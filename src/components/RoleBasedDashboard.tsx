@@ -17,6 +17,7 @@ import {
   Clock,
   TrendingUp
 } from 'lucide-react';
+import { getUserRoleName } from '../utils/user';
 
 const RoleBasedDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -32,9 +33,10 @@ const RoleBasedDashboard: React.FC = () => {
     navigate(href);
   };
 
-  const isAdmin = user.role?.name === 'admin' || user.is_superuser;
-  const isModerator = user.role?.name === 'moderator';
-  const isUser = user.role?.name === 'user';
+  const roleName = getUserRoleName(user);
+  const isAdmin = roleName === 'admin' || user.is_superuser;
+  const isModerator = roleName === 'moderator';
+  const isUser = roleName === 'user';
 
   // Admin Features
   const adminFeatures = [
@@ -234,7 +236,7 @@ const RoleBasedDashboard: React.FC = () => {
                 Welcome back, {user.full_name || user.username || 'User'}!
               </h2>
               <p className="text-gray-600 mt-1">
-                Here's what you can do with your {user.role?.name || 'user'} access level.
+                Here's what you can do with your {roleName || 'user'} access level.
               </p>
             </div>
             <div className="text-right">

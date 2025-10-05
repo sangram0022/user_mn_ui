@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getUserRoleName } from '../utils/user';
 import { Settings, Lock, Bell, Shield } from 'lucide-react';
 
 const AccountPage: React.FC = () => {
@@ -98,7 +99,7 @@ const AccountPage: React.FC = () => {
                 borderRadius: '6px',
                 color: '#6b7280'
               }}>
-                {user?.role?.name || 'No role assigned'}
+                {getUserRoleName(user) || 'No role assigned'}
               </div>
             </div>
           </div>

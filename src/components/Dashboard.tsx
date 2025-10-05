@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClient';
+import { getUserRoleName, userHasRole } from '../utils/user';
 
 // Component interfaces based on backend API responses
-interface UserAnalytics {
+interface DashboardUserAnalytics {
   total_users: number;
   active_users: number;
   inactive_users: number;
@@ -17,14 +18,14 @@ interface UserAnalytics {
   retention_rate: number;
 }
 
-interface LifecycleAnalytics {
+interface DashboardLifecycleAnalytics {
   users_by_stage: Record<string, number>;
   completion_rates: Record<string, number>;
   average_progression_time: Record<string, number>;
   stuck_users: Array<{ stage: string; count: number }>;
 }
 
-interface PendingWorkflow {
+interface DashboardPendingWorkflow {
   request_id: string;
   workflow_type: string;
   requester_name: string;
@@ -35,36 +36,67 @@ interface PendingWorkflow {
 
 const Dashboard: React.FC = () => {
   const { user, hasPermission } = useAuth();
-  const [userAnalytics, setUserAnalytics] = useState<UserAnalytics | null>(null);
-  const [lifecycleAnalytics, setLifecycleAnalytics] = useState<LifecycleAnalytics | null>(null);
-  const [pendingWorkflows, setPendingWorkflows] = useState<PendingWorkflow[]>([]);
+  const [userAnalytics, setUserAnalytics] = useState<DashboardUserAnalytics | null>(null);
+  const [lifecycleAnalytics, setLifecycleAnalytics] = useState<DashboardLifecycleAnalytics | null>(null);
+  const [pendingWorkflows, setPendingWorkflows] = useState<DashboardPendingWorkflow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  type DashboardResult =
+    | { type: 'analytics'; data: DashboardUserAnalytics }
+    | { type: 'lifecycle'; data: DashboardLifecycleAnalytics }
+    | { type: 'workflows'; data: DashboardPendingWorkflow[] };
 
   const loadDashboardData = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const promises = [];
+      const promises: Array<Promise<DashboardResult>> = [];
 
       // Load user analytics if user has permission
       if (hasPermission('ADMIN_ANALYTICS')) {
         promises.push(
-          apiClient.getUserAnalytics().then(data => ({ type: 'analytics', data }))
+          apiClient.getUserAnalytics().then((data): DashboardResult => ({
+            type: 'analytics',
+            data: {
+              total_users: data.total_users ?? 0,
+              active_users: data.active_users ?? 0,
+              inactive_users: data.inactive_users ?? 0,
+              new_users_last_30_days: data.new_users_last_30_days ?? data.new_users_today ?? 0,
+              engagement_distribution: data.engagement_distribution ?? { high: 0, medium: 0, low: 0 },
+              growth_rate: data.growth_rate ?? 0,
+              retention_rate: data.retention_rate ?? 0
+            }
+          }))
         );
       }
 
       // Load lifecycle analytics if user has permission
       if (hasPermission('ADMIN_ANALYTICS')) {
         promises.push(
-          apiClient.request('/business-logic/lifecycle/analytics').then(data => ({ type: 'lifecycle', data }))
+          apiClient
+            .request<{ analytics?: DashboardLifecycleAnalytics } | DashboardLifecycleAnalytics>('/business-logic/lifecycle/analytics')
+            .then((data): DashboardResult => ({
+              type: 'lifecycle',
+              data: (data as { analytics?: DashboardLifecycleAnalytics }).analytics ?? (data as DashboardLifecycleAnalytics)
+            }))
         );
       }
 
       // Load pending workflows for current user
       promises.push(
-        apiClient.getPendingApprovals().then(data => ({ type: 'workflows', data }))
+        apiClient.getPendingApprovals().then((data): DashboardResult => ({
+          type: 'workflows',
+          data: data.map((workflow) => ({
+            request_id: workflow.request_id ?? workflow.id,
+            workflow_type: workflow.workflow_type ?? workflow.type,
+            requester_name: workflow.requester_name ?? workflow.user?.full_name ?? workflow.user?.email ?? 'Unknown',
+            created_at: workflow.created_at,
+            priority: workflow.priority,
+            description: workflow.description ?? ''
+          }))
+        }))
       );
 
       const results = await Promise.allSettled(promises);
@@ -74,13 +106,15 @@ const Dashboard: React.FC = () => {
           const { type, data } = result.value as { type: string; data: unknown };
           switch (type) {
             case 'analytics':
-              setUserAnalytics((data as { analytics?: UserAnalytics }).analytics || data as UserAnalytics);
+              setUserAnalytics((data as { analytics?: DashboardUserAnalytics }).analytics || data as DashboardUserAnalytics);
               break;
             case 'lifecycle':
-              setLifecycleAnalytics((data as { analytics?: LifecycleAnalytics }).analytics || data as LifecycleAnalytics);
+              setLifecycleAnalytics((data as { analytics?: DashboardLifecycleAnalytics }).analytics || data as DashboardLifecycleAnalytics);
               break;
             case 'workflows': {
-              const workflows = Array.isArray(data) ? data as PendingWorkflow[] : (data as { workflows?: PendingWorkflow[] }).workflows || [];
+              const workflows = Array.isArray(data)
+                ? (data as DashboardPendingWorkflow[])
+                : (data as { workflows?: DashboardPendingWorkflow[] }).workflows || [];
               setPendingWorkflows(workflows);
               break;
             }
@@ -163,8 +197,8 @@ const Dashboard: React.FC = () => {
           color: 'var(--text-secondary)',
           fontSize: '1.1rem'
         }}>
-          {user?.role?.name === 'admin' ? 'Admin Dashboard' : 'User Dashboard'} • 
-          Role: <strong>{user?.role?.name}</strong> • 
+          {userHasRole(user, 'admin') ? 'Admin Dashboard' : 'User Dashboard'} • 
+          Role: <strong>{getUserRoleName(user) || 'Member'}</strong> • 
           Stage: <strong>{user?.lifecycle_stage || 'active'}</strong>
         </p>
       </div>
@@ -494,7 +528,7 @@ const LifecycleStageCard: React.FC<{
 };
 
 const WorkflowCard: React.FC<{
-  workflow: PendingWorkflow;
+  workflow: DashboardPendingWorkflow;
 }> = ({ workflow }) => (
   <div style={{
     background: 'var(--background-primary)',
@@ -514,7 +548,7 @@ const WorkflowCard: React.FC<{
       }}>
         <span style={{ fontSize: '1.2rem' }}>⚙️</span>
         <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
-          {workflow.workflow_type.replace('_', ' ').toUpperCase()}
+          {(workflow.workflow_type || 'workflow').replace(/_/g, ' ').toUpperCase()}
         </span>
         <span style={{
           padding: '0.125rem 0.5rem',

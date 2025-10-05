@@ -16,6 +16,7 @@ import {
   FileText,
   ChevronDown
 } from 'lucide-react';
+import { getUserRoleName } from '../utils/user';
 
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -143,7 +144,7 @@ const Navigation = () => {
                       {user.full_name || user.username || 'User'}
                     </div>
                     <div className="text-xs text-gray-500 capitalize">
-                      {user.role?.name || 'Member'}
+                      {getUserRoleName(user) || 'Member'}
                     </div>
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-500" />

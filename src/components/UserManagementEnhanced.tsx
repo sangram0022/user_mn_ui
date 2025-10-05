@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClientComplete';
 import { Plus, Trash2, Eye, Users, UserCheck, UserX, Search, Filter } from 'lucide-react';
+import { getUserPermissions, getUserRoleName } from '../utils/user';
 
 interface User {
   id: number;
@@ -52,11 +53,11 @@ const UserManagementEnhanced: React.FC = () => {
   console.log('User object:', user);
   console.log('User role:', user?.role);
   console.log('User is_superuser:', user?.is_superuser);
-  console.log('User permissions array:', user?.role?.permissions);
+  console.log('User permissions array:', getUserPermissions(user));
   console.log('hasPermission function result for user:read:', hasPermission('user:read'));
-  console.log('Raw permission check:', user?.role?.permissions?.includes('user:read'));
+  console.log('Raw permission check:', getUserPermissions(user).includes('user:read'));
   console.log('Is admin check:', hasPermission('admin'));
-  console.log('User role name:', user?.role?.name);
+  console.log('User role name:', getUserRoleName(user));
   
   // EARLY RETURN TEST: Show a debug message if we're getting here
   if (user) {
@@ -90,7 +91,7 @@ const UserManagementEnhanced: React.FC = () => {
   const loadUsers = useCallback(async () => {
     console.log('📡 UserManagement: Starting to load users...');
     console.log('🔐 Current token in localStorage:', !!localStorage.getItem('access_token'));
-    console.log('👤 Current user permissions:', user?.role?.permissions);
+  console.log('👤 Current user permissions:', getUserPermissions(user));
     
     try {
       setIsLoading(true);
@@ -130,7 +131,7 @@ const UserManagementEnhanced: React.FC = () => {
         error: err,
         message: errorMessage,
         hasToken: !!localStorage.getItem('access_token'),
-        userPermissions: user?.role?.permissions,
+  userPermissions: getUserPermissions(user),
         hasUserReadPermission: hasPermission('user:read')
       });
       

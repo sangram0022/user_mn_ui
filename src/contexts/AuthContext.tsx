@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react';
 import { apiClient } from '../services/apiClient';
 import type { UserProfile, LoginRequest } from '../types';
+import { getUserRoleName, getUserPermissions } from '../utils/user';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -11,6 +12,8 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  refreshProfile: () => Promise<void>;
+  hasPermission: (permission: string) => boolean;
   clearError: () => void;
 }
 
@@ -58,6 +61,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const refreshProfile = async () => {
+    try {
+      const userProfile = await apiClient.getUserProfile();
+      setUser(userProfile);
+    } catch (err) {
+      console.error('Profile refresh failed:', err);
+      setUser(null);
+      throw err;
+    }
+  };
+
   const login = async (credentials: LoginRequest) => {
     try {
       setIsLoading(true);
@@ -67,10 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Store the token
       localStorage.setItem('token', response.access_token);
-      
-      // Get user profile
-      const userProfile = await apiClient.getUserProfile();
-      setUser(userProfile);
+      await refreshProfile();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
       throw err;
@@ -99,13 +110,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const updateProfile = async (updates: Partial<UserProfile>) => {
     try {
       setError(null);
-      
       const updatedProfile = await apiClient.updateUserProfile(updates);
       setUser(updatedProfile);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Profile update failed');
       throw err;
     }
+  };
+
+  const hasPermission = (permission: string): boolean => {
+    if (!user) {
+      return false;
+    }
+
+    if (user.is_superuser) {
+      return true;
+    }
+
+    const normalized = permission.toLowerCase();
+    const roleName = getUserRoleName(user).toLowerCase();
+
+    if (normalized === 'admin') {
+      return roleName === 'admin';
+    }
+
+    const permissions = getUserPermissions(user);
+    return permissions.map(p => p.toLowerCase()).includes(normalized);
   };
 
   const clearError = () => {
@@ -119,7 +149,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error,
     login,
     logout,
-    updateProfile,
+  updateProfile,
+  refreshProfile,
+  hasPermission,
     clearError
   };
 

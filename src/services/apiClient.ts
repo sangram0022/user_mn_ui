@@ -1,23 +1,20 @@
 // Complete API client for FastAPI backend integration
 // Based on the official API documentation
 
-import type { 
-  User, 
-  LoginRequest, 
-  LoginResponse, 
-  RegisterRequest, 
+import type {
+  RegisterRequest,
   RegisterResponse,
-  UserProfile, 
+  LoginResponse,
+  UserProfile,
   CreateUserRequest,
   UpdateUserRequest,
-  PasswordResetRequest,
-  ResetPasswordRequest,
-  VerifyEmailRequest,
   AuditLog,
   AuditSummary,
   AuditLogsQuery,
   AdminUsersQuery,
-  UserSummary
+  UserSummary,
+  UserAnalytics,
+  PendingWorkflow
 } from '../types';
 import { ApiError } from '../utils/apiError';
 
@@ -43,10 +40,14 @@ export const API_CONFIG = {
     ADMIN_USERS: '/admin/users',
     ADMIN_USER_BY_ID: (userId: string) => `/admin/users/${userId}`,
     ADMIN_STATS: '/admin/stats',
+    ADMIN_ANALYTICS: '/admin/analytics',
     
     // Audit Endpoints (/audit)
     AUDIT_LOGS: '/audit/logs',
-    AUDIT_SUMMARY: '/audit/summary'
+    AUDIT_SUMMARY: '/audit/summary',
+
+    // Workflow Endpoints
+    PENDING_APPROVALS: '/workflows/pending'
   }
 };
 
@@ -276,6 +277,44 @@ class ApiClient {
   async getAuditSummary(): Promise<AuditSummary> {
     return await this.request<AuditSummary>(API_CONFIG.ENDPOINTS.AUDIT_SUMMARY);
   }
+
+  // ============================================================================
+  // Analytics & Workflow Methods
+  // ============================================================================
+
+  async getUserAnalytics(): Promise<UserAnalytics> {
+    const response = await this.request<UserAnalytics | { analytics?: UserAnalytics }>(
+      API_CONFIG.ENDPOINTS.ADMIN_ANALYTICS
+    );
+
+    if (response && typeof response === 'object' && 'analytics' in response && response.analytics) {
+      return response.analytics;
+    }
+
+    return response as UserAnalytics;
+  }
+
+  async getPendingApprovals(): Promise<PendingWorkflow[]> {
+    const response = await this.request<
+      PendingWorkflow[] | { pending?: PendingWorkflow[]; workflows?: PendingWorkflow[] }
+    >(API_CONFIG.ENDPOINTS.PENDING_APPROVALS);
+
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    if (response && typeof response === 'object') {
+      if (Array.isArray(response.pending)) {
+        return response.pending;
+      }
+
+      if (Array.isArray(response.workflows)) {
+        return response.workflows;
+      }
+    }
+
+    return [];
+  }
 }
 
 // Export singleton instance
@@ -305,6 +344,8 @@ export const useApi = () => {
     // Audit operations
     getAuditLogs: apiClient.getAuditLogs.bind(apiClient),
     getAuditSummary: apiClient.getAuditSummary.bind(apiClient),
+    getUserAnalytics: apiClient.getUserAnalytics.bind(apiClient),
+    getPendingApprovals: apiClient.getPendingApprovals.bind(apiClient),
 
     // Utility
     isAuthenticated: apiClient.isAuthenticated.bind(apiClient)

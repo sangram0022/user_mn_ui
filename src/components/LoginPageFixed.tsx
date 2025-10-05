@@ -31,14 +31,11 @@ const LoginPage: React.FC = () => {
     
     startLoginTransition(async () => {
       try {
-        const success = await login(formData.email, formData.password);
-        if (success) {
-          navigate('/dashboard');
-        } else {
-          setError('Invalid email or password. Please check your credentials and try again.');
-        }
-      } catch {
-        setError('Login failed. Please try again.');
+        await login({ email: formData.email, password: formData.password });
+        navigate('/dashboard');
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+        setError(message);
       }
     });
   }, [formData.email, formData.password, login, navigate]);

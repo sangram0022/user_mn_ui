@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { apiClient } from '../services/apiClient';
 import type { UserSummary, CreateUserRequest, UpdateUserRequest } from '../types';
+import { getUserRoleName, userHasRole } from '../utils/user';
 
 interface UserManagementProps {
   className?: string;
@@ -40,7 +41,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
         user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+  const matchesRole = roleFilter === 'all' || getUserRoleName(user).toLowerCase() === roleFilter.toLowerCase();
       const matchesStatus = statusFilter === 'all' || 
         (statusFilter === 'active' && user.is_active) ||
         (statusFilter === 'inactive' && !user.is_active);
@@ -49,7 +50,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
     });
   }, [users, searchTerm, roleFilter, statusFilter]);
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = async (userId?: string) => {
+    if (!userId) {
+      setError('Unable to delete user: missing identifier.');
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this user?')) return;
 
     try {
@@ -64,12 +70,14 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
     try {
       const newUser = await apiClient.createUser(userData);
       // Convert User to UserSummary format for the list
+      const roleLabel = getUserRoleName(newUser);
       const userSummary: UserSummary = {
         user_id: newUser.user_id,
         email: newUser.email,
         first_name: newUser.first_name,
         last_name: newUser.last_name,
         role: newUser.role,
+        role_name: roleLabel,
         is_active: true, // Default to active for new users
         is_verified: newUser.is_verified,
         is_approved: true,
@@ -246,11 +254,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.role === 'admin' 
+                      userHasRole(user, 'admin')
                         ? 'bg-purple-100 text-purple-800'
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {user.role}
+                      {getUserRoleName(user) || 'User'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -311,11 +319,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
       )}
 
       {/* Edit User Modal */}
-      {editingUser && (
+      {editingUser?.user_id && (
         <EditUserModal
           user={editingUser}
           onClose={() => setEditingUser(null)}
-          onSubmit={(updates) => handleUpdateUser(editingUser.user_id, updates)}
+          onSubmit={(updates) => handleUpdateUser(editingUser.user_id!, updates)}
         />
       )}
     </div>
@@ -553,7 +561,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSubmit }
           </div>
 
           <div className="text-sm text-gray-500">
-            <p><strong>Role:</strong> {user.role}</p>
+            <p><strong>Role:</strong> {getUserRoleName(user) || 'N/A'}</p>
             <p><strong>Status:</strong> {user.is_active ? 'Active' : 'Inactive'}</p>
             <p className="text-xs mt-1">Role and status changes require admin privileges and are not available in this form.</p>
           </div>

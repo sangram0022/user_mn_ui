@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClientComplete';
 import { CheckCircle, XCircle, AlertCircle, Loader } from 'lucide-react';
+import { getUserRoleName, getUserPermissions } from '../utils/user';
 
 interface SystemCheck {
   name: string;
@@ -40,15 +41,16 @@ const SystemStatus: React.FC = () => {
 
     // Check 1: Authentication
     if (user) {
+      const roleName = getUserRoleName(user, 'unknown');
       updateCheck('Authentication', 'success', `Authenticated as ${user.email}`, 
-        `Role: ${user.role.name}, Active: ${user.is_active}`);
+        `Role: ${roleName}, Active: ${user.is_active}`);
     } else {
       updateCheck('Authentication', 'error', 'Not authenticated', 'Please log in');
     }
 
     // Check 2: Permissions
     if (user) {
-      const permissions = user.role.permissions;
+      const permissions = getUserPermissions(user);
       const hasUserRead = hasPermission('user:read');
       const hasUserWrite = hasPermission('user:write');
       const isAdmin = hasPermission('admin');
@@ -83,7 +85,7 @@ const SystemStatus: React.FC = () => {
     try {
       console.log('🧪 Testing Users API with current token...');
       console.log('🔐 Token in localStorage:', !!localStorage.getItem('access_token'));
-      console.log('👤 Current user:', user?.email, 'Role:', user?.role?.name);
+  console.log('👤 Current user:', user?.email, 'Role:', getUserRoleName(user));
       console.log('🛡️ Has user:read permission:', hasPermission('user:read'));
       
       const usersResponse = await apiClient.getUsers({ limit: 1 });

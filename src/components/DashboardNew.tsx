@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../services/apiClient';
 import type { UserProfile, AuditSummary } from '../types';
+import { getUserRoleName, userHasRole } from '../utils/user';
 
 interface DashboardProps {
   className?: string;
@@ -43,7 +44,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ className = '' }) => {
       
       const totalUsers = users.length;
       const activeUsers = users.filter(u => u.is_active).length;
-      const adminUsers = users.filter(u => u.role === 'admin').length;
+  const adminUsers = users.filter(u => getUserRoleName(u).toLowerCase() === 'admin').length;
       const recentLogins = users.filter(u => {
         if (!u.last_login_at) return false;
         const loginDate = new Date(u.last_login_at);
@@ -60,7 +61,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ className = '' }) => {
       });
 
       // Load audit summary if user has permission
-      if (userProfile.role === 'admin') {
+      if (userHasRole(userProfile, 'admin')) {
         try {
           const audit = await apiClient.getAuditSummary();
           setAuditSummary(audit);
@@ -125,7 +126,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ className = '' }) => {
           <div className="hidden sm:block">
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
               <div className="text-sm text-blue-100">Your Role</div>
-              <div className="text-lg font-semibold capitalize">{user?.role || 'User'}</div>
+              <div className="text-lg font-semibold capitalize">{getUserRoleName(user) || 'User'}</div>
             </div>
           </div>
         </div>
@@ -219,11 +220,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ className = '' }) => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Role</label>
                   <span className={`mt-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    user?.role === 'admin' 
+                    userHasRole(user, 'admin')
                       ? 'bg-purple-100 text-purple-800'
                       : 'bg-gray-100 text-gray-800'
                   }`}>
-                    {user?.role}
+                    {getUserRoleName(user) || 'User'}
                   </span>
                 </div>
                 <div>
@@ -257,7 +258,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ className = '' }) => {
         </div>
 
         {/* Audit Summary - Admin Only */}
-        {user?.role === 'admin' && auditSummary && (
+  {userHasRole(user, 'admin') && auditSummary && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">System Activity</h2>
             <div className="space-y-4">
@@ -278,8 +279,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ className = '' }) => {
                 <div>
                   <h3 className="text-sm font-medium text-gray-700 mb-2">Recent Actions</h3>
                   <div className="space-y-2">
-                    {auditSummary.recent_actions.slice(0, 3).map((action, index) => (
-                      <div key={index} className="text-xs text-gray-600 bg-gray-50 rounded p-2">
+                    {auditSummary.recent_actions.slice(0, 3).map((action) => (
+                      <div key={`${action.action}-${action.timestamp}`} className="text-xs text-gray-600 bg-gray-50 rounded p-2">
                         <div className="font-medium">{action.action}</div>
                         <div>{new Date(action.timestamp).toLocaleString()}</div>
                       </div>
@@ -320,7 +321,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ className = '' }) => {
             </div>
           </button>
 
-          {user?.role === 'admin' && (
+          {userHasRole(user, 'admin') && (
             <>
               <button
                 onClick={() => window.location.href = '/users'}

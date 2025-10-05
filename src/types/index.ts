@@ -28,17 +28,32 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 // User Management Types (Based on API Documentation)
 // ============================================================================
 
+export interface UserRoleInfo {
+  id?: number | string;
+  name: string;
+  description?: string;
+  permissions?: string[];
+}
+
 export interface User {
-  user_id: string;
+  id?: number | string;
+  user_id?: string;
   email: string;
-  first_name: string;
-  last_name: string;
-  role: string;
-  status: string;
-  is_verified: boolean;
-  created_at: string;
-  last_login: string;
-  updated_at: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
+  username?: string;
+  role?: UserRoleInfo | string;
+  role_name?: string;
+  status?: string;
+  lifecycle_stage?: string;
+  is_active?: boolean;
+  is_verified?: boolean;
+  is_superuser?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  last_login?: string;
+  last_login_at?: string;
   phone_number?: string;
   avatar_url?: string;
   preferences?: {
@@ -52,42 +67,29 @@ export interface User {
   };
 }
 
-export interface UserProfile {
-  user_id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  role: string;
-  status: string;
-  is_verified: boolean;
-  created_at: string;
-  last_login: string;
-  updated_at: string;
-  phone_number?: string;
-  avatar_url?: string;
-  preferences?: {
-    theme?: string;
-    notifications?: boolean;
-    language?: string;
-  };
-  metadata?: {
-    source?: string;
-    referrer?: string;
-  };
+export interface UserProfile extends User {
+  departments?: string[];
+  teams?: string[];
+  profile_picture_url?: string;
 }
 
 export interface UserSummary {
-  user_id: string;
+  id?: number | string;
+  user_id?: string;
   email: string;
   first_name: string;
   last_name: string;
-  role: string;
+  full_name?: string;
+  username?: string;
+  role?: UserRoleInfo | string;
+  role_name?: string;
   is_active: boolean;
   is_verified: boolean;
   is_approved: boolean;
   approved_by?: string;
   approved_at?: string;
   created_at: string;
+  last_login?: string;
   last_login_at?: string;
 }
 
@@ -230,6 +232,14 @@ export interface UserAnalytics {
     date: string;
     active_users: number;
   }>;
+  inactive_users?: number;
+  new_users_last_30_days?: number;
+  engagement_distribution?: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  growth_rate?: number;
 }
 
 export interface LifecycleAnalytics {
@@ -280,6 +290,9 @@ export interface PendingWorkflow {
     email: string;
     full_name?: string;
   };
+  request_id?: string;
+  workflow_type?: string;
+  requester_name?: string;
 }
 
 // ============================================================================

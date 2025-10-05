@@ -30,7 +30,7 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      await login(formData.email, formData.password);
+      await login({ email: formData.email, password: formData.password });
       navigate('/dashboard');
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
