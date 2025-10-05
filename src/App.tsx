@@ -64,7 +64,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <NavigationNew />
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1">
         {children}
       </main>
     </div>

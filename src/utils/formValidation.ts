@@ -201,6 +201,7 @@ export const passwordConfirmation = (password: string) => ({
  * Custom hook for form validation with React 19 features
  */
 import { useState, useCallback, useMemo } from 'react';
+import { logger } from './logger';
 
 export interface UseFormValidationProps {
   initialValues: Record<string, ValidationValue>;
@@ -290,7 +291,7 @@ export const useFormValidation = ({
       try {
         await onSubmit(values);
       } catch (error) {
-        console.error('Form submission error:', error);
+        logger.error('Form submission error', error);
       }
     }
 

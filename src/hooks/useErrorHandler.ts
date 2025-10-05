@@ -5,6 +5,7 @@
 import { useState, useCallback } from 'react';
 import { parseApiError, formatErrorForDisplay, isAuthError } from '../utils/errorParser';
 import { errorLogger } from '../utils/errorLogger';
+import { logger } from '../utils/logger';
 import type { ParsedError } from '../types/error';
 
 interface UseErrorHandlerReturn {
@@ -47,7 +48,7 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     
     // Log error for debugging (only in development)
     if (import.meta.env.DEV) {
-      console.error('[useErrorHandler]', context || 'Error occurred:', err);
+      logger.error('[useErrorHandler]', context || 'Error occurred', err);
     }
   }, []);
 

@@ -25,6 +25,9 @@ const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const mobileMenuId = 'mobile-navigation';
+  const userMenuId = 'user-menu';
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -56,7 +59,47 @@ const Navigation = () => {
   };
 
   return (
-    <nav style={{ 
+    <>
+      <a
+        href="#main-content"
+        style={{
+          position: 'absolute',
+          left: '-999px',
+          top: 'auto',
+          width: '1px',
+          height: '1px',
+          overflow: 'hidden',
+          zIndex: 100,
+          color: '#1d4ed8',
+          backgroundColor: 'transparent',
+          borderRadius: '0',
+        }}
+        onFocus={(event) => {
+          event.currentTarget.style.left = '1rem';
+          event.currentTarget.style.top = '0.5rem';
+          event.currentTarget.style.width = 'auto';
+          event.currentTarget.style.height = 'auto';
+          event.currentTarget.style.padding = '0.5rem 1rem';
+          event.currentTarget.style.backgroundColor = '#1d4ed8';
+          event.currentTarget.style.color = '#ffffff';
+          event.currentTarget.style.borderRadius = '0.375rem';
+        }}
+        onBlur={(event) => {
+          event.currentTarget.style.left = '-999px';
+          event.currentTarget.style.top = 'auto';
+          event.currentTarget.style.width = '1px';
+          event.currentTarget.style.height = '1px';
+          event.currentTarget.style.padding = '0';
+          event.currentTarget.style.backgroundColor = 'transparent';
+          event.currentTarget.style.color = '#1d4ed8';
+          event.currentTarget.style.borderRadius = '0';
+        }}
+      >
+        Skip to main content
+      </a>
+      <nav
+        aria-label="Primary navigation"
+        style={{ 
       backgroundColor: 'white', 
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', 
       borderBottom: '1px solid #e5e7eb',
@@ -117,6 +160,7 @@ const Navigation = () => {
                       ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                   }`}
+                  role="menuitem"
                 >
                   <Icon className="w-4 h-4" />
                   <span>{item.name}</span>
@@ -131,6 +175,10 @@ const Navigation = () => {
               /* User is logged in - show user menu */
               <div className="relative">
                 <button
+                  type="button"
+                  aria-haspopup="menu"
+                  aria-expanded={isUserMenuOpen}
+                  aria-controls={userMenuId}
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                 >
@@ -152,7 +200,12 @@ const Navigation = () => {
 
                 {/* User Dropdown Menu */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50">
+                  <div
+                    id={userMenuId}
+                    role="menu"
+                    aria-label="User menu"
+                    className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50"
+                  >
                     <div className="px-4 py-3 border-b border-gray-100">
                       <div className="text-sm font-medium text-gray-900">
                         {user.full_name || user.username || 'User'}
@@ -167,6 +220,7 @@ const Navigation = () => {
                           key={item.name}
                           to={item.href}
                           className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                          role="menuitem"
                           onClick={() => setIsUserMenuOpen(false)}
                         >
                           <Icon className="w-4 h-4" />
@@ -177,8 +231,10 @@ const Navigation = () => {
                     
                     <div className="border-t border-gray-100 mt-1">
                       <button
+                        type="button"
                         onClick={handleLogout}
                         className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                        role="menuitem"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Sign Out</span>
@@ -207,7 +263,11 @@ const Navigation = () => {
 
             {/* Mobile menu button */}
             <button
+              type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls={mobileMenuId}
+              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               className="md:hidden p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200"
             >
               {isMobileMenuOpen ? (
@@ -221,7 +281,12 @@ const Navigation = () => {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
+          <div
+            id={mobileMenuId}
+            role="menu"
+            aria-label="Mobile navigation"
+            className="md:hidden border-t border-gray-200 py-4"
+          >
             <div className="space-y-1">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
@@ -234,6 +299,7 @@ const Navigation = () => {
                         ? 'text-blue-600 bg-blue-50'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                     }`}
+                    role="menuitem"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Icon className="w-5 h-5" />
@@ -260,6 +326,7 @@ const Navigation = () => {
                       key={item.name}
                       to={item.href}
                       className="flex items-center space-x-2 px-3 py-2 text-base text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200"
+                      role="menuitem"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Icon className="w-5 h-5" />
@@ -269,11 +336,13 @@ const Navigation = () => {
                 })}
                 
                 <button
+                  type="button"
                   onClick={() => {
                     handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
                   className="flex items-center space-x-2 w-full px-3 py-2 text-base text-red-600 hover:bg-red-50 transition-colors duration-200"
+                  role="menuitem"
                 >
                   <LogOut className="w-5 h-5" />
                   <span>Sign Out</span>
@@ -312,9 +381,11 @@ const Navigation = () => {
             setIsMobileMenuOpen(false);
             setIsUserMenuOpen(false);
           }}
+          role="presentation"
         />
       )}
     </nav>
+    </>
   );
 };
 

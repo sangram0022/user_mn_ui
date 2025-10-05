@@ -5,6 +5,15 @@
 
 import type { ApiErrorResponse, ParsedError } from '../types/error';
 import errorMessages from '../locales/en/errors.json';
+const isParsedError = (error: unknown): error is ParsedError => {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    'message' in error &&
+    'statusCode' in error
+  );
+};
 
 /**
  * Check if response is an API error response
@@ -112,6 +121,10 @@ const determineErrorSeverity = (code: string, statusCode: number): 'error' | 'wa
  * Parse API error response into standardized format
  */
 export const parseApiError = (error: unknown): ParsedError => {
+  if (isParsedError(error)) {
+    return error;
+  }
+
   // Handle API error response format
   if (isApiErrorResponse(error)) {
     const { message, status_code, path, timestamp } = error.error;

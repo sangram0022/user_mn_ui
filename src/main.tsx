@@ -1,7 +1,18 @@
-import { StrictMode } from 'react'
+import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+
+if (import.meta.env.DEV) {
+  void import('@axe-core/react')
+    .then(async ({ default: axe }) => {
+      const ReactDOM = await import('react-dom');
+      axe(React, ReactDOM, 1000);
+    })
+    .catch(() => {
+      // Silently ignore accessibility tooling setup failures in development
+    });
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

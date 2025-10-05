@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Clock, LogOut, RefreshCcw } from 'lucide-react';
 
 interface SessionWarningModalProps {
@@ -15,6 +15,17 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
   onLogout,
 }) => {
   const [timeLeft, setTimeLeft] = useState(Math.floor(remainingTime / 1000));
+  const extendButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onLogout();
+      }
+    },
+    [onLogout]
+  );
 
   useEffect(() => {
     if (isOpen && remainingTime > 0) {
@@ -31,16 +42,53 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
     }
   }, [isOpen, remainingTime, onLogout]);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      extendButtonRef.current?.focus();
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, handleKeyDown]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const applyPrimaryButtonStyles = (button: HTMLButtonElement) => {
+    button.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
+    button.style.transform = 'translateY(-1px)';
+  };
+
+  const resetPrimaryButtonStyles = (button: HTMLButtonElement) => {
+    button.style.background = 'linear-gradient(135deg, #3b82f6, #8b5cf6)';
+    button.style.transform = 'translateY(0)';
+  };
+
+  const applySecondaryButtonStyles = (button: HTMLButtonElement) => {
+    button.style.backgroundColor = '#dc2626';
+    button.style.color = 'white';
+  };
+
+  const resetSecondaryButtonStyles = (button: HTMLButtonElement) => {
+    button.style.backgroundColor = 'white';
+    button.style.color = '#dc2626';
+  };
+
   if (!isOpen) return null;
 
+  const headingId = 'session-timeout-heading';
+  const descriptionId = 'session-timeout-description';
+
   return (
-    <div style={{
+    <div
+      role="presentation"
+      aria-hidden="false"
+      style={{
       position: 'fixed',
       top: 0,
       left: 0,
@@ -51,8 +99,15 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 9999,
-    }}>
-      <div style={{
+    }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={headingId}
+        aria-describedby={descriptionId}
+        tabIndex={-1}
+        style={{
         backgroundColor: 'white',
         borderRadius: '1rem',
         padding: '2rem',
@@ -78,7 +133,7 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
           }}>
             <Clock style={{ width: '2rem', height: '2rem', color: 'white' }} />
           </div>
-          <h2 style={{
+          <h2 id={headingId} style={{
             fontSize: '1.5rem',
             fontWeight: 'bold',
             color: '#111827',
@@ -87,7 +142,7 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
           }}>
             Session Expiring Soon
           </h2>
-          <p style={{
+          <p id={descriptionId} style={{
             fontSize: '0.875rem',
             color: '#6b7280',
             margin: 0,
@@ -120,6 +175,7 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
           flexDirection: 'column',
         }}>
           <button
+            ref={extendButtonRef}
             onClick={onExtend}
             style={{
               width: '100%',
@@ -138,12 +194,16 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
               transition: 'all 0.2s ease',
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
-              e.currentTarget.style.transform = 'translateY(-1px)';
+              applyPrimaryButtonStyles(e.currentTarget);
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6, #8b5cf6)';
-              e.currentTarget.style.transform = 'translateY(0)';
+              resetPrimaryButtonStyles(e.currentTarget);
+            }}
+            onFocus={(e) => {
+              applyPrimaryButtonStyles(e.currentTarget);
+            }}
+            onBlur={(e) => {
+              resetPrimaryButtonStyles(e.currentTarget);
             }}
           >
             <RefreshCcw style={{ width: '1rem', height: '1rem' }} />
@@ -169,12 +229,16 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
               transition: 'all 0.2s ease',
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#dc2626';
-              e.currentTarget.style.color = 'white';
+              applySecondaryButtonStyles(e.currentTarget);
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = 'white';
-              e.currentTarget.style.color = '#dc2626';
+              resetSecondaryButtonStyles(e.currentTarget);
+            }}
+            onFocus={(e) => {
+              applySecondaryButtonStyles(e.currentTarget);
+            }}
+            onBlur={(e) => {
+              resetSecondaryButtonStyles(e.currentTarget);
             }}
           >
             <LogOut style={{ width: '1rem', height: '1rem' }} />
