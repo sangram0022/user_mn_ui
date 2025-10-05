@@ -44,61 +44,77 @@ const AccountPage: React.FC = () => {
         <div style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <p id="account-email-label" style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
                 Email Address
-              </label>
-              <div style={{
-                padding: '0.75rem',
-                background: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
-                color: '#6b7280'
-              }}>
+              </p>
+              <div
+                aria-labelledby="account-email-label"
+                role="group"
+                style={{
+                  padding: '0.75rem',
+                  background: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '6px',
+                  color: '#6b7280'
+                }}
+              >
                 {user?.email || 'No email set'}
               </div>
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <p id="account-username-label" style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
                 Username
-              </label>
-              <div style={{
-                padding: '0.75rem',
-                background: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
-                color: '#6b7280'
-              }}>
+              </p>
+              <div
+                aria-labelledby="account-username-label"
+                role="group"
+                style={{
+                  padding: '0.75rem',
+                  background: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '6px',
+                  color: '#6b7280'
+                }}
+              >
                 {user?.username || 'No username set'}
               </div>
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <p id="account-fullname-label" style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
                 Full Name
-              </label>
-              <div style={{
-                padding: '0.75rem',
-                background: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
-                color: '#6b7280'
-              }}>
+              </p>
+              <div
+                aria-labelledby="account-fullname-label"
+                role="group"
+                style={{
+                  padding: '0.75rem',
+                  background: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '6px',
+                  color: '#6b7280'
+                }}
+              >
                 {user?.full_name || 'No full name set'}
               </div>
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <p id="account-role-label" style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
                 Role
-              </label>
-              <div style={{
-                padding: '0.75rem',
-                background: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
-                color: '#6b7280'
-              }}>
+              </p>
+              <div
+                aria-labelledby="account-role-label"
+                role="group"
+                style={{
+                  padding: '0.75rem',
+                  background: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '6px',
+                  color: '#6b7280'
+                }}
+              >
                 {getUserRoleName(user) || 'No role assigned'}
               </div>
             </div>
@@ -257,11 +273,11 @@ const AccountPage: React.FC = () => {
             borderRadius: '8px',
             border: '1px solid #fecaca'
           }}>
-            <div>
-              <div style={{ fontWeight: '500', color: '#dc2626' }}>Delete Account</div>
-              <div style={{ fontSize: '0.875rem', color: '#7f1d1d' }}>
+            <div role="group" aria-labelledby="account-delete-label">
+              <p id="account-delete-label" style={{ fontWeight: '500', color: '#dc2626', margin: 0 }}>Delete Account</p>
+              <p style={{ fontSize: '0.875rem', color: '#7f1d1d', margin: '0.25rem 0 0' }}>
                 Permanently delete your account and all data
-              </div>
+              </p>
             </div>
             <button style={{
               padding: '0.5rem 1rem',

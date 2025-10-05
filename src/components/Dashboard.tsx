@@ -408,32 +408,17 @@ const QuickActionCard: React.FC<{
   icon: string;
   onClick: () => void;
 }> = ({ title, description, icon, onClick }) => (
-  <div
+  <button
+    type="button"
     onClick={onClick}
-    style={{
-      background: 'var(--background-secondary)',
-      padding: '1.5rem',
-      borderRadius: '12px',
-      border: '1px solid var(--border-color)',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-      textAlign: 'center'
-    }}
-    onMouseOver={(e) => {
-      e.currentTarget.style.transform = 'translateY(-2px)';
-      e.currentTarget.style.boxShadow = '0 8px 25px var(--shadow-medium)';
-    }}
-    onMouseOut={(e) => {
-      e.currentTarget.style.transform = 'translateY(0px)';
-      e.currentTarget.style.boxShadow = 'none';
-    }}
+    className="quick-action-card"
   >
-    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{icon}</div>
+    <span aria-hidden="true" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{icon}</span>
     <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>{title}</h3>
     <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
       {description}
     </p>
-  </div>
+  </button>
 );
 
 const MetricCard: React.FC<{

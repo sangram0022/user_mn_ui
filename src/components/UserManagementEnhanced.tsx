@@ -472,89 +472,96 @@ const UserManagementEnhanced: React.FC = () => {
         }}>
           <div>
             <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
               color: '#374151',
               fontWeight: '500'
             }}>
-              <Search className="w-4 h-4 inline mr-2" />
-              Search Users
+              <span>
+                <Search className="w-4 h-4 inline mr-2" />
+                Search Users
+              </span>
+              <input
+                type="text"
+                placeholder="Search by email, username..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+              />
             </label>
-            <input
-              type="text"
-              placeholder="Search by email, username..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-            />
           </div>
 
           <div>
             <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
               color: '#374151',
               fontWeight: '500'
             }}>
-              <Filter className="w-4 h-4 inline mr-2" />
-              Filter by Role
+              <span>
+                <Filter className="w-4 h-4 inline mr-2" />
+                Filter by Role
+              </span>
+              <select
+                value={filterRole}
+                onChange={(e) => setFilterRole(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+              >
+                <option value="">All Roles</option>
+                {roles.map(role => (
+                  <option key={role.id} value={role.name}>
+                    {role.name}
+                  </option>
+                ))}
+              </select>
             </label>
-            <select
-              value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-            >
-              <option value="">All Roles</option>
-              {roles.map(role => (
-                <option key={role.id} value={role.name}>
-                  {role.name}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div>
             <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
               color: '#374151',
               fontWeight: '500'
             }}>
-              Status
+              <span>Status</span>
+              <select
+                value={filterActive === undefined ? '' : filterActive.toString()}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFilterActive(value === '' ? undefined : value === 'true');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+              >
+                <option value="">All Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
             </label>
-            <select
-              value={filterActive === undefined ? '' : filterActive.toString()}
-              onChange={(e) => {
-                const value = e.target.value;
-                setFilterActive(value === '' ? undefined : value === 'true');
-              }}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-            >
-              <option value="">All Status</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
           </div>
 
           <button
@@ -899,106 +906,106 @@ const CreateUserModal: React.FC<{
         
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
-              Email *
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <span>Email *</span>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+                required
+              />
             </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-              required
-            />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
-              Password *
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <span>Password *</span>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+                required
+                minLength={8}
+              />
             </label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-              required
-              minLength={8}
-            />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
-              Username
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <span>Username</span>
+              <input
+                type="text"
+                value={formData.username}
+                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+              />
             </label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-            />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
-              Full Name
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <span>Full Name</span>
+              <input
+                type="text"
+                value={formData.full_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+              />
             </label>
-            <input
-              type="text"
-              value={formData.full_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-            />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
-              Role
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <span>Role</span>
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+              >
+                {roles.map(role => (
+                  <option key={role.id} value={role.name}>
+                    {role.name} - {role.description}
+                  </option>
+                ))}
+              </select>
             </label>
-            <select
-              value={formData.role}
-              onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-            >
-              {roles.map(role => (
-                <option key={role.id} value={role.name}>
-                  {role.name} - {role.description}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div style={{ marginBottom: '2rem' }}>
@@ -1102,84 +1109,84 @@ const EditUserModal: React.FC<{
         
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
-              Email
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <span>Email</span>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+              />
             </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-            />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
-              Username
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <span>Username</span>
+              <input
+                type="text"
+                value={formData.username}
+                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+              />
             </label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-            />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
-              Full Name
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <span>Full Name</span>
+              <input
+                type="text"
+                value={formData.full_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+              />
             </label>
-            <input
-              type="text"
-              value={formData.full_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-            />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
-              Role
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+              <span>Role</span>
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: 'white',
+                  color: '#111827'
+                }}
+              >
+                {roles.map(role => (
+                  <option key={role.id} value={role.name}>
+                    {role.name} - {role.description}
+                  </option>
+                ))}
+              </select>
             </label>
-            <select
-              value={formData.role}
-              onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#111827'
-              }}
-            >
-              {roles.map(role => (
-                <option key={role.id} value={role.name}>
-                  {role.name} - {role.description}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div style={{ marginBottom: '2rem' }}>

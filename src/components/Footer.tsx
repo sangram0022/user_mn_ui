@@ -168,19 +168,7 @@ const Footer = ({ apiVersion = "v1.0", buildVersion = "2024.8.2" }: FooterProps)
                     borderRadius: '6px',
                     background: 'var(--background-primary)',
                     fontSize: '0.875rem',
-                    color: 'var(--text-secondary)',
-                    transition: 'all 0.2s ease',
-                    cursor: 'pointer'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.background = 'var(--background-secondary)';
-                    e.currentTarget.style.color = 'var(--text-primary)';
-                    e.currentTarget.style.transform = 'translateX(4px)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.background = 'var(--background-primary)';
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                    e.currentTarget.style.transform = 'translateX(0px)';
+                    color: 'var(--text-secondary)'
                   }}
                 >
                   <span style={{ color: 'var(--primary-color)' }}>✓</span>
@@ -228,6 +216,16 @@ const Footer = ({ apiVersion = "v1.0", buildVersion = "2024.8.2" }: FooterProps)
                     e.currentTarget.style.transform = 'translateX(4px)';
                   }}
                   onMouseOut={(e) => {
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.transform = 'translateX(0px)';
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.color = 'var(--primary-color)';
+                    e.currentTarget.style.background = 'var(--background-primary)';
+                    e.currentTarget.style.transform = 'translateX(4px)';
+                  }}
+                  onBlur={(e) => {
                     e.currentTarget.style.color = 'var(--text-secondary)';
                     e.currentTarget.style.background = 'transparent';
                     e.currentTarget.style.transform = 'translateX(0px)';
@@ -281,6 +279,18 @@ const Footer = ({ apiVersion = "v1.0", buildVersion = "2024.8.2" }: FooterProps)
                       e.currentTarget.style.boxShadow = '0 4px 12px var(--shadow-medium)';
                     }}
                     onMouseOut={(e) => {
+                      e.currentTarget.style.background = 'var(--background-primary)';
+                      e.currentTarget.style.color = 'var(--text-secondary)';
+                      e.currentTarget.style.transform = 'translateY(0px)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.background = 'var(--primary-color)';
+                      e.currentTarget.style.color = 'white';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px var(--shadow-medium)';
+                    }}
+                    onBlur={(e) => {
                       e.currentTarget.style.background = 'var(--background-primary)';
                       e.currentTarget.style.color = 'var(--text-secondary)';
                       e.currentTarget.style.transform = 'translateY(0px)';

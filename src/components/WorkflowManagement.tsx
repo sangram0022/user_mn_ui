@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useId } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClientComplete';
 
@@ -46,6 +46,8 @@ const WorkflowManagement: React.FC = () => {
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowAction | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const statusFilterId = useId();
+  const typeFilterId = useId();
 
   useEffect(() => {
     loadWorkflows();
@@ -210,15 +212,19 @@ const WorkflowManagement: React.FC = () => {
           alignItems: 'end'
         }}>
           <div>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              color: 'var(--text-primary)',
-              fontWeight: '500'
-            }}>
+            <label
+              htmlFor={statusFilterId}
+              style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                color: 'var(--text-primary)',
+                fontWeight: '500'
+              }}
+            >
               Filter by Status
             </label>
             <select
+              id={statusFilterId}
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
               style={{
@@ -238,15 +244,19 @@ const WorkflowManagement: React.FC = () => {
           </div>
 
           <div>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              color: 'var(--text-primary)',
-              fontWeight: '500'
-            }}>
+            <label
+              htmlFor={typeFilterId}
+              style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                color: 'var(--text-primary)',
+                fontWeight: '500'
+              }}
+            >
               Filter by Type
             </label>
             <select
+              id={typeFilterId}
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               style={{
@@ -617,6 +627,8 @@ const WorkflowModal: React.FC<{
 }> = ({ workflow, onAction, onClose, hasApprovalPermission, actionLoading, currentUserId }) => {
   const [justification, setJustification] = useState('');
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
+  const justificationId = useId();
+  const justificationHintId = `${justificationId}-hint`;
   
   const isLoading = (action: string) => actionLoading === `${action}-${workflow.id}`;
   const canApprove = hasApprovalPermission && workflow.status === 'pending' && workflow.requested_by.id !== currentUserId;
@@ -751,18 +763,24 @@ const WorkflowModal: React.FC<{
 
         {canApprove && (
           <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              color: 'var(--text-primary)',
-              fontWeight: '500'
-            }}>
-              Justification {actionType === 'reject' && '(Required for rejection)'}
+            <label
+              htmlFor={justificationId}
+              style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                color: 'var(--text-primary)',
+                fontWeight: '500'
+              }}
+            >
+              Justification
             </label>
             <textarea
+              id={justificationId}
               value={justification}
               onChange={(e) => setJustification(e.target.value)}
               placeholder="Enter justification for your decision..."
+              aria-describedby={justificationHintId}
+              aria-required={actionType === 'reject'}
               style={{
                 width: '100%',
                 minHeight: '100px',
@@ -774,6 +792,18 @@ const WorkflowModal: React.FC<{
                 resize: 'vertical'
               }}
             />
+            <p
+              id={justificationHintId}
+              style={{
+                marginTop: '0.5rem',
+                color: 'var(--text-secondary)',
+                fontSize: '0.85rem'
+              }}
+            >
+              {actionType === 'reject'
+                ? 'Justification is required when rejecting a workflow.'
+                : 'Justification is optional when approving a workflow.'}
+            </p>
           </div>
         )}
 

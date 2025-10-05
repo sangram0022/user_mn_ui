@@ -1,112 +1,203 @@
-// Complete API client for FastAPI backend integration
-// Based on the official API documentation
-
+    getAuditLogs: apiClient.getAuditLogs.bind(apiClient),
+    getAuditSummary: apiClient.getAuditSummary.bind(apiClient),
+    getUserAnalytics: apiClient.getUserAnalytics.bind(apiClient),
 import type {
+  AdminUsersQuery,
+  AuditLog,
+  AuditLogsQuery,
+  AuditSummary,
+  ChangePasswordRequest,
+  CreateUserRequest,
+  LoginResponse,
+  PendingWorkflow,
   RegisterRequest,
   RegisterResponse,
-  LoginResponse,
-  UserProfile,
-  CreateUserRequest,
-  UpdateUserRequest,
-  AuditLog,
-  AuditSummary,
-  AuditLogsQuery,
-  AdminUsersQuery,
-  UserSummary,
+  ResendVerificationRequest,
+  ResendVerificationResponse,
+  ResetPasswordRequest,
   UserAnalytics,
-  PendingWorkflow
+  UserProfile,
+  UserSummary,
+  UpdateUserRequest
 } from '../types';
 import { ApiError } from '../utils/apiError';
 import { normalizeApiError } from '../utils/apiErrorNormalizer';
 
-export const API_CONFIG = {
-  BASE_URL: import.meta.env.PROD 
-    ? 'https://api.usermanagement.com'
-    : 'http://localhost:8000/api/v1', // Direct backend URL with /api/v1 prefix
-  
-  ENDPOINTS: {
-    // Authentication Endpoints (/auth)
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
-    LOGOUT: '/auth/logout',
-    PASSWORD_RESET_REQUEST: '/auth/password-reset-request',
-    RESET_PASSWORD: '/auth/reset-password',
-    VERIFY_EMAIL: '/auth/verify-email',
-    REFRESH: '/auth/refresh',
-    
-    // Profile Endpoints (/profile)
-    PROFILE_ME: '/profile/me',
-    
-    // Admin Endpoints (/admin)
-    ADMIN_USERS: '/admin/users',
-    ADMIN_USER_BY_ID: (userId: string) => `/admin/users/${userId}`,
-    ADMIN_STATS: '/admin/stats',
-    ADMIN_ANALYTICS: '/admin/analytics',
-    
-    // Audit Endpoints (/audit)
-    AUDIT_LOGS: '/audit/logs',
-    AUDIT_SUMMARY: '/audit/summary',
+const DEFAULT_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '')
+  ?? 'http://127.0.0.1:8000/api/v1';
 
-    // Workflow Endpoints
-    PENDING_APPROVALS: '/workflows/pending'
+const ENDPOINTS = {
+  auth: {
+    login: '/auth/login',
+    register: '/auth/register',
+    logout: '/auth/logout',
+    refresh: '/auth/refresh',
+    passwordReset: '/auth/password-reset',
+    passwordResetLegacy: '/auth/password-reset-request',
+    resetPassword: '/auth/reset-password',
+    forgotPassword: '/auth/forgot-password',
+    changePassword: '/auth/change-password',
+    verifyEmail: '/auth/verify-email',
+    resendVerification: '/auth/resend-verification'
+  },
+  profile: {
+    me: '/profile/me'
+  },
+  admin: {
+    users: '/admin/users',
+    userById: (userId: string) => `/admin/users/${userId}`,
+    approveUser: (userId: string) => `/admin/users/${userId}/approve`,
+    rejectUser: (userId: string) => `/admin/users/${userId}/reject`,
+    analytics: '/admin/analytics'
+  },
+  audit: {
+    logs: '/audit/logs',
+    summary: '/audit/summary'
+  },
+  workflows: {
+    pending: '/workflows/pending'
   }
-};
+} as const;
 
-// HTTP client utility for API calls
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+interface RequestOptions extends RequestInit {
+  method?: HttpMethod;
+}
+
+interface StoredSession {
+  accessToken: string;
+  refreshToken?: string;
+  issuedAt?: string;
+  expiresIn?: number;
+}
+
+interface UserListResponse {
+  user_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  is_active: boolean;
+  is_verified: boolean;
+  is_approved: boolean;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  created_at: string;
+  last_login_at?: string | null;
+}
+
+interface CreateUserResponse {
+  user_id: string;
+  email: string;
+  message: string;
+}
+
+interface DeleteUserResponse {
+  user_id: string;
+  email: string;
+  message: string;
+  deleted_at: string;
+}
+
+interface UserDetailResponse extends UserListResponse {
+  updated_at?: string | null;
+  login_count?: number;
+}
+
+interface PasswordResetResponse {
+  message: string;
+  email: string;
+  reset_token_sent?: boolean;
+}
+
+interface ChangePasswordResponse {
+  message: string;
+  success?: boolean;
+  changed_at?: string;
+}
+
+interface ForgotPasswordResponse {
+  message: string;
+  success?: boolean;
+}
+
+interface LogoutResponse {
+  message: string;
+  success?: boolean;
+}
+
 class ApiClient {
   private baseURL: string;
-  private token: string | null = null;
+  private session: StoredSession | null;
 
-  constructor() {
-    this.baseURL = API_CONFIG.BASE_URL;
-    // Try both possible token storage keys for backward compatibility
-    this.token = this.getFromStorage('access_token') || this.getFromStorage('token');
+  constructor(baseURL: string = DEFAULT_BASE_URL) {
+    this.baseURL = baseURL;
+    this.session = this.loadSession();
   }
 
-  setToken(token: string) {
-    this.token = token;
-    this.setInStorage('access_token', token);
-    this.setInStorage('token', token); // Also store as 'token' for compatibility
-  }
-
-  clearToken() {
-    this.token = null;
-    this.removeFromStorage('access_token');
-    this.removeFromStorage('token');
-  }
-
-  isAuthenticated(): boolean {
-    return !!this.token;
-  }
-
-  private getLocalStorage(): Storage | null {
+  private loadSession(): StoredSession | null {
     if (typeof window === 'undefined') {
       return null;
     }
 
     try {
-      return window.localStorage;
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.warn('Unable to access localStorage:', error);
+      const accessToken = window.localStorage.getItem('access_token') ?? undefined;
+      if (!accessToken) {
+        return null;
       }
+
+      const refreshToken = window.localStorage.getItem('refresh_token') ?? undefined;
+      const issuedAt = window.localStorage.getItem('token_issued_at') ?? undefined;
+      const expiresInString = window.localStorage.getItem('token_expires_in') ?? undefined;
+      const expiresIn = expiresInString ? Number(expiresInString) : undefined;
+
+      return {
+        accessToken,
+        refreshToken,
+        issuedAt,
+        expiresIn
+      };
+    } catch (error) {
+      console.warn('Failed to load auth session', error);
       return null;
     }
   }
 
-  private getFromStorage(key: string): string | null {
-    const storage = this.getLocalStorage();
-    return storage?.getItem(key) ?? null;
-  }
+  private persistSession(session: StoredSession | null): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
 
-  private setInStorage(key: string, value: string): void {
-    const storage = this.getLocalStorage();
-    storage?.setItem(key, value);
-  }
+    try {
+      if (!session) {
+        window.localStorage.removeItem('access_token');
+        window.localStorage.removeItem('refresh_token');
+        window.localStorage.removeItem('token_issued_at');
+        window.localStorage.removeItem('token_expires_in');
+        this.session = null;
+        return;
+      }
 
-  private removeFromStorage(key: string): void {
-    const storage = this.getLocalStorage();
-    storage?.removeItem(key);
+      window.localStorage.setItem('access_token', session.accessToken);
+      if (session.refreshToken) {
+        window.localStorage.setItem('refresh_token', session.refreshToken);
+      } else {
+        window.localStorage.removeItem('refresh_token');
+      }
+
+      if (session.issuedAt) {
+        window.localStorage.setItem('token_issued_at', session.issuedAt);
+      }
+
+      if (typeof session.expiresIn === 'number') {
+        window.localStorage.setItem('token_expires_in', String(session.expiresIn));
+      }
+
+      this.session = session;
+    } catch (error) {
+      console.warn('Failed to persist auth session', error);
+    }
   }
 
   private getHeaders(): HeadersInit {
@@ -114,83 +205,21 @@ class ApiClient {
       'Content-Type': 'application/json'
     };
 
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    if (this.session?.accessToken) {
+      headers.Authorization = `Bearer ${this.session.accessToken}`;
     }
 
     return headers;
   }
 
-  async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    // Ensure endpoint doesn't have double slashes
-    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    const url = `${this.baseURL}${cleanEndpoint}`;
-    
-    const config: RequestInit = {
-      ...options,
-      headers: {
-        ...this.getHeaders(),
-        ...options.headers
-      }
-    };
-
-    try {
-      const response = await fetch(url, config);
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          this.clearToken();
-        }
-
-        const errorPayload = await this.parseJson(response);
-        const normalized = normalizeApiError(response.status, response.statusText, errorPayload);
-
-        throw new ApiError({
-          status: normalized.status,
-          message: normalized.message,
-          code: normalized.code,
-          detail: normalized.detail,
-          errors: normalized.errors,
-          headers: response.headers,
-          payload: errorPayload
-        });
-      }
-
-      const responseBody = await this.parseJson<T>(response);
-      return responseBody as T;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        console.error('API Request failed with structured error:', error);
-        throw error;
-      }
-
-      console.error('API Request failed:', error);
-
-      if (error instanceof Error) {
-        throw new ApiError({
-          status: 0,
-          message: error.message,
-          code: 'NETWORK_ERROR'
-        });
-      }
-
-      throw new ApiError({
-        status: 0,
-        message: 'Network request failed',
-        code: 'NETWORK_ERROR'
-      });
-    }
-  }
-
   private async parseJson<T>(response: Response): Promise<T | undefined> {
     const contentType = response.headers.get('content-type');
-
     if (contentType?.includes('application/json')) {
       try {
-        return (await response.json()) as T;
+        return await response.json() as T;
       } catch (error) {
         if (import.meta.env.DEV) {
-          console.warn('Failed to parse JSON response:', error);
+          console.warn('Failed to parse JSON response', error);
         }
         return undefined;
       }
@@ -200,210 +229,278 @@ class ApiClient {
       return undefined;
     }
 
-    try {
-      const text = await response.text();
-      return text ? (text as unknown as T) : undefined;
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.warn('Failed to read response text:', error);
-      }
-      return undefined;
-    }
+    const text = await response.text();
+    return text ? JSON.parse(text) as T : undefined;
   }
 
-  // ============================================================================
-  // Authentication Methods
-  // ============================================================================
+  private async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+    const url = `${this.baseURL}${path.startsWith('/') ? path : `/${path}`}`;
+    const config: RequestInit = {
+      method: options.method ?? 'GET',
+      ...options,
+      headers: {
+        ...this.getHeaders(),
+        ...options.headers
+      }
+    };
+
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        this.persistSession(null);
+      }
+
+      const errorPayload = await this.parseJson(response);
+      const normalized = normalizeApiError(response.status, response.statusText, errorPayload);
+
+      throw new ApiError({
+        status: normalized.status,
+        message: normalized.message,
+        code: normalized.code,
+        detail: normalized.detail,
+        errors: normalized.errors,
+        headers: response.headers,
+        payload: errorPayload
+      });
+    }
+
+    const body = await this.parseJson<T>(response);
+    return body as T;
+  }
+
+  setSessionTokens(loginResponse: LoginResponse): void {
+    const session: StoredSession = {
+      accessToken: loginResponse.access_token,
+      refreshToken: loginResponse.refresh_token,
+      issuedAt: loginResponse.issued_at,
+      expiresIn: loginResponse.expires_in
+    };
+    this.persistSession(session);
+  }
+
+  clearSession(): void {
+    this.persistSession(null);
+  }
+
+  isAuthenticated(): boolean {
+    return Boolean(this.session?.accessToken);
+  }
 
   async login(email: string, password: string): Promise<LoginResponse> {
-    const response = await this.request<LoginResponse>(API_CONFIG.ENDPOINTS.LOGIN, {
+    const response = await this.request<LoginResponse>(ENDPOINTS.auth.login, {
       method: 'POST',
       body: JSON.stringify({ email, password })
     });
 
-    this.setToken(response.access_token);
+    this.setSessionTokens(response);
     return response;
   }
 
-  async register(userData: RegisterRequest): Promise<RegisterResponse> {
-    return await this.request<RegisterResponse>(API_CONFIG.ENDPOINTS.REGISTER, {
+  async register(payload: RegisterRequest): Promise<RegisterResponse> {
+    return await this.request<RegisterResponse>(ENDPOINTS.auth.register, {
       method: 'POST',
-      body: JSON.stringify(userData)
+      body: JSON.stringify(payload)
     });
   }
 
-  async logout(): Promise<{ message: string }> {
+  async logout(): Promise<LogoutResponse> {
     try {
-      const response = await this.request<{ message: string }>(API_CONFIG.ENDPOINTS.LOGOUT, {
+      const response = await this.request<LogoutResponse>(ENDPOINTS.auth.logout, {
         method: 'POST'
       });
-      this.clearToken();
       return response;
+    } finally {
+      this.clearSession();
+    }
+  }
+
+  async requestPasswordReset(email: string): Promise<PasswordResetResponse> {
+    try {
+      return await this.request<PasswordResetResponse>(ENDPOINTS.auth.passwordReset, {
+        method: 'POST',
+        body: JSON.stringify({ email })
+      });
     } catch (error) {
-      // Even if logout fails on server, clear local token
-      this.clearToken();
+      if (error instanceof ApiError && error.status === 404) {
+        return await this.request<PasswordResetResponse>(ENDPOINTS.auth.passwordResetLegacy, {
+          method: 'POST',
+          body: JSON.stringify({ email })
+        });
+      }
       throw error;
     }
   }
 
-  async requestPasswordReset(email: string): Promise<{ message: string }> {
-    return await this.request<{ message: string }>(API_CONFIG.ENDPOINTS.PASSWORD_RESET_REQUEST, {
+  async forgotPassword(email: string): Promise<ForgotPasswordResponse> {
+    return await this.request<ForgotPasswordResponse>(ENDPOINTS.auth.forgotPassword, {
       method: 'POST',
       body: JSON.stringify({ email })
     });
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
-    return await this.request<{ message: string }>(API_CONFIG.ENDPOINTS.RESET_PASSWORD, {
+  async resetPassword(payload: ResetPasswordRequest): Promise<{ message: string }> {
+    return await this.request<{ message: string }>(ENDPOINTS.auth.resetPassword, {
       method: 'POST',
-      body: JSON.stringify({ token, new_password: newPassword })
+      body: JSON.stringify(payload)
+    });
+  }
+
+  async changePassword(payload: ChangePasswordRequest): Promise<ChangePasswordResponse> {
+    return await this.request<ChangePasswordResponse>(ENDPOINTS.auth.changePassword, {
+      method: 'POST',
+      body: JSON.stringify(payload)
     });
   }
 
   async verifyEmail(token: string): Promise<{ message: string }> {
-    return await this.request<{ message: string }>(API_CONFIG.ENDPOINTS.VERIFY_EMAIL, {
+    return await this.request<{ message: string }>(ENDPOINTS.auth.verifyEmail, {
       method: 'POST',
       body: JSON.stringify({ token })
     });
   }
 
-  // ============================================================================
-  // Profile Methods
-  // ============================================================================
+  async resendVerification(payload: ResendVerificationRequest): Promise<ResendVerificationResponse> {
+    return await this.request<ResendVerificationResponse>(ENDPOINTS.auth.resendVerification, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
 
   async getUserProfile(): Promise<UserProfile> {
-    return await this.request<UserProfile>(API_CONFIG.ENDPOINTS.PROFILE_ME);
+    return await this.request<UserProfile>(ENDPOINTS.profile.me);
   }
 
-  async updateUserProfile(userData: UpdateUserRequest): Promise<UserProfile> {
-    return await this.request<UserProfile>(API_CONFIG.ENDPOINTS.PROFILE_ME, {
+  async updateUserProfile(payload: Partial<UserProfile>): Promise<UserProfile> {
+    return await this.request<UserProfile>(ENDPOINTS.profile.me, {
       method: 'PUT',
-      body: JSON.stringify(userData)
+      body: JSON.stringify(payload)
     });
   }
 
-  // ============================================================================
-  // Admin Methods
-  // ============================================================================
+  private mapUserSummary(user: UserListResponse): UserSummary {
+    return {
+      user_id: user.user_id,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      role: user.role,
+      is_active: user.is_active,
+      is_verified: user.is_verified,
+      is_approved: user.is_approved,
+      approved_by: user.approved_by ?? undefined,
+      approved_at: user.approved_at ?? undefined,
+      created_at: user.created_at,
+      last_login_at: user.last_login_at ?? undefined
+    };
+  }
 
   async getUsers(params?: AdminUsersQuery): Promise<UserSummary[]> {
-    const queryString = params ? '?' + new URLSearchParams(
-      Object.entries(params)
-        .filter(([, value]) => value !== undefined)
-        .map(([key, value]) => [key, String(value)])
-    ).toString() : '';
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value === undefined || value === null) {
+          return;
+        }
+        searchParams.append(key, String(value));
+      });
+    }
 
-    return await this.request<UserSummary[]>(`${API_CONFIG.ENDPOINTS.ADMIN_USERS}${queryString}`);
+    const query = searchParams.toString();
+    const path = query ? `${ENDPOINTS.admin.users}?${query}` : ENDPOINTS.admin.users;
+    const response = await this.request<UserListResponse[]>(path);
+    return response.map((user) => this.mapUserSummary(user));
   }
 
-  async createUser(userData: CreateUserRequest): Promise<UserSummary> {
-    return await this.request<UserSummary>(API_CONFIG.ENDPOINTS.ADMIN_USERS, {
+  async getUser(userId: string): Promise<UserSummary> {
+    const response = await this.request<UserDetailResponse>(ENDPOINTS.admin.userById(userId));
+    return this.mapUserSummary(response);
+  }
+
+  async createUser(payload: CreateUserRequest): Promise<UserSummary> {
+    const response = await this.request<CreateUserResponse>(ENDPOINTS.admin.users, {
       method: 'POST',
-      body: JSON.stringify(userData)
+      body: JSON.stringify(payload)
     });
+
+    return await this.getUser(response.user_id);
   }
 
-  async updateUser(userId: string, userData: Partial<CreateUserRequest>): Promise<UserSummary> {
-    return await this.request<UserSummary>(API_CONFIG.ENDPOINTS.ADMIN_USER_BY_ID(userId), {
+  async updateUser(userId: string, payload: UpdateUserRequest): Promise<UserSummary> {
+    const response = await this.request<UserDetailResponse>(ENDPOINTS.admin.userById(userId), {
       method: 'PUT',
-      body: JSON.stringify(userData)
+      body: JSON.stringify(payload)
     });
+    return this.mapUserSummary(response);
   }
 
-  async deleteUser(userId: string): Promise<{ message: string }> {
-    return await this.request<{ message: string }>(API_CONFIG.ENDPOINTS.ADMIN_USER_BY_ID(userId), {
+  async deleteUser(userId: string): Promise<DeleteUserResponse> {
+    return await this.request<DeleteUserResponse>(ENDPOINTS.admin.userById(userId), {
       method: 'DELETE'
     });
   }
 
-  // ============================================================================
-  // Audit Methods
-  // ============================================================================
+  async approveUser(userId: string): Promise<UserSummary> {
+    await this.request(ENDPOINTS.admin.approveUser(userId), {
+      method: 'POST'
+    });
+    return await this.getUser(userId);
+  }
+
+  async rejectUser(userId: string, reason?: string): Promise<UserSummary> {
+    await this.request(ENDPOINTS.admin.rejectUser(userId), {
+      method: 'POST',
+      body: JSON.stringify({ reason })
+    });
+    return await this.getUser(userId);
+  }
+
+  async getUserAnalytics(): Promise<UserAnalytics | null> {
+    try {
+      return await this.request<UserAnalytics>(ENDPOINTS.admin.analytics);
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn('User analytics endpoint unavailable', error);
+      }
+      return null;
+    }
+  }
 
   async getAuditLogs(params?: AuditLogsQuery): Promise<AuditLog[]> {
-    const queryString = params ? '?' + new URLSearchParams(
-      Object.entries(params)
-        .filter(([, value]) => value !== undefined)
-        .map(([key, value]) => [key, String(value)])
-    ).toString() : '';
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value === undefined || value === null) {
+          return;
+        }
+        searchParams.append(key, String(value));
+      });
+    }
 
-    return await this.request<AuditLog[]>(`${API_CONFIG.ENDPOINTS.AUDIT_LOGS}${queryString}`);
+    const query = searchParams.toString();
+    const path = query ? `${ENDPOINTS.audit.logs}?${query}` : ENDPOINTS.audit.logs;
+    return await this.request<AuditLog[]>(path);
   }
 
   async getAuditSummary(): Promise<AuditSummary> {
-    return await this.request<AuditSummary>(API_CONFIG.ENDPOINTS.AUDIT_SUMMARY);
-  }
-
-  // ============================================================================
-  // Analytics & Workflow Methods
-  // ============================================================================
-
-  async getUserAnalytics(): Promise<UserAnalytics> {
-    const response = await this.request<UserAnalytics | { analytics?: UserAnalytics }>(
-      API_CONFIG.ENDPOINTS.ADMIN_ANALYTICS
-    );
-
-    if (response && typeof response === 'object' && 'analytics' in response && response.analytics) {
-      return response.analytics;
-    }
-
-    return response as UserAnalytics;
+    return await this.request<AuditSummary>(ENDPOINTS.audit.summary);
   }
 
   async getPendingApprovals(): Promise<PendingWorkflow[]> {
-    const response = await this.request<
-      PendingWorkflow[] | { pending?: PendingWorkflow[]; workflows?: PendingWorkflow[] }
-    >(API_CONFIG.ENDPOINTS.PENDING_APPROVALS);
-
-    if (Array.isArray(response)) {
-      return response;
-    }
-
-    if (response && typeof response === 'object') {
-      if (Array.isArray(response.pending)) {
-        return response.pending;
+    try {
+      return await this.request<PendingWorkflow[]>(ENDPOINTS.workflows.pending);
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn('Pending workflows endpoint unavailable', error);
       }
-
-      if (Array.isArray(response.workflows)) {
-        return response.workflows;
-      }
+      return [];
     }
-
-    return [];
   }
 }
 
-// Export singleton instance
 export const apiClient = new ApiClient();
 
-// React hook for easy API access
-export const useApi = () => {
-  return {
-    // Authentication
-    login: apiClient.login.bind(apiClient),
-    register: apiClient.register.bind(apiClient),
-    logout: apiClient.logout.bind(apiClient),
-    requestPasswordReset: apiClient.requestPasswordReset.bind(apiClient),
-    resetPassword: apiClient.resetPassword.bind(apiClient),
-    verifyEmail: apiClient.verifyEmail.bind(apiClient),
-
-    // Profile management
-    getUserProfile: apiClient.getUserProfile.bind(apiClient),
-    updateUserProfile: apiClient.updateUserProfile.bind(apiClient),
-
-    // Admin operations
-    getUsers: apiClient.getUsers.bind(apiClient),
-    createUser: apiClient.createUser.bind(apiClient),
-    updateUser: apiClient.updateUser.bind(apiClient),
-    deleteUser: apiClient.deleteUser.bind(apiClient),
-
-    // Audit operations
-    getAuditLogs: apiClient.getAuditLogs.bind(apiClient),
-    getAuditSummary: apiClient.getAuditSummary.bind(apiClient),
-    getUserAnalytics: apiClient.getUserAnalytics.bind(apiClient),
-    getPendingApprovals: apiClient.getPendingApprovals.bind(apiClient),
-
-    // Utility
+export const useApi = () => apiClient;
     isAuthenticated: apiClient.isAuthenticated.bind(apiClient)
   };
 };

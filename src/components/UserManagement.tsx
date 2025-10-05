@@ -324,87 +324,90 @@ const UserManagement: React.FC = () => {
         }}>
           <div>
             <label style={{ 
-              display: 'block',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
               color: 'var(--text-primary)',
               fontWeight: '500'
             }}>
-              Search Users
+              <span>Search Users</span>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by email or name..."
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  background: 'var(--background-primary)',
+                  color: 'var(--text-primary)'
+                }}
+              />
             </label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by email or name..."
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid var(--border-color)',
-                borderRadius: '6px',
-                background: 'var(--background-primary)',
-                color: 'var(--text-primary)'
-              }}
-            />
           </div>
 
           <div>
             <label style={{ 
-              display: 'block',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
               color: 'var(--text-primary)',
               fontWeight: '500'
             }}>
-              Filter by Role
+              <span>Filter by Role</span>
+              <select
+                value={filterRole}
+                onChange={(e) => setFilterRole(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  background: 'var(--background-primary)',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                <option value="">All Roles</option>
+                {roles.map(role => (
+                  <option key={role.id} value={role.name}>
+                    {role.name}
+                  </option>
+                ))}
+              </select>
             </label>
-            <select
-              value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid var(--border-color)',
-                borderRadius: '6px',
-                background: 'var(--background-primary)',
-                color: 'var(--text-primary)'
-              }}
-            >
-              <option value="">All Roles</option>
-              {roles.map(role => (
-                <option key={role.id} value={role.name}>
-                  {role.name}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div>
             <label style={{ 
-              display: 'block',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
               color: 'var(--text-primary)',
               fontWeight: '500'
             }}>
-              Filter by Status
+              <span>Filter by Status</span>
+              <select
+                value={filterActive === undefined ? '' : filterActive.toString()}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFilterActive(value === '' ? undefined : value === 'true');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  background: 'var(--background-primary)',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                <option value="">All Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
             </label>
-            <select
-              value={filterActive === undefined ? '' : filterActive.toString()}
-              onChange={(e) => {
-                const value = e.target.value;
-                setFilterActive(value === '' ? undefined : value === 'true');
-              }}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid var(--border-color)',
-                borderRadius: '6px',
-                background: 'var(--background-primary)',
-                color: 'var(--text-primary)'
-              }}
-            >
-              <option value="">All Status</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -771,105 +774,109 @@ const UserModal: React.FC<{
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>
             <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
               color: 'var(--text-primary)',
               fontWeight: '500'
             }}>
-              Full Name
+              <span>Full Name</span>
+              <input
+                type="text"
+                value={formData.full_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  background: 'var(--background-primary)',
+                  color: 'var(--text-primary)'
+                }}
+                required
+              />
             </label>
-            <input
-              type="text"
-              value={formData.full_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid var(--border-color)',
-                borderRadius: '6px',
-                background: 'var(--background-primary)',
-                color: 'var(--text-primary)'
-              }}
-              required
-            />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
             <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
               color: 'var(--text-primary)',
               fontWeight: '500'
             }}>
-              Username
+              <span>Username</span>
+              <input
+                type="text"
+                value={formData.username}
+                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  background: 'var(--background-primary)',
+                  color: 'var(--text-primary)'
+                }}
+              />
             </label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid var(--border-color)',
-                borderRadius: '6px',
-                background: 'var(--background-primary)',
-                color: 'var(--text-primary)'
-              }}
-            />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
             <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
               color: 'var(--text-primary)',
               fontWeight: '500'
             }}>
-              Email
+              <span>Email</span>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  background: 'var(--background-primary)',
+                  color: 'var(--text-primary)'
+                }}
+                required
+              />
             </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid var(--border-color)',
-                borderRadius: '6px',
-                background: 'var(--background-primary)',
-                color: 'var(--text-primary)'
-              }}
-              required
-            />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
             <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
               color: 'var(--text-primary)',
               fontWeight: '500'
             }}>
-              Role
+              <span>Role</span>
+              <select
+                value={formData.role_id}
+                onChange={(e) => setFormData(prev => ({ ...prev, role_id: parseInt(e.target.value) }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '6px',
+                  background: 'var(--background-primary)',
+                  color: 'var(--text-primary)'
+                }}
+              >
+                {roles.map(role => (
+                  <option key={role.id} value={role.id}>
+                    {role.name} - {role.description}
+                  </option>
+                ))}
+              </select>
             </label>
-            <select
-              value={formData.role_id}
-              onChange={(e) => setFormData(prev => ({ ...prev, role_id: parseInt(e.target.value) }))}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid var(--border-color)',
-                borderRadius: '6px',
-                background: 'var(--background-primary)',
-                color: 'var(--text-primary)'
-              }}
-            >
-              {roles.map(role => (
-                <option key={role.id} value={role.id}>
-                  {role.name} - {role.description}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div style={{ marginBottom: '2rem' }}>

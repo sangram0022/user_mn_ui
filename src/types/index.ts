@@ -36,61 +36,44 @@ export interface UserRoleInfo {
 }
 
 export interface User {
-  id?: number | string;
-  user_id?: string;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  full_name?: string;
-  username?: string;
-  role?: UserRoleInfo | string;
-  role_name?: string;
-  status?: string;
-  lifecycle_stage?: string;
-  is_active?: boolean;
-  is_verified?: boolean;
-  is_superuser?: boolean;
-  created_at?: string;
-  updated_at?: string;
-  last_login?: string;
-  last_login_at?: string;
-  phone_number?: string;
-  avatar_url?: string;
-  preferences?: {
-    theme?: string;
-    notifications?: boolean;
-    language?: string;
-  };
-  metadata?: {
-    source?: string;
-    referrer?: string;
-  };
-}
-
-export interface UserProfile extends User {
-  departments?: string[];
-  teams?: string[];
-  profile_picture_url?: string;
-}
-
-export interface UserSummary {
-  id?: number | string;
-  user_id?: string;
+  user_id: string;
   email: string;
   first_name: string;
   last_name: string;
-  full_name?: string;
-  username?: string;
-  role?: UserRoleInfo | string;
-  role_name?: string;
+  role: string;
+  status?: string;
+  is_active: boolean;
+  is_verified: boolean;
+  is_approved?: boolean;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+  last_login_at?: string | null;
+  phone_number?: string | null;
+  avatar_url?: string | null;
+  preferences?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
+}
+
+export interface UserProfile extends User {
+  last_login?: string | null;
+  profile_data?: Record<string, unknown> | null;
+}
+
+export interface UserSummary {
+  user_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
   is_active: boolean;
   is_verified: boolean;
   is_approved: boolean;
-  approved_by?: string;
-  approved_at?: string;
+  approved_by?: string | null;
+  approved_at?: string | null;
   created_at: string;
-  last_login?: string;
-  last_login_at?: string;
+  last_login_at?: string | null;
 }
 
 export interface UserRole {
@@ -112,17 +95,9 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   first_name?: string;
   last_name?: string;
-  phone_number?: string;
-  avatar_url?: string;
-  preferences?: {
-    theme?: string;
-    notifications?: boolean;
-    language?: string;
-  };
-  metadata?: {
-    source?: string;
-    referrer?: string;
-  };
+  role?: string;
+  is_active?: boolean;
+  is_verified?: boolean;
 }
 
 // ============================================================================
@@ -136,9 +111,15 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   access_token: string;
+  refresh_token: string;
   token_type: string;
   expires_in: number;
-  user: User;
+  refresh_expires_in: number;
+  user_id: string;
+  email: string;
+  role: string;
+  last_login_at?: string;
+  issued_at: string;
 }
 
 export interface RegisterRequest {
@@ -147,7 +128,6 @@ export interface RegisterRequest {
   confirm_password: string;
   first_name: string;
   last_name: string;
-  username: string;
 }
 
 export interface RegisterResponse {
@@ -186,6 +166,7 @@ export interface VerifyEmailRequest {
 export interface ChangePasswordRequest {
   current_password: string;
   new_password: string;
+  confirm_password: string;
 }
 
 // ============================================================================

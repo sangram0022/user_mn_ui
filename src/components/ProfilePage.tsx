@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useId } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient, type UserProfile as ApiUserProfile } from '../services/apiClientComplete';
 import ErrorAlert from './ErrorAlert';
@@ -36,6 +36,14 @@ const ProfilePage: React.FC = () => {
   const { error, handleError, clearError } = useErrorHandler();
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences'>('profile');
+  const fullNameInputId = useId();
+  const usernameInputId = useId();
+  const bioInputId = useId();
+  const locationInputId = useId();
+  const websiteInputId = useId();
+  const currentPasswordInputId = useId();
+  const newPasswordInputId = useId();
+  const confirmPasswordInputId = useId();
 
   // Form state for editing
   const [editForm, setEditForm] = useState({
@@ -305,226 +313,328 @@ const ProfilePage: React.FC = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
           {/* Full Name */}
           <div>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '0.5rem'
-            }}>
-              Full Name
-            </label>
             {isEditing ? (
-              <input
-                type="text"
-                value={editForm.full_name}
-                onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
-                style={{
-                  width: '100%',
+              <>
+                <label
+                  htmlFor={fullNameInputId}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  Full Name
+                </label>
+                <input
+                  id={fullNameInputId}
+                  type="text"
+                  value={editForm.full_name}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '0.875rem',
+                    color: '#111827',
+                    backgroundColor: 'white',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '0.5rem',
+                    outline: 'none'
+                  }}
+                  placeholder="Enter your full name"
+                />
+              </>
+            ) : (
+              <div role="group" aria-labelledby={`${fullNameInputId}-label`}>
+                <p
+                  id={`${fullNameInputId}-label`}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  Full Name
+                </p>
+                <p style={{
                   padding: '0.75rem',
                   fontSize: '0.875rem',
                   color: '#111827',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb',
                   borderRadius: '0.5rem',
-                  outline: 'none'
-                }}
-                placeholder="Enter your full name"
-              />
-            ) : (
-              <p style={{
-                padding: '0.75rem',
-                fontSize: '0.875rem',
-                color: '#111827',
-                backgroundColor: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.5rem',
-                margin: 0
-              }}>
-                {profile?.full_name || 'Not specified'}
-              </p>
+                  margin: 0
+                }}>
+                  {profile?.full_name || 'Not specified'}
+                </p>
+              </div>
             )}
           </div>
 
           {/* Username */}
           <div>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '0.5rem'
-            }}>
-              Username
-            </label>
             {isEditing ? (
-              <input
-                type="text"
-                value={editForm.username}
-                onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                style={{
-                  width: '100%',
+              <>
+                <label
+                  htmlFor={usernameInputId}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  Username
+                </label>
+                <input
+                  id={usernameInputId}
+                  type="text"
+                  value={editForm.username}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '0.875rem',
+                    color: '#111827',
+                    backgroundColor: 'white',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '0.5rem',
+                    outline: 'none'
+                  }}
+                  placeholder="Enter your username"
+                />
+              </>
+            ) : (
+              <div role="group" aria-labelledby={`${usernameInputId}-label`}>
+                <p
+                  id={`${usernameInputId}-label`}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  Username
+                </p>
+                <p style={{
                   padding: '0.75rem',
                   fontSize: '0.875rem',
                   color: '#111827',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb',
                   borderRadius: '0.5rem',
-                  outline: 'none'
-                }}
-                placeholder="Enter your username"
-              />
-            ) : (
-              <p style={{
-                padding: '0.75rem',
-                fontSize: '0.875rem',
-                color: '#111827',
-                backgroundColor: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.5rem',
-                margin: 0
-              }}>
-                {profile?.username || 'Not specified'}
-              </p>
+                  margin: 0
+                }}>
+                  {profile?.username || 'Not specified'}
+                </p>
+              </div>
             )}
           </div>
 
           {/* Bio - Full Width */}
           <div style={{ gridColumn: '1 / -1' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '0.5rem'
-            }}>
-              Bio
-            </label>
             {isEditing ? (
-              <textarea
-                value={editForm.bio}
-                onChange={(e) => setEditForm(prev => ({ ...prev, bio: e.target.value }))}
-                rows={3}
-                style={{
-                  width: '100%',
+              <>
+                <label
+                  htmlFor={bioInputId}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  Bio
+                </label>
+                <textarea
+                  id={bioInputId}
+                  value={editForm.bio}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, bio: e.target.value }))}
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '0.875rem',
+                    color: '#111827',
+                    backgroundColor: 'white',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '0.5rem',
+                    outline: 'none',
+                    resize: 'vertical'
+                  }}
+                  placeholder="Tell us about yourself..."
+                />
+              </>
+            ) : (
+              <div role="group" aria-labelledby={`${bioInputId}-label`}>
+                <p
+                  id={`${bioInputId}-label`}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  Bio
+                </p>
+                <p style={{
                   padding: '0.75rem',
                   fontSize: '0.875rem',
                   color: '#111827',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb',
                   borderRadius: '0.5rem',
-                  outline: 'none',
-                  resize: 'vertical'
-                }}
-                placeholder="Tell us about yourself..."
-              />
-            ) : (
-              <p style={{
-                padding: '0.75rem',
-                fontSize: '0.875rem',
-                color: '#111827',
-                backgroundColor: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.5rem',
-                margin: 0,
-                minHeight: '4rem'
-              }}>
-                {profile?.bio || 'No bio provided'}
-              </p>
+                  margin: 0,
+                  minHeight: '4rem'
+                }}>
+                  {profile?.bio || 'No bio provided'}
+                </p>
+              </div>
             )}
           </div>
 
           {/* Location */}
           <div>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '0.5rem'
-            }}>
-              <MapPin style={{ width: '1rem', height: '1rem', display: 'inline', marginRight: '0.5rem' }} />
-              Location
-            </label>
             {isEditing ? (
-              <input
-                type="text"
-                value={editForm.location}
-                onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
-                style={{
-                  width: '100%',
+              <>
+                <label
+                  htmlFor={locationInputId}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  <MapPin style={{ width: '1rem', height: '1rem', display: 'inline', marginRight: '0.5rem' }} />
+                  Location
+                </label>
+                <input
+                  id={locationInputId}
+                  type="text"
+                  value={editForm.location}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '0.875rem',
+                    color: '#111827',
+                    backgroundColor: 'white',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '0.5rem',
+                    outline: 'none'
+                  }}
+                  placeholder="Your location"
+                />
+              </>
+            ) : (
+              <div role="group" aria-labelledby={`${locationInputId}-label`}>
+                <p
+                  id={`${locationInputId}-label`}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  <MapPin style={{ width: '1rem', height: '1rem', display: 'inline', marginRight: '0.5rem' }} />
+                  Location
+                </p>
+                <p style={{
                   padding: '0.75rem',
                   fontSize: '0.875rem',
                   color: '#111827',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb',
                   borderRadius: '0.5rem',
-                  outline: 'none'
-                }}
-                placeholder="Your location"
-              />
-            ) : (
-              <p style={{
-                padding: '0.75rem',
-                fontSize: '0.875rem',
-                color: '#111827',
-                backgroundColor: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.5rem',
-                margin: 0
-              }}>
-                {profile?.location || 'Not specified'}
-              </p>
+                  margin: 0
+                }}>
+                  {profile?.location || 'Not specified'}
+                </p>
+              </div>
             )}
           </div>
 
           {/* Website */}
           <div>
-            <label style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '0.5rem'
-            }}>
-              <Globe style={{ width: '1rem', height: '1rem', display: 'inline', marginRight: '0.5rem' }} />
-              Website
-            </label>
             {isEditing ? (
-              <input
-                type="url"
-                value={editForm.website}
-                onChange={(e) => setEditForm(prev => ({ ...prev, website: e.target.value }))}
-                style={{
-                  width: '100%',
+              <>
+                <label
+                  htmlFor={websiteInputId}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  <Globe style={{ width: '1rem', height: '1rem', display: 'inline', marginRight: '0.5rem' }} />
+                  Website
+                </label>
+                <input
+                  id={websiteInputId}
+                  type="url"
+                  value={editForm.website}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, website: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    fontSize: '0.875rem',
+                    color: '#111827',
+                    backgroundColor: 'white',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '0.5rem',
+                    outline: 'none'
+                  }}
+                  placeholder="https://your-website.com"
+                />
+              </>
+            ) : (
+              <div role="group" aria-labelledby={`${websiteInputId}-label`}>
+                <p
+                  id={`${websiteInputId}-label`}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  <Globe style={{ width: '1rem', height: '1rem', display: 'inline', marginRight: '0.5rem' }} />
+                  Website
+                </p>
+                <p style={{
                   padding: '0.75rem',
                   fontSize: '0.875rem',
                   color: '#111827',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb',
                   borderRadius: '0.5rem',
-                  outline: 'none'
-                }}
-                placeholder="https://your-website.com"
-              />
-            ) : (
-              <p style={{
-                padding: '0.75rem',
-                fontSize: '0.875rem',
-                color: '#111827',
-                backgroundColor: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.5rem',
-                margin: 0
-              }}>
-                {profile?.website ? (
-                  <a href={profile.website} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6' }}>
-                    {profile.website}
-                  </a>
-                ) : (
-                  'Not specified'
-                )}
-              </p>
+                  margin: 0
+                }}>
+                  {profile?.website ? (
+                    <a href={profile.website} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6' }}>
+                      {profile.website}
+                    </a>
+                  ) : (
+                    'Not specified'
+                  )}
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -636,17 +746,21 @@ const ProfilePage: React.FC = () => {
           <div style={{ display: 'grid', gap: '1rem' }}>
             {/* Current Password */}
             <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem'
-              }}>
+              <label
+                htmlFor={currentPasswordInputId}
+                style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  marginBottom: '0.5rem'
+                }}
+              >
                 Current Password
               </label>
               <div style={{ position: 'relative' }}>
                 <input
+                  id={currentPasswordInputId}
                   type={showPasswords.current ? 'text' : 'password'}
                   value={passwordForm.current_password}
                   onChange={(e) => setPasswordForm(prev => ({ ...prev, current_password: e.target.value }))}
@@ -689,17 +803,21 @@ const ProfilePage: React.FC = () => {
 
             {/* New Password */}
             <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem'
-              }}>
+              <label
+                htmlFor={newPasswordInputId}
+                style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  marginBottom: '0.5rem'
+                }}
+              >
                 New Password
               </label>
               <div style={{ position: 'relative' }}>
                 <input
+                  id={newPasswordInputId}
                   type={showPasswords.new ? 'text' : 'password'}
                   value={passwordForm.new_password}
                   onChange={(e) => setPasswordForm(prev => ({ ...prev, new_password: e.target.value }))}
@@ -742,17 +860,21 @@ const ProfilePage: React.FC = () => {
 
             {/* Confirm Password */}
             <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem'
-              }}>
+              <label
+                htmlFor={confirmPasswordInputId}
+                style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  marginBottom: '0.5rem'
+                }}
+              >
                 Confirm New Password
               </label>
               <div style={{ position: 'relative' }}>
                 <input
+                  id={confirmPasswordInputId}
                   type={showPasswords.confirm ? 'text' : 'password'}
                   value={passwordForm.confirm_password}
                   onChange={(e) => setPasswordForm(prev => ({ ...prev, confirm_password: e.target.value }))}
@@ -883,12 +1005,15 @@ const ProfilePage: React.FC = () => {
                     {description}
                   </p>
                 </div>
-                <label style={{
-                  position: 'relative',
-                  display: 'inline-block',
-                  width: '3rem',
-                  height: '1.5rem'
-                }}>
+                <label
+                  aria-label={label}
+                  style={{
+                    position: 'relative',
+                    display: 'inline-block',
+                    width: '3rem',
+                    height: '1.5rem'
+                  }}
+                >
                   <input
                     type="checkbox"
                     defaultChecked={id === 'email_notifications'}

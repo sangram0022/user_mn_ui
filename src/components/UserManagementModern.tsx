@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useId } from 'react';
 import { apiClient } from '../services/apiClient';
 import type { UserSummary, CreateUserRequest, UpdateUserRequest } from '../types';
 import { getUserRoleName, userHasRole } from '../utils/user';
@@ -158,8 +158,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+          <label className="flex flex-col text-sm font-medium text-gray-700">
+            <span className="mb-2">Search</span>
             <input
               type="text"
               placeholder="Search by name or email..."
@@ -167,9 +167,9 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+          </label>
+          <label className="flex flex-col text-sm font-medium text-gray-700">
+            <span className="mb-2">Role</span>
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
@@ -179,9 +179,9 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
               <option value="admin">Admin</option>
               <option value="user">User</option>
             </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+          </label>
+          <label className="flex flex-col text-sm font-medium text-gray-700">
+            <span className="mb-2">Status</span>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -191,7 +191,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-          </div>
+          </label>
           <div className="flex items-end">
             <button
               onClick={loadUsers}
@@ -381,8 +381,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ onClose, onSubmit }) 
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="flex flex-col text-sm font-medium text-gray-700">
+            <span className="mb-1">Email</span>
             <input
               type="email"
               required
@@ -390,10 +390,10 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ onClose, onSubmit }) 
               onChange={(e) => setFormData({...formData, email: e.target.value})}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-          </div>
+          </label>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <label className="flex flex-col text-sm font-medium text-gray-700">
+            <span className="mb-1">Password</span>
             <input
               type="password"
               required
@@ -401,31 +401,31 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ onClose, onSubmit }) 
               onChange={(e) => setFormData({...formData, password: e.target.value})}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-          </div>
+          </label>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+            <label className="flex flex-col text-sm font-medium text-gray-700">
+              <span className="mb-1">First Name</span>
               <input
                 type="text"
                 value={formData.first_name}
                 onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+            </label>
+            <label className="flex flex-col text-sm font-medium text-gray-700">
+              <span className="mb-1">Last Name</span>
               <input
                 type="text"
                 value={formData.last_name}
                 onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
-            </div>
+            </label>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+          <label className="flex flex-col text-sm font-medium text-gray-700">
+            <span className="mb-1">Role</span>
             <select
               value={formData.role}
               onChange={(e) => setFormData({...formData, role: e.target.value as 'admin' | 'user'})}
@@ -434,7 +434,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ onClose, onSubmit }) 
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
-          </div>
+          </label>
 
           <div className="flex items-center">
             <input
@@ -484,6 +484,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSubmit }
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const emailFieldId = useId();
+  const emailHelpId = `${emailFieldId}-help`;
+  const firstNameId = useId();
+  const lastNameId = useId();
+  const phoneId = useId();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -519,20 +524,23 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSubmit }
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor={emailFieldId} className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
+              id={emailFieldId}
               type="email"
               value={user.email}
               disabled
+              aria-describedby={emailHelpId}
               className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
             />
-            <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+            <p id={emailHelpId} className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+              <label htmlFor={firstNameId} className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
               <input
+                id={firstNameId}
                 type="text"
                 value={formData.first_name}
                 onChange={(e) => setFormData({...formData, first_name: e.target.value})}
@@ -540,8 +548,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSubmit }
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+              <label htmlFor={lastNameId} className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
               <input
+                id={lastNameId}
                 type="text"
                 value={formData.last_name}
                 onChange={(e) => setFormData({...formData, last_name: e.target.value})}
@@ -551,8 +560,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, onClose, onSubmit }
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <label htmlFor={phoneId} className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
             <input
+              id={phoneId}
               type="tel"
               value={formData.phone_number || ''}
               onChange={(e) => setFormData({...formData, phone_number: e.target.value})}

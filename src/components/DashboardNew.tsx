@@ -208,17 +208,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ className = '' }) => {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <p className="block text-sm font-medium text-gray-700">Name</p>
                   <p className="mt-1 text-sm text-gray-900">
                     {user?.first_name} {user?.last_name}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <p className="block text-sm font-medium text-gray-700">Email</p>
                   <p className="mt-1 text-sm text-gray-900">{user?.email}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Role</label>
+                  <p className="block text-sm font-medium text-gray-700">Role</p>
                   <span className={`mt-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                     userHasRole(user, 'admin')
                       ? 'bg-purple-100 text-purple-800'
@@ -228,7 +228,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ className = '' }) => {
                   </span>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <p className="block text-sm font-medium text-gray-700">Status</p>
                   <div className="mt-1 flex items-center">
                     <div className={`h-2 w-2 rounded-full mr-2 ${
                       user?.status === 'active' ? 'bg-green-400' : 'bg-red-400'
@@ -240,7 +240,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ className = '' }) => {
               
               {user?.phone_number && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone</label>
+                  <p className="block text-sm font-medium text-gray-700">Phone</p>
                   <p className="mt-1 text-sm text-gray-900">{user.phone_number}</p>
                 </div>
               )}
