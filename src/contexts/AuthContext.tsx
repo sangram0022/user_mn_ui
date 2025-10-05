@@ -1,23 +1,8 @@
-﻿import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { apiClient } from '../services/apiClient';
 import type { UserProfile, LoginRequest } from '../types';
-import { getUserRoleName, getUserPermissions } from '../utils/user';
-
-interface AuthContextType {
-  user: UserProfile | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-  login: (credentials: LoginRequest) => Promise<void>;
-  logout: () => Promise<void>;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
-  refreshProfile: () => Promise<void>;
-  hasPermission: (permission: string) => boolean;
-  clearError: () => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext, type AuthContextType } from '../hooks/useAuth';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -61,17 +46,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const refreshProfile = async () => {
-    try {
-      const userProfile = await apiClient.getUserProfile();
-      setUser(userProfile);
-    } catch (err) {
-      console.error('Profile refresh failed:', err);
-      setUser(null);
-      throw err;
-    }
-  };
-
   const login = async (credentials: LoginRequest) => {
     try {
       setIsLoading(true);
@@ -81,7 +55,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Store the token
       localStorage.setItem('token', response.access_token);
-      await refreshProfile();
+      
+      // Get user profile
+      const userProfile = await apiClient.getUserProfile();
+      setUser(userProfile);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
       throw err;
@@ -110,6 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const updateProfile = async (updates: Partial<UserProfile>) => {
     try {
       setError(null);
+      
       const updatedProfile = await apiClient.updateUserProfile(updates);
       setUser(updatedProfile);
     } catch (err) {
@@ -118,28 +96,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const hasPermission = (permission: string): boolean => {
-    if (!user) {
-      return false;
-    }
-
-    if (user.is_superuser) {
-      return true;
-    }
-
-    const normalized = permission.toLowerCase();
-    const roleName = getUserRoleName(user).toLowerCase();
-
-    if (normalized === 'admin') {
-      return roleName === 'admin';
-    }
-
-    const permissions = getUserPermissions(user);
-    return permissions.map(p => p.toLowerCase()).includes(normalized);
-  };
-
   const clearError = () => {
     setError(null);
+  };
+
+  const hasPermission = (permission: string): boolean => {
+    if (!user) return false;
+    
+    // Check if user is superuser (admin)
+    if (user.is_superuser) return true;
+    
+    // Check role-based permissions
+    if (typeof user.role === 'object' && user.role?.permissions) {
+      return user.role.permissions.includes(permission);
+    }
+    
+    // Check role name for admin
+    if (user.role_name === 'admin' || user.role === 'admin') return true;
+    
+    // Default deny
+    return false;
+  };
+
+  const refreshProfile = async () => {
+    try {
+      setError(null);
+      const userProfile = await apiClient.getUserProfile();
+      setUser(userProfile);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Profile refresh failed');
+      throw err;
+    }
   };
 
   const value: AuthContextType = {
@@ -149,10 +136,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error,
     login,
     logout,
-  updateProfile,
-  refreshProfile,
-  hasPermission,
-    clearError
+    updateProfile,
+    clearError,
+    hasPermission,
+    refreshProfile
   };
 
   return (
@@ -162,12 +149,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export default AuthProvider;
 
-export default AuthContext;
+// Re-export useAuth hook for backward compatibility
+// eslint-disable-next-line react-refresh/only-export-components
+export { useAuth } from '../hooks/useAuth';

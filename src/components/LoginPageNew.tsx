@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Lock, Mail, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowLeft } from 'lucide-react';
+import { useErrorHandler } from '../hooks/useErrorHandler';
+import ErrorAlert from './ErrorAlert';
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +12,7 @@ const LoginPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { error, handleError, clearError } = useErrorHandler();
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -21,20 +23,19 @@ const LoginPage: React.FC = () => {
       ...prev,
       [name]: value
     }));
-    if (error) setError('');
+    if (error) clearError();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    clearError();
 
     try {
       await login({ email: formData.email, password: formData.password });
       navigate('/dashboard');
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
-      setError(errorMessage);
+      handleError(err);
     } finally {
       setIsLoading(false);
     }
@@ -112,21 +113,8 @@ const LoginPage: React.FC = () => {
         }}>
           {/* Error Alert */}
           {error && (
-            <div style={{ 
-              marginBottom: '1.5rem', 
-              padding: '1rem', 
-              backgroundColor: '#fef2f2', 
-              border: '1px solid #fecaca', 
-              borderRadius: '0.5rem', 
-              display: 'flex', 
-              alignItems: 'flex-start', 
-              gap: '0.75rem'
-            }}>
-              <AlertCircle style={{ width: '1.25rem', height: '1.25rem', color: '#ef4444', flexShrink: 0, marginTop: '0.125rem' }} />
-              <div>
-                <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: '#991b1b', margin: 0 }}>Authentication Error</h3>
-                <p style={{ fontSize: '0.875rem', color: '#b91c1c', marginTop: '0.25rem', margin: '0.25rem 0 0' }}>{error}</p>
-              </div>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <ErrorAlert error={error} onDismiss={clearError} />
             </div>
           )}
 

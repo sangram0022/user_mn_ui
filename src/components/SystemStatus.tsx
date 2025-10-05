@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClientComplete';
 import { CheckCircle, XCircle, AlertCircle, Loader } from 'lucide-react';
@@ -16,15 +16,15 @@ const SystemStatus: React.FC = () => {
   const [checks, setChecks] = useState<SystemCheck[]>([]);
   const [isRunning, setIsRunning] = useState(false);
 
-  const updateCheck = (name: string, status: SystemCheck['status'], message: string, details?: string) => {
+  const updateCheck = useCallback((name: string, status: SystemCheck['status'], message: string, details?: string) => {
     setChecks(prev => prev.map(check => 
       check.name === name 
         ? { ...check, status, message, details }
         : check
     ));
-  };
+  }, []);
 
-  const runSystemChecks = async () => {
+  const runSystemChecks = useCallback(async () => {
     setIsRunning(true);
     
     // Initialize checks
@@ -139,11 +139,11 @@ const SystemStatus: React.FC = () => {
       `Links: ${dashboardLinks.join(', ')}`);
 
     setIsRunning(false);
-  };
+  }, [user, updateCheck, hasPermission]);
 
   useEffect(() => {
     runSystemChecks();
-  }, [user]);
+  }, [user, runSystemChecks]);
 
   const getStatusIcon = (status: SystemCheck['status']) => {
     switch (status) {

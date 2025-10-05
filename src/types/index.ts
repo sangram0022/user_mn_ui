@@ -160,6 +160,16 @@ export interface RegisterResponse {
   verification_token?: string;
 }
 
+export interface ResendVerificationRequest {
+  email: string;
+}
+
+export interface ResendVerificationResponse {
+  message: string;
+  email: string;
+  resent_at: string;
+}
+
 export interface PasswordResetRequest {
   email: string;
 }

@@ -19,6 +19,8 @@ import ApprovalsPage from './components/ApprovalsPage';
 import ActivityPage from './components/ActivityPage';
 import AccountPage from './components/AccountPage';
 import SystemStatus from './components/SystemStatus';
+import EmailConfirmationPage from './components/EmailConfirmationPage';
+import EmailVerificationPage from './components/EmailVerificationPage';
 import './App.css';
 
 // Protected Route Component
@@ -96,6 +98,30 @@ function App() {
             element={
               <PublicRoute>
                 <RegisterPage />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/email-confirmation" 
+            element={
+              <PublicRoute>
+                <EmailConfirmationPage />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/verify-email" 
+            element={
+              <PublicRoute>
+                <EmailVerificationPage />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/email-verification" 
+            element={
+              <PublicRoute>
+                <EmailVerificationPage />
               </PublicRoute>
             } 
           />

@@ -87,7 +87,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
       setUsers([...users, userSummary]);
       setShowCreateModal(false);
     } catch (err) {
-      throw err; // Let the form handle the error
+      setError(err instanceof Error ? err.message : 'Failed to create user');
     }
   };
 
@@ -102,7 +102,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className = '' }
       } : u));
       setEditingUser(null);
     } catch (err) {
-      throw err; // Let the form handle the error
+      setError(err instanceof Error ? err.message : 'Failed to update user');
     }
   };
 

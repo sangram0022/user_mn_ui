@@ -1,7 +1,8 @@
 // Complete FastAPI Backend Integration - All API Endpoints from API_REFERENCE.md
 import { API_ENDPOINTS, API_BASE_URL, getApiDebugInfo } from '../config/backend';
-import type { ApiResponse, RegisterResponse } from '../types';
+import type { ApiResponse, RegisterResponse, ResendVerificationResponse } from '../types';
 import { ApiError } from '../utils/apiError';
+import type { ApiErrorResponse } from '../types/error';
 
 export const API_CONFIG = {
   BASE_URL: API_BASE_URL, // Use centralized backend configuration
@@ -12,6 +13,7 @@ export const API_CONFIG = {
     LOGIN: API_ENDPOINTS.AUTH.LOGIN,
     REFRESH: API_ENDPOINTS.AUTH.REFRESH,
     LOGOUT: API_ENDPOINTS.AUTH.LOGOUT,
+    RESEND_VERIFICATION: '/auth/resend-verification',
     
     // User Management Endpoints
     USERS: API_ENDPOINTS.USERS.BASE,
@@ -339,21 +341,46 @@ class ApiClient {
           return retryBody as T;
         }
 
-        const errorPayload = await response.json().catch(() => undefined);
+        const errorPayload = await response.json().catch(() => undefined) as ApiErrorResponse | undefined;
         console.error('❌ API error response:', errorPayload);
 
-        const message = (errorPayload && typeof errorPayload.message === 'string' && errorPayload.message.trim().length > 0)
-          ? errorPayload.message
-          : (errorPayload && typeof errorPayload.detail === 'string'
-            ? errorPayload.detail
+        // Handle new error response format: { error: { type, message: { message, error_code, ... }, status_code, ... }}
+        if (errorPayload && errorPayload.error) {
+          const errorDetail = errorPayload.error;
+          let errorCode = 'UNKNOWN_ERROR';
+          let errorMessage = '';
+          
+          if (typeof errorDetail.message === 'object' && errorDetail.message !== null) {
+            errorCode = errorDetail.message.error_code || errorCode;
+            errorMessage = errorDetail.message.message || '';
+          } else if (typeof errorDetail.message === 'string') {
+            errorMessage = errorDetail.message;
+          }
+          
+          throw new ApiError({
+            status: errorDetail.status_code || response.status,
+            message: errorMessage || `HTTP ${response.status}: ${response.statusText}`,
+            code: errorCode,
+            detail: errorDetail.path,
+            errors: { timestamp: errorDetail.timestamp },
+            headers: response.headers,
+            payload: errorPayload
+          });
+        }
+
+        // Fallback for old error format
+        const message = (errorPayload && typeof (errorPayload as any).message === 'string' && (errorPayload as any).message.trim().length > 0)
+          ? (errorPayload as any).message
+          : (errorPayload && typeof (errorPayload as any).detail === 'string'
+            ? (errorPayload as any).detail
             : `HTTP ${response.status}: ${response.statusText}`);
 
         throw new ApiError({
           status: response.status,
           message,
-          code: typeof errorPayload?.code === 'string' ? errorPayload.code : undefined,
-          detail: typeof errorPayload?.detail === 'string' ? errorPayload.detail : undefined,
-          errors: errorPayload && typeof errorPayload.errors === 'object' ? errorPayload.errors as Record<string, unknown> : undefined,
+          code: typeof (errorPayload as any)?.code === 'string' ? (errorPayload as any).code : undefined,
+          detail: typeof (errorPayload as any)?.detail === 'string' ? (errorPayload as any).detail : undefined,
+          errors: errorPayload && typeof (errorPayload as any).errors === 'object' ? (errorPayload as any).errors as Record<string, unknown> : undefined,
           headers: response.headers,
           payload: errorPayload
         });
@@ -418,10 +445,34 @@ class ApiClient {
       status: 201,
       meta: payload
         ? {
+            user_id: payload.user_id,
+            email: payload.email,
             verification_required: payload.verification_required,
-            approval_required: payload.approval_required
+            approval_required: payload.approval_required,
+            created_at: payload.created_at,
+            verification_token: payload.verification_token,
           }
-        : undefined
+        : undefined,
+    };
+  }
+
+  async resendVerificationEmail(email: string): Promise<ApiResponse<ResendVerificationResponse>> {
+    const payload = await this.request<ResendVerificationResponse>(API_CONFIG.ENDPOINTS.RESEND_VERIFICATION, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+
+    return {
+      success: true,
+      data: payload,
+      message: payload?.message ?? 'Verification email resent successfully.',
+      status: 200,
+      meta: payload
+        ? {
+            email: payload.email,
+            resent_at: payload.resent_at,
+          }
+        : undefined,
     };
   }
 
@@ -464,6 +515,13 @@ class ApiClient {
     
     this.clearToken();
     return response;
+  }
+
+  async verifyEmail(data: { token: string }): Promise<ApiResponse> {
+    return this.request<ApiResponse>('/api/v1/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   // Password Recovery Endpoints

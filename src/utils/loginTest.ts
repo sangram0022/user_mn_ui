@@ -29,6 +29,7 @@ class BackendTester {
     this.baseUrl = baseUrl;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
     const url = `${this.baseUrl}${endpoint}`;
     
@@ -202,7 +203,7 @@ export { BackendTester, TEST_USER };
 // Auto-run if this script is loaded directly
 if (typeof window !== 'undefined') {
   // Browser environment
-  (window as any).runLoginTest = () => {
+  (window as { runLoginTest?: () => void }).runLoginTest = () => {
     const tester = new BackendTester(BASE_URL);
     tester.runAllTests().catch(console.error);
   };

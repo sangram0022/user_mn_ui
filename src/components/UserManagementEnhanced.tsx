@@ -180,7 +180,7 @@ const UserManagementEnhanced: React.FC = () => {
     console.log('🔧 Current user permissions:', { user: user?.email, hasPermission: hasPermission('admin') });
     loadUsers();
     loadRoles();
-  }, [loadUsers, loadRoles]);
+  }, [loadUsers, loadRoles, hasPermission, user?.email]);
 
   // Reload users when search/filter parameters change
   useEffect(() => {

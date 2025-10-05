@@ -2,9 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, Clock, Eye, EyeOff, Info, LogIn, Lock, Mail, ShieldCheck, User } from 'lucide-react';
 import { apiClient } from '../services/apiClientComplete';
-import { ErrorDisplay } from './ErrorDisplay';
-import { parseError } from '../utils/errorHandling';
-import type { ErrorInfo } from '../utils/errorHandling';
+import ErrorAlert from './ErrorAlert';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 import { buildRegistrationFeedback } from '../utils/registrationFeedback';
 import type { FeedbackIcon, RegistrationFeedback } from '../utils/registrationFeedback';
 
@@ -28,7 +27,7 @@ const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<ErrorInfo | null>(null);
+  const { error, handleError, clearError } = useErrorHandler();
   const [success, setSuccess] = useState(false);
   const [registrationFeedback, setRegistrationFeedback] = useState<RegistrationFeedback | null>(null);
   const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
@@ -89,59 +88,27 @@ const RegisterPage: React.FC = () => {
       [name]: type === 'checkbox' ? checked : value
     }));
     // Clear error when user starts typing
-    if (error) setError(null);
+    if (error) clearError();
   };
 
   const validateForm = () => {
     if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
-      setError({
-        code: 'VALIDATION_ERROR',
-        title: 'Missing Information',
-        message: 'Required fields are missing.',
-        userMessage: 'Please fill in all required fields.',
-        category: 'validation',
-        retryable: false,
-        action: 'Check your data'
-      });
+      handleError(new Error('Please fill in all required fields.'));
       return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError({
-        code: 'VALIDATION_ERROR',
-        title: 'Password Mismatch',
-        message: 'Passwords do not match.',
-        userMessage: 'Passwords do not match. Please make sure both password fields are identical.',
-        category: 'validation',
-        retryable: false,
-        action: 'Check passwords'
-      });
+      handleError(new Error('Passwords do not match. Please make sure both password fields are identical.'));
       return false;
     }
 
     if (formData.password.length < 6) {
-      setError({
-        code: 'VALIDATION_ERROR',
-        title: 'Password Too Short',
-        message: 'Password must be at least 6 characters long.',
-        userMessage: 'Password must be at least 6 characters long. Please choose a stronger password.',
-        category: 'validation',
-        retryable: false,
-        action: 'Use longer password'
-      });
+      handleError(new Error('Password must be at least 6 characters long. Please choose a stronger password.'));
       return false;
     }
 
     if (!formData.terms_accepted) {
-      setError({
-        code: 'VALIDATION_ERROR',
-        title: 'Terms Not Accepted',
-        message: 'Terms and conditions must be accepted.',
-        userMessage: 'Please accept the terms and conditions to continue.',
-        category: 'validation',
-        retryable: false,
-        action: 'Accept terms'
-      });
+      handleError(new Error('Please accept the terms and conditions to continue.'));
       return false;
     }
 
@@ -154,7 +121,7 @@ const RegisterPage: React.FC = () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    setError(null);
+    clearError();
     setSuccess(false);
     setRegistrationFeedback(null);
     setRedirectCountdown(null);
@@ -178,15 +145,10 @@ const RegisterPage: React.FC = () => {
       }
 
       console.warn('Registration response did not include expected payload.', response);
-      const fallbackError = {
-        ...response,
-        success: false,
-        message: response.message || response.error || 'Registration failed. Please try again.'
-      };
-      setError(parseError(fallbackError));
+      const fallbackError = new Error(response.message || response.error || 'Registration failed. Please try again.');
+      handleError(fallbackError);
     } catch (err: unknown) {
-      const parsedError = parseError(err);
-      setError(parsedError);
+      handleError(err);
       setSuccess(false);
       setRegistrationFeedback(null);
     } finally {
@@ -337,12 +299,7 @@ const RegisterPage: React.FC = () => {
           {/* Error Alert */}
           {error && (
             <div className="mb-6">
-              <ErrorDisplay
-                error={error}
-                onClose={() => setError(null)}
-                onRetry={error.retryable ? () => handleSubmit({ preventDefault: () => {} } as any) : undefined}
-                variant="inline"
-              />
+              <ErrorAlert error={error} />
             </div>
           )}
 

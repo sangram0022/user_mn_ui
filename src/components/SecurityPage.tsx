@@ -43,7 +43,19 @@ const SecurityPage: React.FC = () => {
       console.log('📊 Received security metrics:', response);
       
       // Map backend response to our interface
-      const data = response as any; // Type assertion for now
+      const data = response as {
+        active_sessions?: number;
+        failed_logins?: number;
+        system_health?: number;
+        total_users?: number;
+        blocked_ips?: number;
+        audit_logs?: number;
+        security_alerts?: {
+          high?: number;
+          medium?: number;
+          resolved?: number;
+        };
+      };
       setMetrics({
         activeSessions: data.active_sessions || 234,
         failedLogins: data.failed_logins || 23,
