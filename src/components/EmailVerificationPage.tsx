@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Mail, Loader2 } from 'lucide-react';
 import { apiClient } from '../services/apiClientComplete';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 const EmailVerificationPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -9,6 +10,7 @@ const EmailVerificationPage: React.FC = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState<string>('Verifying your email...');
   const [countdown, setCountdown] = useState<number>(5);
+  const { handleError } = useErrorHandler();
 
   const token = searchParams.get('token');
 
@@ -31,14 +33,14 @@ const EmailVerificationPage: React.FC = () => {
           setMessage(response.message || 'Email verification failed. The token may be invalid or expired.');
         }
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Email verification failed. Please try again or request a new verification email.';
+        handleError(error);
         setStatus('error');
-        setMessage(errorMessage);
+        setMessage('Email verification failed. Please try again or request a new verification email.');
       }
     };
 
     verifyEmail();
-  }, [token]);
+  }, [token, handleError]);
 
   useEffect(() => {
     if (status === 'success' && countdown > 0) {

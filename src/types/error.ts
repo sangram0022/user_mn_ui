@@ -27,6 +27,7 @@ export interface ParsedError {
   path?: string;
   timestamp?: string;
   details?: unknown[];
+  severity?: 'error' | 'warning' | 'info';
 }
 
 export interface ErrorDisplayProps {

@@ -17,6 +17,7 @@ import type {
   PendingWorkflow
 } from '../types';
 import { ApiError } from '../utils/apiError';
+import { normalizeApiError } from '../utils/apiErrorNormalizer';
 
 export const API_CONFIG = {
   BASE_URL: import.meta.env.PROD 
@@ -59,23 +60,53 @@ class ApiClient {
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL;
     // Try both possible token storage keys for backward compatibility
-    this.token = localStorage.getItem('access_token') || localStorage.getItem('token');
+    this.token = this.getFromStorage('access_token') || this.getFromStorage('token');
   }
 
   setToken(token: string) {
     this.token = token;
-    localStorage.setItem('access_token', token);
-    localStorage.setItem('token', token); // Also store as 'token' for compatibility
+    this.setInStorage('access_token', token);
+    this.setInStorage('token', token); // Also store as 'token' for compatibility
   }
 
   clearToken() {
     this.token = null;
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('token');
+    this.removeFromStorage('access_token');
+    this.removeFromStorage('token');
   }
 
   isAuthenticated(): boolean {
     return !!this.token;
+  }
+
+  private getLocalStorage(): Storage | null {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+
+    try {
+      return window.localStorage;
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn('Unable to access localStorage:', error);
+      }
+      return null;
+    }
+  }
+
+  private getFromStorage(key: string): string | null {
+    const storage = this.getLocalStorage();
+    return storage?.getItem(key) ?? null;
+  }
+
+  private setInStorage(key: string, value: string): void {
+    const storage = this.getLocalStorage();
+    storage?.setItem(key, value);
+  }
+
+  private removeFromStorage(key: string): void {
+    const storage = this.getLocalStorage();
+    storage?.removeItem(key);
   }
 
   private getHeaders(): HeadersInit {
@@ -111,25 +142,21 @@ class ApiClient {
           this.clearToken();
         }
 
-        const errorPayload = await response.json().catch(() => undefined);
-        const message = (errorPayload && typeof errorPayload.message === 'string' && errorPayload.message.trim().length > 0)
-          ? errorPayload.message
-          : (errorPayload && typeof errorPayload.detail === 'string'
-            ? errorPayload.detail
-            : `HTTP ${response.status}: ${response.statusText}`);
+        const errorPayload = await this.parseJson(response);
+        const normalized = normalizeApiError(response.status, response.statusText, errorPayload);
 
         throw new ApiError({
-          status: response.status,
-          message,
-          code: typeof errorPayload?.code === 'string' ? errorPayload.code : undefined,
-          detail: typeof errorPayload?.detail === 'string' ? errorPayload.detail : undefined,
-          errors: errorPayload && typeof errorPayload.errors === 'object' ? errorPayload.errors as Record<string, unknown> : undefined,
+          status: normalized.status,
+          message: normalized.message,
+          code: normalized.code,
+          detail: normalized.detail,
+          errors: normalized.errors,
           headers: response.headers,
           payload: errorPayload
         });
       }
 
-      const responseBody = await response.json().catch(() => undefined);
+      const responseBody = await this.parseJson<T>(response);
       return responseBody as T;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -152,6 +179,35 @@ class ApiClient {
         message: 'Network request failed',
         code: 'NETWORK_ERROR'
       });
+    }
+  }
+
+  private async parseJson<T>(response: Response): Promise<T | undefined> {
+    const contentType = response.headers.get('content-type');
+
+    if (contentType?.includes('application/json')) {
+      try {
+        return (await response.json()) as T;
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.warn('Failed to parse JSON response:', error);
+        }
+        return undefined;
+      }
+    }
+
+    if (response.status === 204 || response.status === 205) {
+      return undefined;
+    }
+
+    try {
+      const text = await response.text();
+      return text ? (text as unknown as T) : undefined;
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn('Failed to read response text:', error);
+      }
+      return undefined;
     }
   }
 

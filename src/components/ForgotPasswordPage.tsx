@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle, Loader } from 'lucide-react';
 import { apiClient } from '../services/apiClientComplete';
+import ErrorAlert from './ErrorAlert';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const { error, handleError, clearError } = useErrorHandler();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    clearError();
 
     try {
       // Call forgot password API endpoint
@@ -22,11 +24,10 @@ const ForgotPasswordPage: React.FC = () => {
       if (response.success) {
         setIsSuccess(true);
       } else {
-        setError(response.message || 'Failed to send reset email. Please try again.');
+        handleError(new Error(response.message || 'Failed to send reset email. Please try again.'));
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to send reset email. Please try again.';
-      setError(errorMessage);
+      handleError(err);
     } finally {
       setIsLoading(false);
     }
@@ -34,7 +35,7 @@ const ForgotPasswordPage: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
-    if (error) setError('');
+    if (error) clearError();
   };
 
   if (isSuccess) {
@@ -219,21 +220,8 @@ const ForgotPasswordPage: React.FC = () => {
         }}>
           {/* Error Alert */}
           {error && (
-            <div style={{
-              marginBottom: '1.5rem',
-              padding: '1rem',
-              backgroundColor: '#fef2f2',
-              border: '1px solid #fecaca',
-              borderRadius: '0.5rem',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '0.75rem'
-            }}>
-              <AlertCircle style={{ width: '1.25rem', height: '1.25rem', color: '#ef4444', flexShrink: 0, marginTop: '0.125rem' }} />
-              <div>
-                <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: '#991b1b', margin: 0 }}>Error</h3>
-                <p style={{ fontSize: '0.875rem', color: '#b91c1c', marginTop: '0.25rem', margin: '0.25rem 0 0' }}>{error}</p>
-              </div>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <ErrorAlert error={error} />
             </div>
           )}
 

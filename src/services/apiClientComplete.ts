@@ -3,6 +3,7 @@ import { API_ENDPOINTS, API_BASE_URL, getApiDebugInfo } from '../config/backend'
 import type { ApiResponse, RegisterResponse, ResendVerificationResponse } from '../types';
 import { ApiError } from '../utils/apiError';
 import type { ApiErrorResponse } from '../types/error';
+import { normalizeApiError } from '../utils/apiErrorNormalizer';
 
 export const API_CONFIG = {
   BASE_URL: API_BASE_URL, // Use centralized backend configuration
@@ -243,19 +244,68 @@ export interface PaginatedUsersResponse {
 class ApiClient {
   private baseURL: string;
   private token: string | null = null;
+  private readonly debugEnabled: boolean;
 
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL;
-    console.log('🔧 ApiClient initialized with baseURL:', this.baseURL);
+    this.debugEnabled = import.meta.env.DEV && this.getFromStorage('ENABLE_API_DEBUG') === 'true';
+
+    if (this.debugEnabled) {
+      console.debug('[ApiClient] Initialized with baseURL:', this.baseURL);
+    }
     
     // Show debug info in development
-    if (import.meta.env.DEV) {
+    if (import.meta.env.DEV && this.debugEnabled) {
       getApiDebugInfo();
     }
     
     // Initialize token from localStorage
-    this.token = localStorage.getItem('access_token');
-    console.log('🔐 ApiClient token initialized:', !!this.token);
+    this.token = this.getFromStorage('access_token');
+    if (this.debugEnabled) {
+      console.debug('[ApiClient] Initial token state:', !!this.token);
+    }
+  }
+
+  private getLocalStorage(): Storage | null {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+
+    try {
+      return window.localStorage;
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn('[ApiClient] Unable to access localStorage:', error);
+      }
+      return null;
+    }
+  }
+
+  private getFromStorage(key: string): string | null {
+    const storage = this.getLocalStorage();
+    return storage?.getItem(key) ?? null;
+  }
+
+  private setInStorage(key: string, value: string): void {
+    const storage = this.getLocalStorage();
+    storage?.setItem(key, value);
+  }
+
+  private removeFromStorage(key: string): void {
+    const storage = this.getLocalStorage();
+    storage?.removeItem(key);
+  }
+
+  private debug(...args: unknown[]) {
+    if (this.debugEnabled) {
+      console.debug('[ApiClient]', ...args);
+    }
+  }
+
+  private info(...args: unknown[]) {
+    if (this.debugEnabled) {
+      console.info('[ApiClient]', ...args);
+    }
   }
 
   private async request<T>(
@@ -263,16 +313,15 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    console.log('🌐 Making API request to:', url);
+    this.debug('Making API request to:', url);
     
     // Ensure we have the latest token from localStorage
     if (!this.token) {
-      this.token = localStorage.getItem('access_token');
-      console.log('🔄 Refreshed token from localStorage:', !!this.token);
+      this.token = this.getFromStorage('access_token');
+      this.debug('Refreshed token from storage:', !!this.token);
     }
     
-    console.log('🔐 Current token available:', !!this.token);
-    console.log('🔧 Token from localStorage:', !!localStorage.getItem('access_token'));
+    this.debug('Current token available:', !!this.token);
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -281,12 +330,12 @@ class ApiClient {
 
     if (this.token) {
       headers.Authorization = `Bearer ${this.token}`;
-      console.log('✅ Authorization header set with Bearer token');
+      this.debug('Authorization header set with Bearer token');
     } else {
-      console.warn('⚠️ No token available for API request');
+      this.debug('No token available for API request');
     }
 
-    console.log('📋 Request headers:', headers);
+    this.debug('Request headers:', headers);
 
     try {
       const response = await fetch(url, {
@@ -295,18 +344,22 @@ class ApiClient {
       });
 
       if (!response.ok) {
-        console.error('❌ API request failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          url,
-          hasToken: !!this.token
-        });
+        if (this.debugEnabled) {
+          console.error('[ApiClient] Request failed:', {
+            status: response.status,
+            statusText: response.statusText,
+            url,
+            hasToken: !!this.token
+          });
+        }
 
-        const isAuthEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/register');
-        const hasRefreshToken = localStorage.getItem('refresh_token');
+        const isAuthEndpoint = endpoint.includes('/auth/login')
+          || endpoint.includes('/auth/register')
+          || endpoint.includes('/auth/refresh');
+        const hasRefreshToken = this.getFromStorage('refresh_token');
 
         if (response.status === 401 && !isAuthEndpoint && hasRefreshToken) {
-          console.log('🔄 Token expired, attempting refresh...');
+          this.info('Token expired, attempting refresh...');
           await this.refreshToken();
 
           headers.Authorization = `Bearer ${this.token}`;
@@ -316,81 +369,58 @@ class ApiClient {
           });
 
           if (!retryResponse.ok) {
-            console.error('❌ Retry after token refresh also failed:', retryResponse.status);
-            this.handleAuthError();
-            const retryPayload = await retryResponse.json().catch(() => undefined);
-            const retryMessage = (retryPayload && typeof retryPayload.message === 'string' && retryPayload.message.trim().length > 0)
-              ? retryPayload.message
-              : (retryPayload && typeof retryPayload.detail === 'string'
-                ? retryPayload.detail
-                : `HTTP ${retryResponse.status}: ${retryResponse.statusText}`);
+            const retryPayload = await this.parseJson(retryResponse);
+            const normalizedRetryError = normalizeApiError(
+              retryResponse.status,
+              retryResponse.statusText,
+              retryPayload
+            );
+
+            if (retryResponse.status === 401) {
+              this.handleAuthError();
+            }
 
             throw new ApiError({
-              status: retryResponse.status,
-              message: retryMessage,
-              code: typeof retryPayload?.code === 'string' ? retryPayload.code : undefined,
-              detail: typeof retryPayload?.detail === 'string' ? retryPayload.detail : undefined,
-              errors: retryPayload && typeof retryPayload.errors === 'object' ? retryPayload.errors as Record<string, unknown> : undefined,
+              status: normalizedRetryError.status,
+              message: normalizedRetryError.message,
+              code: normalizedRetryError.code,
+              detail: normalizedRetryError.detail,
+              errors: normalizedRetryError.errors,
               headers: retryResponse.headers,
               payload: retryPayload
             });
           }
 
-          console.log('✅ Request succeeded after token refresh');
-          const retryBody = await retryResponse.json().catch(() => undefined);
+          this.debug('Request succeeded after token refresh');
+          const retryBody = await this.parseJson<T>(retryResponse);
           return retryBody as T;
         }
 
-        const errorPayload = await response.json().catch(() => undefined) as ApiErrorResponse | undefined;
-        console.error('❌ API error response:', errorPayload);
-
-        // Handle new error response format: { error: { type, message: { message, error_code, ... }, status_code, ... }}
-        if (errorPayload && errorPayload.error) {
-          const errorDetail = errorPayload.error;
-          let errorCode = 'UNKNOWN_ERROR';
-          let errorMessage = '';
-          
-          if (typeof errorDetail.message === 'object' && errorDetail.message !== null) {
-            errorCode = errorDetail.message.error_code || errorCode;
-            errorMessage = errorDetail.message.message || '';
-          } else if (typeof errorDetail.message === 'string') {
-            errorMessage = errorDetail.message;
-          }
-          
-          throw new ApiError({
-            status: errorDetail.status_code || response.status,
-            message: errorMessage || `HTTP ${response.status}: ${response.statusText}`,
-            code: errorCode,
-            detail: errorDetail.path,
-            errors: { timestamp: errorDetail.timestamp },
-            headers: response.headers,
-            payload: errorPayload
-          });
+        if (response.status === 401) {
+          this.handleAuthError();
         }
 
-        // Fallback for old error format
-        const message = (errorPayload && typeof (errorPayload as any).message === 'string' && (errorPayload as any).message.trim().length > 0)
-          ? (errorPayload as any).message
-          : (errorPayload && typeof (errorPayload as any).detail === 'string'
-            ? (errorPayload as any).detail
-            : `HTTP ${response.status}: ${response.statusText}`);
+        const errorPayload = await this.parseJson<ApiErrorResponse | Record<string, unknown>>(response);
+        const normalizedError = normalizeApiError(response.status, response.statusText, errorPayload);
 
         throw new ApiError({
-          status: response.status,
-          message,
-          code: typeof (errorPayload as any)?.code === 'string' ? (errorPayload as any).code : undefined,
-          detail: typeof (errorPayload as any)?.detail === 'string' ? (errorPayload as any).detail : undefined,
-          errors: errorPayload && typeof (errorPayload as any).errors === 'object' ? (errorPayload as any).errors as Record<string, unknown> : undefined,
+          status: normalizedError.status,
+          message: normalizedError.message,
+          code: normalizedError.code,
+          detail: normalizedError.detail,
+          errors: normalizedError.errors,
           headers: response.headers,
           payload: errorPayload
         });
       }
 
-      const responseBody = await response.json().catch(() => undefined);
+      const responseBody = await this.parseJson<T>(response);
       return responseBody as T;
     } catch (error) {
       if (error instanceof ApiError) {
-        console.error('API request failed with structured error:', error);
+        if (this.debugEnabled) {
+          console.error('[ApiClient] Request failed with structured error:', error);
+        }
         throw error;
       }
 
@@ -413,22 +443,24 @@ class ApiClient {
   }
 
   private handleAuthError() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    this.removeFromStorage('access_token');
+    this.removeFromStorage('refresh_token');
     this.token = null;
     // Redirect to login page or trigger auth state update
-    window.location.href = '/login';
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
   }
 
   setToken(token: string) {
     this.token = token;
-    localStorage.setItem('access_token', token);
+    this.setInStorage('access_token', token);
   }
 
   clearToken() {
     this.token = null;
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    this.removeFromStorage('access_token');
+    this.removeFromStorage('refresh_token');
   }
 
   // Authentication Endpoints
@@ -484,14 +516,14 @@ class ApiClient {
     
     if (response.access_token) {
       this.setToken(response.access_token);
-      localStorage.setItem('refresh_token', response.refresh_token);
+      this.setInStorage('refresh_token', response.refresh_token);
     }
     
     return response;
   }
 
   async refreshToken(): Promise<AuthResponse> {
-    const refreshToken = localStorage.getItem('refresh_token');
+    const refreshToken = this.getFromStorage('refresh_token');
     if (!refreshToken) {
       throw new Error('No refresh token available');
     }
@@ -590,7 +622,9 @@ class ApiClient {
 
   // Role Management Endpoints
   async getRoles(): Promise<{ success: boolean; roles: Array<{ id: number; name: string; description: string; }> }> {
-    return this.request(`${API_BASE_URL}/roles`);
+    return this.request<{ success: boolean; roles: Array<{ id: number; name: string; description: string; }> }>(
+      API_ENDPOINTS.ROLES.BASE
+    );
   }
 
   // Profile Management Endpoints
@@ -745,6 +779,35 @@ class ApiClient {
   // Generic method for external custom requests
   async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     return this.request<T>(endpoint, options);
+  }
+
+  private async parseJson<T>(response: Response): Promise<T | undefined> {
+    const contentType = response.headers.get('content-type');
+
+    if (contentType?.includes('application/json')) {
+      try {
+        return (await response.json()) as T;
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.warn('[ApiClient] Failed to parse JSON response:', error);
+        }
+        return undefined;
+      }
+    }
+
+    if (response.status === 204 || response.status === 205) {
+      return undefined;
+    }
+
+    try {
+      const text = await response.text();
+      return text ? (text as unknown as T) : undefined;
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn('[ApiClient] Failed to read response text:', error);
+      }
+      return undefined;
+    }
   }
 }
 

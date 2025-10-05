@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle, Loader } from 'lucide-react';
 import { apiClient } from '../services/apiClientComplete';
+import ErrorAlert from './ErrorAlert';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -13,39 +15,39 @@ const ResetPasswordPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const { error, handleError, clearError } = useErrorHandler();
   const [token, setToken] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const tokenParam = searchParams.get('token');
     if (!tokenParam) {
-      setError('Invalid or missing reset token');
+      handleError(new Error('Invalid or missing reset token'));
     } else {
       setToken(tokenParam);
     }
-  }, [searchParams]);
+  }, [searchParams, handleError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!token) {
-      setError('Invalid reset token');
+      handleError(new Error('Invalid reset token'));
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      handleError(new Error('Passwords do not match'));
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      handleError(new Error('Password must be at least 6 characters long'));
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    clearError();
 
     try {
       // Call reset password API endpoint
@@ -63,11 +65,10 @@ const ResetPasswordPage: React.FC = () => {
           });
         }, 3000);
       } else {
-        setError(response.message || 'Failed to reset password. Please try again.');
+        handleError(new Error(response.message || 'Failed to reset password. Please try again.'));
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to reset password. Please try again.';
-      setError(errorMessage);
+      handleError(err);
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +80,7 @@ const ResetPasswordPage: React.FC = () => {
       ...prev,
       [name]: value
     }));
-    if (error) setError('');
+    if (error) clearError();
   };
 
   if (!token && !error) {
@@ -211,21 +212,8 @@ const ResetPasswordPage: React.FC = () => {
         }}>
           {/* Error Alert */}
           {error && (
-            <div style={{
-              marginBottom: '1.5rem',
-              padding: '1rem',
-              backgroundColor: '#fef2f2',
-              border: '1px solid #fecaca',
-              borderRadius: '0.5rem',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '0.75rem'
-            }}>
-              <AlertCircle style={{ width: '1.25rem', height: '1.25rem', color: '#ef4444', flexShrink: 0, marginTop: '0.125rem' }} />
-              <div>
-                <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: '#991b1b', margin: 0 }}>Error</h3>
-                <p style={{ fontSize: '0.875rem', color: '#b91c1c', marginTop: '0.25rem', margin: '0.25rem 0 0' }}>{error}</p>
-              </div>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <ErrorAlert error={error} />
             </div>
           )}
 

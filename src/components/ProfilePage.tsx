@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient, type UserProfile as ApiUserProfile } from '../services/apiClientComplete';
+import ErrorAlert from './ErrorAlert';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 import { 
   User as UserIcon, 
   MapPin, 
@@ -15,7 +17,6 @@ import {
   Eye,
   EyeOff,
   CheckCircle,
-  AlertCircle,
   Loader
 } from 'lucide-react';
 
@@ -32,7 +33,7 @@ const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState('');
+  const { error, handleError, clearError } = useErrorHandler();
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences'>('profile');
 
@@ -66,7 +67,7 @@ const ProfilePage: React.FC = () => {
   const loadProfile = useCallback(async () => {
     try {
       setIsLoading(true);
-      setError('');
+      clearError();
       
       const [profileResponse] = await Promise.all([
         apiClient.getProfile(),
@@ -99,12 +100,11 @@ const ProfilePage: React.FC = () => {
       });
 
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load profile';
-      setError(errorMessage);
+      handleError(err);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [clearError, handleError]);
 
   useEffect(() => {
     loadProfile();
@@ -114,7 +114,7 @@ const ProfilePage: React.FC = () => {
   const handleSaveProfile = async () => {
     try {
       setIsSaving(true);
-      setError('');
+      clearError();
 
       const response = await apiClient.updateProfile(editForm);
       
@@ -126,11 +126,10 @@ const ProfilePage: React.FC = () => {
         
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(response.message || 'Failed to update profile');
+        handleError(new Error(response.message || 'Failed to update profile'));
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update profile';
-      setError(errorMessage);
+      handleError(err);
     } finally {
       setIsSaving(false);
     }
@@ -139,18 +138,18 @@ const ProfilePage: React.FC = () => {
   // Change password
   const handleChangePassword = async () => {
     if (passwordForm.new_password !== passwordForm.confirm_password) {
-      setError('New passwords do not match');
+      handleError(new Error('New passwords do not match'));
       return;
     }
 
     if (passwordForm.new_password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      handleError(new Error('Password must be at least 6 characters long'));
       return;
     }
 
     try {
       setIsSaving(true);
-      setError('');
+      clearError();
 
       const response = await apiClient.changePassword({
         current_password: passwordForm.current_password,
@@ -167,11 +166,10 @@ const ProfilePage: React.FC = () => {
         });
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(response.message || 'Failed to change password');
+        handleError(new Error(response.message || 'Failed to change password'));
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to change password';
-      setError(errorMessage);
+      handleError(err);
     } finally {
       setIsSaving(false);
     }
@@ -1031,18 +1029,8 @@ const ProfilePage: React.FC = () => {
 
         {/* Alerts */}
         {error && (
-          <div style={{
-            marginBottom: '1.5rem',
-            padding: '1rem',
-            backgroundColor: '#fef2f2',
-            border: '1px solid #fecaca',
-            borderRadius: '0.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem'
-          }}>
-            <AlertCircle style={{ width: '1.25rem', height: '1.25rem', color: '#ef4444' }} />
-            <p style={{ fontSize: '0.875rem', color: '#b91c1c', margin: 0 }}>{error}</p>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <ErrorAlert error={error} />
           </div>
         )}
 

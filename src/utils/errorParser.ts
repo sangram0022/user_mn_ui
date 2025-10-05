@@ -78,6 +78,37 @@ export const getErrorMessage = (errorCode: string): string => {
 };
 
 /**
+ * Internal function to determine error severity based on error code and status
+ */
+const determineErrorSeverity = (code: string, statusCode: number): 'error' | 'warning' | 'info' => {
+  // Info-level errors
+  if (code === 'MAINTENANCE_MODE' || code === 'RATE_LIMIT_EXCEEDED') {
+    return 'info';
+  }
+  
+  // Warning-level errors
+  if (code === 'EMAIL_NOT_VERIFIED' || code === 'ACCOUNT_LOCKED' || code === 'TOKEN_EXPIRED') {
+    return 'warning';
+  }
+  
+  // Critical errors
+  const criticalCodes = [
+    'ACCOUNT_DISABLED',
+    'PERMISSION_DENIED',
+    'FORBIDDEN',
+  ];
+  if (criticalCodes.includes(code)) {
+    return 'error';
+  }
+  
+  // Status code based severity
+  if (statusCode >= 500) return 'error';
+  if (statusCode >= 400 && statusCode < 500) return 'warning';
+  
+  return 'error'; // Default to error
+};
+
+/**
  * Parse API error response into standardized format
  */
 export const parseApiError = (error: unknown): ParsedError => {
@@ -107,6 +138,7 @@ export const parseApiError = (error: unknown): ParsedError => {
       path,
       timestamp,
       details,
+      severity: determineErrorSeverity(errorCode, status_code),
     };
   }
   
@@ -117,6 +149,7 @@ export const parseApiError = (error: unknown): ParsedError => {
       code: errorCode,
       message: getErrorMessage(errorCode),
       statusCode: 500,
+      severity: determineErrorSeverity(errorCode, 500),
     };
   }
   
@@ -128,6 +161,7 @@ export const parseApiError = (error: unknown): ParsedError => {
         code: 'NETWORK_ERROR',
         message: getErrorMessage('NETWORK_ERROR'),
         statusCode: 0,
+        severity: 'error',
       };
     }
   }
@@ -138,6 +172,7 @@ export const parseApiError = (error: unknown): ParsedError => {
       code: 'UNKNOWN_ERROR',
       message: error || getErrorMessage('DEFAULT'),
       statusCode: 500,
+      severity: 'error',
     };
   }
   
@@ -146,6 +181,7 @@ export const parseApiError = (error: unknown): ParsedError => {
     code: 'UNKNOWN_ERROR',
     message: getErrorMessage('DEFAULT'),
     statusCode: 500,
+    severity: 'error',
   };
 };
 
@@ -191,33 +227,5 @@ export const requiresUserAction = (error: unknown): boolean => {
  */
 export const getErrorSeverity = (error: unknown): 'error' | 'warning' | 'info' => {
   const parsed = parseApiError(error);
-  
-  // Critical errors
-  const criticalCodes = [
-    'ACCOUNT_DISABLED',
-    'ACCOUNT_LOCKED',
-    'PERMISSION_DENIED',
-    'FORBIDDEN',
-  ];
-  if (criticalCodes.includes(parsed.code)) {
-    return 'error';
-  }
-  
-  // Warning level
-  const warningCodes = [
-    'RATE_LIMIT_EXCEEDED',
-    'EMAIL_NOT_VERIFIED',
-    'WEAK_PASSWORD',
-  ];
-  if (warningCodes.includes(parsed.code)) {
-    return 'warning';
-  }
-  
-  // Info level
-  const infoCodes = ['VALIDATION_ERROR', 'INVALID_INPUT'];
-  if (infoCodes.includes(parsed.code)) {
-    return 'info';
-  }
-  
-  return 'error';
+  return parsed.severity || 'error';
 };

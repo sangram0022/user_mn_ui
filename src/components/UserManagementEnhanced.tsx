@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClientComplete';
 import { Plus, Trash2, Eye, Users, UserCheck, UserX, Search, Filter } from 'lucide-react';
@@ -48,23 +48,45 @@ interface UpdateUserData {
 const UserManagementEnhanced: React.FC = () => {
   const { hasPermission, user } = useAuth();
   
-  // DEBUG: Add detailed permission debugging
-  console.log('🔍 UserManagement - Detailed Permission Debug:');
-  console.log('User object:', user);
-  console.log('User role:', user?.role);
-  console.log('User is_superuser:', user?.is_superuser);
-  console.log('User permissions array:', getUserPermissions(user));
-  console.log('hasPermission function result for user:read:', hasPermission('user:read'));
-  console.log('Raw permission check:', getUserPermissions(user).includes('user:read'));
-  console.log('Is admin check:', hasPermission('admin'));
-  console.log('User role name:', getUserRoleName(user));
-  
-  // EARLY RETURN TEST: Show a debug message if we're getting here
-  if (user) {
-    console.log('✅ UserManagement component rendering - user exists');
-  } else {
-    console.log('❌ UserManagement component rendering - no user');
-  }
+  const debugEnabled = useMemo(() => {
+    if (!import.meta.env.DEV) {
+      return false;
+    }
+
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    try {
+      return window.sessionStorage.getItem('DEBUG_USER_MANAGEMENT') === 'true';
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const debugLog = useCallback((...args: unknown[]) => {
+    if (debugEnabled) {
+      console.debug('[UserManagementEnhanced]', ...args);
+    }
+  }, [debugEnabled]);
+
+  useEffect(() => {
+    if (!debugEnabled) {
+      return;
+    }
+
+    debugLog('Permission snapshot', {
+      user,
+      role: user?.role,
+      isSuperuser: user?.is_superuser,
+      permissions: getUserPermissions(user),
+      hasUserRead: hasPermission('user:read'),
+      isAdmin: hasPermission('admin'),
+      roleName: getUserRoleName(user)
+    });
+
+    debugLog(user ? 'Component rendering with active user context' : 'Component rendering without user context');
+  }, [debugEnabled, debugLog, hasPermission, user]);
   
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -89,9 +111,26 @@ const UserManagementEnhanced: React.FC = () => {
 
   // Define functions before useEffect
   const loadUsers = useCallback(async () => {
-    console.log('📡 UserManagement: Starting to load users...');
-    console.log('🔐 Current token in localStorage:', !!localStorage.getItem('access_token'));
-  console.log('👤 Current user permissions:', getUserPermissions(user));
+    let tokenAvailable = false;
+    if (typeof window !== 'undefined') {
+      try {
+        tokenAvailable = !!window.localStorage.getItem('access_token');
+      } catch {
+        tokenAvailable = false;
+      }
+    }
+
+    debugLog('Loading users', {
+      tokenAvailable,
+      permissions: getUserPermissions(user),
+      params: {
+        skip: pagination.skip,
+        limit: pagination.limit,
+        searchTerm,
+        filterRole,
+        filterActive
+      }
+    });
     
     try {
       setIsLoading(true);
@@ -106,15 +145,15 @@ const UserManagementEnhanced: React.FC = () => {
       if (filterRole) params.role = filterRole;
       if (filterActive !== undefined) params.is_active = filterActive;
 
-      console.log('📊 API request params:', params);
-      console.log('🌐 Making API call to getUsers...');
+      debugLog('Requesting users with params', params);
       
       const response = await apiClient.getUsers(params);
       
-      console.log('📨 API Response received:', response);
-      
       if (response.success) {
-        console.log('✅ Users loaded successfully:', response.users?.length, 'users');
+        debugLog('Users loaded successfully', {
+          total: response.total,
+          count: response.users?.length
+        });
         setUsers(response.users || []);
         setPagination(prev => ({
           ...prev,
@@ -127,13 +166,7 @@ const UserManagementEnhanced: React.FC = () => {
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      console.error('❌ Load users error details:', {
-        error: err,
-        message: errorMessage,
-        hasToken: !!localStorage.getItem('access_token'),
-  userPermissions: getUserPermissions(user),
-        hasUserReadPermission: hasPermission('user:read')
-      });
+      console.error('Failed to load users', err);
       
       setError(`Failed to load users: ${errorMessage}`);
       
@@ -143,20 +176,20 @@ const UserManagementEnhanced: React.FC = () => {
       }
     } finally {
       setIsLoading(false);
-      console.log('🏁 loadUsers completed');
+      debugLog('loadUsers completed');
     }
-  }, [pagination.skip, pagination.limit, searchTerm, filterRole, filterActive, user, hasPermission]);
+  }, [debugLog, filterActive, filterRole, pagination.limit, pagination.skip, searchTerm, user]);
 
   const loadRoles = useCallback(async () => {
     try {
-      console.log('🎭 Loading roles from backend...');
+      debugLog('Loading roles from backend...');
       const response = await apiClient.getRoles();
       
       if (response.success && response.roles) {
-        console.log('✅ Roles loaded successfully:', response.roles);
+        debugLog('Roles loaded successfully', response.roles);
         setRoles(response.roles);
       } else {
-        console.error('❌ Failed to load roles:', response);
+        console.error('Failed to load roles', response);
         // Fallback to default roles if backend fails
         setRoles([
           { id: 1, name: 'admin', description: 'Administrator' },
@@ -165,7 +198,7 @@ const UserManagementEnhanced: React.FC = () => {
         ]);
       }
     } catch (err) {
-      console.error('❌ Load roles error:', err);
+      console.error('Failed to load roles', err);
       // Fallback to default roles if backend fails
       setRoles([
         { id: 1, name: 'admin', description: 'Administrator' },
@@ -173,20 +206,32 @@ const UserManagementEnhanced: React.FC = () => {
         { id: 3, name: 'manager', description: 'Manager' }
       ]);
     }
-  }, []);
+  }, [debugLog]);
 
   useEffect(() => {
-    console.log('👥 UserManagementEnhanced component mounted');
-    console.log('🔧 Current user permissions:', { user: user?.email, hasPermission: hasPermission('admin') });
-    loadUsers();
+    debugLog('UserManagementEnhanced mounted', {
+      userEmail: user?.email,
+      hasAdminPermission: hasPermission('admin')
+    });
     loadRoles();
-  }, [loadUsers, loadRoles, hasPermission, user?.email]);
+  }, [debugLog, hasPermission, loadRoles, user?.email]);
 
-  // Reload users when search/filter parameters change
   useEffect(() => {
-    console.log('🔄 Reloading users due to parameter change');
     loadUsers();
-  }, [searchTerm, filterRole, filterActive, pagination.skip, loadUsers]);
+  }, [loadUsers]);
+
+  useEffect(() => {
+    setPagination(prev => {
+      if (prev.skip === 0) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        skip: 0
+      };
+    });
+  }, [filterActive, filterRole, searchTerm]);
 
   const handleUserAction = async (action: string, userId: number, data?: UpdateUserData) => {
     try {
@@ -212,7 +257,9 @@ const UserManagementEnhanced: React.FC = () => {
           }
           break;
         default:
-          console.warn('Unknown action:', action);
+          if (import.meta.env.DEV) {
+            console.warn('Unknown action:', action);
+          }
       }
       
       await loadUsers();
@@ -245,9 +292,9 @@ const UserManagementEnhanced: React.FC = () => {
       try {
         setActionLoading('bulk-delete');
         
-        for (const userId of selectedUsers) {
-          await apiClient.deleteUser(userId);
-        }
+        await Promise.all(
+          Array.from(selectedUsers, userId => apiClient.deleteUser(userId))
+        );
         
         setSelectedUsers(new Set());
         await loadUsers();
@@ -281,14 +328,15 @@ const UserManagementEnhanced: React.FC = () => {
   };
 
   if (!hasPermission('user:read') && !user?.is_superuser) {
-    console.log('❌ ACCESS DENIED: user:read permission missing AND not superuser');
-    console.log('🔧 Current user:', user);
-    console.log('🔧 is_superuser:', user?.is_superuser);
-    console.log('🔧 Available permissions check:', {
-      'user:read': hasPermission('user:read'),
-      'admin': hasPermission('admin'),
-      'user:write': hasPermission('user:write'),
-      'user:delete': hasPermission('user:delete')
+    debugLog('Access denied - insufficient permissions', {
+      user,
+      isSuperuser: user?.is_superuser,
+      permissions: {
+        'user:read': hasPermission('user:read'),
+        admin: hasPermission('admin'),
+        'user:write': hasPermission('user:write'),
+        'user:delete': hasPermission('user:delete')
+      }
     });
     return (
       <div style={{

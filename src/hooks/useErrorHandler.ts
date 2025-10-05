@@ -1,9 +1,10 @@
 /**
- * Custom hook for error handling with localization
+ * Custom hook for error handling with localization and logging
  */
 
 import { useState, useCallback } from 'react';
 import { parseApiError, formatErrorForDisplay, isAuthError } from '../utils/errorParser';
+import { errorLogger } from '../utils/errorLogger';
 import type { ParsedError } from '../types/error';
 
 interface UseErrorHandlerReturn {
@@ -11,12 +12,12 @@ interface UseErrorHandlerReturn {
   errorMessage: string | null;
   setError: (error: unknown) => void;
   clearError: () => void;
-  handleError: (error: unknown) => void;
+  handleError: (error: unknown, context?: string) => void;
   isAuthenticationError: boolean;
 }
 
 /**
- * Hook for managing and displaying errors with automatic parsing and localization
+ * Hook for managing and displaying errors with automatic parsing, localization, and logging
  */
 export const useErrorHandler = (): UseErrorHandlerReturn => {
   const [error, setErrorState] = useState<ParsedError | null>(null);
@@ -35,14 +36,20 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     setErrorState(null);
   }, []);
 
-  const handleError = useCallback((err: unknown) => {
-    setError(err);
+  const handleError = useCallback((err: unknown, context?: string) => {
+    if (!err) return;
+    
+    const parsed = parseApiError(err);
+    setErrorState(parsed);
+    
+    // Log error to centralized error logger
+    errorLogger.log(parsed, context ? { component: context } : undefined);
     
     // Log error for debugging (only in development)
     if (import.meta.env.DEV) {
-      console.error('Error occurred:', err);
+      console.error('[useErrorHandler]', context || 'Error occurred:', err);
     }
-  }, [setError]);
+  }, []);
 
   const errorMessage = error ? error.message : null;
   const isAuthenticationError = error ? isAuthError(error) : false;
