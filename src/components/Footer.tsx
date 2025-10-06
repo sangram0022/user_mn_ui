@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+import { Github, Twitter, Linkedin, Mail, Heart, Shield, Zap, Users, BarChart } from 'lucide-react';
+
 interface FooterProps {
   apiVersion?: string;
   buildVersion?: string;
@@ -6,379 +9,268 @@ interface FooterProps {
 const Footer = ({ apiVersion = "v1.0", buildVersion = "2024.8.2" }: FooterProps) => {
   const currentYear = new Date().getFullYear();
 
-  const quickLinks = [
-    { name: 'API Documentation', href: 'http://localhost:8000/docs', external: true },
-    { name: 'User Guide', href: '#user-guide' },
-    { name: 'Privacy Policy', href: '#privacy' },
-    { name: 'Terms of Service', href: '#terms' },
-  ];
-
-  const socialLinks = [
-    { name: 'GitHub', href: '#github', icon: '📚' },
-    { name: 'Documentation', href: '#docs', icon: '📖' },
-    { name: 'Support', href: '#support', icon: '💬' },
-    { name: 'Community', href: '#community', icon: '👥' },
-  ];
-
-  const features = [
-    'User Lifecycle Management',
-    'Advanced Analytics & Segmentation',
-    'Workflow Automation',
-    'GDPR Compliance Tracking',
-    'Role-Based Access Control',
-    'Real-time Monitoring'
-  ];
-
   return (
-    <footer style={{
-      background: 'var(--background-secondary)',
-      borderTop: '1px solid var(--border-color)',
-      marginTop: 'auto',
-      padding: '3rem 0 1.5rem 0'
-    }}>
-      <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '0 1rem'
-      }}>
-        {/* Main Footer Content */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '2rem',
-          marginBottom: '2rem'
-        }}>
+    <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white mt-auto border-t-4 border-blue-500">
+      {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
-          <div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '1rem'
-            }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: '1.5rem'
-              }}>
-                🚀
-              </div>
-              <div>
-                <h3 style={{
-                  margin: 0,
-                  fontSize: '1.5rem',
-                  fontWeight: '700',
-                  color: 'var(--text-primary)',
-                  background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>
-                  UserMgmt Pro
-                </h3>
-                <p style={{
-                  margin: 0,
-                  fontSize: '0.875rem',
-                  color: 'var(--text-secondary)'
-                }}>
-                  Enterprise User Management
-                </p>
-              </div>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Shield className="w-8 h-8 text-blue-400" />
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                UserManagement
+              </h3>
             </div>
-            <p style={{
-              color: 'var(--text-secondary)',
-              fontSize: '0.95rem',
-              lineHeight: '1.6',
-              marginBottom: '1.5rem'
-            }}>
-              Comprehensive FastAPI-based user management system with advanced lifecycle tracking, 
-              analytics, and enterprise-grade security features.
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Enterprise-grade user management system with advanced role-based access control, workflow automation, and compliance tracking.
             </p>
             
-            {/* System Status */}
-            <div style={{
-              background: 'var(--background-primary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px',
-              padding: '1rem'
-            }}>
-              <h4 style={{
-                margin: '0 0 0.75rem 0',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                color: 'var(--text-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <span style={{ color: 'var(--accent-color)' }}>●</span>
-                System Status
-              </h4>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '0.5rem',
-                fontSize: '0.8rem'
-              }}>
-                <div style={{ color: 'var(--text-secondary)' }}>
-                  <span>API:</span> <span style={{ color: 'var(--accent-color)', fontWeight: '500' }}>Online</span>
-                </div>
-                <div style={{ color: 'var(--text-secondary)' }}>
-                  <span>DB:</span> <span style={{ color: 'var(--accent-color)', fontWeight: '500' }}>Connected</span>
-                </div>
-                <div style={{ color: 'var(--text-secondary)' }}>
-                  <span>Version:</span> <span style={{ fontWeight: '500' }}>{apiVersion}</span>
-                </div>
-                <div style={{ color: 'var(--text-secondary)' }}>
-                  <span>Build:</span> <span style={{ fontWeight: '500' }}>{buildVersion}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Key Features */}
-          <div>
-            <h4 style={{
-              margin: '0 0 1rem 0',
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: 'var(--text-primary)'
-            }}>
-              Key Features
-            </h4>
-            <div style={{
-              display: 'grid',
-              gap: '0.5rem'
-            }}>
-              {features.map((feature, index) => (
-                <div
-                  key={index}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.5rem',
-                    borderRadius: '6px',
-                    background: 'var(--background-primary)',
-                    fontSize: '0.875rem',
-                    color: 'var(--text-secondary)'
-                  }}
-                >
-                  <span style={{ color: 'var(--primary-color)' }}>✓</span>
-                  <span>{feature}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Links & Resources */}
-          <div>
-            <h4 style={{
-              margin: '0 0 1rem 0',
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: 'var(--text-primary)'
-            }}>
-              Resources
-            </h4>
-            <div style={{
-              display: 'grid',
-              gap: '0.75rem',
-              marginBottom: '2rem'
-            }}>
-              {quickLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  target={link.external ? '_blank' : '_self'}
-                  rel={link.external ? 'noopener noreferrer' : undefined}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                    fontSize: '0.875rem',
-                    padding: '0.5rem',
-                    borderRadius: '6px',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.color = 'var(--primary-color)';
-                    e.currentTarget.style.background = 'var(--background-primary)';
-                    e.currentTarget.style.transform = 'translateX(4px)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.transform = 'translateX(0px)';
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.color = 'var(--primary-color)';
-                    e.currentTarget.style.background = 'var(--background-primary)';
-                    e.currentTarget.style.transform = 'translateX(4px)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.transform = 'translateX(0px)';
-                  }}
-                >
-                  <span>→</span>
-                  <span>{link.name}</span>
-                  {link.external && <span style={{ fontSize: '0.75rem' }}>↗</span>}
-                </a>
-              ))}
-            </div>
-
             {/* Social Links */}
-            <div>
-              <h5 style={{
-                margin: '0 0 0.75rem 0',
-                fontSize: '0.95rem',
-                fontWeight: '600',
-                color: 'var(--text-primary)'
-              }}>
-                Connect & Support
-              </h5>
-              <div style={{
-                display: 'flex',
-                gap: '0.75rem',
-                flexWrap: 'wrap'
-              }}>
-                {socialLinks.map((social) => (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    title={social.name}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '8px',
-                      background: 'var(--background-primary)',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--text-secondary)',
-                      textDecoration: 'none',
-                      fontSize: '1.1rem',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = 'var(--primary-color)';
-                      e.currentTarget.style.color = 'white';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px var(--shadow-medium)';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = 'var(--background-primary)';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                      e.currentTarget.style.transform = 'translateY(0px)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.background = 'var(--primary-color)';
-                      e.currentTarget.style.color = 'white';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px var(--shadow-medium)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.background = 'var(--background-primary)';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                      e.currentTarget.style.transform = 'translateY(0px)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  >
-                    {social.icon}
-                  </a>
-                ))}
+            <div className="flex space-x-3 pt-2">
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-blue-600 flex items-center justify-center transition-all duration-200 transform hover:scale-110"
+                aria-label="GitHub"
+              >
+                <Github className="w-5 h-5" />
+              </a>
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-blue-400 flex items-center justify-center transition-all duration-200 transform hover:scale-110"
+                aria-label="Twitter"
+              >
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-blue-700 flex items-center justify-center transition-all duration-200 transform hover:scale-110"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="w-5 h-5" />
+              </a>
+              <a
+                href="mailto:support@usermgmt.com"
+                className="w-10 h-10 rounded-lg bg-gray-800 hover:bg-green-600 flex items-center justify-center transition-all duration-200 transform hover:scale-110"
+                aria-label="Email"
+              >
+                <Mail className="w-5 h-5" />
+              </a>
+            </div>
+
+            {/* System Status Badge */}
+            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-400">Status:</span>
+                <span className="flex items-center text-green-400">
+                  <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                  All Systems Operational
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs mt-2">
+                <span className="text-gray-400">Version:</span>
+                <span className="text-gray-300">{apiVersion} • Build {buildVersion}</span>
               </div>
             </div>
           </div>
+
+          {/* Product Links */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4 text-gray-200 flex items-center">
+              <Zap className="w-5 h-5 mr-2 text-yellow-400" />
+              Product
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <Link to="/dashboard" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link to="/users" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  User Management
+                </Link>
+              </li>
+              <li>
+                <Link to="/analytics" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Analytics
+                </Link>
+              </li>
+              <li>
+                <Link to="/workflows" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Workflows
+                </Link>
+              </li>
+              <li>
+                <Link to="/security" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Security Center
+                </Link>
+              </li>
+              <li>
+                <a href="#pricing" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Pricing
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Company Links */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4 text-gray-200 flex items-center">
+              <Users className="w-5 h-5 mr-2 text-purple-400" />
+              Company
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <a href="#about" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  About Us
+                </a>
+              </li>
+              <li>
+                <a href="#careers" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Careers
+                </a>
+              </li>
+              <li>
+                <a href="#blog" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Blog
+                </a>
+              </li>
+              <li>
+                <a href="#press" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Press Kit
+                </a>
+              </li>
+              <li>
+                <a href="#contact" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Contact Us
+                </a>
+              </li>
+              <li>
+                <a href="#partners" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Partners
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal & Support */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4 text-gray-200 flex items-center">
+              <BarChart className="w-5 h-5 mr-2 text-green-400" />
+              Legal & Support
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <a href="#privacy" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a href="#terms" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Terms of Service
+                </a>
+              </li>
+              <li>
+                <a href="#cookies" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Cookie Policy
+                </a>
+              </li>
+              <li>
+                <a href="#gdpr" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  GDPR Compliance
+                </a>
+              </li>
+              <li>
+                <Link to="/help" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  Help Center
+                </Link>
+              </li>
+              <li>
+                <a href="#api-docs" className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center group">
+                  <span className="mr-2 group-hover:mr-3 transition-all">→</span>
+                  API Documentation
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        {/* Bottom Footer */}
-        <div style={{
-          borderTop: '1px solid var(--border-color)',
-          paddingTop: '1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            fontSize: '0.875rem',
-            color: 'var(--text-secondary)'
-          }}>
-            <span>© {currentYear} UserMgmt Pro. All rights reserved.</span>
-            <span style={{
-              padding: '0.25rem 0.75rem',
-              background: 'var(--background-primary)',
-              borderRadius: '16px',
-              fontSize: '0.75rem',
-              color: 'var(--text-primary)',
-              fontWeight: '500'
-            }}>
-              FastAPI + React
-            </span>
-          </div>
-          
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            fontSize: '0.8rem',
-            color: 'var(--text-light)'
-          }}>
-            <span>Built with ❤️ for Enterprise</span>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.25rem 0.75rem',
-              background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-              borderRadius: '16px',
-              color: 'white',
-              fontSize: '0.75rem',
-              fontWeight: '500'
-            }}>
-              <span>🔐</span>
-              <span>Enterprise Security</span>
+        {/* Features Banner */}
+        <div className="mt-8 bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg p-4 border border-blue-800/50">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            <div className="flex items-center text-gray-300">
+              <Shield className="w-4 h-4 mr-2 text-blue-400" />
+              Enterprise Security
+            </div>
+            <div className="flex items-center text-gray-300">
+              <Users className="w-4 h-4 mr-2 text-purple-400" />
+              Role-Based Access
+            </div>
+            <div className="flex items-center text-gray-300">
+              <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+              Workflow Automation
+            </div>
+            <div className="flex items-center text-gray-300">
+              <BarChart className="w-4 h-4 mr-2 text-green-400" />
+              Advanced Analytics
             </div>
           </div>
         </div>
 
-        {/* Developer Info */}
-        <div style={{
-          marginTop: '1rem',
-          padding: '1rem',
-          background: 'var(--background-primary)',
-          borderRadius: '8px',
-          border: '1px solid var(--border-color)',
-          fontSize: '0.8rem',
-          color: 'var(--text-secondary)',
-          textAlign: 'center'
-        }}>
-          <p style={{ margin: '0 0 0.5rem 0' }}>
-            <strong>Development Environment:</strong> Frontend React ({window.location.origin}) ↔ Backend FastAPI (localhost:8000)
-          </p>
-          <p style={{ margin: 0 }}>
-            <strong>API Integration Ready:</strong> Authentication, User Management, Analytics, Workflows & Compliance
-          </p>
+        {/* Divider */}
+        <div className="border-t border-gray-700 mt-8 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            {/* Copyright */}
+            <div className="text-gray-400 text-sm flex items-center flex-wrap justify-center gap-2">
+              <span>© {currentYear} UserManagement System. All rights reserved.</span>
+              <span className="hidden md:inline">•</span>
+              <span className="flex items-center">
+                Made with <Heart className="w-4 h-4 mx-1 text-red-500 fill-current animate-pulse" /> by the UMS Team
+              </span>
+            </div>
+
+            {/* Additional Links */}
+            <div className="flex flex-wrap justify-center gap-4 text-sm">
+              <a href="#sitemap" className="text-gray-400 hover:text-white transition-colors duration-200">
+                Sitemap
+              </a>
+              <a href="#status" className="text-gray-400 hover:text-white transition-colors duration-200">
+                System Status
+              </a>
+              <a href="#changelog" className="text-gray-400 hover:text-white transition-colors duration-200">
+                Changelog
+              </a>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Decorative Bottom Border */}
+      <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
     </footer>
   );
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import NavigationNew from './components/NavigationNew';
+import Footer from './components/Footer';
 import HomePage from './components/HomePage';
 import LoginPageNew from './components/LoginPageNew';
 import RegisterPage from './components/RegisterPage';
@@ -62,11 +63,24 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 // Layout Component
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <NavigationNew />
       <main id="main-content" tabIndex={-1} className="flex-1">
         {children}
       </main>
+      <Footer />
+    </div>
+  );
+};
+
+// Auth Layout Component (Login/Register pages - no navigation, only footer)
+const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer />
     </div>
   );
 };
@@ -89,7 +103,9 @@ function App() {
             path="/login" 
             element={
               <PublicRoute>
-                <LoginPageNew />
+                <AuthLayout>
+                  <LoginPageNew />
+                </AuthLayout>
               </PublicRoute>
             } 
           />
@@ -97,7 +113,9 @@ function App() {
             path="/register" 
             element={
               <PublicRoute>
-                <RegisterPage />
+                <AuthLayout>
+                  <RegisterPage />
+                </AuthLayout>
               </PublicRoute>
             } 
           />
@@ -105,7 +123,9 @@ function App() {
             path="/email-confirmation" 
             element={
               <PublicRoute>
-                <EmailConfirmationPage />
+                <AuthLayout>
+                  <EmailConfirmationPage />
+                </AuthLayout>
               </PublicRoute>
             } 
           />
@@ -113,7 +133,9 @@ function App() {
             path="/verify-email" 
             element={
               <PublicRoute>
-                <EmailVerificationPage />
+                <AuthLayout>
+                  <EmailVerificationPage />
+                </AuthLayout>
               </PublicRoute>
             } 
           />
@@ -121,7 +143,9 @@ function App() {
             path="/email-verification" 
             element={
               <PublicRoute>
-                <EmailVerificationPage />
+                <AuthLayout>
+                  <EmailVerificationPage />
+                </AuthLayout>
               </PublicRoute>
             } 
           />
