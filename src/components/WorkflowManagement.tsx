@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useId } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { apiClient } from '../services/apiClientComplete';
+import { apiClient } from '../services/apiClientLegacy';
 
 interface WorkflowAction {
   id: number;

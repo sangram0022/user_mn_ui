@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { apiClient } from '../services/apiClientComplete';
+import { apiClient } from '../services/apiClientLegacy';
 import { Shield, AlertTriangle, Lock, Eye, Users, Activity, FileText, CheckCircle } from 'lucide-react';
 
 interface SecurityMetrics {

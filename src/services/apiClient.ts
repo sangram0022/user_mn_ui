@@ -1,6 +1,3 @@
-    getAuditLogs: apiClient.getAuditLogs.bind(apiClient),
-    getAuditSummary: apiClient.getAuditSummary.bind(apiClient),
-    getUserAnalytics: apiClient.getUserAnalytics.bind(apiClient),
 import type {
   AdminUsersQuery,
   AuditLog,
@@ -18,7 +15,8 @@ import type {
   UserAnalytics,
   UserProfile,
   UserSummary,
-  UpdateUserRequest
+  UpdateUserRequest,
+  UserRole
 } from '../types';
 import { ApiError } from '../utils/apiError';
 import { normalizeApiError } from '../utils/apiErrorNormalizer';
@@ -142,7 +140,9 @@ class ApiClient {
     }
 
     try {
-      const accessToken = window.localStorage.getItem('access_token') ?? undefined;
+      const accessToken = window.localStorage.getItem('access_token')
+        ?? window.localStorage.getItem('token')
+        ?? undefined;
       if (!accessToken) {
         return null;
       }
@@ -175,11 +175,13 @@ class ApiClient {
         window.localStorage.removeItem('refresh_token');
         window.localStorage.removeItem('token_issued_at');
         window.localStorage.removeItem('token_expires_in');
+        window.localStorage.removeItem('token');
         this.session = null;
         return;
       }
 
       window.localStorage.setItem('access_token', session.accessToken);
+      window.localStorage.setItem('token', session.accessToken);
       if (session.refreshToken) {
         window.localStorage.setItem('refresh_token', session.refreshToken);
       } else {
@@ -230,7 +232,18 @@ class ApiClient {
     }
 
     const text = await response.text();
-    return text ? JSON.parse(text) as T : undefined;
+    if (!text) {
+      return undefined;
+    }
+
+    try {
+      return JSON.parse(text) as T;
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn('Failed to parse text response as JSON', error, text);
+      }
+      return undefined;
+    }
   }
 
   private async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -244,7 +257,18 @@ class ApiClient {
       }
     };
 
-    const response = await fetch(url, config);
+    let response: Response;
+    try {
+      response = await fetch(url, config);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new ApiError({ status: 0, message: error.message, code: 'NETWORK_ERROR' });
+      }
+      throw new ApiError({ status: 0, message: 'Network request failed', code: 'NETWORK_ERROR' });
+    }
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -455,15 +479,40 @@ class ApiClient {
     return await this.getUser(userId);
   }
 
-  async getUserAnalytics(): Promise<UserAnalytics | null> {
+  async getUserAnalytics(): Promise<UserAnalytics> {
+    const fallback: UserAnalytics = {
+      total_users: 0,
+      active_users: 0,
+      new_users_today: 0,
+      retention_rate: 0,
+      engagement_score: 0,
+      lifecycle_distribution: {},
+      activity_trends: [],
+      inactive_users: 0,
+      new_users_last_30_days: 0,
+      engagement_distribution: { high: 0, medium: 0, low: 0 },
+      growth_rate: 0
+    };
+
     try {
-      return await this.request<UserAnalytics>(ENDPOINTS.admin.analytics);
+      const analytics = await this.request<UserAnalytics>(ENDPOINTS.admin.analytics);
+      return {
+        ...fallback,
+        ...analytics,
+        engagement_distribution: analytics.engagement_distribution ?? fallback.engagement_distribution,
+        lifecycle_distribution: analytics.lifecycle_distribution ?? fallback.lifecycle_distribution,
+        activity_trends: analytics.activity_trends ?? fallback.activity_trends
+      };
     } catch (error) {
       if (import.meta.env.DEV) {
         console.warn('User analytics endpoint unavailable', error);
       }
-      return null;
+      return fallback;
     }
+  }
+
+  async getLifecycleAnalytics<T = unknown>(): Promise<T> {
+    return await this.request<T>('/business-logic/lifecycle/analytics');
   }
 
   async getAuditLogs(params?: AuditLogsQuery): Promise<AuditLog[]> {
@@ -496,13 +545,84 @@ class ApiClient {
       return [];
     }
   }
+
+  async getRoles(): Promise<UserRole[]> {
+    try {
+      return await this.request<UserRole[]>('/admin/roles');
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn('Roles endpoint unavailable, using fallback roles', error);
+      }
+      return [
+        {
+          id: 1,
+          name: 'admin',
+          description: 'Administrator',
+          permissions: ['admin']
+        },
+        {
+          id: 2,
+          name: 'user',
+          description: 'Standard User',
+          permissions: []
+        },
+        {
+          id: 3,
+          name: 'manager',
+          description: 'Manager',
+          permissions: ['user:read', 'user:write']
+        }
+      ];
+    }
+  }
+
+  async execute<T>(path: string, options: RequestOptions = {}): Promise<T> {
+    return await this.request<T>(path, options);
+  }
 }
 
 export const apiClient = new ApiClient();
 
-export const useApi = () => apiClient;
-    isAuthenticated: apiClient.isAuthenticated.bind(apiClient)
-  };
-};
+export const useApi = () => ({
+  // Session helpers
+  isAuthenticated: apiClient.isAuthenticated.bind(apiClient),
+  setSessionTokens: apiClient.setSessionTokens.bind(apiClient),
+  clearSession: apiClient.clearSession.bind(apiClient),
+
+  // Auth flows
+  login: apiClient.login.bind(apiClient),
+  register: apiClient.register.bind(apiClient),
+  logout: apiClient.logout.bind(apiClient),
+  requestPasswordReset: apiClient.requestPasswordReset.bind(apiClient),
+  forgotPassword: apiClient.forgotPassword.bind(apiClient),
+  resetPassword: apiClient.resetPassword.bind(apiClient),
+  changePassword: apiClient.changePassword.bind(apiClient),
+  verifyEmail: apiClient.verifyEmail.bind(apiClient),
+  resendVerification: apiClient.resendVerification.bind(apiClient),
+
+  // Profile
+  getUserProfile: apiClient.getUserProfile.bind(apiClient),
+  updateUserProfile: apiClient.updateUserProfile.bind(apiClient),
+
+  // Admin
+  getUsers: apiClient.getUsers.bind(apiClient),
+  getUser: apiClient.getUser.bind(apiClient),
+  createUser: apiClient.createUser.bind(apiClient),
+  updateUser: apiClient.updateUser.bind(apiClient),
+  deleteUser: apiClient.deleteUser.bind(apiClient),
+  approveUser: apiClient.approveUser.bind(apiClient),
+  rejectUser: apiClient.rejectUser.bind(apiClient),
+  getUserAnalytics: apiClient.getUserAnalytics.bind(apiClient),
+  getRoles: apiClient.getRoles.bind(apiClient),
+
+  // Audit & workflows
+  getAuditLogs: apiClient.getAuditLogs.bind(apiClient),
+  getAuditSummary: apiClient.getAuditSummary.bind(apiClient),
+  getPendingApprovals: apiClient.getPendingApprovals.bind(apiClient),
+
+  // Raw execution
+  execute: apiClient.execute.bind(apiClient)
+});
 
 export default apiClient;
+export type { RequestOptions };

@@ -76,7 +76,7 @@ const Dashboard: React.FC = () => {
       if (hasPermission('ADMIN_ANALYTICS')) {
         promises.push(
           apiClient
-            .request<{ analytics?: DashboardLifecycleAnalytics } | DashboardLifecycleAnalytics>('/business-logic/lifecycle/analytics')
+            .getLifecycleAnalytics<{ analytics?: DashboardLifecycleAnalytics } | DashboardLifecycleAnalytics>()
             .then((data): DashboardResult => ({
               type: 'lifecycle',
               data: (data as { analytics?: DashboardLifecycleAnalytics }).analytics ?? (data as DashboardLifecycleAnalytics)

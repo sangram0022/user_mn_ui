@@ -36,11 +36,14 @@ export interface UserRoleInfo {
 }
 
 export interface User {
+  id?: string | number;
   user_id: string;
   email: string;
   first_name: string;
   last_name: string;
-  role: string;
+  username?: string | null;
+  full_name?: string | null;
+  role: string | UserRoleInfo;
   status?: string;
   is_active: boolean;
   is_verified: boolean;
@@ -54,6 +57,10 @@ export interface User {
   avatar_url?: string | null;
   preferences?: Record<string, unknown> | null;
   metadata?: Record<string, unknown> | null;
+  role_name?: string;
+  is_superuser?: boolean;
+  lifecycle_stage?: string | null;
+  activity_score?: number | null;
 }
 
 export interface UserProfile extends User {
@@ -62,10 +69,13 @@ export interface UserProfile extends User {
 }
 
 export interface UserSummary {
+  id?: string | number;
   user_id: string;
   email: string;
   first_name: string;
   last_name: string;
+  username?: string | null;
+  full_name?: string | null;
   role: string;
   is_active: boolean;
   is_verified: boolean;
@@ -74,6 +84,7 @@ export interface UserSummary {
   approved_at?: string | null;
   created_at: string;
   last_login_at?: string | null;
+  role_name?: string;
 }
 
 export interface UserRole {
@@ -90,6 +101,8 @@ export interface CreateUserRequest {
   last_name: string;
   role?: string;
   is_active?: boolean;
+  username?: string;
+  phone_number?: string;
 }
 
 export interface UpdateUserRequest {
@@ -98,6 +111,9 @@ export interface UpdateUserRequest {
   role?: string;
   is_active?: boolean;
   is_verified?: boolean;
+  username?: string;
+  full_name?: string;
+  phone_number?: string;
 }
 
 // ============================================================================
@@ -128,6 +144,7 @@ export interface RegisterRequest {
   confirm_password: string;
   first_name: string;
   last_name: string;
+  username?: string;
 }
 
 export interface RegisterResponse {
@@ -157,6 +174,7 @@ export interface PasswordResetRequest {
 export interface ResetPasswordRequest {
   token: string;
   new_password: string;
+  confirm_password?: string;
 }
 
 export interface VerifyEmailRequest {

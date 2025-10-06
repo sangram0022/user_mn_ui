@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useId } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { apiClient, type UserProfile as ApiUserProfile } from '../services/apiClientComplete';
+import { apiClient } from '../services/apiClientLegacy';
+import type { UserProfile as BaseUserProfile } from '../types';
 import ErrorAlert from './ErrorAlert';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { 
@@ -19,6 +20,17 @@ import {
   CheckCircle,
   Loader
 } from 'lucide-react';
+
+type ApiUserProfile = BaseUserProfile & {
+  bio?: string | null;
+  location?: string | null;
+  website?: string | null;
+  social_links?: {
+    linkedin?: string | null;
+    twitter?: string | null;
+    github?: string | null;
+  } | null;
+};
 
 interface SecuritySettings {
   two_factor_enabled: boolean;
@@ -83,19 +95,20 @@ const ProfilePage: React.FC = () => {
       ]);
 
       if (profileResponse.success && profileResponse.profile) {
-        setProfile(profileResponse.profile);
+        const profileData = profileResponse.profile as ApiUserProfile;
+        setProfile(profileData);
         
         // Initialize edit form with current data
         setEditForm({
-          full_name: profileResponse.profile.full_name || '',
-          username: profileResponse.profile.username || '',
-          bio: profileResponse.profile.bio || '',
-          location: profileResponse.profile.location || '',
-          website: profileResponse.profile.website || '',
+          full_name: profileData.full_name || '',
+          username: profileData.username || '',
+          bio: profileData.bio || '',
+          location: profileData.location || '',
+          website: profileData.website || '',
           social_links: {
-            linkedin: profileResponse.profile.social_links?.linkedin || '',
-            twitter: profileResponse.profile.social_links?.twitter || '',
-            github: profileResponse.profile.social_links?.github || ''
+            linkedin: profileData.social_links?.linkedin || '',
+            twitter: profileData.social_links?.twitter || '',
+            github: profileData.social_links?.github || ''
           }
         });
       }

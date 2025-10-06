@@ -29,6 +29,7 @@ export default tseslint.config([
       'jsx-a11y/mouse-events-have-key-events': 'warn',
       'jsx-a11y/no-static-element-interactions': 'warn',
       'jsx-a11y/click-events-have-key-events': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
     },
   },
 ])

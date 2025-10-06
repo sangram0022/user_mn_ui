@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { apiClient } from '../services/apiClient';
-import type { UserProfile, LoginRequest } from '../types';
+import type { UserProfile, LoginRequest, UserRoleInfo } from '../types';
 import { AuthContext, type AuthContextType } from '../hooks/useAuth';
 import { logger } from '../utils/logger';
 
@@ -27,8 +27,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setError(null);
       
       // Check if we have a token
-      const token = localStorage.getItem('token');
-      if (!token) {
+      const token = localStorage.getItem('token') ?? localStorage.getItem('access_token');
+      if (!token || !apiClient.isAuthenticated()) {
         setIsLoading(false);
         return;
       }
@@ -53,10 +53,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
-      const response = await apiClient.login(credentials.email, credentials.password);
-      
-      // Store the token
-      localStorage.setItem('token', response.access_token);
+  await apiClient.login(credentials.email, credentials.password);
       
       // Get user profile
       const userProfile = await apiClient.getUserProfile();
@@ -83,6 +80,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Continue with logout even if API call fails
     } finally {
       // Clear local state and token
+      apiClient.clearSession();
       localStorage.removeItem('token');
       setUser(null);
       setIsLoading(false);
@@ -112,8 +110,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (user.is_superuser) return true;
     
     // Check role-based permissions
-    if (typeof user.role === 'object' && user.role?.permissions) {
-      return user.role.permissions.includes(permission);
+    if (typeof user.role === 'object' && user.role && 'permissions' in user.role) {
+      const permissions = (user.role as UserRoleInfo).permissions;
+      if (Array.isArray(permissions)) {
+        return permissions.includes(permission);
+      }
     }
     
     // Check role name for admin

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { apiClient } from '../services/apiClientComplete';
+import { apiClient } from '../services/apiClientLegacy';
 import { Plus, Trash2, Eye, Users, UserCheck, UserX, Search, Filter } from 'lucide-react';
 import { getUserPermissions, getUserRoleName } from '../utils/user';
 

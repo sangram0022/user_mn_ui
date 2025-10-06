@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, Clock, Eye, EyeOff, Info, LogIn, Lock, Mail, ShieldCheck, User } from 'lucide-react';
-import { apiClient } from '../services/apiClientComplete';
+import { apiClient } from '../services/apiClientLegacy';
 import ErrorAlert from './ErrorAlert';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { buildRegistrationFeedback } from '../utils/registrationFeedback';

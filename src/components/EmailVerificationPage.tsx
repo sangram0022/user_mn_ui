@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Mail, Loader2 } from 'lucide-react';
-import { apiClient } from '../services/apiClientComplete';
+import { apiClient } from '../services/apiClientLegacy';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 
 const EmailVerificationPage: React.FC = () => {
