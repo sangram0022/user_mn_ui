@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClientLegacy';
 import { Plus, Trash2, Users } from 'lucide-react';
+import Breadcrumb from './Breadcrumb';
 
 interface User {
   id: number;
@@ -215,6 +216,9 @@ const UserManagement: React.FC = () => {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb />
+      
       {/* Header */}
       <div style={{
         display: 'flex',

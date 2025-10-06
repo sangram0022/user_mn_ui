@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClientLegacy';
 import { Shield, AlertTriangle, Lock, Eye, Users, Activity, FileText, CheckCircle } from 'lucide-react';
+import Breadcrumb from './Breadcrumb';
 
 interface SecurityMetrics {
   activeSessions: number;
@@ -128,6 +129,9 @@ const SecurityPage: React.FC = () => {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb />
+      
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{
           margin: '0 0 0.5rem 0',

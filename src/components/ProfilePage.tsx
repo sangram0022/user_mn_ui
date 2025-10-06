@@ -4,6 +4,7 @@ import { apiClient } from '../services/apiClientLegacy';
 import type { UserProfile as BaseUserProfile } from '../types';
 import ErrorAlert from './ErrorAlert';
 import { useErrorHandler } from '../hooks/useErrorHandler';
+import Breadcrumb from './Breadcrumb';
 import { 
   User as UserIcon, 
   MapPin, 
@@ -1146,6 +1147,9 @@ const ProfilePage: React.FC = () => {
         maxWidth: '64rem',
         margin: '0 auto'
       }}>
+        {/* Breadcrumb Navigation */}
+        <Breadcrumb />
+        
         {/* Header */}
         <div style={{ marginBottom: '2rem' }}>
           <h1 style={{

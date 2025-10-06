@@ -1,12 +1,16 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { TrendingUp, BarChart3, Activity, Clock, CheckCircle } from 'lucide-react';
+import Breadcrumb from './Breadcrumb';
 
 const ActivityPage: React.FC = () => {
   const { user } = useAuth();
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb />
+      
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{
           margin: '0 0 0.5rem 0',

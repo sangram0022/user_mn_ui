@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import NavigationDebug from './NavigationDebug';
+import Breadcrumb from './Breadcrumb';
 import { 
   Users, 
   Shield, 
@@ -298,8 +298,8 @@ const RoleBasedDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Navigation Debug Panel */}
-        <NavigationDebug />
+        {/* Breadcrumb Navigation */}
+        <Breadcrumb />
 
         {/* Feature Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClientLegacy';
+import Breadcrumb from './Breadcrumb';
 
 interface UserAnalytics {
   total_users: number;
@@ -205,6 +206,9 @@ const Analytics: React.FC = () => {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb />
+      
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{

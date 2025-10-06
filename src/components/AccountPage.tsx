@@ -2,12 +2,16 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserRoleName } from '../utils/user';
 import { Settings, Lock, Bell, Shield } from 'lucide-react';
+import Breadcrumb from './Breadcrumb';
 
 const AccountPage: React.FC = () => {
   const { user } = useAuth();
 
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb />
+      
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{
           margin: '0 0 0.5rem 0',

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useId } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClientLegacy';
+import Breadcrumb from './Breadcrumb';
 
 interface WorkflowAction {
   id: number;
@@ -152,6 +153,9 @@ const WorkflowManagement: React.FC = () => {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb />
+      
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{
