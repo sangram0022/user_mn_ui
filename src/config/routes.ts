@@ -16,13 +16,13 @@ export interface RouteConfig {
 }
 
 const LazyHomePage = lazy(() => import('../components/pages/HomePage'));
-const LazyLoginPageNew = lazy(() => import('../components/pages/LoginPageNew'));
-const LazyRegisterPage = lazy(() => import('../components/RegisterPage'));
-const LazyEmailConfirmationPage = lazy(() => import('../components/EmailConfirmationPage'));
-const LazyEmailVerificationPage = lazy(() => import('../components/EmailVerificationPage'));
+const LazyLoginPage = lazy(() => import('@pages/auth/LoginPage'));
+const LazyRegisterPage = lazy(() => import('@pages/auth/RegisterPage'));
+const LazyEmailConfirmationPage = lazy(() => import('@pages/auth/EmailConfirmationPage'));
+const LazyEmailVerificationPage = lazy(() => import('@pages/auth/EmailVerificationPage'));
 const LazyRoleBasedDashboard = lazy(() => import('../components/pages/RoleBasedDashboard'));
 const LazyUserManagementEnhanced = lazy(() => import('../components/UserManagementEnhanced'));
-const LazyAnalytics = lazy(() => import('../components/Analytics'));
+const LazyAnalytics = lazy(() => import('@pages/analytics/AnalyticsPage'));
 const LazyWorkflowManagement = lazy(() => import('../components/WorkflowManagement'));
 const LazyProfilePage = lazy(() => import('../components/ProfilePage'));
 const LazySettingsPage = lazy(() => import('../components/SettingsPage'));
@@ -53,7 +53,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/login',
-    component: LazyLoginPageNew,
+  component: LazyLoginPage,
     layout: 'auth',
     guard: 'public',
     title: 'Login',

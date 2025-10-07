@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, ArrowLeft } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useErrorHandler } from '../../hooks/useErrorHandler';
-import ErrorAlert from '../ErrorAlert';
+import { useAuth } from '@contexts/AuthContext';
+import { useErrorHandler } from '@hooks/errors/useErrorHandler';
+import ErrorAlert from '@shared/ui/ErrorAlert';
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({

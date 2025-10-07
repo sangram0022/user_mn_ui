@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Lock, Eye, EyeOff, CheckCircle, Loader } from 'lucide-react';
-import { apiClient } from '../services/apiClientLegacy';
-import ErrorAlert from './ErrorAlert';
-import { useErrorHandler } from '../hooks/useErrorHandler';
+import { apiClient } from '@services/apiClientLegacy';
+import ErrorAlert from '@shared/ui/ErrorAlert';
+import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 
 const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();

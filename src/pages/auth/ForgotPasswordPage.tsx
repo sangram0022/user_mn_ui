@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle, Loader } from 'lucide-react';
-import { apiClient } from '../services/apiClientLegacy';
-import ErrorAlert from './ErrorAlert';
-import { useErrorHandler } from '../hooks/useErrorHandler';
+import { apiClient } from '@services/apiClientLegacy';
+import ErrorAlert from '@shared/ui/ErrorAlert';
+import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');

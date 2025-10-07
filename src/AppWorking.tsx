@@ -2,11 +2,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import NavigationNew from './components/NavigationNew';
 import HomePage from './components/HomePage';
-import LoginPageNew from './components/LoginPageNew';
-import RegisterPage from './components/RegisterPage';
+import LoginPage from '@pages/auth/LoginPage';
+import RegisterPage from '@pages/auth/RegisterPage';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
-import ForgotPasswordPage from './components/ForgotPasswordPage';
-import ResetPasswordPage from './components/ResetPasswordPage';
+import ForgotPasswordPage from '@pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from '@pages/auth/ResetPasswordPage';
 import ProfilePage from './components/ProfilePage';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -76,7 +76,7 @@ function App() {
             path="/login" 
             element={
               <PublicRoute>
-                <LoginPageNew />
+                <LoginPage />
               </PublicRoute>
             } 
           />

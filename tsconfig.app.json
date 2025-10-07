@@ -4,7 +4,7 @@
     "target": "ES2022",
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-  "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
     "module": "ESNext",
     "skipLibCheck": true,
 
@@ -22,7 +22,24 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": ".",
+    "paths": {
+  "@app/*": ["src/app/*"],
+  "@pages/*": ["src/pages/*"],
+  "@features/*": ["src/features/*"],
+  "@shared/*": ["src/shared/*"],
+  "@entities/*": ["src/entities/*"],
+  "@widgets/*": ["src/widgets/*"],
+  "@config/*": ["src/config/*"],
+  "@contexts/*": ["src/contexts/*"],
+  "@services/*": ["src/services/*"],
+  "@utils/*": ["src/utils/*"],
+  "@hooks/*": ["src/hooks/*"],
+  "@styles/*": ["src/styles/*"],
+  "@types/*": ["src/types/*"],
+  "@assets/*": ["src/assets/*"]
+    }
   },
   "include": ["src"]
 }

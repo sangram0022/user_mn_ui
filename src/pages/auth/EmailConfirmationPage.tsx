@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, CheckCircle, Clock, ArrowLeft, RefreshCw } from 'lucide-react';
-import { apiClient } from '../services/apiClientLegacy';
+import { apiClient } from '@services/apiClientLegacy';
 
 const EmailConfirmationPage: React.FC = () => {
   const location = useLocation();

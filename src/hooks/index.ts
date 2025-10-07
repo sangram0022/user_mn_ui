@@ -28,7 +28,7 @@ export type {
 } from './useFormState';
 
 // Error handling (existing)
-export { useErrorHandler } from './useErrorHandler';
+export { useErrorHandler, useErrorMessage } from './errors/useErrorHandler';
 
 // Authentication (existing)
 export { useAuth } from './useAuth';

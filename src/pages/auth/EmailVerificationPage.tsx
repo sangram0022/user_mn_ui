@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Mail, Loader2 } from 'lucide-react';
-import { apiClient } from '../services/apiClientLegacy';
-import { useErrorHandler } from '../hooks/useErrorHandler';
+import { apiClient } from '@services/apiClientLegacy';
+import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 
 const EmailVerificationPage: React.FC = () => {
   const [searchParams] = useSearchParams();

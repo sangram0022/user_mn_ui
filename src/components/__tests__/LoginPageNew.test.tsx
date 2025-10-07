@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import LoginPageNew from '../LoginPageNew';
+import LoginPage from '@pages/auth/LoginPage';
 
 const loginMock = vi.fn();
 const handleErrorMock = vi.fn();
@@ -15,7 +15,7 @@ vi.mock('../../contexts/AuthContext', () => ({
   }),
 }));
 
-vi.mock('../../hooks/useErrorHandler', () => ({
+vi.mock('../../hooks/errors/useErrorHandler', () => ({
   useErrorHandler: () => ({
     error: null,
     handleError: handleErrorMock,
@@ -35,7 +35,7 @@ const setup = async () => {
   const user = userEvent.setup();
   render(
     <MemoryRouter>
-      <LoginPageNew />
+      <LoginPage />
     </MemoryRouter>
   );
   const emailInput = screen.getByLabelText(/email address/i);
@@ -44,7 +44,7 @@ const setup = async () => {
   return { user, emailInput, passwordInput, submitButton };
 };
 
-describe('LoginPageNew', () => {
+describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

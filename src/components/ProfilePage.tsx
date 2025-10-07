@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../services/apiClientLegacy';
 import type { UserProfile as BaseUserProfile } from '../types';
 import ErrorAlert from './ErrorAlert';
-import { useErrorHandler } from '../hooks/useErrorHandler';
+import { useErrorHandler } from '../hooks/errors/useErrorHandler';
 import Breadcrumb from './Breadcrumb';
 import { 
   User as UserIcon, 
