@@ -13,25 +13,11 @@
  */
 
 // Modern API client (recommended)
-export { apiClient, useApi } from './apiClient';
-export type { RequestOptions } from './apiClient';
+export { apiClient, useApi } from '@services/apiClient';
+export type { RequestOptions } from '@services/apiClient';
 
-// Adapter pattern for backward compatibility
-export { apiClientAdapter } from '@services/adapters';
-export type {
-  StandardResponse,
-  PageInfo,
-  LegacyUser,
-  LegacyUsersResponse,
-  LegacyRolesResponse,
-  ActionResponse,
-  ProfileResponse,
-  AnalyticsResponse,
-  RegisterResponseWrapper
-} from '@services/adapters';
-
-// Legacy compatibility layer
-export { apiClient as legacyApiClient } from './apiClientLegacy';
+// Maintain compatibility for legacy imports by re-exporting the modern client
+export { apiClient as legacyApiClient } from '@services/apiClient';
 
 // Default export is the modern client
-export { default } from './apiClient';
+export { default } from '@services/apiClient';

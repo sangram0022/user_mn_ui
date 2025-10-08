@@ -23,7 +23,7 @@ export const apiClient = apiClientAdapter;
 export type { LegacyUser } from '@services/adapters';
 
 // Deprecated - Use apiClient named export instead
-export const apiClientLegacy = apiClientAdapter;
+export { apiClientLegacy } from '@services/apiClientLegacy';
 
 // Default export for backward compatibility
 export default apiClientAdapter;

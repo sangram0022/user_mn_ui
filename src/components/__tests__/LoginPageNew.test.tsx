@@ -2,22 +2,31 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import LoginPage from '@pages/auth/LoginPage';
+
+import LoginPage from '@features/auth/pages/LoginPage';
+
+type UseErrorHandlerReturn = {
+  error: unknown;
+  errorMessage: string | null;
+  handleError: (error: unknown, context?: string) => void;
+  clearError: () => void;
+};
 
 const loginMock = vi.fn();
 const handleErrorMock = vi.fn();
 const clearErrorMock = vi.fn();
 const navigateMock = vi.fn();
 
-vi.mock('../../contexts/AuthContext', () => ({
+vi.mock('@features/auth', () => ({
   useAuth: () => ({
     login: loginMock,
   }),
 }));
 
-vi.mock('../../hooks/errors/useErrorHandler', () => ({
-  useErrorHandler: () => ({
+vi.mock('@hooks/errors/useErrorHandler', () => ({
+  useErrorHandler: (): UseErrorHandlerReturn => ({
     error: null,
+    errorMessage: null,
     handleError: handleErrorMock,
     clearError: clearErrorMock,
   }),
@@ -67,6 +76,7 @@ describe('LoginPage', () => {
     });
 
     expect(clearErrorMock).toHaveBeenCalled();
+    expect(handleErrorMock).not.toHaveBeenCalled();
   });
 
   it('handles login failure and reports error', async () => {
@@ -79,7 +89,7 @@ describe('LoginPage', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(handleErrorMock).toHaveBeenCalledWith(error);
+      expect(handleErrorMock).toHaveBeenCalledWith(error, 'LoginPage');
     });
 
     expect(navigateMock).not.toHaveBeenCalled();

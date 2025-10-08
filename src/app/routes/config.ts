@@ -17,12 +17,14 @@ export interface RouteConfig {
 }
 
 const LazyHomePage = lazy(() => import('@pages/home/HomePage'));
-const LazyLoginPage = lazy(() => import('@pages/auth/LoginPage'));
-const LazyRegisterPage = lazy(() => import('@pages/auth/RegisterPage'));
-const LazyEmailConfirmationPage = lazy(() => import('@pages/auth/EmailConfirmationPage'));
-const LazyEmailVerificationPage = lazy(() => import('@pages/auth/EmailVerificationPage'));
-const LazyRoleBasedDashboard = lazy(() => import('@pages/dashboard/RoleBasedDashboardPage'));
-const LazyUserManagementEnhanced = lazy(() => import('@pages/users/UserManagementPage'));
+const LazyLoginPage = lazy(() => import('@features/auth/pages/LoginPage'));
+const LazyRegisterPage = lazy(() => import('@features/auth/pages/RegisterPage'));
+const LazyEmailConfirmationPage = lazy(() => import('@features/auth/pages/EmailConfirmationPage'));
+const LazyEmailVerificationPage = lazy(() => import('@features/auth/pages/EmailVerificationPage'));
+const LazyForgotPasswordPage = lazy(() => import('@features/auth/pages/ForgotPasswordPage'));
+const LazyResetPasswordPage = lazy(() => import('@features/auth/pages/ResetPasswordPage'));
+const LazyRoleBasedDashboard = lazy(() => import('@features/dashboard/pages/RoleBasedDashboardPage'));
+const LazyUserManagementEnhanced = lazy(() => import('@features/users/pages/UserManagementPage'));
 const LazyAnalytics = lazy(() => import('@pages/analytics/AnalyticsPage'));
 const LazyWorkflowManagement = lazy(() => import('@pages/workflows/WorkflowManagementPage'));
 const LazyProfilePage = lazy(() => import('@pages/profile/ProfilePage'));
@@ -72,6 +74,58 @@ export const routes: RouteConfig[] = [
     guard: 'public',
     title: 'Register',
     description: 'Create a new account for the user management platform.'
+  },
+  {
+    path: '/forgot-password',
+    component: LazyForgotPasswordPage,
+    layout: 'auth',
+    guard: 'public',
+    title: 'Forgot Password',
+    description: 'Request a password reset link for your account.',
+    suspenseFallback: createElement(PageSkeleton, {
+      heading: 'Sending reset instructions',
+      actionCount: 1,
+      descriptionLines: 2
+    }),
+  },
+  {
+    path: '/auth/forgot-password',
+    component: LazyForgotPasswordPage,
+    layout: 'auth',
+    guard: 'public',
+    title: 'Forgot Password',
+    description: 'Request a password reset link for your account.',
+    suspenseFallback: createElement(PageSkeleton, {
+      heading: 'Sending reset instructions',
+      actionCount: 1,
+      descriptionLines: 2
+    }),
+  },
+  {
+    path: '/reset-password',
+    component: LazyResetPasswordPage,
+    layout: 'auth',
+    guard: 'public',
+    title: 'Reset Password',
+    description: 'Choose a new password to regain access to your account.',
+    suspenseFallback: createElement(PageSkeleton, {
+      heading: 'Preparing password reset',
+      actionCount: 1,
+      descriptionLines: 2
+    }),
+  },
+  {
+    path: '/auth/reset-password',
+    component: LazyResetPasswordPage,
+    layout: 'auth',
+    guard: 'public',
+    title: 'Reset Password',
+    description: 'Choose a new password to regain access to your account.',
+    suspenseFallback: createElement(PageSkeleton, {
+      heading: 'Preparing password reset',
+      actionCount: 1,
+      descriptionLines: 2
+    }),
   },
   {
     path: '/email-confirmation',

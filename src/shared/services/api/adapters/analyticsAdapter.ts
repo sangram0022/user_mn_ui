@@ -37,3 +37,5 @@ export async function getLifecycleAnalytics<T = unknown>(): Promise<AnalyticsRes
     };
   }
 }
+
+export * from '@services/adapters/analyticsAdapter';

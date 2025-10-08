@@ -23,7 +23,16 @@ export const apiClient = apiClientAdapter;
 export type { LegacyUser } from './adapters';
 
 // Deprecated - Use apiClient named export instead
-export const apiClientLegacy = apiClientAdapter;
+export const apiClientLegacy = new Proxy<Record<string, never>>(
+  {},
+  {
+    get() {
+      throw new Error(
+        'apiClientLegacy has been removed. Use apiClient from @services/apiClient instead.'
+      );
+    }
+  }
+) as never;
 
 // Default export for backward compatibility
 export default apiClientAdapter;
