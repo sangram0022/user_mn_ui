@@ -30,8 +30,7 @@ const ENDPOINTS = {
     register: '/auth/register',
     logout: '/auth/logout',
     refresh: '/auth/refresh',
-    passwordReset: '/auth/password-reset',
-    passwordResetLegacy: '/auth/password-reset-request',
+  passwordReset: '/auth/password-reset',
     resetPassword: '/auth/reset-password',
     forgotPassword: '/auth/forgot-password',
     changePassword: '/auth/change-password',
@@ -340,20 +339,10 @@ class ApiClient {
   }
 
   async requestPasswordReset(email: string): Promise<PasswordResetResponse> {
-    try {
-      return await this.request<PasswordResetResponse>(ENDPOINTS.auth.passwordReset, {
-        method: 'POST',
-        body: JSON.stringify({ email })
-      });
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 404) {
-        return await this.request<PasswordResetResponse>(ENDPOINTS.auth.passwordResetLegacy, {
-          method: 'POST',
-          body: JSON.stringify({ email })
-        });
-      }
-      throw error;
-    }
+    return await this.request<PasswordResetResponse>(ENDPOINTS.auth.passwordReset, {
+      method: 'POST',
+      body: JSON.stringify({ email })
+    });
   }
 
   async forgotPassword(email: string): Promise<ForgotPasswordResponse> {

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 
 import { useAuth } from '@features/auth';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
-import { apiClient } from '@services/apiClientLegacy';
+import { apiClient } from '@services/apiClient';
 import type { UserProfile as BaseUserProfile } from '@types';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import Breadcrumb from '@shared/ui/Breadcrumb';
@@ -92,29 +92,22 @@ const ProfilePage: FC = () => {
       setIsLoading(true);
       clearError();
       
-      const [profileResponse] = await Promise.all([
-        apiClient.getProfile(),
-        // Load security settings would be called here if available
-      ]);
+      const profileData = await apiClient.getUserProfile() as ApiUserProfile;
+      setProfile(profileData);
 
-      if (profileResponse.success && profileResponse.profile) {
-        const profileData = profileResponse.profile as ApiUserProfile;
-        setProfile(profileData);
-        
-        // Initialize edit form with current data
-        setEditForm({
-          full_name: profileData.full_name || '',
-          username: profileData.username || '',
-          bio: profileData.bio || '',
-          location: profileData.location || '',
-          website: profileData.website || '',
-          social_links: {
-            linkedin: profileData.social_links?.linkedin || '',
-            twitter: profileData.social_links?.twitter || '',
-            github: profileData.social_links?.github || ''
-          }
-        });
-      }
+      // Initialize edit form with current data
+      setEditForm({
+        full_name: profileData.full_name || '',
+        username: profileData.username || '',
+        bio: profileData.bio || '',
+        location: profileData.location || '',
+        website: profileData.website || '',
+        social_links: {
+          linkedin: profileData.social_links?.linkedin || '',
+          twitter: profileData.social_links?.twitter || '',
+          github: profileData.social_links?.github || ''
+        }
+      });
 
       // Mock security settings for now
       setSecuritySettings({
@@ -140,18 +133,14 @@ const ProfilePage: FC = () => {
       setIsSaving(true);
       clearError();
 
-      const response = await apiClient.updateProfile(editForm);
-      
-      if (response.success) {
-        setSuccess('Profile updated successfully!');
-        setIsEditing(false);
-        await loadProfile();
-        await refreshProfile();
-        
-        setTimeout(() => setSuccess(''), 3000);
-      } else {
-        handleError(new Error(response.message || 'Failed to update profile'));
-      }
+      await apiClient.updateUserProfile(editForm);
+
+      setSuccess('Profile updated successfully!');
+      setIsEditing(false);
+      await loadProfile();
+      await refreshProfile();
+
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err: unknown) {
       handleError(err);
     } finally {
@@ -181,7 +170,7 @@ const ProfilePage: FC = () => {
         confirm_password: passwordForm.confirm_password
       });
 
-      if (response.success) {
+      if (response.success !== false) {
         setSuccess('Password changed successfully!');
         setPasswordForm({
           current_password: '',

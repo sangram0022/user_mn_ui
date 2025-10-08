@@ -3,31 +3,27 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Trash2, Eye, Users, UserCheck, UserX, Search, Filter } from 'lucide-react';
 
 import { useAuth } from '@features/auth';
-import { apiClient } from '@services/apiClientLegacy';
+import { apiClient } from '@services/apiClient';
 import { getUserPermissions, getUserRoleName } from '@utils/user';
+import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@types';
+
+interface Role extends UserRole {}
 
 interface User {
-  id: number;
+  id: string;
   email: string;
-  username?: string;
-  full_name?: string;
+  username?: string | null;
+  full_name?: string | null;
+  first_name: string;
+  last_name: string;
   is_active: boolean;
   is_verified: boolean;
-  role: {
-    id: number;
-    name: string;
-    description: string;
-  };
-  lifecycle_stage?: string;
-  activity_score?: number;
-  last_login_at?: string;
+  is_approved: boolean;
+  role: Role;
+  lifecycle_stage?: string | null;
+  activity_score?: number | null;
+  last_login_at?: string | null;
   created_at: string;
-}
-
-interface Role {
-  id: number;
-  name: string;
-  description: string;
 }
 
 interface CreateUserData {
@@ -92,6 +88,7 @@ const UserManagementEnhanced: FC = () => {
   
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const roleMap = useMemo(() => new Map(roles.map((role) => [role.name, role])), [roles]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -108,8 +105,55 @@ const UserManagementEnhanced: FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<Set<number>>(new Set());
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const buildCreateUserRequest = useCallback((data: CreateUserData): CreateUserRequest => {
+    const trimmedName = data.full_name?.trim();
+    const nameSegments = trimmedName ? trimmedName.split(' ') : [];
+    const firstName = nameSegments[0] ?? data.email.split('@')[0] ?? 'First';
+    const lastName = nameSegments.length > 1 ? nameSegments.slice(1).join(' ') : 'User';
+
+    return {
+      email: data.email,
+      password: data.password,
+      first_name: firstName || 'First',
+      last_name: lastName || 'User',
+      role: data.role,
+      is_active: data.is_active ?? true,
+      username: data.username
+    };
+  }, []);
+
+  const buildUpdateUserRequest = useCallback((data: UpdateUserData): UpdateUserRequest => {
+    const request: UpdateUserRequest = {};
+
+    if (data.role) {
+      request.role = data.role;
+    }
+
+    if (typeof data.is_active === 'boolean') {
+      request.is_active = data.is_active;
+    }
+
+    if (typeof data.username === 'string') {
+      request.username = data.username;
+    }
+
+    if (data.full_name) {
+      const trimmed = data.full_name.trim();
+      if (trimmed) {
+        request.full_name = trimmed;
+        const segments = trimmed.split(' ');
+        request.first_name = segments[0];
+        if (segments.length > 1) {
+          request.last_name = segments.slice(1).join(' ');
+        }
+      }
+    }
+
+    return request;
+  }, []);
 
   // Define functions before useEffect
   const loadUsers = useCallback(async () => {
@@ -149,23 +193,46 @@ const UserManagementEnhanced: FC = () => {
 
       debugLog('Requesting users with params', params);
       
-      const response = await apiClient.getUsers(params);
-      
-      if (response.success) {
-        debugLog('Users loaded successfully', {
-          total: response.total,
-          count: response.users?.length
-        });
-        setUsers(response.users || []);
-        setPagination(prev => ({
-          ...prev,
-          total: response.total || 0,
-          hasMore: response.page_info?.has_more || false
-        }));
-      } else {
-        console.error('❌ API response indicates failure:', response);
-        throw new Error('Failed to load users');
-      }
+      const summaries = await apiClient.getUsers(params);
+
+      const mappedUsers = summaries.map((summary: UserSummary, index) => {
+        const resolvedRole = roleMap.get(summary.role) ?? {
+          id: index + 1,
+          name: summary.role,
+          description: summary.role,
+          permissions: []
+        };
+
+        const fallbackName = `${summary.first_name ?? ''} ${summary.last_name ?? ''}`.trim();
+
+        return {
+          id: summary.user_id ?? String(index + 1),
+          email: summary.email,
+          username: summary.username ?? null,
+          full_name: summary.full_name ?? (fallbackName || summary.email),
+          first_name: summary.first_name,
+          last_name: summary.last_name,
+          is_active: summary.is_active,
+          is_verified: summary.is_verified,
+          is_approved: summary.is_approved,
+          role: resolvedRole,
+          lifecycle_stage: summary.role_name ?? null,
+          activity_score: null,
+          last_login_at: summary.last_login_at ?? null,
+          created_at: summary.created_at
+        } satisfies User;
+      });
+
+      debugLog('Users loaded successfully', {
+        count: mappedUsers.length
+      });
+
+      setUsers(mappedUsers);
+      setPagination(prev => ({
+        ...prev,
+        total: mappedUsers.length,
+        hasMore: mappedUsers.length >= prev.limit
+      }));
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       console.error('Failed to load users', err);
@@ -180,32 +247,22 @@ const UserManagementEnhanced: FC = () => {
       setIsLoading(false);
       debugLog('loadUsers completed');
     }
-  }, [debugLog, filterActive, filterRole, pagination.limit, pagination.skip, searchTerm, user]);
+  }, [debugLog, filterActive, filterRole, pagination.limit, pagination.skip, roleMap, searchTerm, user]);
 
   const loadRoles = useCallback(async () => {
     try {
       debugLog('Loading roles from backend...');
-      const response = await apiClient.getRoles();
-      
-      if (response.success && response.roles) {
-        debugLog('Roles loaded successfully', response.roles);
-        setRoles(response.roles);
-      } else {
-        console.error('Failed to load roles', response);
-        // Fallback to default roles if backend fails
-        setRoles([
-          { id: 1, name: 'admin', description: 'Administrator' },
-          { id: 2, name: 'user', description: 'Standard User' },
-          { id: 3, name: 'manager', description: 'Manager' }
-        ]);
-      }
+      const fetchedRoles = await apiClient.getRoles();
+
+      debugLog('Roles loaded successfully', fetchedRoles);
+      setRoles(fetchedRoles);
     } catch (err) {
       console.error('Failed to load roles', err);
       // Fallback to default roles if backend fails
       setRoles([
-        { id: 1, name: 'admin', description: 'Administrator' },
-        { id: 2, name: 'user', description: 'Standard User' },
-        { id: 3, name: 'manager', description: 'Manager' }
+        { id: 1, name: 'admin', description: 'Administrator', permissions: ['admin'] },
+        { id: 2, name: 'user', description: 'Standard User', permissions: [] },
+        { id: 3, name: 'manager', description: 'Manager', permissions: ['user:read', 'user:write'] }
       ]);
     }
   }, [debugLog]);
@@ -235,9 +292,9 @@ const UserManagementEnhanced: FC = () => {
     });
   }, [filterActive, filterRole, searchTerm]);
 
-  const handleUserAction = async (action: string, userId: number, data?: UpdateUserData) => {
+  const handleUserAction = async (action: string, userId: string, data?: UpdateUserData) => {
     try {
-      setActionLoading(`${action}-${userId}`);
+  setActionLoading(`${action}-${userId}`);
       
       switch (action) {
         case 'activate':
@@ -255,7 +312,7 @@ const UserManagementEnhanced: FC = () => {
           break;
         case 'update':
           if (data) {
-            await apiClient.updateUser(userId, data);
+            await apiClient.updateUser(userId, buildUpdateUserRequest(data));
           }
           break;
         default:
@@ -276,7 +333,7 @@ const UserManagementEnhanced: FC = () => {
   const handleCreateUser = async (userData: CreateUserData) => {
     try {
       setActionLoading('create-user');
-      await apiClient.createUser(userData);
+      await apiClient.createUser(buildCreateUserRequest(userData));
       setShowCreateModal(false);
       await loadUsers();
     } catch (error) {
@@ -309,7 +366,7 @@ const UserManagementEnhanced: FC = () => {
     }
   };
 
-  const handleSelectUser = (userId: number, selected: boolean) => {
+  const handleSelectUser = (userId: string, selected: boolean) => {
     setSelectedUsers(prev => {
       const newSet = new Set(prev);
       if (selected) {
@@ -732,7 +789,7 @@ const UserManagementEnhanced: FC = () => {
                                   user.is_active ? 'deactivate' : 'activate',
                                   user.id
                                 )}
-                                disabled={actionLoading?.includes(user.id.toString())}
+                                disabled={actionLoading?.includes(user.id)}
                                 style={{
                                   padding: '0.5rem',
                                   background: user.is_active ? '#f59e0b' : '#10b981',
@@ -755,7 +812,7 @@ const UserManagementEnhanced: FC = () => {
                               
                               <button
                                 onClick={() => handleUserAction('delete', user.id)}
-                                disabled={actionLoading?.includes(user.id.toString())}
+                                disabled={actionLoading?.includes(user.id)}
                                 style={{
                                   padding: '0.5rem',
                                   background: '#ef4444',
@@ -854,7 +911,7 @@ const UserManagementEnhanced: FC = () => {
             setShowUserModal(false);
           }}
           onClose={() => setShowUserModal(false)}
-          isLoading={actionLoading?.includes(selectedUser.id.toString()) || false}
+          isLoading={actionLoading?.includes(selectedUser.id) || false}
         />
       )}
     </div>

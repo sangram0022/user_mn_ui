@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Shield, AlertTriangle, Lock, Eye, Users, Activity, FileText, CheckCircle } from 'lucide-react';
 
 import { useAuth } from '@features/auth';
-import { apiClient } from '@services/apiClientLegacy';
+import { apiClient } from '@services/apiClient';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 
 interface SecurityMetrics {
@@ -39,7 +39,7 @@ const SecurityPage: FC = () => {
       
       // Make real API call to backend metrics endpoint
       console.log('📡 Making API request to: /api/v1/health/metrics');
-      const response = await apiClient.makeRequest('/health/metrics', {
+      const response = await apiClient.execute('/health/metrics', {
         method: 'GET'
       });
       

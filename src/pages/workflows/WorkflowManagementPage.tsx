@@ -2,7 +2,6 @@ import type { FC } from 'react';
 import { useCallback, useEffect, useId, useState } from 'react';
 
 import { useAuth } from '@features/auth';
-import { apiClient } from '@services/apiClientLegacy';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 
 interface WorkflowAction {
@@ -114,21 +113,10 @@ const WorkflowManagement: FC = () => {
     }
   }, []);
 
-  const handleWorkflowAction = async (workflowId: number, action: 'approve' | 'reject', justification?: string) => {
+  const handleWorkflowAction = async (workflowId: number, action: 'approve' | 'reject', _justification?: string) => {
     try {
       setActionLoading(`${action}-${workflowId}`);
-      
-      await apiClient.approveWorkflow(workflowId.toString(), {
-        action,
-        comments: justification
-      });
-
-      await loadWorkflows();
-      await loadStats();
-      setShowModal(false);
-      setSelectedWorkflow(null);
-    } catch (err: unknown) {
-      setError(`Failed to ${action} workflow: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setError('Workflow approvals are not yet supported in this environment.');
     } finally {
       setActionLoading(null);
     }

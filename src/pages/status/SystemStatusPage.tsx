@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Loader } from 'lucide-react';
 
 import { useAuth } from '@features/auth';
-import { apiClient } from '@services/apiClientLegacy';
+import { apiClient } from '@services/apiClient';
 import { getUserRoleName, getUserPermissions } from '@utils/user';
 
 interface SystemCheck {
@@ -90,16 +90,10 @@ const SystemStatus: FC = () => {
   console.log('👤 Current user:', user?.email, 'Role:', getUserRoleName(user));
       console.log('🛡️ Has user:read permission:', hasPermission('user:read'));
       
-      const usersResponse = await apiClient.getUsers({ limit: 1 });
-      if (usersResponse.success) {
-        updateCheck('Users API', 'success', 
-          'Users API working', 
-          `Found ${usersResponse.total || 0} total users`);
-      } else {
-        updateCheck('Users API', 'warning', 
-          'Users API responded but with errors', 
-          JSON.stringify(usersResponse));
-      }
+      const users = await apiClient.getUsers({ limit: 1 });
+      updateCheck('Users API', 'success', 
+        'Users API working', 
+        `Found ${users.length} user${users.length === 1 ? '' : 's'}`);
     } catch (error) {
       console.error('🚨 Users API test failed:', error);
       updateCheck('Users API', 'error', 
@@ -109,16 +103,10 @@ const SystemStatus: FC = () => {
 
     // Check 5: Roles API
     try {
-      const rolesResponse = await apiClient.getRoles();
-      if (rolesResponse.success && rolesResponse.roles) {
-        updateCheck('Roles API', 'success',
-          `Found ${rolesResponse.roles.length} roles`,
-          rolesResponse.roles.map((role: { name: string }) => role.name).join(', '));
-      } else {
-        updateCheck('Roles API', 'warning', 
-          'Roles API responded but with errors', 
-          JSON.stringify(rolesResponse));
-      }
+      const roles = await apiClient.getRoles();
+      updateCheck('Roles API', 'success',
+        `Found ${roles.length} role${roles.length === 1 ? '' : 's'}`,
+        roles.map((role) => role.name).join(', ') || 'No roles available');
     } catch (error) {
       updateCheck('Roles API', 'error', 
         'Roles API failed', 
