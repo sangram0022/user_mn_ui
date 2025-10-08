@@ -1,39 +1,37 @@
 import type { FC } from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useAuth } from '@contexts/AuthContext';
-import { apiClient } from '@services/apiClientLegacy';
+import { useAuth } from '@features/auth';
+import { apiClient } from '@services/apiClient';
+import type { UserAnalytics as AnalyticsSummary } from '@types';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 
-interface UserAnalytics {
-  total_users: number;
-  active_users: number;
+type TopUser = {
+  user_id: string | number;
+  email: string;
+  activity_score: number;
+};
+
+type LifecycleTransition = {
+  from_stage: string;
+  to_stage: string;
+  count: number;
+};
+
+type AnalyticsData = AnalyticsSummary & {
+  engagement_distribution: Record<string, number>;
   inactive_users: number;
-  verified_users: number;
-  unverified_users: number;
-  users_by_role: Array<{
-    role_name: string;
-    count: number;
-  }>;
-  users_by_lifecycle_stage: Array<{
-    lifecycle_stage: string;
-    count: number;
-  }>;
-  top_users_by_activity: Array<{
-    user_id: number;
-    email: string;
-    activity_score: number;
-  }>;
-  recent_registrations: Array<{
-    date: string;
-    count: number;
-  }>;
-  lifecycle_transitions: Array<{
-    from_stage: string;
-    to_stage: string;
-    count: number;
-  }>;
-}
+  new_users_last_30_days: number;
+  growth_rate: number;
+  top_users_by_activity: TopUser[];
+  lifecycle_transitions: LifecycleTransition[];
+};
+
+type ChartDataItem = {
+  label: string;
+  value: number;
+  detail?: string;
+};
 
 interface UserSegmentation {
   segments: Array<{
@@ -53,77 +51,201 @@ interface MetricCard {
   trend?: 'up' | 'down' | 'neutral';
 }
 
+const toChartData = (record: Record<string, number>): ChartDataItem[] =>
+  Object.entries(record)
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value);
+
+const createFallbackAnalytics = (): AnalyticsData => ({
+  total_users: 0,
+  active_users: 0,
+  new_users_today: 0,
+  retention_rate: 0,
+  engagement_score: 0,
+  lifecycle_distribution: {},
+  activity_trends: [],
+  engagement_distribution: { high: 0, medium: 0, low: 0 },
+  inactive_users: 0,
+  new_users_last_30_days: 0,
+  growth_rate: 0,
+  top_users_by_activity: [],
+  lifecycle_transitions: []
+});
+
+const normalizeAnalytics = (payload: AnalyticsSummary): AnalyticsData => {
+  const fallback = createFallbackAnalytics();
+  const extended = payload as Partial<AnalyticsData>;
+
+  const totalUsers = Number(payload.total_users ?? 0);
+  const activeUsers = Number(payload.active_users ?? 0);
+  const inactiveUsers = Number.isFinite(payload.inactive_users)
+    ? Number(payload.inactive_users)
+    : Math.max(totalUsers - activeUsers, 0);
+
+  return {
+    ...fallback,
+    ...payload,
+    inactive_users: inactiveUsers,
+    new_users_last_30_days: payload.new_users_last_30_days ?? fallback.new_users_last_30_days,
+    growth_rate: payload.growth_rate ?? fallback.growth_rate,
+    engagement_distribution: {
+      ...fallback.engagement_distribution,
+      ...(payload.engagement_distribution ?? {})
+    },
+    activity_trends: payload.activity_trends ?? fallback.activity_trends,
+    top_users_by_activity: extended.top_users_by_activity ?? fallback.top_users_by_activity,
+    lifecycle_transitions: extended.lifecycle_transitions ?? fallback.lifecycle_transitions
+  };
+};
+
+const formatPercentage = (value?: number): string => {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return '0%';
+  }
+
+  const normalized = value >= 0 && value <= 1 ? value * 100 : value;
+  return `${normalized.toFixed(1)}%`;
+};
+
+const formatScore = (value: number | undefined): string =>
+  Number.isFinite(value) ? (value as number).toFixed(1) : '0.0';
+
 const Analytics: FC = () => {
   const { hasPermission } = useAuth();
-  const [analytics, setAnalytics] = useState<UserAnalytics | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [segmentation, setSegmentation] = useState<UserSegmentation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'lifecycle' | 'engagement' | 'cohorts' | 'segmentation'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'lifecycle' | 'segmentation'>('overview');
 
-  useEffect(() => {
-    loadAnalytics();
-    loadSegmentation();
-  }, []);
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      console.log('📊 Analytics: Starting to load analytics data...');
-      
+
       const response = await apiClient.getUserAnalytics();
-      
-      console.log('📊 Analytics API Response:', response);
-      
-      if (response.success && response.data) {
-        console.log('✅ Analytics loaded from backend:', response.data);
-        setAnalytics(response.data as UserAnalytics);
-      } else {
-        console.warn('⚠️ Analytics API failed, using fallback data');
-        throw new Error('Analytics API returned no data');
-      }
+      setAnalytics(normalizeAnalytics(response));
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       console.error('❌ Analytics API error:', err);
-      
-      // Only use fallback data if backend is not available
-      console.log('📊 Using fallback analytics data due to API error');
-      setAnalytics({
-        total_users: 0,
-        active_users: 0,
-        inactive_users: 0,
-        verified_users: 0,
-        unverified_users: 0,
-        users_by_role: [],
-        users_by_lifecycle_stage: [],
-        top_users_by_activity: [],
-        recent_registrations: [],
-        lifecycle_transitions: []
-      });
+      setAnalytics(createFallbackAnalytics());
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(`Analytics temporarily unavailable: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const loadSegmentation = async () => {
+  const loadSegmentation = useCallback(async (): Promise<void> => {
     try {
-      console.log('🎯 Analytics: Loading user segmentation...');
-      
-      // Mock data since backend method doesn't exist yet
       console.warn('⚠️ getUserSegmentation API not implemented, using mock data');
-      setSegmentation({
-        segments: []
-      });
+      setSegmentation({ segments: [] });
     } catch (err: unknown) {
       console.error('❌ Segmentation error:', err);
-      setSegmentation({
-        segments: []
-      });
+      setSegmentation({ segments: [] });
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    void loadAnalytics();
+    void loadSegmentation();
+  }, [loadAnalytics, loadSegmentation]);
+
+  const overviewMetrics = useMemo<MetricCard[]>(() => {
+    if (!analytics) {
+      return [];
+    }
+
+    const totalUsers = analytics.total_users ?? 0;
+    const activeUsers = analytics.active_users ?? 0;
+    const inactiveUsers = analytics.inactive_users ?? Math.max(totalUsers - activeUsers, 0);
+    const newUsersToday = analytics.new_users_today ?? 0;
+    const newUsersLast30Days = analytics.new_users_last_30_days ?? 0;
+
+    return [
+      {
+        title: 'Total Users',
+        value: totalUsers,
+        icon: '👥',
+        color: 'var(--primary-color)'
+      },
+      {
+        title: 'Active Users',
+        value: activeUsers,
+        icon: '✅',
+        color: '#10b981',
+        change: totalUsers ? `${Math.round((activeUsers / totalUsers) * 100)}% of total` : undefined
+      },
+      {
+        title: 'Inactive Users',
+        value: inactiveUsers,
+        icon: '⏸️',
+        color: '#ef4444'
+      },
+      {
+        title: 'New Users (30 days)',
+        value: newUsersLast30Days,
+        icon: '🆕',
+        color: '#6366f1',
+        change: totalUsers ? `${Math.round((newUsersLast30Days / Math.max(totalUsers, 1)) * 100)}% of total` : undefined
+      },
+      {
+        title: 'Retention Rate',
+        value: formatPercentage(analytics.retention_rate),
+        icon: '📈',
+        color: '#f97316'
+      },
+      {
+        title: 'Engagement Score',
+        value: formatScore(analytics.engagement_score),
+        icon: '⚡',
+        color: '#22d3ee'
+      },
+      {
+        title: 'Growth Rate',
+        value: formatPercentage(analytics.growth_rate),
+        icon: '🌱',
+        color: '#84cc16'
+      },
+      {
+        title: 'New Users Today',
+        value: newUsersToday,
+        icon: '📅',
+        color: '#a855f7'
+      }
+    ];
+  }, [analytics]);
+
+  const { engagementDistribution, lifecycleDistribution, activityTrendItems, topUsers, lifecycleTransitions } = useMemo(() => {
+    if (!analytics) {
+      return {
+        engagementDistribution: [],
+        lifecycleDistribution: [],
+        activityTrendItems: [],
+        topUsers: [],
+        lifecycleTransitions: []
+      };
+    }
+
+    const totalUsers = analytics.total_users ?? 0;
+    const engagementDistributionRaw = toChartData(analytics.engagement_distribution ?? {});
+    const engagementDistribution = engagementDistributionRaw.map((item) => ({
+      ...item,
+      detail: totalUsers
+        ? `${Math.round((item.value / Math.max(totalUsers, 1)) * 100)}%`
+        : item.value.toLocaleString()
+    }));
+
+    return {
+      engagementDistribution,
+      lifecycleDistribution: toChartData(analytics.lifecycle_distribution ?? {}),
+      activityTrendItems: (analytics.activity_trends ?? []).map(({ date, active_users }) => ({
+        label: date,
+        value: active_users
+      })),
+      topUsers: analytics.top_users_by_activity ?? [],
+      lifecycleTransitions: analytics.lifecycle_transitions ?? []
+    };
+  }, [analytics]);
 
   if (!hasPermission('analytics:read')) {
     return (
@@ -176,41 +298,11 @@ const Analytics: FC = () => {
     );
   }
 
-  const overviewMetrics: MetricCard[] = [
-    {
-      title: 'Total Users',
-      value: analytics.total_users,
-      icon: '👥',
-      color: 'var(--primary-color)'
-    },
-    {
-      title: 'Active Users',
-      value: analytics.active_users,
-      icon: '✅',
-      color: '#10b981',
-      change: `${Math.round((analytics.active_users / analytics.total_users) * 100)}%`
-    },
-    {
-      title: 'Verified Users',
-      value: analytics.verified_users,
-      icon: '🔐',
-      color: '#3b82f6',
-      change: `${Math.round((analytics.verified_users / analytics.total_users) * 100)}%`
-    },
-    {
-      title: 'Inactive Users',
-      value: analytics.inactive_users,
-      icon: '⏸️',
-      color: '#ef4444',
-      change: `${Math.round((analytics.inactive_users / analytics.total_users) * 100)}%`
-    }
-  ];
-
   return (
     <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Breadcrumb Navigation */}
       <Breadcrumb />
-      
+
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{
@@ -241,7 +333,7 @@ const Analytics: FC = () => {
         ].map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as 'overview' | 'lifecycle' | 'engagement' | 'cohorts' | 'segmentation')}
+            onClick={() => setActiveTab(tab.id as 'overview' | 'lifecycle' | 'segmentation')}
             style={{
               padding: '1rem 1.5rem',
               background: 'none',
@@ -263,15 +355,23 @@ const Analytics: FC = () => {
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
-        <OverviewTab metrics={overviewMetrics} analytics={analytics} />
+        <OverviewTab
+          metrics={overviewMetrics}
+          engagementDistribution={engagementDistribution}
+          activityTrends={activityTrendItems}
+          topUsers={topUsers}
+        />
       )}
 
       {activeTab === 'lifecycle' && (
-        <LifecycleTab analytics={analytics} />
+        <LifecycleTab
+          lifecycleDistribution={lifecycleDistribution}
+          transitions={lifecycleTransitions}
+        />
       )}
 
       {activeTab === 'segmentation' && (
-        <SegmentationTab segmentation={segmentation} onRefresh={loadSegmentation} />
+        <SegmentationTab segmentation={segmentation} onRefresh={() => void loadSegmentation()} />
       )}
     </div>
   );
@@ -280,144 +380,82 @@ const Analytics: FC = () => {
 // Overview Tab Component
 const OverviewTab: FC<{
   metrics: MetricCard[];
-  analytics: UserAnalytics;
-}> = ({ metrics, analytics }) => {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {/* Metrics Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '1.5rem'
-      }}>
-        {metrics.map((metric, index) => (
-          <MetricCardComponent key={index} metric={metric} />
-        ))}
-      </div>
-
-      {/* Charts Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '2rem'
-      }}>
-        {/* Users by Role */}
-        <ChartCard
-          title="Users by Role"
-          icon="👔"
-          data={analytics.users_by_role}
-          type="pie"
-        />
-
-        {/* Recent Registrations */}
-        <ChartCard
-          title="Recent Registrations"
-          icon="📅"
-          data={analytics.recent_registrations}
-          type="line"
-        />
-
-        {/* Top Active Users */}
-        <div style={{
-          background: 'var(--background-secondary)',
-          padding: '1.5rem',
-          borderRadius: '12px',
-          border: '1px solid var(--border-color)',
-          gridColumn: 'span 1'
-        }}>
-          <h3 style={{
-            margin: '0 0 1rem 0',
-            color: 'var(--text-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}>
-            🏆 Top Active Users
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {analytics.top_users_by_activity.slice(0, 5).map((user, index) => (
-              <div
-                key={user.user_id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0.75rem',
-                  background: 'var(--background-primary)',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{
-                    width: '2rem',
-                    height: '2rem',
-                    borderRadius: '50%',
-                    background: index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : 'var(--primary-color)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '0.8rem',
-                    fontWeight: 'bold'
-                  }}>
-                    {index + 1}
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
-                      {user.email}
-                    </div>
-                  </div>
-                </div>
-                <div style={{
-                  padding: '0.25rem 0.75rem',
-                  background: 'var(--primary-color)',
-                  color: 'white',
-                  borderRadius: '16px',
-                  fontSize: '0.85rem',
-                  fontWeight: '500'
-                }}>
-                  {user.activity_score}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+  engagementDistribution: ChartDataItem[];
+  activityTrends: ChartDataItem[];
+  topUsers: TopUser[];
+}> = ({ metrics, engagementDistribution, activityTrends, topUsers }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    {/* Metrics Cards */}
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gap: '1.5rem'
+    }}>
+      {metrics.map((metric, index) => (
+        <MetricCardComponent key={`${metric.title}-${index}`} metric={metric} />
+      ))}
     </div>
-  );
-};
+
+    {/* Charts Grid */}
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+      gap: '2rem'
+    }}>
+      <ChartCard
+        title="Engagement Distribution"
+        icon="⚖️"
+        data={engagementDistribution}
+        emptyLabel="No engagement data available"
+      />
+
+      <ChartCard
+        title="Active Users Trend"
+        icon="📅"
+        data={activityTrends}
+        emptyLabel="No activity trend data available"
+      />
+
+      <TopUsersCard users={topUsers} />
+    </div>
+  </div>
+);
 
 // Lifecycle Tab Component
 const LifecycleTab: FC<{
-  analytics: UserAnalytics;
-}> = ({ analytics }) => {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {/* Lifecycle Stage Distribution */}
-      <div style={{
-        background: 'var(--background-secondary)',
-        padding: '1.5rem',
-        borderRadius: '12px',
-        border: '1px solid var(--border-color)'
+  lifecycleDistribution: ChartDataItem[];
+  transitions: LifecycleTransition[];
+}> = ({ lifecycleDistribution, transitions }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    {/* Lifecycle Stage Distribution */}
+    <div style={{
+      background: 'var(--background-secondary)',
+      padding: '1.5rem',
+      borderRadius: '12px',
+      border: '1px solid var(--border-color)'
+    }}>
+      <h3 style={{
+        margin: '0 0 1.5rem 0',
+        color: 'var(--text-primary)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem'
       }}>
-        <h3 style={{
-          margin: '0 0 1.5rem 0',
-          color: 'var(--text-primary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem'
-        }}>
-          🎯 Lifecycle Stage Distribution
-        </h3>
+        🎯 Lifecycle Stage Distribution
+      </h3>
+      {lifecycleDistribution.length === 0 ? (
+        <div style={{ color: 'var(--text-secondary)' }}>
+          No lifecycle distribution data available.
+        </div>
+      ) : (
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: '1rem'
         }}>
-          {analytics.users_by_lifecycle_stage.map((stage) => (
+          {lifecycleDistribution.map((stage) => (
             <div
-              key={stage.lifecycle_stage}
+              key={stage.label}
               style={{
                 padding: '1rem',
                 background: 'var(--background-primary)',
@@ -432,40 +470,46 @@ const LifecycleTab: FC<{
                 color: 'var(--primary-color)',
                 marginBottom: '0.5rem'
               }}>
-                {stage.count}
+                {stage.value.toLocaleString()}
               </div>
               <div style={{
                 color: 'var(--text-primary)',
                 fontWeight: '500',
                 textTransform: 'capitalize'
               }}>
-                {stage.lifecycle_stage}
+                {stage.label}
               </div>
             </div>
           ))}
         </div>
-      </div>
+      )}
+    </div>
 
-      {/* Lifecycle Transitions */}
-      <div style={{
-        background: 'var(--background-secondary)',
-        padding: '1.5rem',
-        borderRadius: '12px',
-        border: '1px solid var(--border-color)'
+    {/* Lifecycle Transitions */}
+    <div style={{
+      background: 'var(--background-secondary)',
+      padding: '1.5rem',
+      borderRadius: '12px',
+      border: '1px solid var(--border-color)'
+    }}>
+      <h3 style={{
+        margin: '0 0 1.5rem 0',
+        color: 'var(--text-primary)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem'
       }}>
-        <h3 style={{
-          margin: '0 0 1.5rem 0',
-          color: 'var(--text-primary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem'
-        }}>
-          🔄 Lifecycle Transitions
-        </h3>
+        🔄 Lifecycle Transitions
+      </h3>
+      {transitions.length === 0 ? (
+        <div style={{ color: 'var(--text-secondary)' }}>
+          No lifecycle transition data available yet.
+        </div>
+      ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {analytics.lifecycle_transitions.map((transition, index) => (
+          {transitions.map((transition) => (
             <div
-              key={index}
+              key={`${transition.from_stage}-${transition.to_stage}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -514,10 +558,10 @@ const LifecycleTab: FC<{
             </div>
           ))}
         </div>
-      </div>
+      )}
     </div>
-  );
-};
+  </div>
+);
 
 // Segmentation Tab Component
 const SegmentationTab: FC<{
@@ -579,7 +623,7 @@ const SegmentationTab: FC<{
       }}>
         {segmentation.segments.map((segment, index) => (
           <div
-            key={index}
+            key={`${segment.name}-${index}`}
             style={{
               background: 'var(--background-secondary)',
               padding: '1.5rem',
@@ -638,90 +682,90 @@ const SegmentationTab: FC<{
 };
 
 // Metric Card Component
-const MetricCardComponent: FC<{ metric: MetricCard }> = ({ metric }) => {
-  return (
+const MetricCardComponent: FC<{ metric: MetricCard }> = ({ metric }) => (
+  <div style={{
+    background: 'var(--background-secondary)',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    border: '1px solid var(--border-color)'
+  }}>
     <div style={{
-      background: 'var(--background-secondary)',
-      padding: '1.5rem',
-      borderRadius: '12px',
-      border: '1px solid var(--border-color)'
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: '1rem'
     }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: '1rem'
-      }}>
-        <div>
-          <h3 style={{
-            margin: '0 0 0.5rem 0',
-            color: 'var(--text-secondary)',
-            fontSize: '0.9rem',
-            fontWeight: '500'
-          }}>
-            {metric.title}
-          </h3>
-          <div style={{
-            fontSize: '2rem',
-            fontWeight: 'bold',
-            color: 'var(--text-primary)'
-          }}>
-            {typeof metric.value === 'number' ? metric.value.toLocaleString() : metric.value}
-          </div>
-        </div>
+      <div>
+        <h3 style={{
+          margin: '0 0 0.5rem 0',
+          color: 'var(--text-secondary)',
+          fontSize: '0.9rem',
+          fontWeight: '500'
+        }}>
+          {metric.title}
+        </h3>
         <div style={{
           fontSize: '2rem',
-          opacity: 0.7
+          fontWeight: 'bold',
+          color: 'var(--text-primary)'
         }}>
-          {metric.icon}
+          {typeof metric.value === 'number' ? metric.value.toLocaleString() : metric.value}
         </div>
       </div>
-      
-      {metric.change && (
-        <div style={{
-          padding: '0.25rem 0.75rem',
-          background: metric.color + '20',
-          color: metric.color,
-          borderRadius: '16px',
-          fontSize: '0.85rem',
-          fontWeight: '500',
-          display: 'inline-block'
-        }}>
-          {metric.change}
-        </div>
-      )}
+      <div style={{
+        fontSize: '2rem',
+        opacity: 0.7
+      }}>
+        {metric.icon}
+      </div>
     </div>
-  );
-};
+
+    {metric.change && (
+      <div style={{
+        padding: '0.25rem 0.75rem',
+        background: `${metric.color}20`,
+        color: metric.color,
+        borderRadius: '16px',
+        fontSize: '0.85rem',
+        fontWeight: '500',
+        display: 'inline-block'
+      }}>
+        {metric.change}
+      </div>
+    )}
+  </div>
+);
 
 // Chart Card Component
 const ChartCard: FC<{
   title: string;
   icon: string;
-  data: Array<Record<string, unknown>>;
-  type: 'pie' | 'line' | 'bar';
-}> = ({ title, icon, data }) => {
-  return (
-    <div style={{
-      background: 'var(--background-secondary)',
-      padding: '1.5rem',
-      borderRadius: '12px',
-      border: '1px solid var(--border-color)'
+  data: ChartDataItem[];
+  emptyLabel: string;
+}> = ({ title, icon, data, emptyLabel }) => (
+  <div style={{
+    background: 'var(--background-secondary)',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    border: '1px solid var(--border-color)'
+  }}>
+    <h3 style={{
+      margin: '0 0 1rem 0',
+      color: 'var(--text-primary)',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem'
     }}>
-      <h3 style={{
-        margin: '0 0 1rem 0',
-        color: 'var(--text-primary)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem'
-      }}>
-        {icon} {title}
-      </h3>
-      
+      {icon} {title}
+    </h3>
+
+    {data.length === 0 ? (
+      <div style={{ color: 'var(--text-secondary)' }}>{emptyLabel}</div>
+    ) : (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {data.map((item, index) => (
+        {data.map((item) => (
           <div
-            key={index}
+            key={item.label}
             style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -736,22 +780,93 @@ const ChartCard: FC<{
               color: 'var(--text-primary)',
               textTransform: 'capitalize'
             }}>
-              {String((item as { role_name?: string; lifecycle_stage?: string; date?: string }).role_name || 
-                     (item as { role_name?: string; lifecycle_stage?: string; date?: string }).lifecycle_stage || 
-                     (item as { role_name?: string; lifecycle_stage?: string; date?: string }).date || 
-                     Object.keys(item)[0] || 'Unknown')}
+              {item.label}
             </span>
             <span style={{
               fontWeight: '600',
               color: 'var(--primary-color)'
             }}>
-              {String((item as { count?: number }).count || Object.values(item)[1] || 0)}
+              {item.detail ?? item.value.toLocaleString()}
             </span>
           </div>
         ))}
       </div>
-    </div>
-  );
-};
+    )}
+  </div>
+);
+
+// Top Users Card Component
+const TopUsersCard: FC<{ users: TopUser[] }> = ({ users }) => (
+  <div style={{
+    background: 'var(--background-secondary)',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    border: '1px solid var(--border-color)'
+  }}>
+    <h3 style={{
+      margin: '0 0 1rem 0',
+      color: 'var(--text-primary)',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem'
+    }}>
+      🏆 Top Active Users
+    </h3>
+    {users.length === 0 ? (
+      <div style={{ color: 'var(--text-secondary)' }}>
+        No active user ranking available yet.
+      </div>
+    ) : (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {users.slice(0, 5).map((user, index) => (
+          <div
+            key={user.user_id}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '0.75rem',
+              background: 'var(--background-primary)',
+              borderRadius: '8px',
+              border: '1px solid var(--border-color)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{
+                width: '2rem',
+                height: '2rem',
+                borderRadius: '50%',
+                background: index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : 'var(--primary-color)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '0.8rem',
+                fontWeight: 'bold'
+              }}>
+                {index + 1}
+              </div>
+              <div>
+                <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
+                  {user.email}
+                </div>
+              </div>
+            </div>
+            <div style={{
+              padding: '0.25rem 0.75rem',
+              background: 'var(--primary-color)',
+              color: 'white',
+              borderRadius: '16px',
+              fontSize: '0.85rem',
+              fontWeight: '500'
+            }}>
+              {user.activity_score}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
 
 export default Analytics;

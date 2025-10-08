@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { Activity, BarChart3, CheckCircle, Clock, TrendingUp } from 'lucide-react';
 
-import { useAuth } from '@contexts/AuthContext';
+import { useAuth } from '@features/auth';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 
 const ActivityPage: FC = () => {

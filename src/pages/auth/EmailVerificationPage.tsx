@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Mail, Loader2 } from 'lucide-react';
-import { apiClient } from '@services/apiClientLegacy';
+import { apiClient } from '@services/apiClient';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 
 const EmailVerificationPage: React.FC = () => {
@@ -23,15 +23,10 @@ const EmailVerificationPage: React.FC = () => {
       }
 
       try {
-        const response = await apiClient.verifyEmail({ token });
+        const response = await apiClient.verifyEmail(token);
 
-        if (response.success) {
-          setStatus('success');
-          setMessage('Your email has been successfully verified! You can now sign in to your account.');
-        } else {
-          setStatus('error');
-          setMessage(response.message || 'Email verification failed. The token may be invalid or expired.');
-        }
+        setStatus('success');
+        setMessage(response.message ?? 'Your email has been successfully verified! You can now sign in to your account.');
       } catch (error: unknown) {
         handleError(error);
         setStatus('error');

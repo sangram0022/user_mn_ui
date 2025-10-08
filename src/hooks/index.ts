@@ -31,7 +31,7 @@ export type {
 export { useErrorHandler, useErrorMessage } from './errors/useErrorHandler';
 
 // Authentication (existing)
-export { useAuth } from './useAuth';
+export { useAuth } from '@features/auth';
 
 // Session management (existing)
 export { useSessionManagement } from './useSessionManagement';

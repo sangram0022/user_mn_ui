@@ -9,18 +9,18 @@
  * This module exists only for backward compatibility during migration.
  *
  * Architecture:
- * - Delegates to modular adapters in ./adapters
+ * - Delegates to modular adapters in @services/adapters
  * - Maintains legacy method signatures
  * - Provides type compatibility
  */
 
-import { apiClientAdapter } from './adapters';
+import { apiClientAdapter } from '@services/adapters';
 
 // Re-export all adapter functionality
 export const apiClient = apiClientAdapter;
 
 // Re-export types for backward compatibility
-export type { LegacyUser } from './adapters';
+export type { LegacyUser } from '@services/adapters';
 
 // Deprecated - Use apiClient named export instead
 export const apiClientLegacy = apiClientAdapter;

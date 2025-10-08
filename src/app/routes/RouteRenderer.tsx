@@ -1,19 +1,21 @@
-import React, { Suspense, useEffect } from 'react';
-import ErrorBoundary from '../ErrorBoundary';
-import Loading from '../Loading';
+import { Suspense, useEffect } from 'react';
+import type { ComponentType, FC, ReactNode } from 'react';
+
 import AppLayout from '../layout/AppLayout';
 import AuthLayout from '../layout/AuthLayout';
-import type { RouteConfig } from '../../config/routes';
+import ErrorBoundary from '@shared/ui/ErrorBoundary';
+import Loading from '@shared/ui/Loading';
+import type { RouteConfig } from './config';
 
-const PlainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => <>{children}</>;
+const PlainLayout: FC<{ children: ReactNode }> = ({ children }) => <>{children}</>;
 
-const layoutComponents: Record<RouteConfig['layout'], React.ComponentType<{ children: React.ReactNode }>> = {
+const layoutComponents: Record<RouteConfig['layout'], ComponentType<{ children: ReactNode }>> = {
   default: AppLayout,
   auth: AuthLayout,
   none: PlainLayout,
 };
 
-const RouteRenderer: React.FC<{ route: RouteConfig }> = ({ route }) => {
+const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => {
   const {
     component: Component,
     layout,

@@ -1,5 +1,7 @@
+import type { Dispatch, SetStateAction } from 'react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+
+import { useAuth } from '@features/auth';
 
 interface SessionData {
   sessionId: string;
@@ -23,7 +25,7 @@ const DEFAULT_CONFIG: SessionConfig = {
 export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
   const { user, logout } = useAuth();
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
-  const [showWarning, setShowWarning] = useState(false);
+  const [showWarning, setShowWarning]: [boolean, Dispatch<SetStateAction<boolean>>] = useState(false);
   
   const sessionConfig = useMemo(() => ({ ...DEFAULT_CONFIG, ...config }), [config]);
 

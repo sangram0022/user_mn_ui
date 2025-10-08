@@ -1,1 +1,1 @@
-export { default } from './pages/MyWorkflowsPage';
+export { default } from '@pages/workflows/MyWorkflowsPage';

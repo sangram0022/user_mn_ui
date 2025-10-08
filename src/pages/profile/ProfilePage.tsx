@@ -1,25 +1,27 @@
-import React, { useState, useEffect, useCallback, useMemo, useId } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiClient } from '../services/apiClientLegacy';
-import type { UserProfile as BaseUserProfile } from '../types';
-import ErrorAlert from './ErrorAlert';
-import { useErrorHandler } from '../hooks/errors/useErrorHandler';
-import Breadcrumb from './Breadcrumb';
-import { 
-  User as UserIcon, 
-  MapPin, 
-  Globe, 
-  Edit3, 
-  Save, 
-  X, 
-  Camera,
-  Shield,
-  Settings,
+import type { FC } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+
+import { useAuth } from '@features/auth';
+import { useErrorHandler } from '@hooks/errors/useErrorHandler';
+import { apiClient } from '@services/apiClientLegacy';
+import type { UserProfile as BaseUserProfile } from '@types';
+import ErrorAlert from '@shared/ui/ErrorAlert';
+import Breadcrumb from '@shared/ui/Breadcrumb';
+import {
   Bell,
+  Camera,
+  CheckCircle,
+  Edit3,
   Eye,
   EyeOff,
-  CheckCircle,
-  Loader
+  Globe,
+  Loader,
+  MapPin,
+  Save,
+  Settings,
+  Shield,
+  User as UserIcon,
+  X
 } from 'lucide-react';
 
 type ApiUserProfile = BaseUserProfile & {
@@ -39,7 +41,7 @@ interface SecuritySettings {
   active_sessions: number;
 }
 
-const ProfilePage: React.FC = () => {
+const ProfilePage: FC = () => {
   const { refreshProfile } = useAuth();
   const [profile, setProfile] = useState<ApiUserProfile | null>(null);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);

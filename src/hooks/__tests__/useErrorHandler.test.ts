@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useErrorHandler } from '../useErrorHandler';
+import { useErrorHandler } from '../errors/useErrorHandler';
 import { errorLogger } from '../../utils/errorLogger';
 
 describe('useErrorHandler', () => {

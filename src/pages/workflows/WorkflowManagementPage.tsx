@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useCallback, useId } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiClient } from '../services/apiClientLegacy';
-import Breadcrumb from './Breadcrumb';
+import type { FC } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
+
+import { useAuth } from '@features/auth';
+import { apiClient } from '@services/apiClientLegacy';
+import Breadcrumb from '@shared/ui/Breadcrumb';
 
 interface WorkflowAction {
   id: number;
@@ -36,7 +38,7 @@ interface WorkflowStats {
   }>;
 }
 
-const WorkflowManagement: React.FC = () => {
+const WorkflowManagement: FC = () => {
   const { hasPermission, user } = useAuth();
   const [workflows, setWorkflows] = useState<WorkflowAction[]>([]);
   const [stats, setStats] = useState<WorkflowStats | null>(null);
@@ -394,7 +396,7 @@ const WorkflowManagement: React.FC = () => {
 };
 
 // Stat Card Component
-const StatCard: React.FC<{
+const StatCard: FC<{
   title: string;
   value: number;
   icon: string;
@@ -441,7 +443,7 @@ const StatCard: React.FC<{
 };
 
 // Workflow Card Component
-const WorkflowCard: React.FC<{
+const WorkflowCard: FC<{
   workflow: WorkflowAction;
   index: number;
   onView: () => void;
@@ -621,7 +623,7 @@ const WorkflowCard: React.FC<{
 };
 
 // Workflow Modal Component
-const WorkflowModal: React.FC<{
+const WorkflowModal: FC<{
   workflow: WorkflowAction;
   onAction: (id: number, action: 'approve' | 'reject', justification?: string) => void;
   onClose: () => void;

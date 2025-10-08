@@ -17,7 +17,7 @@ export { apiClient, useApi } from './apiClient';
 export type { RequestOptions } from './apiClient';
 
 // Adapter pattern for backward compatibility
-export { apiClientAdapter } from './adapters';
+export { apiClientAdapter } from '@services/adapters';
 export type {
   StandardResponse,
   PageInfo,
@@ -28,7 +28,7 @@ export type {
   ProfileResponse,
   AnalyticsResponse,
   RegisterResponseWrapper
-} from './adapters';
+} from '@services/adapters';
 
 // Legacy compatibility layer
 export { apiClient as legacyApiClient } from './apiClientLegacy';

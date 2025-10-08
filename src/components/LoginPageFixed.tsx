@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useTransition, startTransition } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+
+import { useAuth } from '@features/auth';
 import { Eye, EyeOff, Lock, Mail, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const LoginPage: React.FC = () => {

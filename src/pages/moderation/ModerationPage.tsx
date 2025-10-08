@@ -1,9 +1,10 @@
-import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { Clock, CheckCircle, Users } from 'lucide-react';
-import Breadcrumb from './Breadcrumb';
+import type { FC } from 'react';
+import { Eye, UserCheck, AlertTriangle, FileText } from 'lucide-react';
 
-const ApprovalsPage: React.FC = () => {
+import { useAuth } from '@features/auth';
+import Breadcrumb from '@shared/ui/Breadcrumb';
+
+const ModerationPage: FC = () => {
   const { hasPermission } = useAuth();
 
   if (!hasPermission('admin') && !hasPermission('moderator')) {
@@ -19,7 +20,7 @@ const ApprovalsPage: React.FC = () => {
           ⛔ Access Denied
         </h3>
         <p style={{ color: '#7f1d1d' }}>
-          You don't have permission to access approval workflows.
+          You don't have permission to access moderation features.
         </p>
       </div>
     );
@@ -38,11 +39,11 @@ const ApprovalsPage: React.FC = () => {
           alignItems: 'center',
           gap: '0.5rem'
         }}>
-          <Clock className="w-6 h-6" />
-          Approval Workflows
+          <Eye className="w-6 h-6" />
+          Moderation Center
         </h1>
         <p style={{ margin: 0, color: '#6b7280' }}>
-          Handle pending approvals and user requests
+          Review and moderate user activities and content
         </p>
       </div>
 
@@ -54,10 +55,10 @@ const ApprovalsPage: React.FC = () => {
         padding: '3rem',
         textAlign: 'center'
       }}>
-        <Clock className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-        <h2 style={{ color: '#111827', marginBottom: '1rem' }}>Approval Workflows Coming Soon</h2>
+        <Eye className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+        <h2 style={{ color: '#111827', marginBottom: '1rem' }}>Moderation Features Coming Soon</h2>
         <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
-          Advanced approval workflow management tools are being developed.
+          Advanced moderation tools are being developed and will be available soon.
         </p>
         
         <div style={{
@@ -72,10 +73,10 @@ const ApprovalsPage: React.FC = () => {
             borderRadius: '8px',
             border: '1px solid #e5e7eb'
           }}>
-            <Clock className="w-8 h-8 text-orange-600 mb-2" />
-            <h3 style={{ color: '#111827', marginBottom: '0.5rem' }}>Pending Requests</h3>
+            <UserCheck className="w-8 h-8 text-blue-600 mb-2" />
+            <h3 style={{ color: '#111827', marginBottom: '0.5rem' }}>User Reviews</h3>
             <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem' }}>
-              15 requests awaiting approval
+              Review user profiles and activities
             </p>
           </div>
 
@@ -85,10 +86,10 @@ const ApprovalsPage: React.FC = () => {
             borderRadius: '8px',
             border: '1px solid #e5e7eb'
           }}>
-            <CheckCircle className="w-8 h-8 text-green-600 mb-2" />
-            <h3 style={{ color: '#111827', marginBottom: '0.5rem' }}>Approved Today</h3>
+            <AlertTriangle className="w-8 h-8 text-orange-600 mb-2" />
+            <h3 style={{ color: '#111827', marginBottom: '0.5rem' }}>Content Moderation</h3>
             <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem' }}>
-              8 requests successfully processed
+              Review flagged content and take action
             </p>
           </div>
 
@@ -98,10 +99,10 @@ const ApprovalsPage: React.FC = () => {
             borderRadius: '8px',
             border: '1px solid #e5e7eb'
           }}>
-            <Users className="w-8 h-8 text-blue-600 mb-2" />
-            <h3 style={{ color: '#111827', marginBottom: '0.5rem' }}>User Registrations</h3>
+            <FileText className="w-8 h-8 text-green-600 mb-2" />
+            <h3 style={{ color: '#111827', marginBottom: '0.5rem' }}>Activity Logs</h3>
             <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem' }}>
-              5 new user approvals needed
+              Monitor user activities and behaviors
             </p>
           </div>
         </div>
@@ -110,4 +111,4 @@ const ApprovalsPage: React.FC = () => {
   );
 };
 
-export default ApprovalsPage;
+export default ModerationPage;

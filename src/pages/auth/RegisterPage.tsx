@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, Clock, Eye, EyeOff, Info, LogIn, Lock, Mail, ShieldCheck, User } from 'lucide-react';
-import { apiClient } from '@services/apiClientLegacy';
+import { apiClient } from '@services/apiClient';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { buildRegistrationFeedback } from '@utils/registrationFeedback';
@@ -131,22 +131,16 @@ const RegisterPage: React.FC = () => {
       const response = await apiClient.register({
         email: formData.email,
         password: formData.password,
-        username: formData.email, // Use email as username
+        confirm_password: formData.confirmPassword || formData.password,
+        username: formData.email,
         first_name: formData.firstName,
-        last_name: formData.lastName,
-        terms_accepted: formData.terms_accepted
+        last_name: formData.lastName
       });
 
-      if (response.success && response.data) {
-        const feedback = buildRegistrationFeedback(response.data);
-        setRegistrationFeedback(feedback);
-        setSuccess(true);
-        return;
-      }
-
-      console.warn('Registration response did not include expected payload.', response);
-      const fallbackError = new Error(response.message || response.error || 'Registration failed. Please try again.');
-      handleError(fallbackError);
+      const feedback = buildRegistrationFeedback(response);
+      setRegistrationFeedback(feedback);
+      setSuccess(true);
+      return;
     } catch (err: unknown) {
       handleError(err);
       setSuccess(false);

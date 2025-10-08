@@ -1,5 +1,6 @@
 import { createElement, lazy, type ComponentType, type LazyExoticComponent, type ReactNode } from 'react';
-import { DashboardSkeleton, PageSkeleton, TableSkeleton } from '../components/ui/Skeleton';
+
+import { DashboardSkeleton, PageSkeleton, TableSkeleton } from '@shared/ui/Skeleton';
 
 export type RouteGuard = 'public' | 'protected' | 'none';
 export type RouteLayout = 'default' | 'auth' | 'none';
@@ -15,27 +16,27 @@ export interface RouteConfig {
   documentTitleFormatter?: (title: string) => string;
 }
 
-const LazyHomePage = lazy(() => import('../components/pages/HomePage'));
+const LazyHomePage = lazy(() => import('@pages/home/HomePage'));
 const LazyLoginPage = lazy(() => import('@pages/auth/LoginPage'));
 const LazyRegisterPage = lazy(() => import('@pages/auth/RegisterPage'));
 const LazyEmailConfirmationPage = lazy(() => import('@pages/auth/EmailConfirmationPage'));
 const LazyEmailVerificationPage = lazy(() => import('@pages/auth/EmailVerificationPage'));
-const LazyRoleBasedDashboard = lazy(() => import('../components/pages/RoleBasedDashboard'));
-const LazyUserManagementEnhanced = lazy(() => import('../components/UserManagementEnhanced'));
+const LazyRoleBasedDashboard = lazy(() => import('@pages/dashboard/RoleBasedDashboardPage'));
+const LazyUserManagementEnhanced = lazy(() => import('@pages/users/UserManagementPage'));
 const LazyAnalytics = lazy(() => import('@pages/analytics/AnalyticsPage'));
-const LazyWorkflowManagement = lazy(() => import('../components/WorkflowManagement'));
-const LazyProfilePage = lazy(() => import('../components/ProfilePage'));
-const LazySettingsPage = lazy(() => import('../components/SettingsPage'));
-const LazyHelpPage = lazy(() => import('../components/pages/HelpPage'));
-const LazyReportsPage = lazy(() => import('../components/ReportsPage'));
-const LazySecurityPage = lazy(() => import('../components/SecurityPage'));
-const LazyModerationPage = lazy(() => import('../components/ModerationPage'));
-const LazyApprovalsPage = lazy(() => import('../components/ApprovalsPage'));
-const LazyActivityPage = lazy(() => import('../components/ActivityPage'));
-const LazyAccountPage = lazy(() => import('../components/AccountPage'));
-const LazySystemStatus = lazy(() => import('../components/SystemStatus'));
-const LazyMyWorkflowsPage = lazy(() => import('../components/pages/MyWorkflowsPage'));
-const LazyNotFoundPage = lazy(() => import('../components/pages/NotFoundPage'));
+const LazyWorkflowManagement = lazy(() => import('@pages/workflows/WorkflowManagementPage'));
+const LazyProfilePage = lazy(() => import('@pages/profile/ProfilePage'));
+const LazySettingsPage = lazy(() => import('@pages/settings/SettingsPage'));
+const LazyHelpPage = lazy(() => import('@pages/support/HelpPage'));
+const LazyReportsPage = lazy(() => import('@pages/reports/ReportsPage'));
+const LazySecurityPage = lazy(() => import('@pages/security/SecurityPage'));
+const LazyModerationPage = lazy(() => import('@pages/moderation/ModerationPage'));
+const LazyApprovalsPage = lazy(() => import('@pages/workflows/ApprovalsPage'));
+const LazyActivityPage = lazy(() => import('@pages/activity/ActivityPage'));
+const LazyAccountPage = lazy(() => import('@pages/account/AccountPage'));
+const LazySystemStatus = lazy(() => import('@pages/status/SystemStatusPage'));
+const LazyMyWorkflowsPage = lazy(() => import('@pages/workflows/MyWorkflowsPage'));
+const LazyNotFoundPage = lazy(() => import('@pages/errors/NotFoundPage'));
 
 export const routes: RouteConfig[] = [
   {

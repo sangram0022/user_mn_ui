@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiClient } from '../services/apiClientLegacy';
+import type { FC } from 'react';
+import { useEffect, useState } from 'react';
 import { Shield, AlertTriangle, Lock, Eye, Users, Activity, FileText, CheckCircle } from 'lucide-react';
-import Breadcrumb from './Breadcrumb';
+
+import { useAuth } from '@features/auth';
+import { apiClient } from '@services/apiClientLegacy';
+import Breadcrumb from '@shared/ui/Breadcrumb';
 
 interface SecurityMetrics {
   activeSessions: number;
@@ -16,7 +18,7 @@ interface SecurityMetrics {
   };
 }
 
-const SecurityPage: React.FC = () => {
+const SecurityPage: FC = () => {
   const { hasPermission } = useAuth();
   const [metrics, setMetrics] = useState<SecurityMetrics | null>(null);
   const [loading, setLoading] = useState(true);

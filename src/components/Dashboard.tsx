@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiClient } from '../services/apiClient';
-import { getUserRoleName, userHasRole } from '../utils/user';
+
+import { useAuth } from '@features/auth';
+import { apiClient } from '@services/apiClient';
+import { getUserRoleName, userHasRole } from '@utils/user';
 
 // Component interfaces based on backend API responses
 interface DashboardUserAnalytics {

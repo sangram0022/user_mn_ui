@@ -1,1 +1,1 @@
-export { default } from './pages/HelpPage';
+export { default } from '@pages/support/HelpPage';

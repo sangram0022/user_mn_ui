@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
-import { apiClient } from '../services/apiClient';
-import type { UserProfile, LoginRequest, UserRoleInfo } from '../types';
-import { AuthContext, type AuthContextType } from '../hooks/useAuth';
-import { logger } from '../utils/logger';
+import { useEffect, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+
+import { apiClient } from '@services/apiClient';
+import type { LoginRequest, UserProfile, UserRoleInfo } from '@types';
+import { logger } from '@utils/logger';
+
+import { AuthContext, type AuthContextType } from '../context/AuthContext';
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
 
-  await apiClient.login(credentials.email, credentials.password);
+      await apiClient.login(credentials.email, credentials.password);
       
       // Get user profile
       const userProfile = await apiClient.getUserProfile();
@@ -159,4 +161,4 @@ export default AuthProvider;
 
 // Re-export useAuth hook for backward compatibility
 // eslint-disable-next-line react-refresh/only-export-components
-export { useAuth } from '../hooks/useAuth';
+export { useAuth } from '../context/AuthContext';

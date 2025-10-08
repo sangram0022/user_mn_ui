@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiClient } from '../services/apiClientLegacy';
+import type { FC, FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Trash2, Eye, Users, UserCheck, UserX, Search, Filter } from 'lucide-react';
-import { getUserPermissions, getUserRoleName } from '../utils/user';
+
+import { useAuth } from '@features/auth';
+import { apiClient } from '@services/apiClientLegacy';
+import { getUserPermissions, getUserRoleName } from '@utils/user';
 
 interface User {
   id: number;
@@ -45,7 +47,7 @@ interface UpdateUserData {
   is_active?: boolean;
 }
 
-const UserManagementEnhanced: React.FC = () => {
+const UserManagementEnhanced: FC = () => {
   const { hasPermission, user } = useAuth();
   
   const debugEnabled = useMemo(() => {
@@ -860,7 +862,7 @@ const UserManagementEnhanced: React.FC = () => {
 };
 
 // Create User Modal Component
-const CreateUserModal: React.FC<{
+const CreateUserModal: FC<{
   roles: Role[];
   onSave: (data: CreateUserData) => void;
   onClose: () => void;
@@ -875,7 +877,7 @@ const CreateUserModal: React.FC<{
     is_active: true
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSave(formData);
   };
@@ -1063,7 +1065,7 @@ const CreateUserModal: React.FC<{
 };
 
 // Edit User Modal Component
-const EditUserModal: React.FC<{
+const EditUserModal: FC<{
   user: User;
   roles: Role[];
   onSave: (data: UpdateUserData) => void;
@@ -1078,7 +1080,7 @@ const EditUserModal: React.FC<{
     is_active: user.is_active
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSave(formData);
   };

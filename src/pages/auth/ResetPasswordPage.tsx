@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Lock, Eye, EyeOff, CheckCircle, Loader } from 'lucide-react';
-import { apiClient } from '@services/apiClientLegacy';
+import { apiClient } from '@services/apiClient';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 
@@ -56,17 +56,17 @@ const ResetPasswordPage: React.FC = () => {
         new_password: formData.password,
         confirm_password: formData.confirmPassword
       });
-      
-      if (response.success) {
-        setIsSuccess(true);
-        setTimeout(() => {
-          navigate('/login', { 
-            state: { message: 'Password reset successful! Please log in with your new password.' }
-          });
-        }, 3000);
-      } else {
-        handleError(new Error(response.message || 'Failed to reset password. Please try again.'));
+
+      if (!response.message) {
+        console.warn('Password reset response missing message payload');
       }
+
+      setIsSuccess(true);
+      setTimeout(() => {
+        navigate('/login', {
+          state: { message: response.message ?? 'Password reset successful! Please log in with your new password.' }
+        });
+      }, 3000);
     } catch (err: unknown) {
       handleError(err);
     } finally {

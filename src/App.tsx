@@ -1,9 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { routes, notFoundRoute } from './config/routes';
-import { ProtectedRoute, PublicRoute } from './components/routes/RouteGuards';
-import RouteRenderer from './components/routes/RouteRenderer';
+
+import { AuthProvider } from '@features/auth';
+import { ProtectedRoute, PublicRoute } from '@app/routes/RouteGuards';
+import RouteRenderer from '@app/routes/RouteRenderer';
+import { routes, notFoundRoute } from '@app/routes/config';
 import './App.css';
 
 const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode) => {

@@ -1,7 +1,8 @@
-import React from 'react';
+import type { FC, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import Breadcrumb from '../ui/Breadcrumb';
+
+import { useAuth } from '@features/auth';
+import Breadcrumb from '@shared/ui/Breadcrumb';
 import {
   Users,
   Shield,
@@ -17,16 +18,16 @@ import {
   Clock,
   TrendingUp,
 } from 'lucide-react';
-import { getUserRoleName } from '../../utils/user';
+import { getUserRoleName } from '@utils/user';
 
-const RoleBasedDashboard: React.FC = () => {
+const RoleBasedDashboard: FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
   if (!user) return null;
 
-  const handleFeatureClick = (href: string, e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleFeatureClick = (href: string, event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
     console.log(`🧭 Dashboard navigation clicked: ${href}`);
     console.log('🔧 Using navigate() to route to:', href);
     navigate(href);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, CheckCircle, Clock, ArrowLeft, RefreshCw } from 'lucide-react';
-import { apiClient } from '@services/apiClientLegacy';
+import { apiClient } from '@services/apiClient';
 
 const EmailConfirmationPage: React.FC = () => {
   const location = useLocation();
@@ -43,12 +43,8 @@ const EmailConfirmationPage: React.FC = () => {
     setResendMessage(null);
 
     try {
-      const response = await apiClient.resendVerificationEmail(email);
-      if (response.success) {
-        setResendMessage('Verification email has been resent successfully!');
-      } else {
-        setResendMessage('Failed to resend verification email. Please try again.');
-      }
+      const response = await apiClient.resendVerification({ email });
+      setResendMessage(response.message ?? 'Verification email has been resent successfully!');
     } catch (error) {
       console.error('Resend verification error:', error);
       setResendMessage('Failed to resend verification email. Please try again.');

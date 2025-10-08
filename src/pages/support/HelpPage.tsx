@@ -1,7 +1,8 @@
-import React from 'react';
-import Breadcrumb from '../ui/Breadcrumb';
+import type { FC } from 'react';
 
-const HelpPage: React.FC = () => {
+import Breadcrumb from '@shared/ui/Breadcrumb';
+
+const HelpPage: FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

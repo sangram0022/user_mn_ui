@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle, Loader } from 'lucide-react';
-import { apiClient } from '@services/apiClientLegacy';
+import { apiClient } from '@services/apiClient';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 
@@ -19,13 +19,14 @@ const ForgotPasswordPage: React.FC = () => {
 
     try {
       // Call forgot password API endpoint
-      const response = await apiClient.forgotPassword({ email });
-      
-      if (response.success) {
-        setIsSuccess(true);
-      } else {
+      const response = await apiClient.forgotPassword(email);
+
+      if (response.success === false) {
         handleError(new Error(response.message || 'Failed to send reset email. Please try again.'));
+        return;
       }
+
+      setIsSuccess(true);
     } catch (err: unknown) {
       handleError(err);
     } finally {
@@ -34,7 +35,7 @@ const ForgotPasswordPage: React.FC = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
+  setEmail(e.target.value);
     if (error) clearError();
   };
 

@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiClient } from '../services/apiClientLegacy';
+import type { FC } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Loader } from 'lucide-react';
-import { getUserRoleName, getUserPermissions } from '../utils/user';
+
+import { useAuth } from '@features/auth';
+import { apiClient } from '@services/apiClientLegacy';
+import { getUserRoleName, getUserPermissions } from '@utils/user';
 
 interface SystemCheck {
   name: string;
@@ -11,7 +13,7 @@ interface SystemCheck {
   details?: string;
 }
 
-const SystemStatus: React.FC = () => {
+const SystemStatus: FC = () => {
   const { user, hasPermission } = useAuth();
   const [checks, setChecks] = useState<SystemCheck[]>([]);
   const [isRunning, setIsRunning] = useState(false);
@@ -109,9 +111,9 @@ const SystemStatus: React.FC = () => {
     try {
       const rolesResponse = await apiClient.getRoles();
       if (rolesResponse.success && rolesResponse.roles) {
-        updateCheck('Roles API', 'success', 
-          `Found ${rolesResponse.roles.length} roles`, 
-          rolesResponse.roles.map(r => r.name).join(', '));
+        updateCheck('Roles API', 'success',
+          `Found ${rolesResponse.roles.length} roles`,
+          rolesResponse.roles.map((role: { name: string }) => role.name).join(', '));
       } else {
         updateCheck('Roles API', 'warning', 
           'Roles API responded but with errors', 
