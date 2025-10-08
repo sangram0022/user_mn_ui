@@ -88,7 +88,19 @@ const UserManagementEnhanced: FC = () => {
   
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
-  const roleMap = useMemo(() => new Map(roles.map((role) => [role.name, role])), [roles]);
+  const roleMap = useMemo(() => {
+    const map = new Map<string, Role>();
+    roles.forEach((role) => {
+      map.set(role.name, role);
+      map.set(role.name.toLowerCase(), role);
+      map.set(String(role.id), role);
+      if (role.description) {
+        map.set(role.description, role);
+        map.set(role.description.toLowerCase(), role);
+      }
+    });
+    return map;
+  }, [roles]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -105,7 +117,7 @@ const UserManagementEnhanced: FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set<string>());
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const buildCreateUserRequest = useCallback((data: CreateUserData): CreateUserRequest => {
@@ -113,15 +125,17 @@ const UserManagementEnhanced: FC = () => {
     const nameSegments = trimmedName ? trimmedName.split(' ') : [];
     const firstName = nameSegments[0] ?? data.email.split('@')[0] ?? 'First';
     const lastName = nameSegments.length > 1 ? nameSegments.slice(1).join(' ') : 'User';
+    const username = data.username?.trim();
+    const role = data.role?.trim();
 
     return {
       email: data.email,
       password: data.password,
       first_name: firstName || 'First',
       last_name: lastName || 'User',
-      role: data.role,
+      role: role && role.length > 0 ? role : undefined,
       is_active: data.is_active ?? true,
-      username: data.username
+      username: username && username.length > 0 ? username : undefined
     };
   }, []);
 
@@ -129,7 +143,10 @@ const UserManagementEnhanced: FC = () => {
     const request: UpdateUserRequest = {};
 
     if (data.role) {
-      request.role = data.role;
+      const trimmedRole = data.role.trim();
+      if (trimmedRole) {
+        request.role = trimmedRole;
+      }
     }
 
     if (typeof data.is_active === 'boolean') {
@@ -137,7 +154,10 @@ const UserManagementEnhanced: FC = () => {
     }
 
     if (typeof data.username === 'string') {
-      request.username = data.username;
+      const trimmed = data.username.trim();
+      if (trimmed) {
+        request.username = trimmed;
+      }
     }
 
     if (data.full_name) {
@@ -196,17 +216,32 @@ const UserManagementEnhanced: FC = () => {
       const summaries = await apiClient.getUsers(params);
 
       const mappedUsers = summaries.map((summary: UserSummary, index) => {
-        const resolvedRole = roleMap.get(summary.role) ?? {
-          id: index + 1,
+        const roleCandidates = [
+          summary.role,
+          summary.role?.toLowerCase(),
+          summary.role_name,
+          summary.role_name?.toLowerCase(),
+          summary.id != null ? String(summary.id) : undefined
+        ].filter((candidate): candidate is string => Boolean(candidate));
+
+        const resolvedRole = roleCandidates.reduce<Role | undefined>((acc, key) => {
+          if (acc) {
+            return acc;
+          }
+          return roleMap.get(key);
+        }, undefined) ?? {
+          id: typeof summary.id === 'number' ? summary.id : index + 1,
           name: summary.role,
-          description: summary.role,
+          description: summary.role_name ?? summary.role,
           permissions: []
-        };
+        } satisfies Role;
 
         const fallbackName = `${summary.first_name ?? ''} ${summary.last_name ?? ''}`.trim();
 
+        const userId = summary.user_id ?? (summary.id != null ? String(summary.id) : String(index + 1));
+
         return {
-          id: summary.user_id ?? String(index + 1),
+          id: userId,
           email: summary.email,
           username: summary.username ?? null,
           full_name: summary.full_name ?? (fallbackName || summary.email),
@@ -254,8 +289,14 @@ const UserManagementEnhanced: FC = () => {
       debugLog('Loading roles from backend...');
       const fetchedRoles = await apiClient.getRoles();
 
-      debugLog('Roles loaded successfully', fetchedRoles);
-      setRoles(fetchedRoles);
+      const normalizedRoles = fetchedRoles.map((role, index) => ({
+        ...role,
+        id: typeof role.id === 'number' ? role.id : Number.parseInt(String(role.id), 10) || index + 1,
+        permissions: role.permissions ?? []
+      }));
+
+      debugLog('Roles loaded successfully', normalizedRoles);
+      setRoles(normalizedRoles);
     } catch (err) {
       console.error('Failed to load roles', err);
       // Fallback to default roles if backend fails
@@ -312,7 +353,13 @@ const UserManagementEnhanced: FC = () => {
           break;
         case 'update':
           if (data) {
-            await apiClient.updateUser(userId, buildUpdateUserRequest(data));
+            const payload = buildUpdateUserRequest(data);
+            if (Object.keys(payload).length === 0) {
+              debugLog('No changes detected for user update, skipping API call', payload);
+              break;
+            }
+
+            await apiClient.updateUser(userId, payload);
           }
           break;
         default:
@@ -355,7 +402,7 @@ const UserManagementEnhanced: FC = () => {
           Array.from(selectedUsers, userId => apiClient.deleteUser(userId))
         );
         
-        setSelectedUsers(new Set());
+  setSelectedUsers(new Set<string>());
         await loadUsers();
       } catch (error) {
         console.error('Bulk delete failed:', error);
@@ -380,9 +427,9 @@ const UserManagementEnhanced: FC = () => {
 
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
-      setSelectedUsers(new Set(users.map(user => user.id)));
+      setSelectedUsers(new Set<string>(users.map(user => user.id)));
     } else {
-      setSelectedUsers(new Set());
+      setSelectedUsers(new Set<string>());
     }
   };
 
@@ -476,7 +523,7 @@ const UserManagementEnhanced: FC = () => {
                 {actionLoading === 'bulk-delete' ? 'Deleting...' : 'Delete'}
               </button>
               <button
-                onClick={() => setSelectedUsers(new Set())}
+                onClick={() => setSelectedUsers(new Set<string>())}
                 style={{
                   padding: '0.25rem 0.5rem',
                   background: '#666',
