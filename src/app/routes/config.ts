@@ -16,7 +16,7 @@ export interface RouteConfig {
   documentTitleFormatter?: (title: string) => string;
 }
 
-const LazyHomePage = lazy(() => import('@pages/home/HomePage'));
+const LazyHomePage = lazy(() => import('@features/home/pages/HomePage'));
 const LazyLoginPage = lazy(() => import('@features/auth/pages/LoginPage'));
 const LazyRegisterPage = lazy(() => import('@features/auth/pages/RegisterPage'));
 const LazyEmailConfirmationPage = lazy(() => import('@features/auth/pages/EmailConfirmationPage'));
@@ -25,18 +25,18 @@ const LazyForgotPasswordPage = lazy(() => import('@features/auth/pages/ForgotPas
 const LazyResetPasswordPage = lazy(() => import('@features/auth/pages/ResetPasswordPage'));
 const LazyRoleBasedDashboard = lazy(() => import('@features/dashboard/pages/RoleBasedDashboardPage'));
 const LazyUserManagementEnhanced = lazy(() => import('@features/users/pages/UserManagementPage'));
-const LazyAnalytics = lazy(() => import('@pages/analytics/AnalyticsPage'));
+const LazyAnalytics = lazy(() => import('@features/analytics/pages/AnalyticsPage'));
 const LazyWorkflowManagement = lazy(() => import('@pages/workflows/WorkflowManagementPage'));
 const LazyProfilePage = lazy(() => import('@pages/profile/ProfilePage'));
 const LazySettingsPage = lazy(() => import('@pages/settings/SettingsPage'));
 const LazyHelpPage = lazy(() => import('@pages/support/HelpPage'));
-const LazyReportsPage = lazy(() => import('@pages/reports/ReportsPage'));
+const LazyReportsPage = lazy(() => import('@features/reports/pages/ReportsPage'));
 const LazySecurityPage = lazy(() => import('@pages/security/SecurityPage'));
-const LazyModerationPage = lazy(() => import('@pages/moderation/ModerationPage'));
+const LazyModerationPage = lazy(() => import('@features/moderation/pages/ModerationPage'));
 const LazyApprovalsPage = lazy(() => import('@pages/workflows/ApprovalsPage'));
-const LazyActivityPage = lazy(() => import('@pages/activity/ActivityPage'));
-const LazyAccountPage = lazy(() => import('@pages/account/AccountPage'));
-const LazySystemStatus = lazy(() => import('@pages/status/SystemStatusPage'));
+const LazyActivityPage = lazy(() => import('@features/activity/pages/ActivityPage'));
+const LazyAccountPage = lazy(() => import('@features/account/pages/AccountPage'));
+const LazySystemStatus = lazy(() => import('@features/status/pages/SystemStatusPage'));
 const LazyMyWorkflowsPage = lazy(() => import('@pages/workflows/MyWorkflowsPage'));
 const LazyNotFoundPage = lazy(() => import('@pages/errors/NotFoundPage'));
 
