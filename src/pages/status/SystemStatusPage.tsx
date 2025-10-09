@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Loader } from 'lucide-react';
 
 import { useAuth } from '@features/auth';
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@lib/api';
 import { getUserRoleName, getUserPermissions } from '@utils/user';
 
 interface SystemCheck {

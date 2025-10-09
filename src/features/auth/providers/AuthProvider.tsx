@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@lib/api';
 import type { LoginRequest, UserProfile, UserRoleInfo } from '@types';
 import { logger } from '@utils/logger';
 

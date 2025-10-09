@@ -181,4 +181,7 @@ export function createErrorResponse(message: string): StandardResponse {
   };
 }
 
-export * from '@services/adapters/types';
+/**
+ * @deprecated Legacy adapter types removed.
+ */
+export {};

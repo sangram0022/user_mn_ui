@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, Clock, Eye, EyeOff, Info, LogIn, Lock, Mail, ShieldCheck, User } from 'lucide-react';
 
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@lib/api';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { buildRegistrationFeedback } from '@utils/registrationFeedback';

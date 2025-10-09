@@ -1,3 +1,3 @@
-export { apiClient, useApi } from '@services/apiClient';
-export type { RequestOptions } from '@services/apiClient';
-export { default } from '@services/apiClient';
+export { ApiClient, apiClient, useApi } from '@lib/api';
+export type { RequestOptions } from '@lib/api';
+export { apiClient as default } from '@lib/api';

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Shield, AlertTriangle, Lock, Eye, Users, Activity, FileText, CheckCircle } from 'lucide-react';
 
 import { useAuth } from '@features/auth';
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@lib/api';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 
 interface SecurityMetrics {

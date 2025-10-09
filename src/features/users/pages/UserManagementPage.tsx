@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Trash2, Eye, Users, UserCheck, UserX, Search, Filter } from 'lucide-react';
 
 import { useAuth } from '@features/auth';
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@lib/api';
 import { getUserPermissions, getUserRoleName } from '@utils/user';
 import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@types';
 

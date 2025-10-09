@@ -3,4 +3,7 @@
  * Provides backward-compatible API wrappers for authentication operations
  */
 
-export * from '@services/adapters/authAdapter';
+/**
+ * @deprecated Legacy adapter exports removed.
+ */
+export {};

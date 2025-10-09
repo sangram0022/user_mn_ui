@@ -33,7 +33,7 @@
   "@widgets/*": ["src/widgets/*"],
   "@config/*": ["src/config/*"],
   "@contexts/*": ["src/contexts/*"],
-  "@services/*": ["src/services/*"],
+  "@lib/*": ["src/lib/*"],
   "@utils/*": ["src/utils/*"],
   "@hooks/*": ["src/hooks/*"],
   "@styles/*": ["src/styles/*"],

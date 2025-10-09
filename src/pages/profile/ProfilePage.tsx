@@ -3,7 +3,7 @@ import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 
 import { useAuth } from '@features/auth';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@lib/api';
 import type { UserProfile as BaseUserProfile } from '@types';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import Breadcrumb from '@shared/ui/Breadcrumb';

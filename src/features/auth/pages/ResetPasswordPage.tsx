@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Eye, EyeOff, Loader, Lock } from 'lucide-react';
 
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@lib/api';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 

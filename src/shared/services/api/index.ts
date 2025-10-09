@@ -13,11 +13,11 @@
  */
 
 // Modern API client (recommended)
-export { apiClient, useApi } from '@services/apiClient';
-export type { RequestOptions } from '@services/apiClient';
+export { ApiClient, apiClient, useApi } from '@lib/api';
+export type { RequestOptions } from '@lib/api';
 
 // Maintain compatibility for legacy imports by re-exporting the modern client
-export { apiClient as legacyApiClient } from '@services/apiClient';
+export { apiClient as legacyApiClient } from '@lib/api';
 
 // Default export is the modern client
-export { default } from '@services/apiClient';
+export { apiClient as default } from '@lib/api';

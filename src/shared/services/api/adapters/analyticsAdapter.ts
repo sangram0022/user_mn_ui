@@ -38,4 +38,7 @@ export async function getLifecycleAnalytics<T = unknown>(): Promise<AnalyticsRes
   }
 }
 
-export * from '@services/adapters/analyticsAdapter';
+/**
+ * @deprecated Legacy adapter exports removed.
+ */
+export {};

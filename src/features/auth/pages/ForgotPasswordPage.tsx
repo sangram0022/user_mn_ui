@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, Loader, Mail } from 'lucide-react';
 
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@lib/api';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 

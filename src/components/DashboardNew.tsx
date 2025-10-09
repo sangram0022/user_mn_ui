@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { apiClient } from '../services/apiClient';
+import { apiClient } from '@lib/api';
 import type { UserProfile, AuditSummary } from '../types';
 import { getUserRoleName, userHasRole } from '../utils/user';
 
