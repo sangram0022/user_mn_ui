@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ToastContext, type ToastContextType } from '@contexts/ToastContext';
-import type { ErrorInfo } from '@utils/errorHandling';
+import type { ErrorInfo } from '@shared/utils/error';
 
 interface ToastProviderProps {
   children: React.ReactNode;

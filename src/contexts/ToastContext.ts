@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import type { ErrorInfo } from '@utils/errorHandling';
+import type { ErrorInfo } from '@shared/utils/error';
 
 export interface ToastContextType {
 	showError: (error: ErrorInfo | unknown) => void;

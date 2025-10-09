@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseApiError, getErrorSeverity, isAuthError, formatErrorForDisplay } from '../errorParser';
+import { parseApiError, getErrorSeverity, isAuthError, formatErrorForDisplay } from '@shared/utils/error';
 
 describe('errorParser', () => {
   it('parses structured API errors', () => {

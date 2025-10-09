@@ -1,2 +1,2 @@
-export { normalizeApiError } from '@utils/apiErrorNormalizer';
-export type { NormalizedApiError } from '@utils/apiErrorNormalizer';
+export { normalizeApiError } from './error';
+export type { NormalizedApiError } from './error';

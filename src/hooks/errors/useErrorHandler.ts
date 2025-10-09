@@ -3,8 +3,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { parseApiError, formatErrorForDisplay, isAuthError } from '../../utils/errorParser';
-import { errorLogger } from '../../utils/errorLogger';
+import { parseApiError, formatErrorForDisplay, isAuthError, errorLogger } from '@shared/utils/error';
 import { logger } from '../../utils/logger';
 import type { ParsedError } from '../../types/error';
 

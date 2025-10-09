@@ -19,7 +19,7 @@ import type {
   UserRole
 } from '../types';
 import { ApiError } from '../utils/apiError';
-import { normalizeApiError } from '../utils/apiErrorNormalizer';
+import { normalizeApiError } from '@shared/utils/error';
 
 const DEFAULT_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '')
   ?? 'http://127.0.0.1:8000/api/v1';

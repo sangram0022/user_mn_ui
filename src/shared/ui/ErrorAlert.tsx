@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import type { ErrorDisplayProps } from '../../types/error';
-import { parseApiError, getErrorSeverity } from '../../utils/errorParser';
+import { parseApiError, getErrorSeverity } from '@shared/utils/error';
 
 /**
  * ErrorAlert Component
