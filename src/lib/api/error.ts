@@ -1,5 +1,4 @@
-export interface ApiErrorInit {
-  status: number;
+export interface ApiErrorInit { status: number;
   message: string;
   code?: string;
   detail?: string;
@@ -7,15 +6,13 @@ export interface ApiErrorInit {
   headers?: Headers | Record<string, string>;
   timestamp?: string;
   requestId?: string;
-  payload?: unknown;
-}
+  payload?: unknown; }
 
 /**
  * Rich HTTP error object produced by the API client.
  * Captures metadata such as status code, correlation IDs, and retry hints.
  */
-export class ApiError extends Error {
-  public readonly status: number;
+export class ApiError extends Error { public readonly status: number;
   public readonly code?: string;
   public readonly detail?: string;
   public readonly errors?: Record<string, unknown>;
@@ -50,8 +47,7 @@ export class ApiError extends Error {
 
     if (typeof Headers !== 'undefined' && headers instanceof Headers) {
       const normalized: Record<string, string> = {};
-      headers.forEach((value, key) => {
-        normalized[key.toLowerCase()] = value;
+      headers.forEach((value, key) => { normalized[key.toLowerCase()] = value;
       });
       return normalized;
     }
@@ -61,19 +57,16 @@ export class ApiError extends Error {
     );
   }
 
-  private static parseRetryAfter(headerValue?: string): number | undefined {
-    if (!headerValue) {
+  private static parseRetryAfter(headerValue?: string): number | undefined { if (!headerValue) {
       return undefined;
     }
 
     const numericValue = Number(headerValue);
-    if (!Number.isNaN(numericValue)) {
-      return numericValue >= 0 ? numericValue : undefined;
+    if (!Number.isNaN(numericValue)) { return numericValue >= 0 ? numericValue : undefined;
     }
 
     const timestamp = Date.parse(headerValue);
-    if (!Number.isNaN(timestamp)) {
-      const deltaMs = timestamp - Date.now();
+    if (!Number.isNaN(timestamp)) { const deltaMs = timestamp - Date.now();
       if (deltaMs <= 0) {
         return 0;
       }
@@ -83,8 +76,7 @@ export class ApiError extends Error {
     return undefined;
   }
 
-  toJSON() {
-    return {
+  toJSON() { return {
       name: this.name,
       message: this.message,
       status: this.status,

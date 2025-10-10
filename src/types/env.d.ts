@@ -1,10 +1,11 @@
+import { logger } from './../shared/utils/logger';
+
 /**
  * Environment variables type definitions
  * Add your environment variables here for better type safety
  */
 
-interface ImportMetaEnv {
-  // API Configuration
+interface ImportMetaEnv { // API Configuration
   readonly VITE_API_BASE_URL: string;
   readonly VITE_API_TIMEOUT: string;
   
@@ -36,16 +37,12 @@ interface ImportMetaEnv {
   // Build Information
   readonly VITE_APP_VERSION: string;
   readonly VITE_BUILD_TIME: string;
-  readonly VITE_GIT_COMMIT: string;
-}
+  readonly VITE_GIT_COMMIT: string; }
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
+interface ImportMeta { readonly env: ImportMetaEnv; }
 
 // Environment validation helpers
-export const validateEnvironment = (): void => {
-  const requiredEnvVars = [
+export const validateEnvironment = (): void => { const requiredEnvVars = [
     'VITE_API_BASE_URL',
   ] as const;
 
@@ -54,7 +51,7 @@ export const validateEnvironment = (): void => {
   );
 
   if (missingVars.length > 0) {
-    console.error('Missing required environment variables:', missingVars);
+    logger.error('Missing required environment variables:', undefined, { missingVars  });
     throw new Error(
       `Missing required environment variables: ${missingVars.join(', ')}`
     );
@@ -62,12 +59,10 @@ export const validateEnvironment = (): void => {
 };
 
 // Environment utilities
-export const getEnvironment = () => ({
-  isDevelopment: import.meta.env.DEV,
+export const getEnvironment = () => ({ isDevelopment: import.meta.env.DEV,
   isProduction: import.meta.env.PROD,
   mode: import.meta.env.MODE,
-  baseUrl: import.meta.env.BASE_URL,
-});
+  baseUrl: import.meta.env.BASE_URL, });
 
 // Type-safe environment getter
 export const getEnvVar = <T extends keyof ImportMetaEnv>(
@@ -88,6 +83,4 @@ export const isFeatureEnabled = (feature: keyof Pick<ImportMetaEnv,
   | 'VITE_ENABLE_NOTIFICATIONS'
   | 'VITE_ENABLE_EXPERIMENTAL'
   | 'VITE_ENABLE_ERROR_REPORTING'
->): boolean => {
-  return import.meta.env[feature] === 'true';
-};
+>): boolean => { return import.meta.env[feature] === 'true'; };

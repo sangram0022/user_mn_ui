@@ -39,7 +39,7 @@ Suggestions for improving code quality, architecture, and React/TypeScript best 
 
 ## 7. State Management
 - **Current Approach**: Using React Context for auth
-- **Considerations**: For complex state, evaluate Zustand or Redux Toolkit if the app grows
+
 - **Data Fetching**: Consider React Query (TanStack Query) for server state management
 
 ## Priority Implementation:

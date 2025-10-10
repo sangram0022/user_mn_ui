@@ -8,17 +8,13 @@ import type { ReactNode } from 'react';
 import { designTokens, designUtils } from './tokens';
 
 // Base layout props
-interface BaseLayoutProps {
-  className?: string;
-  children?: ReactNode;
-}
+interface BaseLayoutProps { className?: string;
+  children?: ReactNode; }
 
 // Container component for max-width layouts
-export interface ContainerProps extends BaseLayoutProps {
-  maxWidth?: keyof typeof designTokens.layout.containerMaxWidth;
+export interface ContainerProps extends BaseLayoutProps { maxWidth?: keyof typeof designTokens.layout.containerMaxWidth;
   padding?: boolean;
-  center?: boolean;
-}
+  center?: boolean; }
 
 export const Container = forwardRef<HTMLDivElement, ContainerProps>(
   ({ maxWidth = 'xl', padding = true, center = true, className, children, ...props }, ref) => {
@@ -45,8 +41,7 @@ export const Container = forwardRef<HTMLDivElement, ContainerProps>(
 Container.displayName = 'Container';
 
 // Flexible grid system
-export interface GridProps extends BaseLayoutProps {
-  cols?: number | 'auto';
+export interface GridProps extends BaseLayoutProps { cols?: number | 'auto';
   gap?: keyof typeof designTokens.spacing;
   responsive?: {
     sm?: number;
@@ -60,8 +55,7 @@ export interface GridProps extends BaseLayoutProps {
 }
 
 export const Grid = forwardRef<HTMLDivElement, GridProps>(
-  ({ 
-    cols = 1, 
+  ({ cols = 1, 
     gap = '4', 
     responsive,
     autoFit = false,
@@ -74,8 +68,7 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(
     
     if (autoFit) {
       gridClass = `grid-cols-[repeat(auto-fit,minmax(${minChildWidth},1fr))]`;
-    } else if (cols === 'auto') {
-      gridClass = 'grid-cols-auto';
+    } else if (cols === 'auto') { gridClass = 'grid-cols-auto';
     } else {
       gridClass = `grid-cols-${cols}`;
     }
@@ -109,8 +102,7 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(
 Grid.displayName = 'Grid';
 
 // Flexbox utilities
-export interface FlexProps extends BaseLayoutProps {
-  direction?: 'row' | 'col' | 'row-reverse' | 'col-reverse';
+export interface FlexProps extends BaseLayoutProps { direction?: 'row' | 'col' | 'row-reverse' | 'col-reverse';
   align?: 'start' | 'center' | 'end' | 'stretch' | 'baseline';
   justify?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
   wrap?: boolean;
@@ -124,8 +116,7 @@ export interface FlexProps extends BaseLayoutProps {
 }
 
 export const Flex = forwardRef<HTMLDivElement, FlexProps>(
-  ({ 
-    direction = 'row',
+  ({ direction = 'row',
     align = 'start',
     justify = 'start',
     wrap = false,
@@ -173,11 +164,9 @@ export const Flex = forwardRef<HTMLDivElement, FlexProps>(
 Flex.displayName = 'Flex';
 
 // Stack component for vertical layouts
-export interface StackProps extends BaseLayoutProps {
-  spacing?: keyof typeof designTokens.spacing;
+export interface StackProps extends BaseLayoutProps { spacing?: keyof typeof designTokens.spacing;
   align?: 'start' | 'center' | 'end' | 'stretch';
-  divider?: ReactNode;
-}
+  divider?: ReactNode; }
 
 export const Stack = forwardRef<HTMLDivElement, StackProps>(
   ({ spacing = '4', align = 'stretch', divider, className, children, ...props }, ref) => {
@@ -213,16 +202,13 @@ export const Stack = forwardRef<HTMLDivElement, StackProps>(
 Stack.displayName = 'Stack';
 
 // HStack component for horizontal layouts
-export interface HStackProps extends BaseLayoutProps {
-  spacing?: keyof typeof designTokens.spacing;
+export interface HStackProps extends BaseLayoutProps { spacing?: keyof typeof designTokens.spacing;
   align?: 'start' | 'center' | 'end' | 'stretch' | 'baseline';
   justify?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
-  wrap?: boolean;
-}
+  wrap?: boolean; }
 
 export const HStack = forwardRef<HTMLDivElement, HStackProps>(
-  ({ 
-    spacing = '4', 
+  ({ spacing = '4', 
     align = 'center', 
     justify = 'start',
     wrap = false,
@@ -255,10 +241,8 @@ export const HStack = forwardRef<HTMLDivElement, HStackProps>(
 HStack.displayName = 'HStack';
 
 // Center component for centering content
-export interface CenterProps extends BaseLayoutProps {
-  minHeight?: string;
-  inline?: boolean;
-}
+export interface CenterProps extends BaseLayoutProps { minHeight?: string;
+  inline?: boolean; }
 
 export const Center = forwardRef<HTMLDivElement, CenterProps>(
   ({ minHeight, inline = false, className, children, ...props }, ref) => {
@@ -284,14 +268,11 @@ export const Center = forwardRef<HTMLDivElement, CenterProps>(
 Center.displayName = 'Center';
 
 // Aspect Ratio component
-export interface AspectRatioProps extends BaseLayoutProps {
-  ratio?: keyof typeof designTokens.layout.aspectRatio | number;
-  maxWidth?: string;
-}
+export interface AspectRatioProps extends BaseLayoutProps { ratio?: keyof typeof designTokens.layout.aspectRatio | number;
+  maxWidth?: string; }
 
 export const AspectRatio = forwardRef<HTMLDivElement, AspectRatioProps>(
-  ({ ratio = 'video', maxWidth, className, children, ...props }, ref) => {
-    let ratioClass = '';
+  ({ ratio = 'video', maxWidth, className, children, ...props }, ref) => { let ratioClass = '';
     
     if (typeof ratio === 'string') {
       ratioClass = designTokens.layout.aspectRatio[ratio];
@@ -321,9 +302,7 @@ export const AspectRatio = forwardRef<HTMLDivElement, AspectRatioProps>(
 AspectRatio.displayName = 'AspectRatio';
 
 // Spacer component for flexible spacing
-export interface SpacerProps {
-  className?: string;
-}
+export interface SpacerProps { className?: string; }
 
 export const Spacer = forwardRef<HTMLDivElement, SpacerProps>(
   ({ className, ...props }, ref) => {
@@ -339,17 +318,14 @@ export const Spacer = forwardRef<HTMLDivElement, SpacerProps>(
 Spacer.displayName = 'Spacer';
 
 // Divider component
-export interface DividerProps extends BaseLayoutProps {
-  orientation?: 'horizontal' | 'vertical';
+export interface DividerProps extends BaseLayoutProps { orientation?: 'horizontal' | 'vertical';
   variant?: 'solid' | 'dashed' | 'dotted';
   thickness?: '1' | '2' | '4';
   color?: string;
-  length?: string;
-}
+  length?: string; }
 
 export const Divider = forwardRef<HTMLDivElement, DividerProps>(
-  ({ 
-    orientation = 'horizontal',
+  ({ orientation = 'horizontal',
     variant = 'solid',
     thickness = '1',
     color = 'border-secondary-200',
@@ -408,28 +384,21 @@ export const Divider = forwardRef<HTMLDivElement, DividerProps>(
 Divider.displayName = 'Divider';
 
 // Show/Hide component for responsive visibility
-export interface ShowHideProps extends BaseLayoutProps {
-  above?: keyof typeof designTokens.breakpoints;
+export interface ShowHideProps extends BaseLayoutProps { above?: keyof typeof designTokens.breakpoints;
   below?: keyof typeof designTokens.breakpoints;
-  only?: keyof typeof designTokens.breakpoints;
-}
+  only?: keyof typeof designTokens.breakpoints; }
 
 export const Show = forwardRef<HTMLDivElement, ShowHideProps>(
-  ({ above, below, only, className, children, ...props }, ref) => {
-    let visibilityClass = '';
+  ({ above, below, only, className, children, ...props }, ref) => { let visibilityClass = '';
     
     if (only) {
       const breakpoint = only;
       if (breakpoint === 'sm') {
         visibilityClass = 'hidden sm:block md:hidden';
-      } else if (breakpoint === 'md') {
-        visibilityClass = 'hidden md:block lg:hidden';
-      } else if (breakpoint === 'lg') {
-        visibilityClass = 'hidden lg:block xl:hidden';
-      } else if (breakpoint === 'xl') {
-        visibilityClass = 'hidden xl:block 2xl:hidden';
-      } else if (breakpoint === '2xl') {
-        visibilityClass = 'hidden 2xl:block';
+      } else if (breakpoint === 'md') { visibilityClass = 'hidden md:block lg:hidden';
+      } else if (breakpoint === 'lg') { visibilityClass = 'hidden lg:block xl:hidden';
+      } else if (breakpoint === 'xl') { visibilityClass = 'hidden xl:block 2xl:hidden';
+      } else if (breakpoint === '2xl') { visibilityClass = 'hidden 2xl:block';
       }
     } else {
       if (above) {
@@ -456,21 +425,16 @@ export const Show = forwardRef<HTMLDivElement, ShowHideProps>(
 Show.displayName = 'Show';
 
 export const Hide = forwardRef<HTMLDivElement, ShowHideProps>(
-  ({ above, below, only, className, children, ...props }, ref) => {
-    let visibilityClass = '';
+  ({ above, below, only, className, children, ...props }, ref) => { let visibilityClass = '';
     
     if (only) {
       const breakpoint = only;
       if (breakpoint === 'sm') {
         visibilityClass = 'sm:hidden md:block';
-      } else if (breakpoint === 'md') {
-        visibilityClass = 'md:hidden lg:block';
-      } else if (breakpoint === 'lg') {
-        visibilityClass = 'lg:hidden xl:block';
-      } else if (breakpoint === 'xl') {
-        visibilityClass = 'xl:hidden 2xl:block';
-      } else if (breakpoint === '2xl') {
-        visibilityClass = '2xl:hidden';
+      } else if (breakpoint === 'md') { visibilityClass = 'md:hidden lg:block';
+      } else if (breakpoint === 'lg') { visibilityClass = 'lg:hidden xl:block';
+      } else if (breakpoint === 'xl') { visibilityClass = 'xl:hidden 2xl:block';
+      } else if (breakpoint === '2xl') { visibilityClass = '2xl:hidden';
       }
     } else {
       if (above) {

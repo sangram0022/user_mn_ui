@@ -1,10 +1,9 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '@features/auth/providers/AuthProvider';
+import { AuthProvider } from 'src/domains/auth/providers/AuthProvider';
 import { routes, notFoundRoute } from '@routing/config';
 import { ProtectedRoute, PublicRoute } from '@routing/RouteGuards';
 import RouteRenderer from '@routing/RouteRenderer';
-import { ErrorBoundary } from '@shared/components/ErrorBoundary';
+import { PageErrorBoundary as ErrorBoundary } from '@shared/errors/ErrorBoundary';
 import { SuspenseBoundary } from '@shared/components/ui';
 import '@app/App.css';
 
@@ -21,7 +20,7 @@ const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode)
 
 function App() {
   return (
-    <ErrorBoundary enableReporting={true}>
+    <ErrorBoundary>
       <AuthProvider>
         <Router>
           <SuspenseBoundary loadingText="Loading application...">

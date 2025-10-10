@@ -1,18 +1,14 @@
 import React from 'react';
 
-interface SkeletonProps {
-  className?: string;
+interface SkeletonProps { className?: string;
   variant?: 'text' | 'rectangular' | 'circular';
   width?: number | string;
-  height?: number | string;
-}
+  height?: number | string; }
 
-export const Skeleton: React.FC<SkeletonProps> = ({
-  className = '',
+export const Skeleton: React.FC<SkeletonProps> = ({ className = '',
   variant = 'text',
   width,
-  height,
-}) => {
+  height, }) => {
   const style: React.CSSProperties = {};
 
   if (width) {
@@ -23,8 +19,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     style.height = typeof height === 'number' ? `${height}px` : height;
   }
 
-  const variantClasses = {
-    text: 'h-4 rounded-md',
+  const variantClasses = { text: 'h-4 rounded-md',
     rectangular: 'rounded-lg',
     circular: 'rounded-full',
   } as const;
@@ -39,17 +34,13 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   );
 };
 
-interface PageSkeletonProps {
-  heading?: string;
+interface PageSkeletonProps { heading?: string;
   descriptionLines?: number;
-  actionCount?: number;
-}
+  actionCount?: number; }
 
-export const PageSkeleton: React.FC<PageSkeletonProps> = ({
-  heading = 'Loading content',
+export const PageSkeleton: React.FC<PageSkeletonProps> = ({ heading = 'Loading content',
   descriptionLines = 3,
-  actionCount = 2,
-}) => {
+  actionCount = 2, }) => {
   return (
     <section className="min-h-[50vh] px-6 py-12">
       <div className="mx-auto max-w-5xl space-y-8">
@@ -81,13 +72,10 @@ export const PageSkeleton: React.FC<PageSkeletonProps> = ({
   );
 };
 
-interface TableSkeletonProps {
-  columns?: number;
-  rows?: number;
-}
+interface TableSkeletonProps { columns?: number;
+  rows?: number; }
 
-export const TableSkeleton: React.FC<TableSkeletonProps> = ({ columns = 4, rows = 5 }) => {
-  return (
+export const TableSkeleton: React.FC<TableSkeletonProps> = ({ columns = 4, rows = 5 }) => { return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
       <div className="grid grid-cols-1 gap-3 border-b border-slate-200 bg-slate-50 p-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: columns }).map((_, index) => (

@@ -4,9 +4,7 @@ import PrimaryNavigation from '@app/navigation/PrimaryNavigation';
 
 import Footer from './Footer';
 
-export interface AppLayoutProps {
-  children: ReactNode;
-}
+export interface AppLayoutProps { children: ReactNode; }
 
 const AppLayout: FC<AppLayoutProps> = ({ children }) => (
   <div className="min-h-screen bg-gray-50 flex flex-col">

@@ -3,9 +3,7 @@
  */
 
 // Generic component props with children
-export type PropsWithChildren<P = Record<string, unknown>> = P & {
-  children?: React.ReactNode;
-};
+export type PropsWithChildren<P = Record<string, unknown>> = P & { children?: React.ReactNode; };
 
 // Component props without children
 export type PropsWithoutChildren<P> = Omit<P, 'children'>;
@@ -17,14 +15,10 @@ export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
 // Nullable fields utility
-export type Nullable<T> = {
-  [K in keyof T]: T[K] | null;
-};
+export type Nullable<T> = { [K in keyof T]: T[K] | null; };
 
 // Deep partial utility
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
+export type DeepPartial<T> = { [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]; };
 
 // Extract function parameters
 export type Parameters<T extends (...args: unknown[]) => unknown> = T extends (...args: infer P) => unknown ? P : never;
@@ -33,15 +27,12 @@ export type Parameters<T extends (...args: unknown[]) => unknown> = T extends (.
 export type ReturnType<T extends (...args: unknown[]) => unknown> = T extends (...args: unknown[]) => infer R ? R : unknown;
 
 // API Response types
-export interface ApiResponse<T = unknown> {
-  data: T;
+export interface ApiResponse<T = unknown> { data: T;
   message?: string;
   success: boolean;
-  errors?: Record<string, string[]>;
-}
+  errors?: Record<string, string[]>; }
 
-export interface PaginatedResponse<T = unknown> {
-  data: T[];
+export interface PaginatedResponse<T = unknown> { data: T[];
   pagination: {
     page: number;
     limit: number;
@@ -53,22 +44,18 @@ export interface PaginatedResponse<T = unknown> {
 }
 
 // Form field types
-export interface FormFieldProps {
-  label?: string;
+export interface FormFieldProps { label?: string;
   error?: string;
   required?: boolean;
   disabled?: boolean;
   placeholder?: string;
-  helperText?: string;
-}
+  helperText?: string; }
 
 // Generic input component props
-export type InputProps<T = string> = FormFieldProps & {
-  value: T;
+export type InputProps<T = string> = FormFieldProps & { value: T;
   onChange: (value: T) => void;
   onBlur?: () => void;
-  onFocus?: () => void;
-};
+  onFocus?: () => void; };
 
 // Component variants and sizes
 export type ComponentSize = 'small' | 'medium' | 'large';
@@ -77,11 +64,9 @@ export type ComponentColor = 'inherit' | 'primary' | 'secondary' | 'default' | '
 
 // Status types
 export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
-export type AsyncState<T> = {
-  data: T | null;
+export type AsyncState<T> = { data: T | null;
   status: LoadingState;
-  error: string | null;
-};
+  error: string | null; };
 
 // Event handler types
 export type EventHandler<T = Event> = (event: T) => void;
@@ -93,25 +78,20 @@ export type StringID = string;
 export type NumericID = number;
 
 // User and authentication types
-export interface BaseUser {
-  id: ID;
+export interface BaseUser { id: ID;
   email: string;
   name: string;
   avatar?: string;
   role: string;
   createdAt: string;
-  updatedAt: string;
-}
+  updatedAt: string; }
 
-export interface AuthTokens {
-  accessToken: string;
+export interface AuthTokens { accessToken: string;
   refreshToken: string;
-  expiresAt: number;
-}
+  expiresAt: number; }
 
 // Theme and styling types
-export interface ThemeColors {
-  primary: string;
+export interface ThemeColors { primary: string;
   secondary: string;
   success: string;
   warning: string;
@@ -127,8 +107,7 @@ export interface ThemeColors {
 }
 
 // Route and navigation types
-export interface RouteConfig {
-  path: string;
+export interface RouteConfig { path: string;
   component: React.ComponentType<unknown>;
   exact?: boolean;
   guard?: React.ComponentType<unknown>;
@@ -140,13 +119,11 @@ export interface RouteConfig {
 }
 
 // Error types
-export interface AppError {
-  message: string;
+export interface AppError { message: string;
   code?: string;
   status?: number;
   details?: unknown;
-  timestamp: string;
-}
+  timestamp: string; }
 
 // Generic service response
 export type ServiceResponse<T> = Promise<ApiResponse<T>>;
@@ -170,14 +147,10 @@ export type ArrayElement<T> = T extends readonly (infer U)[] ? U : never;
 export type ObjectValues<T> = T[keyof T];
 
 // Pick by type
-export type PickByType<T, U> = {
-  [K in keyof T as T[K] extends U ? K : never]: T[K];
-};
+export type PickByType<T, U> = { [K in keyof T as T[K] extends U ? K : never]: T[K]; };
 
 // Omit by type
-export type OmitByType<T, U> = {
-  [K in keyof T as T[K] extends U ? never : K]: T[K];
-};
+export type OmitByType<T, U> = { [K in keyof T as T[K] extends U ? never : K]: T[K]; };
 
 // Function type guards
 export type TypeGuard<T> = (value: unknown) => value is T;
@@ -186,6 +159,4 @@ export type TypeGuard<T> = (value: unknown) => value is T;
 export type AsyncFunction<T extends unknown[] = unknown[], R = unknown> = (...args: T) => Promise<R>;
 
 // Component display name helper
-export type WithDisplayName<T> = T & {
-  displayName?: string;
-};
+export type WithDisplayName<T> = T & { displayName?: string; };

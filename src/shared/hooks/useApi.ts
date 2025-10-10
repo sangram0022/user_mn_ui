@@ -3,24 +3,19 @@
  */
 import { useState, useCallback, useRef, useEffect } from 'react';
 
-export interface ApiState<T> {
-  data: T | null;
+export interface ApiState<T> { data: T | null;
   loading: boolean;
-  error: Error | null;
-}
+  error: Error | null; }
 
-export interface UseApiOptions {
-  onSuccess?: (data: unknown) => void;
+export interface UseApiOptions { onSuccess?: (data: unknown) => void;
   onError?: (error: Error) => void;
   retryCount?: number;
-  retryDelay?: number;
-}
+  retryDelay?: number; }
 
 export function useApi<T = unknown>(
   apiFunction: (...args: unknown[]) => Promise<T>,
   options: UseApiOptions = {}
-) {
-  const [state, setState] = useState<ApiState<T>>({
+) { const [state, setState] = useState<ApiState<T>>({
     data: null,
     loading: false,
     error: null,
@@ -31,8 +26,7 @@ export function useApi<T = unknown>(
   const abortController = useRef<AbortController | null>(null);
 
   const execute = useCallback(
-    async (...args: unknown[]) => {
-      // Cancel previous request if still pending
+    async (...args: unknown[]) => { // Cancel previous request if still pending
       if (abortController.current) {
         abortController.current.abort();
       }
@@ -40,11 +34,9 @@ export function useApi<T = unknown>(
       abortController.current = new AbortController();
       retryAttempts.current = 0;
 
-      const attemptRequest = async (): Promise<void> => {
-        setState(prev => ({ ...prev, loading: true, error: null }));
+      const attemptRequest = async (): Promise<void> => { setState(prev => ({ ...prev, loading: true, error: null }));
 
-        try {
-          const result = await apiFunction(...args);
+        try { const result = await apiFunction(...args);
           
           if (!abortController.current?.signal.aborted) {
             setState({
@@ -54,8 +46,7 @@ export function useApi<T = unknown>(
             });
             onSuccess?.(result);
           }
-        } catch (error) {
-          if (!abortController.current?.signal.aborted) {
+        } catch (error) { if (!abortController.current?.signal.aborted) {
             const apiError = error instanceof Error ? error : new Error('Unknown error');
             
             // Retry logic
@@ -65,8 +56,7 @@ export function useApi<T = unknown>(
               return;
             }
 
-            setState({
-              data: null,
+            setState({ data: null,
               loading: false,
               error: apiError,
             });
@@ -80,8 +70,7 @@ export function useApi<T = unknown>(
     [apiFunction, onSuccess, onError, retryCount, retryDelay]
   );
 
-  const reset = useCallback(() => {
-    setState({
+  const reset = useCallback(() => { setState({
       data: null,
       loading: false,
       error: null,
@@ -90,16 +79,14 @@ export function useApi<T = unknown>(
   }, []);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(() => { return () => {
       if (abortController.current) {
         abortController.current.abort();
       }
     };
   }, []);
 
-  return {
-    ...state,
+  return { ...state,
     execute,
     reset,
     retry: execute,

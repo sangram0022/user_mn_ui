@@ -2,12 +2,10 @@
  * API-related constants and configuration
  */
 
-export const API_CONFIG = {
-  BASE_URL: import.meta.env['VITE_API_BASE_URL'] || '/api/v1',
+export const API_CONFIG = { BASE_URL: import.meta.env['VITE_API_BASE_URL'] || '/api/v1',
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
-  RETRY_DELAY: 1000,
-};
+  RETRY_DELAY: 1000, };
 
 export const API_ENDPOINTS = {
   // Auth endpoints
@@ -32,8 +30,7 @@ export const API_ENDPOINTS = {
   UPLOAD_DOCUMENTS: '/upload/documents',
 };
 
-export const ERROR_MESSAGES = {
-  NETWORK: 'Network error occurred. Please check your connection.',
+export const ERROR_MESSAGES = { NETWORK: 'Network error occurred. Please check your connection.',
   NETWORK_ERROR: 'Network error occurred. Please check your connection.',
   TIMEOUT: 'Request timeout. Please try again.',
   TIMEOUT_ERROR: 'Request timeout. Please try again.',
@@ -43,5 +40,4 @@ export const ERROR_MESSAGES = {
   SERVER_ERROR: 'Internal server error. Please try again later.',
   UNKNOWN: 'An unexpected error occurred.',
   UNKNOWN_ERROR: 'An unexpected error occurred.',
-  VALIDATION_ERROR: 'Validation failed. Please check your input.',
-};
+  VALIDATION_ERROR: 'Validation failed. Please check your input.', };

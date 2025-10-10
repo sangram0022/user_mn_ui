@@ -3,9 +3,9 @@
  * Comprehensive showcase of the modern design system components
  */
 
+import { logger } from './../shared/utils/logger';
 import React, { useState } from 'react';
-import {
-  Button,
+import { Button,
   Card,
   Alert,
   Badge,
@@ -20,12 +20,10 @@ import {
   Textarea,
   Checkbox,
   RadioGroup,
-  Toggle
-} from '../shared/design';
+  Toggle } from '../shared/design';
 import type { SelectOption, RadioOption } from '../shared/design';
 
-export const DesignSystemDemo: React.FC = () => {
-  const [showModal, setShowModal] = useState(false);
+export const DesignSystemDemo: React.FC = () => { const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -106,7 +104,7 @@ export const DesignSystemDemo: React.FC = () => {
               title="Success!"
               icon={<CheckIcon />}
               dismissible
-              onDismiss={() => console.log('Success alert dismissed')}
+              onDismiss={() => logger.info('Success alert dismissed')}
             >
               Your changes have been saved successfully.
             </Alert>
@@ -189,8 +187,7 @@ export const DesignSystemDemo: React.FC = () => {
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                validation={{ 
-                  required: true, 
+                validation={{ required: true, 
                   pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ 
                 }}
                 leftIcon={<EmailIcon />}

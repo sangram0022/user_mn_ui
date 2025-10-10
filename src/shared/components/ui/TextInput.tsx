@@ -5,8 +5,7 @@ import React, { forwardRef } from 'react';
 import { AlertCircle } from 'lucide-react';
 import type { ComponentSize } from '@shared/types';
 
-export interface TextInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onBlur' | 'onFocus' | 'size'> {
-  // Form field props
+export interface TextInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onBlur' | 'onFocus' | 'size'> { // Form field props
   label?: string;
   error?: string;
   required?: boolean;
@@ -23,13 +22,11 @@ export interface TextInputProps extends Omit<React.InputHTMLAttributes<HTMLInput
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
-  onFocus?: () => void;
-}
+  onFocus?: () => void; }
 
 const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
   (
-    {
-      label,
+    { label,
       error,
       required = false,
       disabled = false,
@@ -46,8 +43,7 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
       ...props
     },
     ref
-  ) => {
-    const inputId = React.useId();
+  ) => { const inputId = React.useId();
     const errorId = React.useId();
     const helperTextId = React.useId();
 
@@ -86,8 +82,7 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
       className,
     ].join(' ');
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(e.target.value);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { onChange(e.target.value);
     };
 
     return (
@@ -118,8 +113,7 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
             disabled={disabled}
             required={required}
             aria-invalid={Boolean(error)}
-            aria-describedby={
-              error ? errorId : helperText ? helperTextId : undefined
+            aria-describedby={ error ? errorId : helperText ? helperTextId : undefined
             }
             {...props}
           />

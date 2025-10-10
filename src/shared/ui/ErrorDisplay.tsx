@@ -1,6 +1,6 @@
-import React from 'react';
-import {
-  AlertCircle,
+import { logger } from './../utils/logger';
+import { useState, useEffect, Component } from 'react';
+import { AlertCircle,
   CheckCircle,
   Clock,
   Info,
@@ -9,40 +9,34 @@ import {
   WifiOff,
   X,
   RefreshCw,
-  AlertTriangle,
-} from 'lucide-react';
+  AlertTriangle, } from 'lucide-react';
 import type { ErrorInfo } from '@shared/utils/error';
 import { ERROR_CATEGORY_CONFIG } from '@shared/utils/error';
 
-interface ErrorDisplayProps {
-  error: ErrorInfo;
+interface ErrorDisplayProps { error: ErrorInfo;
   onClose?: () => void;
   onRetry?: () => void;
   className?: string;
   showIcon?: boolean;
   showAction?: boolean;
-  variant?: 'inline' | 'toast' | 'banner' | 'modal';
-}
+  variant?: 'inline' | 'toast' | 'banner' | 'modal'; }
 
 /**
  * Icon mapping for error categories
  */
-const ERROR_ICONS = {
-  'alert-circle': AlertCircle,
+const ERROR_ICONS = { 'alert-circle': AlertCircle,
   'check-circle': CheckCircle,
   clock: Clock,
   info: Info,
   server: Server,
   'shield-x': ShieldX,
   'wifi-off': WifiOff,
-  'alert-triangle': AlertTriangle,
-} as const;
+  'alert-triangle': AlertTriangle, } as const;
 
 /**
  * Color scheme mapping for error categories
  */
-const ERROR_COLORS = {
-  red: {
+const ERROR_COLORS = { red: {
     bg: 'bg-red-50',
     border: 'border-red-200',
     text: 'text-red-800',
@@ -51,8 +45,7 @@ const ERROR_COLORS = {
     button: 'text-red-600 hover:text-red-800',
     buttonSecondary: 'bg-red-100 hover:bg-red-200 text-red-800',
   },
-  orange: {
-    bg: 'bg-orange-50',
+  orange: { bg: 'bg-orange-50',
     border: 'border-orange-200',
     text: 'text-orange-800',
     title: 'text-orange-800',
@@ -60,8 +53,7 @@ const ERROR_COLORS = {
     button: 'text-orange-600 hover:text-orange-800',
     buttonSecondary: 'bg-orange-100 hover:bg-orange-200 text-orange-800',
   },
-  yellow: {
-    bg: 'bg-yellow-50',
+  yellow: { bg: 'bg-yellow-50',
     border: 'border-yellow-200',
     text: 'text-yellow-800',
     title: 'text-yellow-800',
@@ -69,8 +61,7 @@ const ERROR_COLORS = {
     button: 'text-yellow-600 hover:text-yellow-800',
     buttonSecondary: 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800',
   },
-  gray: {
-    bg: 'bg-gray-50',
+  gray: { bg: 'bg-gray-50',
     border: 'border-gray-200',
     text: 'text-gray-800',
     title: 'text-gray-800',
@@ -78,8 +69,7 @@ const ERROR_COLORS = {
     button: 'text-gray-600 hover:text-gray-800',
     buttonSecondary: 'bg-gray-100 hover:bg-gray-200 text-gray-800',
   },
-  blue: {
-    bg: 'bg-blue-50',
+  blue: { bg: 'bg-blue-50',
     border: 'border-blue-200',
     text: 'text-blue-800',
     title: 'text-blue-800',
@@ -93,15 +83,13 @@ const ERROR_COLORS = {
  * Enterprise Error Display Component
  * Displays errors with appropriate styling, icons, and actions based on error category
  */
-export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
-  error,
+export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error,
   onClose,
   onRetry,
   className = '',
   showIcon = true,
   showAction = true,
-  variant = 'inline',
-}) => {
+  variant = 'inline', }) => {
   const categoryConfig = ERROR_CATEGORY_CONFIG[error.category];
   const colors = ERROR_COLORS[categoryConfig.color as keyof typeof ERROR_COLORS] || ERROR_COLORS.gray;
   const IconComponent = ERROR_ICONS[categoryConfig.icon as keyof typeof ERROR_ICONS] || AlertCircle;
@@ -199,20 +187,15 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   );
 };
 
-interface RateLimitErrorProps extends Omit<ErrorDisplayProps, 'error'> {
-  retryAfter?: number;
-  onCountdownComplete?: () => void;
-}
+interface RateLimitErrorProps extends Omit<ErrorDisplayProps, 'error'> { retryAfter?: number;
+  onCountdownComplete?: () => void; }
 
-export const RateLimitError: React.FC<RateLimitErrorProps> = ({
-  retryAfter = 60,
+export const RateLimitError: React.FC<RateLimitErrorProps> = ({ retryAfter = 60,
   onCountdownComplete,
   onRetry,
-  ...props
-}) => {
-  const [countdown, setCountdown] = React.useState(retryAfter);
+  ...props }) => { const [countdown, setCountdown] = useState(retryAfter);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => {
         setCountdown(prev => prev - 1);
@@ -241,20 +224,15 @@ export const RateLimitError: React.FC<RateLimitErrorProps> = ({
   return <ErrorDisplay error={rateLimitError} onRetry={countdown === 0 ? onRetry : undefined} {...props} />;
 };
 
-interface ErrorToastProps extends ErrorDisplayProps {
-  autoHideDelay?: number;
-  onAutoHide?: () => void;
-}
+interface ErrorToastProps extends ErrorDisplayProps { autoHideDelay?: number;
+  onAutoHide?: () => void; }
 
-export const ErrorToast: React.FC<ErrorToastProps> = ({
-  autoHideDelay = 5000,
+export const ErrorToast: React.FC<ErrorToastProps> = ({ autoHideDelay = 5000,
   onAutoHide,
   onClose,
-  ...props
-}) => {
-  const [isVisible, setIsVisible] = React.useState(true);
+  ...props }) => { const [isVisible, setIsVisible] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (autoHideDelay > 0) {
       const timer = setTimeout(() => {
         setIsVisible(false);
@@ -266,8 +244,7 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
     return undefined;
   }, [autoHideDelay, onAutoHide]);
 
-  const handleClose = () => {
-    setIsVisible(false);
+  const handleClose = () => { setIsVisible(false);
     onClose?.();
   };
 
@@ -283,34 +260,27 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
   );
 };
 
-interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ComponentType<{ error: Error; resetError: () => void }>;
+interface ErrorBoundaryProps { children: React.ReactNode;
+  fallback?: ComponentType<{ error: Error; resetError: () => void }>;
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error: Error | null;
-}
+interface ErrorBoundaryState { hasError: boolean;
+  error: Error | null; }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = { hasError: false, error: null };
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> { override state: ErrorBoundaryState = { hasError: false, error: null };
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState { return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-  console.error('ErrorBoundary caught an error:', error, errorInfo);
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) { logger.error('ErrorBoundary caught an error:', undefined, { error, errorInfo  });
     this.props.onError?.(error, errorInfo);
   }
 
-  resetError = () => {
-    this.setState({ hasError: false, error: null });
+  resetError = () => { this.setState({ hasError: false, error: null });
   };
 
-  render() {
+  override render() {
     if (this.state.hasError && this.state.error) {
       if (this.props.fallback) {
         const FallbackComponent = this.props.fallback;
@@ -320,8 +290,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <ErrorDisplay
-            error={{
-              code: 'REACT_ERROR',
+            error={{ code: 'REACT_ERROR',
               title: 'Something went wrong',
               message: this.state.error.message,
               userMessage: 'An unexpected error occurred. Please refresh the page.',

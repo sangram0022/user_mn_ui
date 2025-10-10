@@ -6,26 +6,21 @@ import type { User, UserProfile, UserSummary, UserRoleInfo } from '../types';
 export const getRoleName = (
   role?: string | UserRoleInfo | null,
   fallback = ''
-): string => {
-  if (!role) {
+): string => { if (!role) {
     return fallback;
   }
 
-  if (typeof role === 'string') {
-    return role;
+  if (typeof role === 'string') { return role;
   }
 
-  if (role.name) {
-    return role.name;
+  if (role.name) { return role.name;
   }
 
   return fallback;
 };
 
-interface RoleSource {
-  role?: string | UserRoleInfo | null;
-  role_name?: string | null;
-}
+interface RoleSource { role?: string | UserRoleInfo | null;
+  role_name?: string | null; }
 
 /**
  * Derive the most relevant role label from a user-like object.
@@ -33,18 +28,15 @@ interface RoleSource {
 export const getUserRoleName = <T extends RoleSource | null | undefined>(
   source: T,
   fallback = ''
-): string => {
-  if (!source) {
+): string => { if (!source) {
     return fallback;
   }
 
   const directRole = getRoleName(source.role, fallback);
-  if (directRole) {
-    return directRole;
+  if (directRole) { return directRole;
   }
 
-  if (source.role_name) {
-    return source.role_name;
+  if (source.role_name) { return source.role_name;
   }
 
   return fallback;
@@ -56,8 +48,7 @@ export const getUserRoleName = <T extends RoleSource | null | undefined>(
 export const userHasRole = <T extends RoleSource | null | undefined>(
   source: T,
   roleName: string
-): boolean => {
-  if (!roleName) {
+): boolean => { if (!roleName) {
     return false;
   }
 
@@ -70,15 +61,13 @@ export const userHasRole = <T extends RoleSource | null | undefined>(
  */
 export const getUserPermissions = <T extends RoleSource | null | undefined>(
   source: T
-): string[] => {
-  if (!source) {
+): string[] => { if (!source) {
     return [];
   }
 
   const role = source.role;
 
-  if (role && typeof role !== 'string' && Array.isArray(role.permissions)) {
-    return role.permissions;
+  if (role && typeof role !== 'string' && Array.isArray(role.permissions)) { return role.permissions;
   }
 
   return [];

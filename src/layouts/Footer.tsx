@@ -1,10 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Github, Twitter, Linkedin, Mail, Heart, Shield, Zap, Users, BarChart } from 'lucide-react';
 
-interface FooterProps {
-  apiVersion?: string;
-  buildVersion?: string;
-}
+interface FooterProps { apiVersion?: string;
+  buildVersion?: string; }
 
 const Footer = ({ apiVersion = "v1.0", buildVersion = "2024.8.2" }: FooterProps) => {
   const currentYear = new Date().getFullYear();

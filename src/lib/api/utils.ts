@@ -1,6 +1,5 @@
 // Enhanced API client with comprehensive error handling and types
-import type { 
-  ApiResponse, 
+import type { ApiResponse, 
   PaginatedResponse, 
   User, 
   LoginRequest, 
@@ -8,16 +7,14 @@ import type {
   CreateUserRequest,
   UpdateUserRequest,
   ChangePasswordRequest,
-  UserAnalytics
-} from '@shared/types';
+  UserAnalytics } from '@shared/types';
 
 import { API_CONFIG, API_ENDPOINTS, ERROR_MESSAGES } from './constants';
 
 /**
  * Custom error class for API errors
  */
-export class ApiError extends Error {
-  public status: number;
+export class ApiError extends Error { public status: number;
   public code: string;
   public errors?: Record<string, string[]>;
 
@@ -38,19 +35,16 @@ export class ApiError extends Error {
 /**
  * Request configuration interface
  */
-interface RequestConfig {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+interface RequestConfig { method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   body?: unknown;
   params?: Record<string, string | number | boolean>;
-  timeout?: number;
-}
+  timeout?: number; }
 
 /**
  * Enhanced API client class with retry logic and proper error handling
  */
-class APIClient {
-  private baseURL: string;
+class APIClient { private baseURL: string;
   private defaultTimeout: number;
   private retryAttempts: number;
   private retryDelay: number;
@@ -66,15 +60,13 @@ class APIClient {
   /**
    * Set authentication token
    */
-  setAuthToken(token: string | null): void {
-    this.authToken = token;
+  setAuthToken(token: string | null): void { this.authToken = token;
   }
 
   /**
    * Get authentication token from localStorage
    */
-  private getAuthToken(): string | null {
-    if (this.authToken) return this.authToken;
+  private getAuthToken(): string | null { if (this.authToken) return this.authToken;
     
     if (typeof window !== 'undefined') {
       return localStorage.getItem('auth_token');
@@ -86,8 +78,7 @@ class APIClient {
   /**
    * Build query string from parameters
    */
-  private buildQueryString(params: Record<string, string | number | boolean>): string {
-    const searchParams = new URLSearchParams();
+  private buildQueryString(params: Record<string, string | number | boolean>): string { const searchParams = new URLSearchParams();
     
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -102,8 +93,7 @@ class APIClient {
   /**
    * Get default headers
    */
-  private getDefaultHeaders(): Record<string, string> {
-    const headers: Record<string, string> = {
+  private getDefaultHeaders(): Record<string, string> { const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
 
@@ -118,15 +108,13 @@ class APIClient {
   /**
    * Handle API response
    */
-  private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
-    const contentType = response.headers.get('content-type');
+  private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> { const contentType = response.headers.get('content-type');
     
     let data: ApiResponse<T>;
     
     if (contentType?.includes('application/json')) {
       data = await response.json();
-    } else {
-      // Handle non-JSON responses
+    } else { // Handle non-JSON responses
       const text = await response.text();
       data = {
         success: response.ok,
@@ -135,8 +123,7 @@ class APIClient {
       };
     }
 
-    if (!response.ok) {
-      const errorMessage = data.message || this.getErrorMessage(response.status);
+    if (!response.ok) { const errorMessage = data.message || this.getErrorMessage(response.status);
       throw new ApiError(
         errorMessage,
         response.status,
@@ -151,8 +138,7 @@ class APIClient {
   /**
    * Get error message based on status code
    */
-  private getErrorMessage(status: number): string {
-    switch (status) {
+  private getErrorMessage(status: number): string { switch (status) {
       case 401:
         return ERROR_MESSAGES.UNAUTHORIZED;
       case 403:
@@ -176,15 +162,13 @@ class APIClient {
   /**
    * Sleep utility for retry delays
    */
-  private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  private sleep(ms: number): Promise<void> { return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
    * Check if error is retryable
    */
-  private isRetryableError(error: ApiError): boolean {
-    // Retry on network errors and 5xx server errors
+  private isRetryableError(error: ApiError): boolean { // Retry on network errors and 5xx server errors
     return error.status >= 500 || error.status === 0;
   }
 
@@ -205,21 +189,18 @@ class APIClient {
 
     const url = `${this.baseURL}${endpoint}${params ? this.buildQueryString(params) : ''}`;
     
-    const requestHeaders = {
-      ...this.getDefaultHeaders(),
+    const requestHeaders = { ...this.getDefaultHeaders(),
       ...headers
     };
 
-    const requestConfig: RequestInit = {
-      method,
+    const requestConfig: RequestInit = { method,
       headers: requestHeaders,
       body: body ? JSON.stringify(body) : undefined,
     };
 
     let lastError: ApiError;
 
-    for (let attempt = 0; attempt <= this.retryAttempts; attempt++) {
-      try {
+    for (let attempt = 0; attempt <= this.retryAttempts; attempt++) { try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -231,22 +212,17 @@ class APIClient {
         clearTimeout(timeoutId);
         return await this.handleResponse<T>(response);
 
-      } catch (error) {
-        if (error instanceof ApiError) {
+      } catch (error) { if (error instanceof ApiError) {
           lastError = error;
-        } else if (error instanceof Error) {
-          if (error.name === 'AbortError') {
+        } else if (error instanceof Error) { if (error.name === 'AbortError') {
             lastError = new ApiError(ERROR_MESSAGES.TIMEOUT_ERROR, 408, 'TIMEOUT_ERROR');
-          } else {
-            lastError = new ApiError(ERROR_MESSAGES.NETWORK_ERROR, 0, 'NETWORK_ERROR');
+          } else { lastError = new ApiError(ERROR_MESSAGES.NETWORK_ERROR, 0, 'NETWORK_ERROR');
           }
-        } else {
-          lastError = new ApiError(ERROR_MESSAGES.UNKNOWN_ERROR, 0, 'UNKNOWN_ERROR');
+        } else { lastError = new ApiError(ERROR_MESSAGES.UNKNOWN_ERROR, 0, 'UNKNOWN_ERROR');
         }
 
         // Don't retry on the last attempt or non-retryable errors
-        if (attempt === this.retryAttempts || !this.isRetryableError(lastError)) {
-          break;
+        if (attempt === this.retryAttempts || !this.isRetryableError(lastError)) { break;
         }
 
         // Wait before retrying with exponential backoff
@@ -261,41 +237,35 @@ class APIClient {
   // Authentication API Methods
   // ============================================================================
 
-  async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    return this.request<LoginResponse>(API_ENDPOINTS.LOGIN, {
+  async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> { return this.request<LoginResponse>(API_ENDPOINTS.LOGIN, {
       method: 'POST',
       body: credentials
     });
   }
 
-  async logout(): Promise<ApiResponse<void>> {
-    return this.request<void>(API_ENDPOINTS.LOGOUT, {
+  async logout(): Promise<ApiResponse<void>> { return this.request<void>(API_ENDPOINTS.LOGOUT, {
       method: 'POST'
     });
   }
 
-  async refreshToken(): Promise<ApiResponse<LoginResponse>> {
-    return this.request<LoginResponse>(API_ENDPOINTS.REFRESH_TOKEN, {
+  async refreshToken(): Promise<ApiResponse<LoginResponse>> { return this.request<LoginResponse>(API_ENDPOINTS.REFRESH_TOKEN, {
       method: 'POST'
     });
   }
 
-  async forgotPassword(email: string): Promise<ApiResponse<void>> {
-    return this.request<void>(API_ENDPOINTS.FORGOT_PASSWORD, {
+  async forgotPassword(email: string): Promise<ApiResponse<void>> { return this.request<void>(API_ENDPOINTS.FORGOT_PASSWORD, {
       method: 'POST',
       body: { email }
     });
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<ApiResponse<void>> {
-    return this.request<void>(API_ENDPOINTS.RESET_PASSWORD, {
+  async resetPassword(token: string, newPassword: string): Promise<ApiResponse<void>> { return this.request<void>(API_ENDPOINTS.RESET_PASSWORD, {
       method: 'POST',
       body: { token, new_password: newPassword }
     });
   }
 
-  async changePassword(data: ChangePasswordRequest): Promise<ApiResponse<void>> {
-    return this.request<void>(API_ENDPOINTS.CHANGE_PASSWORD, {
+  async changePassword(data: ChangePasswordRequest): Promise<ApiResponse<void>> { return this.request<void>(API_ENDPOINTS.CHANGE_PASSWORD, {
       method: 'POST',
       body: data
     });
@@ -305,8 +275,7 @@ class APIClient {
   // User API Methods
   // ============================================================================
 
-  async getUsers(params?: {
-    page?: number;
+  async getUsers(params?: { page?: number;
     limit?: number;
     search?: string;
     role?: string;
@@ -320,40 +289,34 @@ class APIClient {
     });
   }
 
-  async getUserById(id: string): Promise<ApiResponse<User>> {
-    return this.request<User>(API_ENDPOINTS.USER_BY_ID(id), {
+  async getUserById(id: string): Promise<ApiResponse<User>> { return this.request<User>(API_ENDPOINTS.USER_BY_ID(id), {
       method: 'GET'
     });
   }
 
-  async createUser(userData: CreateUserRequest): Promise<ApiResponse<User>> {
-    return this.request<User>(API_ENDPOINTS.USERS, {
+  async createUser(userData: CreateUserRequest): Promise<ApiResponse<User>> { return this.request<User>(API_ENDPOINTS.USERS, {
       method: 'POST',
       body: userData
     });
   }
 
-  async updateUser(id: string, userData: UpdateUserRequest): Promise<ApiResponse<User>> {
-    return this.request<User>(API_ENDPOINTS.USER_BY_ID(id), {
+  async updateUser(id: string, userData: UpdateUserRequest): Promise<ApiResponse<User>> { return this.request<User>(API_ENDPOINTS.USER_BY_ID(id), {
       method: 'PUT',
       body: userData
     });
   }
 
-  async deleteUser(id: string): Promise<ApiResponse<void>> {
-    return this.request<void>(API_ENDPOINTS.USER_BY_ID(id), {
+  async deleteUser(id: string): Promise<ApiResponse<void>> { return this.request<void>(API_ENDPOINTS.USER_BY_ID(id), {
       method: 'DELETE'
     });
   }
 
-  async getUserProfile(): Promise<ApiResponse<User>> {
-    return this.request<User>(API_ENDPOINTS.USER_PROFILE, {
+  async getUserProfile(): Promise<ApiResponse<User>> { return this.request<User>(API_ENDPOINTS.USER_PROFILE, {
       method: 'GET'
     });
   }
 
-  async updateUserProfile(userData: Partial<UpdateUserRequest>): Promise<ApiResponse<User>> {
-    return this.request<User>(API_ENDPOINTS.USER_PROFILE, {
+  async updateUserProfile(userData: Partial<UpdateUserRequest>): Promise<ApiResponse<User>> { return this.request<User>(API_ENDPOINTS.USER_PROFILE, {
       method: 'PUT',
       body: userData
     });
@@ -363,8 +326,7 @@ class APIClient {
   // Analytics API Methods
   // ============================================================================
 
-  async getUserAnalytics(): Promise<ApiResponse<UserAnalytics>> {
-    return this.request<UserAnalytics>(API_ENDPOINTS.USER_ANALYTICS, {
+  async getUserAnalytics(): Promise<ApiResponse<UserAnalytics>> { return this.request<UserAnalytics>(API_ENDPOINTS.USER_ANALYTICS, {
       method: 'GET'
     });
   }
@@ -373,8 +335,7 @@ class APIClient {
   // Bulk Operations
   // ============================================================================
 
-  async bulkDeleteUsers(userIds: string[]): Promise<ApiResponse<void>> {
-    return this.request<void>(API_ENDPOINTS.USER_BULK_ACTIONS, {
+  async bulkDeleteUsers(userIds: string[]): Promise<ApiResponse<void>> { return this.request<void>(API_ENDPOINTS.USER_BULK_ACTIONS, {
       method: 'DELETE',
       body: { user_ids: userIds }
     });
@@ -383,8 +344,7 @@ class APIClient {
   async bulkUpdateUsers(
     userIds: string[], 
     updates: Partial<UpdateUserRequest>
-  ): Promise<ApiResponse<void>> {
-    return this.request<void>(API_ENDPOINTS.USER_BULK_ACTIONS, {
+  ): Promise<ApiResponse<void>> { return this.request<void>(API_ENDPOINTS.USER_BULK_ACTIONS, {
       method: 'PUT',
       body: { 
         user_ids: userIds,
@@ -397,12 +357,10 @@ class APIClient {
   // File Upload Methods
   // ============================================================================
 
-  async uploadAvatar(file: File): Promise<ApiResponse<{ url: string }>> {
-    const formData = new FormData();
+  async uploadAvatar(file: File): Promise<ApiResponse<{ url: string }>> { const formData = new FormData();
     formData.append('file', file);
 
-    return this.request<{ url: string }>(API_ENDPOINTS.UPLOAD_AVATAR, {
-      method: 'POST',
+    return this.request<{ url: string }>(API_ENDPOINTS.UPLOAD_AVATAR, { method: 'POST',
       body: formData,
       headers: {
         // Don't set Content-Type for FormData, let browser set it with boundary
@@ -410,12 +368,10 @@ class APIClient {
     });
   }
 
-  async uploadDocument(file: File): Promise<ApiResponse<{ url: string }>> {
-    const formData = new FormData();
+  async uploadDocument(file: File): Promise<ApiResponse<{ url: string }>> { const formData = new FormData();
     formData.append('file', file);
 
-    return this.request<{ url: string }>(API_ENDPOINTS.UPLOAD_DOCUMENTS, {
-      method: 'POST',
+    return this.request<{ url: string }>(API_ENDPOINTS.UPLOAD_DOCUMENTS, { method: 'POST',
       body: formData,
       headers: {
         // Don't set Content-Type for FormData
@@ -431,38 +387,28 @@ export const apiClient = new APIClient();
 export { APIClient };
 
 // Helper functions for common operations
-export const authAPI = {
-  login: (credentials: LoginRequest) => apiClient.login(credentials),
+export const authAPI = { login: (credentials: LoginRequest) => apiClient.login(credentials),
   logout: () => apiClient.logout(),
   refreshToken: () => apiClient.refreshToken(),
   forgotPassword: (email: string) => apiClient.forgotPassword(email),
   resetPassword: (token: string, newPassword: string) => 
     apiClient.resetPassword(token, newPassword),
-  changePassword: (data: ChangePasswordRequest) => apiClient.changePassword(data),
-};
+  changePassword: (data: ChangePasswordRequest) => apiClient.changePassword(data), };
 
-export const userAPI = {
-  getAll: (params?: Parameters<typeof apiClient.getUsers>[0]) => apiClient.getUsers(params),
+export const userAPI = { getAll: (params?: Parameters<typeof apiClient.getUsers>[0]) => apiClient.getUsers(params),
   getById: (id: string) => apiClient.getUserById(id),
   create: (userData: CreateUserRequest) => apiClient.createUser(userData),
   update: (id: string, userData: UpdateUserRequest) => apiClient.updateUser(id, userData),
   delete: (id: string) => apiClient.deleteUser(id),
   getProfile: () => apiClient.getUserProfile(),
   updateProfile: (userData: Partial<UpdateUserRequest>) => 
-    apiClient.updateUserProfile(userData),
-};
+    apiClient.updateUserProfile(userData), };
 
-export const analyticsAPI = {
-  getUserAnalytics: () => apiClient.getUserAnalytics(),
-};
+export const analyticsAPI = { getUserAnalytics: () => apiClient.getUserAnalytics(), };
 
-export const bulkAPI = {
-  deleteUsers: (userIds: string[]) => apiClient.bulkDeleteUsers(userIds),
+export const bulkAPI = { deleteUsers: (userIds: string[]) => apiClient.bulkDeleteUsers(userIds),
   updateUsers: (userIds: string[], updates: Partial<UpdateUserRequest>) => 
-    apiClient.bulkUpdateUsers(userIds, updates),
-};
+    apiClient.bulkUpdateUsers(userIds, updates), };
 
-export const uploadAPI = {
-  avatar: (file: File) => apiClient.uploadAvatar(file),
-  document: (file: File) => apiClient.uploadDocument(file),
-};
+export const uploadAPI = { avatar: (file: File) => apiClient.uploadAvatar(file),
+  document: (file: File) => apiClient.uploadDocument(file), };

@@ -2,28 +2,20 @@
 
 export type ValidationValue = string | number | boolean | null | undefined;
 
-export interface ValidationRule {
-  required?: boolean;
+export interface ValidationRule { required?: boolean;
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  custom?: (value: ValidationValue) => string | null;
-}
+  custom?: (value: ValidationValue) => string | null; }
 
-export interface ValidationErrors {
-  [key: string]: string;
-}
+export interface ValidationErrors { [key: string]: string; }
 
-export interface FormField {
-  value: ValidationValue;
+export interface FormField { value: ValidationValue;
   error?: string;
   touched?: boolean;
-  rules?: ValidationRule;
-}
+  rules?: ValidationRule; }
 
-export interface FormState {
-  [key: string]: FormField;
-}
+export interface FormState { [key: string]: FormField; }
 
 // Email validation regex
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -40,8 +32,7 @@ export const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-z
 /**
  * Validate a single field based on its rules
  */
-export const validateField = (value: ValidationValue, rules: ValidationRule): string | null => {
-  if (rules.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
+export const validateField = (value: ValidationValue, rules: ValidationRule): string | null => { if (rules.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
     return 'This field is required';
   }
 
@@ -54,13 +45,11 @@ export const validateField = (value: ValidationValue, rules: ValidationRule): st
       return `Must be no more than ${rules.maxLength} characters`;
     }
 
-    if (rules.pattern && !rules.pattern.test(value)) {
-      return 'Invalid format';
+    if (rules.pattern && !rules.pattern.test(value)) { return 'Invalid format';
     }
   }
 
-  if (rules.custom) {
-    return rules.custom(value);
+  if (rules.custom) { return rules.custom(value);
   }
 
   return null;
@@ -72,8 +61,7 @@ export const validateField = (value: ValidationValue, rules: ValidationRule): st
 export const validateForm = (formState: FormState): ValidationErrors => {
   const errors: ValidationErrors = {};
 
-  Object.keys(formState).forEach(fieldName => {
-    const field = formState[fieldName];
+  Object.keys(formState).forEach(fieldName => { const field = formState[fieldName];
     if (field?.rules) {
       const error = validateField(field.value, field.rules);
       if (error) {
@@ -88,15 +76,12 @@ export const validateForm = (formState: FormState): ValidationErrors => {
 /**
  * Check if form has any errors
  */
-export const hasFormErrors = (formState: FormState): boolean => {
-  return Object.values(validateForm(formState)).some(error => error !== null);
-};
+export const hasFormErrors = (formState: FormState): boolean => { return Object.values(validateForm(formState)).some(error => error !== null); };
 
 /**
  * Check if form is valid and ready to submit
  */
-export const isFormValid = (formState: FormState): boolean => {
-  const errors = validateForm(formState);
+export const isFormValid = (formState: FormState): boolean => { const errors = validateForm(formState);
   const hasRequiredFields = Object.keys(formState).every(fieldName => {
     const field = formState[fieldName];
     if (field?.rules?.required) {
@@ -111,8 +96,7 @@ export const isFormValid = (formState: FormState): boolean => {
 /**
  * Common validation rules
  */
-export const ValidationRules = {
-  email: {
+export const ValidationRules = { email: {
     required: true,
     pattern: EMAIL_REGEX,
     custom: (value: string) => {
@@ -123,8 +107,7 @@ export const ValidationRules = {
     }
   },
 
-  password: {
-    required: true,
+  password: { required: true,
     minLength: 6,
     custom: (value: string) => {
       if (value && value.length < 6) {
@@ -134,8 +117,7 @@ export const ValidationRules = {
     }
   },
 
-  strongPassword: {
-    required: true,
+  strongPassword: { required: true,
     minLength: 8,
     pattern: STRONG_PASSWORD_REGEX,
     custom: (value: string) => {
@@ -146,12 +128,10 @@ export const ValidationRules = {
     }
   },
 
-  required: {
-    required: true
+  required: { required: true
   },
 
-  phone: {
-    pattern: PHONE_REGEX,
+  phone: { pattern: PHONE_REGEX,
     custom: (value: string) => {
       if (value && !PHONE_REGEX.test(value)) {
         return 'Please enter a valid phone number';
@@ -160,8 +140,7 @@ export const ValidationRules = {
     }
   },
 
-  url: {
-    pattern: URL_REGEX,
+  url: { pattern: URL_REGEX,
     custom: (value: string) => {
       if (value && !URL_REGEX.test(value)) {
         return 'Please enter a valid URL (e.g., https://example.com)';
@@ -170,8 +149,7 @@ export const ValidationRules = {
     }
   },
 
-  username: {
-    required: true,
+  username: { required: true,
     minLength: 3,
     maxLength: 30,
     pattern: /^[a-zA-Z0-9_-]+$/,
@@ -187,8 +165,7 @@ export const ValidationRules = {
 /**
  * Password confirmation validation
  */
-export const passwordConfirmation = (password: string) => ({
-  required: true,
+export const passwordConfirmation = (password: string) => ({ required: true,
   custom: (value: string) => {
     if (value !== password) {
       return 'Passwords do not match';
@@ -203,17 +180,13 @@ export const passwordConfirmation = (password: string) => ({
 import { useState, useCallback, useMemo } from 'react';
 import { logger } from './logger';
 
-export interface UseFormValidationProps {
-  initialValues: Record<string, ValidationValue>;
+export interface UseFormValidationProps { initialValues: Record<string, ValidationValue>;
   validationRules: Record<string, ValidationRule>;
-  onSubmit?: (values: Record<string, ValidationValue>) => void | Promise<void>;
-}
+  onSubmit?: (values: Record<string, ValidationValue>) => void | Promise<void>; }
 
-export const useFormValidation = ({
-  initialValues,
+export const useFormValidation = ({ initialValues,
   validationRules,
-  onSubmit
-}: UseFormValidationProps) => {
+  onSubmit }: UseFormValidationProps) => {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -222,8 +195,7 @@ export const useFormValidation = ({
   // Create form state from current values
   const formState = useMemo(() => {
     const state: FormState = {};
-    Object.keys(values).forEach(key => {
-      state[key] = {
+    Object.keys(values).forEach(key => { state[key] = {
         value: values[key],
         error: errors[key],
         touched: touched[key],
@@ -234,8 +206,7 @@ export const useFormValidation = ({
   }, [values, errors, touched, validationRules]);
 
   // Validate single field
-  const validateSingleField = useCallback((name: string, value: ValidationValue) => {
-    const rules = validationRules[name];
+  const validateSingleField = useCallback((name: string, value: ValidationValue) => { const rules = validationRules[name];
     if (rules) {
       return validateField(value, rules);
     }
@@ -243,35 +214,29 @@ export const useFormValidation = ({
   }, [validationRules]);
 
   // Handle field change
-  const handleChange = useCallback((name: string, value: ValidationValue) => {
-    setValues(prev => ({ ...prev, [name]: value }));
+  const handleChange = useCallback((name: string, value: ValidationValue) => { setValues(prev => ({ ...prev, [name]: value }));
     
     // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+    if (errors[name]) { setErrors(prev => ({ ...prev, [name]: '' }));
     }
   }, [errors]);
 
   // Handle field blur
-  const handleBlur = useCallback((name: string) => {
-    setTouched(prev => ({ ...prev, [name]: true }));
+  const handleBlur = useCallback((name: string) => { setTouched(prev => ({ ...prev, [name]: true }));
     
     const error = validateSingleField(name, values[name]);
-    if (error) {
-      setErrors(prev => ({ ...prev, [name]: error }));
+    if (error) { setErrors(prev => ({ ...prev, [name]: error }));
     }
   }, [validateSingleField, values]);
 
   // Validate entire form
-  const validate = useCallback(() => {
-    const formErrors = validateForm(formState);
+  const validate = useCallback(() => { const formErrors = validateForm(formState);
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   }, [formState]);
 
   // Handle form submission
-  const handleSubmit = useCallback(async (e?: React.FormEvent) => {
-    if (e) {
+  const handleSubmit = useCallback(async (e?: React.FormEvent) => { if (e) {
       e.preventDefault();
     }
 
@@ -279,19 +244,16 @@ export const useFormValidation = ({
     
     // Mark all fields as touched
     const allTouched: Record<string, boolean> = {};
-    Object.keys(values).forEach(key => {
-      allTouched[key] = true;
+    Object.keys(values).forEach(key => { allTouched[key] = true;
     });
     setTouched(allTouched);
 
     // Validate form
     const isValid = validate();
     
-    if (isValid && onSubmit) {
-      try {
+    if (isValid && onSubmit) { try {
         await onSubmit(values);
-      } catch (error) {
-        logger.error('Form submission error', error instanceof Error ? error : new Error(String(error)));
+      } catch (error) { logger.error('Form submission error', error instanceof Error ? error : new Error(String(error)));
       }
     }
 
@@ -308,12 +270,10 @@ export const useFormValidation = ({
   }, [initialValues]);
 
   // Check if form is valid
-  const isValid = useMemo(() => {
-    return isFormValid(formState);
+  const isValid = useMemo(() => { return isFormValid(formState);
   }, [formState]);
 
-  return {
-    values,
+  return { values,
     errors,
     touched,
     isSubmitting,

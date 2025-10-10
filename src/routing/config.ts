@@ -5,44 +5,41 @@ import { DashboardSkeleton, PageSkeleton, TableSkeleton } from '@shared/ui/Skele
 export type RouteGuard = 'public' | 'protected' | 'none';
 export type RouteLayout = 'default' | 'auth' | 'none';
 
-export interface RouteConfig {
-  path: string;
+export interface RouteConfig { path: string;
   component: LazyExoticComponent<ComponentType>;
   layout: RouteLayout;
   guard: RouteGuard;
   title?: string;
   description?: string;
   suspenseFallback?: ReactNode;
-  documentTitleFormatter?: (title: string) => string;
-}
+  documentTitleFormatter?: (title: string) => string; }
 
-const LazyHomePage = lazy(() => import('@features/home/pages/HomePage'));
-const LazyLoginPage = lazy(() => import('@features/auth/pages/LoginPage'));
-const LazyRegisterPage = lazy(() => import('@features/auth/pages/RegisterPage'));
-const LazyEmailConfirmationPage = lazy(() => import('@features/auth/pages/EmailConfirmationPage'));
-const LazyEmailVerificationPage = lazy(() => import('@features/auth/pages/EmailVerificationPage'));
-const LazyForgotPasswordPage = lazy(() => import('@features/auth/pages/ForgotPasswordPage'));
-const LazyResetPasswordPage = lazy(() => import('@features/auth/pages/ResetPasswordPage'));
-const LazyRoleBasedDashboard = lazy(() => import('@features/dashboard/pages/RoleBasedDashboardPage'));
-const LazyUserManagementEnhanced = lazy(() => import('@features/users/pages/UserManagementPage'));
-const LazyAnalytics = lazy(() => import('@features/analytics/pages/AnalyticsPage'));
-const LazyWorkflowManagement = lazy(() => import('@features/workflows/pages/WorkflowManagementPage'));
-const LazyProfilePage = lazy(() => import('@features/profile/pages/ProfilePage'));
-const LazySettingsPage = lazy(() => import('@features/settings/pages/SettingsPage'));
-const LazyHelpPage = lazy(() => import('@features/support/pages/HelpPage'));
-const LazyReportsPage = lazy(() => import('@features/reports/pages/ReportsPage'));
-const LazySecurityPage = lazy(() => import('@features/security/pages/SecurityPage'));
-const LazyModerationPage = lazy(() => import('@features/moderation/pages/ModerationPage'));
-const LazyApprovalsPage = lazy(() => import('@features/workflows/pages/ApprovalsPage'));
-const LazyActivityPage = lazy(() => import('@features/activity/pages/ActivityPage'));
-const LazyAccountPage = lazy(() => import('@features/account/pages/AccountPage'));
-const LazySystemStatus = lazy(() => import('@features/status/pages/SystemStatusPage'));
-const LazyMyWorkflowsPage = lazy(() => import('@features/workflows/pages/MyWorkflowsPage'));
+const LazyHomePage = lazy(() => import('src/domains/home/pages/HomePage'));
+const LazyLoginPage = lazy(() => import('src/domains/auth/pages/LoginPage'));
+const LazyRegisterPage = lazy(() => import('src/domains/auth/pages/RegisterPage'));
+const LazyEmailConfirmationPage = lazy(() => import('src/domains/auth/pages/EmailConfirmationPage'));
+const LazyEmailVerificationPage = lazy(() => import('src/domains/auth/pages/EmailVerificationPage'));
+const LazyForgotPasswordPage = lazy(() => import('src/domains/auth/pages/ForgotPasswordPage'));
+const LazyResetPasswordPage = lazy(() => import('src/domains/auth/pages/ResetPasswordPage'));
+const LazyRoleBasedDashboard = lazy(() => import('src/domains/dashboard/pages/RoleBasedDashboardPage'));
+const LazyUserManagementEnhanced = lazy(() => import('src/domains/users/pages/UserManagementPage'));
+const LazyAnalytics = lazy(() => import('src/domains/analytics/pages/AnalyticsPage'));
+const LazyWorkflowManagement = lazy(() => import('src/domains/workflows/pages/WorkflowManagementPage'));
+const LazyProfilePage = lazy(() => import('src/domains/profile/pages/ProfilePage'));
+const LazySettingsPage = lazy(() => import('src/domains/settings/pages/SettingsPage'));
+const LazyHelpPage = lazy(() => import('src/domains/support/pages/HelpPage'));
+const LazyReportsPage = lazy(() => import('src/domains/reports/pages/ReportsPage'));
+const LazySecurityPage = lazy(() => import('src/domains/security/pages/SecurityPage'));
+const LazyModerationPage = lazy(() => import('src/domains/moderation/pages/ModerationPage'));
+const LazyApprovalsPage = lazy(() => import('src/domains/workflows/pages/ApprovalsPage'));
+const LazyActivityPage = lazy(() => import('src/domains/activity/pages/ActivityPage'));
+const LazyAccountPage = lazy(() => import('src/domains/account/pages/AccountPage'));
+const LazySystemStatus = lazy(() => import('src/domains/status/pages/SystemStatusPage'));
+const LazyMyWorkflowsPage = lazy(() => import('src/domains/workflows/pages/MyWorkflowsPage'));
 const LazyNotFoundPage = lazy(() => import('@shared/pages/NotFoundPage'));
 
 export const routes: RouteConfig[] = [
-  {
-    path: '/',
+  { path: '/',
     component: LazyHomePage,
     layout: 'default',
     guard: 'none',
@@ -54,8 +51,7 @@ export const routes: RouteConfig[] = [
       descriptionLines: 2
     }),
   },
-  {
-    path: '/login',
+  { path: '/login',
   component: LazyLoginPage,
     layout: 'auth',
     guard: 'public',
@@ -67,16 +63,14 @@ export const routes: RouteConfig[] = [
       descriptionLines: 1
     }),
   },
-  {
-    path: '/register',
+  { path: '/register',
     component: LazyRegisterPage,
     layout: 'auth',
     guard: 'public',
     title: 'Register',
     description: 'Create a new account for the user management platform.'
   },
-  {
-    path: '/forgot-password',
+  { path: '/forgot-password',
     component: LazyForgotPasswordPage,
     layout: 'auth',
     guard: 'public',
@@ -88,8 +82,7 @@ export const routes: RouteConfig[] = [
       descriptionLines: 2
     }),
   },
-  {
-    path: '/auth/forgot-password',
+  { path: '/auth/forgot-password',
     component: LazyForgotPasswordPage,
     layout: 'auth',
     guard: 'public',
@@ -101,8 +94,7 @@ export const routes: RouteConfig[] = [
       descriptionLines: 2
     }),
   },
-  {
-    path: '/reset-password',
+  { path: '/reset-password',
     component: LazyResetPasswordPage,
     layout: 'auth',
     guard: 'public',
@@ -114,8 +106,7 @@ export const routes: RouteConfig[] = [
       descriptionLines: 2
     }),
   },
-  {
-    path: '/auth/reset-password',
+  { path: '/auth/reset-password',
     component: LazyResetPasswordPage,
     layout: 'auth',
     guard: 'public',
@@ -127,32 +118,28 @@ export const routes: RouteConfig[] = [
       descriptionLines: 2
     }),
   },
-  {
-    path: '/email-confirmation',
+  { path: '/email-confirmation',
     component: LazyEmailConfirmationPage,
     layout: 'auth',
     guard: 'public',
     title: 'Email Confirmation',
     description: 'Confirm your email address to activate your account.'
   },
-  {
-    path: '/verify-email',
+  { path: '/verify-email',
     component: LazyEmailVerificationPage,
     layout: 'auth',
     guard: 'public',
     title: 'Verify Email',
     description: 'Verify your email to continue with the onboarding process.'
   },
-  {
-    path: '/email-verification',
+  { path: '/email-verification',
     component: LazyEmailVerificationPage,
     layout: 'auth',
     guard: 'public',
     title: 'Email Verification',
     description: 'Verify your email address and unlock full access.'
   },
-  {
-    path: '/dashboard',
+  { path: '/dashboard',
     component: LazyRoleBasedDashboard,
     layout: 'default',
     guard: 'protected',
@@ -160,8 +147,7 @@ export const routes: RouteConfig[] = [
     description: 'View real-time insights and quick actions tailored to your role.',
     suspenseFallback: createElement(DashboardSkeleton),
   },
-  {
-    path: '/users',
+  { path: '/users',
     component: LazyUserManagementEnhanced,
     layout: 'default',
     guard: 'protected',
@@ -169,8 +155,7 @@ export const routes: RouteConfig[] = [
     description: 'Manage users, roles, and access policies across the system.',
     suspenseFallback: createElement(TableSkeleton, { rows: 6, columns: 5 }),
   },
-  {
-    path: '/analytics',
+  { path: '/analytics',
     component: LazyAnalytics,
     layout: 'default',
     guard: 'protected',
@@ -182,8 +167,7 @@ export const routes: RouteConfig[] = [
       descriptionLines: 3
     }),
   },
-  {
-    path: '/workflows',
+  { path: '/workflows',
     component: LazyWorkflowManagement,
     layout: 'default',
     guard: 'protected',
@@ -194,8 +178,7 @@ export const routes: RouteConfig[] = [
       actionCount: 4
     }),
   },
-  {
-    path: '/profile',
+  { path: '/profile',
     component: LazyProfilePage,
     layout: 'default',
     guard: 'protected',
@@ -206,8 +189,7 @@ export const routes: RouteConfig[] = [
       actionCount: 2
     }),
   },
-  {
-    path: '/settings',
+  { path: '/settings',
     component: LazySettingsPage,
     layout: 'default',
     guard: 'protected',
@@ -218,8 +200,7 @@ export const routes: RouteConfig[] = [
       actionCount: 3
     }),
   },
-  {
-    path: '/help',
+  { path: '/help',
     component: LazyHelpPage,
     layout: 'default',
     guard: 'protected',
@@ -231,8 +212,7 @@ export const routes: RouteConfig[] = [
       descriptionLines: 2
     }),
   },
-  {
-    path: '/reports',
+  { path: '/reports',
     component: LazyReportsPage,
     layout: 'default',
     guard: 'protected',
@@ -240,8 +220,7 @@ export const routes: RouteConfig[] = [
     description: 'Generate and review operational reports.',
     suspenseFallback: createElement(TableSkeleton, { rows: 5, columns: 4 }),
   },
-  {
-    path: '/security',
+  { path: '/security',
     component: LazySecurityPage,
     layout: 'default',
     guard: 'protected',
@@ -252,8 +231,7 @@ export const routes: RouteConfig[] = [
       actionCount: 3
     }),
   },
-  {
-    path: '/moderation',
+  { path: '/moderation',
     component: LazyModerationPage,
     layout: 'default',
     guard: 'protected',
@@ -264,8 +242,7 @@ export const routes: RouteConfig[] = [
       actionCount: 4
     }),
   },
-  {
-    path: '/approvals',
+  { path: '/approvals',
     component: LazyApprovalsPage,
     layout: 'default',
     guard: 'protected',
@@ -276,8 +253,7 @@ export const routes: RouteConfig[] = [
       actionCount: 4
     }),
   },
-  {
-    path: '/activity',
+  { path: '/activity',
     component: LazyActivityPage,
     layout: 'default',
     guard: 'protected',
@@ -285,8 +261,7 @@ export const routes: RouteConfig[] = [
     description: 'Audit and review recent activity throughout the platform.',
     suspenseFallback: createElement(TableSkeleton, { rows: 8, columns: 5 }),
   },
-  {
-    path: '/account',
+  { path: '/account',
     component: LazyAccountPage,
     layout: 'default',
     guard: 'protected',
@@ -297,8 +272,7 @@ export const routes: RouteConfig[] = [
       actionCount: 3
     }),
   },
-  {
-    path: '/status',
+  { path: '/status',
     component: LazySystemStatus,
     layout: 'default',
     guard: 'protected',
@@ -310,8 +284,7 @@ export const routes: RouteConfig[] = [
       descriptionLines: 2
     }),
   },
-  {
-    path: '/my-workflows',
+  { path: '/my-workflows',
     component: LazyMyWorkflowsPage,
     layout: 'default',
     guard: 'protected',
@@ -325,8 +298,7 @@ export const routes: RouteConfig[] = [
   }
 ];
 
-export const notFoundRoute: RouteConfig = {
-  path: '*',
+export const notFoundRoute: RouteConfig = { path: '*',
   component: LazyNotFoundPage,
   layout: 'default',
   guard: 'none',

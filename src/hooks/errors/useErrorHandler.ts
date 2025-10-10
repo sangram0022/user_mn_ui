@@ -7,20 +7,17 @@ import { parseApiError, formatErrorForDisplay, isAuthError, errorLogger } from '
 import { logger } from '@shared/utils/logger';
 import type { ParsedError } from '@shared/types/error';
 
-interface UseErrorHandlerReturn {
-  error: ParsedError | null;
+interface UseErrorHandlerReturn { error: ParsedError | null;
   errorMessage: string | null;
   setError: (error: unknown) => void;
   clearError: () => void;
   handleError: (error: unknown, context?: string) => void;
-  isAuthenticationError: boolean;
-}
+  isAuthenticationError: boolean; }
 
 /**
  * Hook for managing and displaying errors with automatic parsing, localization, and logging
  */
-export const useErrorHandler = (): UseErrorHandlerReturn => {
-  const [error, setErrorState] = useState<ParsedError | null>(null);
+export const useErrorHandler = (): UseErrorHandlerReturn => { const [error, setErrorState] = useState<ParsedError | null>(null);
 
   const setError = useCallback((err: unknown) => {
     if (!err) {
@@ -32,12 +29,10 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     setErrorState(parsed);
   }, []);
 
-  const clearError = useCallback(() => {
-    setErrorState(null);
+  const clearError = useCallback(() => { setErrorState(null);
   }, []);
 
-  const handleError = useCallback((err: unknown, context?: string) => {
-    if (!err) return;
+  const handleError = useCallback((err: unknown, context?: string) => { if (!err) return;
     
     const parsed = parseApiError(err);
     setErrorState(parsed);
@@ -46,16 +41,14 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     errorLogger.log(parsed, context ? { component: context } : undefined);
     
     // Log error for debugging (only in development)
-    if (import.meta.env.DEV) {
-      logger.error('[useErrorHandler]', err instanceof Error ? err : new Error(String(err)), { context });
+    if (import.meta.env.DEV) { logger.error('[useErrorHandler]', err instanceof Error ? err : new Error(String(err)), { context });
     }
   }, []);
 
   const errorMessage = error ? error.message : null;
   const isAuthenticationError = error ? isAuthError(error) : false;
 
-  return {
-    error,
+  return { error,
     errorMessage,
     setError,
     clearError,
@@ -67,20 +60,17 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
 /**
  * Hook for displaying error messages as formatted strings
  */
-export const useErrorMessage = () => {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+export const useErrorMessage = () => { const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const showError = useCallback((error: unknown) => {
     const message = formatErrorForDisplay(error);
     setErrorMessage(message);
   }, []);
 
-  const clearError = useCallback(() => {
-    setErrorMessage(null);
+  const clearError = useCallback(() => { setErrorMessage(null);
   }, []);
 
-  return {
-    errorMessage,
+  return { errorMessage,
     showError,
     clearError,
   };

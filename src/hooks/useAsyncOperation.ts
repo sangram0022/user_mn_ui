@@ -8,12 +8,10 @@
  * ```tsx
  * const { execute, isLoading, error, clearError } = useAsyncOperation();
  * 
- * const handleSubmit = async () => {
- *   await execute(async () => {
+ * const handleSubmit = async () => { *   await execute(async () => {
  *     await apiClient.createUser(formData);
- *   }, {
- *     onSuccess: () => console.log('User created'),
- *     onError: (err) => console.error(err)
+ *   }, { *     onSuccess: () => logger.info('User created'),
+ *     onError: (err) => logger.error(err)
  *   });
  * };
  * ```
@@ -21,33 +19,29 @@
 
 import { useState, useCallback } from 'react';
 
-export interface AsyncOperationOptions<T = void> {
-  onSuccess?: (result: T) => void | Promise<void>;
+export interface AsyncOperationOptions<T = void> { onSuccess?: (result: T) => void | Promise<void>;
   onError?: (error: Error) => void | Promise<void>;
   onFinally?: () => void | Promise<void>;
-}
+ }
 
-export interface UseAsyncOperationResult<T = void> {
-  execute: (operation: () => Promise<T>, options?: AsyncOperationOptions<T>) => Promise<T | undefined>;
+export interface UseAsyncOperationResult<T = void> { execute: (operation: () => Promise<T>, options?: AsyncOperationOptions<T>) => Promise<T | undefined>;
   isLoading: boolean;
   error: Error | null;
   clearError: () => void;
   reset: () => void;
-}
+ }
 
 /**
  * Hook for managing async operations with loading and error states
  */
-export function useAsyncOperation<T = void>(): UseAsyncOperationResult<T> {
-  const [isLoading, setIsLoading] = useState(false);
+export function useAsyncOperation<T = void>(): UseAsyncOperationResult<T> { const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const clearError = useCallback(() => {
     setError(null);
   }, []);
 
-  const reset = useCallback(() => {
-    setIsLoading(false);
+  const reset = useCallback(() => { setIsLoading(false);
     setError(null);
   }, []);
 
@@ -55,8 +49,7 @@ export function useAsyncOperation<T = void>(): UseAsyncOperationResult<T> {
     async (
       operation: () => Promise<T>,
       options?: AsyncOperationOptions<T>
-    ): Promise<T | undefined> => {
-      try {
+    ): Promise<T | undefined> => { try {
         setIsLoading(true);
         setError(null);
         
@@ -67,8 +60,7 @@ export function useAsyncOperation<T = void>(): UseAsyncOperationResult<T> {
         }
         
         return result;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Operation failed');
+      } catch (err) { const error = err instanceof Error ? err : new Error('Operation failed');
         setError(error);
         
         if (options?.onError) {
@@ -76,8 +68,7 @@ export function useAsyncOperation<T = void>(): UseAsyncOperationResult<T> {
         }
         
         return undefined;
-      } finally {
-        setIsLoading(false);
+      } finally { setIsLoading(false);
         
         if (options?.onFinally) {
           await options.onFinally();
@@ -87,8 +78,7 @@ export function useAsyncOperation<T = void>(): UseAsyncOperationResult<T> {
     []
   );
 
-  return {
-    execute,
+  return { execute,
     isLoading,
     error,
     clearError,

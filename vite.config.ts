@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'node:url'
+import { analyzer } from 'vite-bundle-analyzer'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -8,8 +9,13 @@ export default defineConfig({
     react({
       // Use automatic JSX runtime
       jsxRuntime: 'automatic'
+    }),
+    // Bundle analyzer - only in analysis mode
+    process.env.ANALYZE === 'true' && analyzer({
+      analyzerMode: 'server',
+      openAnalyzer: true,
     })
-  ],
+  ].filter(Boolean),
   resolve: {
     alias: {
   '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
@@ -34,6 +40,12 @@ export default defineConfig({
     cors: true,
     hmr: {
       overlay: true
+    },
+    // Security headers for development
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block'
     },
     // Proxy API requests to backend to avoid CORS issues
     proxy: {
@@ -60,26 +72,32 @@ export default defineConfig({
   
   // Build optimizations
   build: {
-    target: 'es2022',
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: false,
+    sourcemap: process.env.NODE_ENV === 'development',
     minify: 'esbuild',
     
-    // Rollup options
+    // Rollup options for enhanced code splitting
     rollupOptions: {
       output: {
         manualChunks: {
           // Vendor chunks for better caching
           react: ['react', 'react-dom'],
           router: ['react-router-dom'],
-          icons: ['lucide-react']
+          icons: ['lucide-react'],
+          // Security and validation libs
+          security: ['zod', 'dompurify', 'crypto-js'],
+          // Performance libs
+          performance: ['@tanstack/react-query', 'react-intersection-observer']
         }
       }
     },
     
-    // Chunk size warnings
-    chunkSizeWarningLimit: 1000
+    // Performance optimizations
+    chunkSizeWarningLimit: 600, // Warn if chunk > 600KB
+    
+    // Target modern browsers for better optimization
+    target: ['es2020', 'chrome80', 'firefox78', 'safari14']
   },
   
   // CSS processing
@@ -90,6 +108,20 @@ export default defineConfig({
   // Preview configuration
   preview: {
     port: 4173,
-    open: true
+    open: true,
+    // Production-like security headers
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+      'Referrer-Policy': 'strict-origin-when-cross-origin'
+    }
+  },
+  
+  // Environment variables
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0')
   }
 })

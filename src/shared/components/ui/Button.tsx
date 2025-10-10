@@ -5,20 +5,17 @@ import React, { forwardRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { ComponentSize, ComponentVariant } from '@shared/types';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ComponentVariant;
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { variant?: ComponentVariant;
   size?: ComponentSize;
   loading?: boolean;
   fullWidth?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
-  as?: React.ElementType;
-}
+  as?: React.ElementType; }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      children,
+    { children,
       variant = 'primary',
       size = 'medium',
       loading = false,
@@ -31,8 +28,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ...props
     },
     ref
-  ) => {
-    const baseClasses = [
+  ) => { const baseClasses = [
       'inline-flex items-center justify-center font-medium rounded-md',
       'transition-colors duration-200 ease-in-out',
       'focus:outline-none focus:ring-2 focus:ring-offset-2',
@@ -72,8 +68,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ],
     };
 
-    const sizeClasses = {
-      small: ['px-3 py-1.5 text-sm'],
+    const sizeClasses = { small: ['px-3 py-1.5 text-sm'],
       medium: ['px-4 py-2 text-sm'],
       large: ['px-6 py-3 text-base'],
     };

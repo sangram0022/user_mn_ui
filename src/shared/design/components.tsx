@@ -8,24 +8,19 @@ import type { ReactNode } from 'react';
 import { designTokens, designUtils } from './tokens';
 
 // Base component props
-interface BaseProps {
-  className?: string;
-  children?: ReactNode;
-}
+interface BaseProps { className?: string;
+  children?: ReactNode; }
 
 // Button component props and variants
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: keyof typeof designTokens.variants.button;
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { variant?: keyof typeof designTokens.variants.button;
   size?: keyof typeof designTokens.sizes.button;
   loading?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
-  fullWidth?: boolean;
-}
+  fullWidth?: boolean; }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ 
-    variant = 'primary', 
+  ({ variant = 'primary', 
     size = 'md', 
     loading = false,
     leftIcon,
@@ -92,8 +87,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button';
 
 // Input component props and variants
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  variant?: 'default';
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> { variant?: 'default';
   inputSize?: keyof typeof designTokens.sizes.input;
   error?: boolean;
   success?: boolean;
@@ -101,12 +95,10 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   rightIcon?: ReactNode;
   label?: string;
   helperText?: string;
-  errorText?: string;
-}
+  errorText?: string; }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({
-    variant: _variant = 'default',
+  ({ variant: _variant = 'default',
     inputSize = 'md',
     error = false,
     success = false,
@@ -118,19 +110,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     className,
     disabled,
     ...props
-  }, ref) => {
-    const baseClass = designTokens.baseClasses.input;
+  }, ref) => { const baseClass = designTokens.baseClasses.input;
     const sizeClass = designTokens.sizes.input[inputSize];
     
     let variantClass: string;
     if (disabled) {
       variantClass = designTokens.variants.input.default.disabled;
-    } else if (error) {
-      variantClass = designTokens.variants.input.default.error;
-    } else if (success) {
-      variantClass = designTokens.variants.input.default.success;
-    } else {
-      variantClass = designTokens.variants.input.default.base;
+    } else if (error) { variantClass = designTokens.variants.input.default.error;
+    } else if (success) { variantClass = designTokens.variants.input.default.success;
+    } else { variantClass = designTokens.variants.input.default.base;
     }
     
     const hasIcons = leftIcon || rightIcon;
@@ -182,11 +170,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = 'Input';
 
 // Card component
-export interface CardProps extends BaseProps {
-  padding?: keyof typeof designTokens.spacing;
+export interface CardProps extends BaseProps { padding?: keyof typeof designTokens.spacing;
   hover?: boolean;
-  border?: boolean;
-}
+  border?: boolean; }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ padding = '6', hover = false, border = true, className, children, ...props }, ref) => {
@@ -214,17 +200,14 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
 Card.displayName = 'Card';
 
 // Alert component
-export interface AlertProps extends BaseProps {
-  variant?: keyof typeof designTokens.variants.alert;
+export interface AlertProps extends BaseProps { variant?: keyof typeof designTokens.variants.alert;
   icon?: ReactNode;
   title?: string;
   dismissible?: boolean;
-  onDismiss?: () => void;
-}
+  onDismiss?: () => void; }
 
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(
-  ({ 
-    variant = 'info', 
+  ({ variant = 'info', 
     icon, 
     title, 
     dismissible = false, 
@@ -286,15 +269,12 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(
 Alert.displayName = 'Alert';
 
 // Badge component
-export interface BadgeProps extends BaseProps {
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error';
+export interface BadgeProps extends BaseProps { variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error';
   size?: 'sm' | 'md' | 'lg';
-  dot?: boolean;
-}
+  dot?: boolean; }
 
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ variant = 'primary', size = 'md', dot = false, className, children, ...props }, ref) => {
-    const baseClass = 'inline-flex items-center font-medium rounded-full';
+  ({ variant = 'primary', size = 'md', dot = false, className, children, ...props }, ref) => { const baseClass = 'inline-flex items-center font-medium rounded-full';
     
     const variantClasses = {
       primary: 'bg-primary-100 text-primary-800',
@@ -304,8 +284,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
       error: 'bg-error-100 text-error-800'
     };
     
-    const sizeClasses = {
-      sm: dot ? 'w-2 h-2' : 'px-2.5 py-0.5 text-xs',
+    const sizeClasses = { sm: dot ? 'w-2 h-2' : 'px-2.5 py-0.5 text-xs',
       md: dot ? 'w-2.5 h-2.5' : 'px-3 py-0.5 text-sm',
       lg: dot ? 'w-3 h-3' : 'px-3 py-1 text-sm'
     };
@@ -328,26 +307,21 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
 Badge.displayName = 'Badge';
 
 // Modal component
-export interface ModalProps extends BaseProps {
-  isOpen: boolean;
+export interface ModalProps extends BaseProps { isOpen: boolean;
   onClose: () => void;
   title?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   closeOnOverlayClick?: boolean;
-  showCloseButton?: boolean;
-}
+  showCloseButton?: boolean; }
 
-export const Modal: React.FC<ModalProps> = ({
-  isOpen,
+export const Modal: React.FC<ModalProps> = ({ isOpen,
   onClose,
   title,
   size = 'md',
   closeOnOverlayClick = true,
   showCloseButton = true,
   className,
-  children
-}) => {
-  if (!isOpen) return null;
+  children }) => { if (!isOpen) return null;
   
   const sizeClasses = {
     sm: 'max-w-md',
@@ -357,14 +331,12 @@ export const Modal: React.FC<ModalProps> = ({
     full: 'max-w-full mx-4'
   };
   
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget && closeOnOverlayClick) {
+  const handleOverlayClick = (e: React.MouseEvent) => { if (e.target === e.currentTarget && closeOnOverlayClick) {
       onClose();
     }
   };
   
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
+  const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Escape') {
       onClose();
     }
   };
@@ -419,10 +391,8 @@ export const Modal: React.FC<ModalProps> = ({
 };
 
 // Loading Spinner component
-export interface SpinnerProps extends BaseProps {
-  size?: keyof typeof designTokens.sizes.icon;
-  color?: string;
-}
+export interface SpinnerProps extends BaseProps { size?: keyof typeof designTokens.sizes.icon;
+  color?: string; }
 
 export const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
   ({ size = 'md', color = 'text-primary-500', className, ...props }, ref) => {

@@ -1,40 +1,32 @@
 import type { FC, ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 
-import { useAuth } from '@features/auth';
+import { useAuth } from 'src/domains/auth';
 import Loading from '@shared/ui/Loading';
 
-interface RouteGuardProps {
-  children: ReactNode;
-}
+interface RouteGuardProps { children: ReactNode; }
 
 const FullScreenLoader: FC = () => (
   <Loading fullScreen overlay text="Loading..." />
 );
 
-export const ProtectedRoute: FC<RouteGuardProps> = ({ children }) => {
-  const { user, isLoading } = useAuth();
+export const ProtectedRoute: FC<RouteGuardProps> = ({ children }) => { const { user, isLoading } = useAuth();
 
-  if (isLoading) {
-    return <FullScreenLoader />;
+  if (isLoading) { return <FullScreenLoader />;
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  if (!user) { return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
 };
 
-export const PublicRoute: FC<RouteGuardProps> = ({ children }) => {
-  const { user, isLoading } = useAuth();
+export const PublicRoute: FC<RouteGuardProps> = ({ children }) => { const { user, isLoading } = useAuth();
 
-  if (isLoading) {
-    return <FullScreenLoader />;
+  if (isLoading) { return <FullScreenLoader />;
   }
 
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
+  if (user) { return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

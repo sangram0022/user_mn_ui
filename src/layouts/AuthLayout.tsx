@@ -2,9 +2,7 @@ import type { FC, ReactNode } from 'react';
 
 import Footer from './Footer';
 
-export interface AuthLayoutProps {
-  children: ReactNode;
-}
+export interface AuthLayoutProps { children: ReactNode; }
 
 const AuthLayout: FC<AuthLayoutProps> = ({ children }) => (
   <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 via-white to-gray-100">

@@ -9,8 +9,7 @@
  * const pagination = usePagination({ pageSize: 20 });
  * 
  * // Fetch data
- * const data = await apiClient.getUsers({
- *   skip: pagination.skip,
+ * const data = await apiClient.getUsers({ *   skip: pagination.skip,
  *   limit: pagination.limit
  * });
  * 
@@ -24,20 +23,15 @@
 
 import { useState, useCallback, useMemo } from 'react';
 
-export interface PaginationState {
-  page: number;
+export interface PaginationState { page: number;
   pageSize: number;
-  total: number;
-}
+  total: number; }
 
-export interface UsePaginationOptions {
-  initialPage?: number;
+export interface UsePaginationOptions { initialPage?: number;
   pageSize?: number;
-  initialTotal?: number;
-}
+  initialTotal?: number; }
 
-export interface UsePaginationResult {
-  // Current state
+export interface UsePaginationResult { // Current state
   page: number;
   pageSize: number;
   total: number;
@@ -55,14 +49,12 @@ export interface UsePaginationResult {
   setPageSize: (pageSize: number) => void;
   nextPage: () => void;
   previousPage: () => void;
-  reset: () => void;
-}
+  reset: () => void; }
 
 /**
  * Hook for managing pagination state
  */
-export function usePagination(options: UsePaginationOptions = {}): UsePaginationResult {
-  const {
+export function usePagination(options: UsePaginationOptions = {}): UsePaginationResult { const {
     initialPage = 0,
     pageSize: initialPageSize = 25,
     initialTotal = 0
@@ -80,35 +72,29 @@ export function usePagination(options: UsePaginationOptions = {}): UsePagination
   const hasPreviousPage = useMemo(() => page > 0, [page]);
 
   // Actions
-  const setPage = useCallback((newPage: number) => {
-    setPageState(Math.max(0, newPage));
+  const setPage = useCallback((newPage: number) => { setPageState(Math.max(0, newPage));
   }, []);
 
-  const setPageSize = useCallback((newPageSize: number) => {
-    setPageSizeState(newPageSize);
+  const setPageSize = useCallback((newPageSize: number) => { setPageSizeState(newPageSize);
     setPageState(0); // Reset to first page when page size changes
   }, []);
 
-  const nextPage = useCallback(() => {
-    if (hasNextPage) {
+  const nextPage = useCallback(() => { if (hasNextPage) {
       setPageState(prev => prev + 1);
     }
   }, [hasNextPage]);
 
-  const previousPage = useCallback(() => {
-    if (hasPreviousPage) {
+  const previousPage = useCallback(() => { if (hasPreviousPage) {
       setPageState(prev => prev - 1);
     }
   }, [hasPreviousPage]);
 
-  const reset = useCallback(() => {
-    setPageState(initialPage);
+  const reset = useCallback(() => { setPageState(initialPage);
     setPageSizeState(initialPageSize);
     setTotal(initialTotal);
   }, [initialPage, initialPageSize, initialTotal]);
 
-  return {
-    page,
+  return { page,
     pageSize,
     total,
     skip,

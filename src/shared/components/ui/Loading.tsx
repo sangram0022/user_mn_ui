@@ -5,32 +5,25 @@ import React, { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { ComponentSize } from '@shared/types';
 
-export interface LoadingProps {
-  size?: ComponentSize;
+export interface LoadingProps { size?: ComponentSize;
   text?: string;
   variant?: 'spinner' | 'skeleton' | 'dots';
   fullScreen?: boolean;
-  className?: string;
-}
+  className?: string; }
 
-export interface SkeletonProps {
-  className?: string;
+export interface SkeletonProps { className?: string;
   lines?: number;
   width?: string | number;
   height?: string | number;
   circular?: boolean;
-  animation?: 'pulse' | 'wave' | 'none';
-}
+  animation?: 'pulse' | 'wave' | 'none'; }
 
 // Main Loading component
-const Loading: React.FC<LoadingProps> = ({
-  size = 'medium',
+const Loading: React.FC<LoadingProps> = ({ size = 'medium',
   text = 'Loading...',
   variant = 'spinner',
   fullScreen = false,
-  className = '',
-}) => {
-  const sizeClasses = {
+  className = '', }) => { const sizeClasses = {
     small: 'w-4 h-4',
     medium: 'w-8 h-8',
     large: 'w-12 h-12',
@@ -79,15 +72,12 @@ const Loading: React.FC<LoadingProps> = ({
 };
 
 // Skeleton component
-export const Skeleton: React.FC<SkeletonProps> = ({
-  className = '',
+export const Skeleton: React.FC<SkeletonProps> = ({ className = '',
   lines = 3,
   width = '100%',
   height = '1rem',
   circular = false,
-  animation = 'pulse',
-}) => {
-  const baseClasses = [
+  animation = 'pulse', }) => { const baseClasses = [
     'bg-gray-200 rounded',
     circular ? 'rounded-full' : 'rounded',
   ];
@@ -119,8 +109,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
         <div
           key={i}
           className={skeletonClasses}
-          style={{
-            ...style,
+          style={{ ...style,
             width: i === lines - 1 ? '75%' : style.width, // Last line is shorter
           }}
         />
@@ -130,17 +119,13 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 };
 
 // Suspense boundary with loading fallback
-export interface SuspenseBoundaryProps {
-  children: React.ReactNode;
+export interface SuspenseBoundaryProps { children: React.ReactNode;
   fallback?: React.ReactNode;
-  loadingText?: string;
-}
+  loadingText?: string; }
 
-export const SuspenseBoundary: React.FC<SuspenseBoundaryProps> = ({
-  children,
+export const SuspenseBoundary: React.FC<SuspenseBoundaryProps> = ({ children,
   fallback,
-  loadingText = 'Loading content...',
-}) => {
+  loadingText = 'Loading content...', }) => {
   const defaultFallback = <Loading text={loadingText} variant="spinner" />;
   
   return (

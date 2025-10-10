@@ -4,12 +4,10 @@ import type { ApiEndpoints, TableColumn, FilterOption, User } from '../types';
 /**
  * API Configuration
  */
-export const API_CONFIG = {
-  BASE_URL: import.meta.env['VITE_API_BASE_URL'] || '', // Use empty string to use relative URLs with proxy
+export const API_CONFIG = { BASE_URL: import.meta.env['VITE_API_BASE_URL'] || '', // Use empty string to use relative URLs with proxy
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
-  RETRY_DELAY: 1000,
-} as const;
+  RETRY_DELAY: 1000, } as const;
 
 /**
  * API Endpoints
@@ -48,15 +46,13 @@ export const API_ENDPOINTS: ApiEndpoints = {
 /**
  * User Roles with hierarchical permissions
  */
-export const USER_ROLES = {
-  super_admin: {
+export const USER_ROLES = { super_admin: {
     label: 'Super Admin',
     level: 100,
     permissions: ['*'],
     color: 'bg-red-500 text-white'
   },
-  admin: {
-    label: 'Administrator',
+  admin: { label: 'Administrator',
     level: 80,
     permissions: [
       'users.read', 'users.write', 'users.delete',
@@ -65,8 +61,7 @@ export const USER_ROLES = {
     ],
     color: 'bg-purple-500 text-white'
   },
-  moderator: {
-    label: 'Moderator',
+  moderator: { label: 'Moderator',
     level: 60,
     permissions: [
       'users.read', 'users.write',
@@ -74,16 +69,14 @@ export const USER_ROLES = {
     ],
     color: 'bg-blue-500 text-white'
   },
-  user: {
-    label: 'User',
+  user: { label: 'User',
     level: 20,
     permissions: [
       'profile.read', 'profile.write'
     ],
     color: 'bg-green-500 text-white'
   },
-  guest: {
-    label: 'Guest',
+  guest: { label: 'Guest',
     level: 0,
     permissions: ['profile.read'],
     color: 'bg-gray-500 text-white'
@@ -93,24 +86,20 @@ export const USER_ROLES = {
 /**
  * User Status Configuration
  */
-export const USER_STATUS = {
-  active: {
+export const USER_STATUS = { active: {
     label: 'Active',
     color: 'bg-green-100 text-green-800',
     icon: 'CheckCircle'
   },
-  inactive: {
-    label: 'Inactive',
+  inactive: { label: 'Inactive',
     color: 'bg-gray-100 text-gray-800',
     icon: 'XCircle'
   },
-  pending: {
-    label: 'Pending',
+  pending: { label: 'Pending',
     color: 'bg-yellow-100 text-yellow-800',
     icon: 'Clock'
   },
-  suspended: {
-    label: 'Suspended',
+  suspended: { label: 'Suspended',
     color: 'bg-red-100 text-red-800',
     icon: 'AlertTriangle'
   }
@@ -120,44 +109,37 @@ export const USER_STATUS = {
  * Table Configuration for User Management
  */
 export const USER_TABLE_COLUMNS: TableColumn<User>[] = [
-  {
-    key: 'id',
+  { key: 'id',
     label: 'ID',
     sortable: true,
     width: '80px'
   },
-  {
-    key: 'full_name',
+  { key: 'full_name',
     label: 'Name',
     sortable: true,
     width: '200px'
   },
-  {
-    key: 'email',
+  { key: 'email',
     label: 'Email',
     sortable: true,
     width: '250px'
   },
-  {
-    key: 'role',
+  { key: 'role',
     label: 'Role',
     sortable: true,
     width: '120px'
   },
-  {
-    key: 'is_active',
+  { key: 'is_active',
     label: 'Status',
     sortable: true,
     width: '100px'
   },
-  {
-    key: 'created_at',
+  { key: 'created_at',
     label: 'Created',
     sortable: true,
     width: '120px'
   },
-  {
-    key: 'last_login_at',
+  { key: 'last_login_at',
     label: 'Last Login',
     sortable: true,
     width: '120px'
@@ -168,8 +150,7 @@ export const USER_TABLE_COLUMNS: TableColumn<User>[] = [
  * Filter Options for User Management
  */
 export const USER_FILTERS: FilterOption[] = [
-  {
-    key: 'role',
+  { key: 'role',
     label: 'Role',
     type: 'select',
     options: Object.entries(USER_ROLES).map(([value, config]) => ({
@@ -177,8 +158,7 @@ export const USER_FILTERS: FilterOption[] = [
       label: (config as { label: string }).label
     }))
   },
-  {
-    key: 'status',
+  { key: 'status',
     label: 'Status',
     type: 'select',
     options: Object.entries(USER_STATUS).map(([value, config]) => ({
@@ -186,13 +166,11 @@ export const USER_FILTERS: FilterOption[] = [
       label: (config as { label: string }).label
     }))
   },
-  {
-    key: 'dateRange',
+  { key: 'dateRange',
     label: 'Created Date',
     type: 'dateRange'
   },
-  {
-    key: 'lastLogin',
+  { key: 'lastLogin',
     label: 'Last Login',
     type: 'dateRange'
   }
@@ -201,17 +179,14 @@ export const USER_FILTERS: FilterOption[] = [
 /**
  * Pagination Configuration
  */
-export const PAGINATION_CONFIG = {
-  DEFAULT_PAGE_SIZE: 10,
+export const PAGINATION_CONFIG = { DEFAULT_PAGE_SIZE: 10,
   PAGE_SIZE_OPTIONS: [5, 10, 25, 50, 100],
-  MAX_VISIBLE_PAGES: 5
-} as const;
+  MAX_VISIBLE_PAGES: 5 } as const;
 
 /**
  * Validation Rules
  */
-export const VALIDATION_RULES = {
-  EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+export const VALIDATION_RULES = { EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   PHONE: /^\+?[\d\s\-()]+$/,
   PASSWORD: {
     MIN_LENGTH: 8,
@@ -221,13 +196,11 @@ export const VALIDATION_RULES = {
     REQUIRE_SPECIAL_CHARS: true,
     PATTERN: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/
   },
-  USERNAME: {
-    MIN_LENGTH: 3,
+  USERNAME: { MIN_LENGTH: 3,
     MAX_LENGTH: 30,
     PATTERN: /^[a-zA-Z0-9_]+$/
   },
-  NAME: {
-    MIN_LENGTH: 2,
+  NAME: { MIN_LENGTH: 2,
     MAX_LENGTH: 50,
     PATTERN: /^[a-zA-Z\s]+$/
   }
@@ -236,14 +209,12 @@ export const VALIDATION_RULES = {
 /**
  * File Upload Configuration
  */
-export const UPLOAD_CONFIG = {
-  AVATAR: {
+export const UPLOAD_CONFIG = { AVATAR: {
     MAX_SIZE: 5 * 1024 * 1024, // 5MB
     ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
     MAX_DIMENSIONS: { width: 1024, height: 1024 }
   },
-  DOCUMENTS: {
-    MAX_SIZE: 10 * 1024 * 1024, // 10MB
+  DOCUMENTS: { MAX_SIZE: 10 * 1024 * 1024, // 10MB
     ALLOWED_TYPES: [
       'application/pdf',
       'application/msword',
@@ -256,8 +227,7 @@ export const UPLOAD_CONFIG = {
 /**
  * Application Settings
  */
-export const APP_CONFIG = {
-  NAME: 'User Management System',
+export const APP_CONFIG = { NAME: 'User Management System',
   VERSION: '2.0.0',
   DESCRIPTION: 'Advanced User Management with Analytics',
   COMPANY: 'Your Company',
@@ -277,23 +247,20 @@ export const APP_CONFIG = {
   },
 
   // UI Configuration
-  UI: {
-    THEME: 'light' as 'light' | 'dark' | 'auto',
+  UI: { THEME: 'light' as 'light' | 'dark' | 'auto',
     ANIMATIONS: true,
     COMPACT_MODE: false,
     SIDEBAR_COLLAPSED: false
   },
 
   // Cache Configuration
-  CACHE: {
-    USER_LIST_TTL: 5 * 60 * 1000, // 5 minutes
+  CACHE: { USER_LIST_TTL: 5 * 60 * 1000, // 5 minutes
     ANALYTICS_TTL: 10 * 60 * 1000, // 10 minutes
     SETTINGS_TTL: 30 * 60 * 1000, // 30 minutes
   },
 
   // Security Settings
-  SECURITY: {
-    SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
+  SECURITY: { SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
     INACTIVITY_WARNING: 5 * 60 * 1000, // 5 minutes before timeout
     MAX_LOGIN_ATTEMPTS: 5,
     LOCKOUT_DURATION: 15 * 60 * 1000, // 15 minutes
@@ -304,8 +271,7 @@ export const APP_CONFIG = {
 /**
  * Error Messages
  */
-export const ERROR_MESSAGES = {
-  NETWORK_ERROR: 'Network error. Please check your connection.',
+export const ERROR_MESSAGES = { NETWORK_ERROR: 'Network error. Please check your connection.',
   UNAUTHORIZED: 'You are not authorized to perform this action.',
   FORBIDDEN: 'Access denied. Insufficient permissions.',
   NOT_FOUND: 'The requested resource was not found.',
@@ -328,14 +294,12 @@ export const ERROR_MESSAGES = {
   PASSWORD_TOO_WEAK: 'Password must contain at least 8 characters with uppercase, lowercase, numbers, and special characters.',
   PASSWORDS_DONT_MATCH: 'Passwords do not match.',
   USERNAME_TAKEN: 'Username is already taken.',
-  EMAIL_TAKEN: 'Email address is already registered.'
-} as const;
+  EMAIL_TAKEN: 'Email address is already registered.' } as const;
 
 /**
  * Success Messages
  */
-export const SUCCESS_MESSAGES = {
-  USER_CREATED: 'User created successfully.',
+export const SUCCESS_MESSAGES = { USER_CREATED: 'User created successfully.',
   USER_UPDATED: 'User updated successfully.',
   USER_DELETED: 'User deleted successfully.',
   PASSWORD_CHANGED: 'Password changed successfully.',
@@ -344,28 +308,24 @@ export const SUCCESS_MESSAGES = {
   SETTINGS_SAVED: 'Settings saved successfully.',
   EXPORT_COMPLETED: 'Export completed successfully.',
   IMPORT_COMPLETED: 'Import completed successfully.',
-  BULK_ACTION_COMPLETED: 'Bulk action completed successfully.'
-} as const;
+  BULK_ACTION_COMPLETED: 'Bulk action completed successfully.' } as const;
 
 /**
  * Local Storage Keys
  */
-export const STORAGE_KEYS = {
-  AUTH_TOKEN: 'auth_token',
+export const STORAGE_KEYS = { AUTH_TOKEN: 'auth_token',
   REFRESH_TOKEN: 'refresh_token',
   USER_PREFERENCES: 'user_preferences',
   THEME: 'theme',
   LANGUAGE: 'language',
   SIDEBAR_STATE: 'sidebar_state',
   TABLE_SETTINGS: 'table_settings',
-  RECENT_SEARCHES: 'recent_searches'
-} as const;
+  RECENT_SEARCHES: 'recent_searches' } as const;
 
 /**
  * Event Names for Analytics
  */
-export const ANALYTICS_EVENTS = {
-  USER_LOGIN: 'user_login',
+export const ANALYTICS_EVENTS = { USER_LOGIN: 'user_login',
   USER_LOGOUT: 'user_logout',
   USER_CREATED: 'user_created',
   USER_UPDATED: 'user_updated',
@@ -378,5 +338,4 @@ export const ANALYTICS_EVENTS = {
   BULK_ACTION_PERFORMED: 'bulk_action_performed',
   SEARCH_PERFORMED: 'search_performed',
   FILTER_APPLIED: 'filter_applied',
-  PAGE_VIEW: 'page_view'
-} as const;
+  PAGE_VIEW: 'page_view' } as const;

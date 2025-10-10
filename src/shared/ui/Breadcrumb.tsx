@@ -2,13 +2,10 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 
-interface BreadcrumbItem {
-  label: string;
-  path: string;
-}
+interface BreadcrumbItem { label: string;
+  path: string; }
 
-const Breadcrumb: React.FC = () => {
-  const location = useLocation();
+const Breadcrumb: React.FC = () => { const location = useLocation();
 
   const routeNames: Record<string, string> = {
     dashboard: 'Dashboard',
@@ -26,8 +23,7 @@ const Breadcrumb: React.FC = () => {
     help: 'Help & Support',
   };
 
-  const generateBreadcrumbs = (): BreadcrumbItem[] => {
-    const pathSegments = location.pathname.split('/').filter((segment) => segment !== '');
+  const generateBreadcrumbs = (): BreadcrumbItem[] => { const pathSegments = location.pathname.split('/').filter((segment) => segment !== '');
 
     const breadcrumbs: BreadcrumbItem[] = [{ label: 'Home', path: '/' }];
 
@@ -43,8 +39,7 @@ const Breadcrumb: React.FC = () => {
 
   const breadcrumbs = generateBreadcrumbs();
 
-  if (location.pathname === '/' || location.pathname === '/login') {
-    return null;
+  if (location.pathname === '/' || location.pathname === '/login') { return null;
   }
 
   return (

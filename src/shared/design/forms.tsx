@@ -10,23 +10,19 @@ import { Input } from './components';
 import type { InputProps } from './components';
 
 // Form Field Wrapper
-export interface FormFieldProps {
-  label?: string;
+export interface FormFieldProps { label?: string;
   error?: string;
   helperText?: string;
   required?: boolean;
   children: ReactNode;
-  className?: string;
-}
+  className?: string; }
 
-export const FormField: React.FC<FormFieldProps> = ({
-  label,
+export const FormField: React.FC<FormFieldProps> = ({ label,
   error,
   helperText,
   required = false,
   children,
-  className
-}) => {
+  className }) => {
   return (
     <div className={designUtils.buildClass('space-y-1', className)}>
       {label && (
@@ -46,8 +42,7 @@ export const FormField: React.FC<FormFieldProps> = ({
 };
 
 // Enhanced Input with better validation
-export interface FormInputProps extends Omit<InputProps, 'error' | 'helperText' | 'errorText'> {
-  label?: string;
+export interface FormInputProps extends Omit<InputProps, 'error' | 'helperText' | 'errorText'> { label?: string;
   error?: string;
   helperText?: string;
   validation?: {
@@ -61,8 +56,7 @@ export interface FormInputProps extends Omit<InputProps, 'error' | 'helperText' 
 }
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
-  ({ 
-    label, 
+  ({ label, 
     error, 
     helperText, 
     validation,
@@ -74,8 +68,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
     onChange,
     onBlur,
     ...props 
-  }, ref) => {
-    const [internalError, setInternalError] = useState<string>('');
+  }, ref) => { const [internalError, setInternalError] = useState<string>('');
     const [touched, setTouched] = useState(false);
     
     const currentValue = typeof value === 'string' ? value : '';
@@ -96,26 +89,22 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         return `Maximum ${validation.maxLength} characters allowed`;
       }
       
-      if (validation.pattern && !validation.pattern.test(val)) {
-        return 'Invalid format';
+      if (validation.pattern && !validation.pattern.test(val)) { return 'Invalid format';
       }
       
-      if (validation.custom) {
-        return validation.custom(val) || '';
+      if (validation.custom) { return validation.custom(val) || '';
       }
       
       return '';
     };
     
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      setTouched(true);
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => { setTouched(true);
       const validationError = validateValue(e.target.value);
       setInternalError(validationError);
       onBlur?.(e);
     };
     
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (touched) {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { if (touched) {
         const validationError = validateValue(e.target.value);
         setInternalError(validationError);
       }
@@ -154,24 +143,19 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
 FormInput.displayName = 'FormInput';
 
 // Select Component
-export interface SelectOption {
-  value: string;
+export interface SelectOption { value: string;
   label: string;
-  disabled?: boolean;
-}
+  disabled?: boolean; }
 
-export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'> {
-  label?: string;
+export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'> { label?: string;
   error?: string;
   helperText?: string;
   options: SelectOption[];
   placeholder?: string;
-  inputSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-}
+  inputSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'; }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ 
-    label, 
+  ({ label, 
     error, 
     helperText, 
     options, 
@@ -179,8 +163,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     inputSize = 'md',
     className,
     ...props 
-  }, ref) => {
-    const sizeClasses = {
+  }, ref) => { const sizeClasses = {
       xs: 'px-2.5 py-1.5 text-xs',
       sm: 'px-3 py-2 text-sm',
       md: 'px-3 py-2 text-sm',
@@ -227,17 +210,14 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 Select.displayName = 'Select';
 
 // Textarea Component
-export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label?: string;
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> { label?: string;
   error?: string;
   helperText?: string;
   resize?: 'none' | 'vertical' | 'horizontal' | 'both';
-  showCharCount?: boolean;
-}
+  showCharCount?: boolean; }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ 
-    label, 
+  ({ label, 
     error, 
     helperText, 
     resize = 'vertical',
@@ -246,8 +226,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     maxLength,
     value = '',
     ...props 
-  }, ref) => {
-    const resizeClasses = {
+  }, ref) => { const resizeClasses = {
       none: 'resize-none',
       vertical: 'resize-y',
       horizontal: 'resize-x',
@@ -293,25 +272,21 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 Textarea.displayName = 'Textarea';
 
 // Checkbox Component
-export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
-  label?: string;
+export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> { label?: string;
   description?: string;
   error?: string;
   size?: 'sm' | 'md' | 'lg';
-  indeterminate?: boolean;
-}
+  indeterminate?: boolean; }
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ 
-    label, 
+  ({ label, 
     description, 
     error,
     size = 'md',
     indeterminate: _indeterminate = false,
     className,
     ...props 
-  }, ref) => {
-    const sizeClasses = {
+  }, ref) => { const sizeClasses = {
       sm: 'h-4 w-4',
       md: 'h-5 w-5',
       lg: 'h-6 w-6'
@@ -365,15 +340,12 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 Checkbox.displayName = 'Checkbox';
 
 // Radio Group Component
-export interface RadioOption {
-  value: string;
+export interface RadioOption { value: string;
   label: string;
   description?: string;
-  disabled?: boolean;
-}
+  disabled?: boolean; }
 
-export interface RadioGroupProps {
-  name: string;
+export interface RadioGroupProps { name: string;
   value?: string;
   onChange?: (value: string) => void;
   options: RadioOption[];
@@ -381,11 +353,9 @@ export interface RadioGroupProps {
   error?: string;
   orientation?: 'horizontal' | 'vertical';
   size?: 'sm' | 'md' | 'lg';
-  className?: string;
-}
+  className?: string; }
 
-export const RadioGroup: React.FC<RadioGroupProps> = ({
-  name,
+export const RadioGroup: React.FC<RadioGroupProps> = ({ name,
   value,
   onChange,
   options,
@@ -393,9 +363,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   error,
   orientation = 'vertical',
   size = 'md',
-  className
-}) => {
-  const sizeClasses = {
+  className }) => { const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-5 w-5',
     lg: 'h-6 w-6'
@@ -449,43 +417,36 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 };
 
 // Toggle/Switch Component
-export interface ToggleProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
-  label?: string;
+export interface ToggleProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> { label?: string;
   description?: string;
   size?: 'sm' | 'md' | 'lg';
-  color?: 'primary' | 'success' | 'warning' | 'error';
-}
+  color?: 'primary' | 'success' | 'warning' | 'error'; }
 
 export const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
-  ({ 
-    label, 
+  ({ label, 
     description, 
     size = 'md', 
     color = 'primary',
     checked = false,
     className,
     ...props 
-  }, ref) => {
-    const sizeClasses = {
+  }, ref) => { const sizeClasses = {
       sm: {
         switch: 'h-5 w-9',
         thumb: 'h-4 w-4',
         translate: 'translate-x-4'
       },
-      md: {
-        switch: 'h-6 w-11',
+      md: { switch: 'h-6 w-11',
         thumb: 'h-5 w-5',
         translate: 'translate-x-5'
       },
-      lg: {
-        switch: 'h-7 w-12',
+      lg: { switch: 'h-7 w-12',
         thumb: 'h-6 w-6',
         translate: 'translate-x-5'
       }
     };
     
-    const colorClasses = {
-      primary: 'bg-primary-600',
+    const colorClasses = { primary: 'bg-primary-600',
       success: 'bg-success-600',
       warning: 'bg-warning-600',
       error: 'bg-error-600'

@@ -1,16 +1,14 @@
 /**
  * Loading Higher-Order Component
  */
-import React from 'react';
+import { ComponentType } from 'react';
 import Loading, { type LoadingProps } from './Loading';
 
 // HOC for adding loading state to components
 export function withLoading<P extends object>(
-  WrappedComponent: React.ComponentType<P>,
+  WrappedComponent: ComponentType<P>,
   loadingProps?: Partial<LoadingProps>
-) {
-  const WithLoadingComponent = (props: P & { isLoading?: boolean }) => {
-    const { isLoading, ...restProps } = props;
+) { const WithLoadingComponent = (props: P & { isLoading?: boolean }) => { const { isLoading, ...restProps } = props;
     
     if (isLoading) {
       return <Loading {...loadingProps} />;

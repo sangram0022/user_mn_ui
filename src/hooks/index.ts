@@ -7,31 +7,25 @@
 
 // Async operation management
 export { useAsyncOperation } from './useAsyncOperation';
-export type {
-  AsyncOperationOptions,
-  UseAsyncOperationResult
-} from './useAsyncOperation';
+export type { AsyncOperationOptions,
+  UseAsyncOperationResult } from './useAsyncOperation';
 
 // Pagination management
 export { usePagination } from './usePagination';
-export type {
-  PaginationState,
+export type { PaginationState,
   UsePaginationOptions,
-  UsePaginationResult
-} from './usePagination';
+  UsePaginationResult } from './usePagination';
 
 // Form state management
 export { useFormState } from './useFormState';
-export type {
-  UseFormStateOptions,
-  UseFormStateResult
-} from './useFormState';
+export type { UseFormStateOptions,
+  UseFormStateResult } from './useFormState';
 
 // Error handling (existing)
 export { useErrorHandler, useErrorMessage } from './errors/useErrorHandler';
 
 // Authentication (existing)
-export { useAuth } from '@features/auth';
+export { useAuth } from 'src/domains/auth';
 
 // Session management (existing)
 export { useSessionManagement } from './useSessionManagement';

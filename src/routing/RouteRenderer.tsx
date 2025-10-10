@@ -3,20 +3,17 @@ import type { ComponentType, FC, ReactNode } from 'react';
 
 import AppLayout from '@layouts/AppLayout';
 import AuthLayout from '@layouts/AuthLayout';
-import ErrorBoundary from '@shared/ui/ErrorBoundary';
+import { PageErrorBoundary as ErrorBoundary } from '@shared/errors/ErrorBoundary';
 import Loading from '@shared/ui/Loading';
 import type { RouteConfig } from './config';
 
 const PlainLayout: FC<{ children: ReactNode }> = ({ children }) => <>{children}</>;
 
-const layoutComponents: Record<RouteConfig['layout'], ComponentType<{ children: ReactNode }>> = {
-  default: AppLayout,
+const layoutComponents: Record<RouteConfig['layout'], ComponentType<{ children: ReactNode }>> = { default: AppLayout,
   auth: AuthLayout,
-  none: PlainLayout,
-};
+  none: PlainLayout, };
 
-const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => {
-  const {
+const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => { const {
     component: Component,
     layout,
     title,
@@ -33,8 +30,7 @@ const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => {
       document.title = formattedTitle;
     }
 
-    if (description) {
-      const metaDescription = document.querySelector('meta[name="description"]');
+    if (description) { const metaDescription = document.querySelector('meta[name="description"]');
       if (metaDescription) {
         metaDescription.setAttribute('content', description);
       }

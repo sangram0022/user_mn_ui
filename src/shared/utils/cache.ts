@@ -1,32 +1,27 @@
 /**
  * Advanced caching strategies for React applications
  */
+import { logger } from './logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Cache entry interface
-export interface CacheEntry<T> {
-  data: T;
+export interface CacheEntry<T> { data: T;
   timestamp: number;
   ttl: number;
-  stale: boolean;
-}
+  stale: boolean; }
 
 // Cache configuration
-export interface CacheConfig {
-  defaultTTL: number; // Time to live in milliseconds
+export interface CacheConfig { defaultTTL: number; // Time to live in milliseconds
   maxSize: number; // Maximum number of entries
   staleWhileRevalidate: boolean; // Serve stale data while revalidating
   persistToBrowser: boolean; // Persist to localStorage/sessionStorage
-  storageKey?: string;
-}
+  storageKey?: string; }
 
 // Default cache configuration
-const DEFAULT_CACHE_CONFIG: CacheConfig = {
-  defaultTTL: 5 * 60 * 1000, // 5 minutes
+const DEFAULT_CACHE_CONFIG: CacheConfig = { defaultTTL: 5 * 60 * 1000, // 5 minutes
   maxSize: 100,
   staleWhileRevalidate: true,
-  persistToBrowser: false
-};
+  persistToBrowser: false };
 
 /**
  * In-memory cache implementation with LRU eviction
@@ -37,16 +32,13 @@ export class MemoryCache<T = unknown> {
   private accessCounter = 0;
   private config: CacheConfig;
 
-  constructor(config: Partial<CacheConfig> = {}) {
-    this.config = { ...DEFAULT_CACHE_CONFIG, ...config };
+  constructor(config: Partial<CacheConfig> = {}) { this.config = { ...DEFAULT_CACHE_CONFIG, ...config };
     
-    if (this.config.persistToBrowser) {
-      this.loadFromStorage();
+    if (this.config.persistToBrowser) { this.loadFromStorage();
     }
   }
 
-  get(key: string): CacheEntry<T> | null {
-    const entry = this.cache.get(key);
+  get(key: string): CacheEntry<T> | null { const entry = this.cache.get(key);
     
     if (!entry) {
       return null;
@@ -59,11 +51,9 @@ export class MemoryCache<T = unknown> {
     const now = Date.now();
     const isExpired = now - entry.timestamp > entry.ttl;
 
-    if (isExpired) {
-      if (this.config.staleWhileRevalidate) {
+    if (isExpired) { if (this.config.staleWhileRevalidate) {
         return { ...entry, stale: true };
-      } else {
-        this.delete(key);
+      } else { this.delete(key);
         return null;
       }
     }
@@ -71,8 +61,7 @@ export class MemoryCache<T = unknown> {
     return entry;
   }
 
-  set(key: string, data: T, ttl?: number): void {
-    const entry: CacheEntry<T> = {
+  set(key: string, data: T, ttl?: number): void { const entry: CacheEntry<T> = {
       data,
       timestamp: Date.now(),
       ttl: ttl ?? this.config.defaultTTL,
@@ -80,20 +69,17 @@ export class MemoryCache<T = unknown> {
     };
 
     // Evict LRU entries if cache is full
-    if (this.cache.size >= this.config.maxSize && !this.cache.has(key)) {
-      this.evictLRU();
+    if (this.cache.size >= this.config.maxSize && !this.cache.has(key)) { this.evictLRU();
     }
 
     this.cache.set(key, entry);
     this.accessOrder.set(key, ++this.accessCounter);
 
-    if (this.config.persistToBrowser) {
-      this.saveToStorage();
+    if (this.config.persistToBrowser) { this.saveToStorage();
     }
   }
 
-  delete(key: string): boolean {
-    const deleted = this.cache.delete(key);
+  delete(key: string): boolean { const deleted = this.cache.delete(key);
     this.accessOrder.delete(key);
     
     if (deleted && this.config.persistToBrowser) {
@@ -103,8 +89,7 @@ export class MemoryCache<T = unknown> {
     return deleted;
   }
 
-  clear(): void {
-    this.cache.clear();
+  clear(): void { this.cache.clear();
     this.accessOrder.clear();
     this.accessCounter = 0;
     
@@ -113,16 +98,13 @@ export class MemoryCache<T = unknown> {
     }
   }
 
-  keys(): string[] {
-    return Array.from(this.cache.keys());
+  keys(): string[] { return Array.from(this.cache.keys());
   }
 
-  size(): number {
-    return this.cache.size;
+  size(): number { return this.cache.size;
   }
 
-  private evictLRU(): void {
-    let lruKey = '';
+  private evictLRU(): void { let lruKey = '';
     let lruAccess = Infinity;
 
     for (const [key, access] of this.accessOrder) {
@@ -132,13 +114,11 @@ export class MemoryCache<T = unknown> {
       }
     }
 
-    if (lruKey) {
-      this.delete(lruKey);
+    if (lruKey) { this.delete(lruKey);
     }
   }
 
-  private loadFromStorage(): void {
-    if (!this.config.storageKey) return;
+  private loadFromStorage(): void { if (!this.config.storageKey) return;
 
     try {
       const stored = localStorage.getItem(this.config.storageKey);
@@ -148,13 +128,11 @@ export class MemoryCache<T = unknown> {
         this.accessOrder = new Map(parsed.accessOrder);
         this.accessCounter = parsed.accessCounter || 0;
       }
-    } catch (error) {
-      console.warn('Failed to load cache from storage:', error);
+    } catch (error) { logger.warn('Failed to load cache from storage:', { error  });
     }
   }
 
-  private saveToStorage(): void {
-    if (!this.config.storageKey) return;
+  private saveToStorage(): void { if (!this.config.storageKey) return;
 
     try {
       const toStore = {
@@ -163,13 +141,11 @@ export class MemoryCache<T = unknown> {
         accessCounter: this.accessCounter
       };
       localStorage.setItem(this.config.storageKey, JSON.stringify(toStore));
-    } catch (error) {
-      console.warn('Failed to save cache to storage:', error);
+    } catch (error) { logger.warn('Failed to save cache to storage:', { error  });
     }
   }
 
-  private clearStorage(): void {
-    if (!this.config.storageKey) return;
+  private clearStorage(): void { if (!this.config.storageKey) return;
     localStorage.removeItem(this.config.storageKey);
   }
 }
@@ -177,8 +153,7 @@ export class MemoryCache<T = unknown> {
 /**
  * React hook for using cache with automatic revalidation
  */
-export interface UseCacheOptions<T> {
-  key: string;
+export interface UseCacheOptions<T> { key: string;
   fetcher: () => Promise<T>;
   ttl?: number;
   enabled?: boolean;
@@ -186,14 +161,12 @@ export interface UseCacheOptions<T> {
   revalidateOnReconnect?: boolean;
   dedupingInterval?: number;
   onSuccess?: (data: T) => void;
-  onError?: (error: Error) => void;
-}
+  onError?: (error: Error) => void; }
 
 const globalCache = new MemoryCache();
 const pendingRequests = new Map<string, Promise<unknown>>();
 
-export function useCache<T>({
-  key,
+export function useCache<T>({ key,
   fetcher,
   ttl,
   enabled = true,
@@ -201,9 +174,7 @@ export function useCache<T>({
   revalidateOnReconnect = false,
   dedupingInterval = 2000,
   onSuccess,
-  onError
-}: UseCacheOptions<T>) {
-  const [data, setData] = useState<T | null>(null);
+  onError }: UseCacheOptions<T>) { const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
@@ -222,25 +193,21 @@ export function useCache<T>({
     const cachedEntry = globalCache.get(key) as CacheEntry<T> | null;
     
     // Return cached data if fresh and not forcing revalidation
-    if (!force && cachedEntry && !cachedEntry.stale) {
-      setData(cachedEntry.data);
+    if (!force && cachedEntry && !cachedEntry.stale) { setData(cachedEntry.data);
       setError(null);
       return;
     }
 
     // Set loading state only if no cached data
-    if (!cachedEntry) {
-      setIsLoading(true);
-    } else {
-      setIsValidating(true);
+    if (!cachedEntry) { setIsLoading(true);
+    } else { setIsValidating(true);
     }
 
     // Check for pending request to avoid duplicate fetches
     const pendingKey = `${key}_${JSON.stringify(fetcher.toString())}`;
     let request = pendingRequests.get(pendingKey) as Promise<T> | undefined;
 
-    if (!request) {
-      request = fetcher();
+    if (!request) { request = fetcher();
       pendingRequests.set(pendingKey, request);
       
       // Clean up pending request after completion
@@ -249,8 +216,7 @@ export function useCache<T>({
       });
     }
 
-    try {
-      const result = await request;
+    try { const result = await request;
       lastFetchRef.current = now;
 
       if (mountedRef.current) {
@@ -259,8 +225,7 @@ export function useCache<T>({
         globalCache.set(key, result, ttl);
         onSuccess?.(result);
       }
-    } catch (err) {
-      if (mountedRef.current) {
+    } catch (err) { if (mountedRef.current) {
         const error = err as Error;
         setError(error);
         onError?.(error);
@@ -270,8 +235,7 @@ export function useCache<T>({
           setData(cachedEntry.data);
         }
       }
-    } finally {
-      if (mountedRef.current) {
+    } finally { if (mountedRef.current) {
         setIsLoading(false);
         setIsValidating(false);
       }
@@ -279,13 +243,11 @@ export function useCache<T>({
   }, [key, fetcher, ttl, enabled, dedupingInterval, onSuccess, onError]);
 
   // Initial fetch
-  useEffect(() => {
-    void revalidate();
+  useEffect(() => { void revalidate();
   }, [revalidate]);
 
   // Revalidate on focus
-  useEffect(() => {
-    if (!revalidateOnFocus) return;
+  useEffect(() => { if (!revalidateOnFocus) return;
 
     const handleFocus = () => {
       void revalidate();
@@ -296,8 +258,7 @@ export function useCache<T>({
   }, [revalidate, revalidateOnFocus]);
 
   // Revalidate on reconnect
-  useEffect(() => {
-    if (!revalidateOnReconnect) return;
+  useEffect(() => { if (!revalidateOnReconnect) return;
 
     const handleOnline = () => {
       void revalidate();
@@ -308,29 +269,24 @@ export function useCache<T>({
   }, [revalidate, revalidateOnReconnect]);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(() => { return () => {
       mountedRef.current = false;
     };
   }, []);
 
-  const mutate = useCallback((newData?: T | ((prevData: T | null) => T)) => {
-    if (typeof newData === 'function') {
+  const mutate = useCallback((newData?: T | ((prevData: T | null) => T)) => { if (typeof newData === 'function') {
       const updater = newData as (prevData: T | null) => T;
       const updated = updater(data);
       setData(updated);
       globalCache.set(key, updated, ttl);
-    } else if (newData !== undefined) {
-      setData(newData);
+    } else if (newData !== undefined) { setData(newData);
       globalCache.set(key, newData, ttl);
-    } else {
-      // Revalidate
+    } else { // Revalidate
       void revalidate(true);
     }
   }, [key, data, ttl, revalidate]);
 
-  return {
-    data,
+  return { data,
     error,
     isLoading,
     isValidating,
@@ -342,16 +298,14 @@ export function useCache<T>({
 /**
  * Cache utilities
  */
-export const CacheUtils = {
-  // Invalidate specific cache entries
+export const CacheUtils = { // Invalidate specific cache entries
   invalidate: (keys: string | string[]) => {
     const keysArray = Array.isArray(keys) ? keys : [keys];
     keysArray.forEach(key => globalCache.delete(key));
   },
 
   // Invalidate cache entries by pattern
-  invalidatePattern: (pattern: RegExp) => {
-    const keys = globalCache.keys();
+  invalidatePattern: (pattern: RegExp) => { const keys = globalCache.keys();
     keys.forEach(key => {
       if (pattern.test(key)) {
         globalCache.delete(key);
@@ -360,32 +314,27 @@ export const CacheUtils = {
   },
 
   // Clear all cache
-  clear: () => {
-    globalCache.clear();
+  clear: () => { globalCache.clear();
   },
 
   // Get cache statistics
-  getStats: () => ({
-    size: globalCache.size(),
+  getStats: () => ({ size: globalCache.size(),
     keys: globalCache.keys()
   }),
 
   // Prefetch data
-  prefetch: async <T>(key: string, fetcher: () => Promise<T>, ttl?: number) => {
-    const cached = globalCache.get(key);
+  prefetch: async <T>(key: string, fetcher: () => Promise<T>, ttl?: number) => { const cached = globalCache.get(key);
     if (!cached || cached.stale) {
       try {
         const data = await fetcher();
         globalCache.set(key, data, ttl);
       } catch (error) {
-        console.warn(`Prefetch failed for key ${key}:`, error);
+        logger.warn(`Prefetch failed for key ${key}:`, error);
       }
     }
   }
 };
 
-export default {
-  MemoryCache,
+export default { MemoryCache,
   useCache,
-  CacheUtils
-};
+  CacheUtils };

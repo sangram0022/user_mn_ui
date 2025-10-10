@@ -1,24 +1,19 @@
 import React from 'react';
 import { Loader } from 'lucide-react';
 
-interface LoadingProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+interface LoadingProps { size?: 'sm' | 'md' | 'lg' | 'xl';
   variant?: 'spinner' | 'dots' | 'pulse' | 'bars';
   text?: string;
   fullScreen?: boolean;
   overlay?: boolean;
-  color?: string;
-}
+  color?: string; }
 
-const Loading: React.FC<LoadingProps> = ({
-  size = 'md',
+const Loading: React.FC<LoadingProps> = ({ size = 'md',
   variant = 'spinner',
   text,
   fullScreen = false,
   overlay = false,
-  color = '#3b82f6',
-}) => {
-  const sizes = {
+  color = '#3b82f6', }) => { const sizes = {
     sm: { icon: '1rem', text: '0.75rem', padding: '1rem' },
     md: { icon: '1.5rem', text: '0.875rem', padding: '1.5rem' },
     lg: { icon: '2rem', text: '1rem', padding: '2rem' },
@@ -27,8 +22,7 @@ const Loading: React.FC<LoadingProps> = ({
 
   const currentSize = sizes[size];
 
-  const containerStyles: React.CSSProperties = {
-    display: 'flex',
+  const containerStyles: React.CSSProperties = { display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
@@ -43,8 +37,7 @@ const Loading: React.FC<LoadingProps> = ({
       backgroundColor: overlay ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
       zIndex: 9999,
     }),
-    ...(overlay && !fullScreen && {
-      position: 'absolute',
+    ...(overlay && !fullScreen && { position: 'absolute',
       top: 0,
       left: 0,
       width: '100%',
@@ -54,15 +47,13 @@ const Loading: React.FC<LoadingProps> = ({
     }),
   };
 
-  const renderLoadingIcon = () => {
-    const iconStyle: React.CSSProperties = {
+  const renderLoadingIcon = () => { const iconStyle: React.CSSProperties = {
       width: currentSize.icon,
       height: currentSize.icon,
       color,
     };
 
-    switch (variant) {
-      case 'spinner':
+    switch (variant) { case 'spinner':
         return (
           <Loader
             style={{
@@ -92,8 +83,7 @@ const Loading: React.FC<LoadingProps> = ({
       case 'pulse':
         return (
           <div
-            style={{
-              width: currentSize.icon,
+            style={{ width: currentSize.icon,
               height: currentSize.icon,
               backgroundColor: color,
               borderRadius: '50%',
@@ -127,39 +117,32 @@ const Loading: React.FC<LoadingProps> = ({
   return (
     <>
       <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
+        @keyframes spin { from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
 
-        @keyframes loadingDots {
-          0%, 80%, 100% {
+        @keyframes loadingDots { 0%, 80%, 100% {
             transform: scale(0);
             opacity: 0.5;
           }
-          40% {
-            transform: scale(1);
+          40% { transform: scale(1);
             opacity: 1;
           }
         }
 
-        @keyframes loadingPulse {
-          0% {
+        @keyframes loadingPulse { 0% {
             transform: scale(0);
             opacity: 1;
           }
-          100% {
-            transform: scale(1);
+          100% { transform: scale(1);
             opacity: 0;
           }
         }
 
-        @keyframes loadingBars {
-          0%, 40%, 100% {
+        @keyframes loadingBars { 0%, 40%, 100% {
             transform: scaleY(0.4);
           }
-          20% {
-            transform: scaleY(1);
+          20% { transform: scaleY(1);
           }
         }
       `}</style>
@@ -168,8 +151,7 @@ const Loading: React.FC<LoadingProps> = ({
         {renderLoadingIcon()}
         {text && (
           <p
-            style={
-              {
+            style={ {
                 fontSize: currentSize.text,
                 color: '#6b7280',
                 margin: 0,
@@ -206,34 +188,28 @@ export const LoadingOverlay: React.FC<Pick<LoadingProps, 'text' | 'variant' | 's
   <Loading fullScreen overlay {...props} />
 );
 
-interface LoadingButtonProps {
-  loading?: boolean;
+interface LoadingButtonProps { loading?: boolean;
   children: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
   variant?: 'primary' | 'secondary';
   size?: 'sm' | 'md' | 'lg';
-  style?: React.CSSProperties;
-}
+  style?: React.CSSProperties; }
 
-export const LoadingButton: React.FC<LoadingButtonProps> = ({
-  loading = false,
+export const LoadingButton: React.FC<LoadingButtonProps> = ({ loading = false,
   children,
   onClick,
   disabled = false,
   variant = 'primary',
   size = 'md',
   style,
-  ...props
-}) => {
-  const buttonSizes = {
+  ...props }) => { const buttonSizes = {
     sm: { padding: '0.5rem 1rem', fontSize: '0.75rem', iconSize: '0.875rem' },
     md: { padding: '0.75rem 1.5rem', fontSize: '0.875rem', iconSize: '1rem' },
     lg: { padding: '1rem 2rem', fontSize: '1rem', iconSize: '1.25rem' },
   };
 
-  const variants = {
-    primary: {
+  const variants = { primary: {
       background: loading || disabled ? '#9ca3af' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
       color: 'white',
       border: 'none',
@@ -252,8 +228,7 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
     <button
       onClick={loading || disabled ? undefined : onClick}
       disabled={loading || disabled}
-      style={{
-        display: 'flex',
+      style={{ display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: '0.5rem',
@@ -270,8 +245,7 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
     >
       {loading && (
         <Loader
-          style={{
-            width: currentSize.iconSize,
+          style={{ width: currentSize.iconSize,
             height: currentSize.iconSize,
             animation: 'spin 1s linear infinite',
           }}
@@ -282,10 +256,8 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
   );
 };
 
-export const TableLoadingSkeleton: React.FC<{ rows?: number; columns?: number }> = ({
-  rows = 5,
-  columns = 4,
-}) => (
+export const TableLoadingSkeleton: React.FC<{ rows?: number; columns?: number }> = ({ rows = 5,
+  columns = 4, }) => (
   <div style={{ width: '100%' }}>
     {Array.from({ length: rows }).map((_, rowIndex) => (
       <div
@@ -320,24 +292,21 @@ export const CardLoadingSkeleton: React.FC<{ count?: number }> = ({ count = 3 })
     {Array.from({ length: count }).map((_, index) => (
       <div
         key={index}
-        style={{
-          padding: '1.5rem',
+        style={{ padding: '1.5rem',
           backgroundColor: 'white',
           borderRadius: '0.5rem',
           border: '1px solid #e5e7eb',
         }}
       >
         <div
-          style={{
-            display: 'flex',
+          style={{ display: 'flex',
             alignItems: 'center',
             gap: '1rem',
             marginBottom: '1rem',
           }}
         >
           <div
-            style={{
-              width: '3rem',
+            style={{ width: '3rem',
               height: '3rem',
               backgroundColor: '#f3f4f6',
               borderRadius: '50%',
@@ -346,8 +315,7 @@ export const CardLoadingSkeleton: React.FC<{ count?: number }> = ({ count = 3 })
           />
           <div style={{ flex: 1 }}>
             <div
-              style={{
-                height: '1rem',
+              style={{ height: '1rem',
                 backgroundColor: '#f3f4f6',
                 borderRadius: '0.25rem',
                 marginBottom: '0.5rem',
@@ -356,8 +324,7 @@ export const CardLoadingSkeleton: React.FC<{ count?: number }> = ({ count = 3 })
               }}
             />
             <div
-              style={{
-                height: '0.75rem',
+              style={{ height: '0.75rem',
                 backgroundColor: '#f3f4f6',
                 borderRadius: '0.25rem',
                 width: '60%',
@@ -368,8 +335,7 @@ export const CardLoadingSkeleton: React.FC<{ count?: number }> = ({ count = 3 })
           </div>
         </div>
         <div
-          style={{
-            height: '4rem',
+          style={{ height: '4rem',
             backgroundColor: '#f3f4f6',
             borderRadius: '0.25rem',
             animation: 'loadingPulse 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite',

@@ -8,15 +8,12 @@ describe('useErrorHandler', () => {
     vi.spyOn(errorLogger, 'log').mockImplementation(() => {});
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+  afterEach(() => { vi.restoreAllMocks();
   });
 
-  it('handles errors via handleError and logs context', () => {
-    const { result } = renderHook(() => useErrorHandler());
+  it('handles errors via handleError and logs context', () => { const { result } = renderHook(() => useErrorHandler());
 
-    act(() => {
-      result.current.handleError(new Error('Test error'), 'TestComponent');
+    act(() => { result.current.handleError(new Error('Test error'), 'TestComponent');
     });
 
     expect(result.current.error).toBeTruthy();
@@ -24,28 +21,23 @@ describe('useErrorHandler', () => {
     expect(errorLogger.log).toHaveBeenCalledWith(expect.objectContaining({ code: expect.any(String) }), { component: 'TestComponent' });
   });
 
-  it('clears error state correctly', () => {
-    const { result } = renderHook(() => useErrorHandler());
+  it('clears error state correctly', () => { const { result } = renderHook(() => useErrorHandler());
 
-    act(() => {
-      result.current.setError('Something went wrong');
+    act(() => { result.current.setError('Something went wrong');
     });
 
     expect(result.current.error).not.toBeNull();
 
-    act(() => {
-      result.current.clearError();
+    act(() => { result.current.clearError();
     });
 
     expect(result.current.error).toBeNull();
     expect(result.current.errorMessage).toBeNull();
   });
 
-  it('flags authentication errors', async () => {
-    const { result } = renderHook(() => useErrorHandler());
+  it('flags authentication errors', async () => { const { result } = renderHook(() => useErrorHandler());
 
-    const apiError = {
-      error: {
+    const apiError = { error: {
         message: {
           error_code: 'INVALID_CREDENTIALS',
           message: 'Invalid username or password',
@@ -57,12 +49,10 @@ describe('useErrorHandler', () => {
       },
     };
 
-    act(() => {
-      result.current.handleError(apiError, 'LoginForm');
+    act(() => { result.current.handleError(apiError, 'LoginForm');
     });
 
-    await waitFor(() => {
-      expect(result.current.isAuthenticationError).toBe(true);
+    await waitFor(() => { expect(result.current.isAuthenticationError).toBe(true);
       expect(result.current.error?.code).toBe('INVALID_CREDENTIALS');
     });
   });

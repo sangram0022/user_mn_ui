@@ -12,14 +12,10 @@ export type { UseLoadingOptions } from './useLoading';
 
 export { useLocalStorage, useSessionStorage } from './useStorage';
 
-export { 
-  useOptimisticUpdates, 
+export { useOptimisticUpdates, 
   useAdvancedFormState, 
-  useOptimisticList 
-} from './useReact19Features';
-export type { 
-  OptimisticAction, 
+  useOptimisticList  } from './useReact19Features';
+export type { OptimisticAction, 
   UseOptimisticUpdatesOptions, 
   UseAdvancedFormStateOptions,
-  OptimisticListItem 
-} from './useReact19Features';
+  OptimisticListItem  } from './useReact19Features';

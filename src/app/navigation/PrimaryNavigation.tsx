@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '@features/auth';
+import { useAuth } from 'src/domains/auth';
 import { getUserRoleName } from '@shared/utils/user';
-import { 
-  Menu, 
+import { Menu, 
   X, 
   User, 
   LogOut, 
@@ -16,11 +15,9 @@ import {
   BarChart3,
   Workflow,
   FileText,
-  ChevronDown
-} from 'lucide-react';
+  ChevronDown } from 'lucide-react';
 
-const Navigation = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const Navigation = () => { const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -29,8 +26,7 @@ const Navigation = () => {
   const mobileMenuId = 'mobile-navigation';
   const userMenuId = 'user-menu';
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = () => { logout();
     navigate('/');
     setIsUserMenuOpen(false);
   };
@@ -52,8 +48,7 @@ const Navigation = () => {
     { name: 'Help & Support', href: '/help', icon: HelpCircle },
   ];
 
-  const isActive = (href: string) => {
-    if (href === '/') {
+  const isActive = (href: string) => { if (href === '/') {
       return location.pathname === '/';
     }
     return location.pathname.startsWith(href);
@@ -63,8 +58,7 @@ const Navigation = () => {
     <>
       <a
         href="#main-content"
-        style={{
-          position: 'absolute',
+        style={{ position: 'absolute',
           left: '-999px',
           top: 'auto',
           width: '1px',
@@ -75,8 +69,7 @@ const Navigation = () => {
           backgroundColor: 'transparent',
           borderRadius: '0',
         }}
-        onFocus={(event) => {
-          event.currentTarget.style.left = '1rem';
+        onFocus={(event) => { event.currentTarget.style.left = '1rem';
           event.currentTarget.style.top = '0.5rem';
           event.currentTarget.style.width = 'auto';
           event.currentTarget.style.height = 'auto';
@@ -85,8 +78,7 @@ const Navigation = () => {
           event.currentTarget.style.color = '#ffffff';
           event.currentTarget.style.borderRadius = '0.375rem';
         }}
-        onBlur={(event) => {
-          event.currentTarget.style.left = '-999px';
+        onBlur={(event) => { event.currentTarget.style.left = '-999px';
           event.currentTarget.style.top = 'auto';
           event.currentTarget.style.width = '1px';
           event.currentTarget.style.height = '1px';
@@ -100,35 +92,30 @@ const Navigation = () => {
       </a>
       <nav
         aria-label="Primary navigation"
-        style={{ 
-      backgroundColor: 'white', 
+        style={{ backgroundColor: 'white', 
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', 
       borderBottom: '1px solid #e5e7eb',
       position: 'sticky',
       top: 0,
       zIndex: 50
     }}>
-      <div style={{ 
-        maxWidth: '1280px', 
+      <div style={{ maxWidth: '1280px', 
         margin: '0 auto', 
         padding: '0 1rem'
       }}>
-        <div style={{ 
-          display: 'flex', 
+        <div style={{ display: 'flex', 
           justifyContent: 'space-between', 
           height: '4rem',
           alignItems: 'center'
         }}>
           {/* Logo and Brand */}
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Link to="/" style={{ 
-              display: 'flex', 
+            <Link to="/" style={{ display: 'flex', 
               alignItems: 'center', 
               gap: '0.5rem',
               textDecoration: 'none'
             }}>
-              <div style={{ 
-                width: '2rem', 
+              <div style={{ width: '2rem', 
                 height: '2rem', 
                 background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', 
                 borderRadius: '0.5rem', 
@@ -138,8 +125,7 @@ const Navigation = () => {
               }}>
                 <User style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} />
               </div>
-              <span style={{ 
-                fontSize: '1.25rem', 
+              <span style={{ fontSize: '1.25rem', 
                 fontWeight: 'bold', 
                 color: '#111827'
               }}>
@@ -156,8 +142,7 @@ const Navigation = () => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                    isActive(item.href)
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${ isActive(item.href)
                       ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                   }`}
@@ -295,8 +280,7 @@ const Navigation = () => {
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                      isActive(item.href)
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${ isActive(item.href)
                         ? 'text-blue-600 bg-blue-50'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                     }`}
@@ -338,8 +322,7 @@ const Navigation = () => {
                 
                 <button
                   type="button"
-                  onClick={() => {
-                    handleLogout();
+                  onClick={() => { handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
                   className="flex items-center space-x-2 w-full px-3 py-2 text-base text-red-600 hover:bg-red-50 transition-colors duration-200"
@@ -378,8 +361,7 @@ const Navigation = () => {
       {(isMobileMenuOpen || isUserMenuOpen) && (
         <div 
           className="fixed inset-0 z-40 bg-black bg-opacity-25"
-          onClick={() => {
-            setIsMobileMenuOpen(false);
+          onClick={() => { setIsMobileMenuOpen(false);
             setIsUserMenuOpen(false);
           }}
           role="presentation"

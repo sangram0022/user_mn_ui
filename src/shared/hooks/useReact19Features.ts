@@ -5,30 +5,23 @@ import { useCallback, useOptimistic, useTransition, useState } from 'react';
 import type { AsyncFunction } from '@shared/types';
 
 // Types for optimistic updates
-export interface OptimisticAction<T> {
-  type: string;
+export interface OptimisticAction<T> { type: string;
   payload?: unknown;
-  optimisticData?: T;
-}
+  optimisticData?: T; }
 
-export interface UseOptimisticUpdatesOptions<T> {
-  initialData: T;
+export interface UseOptimisticUpdatesOptions<T> { initialData: T;
   updateFn: (state: T, action: OptimisticAction<T>) => T;
   onSuccess?: (data: T) => void;
-  onError?: (error: Error, rollbackData: T) => void;
-}
+  onError?: (error: Error, rollbackData: T) => void; }
 
 /**
  * Advanced hook for optimistic updates using React 19's useOptimistic
  * Provides immediate UI feedback while async operations are pending
  */
-export function useOptimisticUpdates<T>({
-  initialData,
+export function useOptimisticUpdates<T>({ initialData,
   updateFn,
   onSuccess,
-  onError
-}: UseOptimisticUpdatesOptions<T>) {
-  const [isPending, startTransition] = useTransition();
+  onError }: UseOptimisticUpdatesOptions<T>) { const [isPending, startTransition] = useTransition();
   const [optimisticData, addOptimistic] = useOptimistic(initialData, updateFn);
 
   const performOptimisticUpdate = useCallback(
@@ -43,8 +36,7 @@ export function useOptimisticUpdates<T>({
           const result = await asyncOperation(action);
           onSuccess?.(result);
         });
-      } catch (error) {
-        // Rollback optimistic update on error
+      } catch (error) { // Rollback optimistic update on error
         addOptimistic({ type: 'ROLLBACK', optimisticData: originalData });
         onError?.(error as Error, originalData);
       }
@@ -52,8 +44,7 @@ export function useOptimisticUpdates<T>({
     [optimisticData, addOptimistic, onSuccess, onError]
   );
 
-  return {
-    data: optimisticData,
+  return { data: optimisticData,
     isPending,
     performOptimisticUpdate,
     addOptimistic
@@ -63,20 +54,15 @@ export function useOptimisticUpdates<T>({
 /**
  * Enhanced form state management using modern React patterns
  */
-export interface UseAdvancedFormStateOptions<T, R> {
-  initialState: T;
+export interface UseAdvancedFormStateOptions<T, R> { initialState: T;
   action: (prevState: T, formData: FormData) => Promise<R>;
   onSuccess?: (result: R) => void;
-  onError?: (error: Error) => void;
-}
+  onError?: (error: Error) => void; }
 
-export function useAdvancedFormState<T, R>({
-  initialState,
+export function useAdvancedFormState<T, R>({ initialState,
   action,
   onSuccess,
-  onError
-}: UseAdvancedFormStateOptions<T, R>) {
-  const [isPending, startTransition] = useTransition();
+  onError }: UseAdvancedFormStateOptions<T, R>) { const [isPending, startTransition] = useTransition();
   const [state, setState] = useState<T>(initialState);
   
   const wrappedAction = useCallback(
@@ -85,8 +71,7 @@ export function useAdvancedFormState<T, R>({
         const result = await action(state, formData);
         onSuccess?.(result);
         return result;
-      } catch (error) {
-        onError?.(error as Error);
+      } catch (error) { onError?.(error as Error);
         throw error;
       }
     },
@@ -94,20 +79,17 @@ export function useAdvancedFormState<T, R>({
   );
 
   const handleSubmit = useCallback(
-    (formData: FormData) => {
-      startTransition(async () => {
+    (formData: FormData) => { startTransition(async () => {
         await wrappedAction(formData);
       });
     },
     [wrappedAction]
   );
 
-  const updateState = useCallback((newState: T) => {
-    setState(newState);
+  const updateState = useCallback((newState: T) => { setState(newState);
   }, []);
 
-  return {
-    state,
+  return { state,
     isPending,
     handleSubmit,
     updateState
@@ -117,26 +99,20 @@ export function useAdvancedFormState<T, R>({
 /**
  * Optimistic list operations (add, remove, update)
  */
-export interface OptimisticListItem {
-  id: string | number;
-  [key: string]: unknown;
-}
+export interface OptimisticListItem { id: string | number;
+  [key: string]: unknown; }
 
-interface ListOptimisticAction<T extends OptimisticListItem> {
-  type: 'ADD' | 'UPDATE' | 'REMOVE' | 'ROLLBACK';
+interface ListOptimisticAction<T extends OptimisticListItem> { type: 'ADD' | 'UPDATE' | 'REMOVE' | 'ROLLBACK';
   payload?: T['id'] | T[];
-  optimisticData?: T;
-}
+  optimisticData?: T; }
 
 export function useOptimisticList<T extends OptimisticListItem>(
   initialItems: T[],
-  apiOperations: {
-    add: (item: Omit<T, 'id'>) => Promise<T>;
+  apiOperations: { add: (item: Omit<T, 'id'>) => Promise<T>;
     update: (id: T['id'], updates: Partial<T>) => Promise<T>;
     remove: (id: T['id']) => Promise<void>;
   }
-) {
-  const [isPending, startTransition] = useTransition();
+) { const [isPending, startTransition] = useTransition();
   
   const [optimisticItems, addOptimistic] = useOptimistic(
     initialItems,
@@ -170,8 +146,7 @@ export function useOptimisticList<T extends OptimisticListItem>(
 
       addOptimistic({ type: 'ADD', optimisticData: optimisticItem });
 
-      try {
-        startTransition(async () => {
+      try { startTransition(async () => {
           const realItem = await apiOperations.add(newItem);
           // Replace temp item with real item
           addOptimistic({ 
@@ -179,8 +154,7 @@ export function useOptimisticList<T extends OptimisticListItem>(
             optimisticData: realItem 
           });
         });
-      } catch (error) {
-        addOptimistic({ type: 'ROLLBACK', payload: originalItems });
+      } catch (error) { addOptimistic({ type: 'ROLLBACK', payload: originalItems });
         throw error;
       }
     },
@@ -188,19 +162,16 @@ export function useOptimisticList<T extends OptimisticListItem>(
   );
 
   const updateItem = useCallback(
-    async (id: T['id'], updates: Partial<T>) => {
-      const originalItems = optimisticItems;
+    async (id: T['id'], updates: Partial<T>) => { const originalItems = optimisticItems;
       const optimisticUpdate = { id, ...updates } as T;
 
       addOptimistic({ type: 'UPDATE', optimisticData: optimisticUpdate });
 
-      try {
-        startTransition(async () => {
+      try { startTransition(async () => {
           const updatedItem = await apiOperations.update(id, updates);
           addOptimistic({ type: 'UPDATE', optimisticData: updatedItem });
         });
-      } catch (error) {
-        addOptimistic({ type: 'ROLLBACK', payload: originalItems });
+      } catch (error) { addOptimistic({ type: 'ROLLBACK', payload: originalItems });
         throw error;
       }
     },
@@ -208,25 +179,21 @@ export function useOptimisticList<T extends OptimisticListItem>(
   );
 
   const removeItem = useCallback(
-    async (id: T['id']) => {
-      const originalItems = optimisticItems;
+    async (id: T['id']) => { const originalItems = optimisticItems;
 
       addOptimistic({ type: 'REMOVE', payload: id });
 
-      try {
-        startTransition(async () => {
+      try { startTransition(async () => {
           await apiOperations.remove(id);
         });
-      } catch (error) {
-        addOptimistic({ type: 'ROLLBACK', payload: originalItems });
+      } catch (error) { addOptimistic({ type: 'ROLLBACK', payload: originalItems });
         throw error;
       }
     },
     [optimisticItems, addOptimistic, apiOperations]
   );
 
-  return {
-    items: optimisticItems,
+  return { items: optimisticItems,
     isPending,
     addItem,
     updateItem,
@@ -234,8 +201,6 @@ export function useOptimisticList<T extends OptimisticListItem>(
   };
 }
 
-export default {
-  useOptimisticUpdates,
+export default { useOptimisticUpdates,
   useAdvancedFormState,
-  useOptimisticList
-};
+  useOptimisticList };

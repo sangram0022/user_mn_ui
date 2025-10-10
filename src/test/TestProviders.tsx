@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from '@features/auth/providers/AuthProvider';
+import { AuthProvider } from 'src/domains/auth/providers/AuthProvider';
 
 // Test providers wrapper component
 export const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {

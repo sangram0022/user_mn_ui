@@ -1,8 +1,7 @@
 import { createContext } from 'react';
 import type { UserProfile, LoginRequest } from '@shared/types';
 
-export interface AuthContextType {
-  user: UserProfile | null;
+export interface AuthContextType { user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -11,7 +10,6 @@ export interface AuthContextType {
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   refreshProfile: () => Promise<void>;
   hasPermission: (permission: string) => boolean;
-  clearError: () => void;
-}
+  clearError: () => void; }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

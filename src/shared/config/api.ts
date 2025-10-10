@@ -20,16 +20,14 @@ export const BACKEND_CONFIG = {
 } as const;
 
 // Get the appropriate base URL based on environment
-export const getApiBaseUrl = (): string => {
-  if (BACKEND_CONFIG.USE_PROXY && import.meta.env.DEV) {
+export const getApiBaseUrl = (): string => { if (BACKEND_CONFIG.USE_PROXY && import.meta.env.DEV) {
     return '/api/v1'; // Use proxy in development
   }
   return BACKEND_CONFIG.API_BASE_URL; // Use absolute URL in production
 };
 
 // API Endpoints - All endpoints from backend_api.json
-export const API_ENDPOINTS = {
-  // Authentication Endpoints
+export const API_ENDPOINTS = { // Authentication Endpoints
   AUTH: {
     REGISTER: '/auth/register',
     LOGIN: '/auth/login', 
@@ -50,14 +48,12 @@ export const API_ENDPOINTS = {
   },
   
   // Admin Endpoints
-  ADMIN: {
-    STATS: '/admin/stats',
+  ADMIN: { STATS: '/admin/stats',
     HEALTH: '/admin/health',
   },
   
   // Health Monitoring Endpoints
-  HEALTH: {
-    BASIC: '/health/',
+  HEALTH: { BASIC: '/health/',
     DETAILED: '/health/detailed',
     METRICS: '/health/metrics',
     PERFORMANCE: '/health/performance',

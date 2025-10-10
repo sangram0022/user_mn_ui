@@ -7,29 +7,24 @@
 export { designTokens, designUtils } from './tokens';
 
 // Core components
-export {
-  Button,
+export { Button,
   Input,
   Card,
   Alert,
   Badge,
   Modal,
-  Spinner
-} from './components';
+  Spinner } from './components';
 
-export type {
-  ButtonProps,
+export type { ButtonProps,
   InputProps,
   CardProps,
   AlertProps,
   BadgeProps,
   ModalProps,
-  SpinnerProps
-} from './components';
+  SpinnerProps } from './components';
 
 // Layout components
-export {
-  Container,
+export { Container,
   Grid,
   Flex,
   Stack,
@@ -39,11 +34,9 @@ export {
   Spacer,
   Divider,
   Show,
-  Hide
-} from './layout';
+  Hide } from './layout';
 
-export type {
-  ContainerProps,
+export type { ContainerProps,
   GridProps,
   FlexProps,
   StackProps,
@@ -52,22 +45,18 @@ export type {
   AspectRatioProps,
   SpacerProps,
   DividerProps,
-  ShowHideProps
-} from './layout';
+  ShowHideProps } from './layout';
 
 // Form components
-export {
-  FormField,
+export { FormField,
   FormInput,
   Select,
   Textarea,
   Checkbox,
   RadioGroup,
-  Toggle
-} from './forms';
+  Toggle } from './forms';
 
-export type {
-  FormFieldProps,
+export type { FormFieldProps,
   FormInputProps,
   SelectProps,
   SelectOption,
@@ -75,14 +64,12 @@ export type {
   CheckboxProps,
   RadioGroupProps,
   RadioOption,
-  ToggleProps
-} from './forms';
+  ToggleProps } from './forms';
 
 // Re-export commonly used design system utilities
 import { designTokens, designUtils } from './tokens';
 
-export const {
-  colors,
+export const { colors,
   typography,
   spacing,
   borderRadius,
@@ -93,8 +80,7 @@ export const {
   breakpoints,
   zIndex,
   baseClasses,
-  layout
-} = designTokens;
+  layout } = designTokens;
 
 // Utility functions for common design system operations
 export const ds = {
@@ -177,8 +163,7 @@ export const ds = {
   container: 'container mx-auto px-4',
   grid: (cols: number) => `grid grid-cols-${cols}`,
   gap: (size: string) => `gap-${size}`,
-  flex: {
-    center: 'flex items-center justify-center',
+  flex: { center: 'flex items-center justify-center',
     between: 'flex items-center justify-between',
     start: 'flex items-center justify-start',
     end: 'flex items-center justify-end',
@@ -188,8 +173,7 @@ export const ds = {
 };
 
 // Component composition utilities
-export const compose = {
-  // Create a card with common styling
+export const compose = { // Create a card with common styling
   card: (className?: string) => designUtils.buildClass(
     baseClasses.card,
     'p-6',
@@ -224,15 +208,12 @@ export const compose = {
     baseClasses.dropdown,
     'py-1',
     className
-  )
-};
+  ) };
 
 // Export everything as a single design system object
-export const designSystem = {
-  tokens: designTokens,
+export const designSystem = { tokens: designTokens,
   utils: designUtils,
   ds,
-  compose
-};
+  compose };
 
 export default designSystem;
