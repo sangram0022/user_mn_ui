@@ -58,6 +58,9 @@ const EmailVerificationPage: React.FC = () => {
         message: 'Email verified successfully! Please sign in with your credentials.'
       }
     });
+    
+    // Return undefined for the case where navigate is called
+    return undefined;
   }, [status, countdown, navigate]);
 
   const getStatusIcon = () => {

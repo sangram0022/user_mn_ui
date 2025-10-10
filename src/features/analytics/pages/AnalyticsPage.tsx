@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '@features/auth';
 import { apiClient } from '@lib/api';
-import type { UserAnalytics as AnalyticsSummary } from '@types';
+import type { UserAnalytics as AnalyticsSummary } from '@shared/types';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 
 type TopUser = {

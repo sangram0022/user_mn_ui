@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@features/auth';
-import { getUserRoleName } from '@utils/user';
+import { getUserRoleName } from '@shared/utils/user';
 import { 
   Menu, 
   X, 

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { ApiError } from '@utils/apiError';
-import type { ApiErrorResponse, ParsedError } from '../../types/error';
-export type { ApiErrorResponse, ParsedError } from '../../types/error';
+import { ApiError } from '@lib/api/error';
+import type { ApiErrorResponse, ParsedError } from '@shared/types/error';
+export type { ApiErrorResponse, ParsedError } from '@shared/types/error';
 import errorMessages from '../../locales/en/errors.json';
 
 export interface ErrorInfo {
@@ -309,7 +309,7 @@ export function getErrorFromStatusCode(statusCode: number): ErrorInfo {
 
 export function getErrorFromMessage(errorMessage: string): ErrorInfo {
   const httpMatch = errorMessage.match(/HTTP error! status: (\d+)/);
-  if (httpMatch) {
+  if (httpMatch?.[1]) {
     const statusCode = Number.parseInt(httpMatch[1], 10);
     return getErrorFromStatusCode(statusCode);
   }
@@ -489,17 +489,16 @@ export const isApiErrorResponse = (error: unknown): error is ApiErrorResponse =>
   return (
     typeof error === 'object' &&
     error !== null &&
-    'error' in error &&
-    typeof (error as ApiErrorResponse).error === 'object'
+    ('message' in error || 'detail' in error || 'errors' in error)
   );
 };
 
 const extractErrorCode = (error: unknown): string => {
   if (isApiErrorResponse(error)) {
-    const { message } = error.error;
+    const { code, message } = error;
 
-    if (typeof message === 'object' && message !== null && 'error_code' in message) {
-      return (message as { error_code: string }).error_code;
+    if (code && typeof code === 'string') {
+      return code;
     }
 
     if (typeof message === 'string') {
@@ -541,13 +540,13 @@ export const getErrorMessage = (errorCode: string): string => {
   return message || errorMessages.DEFAULT;
 };
 
-const determineErrorSeverity = (code: string, statusCode: number): 'error' | 'warning' | 'info' => {
+const determineErrorSeverity = (code: string, statusCode: number): 'low' | 'medium' | 'high' | 'critical' => {
   if (code === 'MAINTENANCE_MODE' || code === 'RATE_LIMIT_EXCEEDED') {
-    return 'info';
+    return 'low';
   }
 
   if (code === 'EMAIL_NOT_VERIFIED' || code === 'ACCOUNT_LOCKED' || code === 'TOKEN_EXPIRED') {
-    return 'warning';
+    return 'medium';
   }
 
   const criticalCodes = [
@@ -556,13 +555,13 @@ const determineErrorSeverity = (code: string, statusCode: number): 'error' | 'wa
     'FORBIDDEN',
   ];
   if (criticalCodes.includes(code)) {
-    return 'error';
+    return 'critical';
   }
 
-  if (statusCode >= 500) return 'error';
-  if (statusCode >= 400 && statusCode < 500) return 'warning';
+  if (statusCode >= 500) return 'critical';
+  if (statusCode >= 400 && statusCode < 500) return 'high';
 
-  return 'error';
+  return 'medium';
 };
 
 export const parseApiError = (error: unknown): ParsedError => {
@@ -571,69 +570,93 @@ export const parseApiError = (error: unknown): ParsedError => {
   }
 
   if (isApiErrorResponse(error)) {
-    const { message, status_code, path, timestamp } = error.error;
+    const { message, detail, status, code } = error;
 
-    let errorCode = 'UNKNOWN_ERROR';
+    const errorCode = code || 'UNKNOWN_ERROR';
     let errorMessage = '';
-    let details: unknown[] = [];
+    let details: string[] = [];
 
-    if (typeof message === 'object' && message !== null) {
-      errorCode = message.error_code || errorCode;
-      errorMessage = message.message || '';
-      details = message.data || [];
-    } else if (typeof message === 'string') {
+    if (typeof message === 'string') {
       errorMessage = message;
+    } else if (typeof detail === 'string') {
+      errorMessage = detail;
     }
 
+    if (error.errors && typeof error.errors === 'object') {
+      details = formatErrorDetails(error.errors as Record<string, unknown>);
+    }
+
+    const timestamp = new Date().toISOString();
     const localizedMessage = getErrorMessage(errorCode);
 
     return {
       code: errorCode,
       message: localizedMessage || errorMessage || getErrorMessage('DEFAULT'),
-      statusCode: status_code,
-      path,
-      timestamp,
       details,
-      severity: determineErrorSeverity(errorCode, status_code),
+      category: 'unknown' as const,
+      timestamp,
+      severity: determineErrorSeverity(errorCode, status || 500),
+      userMessage: localizedMessage || errorMessage || 'An error occurred',
+      retryable: false,
     };
   }
 
   if (error instanceof Error) {
     const errorCode = extractErrorCode(error);
+    const timestamp = new Date().toISOString();
     return {
       code: errorCode,
       message: getErrorMessage(errorCode),
-      statusCode: 500,
+      details: [error.message],
+      category: 'unknown' as const,
       severity: determineErrorSeverity(errorCode, 500),
+      userMessage: 'An unexpected error occurred. Please try again.',
+      retryable: false,
+      timestamp,
     };
   }
 
   if (typeof error === 'object' && error !== null && 'message' in error) {
     const errorMessage = (error as { message: string }).message;
+    const timestamp = new Date().toISOString();
     if (errorMessage.includes('fetch') || errorMessage.includes('network')) {
       return {
         code: 'NETWORK_ERROR',
         message: getErrorMessage('NETWORK_ERROR'),
-        statusCode: 0,
-        severity: 'error',
+        details: [errorMessage],
+        category: 'network' as const,
+        severity: 'medium' as const,
+        userMessage: 'Network connection error. Please check your internet connection.',
+        retryable: true,
+        timestamp,
       };
     }
   }
 
   if (typeof error === 'string') {
+    const timestamp = new Date().toISOString();
     return {
       code: 'UNKNOWN_ERROR',
       message: error || getErrorMessage('DEFAULT'),
-      statusCode: 500,
-      severity: 'error',
+      details: [error],
+      category: 'unknown' as const,
+      severity: 'medium' as const,
+      userMessage: 'An error occurred. Please try again.',
+      retryable: false,
+      timestamp,
     };
   }
 
+  const timestamp = new Date().toISOString();
   return {
     code: 'UNKNOWN_ERROR',
     message: getErrorMessage('DEFAULT'),
-    statusCode: 500,
-    severity: 'error',
+    details: ['Unknown error occurred'],
+    category: 'unknown' as const,
+    severity: 'medium' as const,
+    userMessage: 'An unexpected error occurred. Please try again.',
+    retryable: false,
+    timestamp,
   };
 };
 
@@ -667,7 +690,14 @@ export const requiresUserAction = (error: unknown): boolean => {
 
 export const getErrorSeverity = (error: unknown): 'error' | 'warning' | 'info' => {
   const parsed = parseApiError(error);
-  return parsed.severity || 'error';
+  // Map new severity values to legacy values
+  switch (parsed.severity) {
+    case 'low': return 'info';
+    case 'medium': return 'warning';
+    case 'high': return 'error';
+    case 'critical': return 'error';
+    default: return 'error';
+  }
 };
 
 export interface NormalizedApiError {
@@ -684,40 +714,29 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
 };
 
 const normalizeNewErrorFormat = (
-  payload: ApiErrorResponse['error'],
+  payload: ApiErrorResponse,
   fallbackMessage: string,
   status: number
 ): NormalizedApiError => {
-  const { status_code: apiStatus, message, path, timestamp } = payload;
+  const { status: apiStatus, message, detail } = payload;
 
   let normalizedMessage = fallbackMessage;
-  let code: string | undefined;
-  let errors: Record<string, unknown> | undefined;
+  const code: string | undefined = payload.code;
+  const errors: Record<string, unknown> | undefined = payload.errors;
 
   if (typeof message === 'string') {
     normalizedMessage = message.trim() || fallbackMessage;
-  } else if (isRecord(message)) {
-    const detailMessage = typeof message.message === 'string' ? message.message.trim() : '';
-    normalizedMessage = detailMessage || fallbackMessage;
-
-    if (typeof message.error_code === 'string' && message.error_code.trim()) {
-      code = message.error_code.trim();
-    }
-
-    if (Array.isArray(message.data) && message.data.length > 0) {
-      errors = {
-        data: message.data,
-      };
-    }
+  } else if (typeof detail === 'string') {
+    normalizedMessage = detail.trim() || fallbackMessage;
   }
 
   return {
     status: typeof apiStatus === 'number' ? apiStatus : status,
     message: normalizedMessage,
     code,
-    detail: typeof path === 'string' ? path : undefined,
+    detail,
     errors,
-    timestamp,
+    timestamp: new Date().toISOString(),
   };
 };
 
@@ -735,33 +754,7 @@ export const normalizeApiError = (
     };
   }
 
-  if ('error' in payload && isRecord(payload.error)) {
-    return normalizeNewErrorFormat(payload.error as ApiErrorResponse['error'], fallbackMessage, status);
-  }
-
-  const message = typeof payload.message === 'string' && payload.message.trim()
-    ? payload.message.trim()
-    : undefined;
-
-  const detail = typeof payload.detail === 'string' && payload.detail.trim()
-    ? payload.detail.trim()
-    : undefined;
-
-  const code = typeof payload.code === 'string' && payload.code.trim()
-    ? payload.code.trim()
-    : undefined;
-
-  const errors = isRecord(payload.errors)
-    ? (payload.errors as Record<string, unknown>)
-    : undefined;
-
-  return {
-    status,
-    message: message || detail || fallbackMessage,
-    code,
-    detail,
-    errors,
-  };
+  return normalizeNewErrorFormat(payload as ApiErrorResponse, fallbackMessage, status);
 };
 
 export interface ErrorLogEntry {
@@ -945,7 +938,20 @@ class ErrorLogger {
   }
 
   getLogsBySeverity(severity: 'error' | 'warning' | 'info'): ErrorLogEntry[] {
-    return this.logs.filter(log => log.error.severity === severity);
+    // Map legacy severity to new severity values
+    const mappedSeverities: ('low' | 'medium' | 'high' | 'critical')[] = [];
+    switch (severity) {
+      case 'info':
+        mappedSeverities.push('low');
+        break;
+      case 'warning':
+        mappedSeverities.push('medium');
+        break;
+      case 'error':
+        mappedSeverities.push('high', 'critical');
+        break;
+    }
+    return this.logs.filter(log => mappedSeverities.includes(log.error.severity));
   }
 
   getRecentLogs(count: number = 10): ErrorLogEntry[] {

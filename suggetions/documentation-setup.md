@@ -20,7 +20,6 @@ Suggestions for improving project documentation, setup, and development environm
 
 ## 3. Development Workflow
 - **Pre-commit Hooks**: Add Husky and lint-staged for code quality checks
-- **CI/CD**: Set up GitHub Actions for automated testing and deployment
 - **Environment Configuration**: Use environment variables properly and add validation
 - **Code Formatting**: Consider adding Prettier for consistent code formatting
 

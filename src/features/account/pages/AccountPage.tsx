@@ -3,7 +3,7 @@ import { Bell, Lock, Settings, Shield } from 'lucide-react';
 
 import { useAuth } from '@features/auth';
 import Breadcrumb from '@shared/ui/Breadcrumb';
-import { getUserRoleName } from '@utils/user';
+import { getUserRoleName } from '@shared/utils/user';
 
 const AccountPage: FC = () => {
   const { user } = useAuth();

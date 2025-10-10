@@ -1,19 +1,22 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, Clock, Eye, EyeOff, Info, LogIn, Lock, Mail, ShieldCheck, User } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Eye, EyeOff, Info, LogIn, Lock, Mail, ShieldCheck, User, AlertTriangle, XCircle } from 'lucide-react';
 
 import { apiClient } from '@lib/api';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
-import { buildRegistrationFeedback } from '@utils/registrationFeedback';
-import type { FeedbackIcon, RegistrationFeedback } from '@utils/registrationFeedback';
+import { buildRegistrationFeedback } from '../utils/registrationFeedback';
+import type { FeedbackIcon, RegistrationFeedback } from '../utils/registrationFeedback';
 
 const FEEDBACK_ICON_MAP: Record<FeedbackIcon, React.ComponentType<{ className?: string }>> = {
   mail: Mail,
   shield: ShieldCheck,
   clock: Clock,
   login: LogIn,
-  info: Info
+  info: Info,
+  check: CheckCircle,
+  warning: AlertTriangle,
+  error: XCircle
 };
 
 const RegisterPage: React.FC = () => {

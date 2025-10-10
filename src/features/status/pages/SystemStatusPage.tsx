@@ -4,7 +4,7 @@ import { CheckCircle, XCircle, AlertCircle, Loader } from 'lucide-react';
 
 import { useAuth } from '@features/auth';
 import { apiClient } from '@lib/api';
-import { getUserRoleName, getUserPermissions } from '@utils/user';
+import { getUserRoleName, getUserPermissions } from '@shared/utils/user';
 
 interface SystemCheck {
   name: string;

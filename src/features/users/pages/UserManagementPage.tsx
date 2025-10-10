@@ -4,8 +4,8 @@ import { Plus, Trash2, Eye, Users, UserCheck, UserX, Search, Filter } from 'luci
 
 import { useAuth } from '@features/auth';
 import { apiClient } from '@lib/api';
-import { getUserPermissions, getUserRoleName } from '@utils/user';
-import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@types';
+import { getUserPermissions, getUserRoleName } from '@shared/utils/user';
+import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@shared/types';
 
 type Role = UserRole;
 
@@ -207,9 +207,9 @@ const UserManagementEnhanced: FC = () => {
         limit: pagination.limit
       };
 
-      if (searchTerm) params.search = searchTerm;
-      if (filterRole) params.role = filterRole;
-      if (filterActive !== undefined) params.is_active = filterActive;
+      if (searchTerm) params['search'] = searchTerm;
+      if (filterRole) params['role'] = filterRole;
+      if (filterActive !== undefined) params['is_active'] = filterActive;
 
       debugLog('Requesting users with params', params);
       

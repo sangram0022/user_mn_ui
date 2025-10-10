@@ -40,6 +40,9 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
 
       return () => clearInterval(interval);
     }
+    
+    // Return undefined when conditions are not met
+    return undefined;
   }, [isOpen, remainingTime, onLogout]);
 
   useEffect(() => {

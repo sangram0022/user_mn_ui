@@ -18,7 +18,7 @@ import {
   Clock,
   TrendingUp,
 } from 'lucide-react';
-import { getUserRoleName } from '@utils/user';
+import { getUserRoleName } from '@shared/utils/user';
 
 const RoleBasedDashboard: FC = () => {
   const { user } = useAuth();

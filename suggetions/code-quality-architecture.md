@@ -9,7 +9,7 @@ Suggestions for improving code quality, architecture, and React/TypeScript best 
 - **Error Boundaries**: Implement error boundaries around route components to prevent entire app crashes
 
 ## 2. React 19 Features Adoption
-- **Concurrent Features**: Use `useTransition` and `Suspense` for better UX (already partially implemented in `LoginPageFixed.tsx`)
+- **Concurrent Features**: Use `useTransition` and `Suspense` for better UX (already partially implemented in `LoginPage.tsx`)
 - **Server Components**: Consider migrating to Next.js or Remix for better SSR/SSG if needed
 - **New Hooks**: Leverage `useOptimistic`, `useFormState`, and other new hooks
 

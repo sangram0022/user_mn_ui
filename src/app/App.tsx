@@ -1,9 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@features/auth/providers/AuthProvider';
-import { routes, notFoundRoute } from '@app/routes/config';
-import { ProtectedRoute, PublicRoute } from '@app/routes/RouteGuards';
-import RouteRenderer from '@app/routes/RouteRenderer';
+import { routes, notFoundRoute } from '@routing/config';
+import { ProtectedRoute, PublicRoute } from '@routing/RouteGuards';
+import RouteRenderer from '@routing/RouteRenderer';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
+import { SuspenseBoundary } from '@shared/components/ui';
 import '@app/App.css';
 
 const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode) => {
@@ -19,20 +21,24 @@ const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode)
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {routes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={wrapWithGuard(route, <RouteRenderer route={route} />)}
-            />
-          ))}
-          <Route path="*" element={<RouteRenderer route={notFoundRoute} />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary enableReporting={true}>
+      <AuthProvider>
+        <Router>
+          <SuspenseBoundary loadingText="Loading application...">
+            <Routes>
+              {routes.map((route) => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={wrapWithGuard(route, <RouteRenderer route={route} />)}
+                />
+              ))}
+              <Route path="*" element={<RouteRenderer route={notFoundRoute} />} />
+            </Routes>
+          </SuspenseBoundary>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

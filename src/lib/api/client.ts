@@ -17,12 +17,12 @@ import type {
   UserSummary,
   UpdateUserRequest,
   UserRole
-} from '@types';
+} from '@shared/types';
 import { normalizeApiError } from '@shared/utils/error';
 
 import { ApiError } from './error';
 
-const DEFAULT_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '')
+const DEFAULT_BASE_URL = (import.meta.env['VITE_API_BASE_URL'] as string | undefined)?.replace(/\/$/, '')
   ?? 'http://127.0.0.1:8000/api/v1';
 
 const ENDPOINTS = {
@@ -203,12 +203,12 @@ export class ApiClient {
   }
 
   private getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json'
     };
 
     if (this.session?.accessToken) {
-      headers.Authorization = `Bearer ${this.session.accessToken}`;
+      headers['Authorization'] = `Bearer ${this.session.accessToken}`;
     }
 
     return headers;

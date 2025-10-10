@@ -121,6 +121,9 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
       const interval = setInterval(checkSession, sessionConfig.checkInterval);
       return () => clearInterval(interval);
     }
+    
+    // Return undefined when conditions are not met
+    return undefined;
   }, [user, sessionData, checkSession, sessionConfig.checkInterval]);
 
   // Initialize session on user login

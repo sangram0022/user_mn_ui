@@ -4,8 +4,8 @@
 
 import { useState, useCallback } from 'react';
 import { parseApiError, formatErrorForDisplay, isAuthError, errorLogger } from '@shared/utils/error';
-import { logger } from '../../utils/logger';
-import type { ParsedError } from '../../types/error';
+import { logger } from '@shared/utils/logger';
+import type { ParsedError } from '@shared/types/error';
 
 interface UseErrorHandlerReturn {
   error: ParsedError | null;
@@ -47,7 +47,7 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     
     // Log error for debugging (only in development)
     if (import.meta.env.DEV) {
-      logger.error('[useErrorHandler]', context || 'Error occurred', err);
+      logger.error('[useErrorHandler]', err instanceof Error ? err : new Error(String(err)), { context });
     }
   }, []);
 

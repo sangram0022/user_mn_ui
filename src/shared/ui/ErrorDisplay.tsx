@@ -11,8 +11,8 @@ import {
   RefreshCw,
   AlertTriangle,
 } from 'lucide-react';
-import type { ErrorInfo } from '../../utils/errorHandling';
-import { ERROR_CATEGORY_CONFIG } from '../../utils/errorHandling';
+import type { ErrorInfo } from '@shared/utils/error';
+import { ERROR_CATEGORY_CONFIG } from '@shared/utils/error';
 
 interface ErrorDisplayProps {
   error: ErrorInfo;

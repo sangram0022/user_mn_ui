@@ -1,6 +1,12 @@
 // Global TypeScript types and interfaces for the application
 // Based on the FastAPI User Management System API Documentation
 
+// Export error types
+export * from './error';
+
+// Export utility types
+export * from './utilities';
+
 // ============================================================================
 // API Response Types
 // ============================================================================

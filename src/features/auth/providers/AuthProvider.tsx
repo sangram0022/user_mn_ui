@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
 import { apiClient } from '@lib/api';
-import type { LoginRequest, UserProfile, UserRoleInfo } from '@types';
-import { logger } from '@utils/logger';
+import type { LoginRequest, UserProfile, UserRoleInfo } from '@shared/types';
+import { logger } from '@shared/utils/logger';
 
 import { AuthContext, type AuthContextType } from '../context/AuthContext';
 
@@ -38,9 +38,9 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       // Try to get user profile to verify token is still valid
       const userProfile = await apiClient.getUserProfile();
       setUser(userProfile);
-      logger.debug('Auth check succeeded for user', userProfile?.email);
+      logger.debug('Auth check succeeded for user', { email: userProfile?.email });
     } catch (err) {
-      logger.error('Auth check failed', err);
+      logger.error('Auth check failed', err instanceof Error ? err : new Error(String(err)));
       // Clear invalid token
       localStorage.removeItem('token');
       setUser(null);
@@ -63,7 +63,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       logger.info('User logged in', { email: userProfile.email });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
-      logger.error('Login failed', err);
+      logger.error('Login failed', err instanceof Error ? err : new Error(String(err)));
       throw err;
     } finally {
       setIsLoading(false);
@@ -78,7 +78,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       await apiClient.logout();
       logger.debug('Logout API call succeeded');
     } catch (err) {
-      logger.warn('Logout API call failed', err);
+      logger.warn('Logout API call failed', { error: String(err) });
       // Continue with logout even if API call fails
     } finally {
       // Clear local state and token
