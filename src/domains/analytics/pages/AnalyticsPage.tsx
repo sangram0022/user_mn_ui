@@ -2,7 +2,7 @@ import { logger } from './../../../shared/utils/logger';
 import type { FC } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../auth/context/AuthContext';
 import { apiClient } from '@lib/api';
 import type { UserAnalytics as AnalyticsSummary } from '@shared/types';
 import Breadcrumb from '@shared/ui/Breadcrumb';

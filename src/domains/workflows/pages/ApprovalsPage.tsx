@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { Clock, CheckCircle, Users } from 'lucide-react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../auth/context/AuthContext';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 
 const ApprovalsPage: FC = () => { const { hasPermission } = useAuth();

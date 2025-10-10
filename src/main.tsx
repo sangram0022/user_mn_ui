@@ -2,6 +2,10 @@ import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/index.css'
 import App from './app/App'
+import { globalErrorHandler } from './shared/utils/GlobalErrorHandler'
+
+// Initialize global error handler
+globalErrorHandler;
 
 if (import.meta.env.DEV) { void import('@axe-core/react')
     .then(async ({ default: axe }) => { const ReactDOM = await import('react-dom');

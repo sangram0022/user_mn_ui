@@ -4,11 +4,13 @@
  */
 
 import { logger } from './../utils/logger';
-import { lazy, Suspense, memo, useMemo, useCallback, useTransition, startTransition, useState } from 'react';
+import { lazy, Suspense, memo, useMemo, useCallback, useTransition, startTransition, useState, Component } from 'react';
 import type { ComponentType,
+  ComponentProps,
   ReactElement,
   PropsWithChildren,
-  MemoExoticComponent } from 'react';
+  MemoExoticComponent
+ } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 // ==================== LAZY LOADING UTILITIES ====================
@@ -17,7 +19,8 @@ export interface LazyLoadOptions { fallback?: ReactElement;
   errorBoundary?: boolean;
   retryDelay?: number;
   maxRetries?: number;
-  preload?: boolean; }
+  preload?: boolean;
+ }
 
 export class LazyLoadingManager { private static loadedModules = new Map<string, any>();
   private static loadingPromises = new Map<string, Promise<any>>();
@@ -56,7 +59,7 @@ export class LazyLoadingManager { private static loadedModules = new Map<string,
           this.loadingPromises.delete(moduleKey);
           return module;
         } catch (error) {
-          logger.error(`Failed to load module (attempt ${attempts + 1}):`, error);
+          logger.error(`Failed to load module (attempt ${attempts + 1}):`, error instanceof Error ? error : new Error(String(error)));
           
           if (attempts < maxRetries) { this.retryAttempts.set(moduleKey, attempts + 1);
             await new Promise(resolve => setTimeout(resolve, retryDelay * (attempts + 1)));
@@ -182,7 +185,8 @@ export class CodeSplittingManager { private static routeComponents = new Map<str
 // ==================== MEMOIZATION UTILITIES ====================
 
 export interface MemoOptions { equalityFn?: (prevProps: any, nextProps: any) => boolean;
-  displayName?: string; }
+  displayName?: string;
+ }
 
 export class MemoizationManager {
   /**
@@ -243,7 +247,7 @@ export class MemoizationManager {
     return useCallback(
       (...args: Parameters<T>) => {
         if (process.env.NODE_ENV === 'development' && debugName) {
-          logger.debug(`Executing callback: ${debugName}`, args);
+          logger.debug(`Executing callback: ${debugName}`, { args: args.map(String).join(", ") });
         }
         return callback(...args);
       },
@@ -281,14 +285,16 @@ export interface VirtualScrollProps { items: any[];
   containerHeight: number;
   renderItem: (item: any, index: number) => ReactElement;
   overscan?: number;
-  className?: string; }
+  className?: string;
+ }
 
 export const VirtualScroll: React.FC<VirtualScrollProps> = memo(({ items,
   itemHeight,
   containerHeight,
   renderItem,
   overscan = 5,
-  className = '' }) => { const [scrollTop, setScrollTop] = useState(0);
+  className = ''
+ }) => { const [scrollTop, setScrollTop] = useState(0);
 
   const visibleStart = Math.floor(scrollTop / itemHeight);
   const visibleEnd = Math.min(
@@ -340,7 +346,8 @@ export interface OptimizedImageProps { src: string;
   quality?: number;
   format?: 'webp' | 'jpeg' | 'png';
   onLoad?: () => void;
-  onError?: (error: Event) => void; }
+  onError?: (error: Event) => void;
+ }
 
 export const OptimizedImage: React.FC<OptimizedImageProps> = memo(({ src,
   alt,
@@ -352,7 +359,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = memo(({ src,
   quality = 80,
   format = 'webp',
   onLoad,
-  onError }) => { const [isLoading, setIsLoading] = useState(true);
+  onError
+ }) => { const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const { ref: imgRef, inView } = useInView({ threshold: 0.1,
     triggerOnce: true,
@@ -464,7 +472,8 @@ export class TransitionManager { /**
 // ==================== ERROR BOUNDARY FOR LAZY COMPONENTS ====================
 
 interface ErrorBoundaryState { hasError: boolean;
-  error?: Error; }
+  error?: Error;
+ }
 
 class ErrorBoundary extends Component<
   PropsWithChildren<{}>,
@@ -480,14 +489,16 @@ class ErrorBoundary extends Component<
     };
   }
 
-  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) { logger.error('Lazy component loading error:', undefined, { error, errorInfo  });
+  override componentDidCatch(error: Error, _errorInfo: { componentStack?: string }) { 
+    const enrichedError = new Error(error.message);
+    enrichedError.stack = error.stack;
+    logger.error('Lazy component loading error:', enrichedError);
     
     // Report to monitoring service in production
-    if (process.env.NODE_ENV === 'production') { // Implementation depends on your monitoring service
-      logger.error('Component failed to load:', undefined, { error: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack
-       });
+    if (process.env.NODE_ENV === 'production') {
+      const productionError = new Error(`Component failed to load: ${error.message}`);
+      productionError.stack = error.stack;
+      logger.error('Component failed to load:', productionError);
     }
   }
 
@@ -521,6 +532,7 @@ export const performanceUtils = { lazyLoading: LazyLoadingManager,
   memoization: MemoizationManager,
   transitions: TransitionManager,
   VirtualScroll,
-  OptimizedImage };
+  OptimizedImage
+ };
 
 export default performanceUtils;

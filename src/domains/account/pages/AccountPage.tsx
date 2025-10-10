@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { Bell, Lock, Settings, Shield } from 'lucide-react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../auth/context/AuthContext';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import { getUserRoleName } from '@shared/utils/user';
 

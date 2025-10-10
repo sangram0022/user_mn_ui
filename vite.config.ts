@@ -18,18 +18,23 @@ export default defineConfig({
   ].filter(Boolean),
   resolve: {
     alias: {
-  '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
-  '@features': fileURLToPath(new URL('./src/features', import.meta.url)),
-  '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
-  '@widgets': fileURLToPath(new URL('./src/widgets', import.meta.url)),
-  '@config': fileURLToPath(new URL('./src/config', import.meta.url)),
-  '@contexts': fileURLToPath(new URL('./src/contexts', import.meta.url)),
-  '@lib': fileURLToPath(new URL('./src/lib', import.meta.url)),
-  '@hooks': fileURLToPath(new URL('./src/hooks', import.meta.url)),
-  '@styles': fileURLToPath(new URL('./src/styles', import.meta.url)),
-  '@layouts': fileURLToPath(new URL('./src/layouts', import.meta.url)),
-  '@routing': fileURLToPath(new URL('./src/routing', import.meta.url)),
-  '@assets': fileURLToPath(new URL('./src/assets', import.meta.url))
+      // DDD Architecture Paths
+      '@domains': fileURLToPath(new URL('./src/domains', import.meta.url)),
+      '@infrastructure': fileURLToPath(new URL('./src/infrastructure', import.meta.url)),
+      '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
+      '@app': fileURLToPath(new URL('./src/app', import.meta.url)),
+      
+      // Legacy paths (deprecated - migrate to DDD structure)
+      '@features': fileURLToPath(new URL('./src/features', import.meta.url)),
+      '@widgets': fileURLToPath(new URL('./src/widgets', import.meta.url)),
+      '@config': fileURLToPath(new URL('./src/config', import.meta.url)),
+      '@contexts': fileURLToPath(new URL('./src/contexts', import.meta.url)),
+      '@lib': fileURLToPath(new URL('./src/lib', import.meta.url)),
+      '@hooks': fileURLToPath(new URL('./src/hooks', import.meta.url)),
+      '@styles': fileURLToPath(new URL('./src/styles', import.meta.url)),
+      '@layouts': fileURLToPath(new URL('./src/layouts', import.meta.url)),
+      '@routing': fileURLToPath(new URL('./src/routing', import.meta.url)),
+      '@assets': fileURLToPath(new URL('./src/assets', import.meta.url))
     }
   },
   
@@ -80,15 +85,51 @@ export default defineConfig({
     // Rollup options for enhanced code splitting
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Vendor chunks for better caching
-          react: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          icons: ['lucide-react'],
-          // Security and validation libs
-          security: ['zod', 'dompurify', 'crypto-js'],
-          // Performance libs
-          performance: ['@tanstack/react-query', 'react-intersection-observer']
+        manualChunks(id) {
+          // Vendor chunks for better caching and lazy loading
+          if (id.includes('node_modules')) {
+            // React core
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            // Router
+            if (id.includes('react-router')) {
+              return 'router-vendor';
+            }
+            // Icons
+            if (id.includes('lucide-react')) {
+              return 'icons-vendor';
+            }
+            // Security and validation
+            if (id.includes('zod') || id.includes('dompurify') || id.includes('crypto-js')) {
+              return 'security-vendor';
+            }
+            // Query and state management
+            if (id.includes('@tanstack/react-query') || id.includes('react-intersection-observer')) {
+              return 'query-vendor';
+            }
+            // Other vendor libraries
+            return 'vendor';
+          }
+          
+          // Split large application modules
+          if (id.includes('/src/domains/workflows')) {
+            return 'domain-workflows';
+          }
+          if (id.includes('/src/domains/analytics')) {
+            return 'domain-analytics';
+          }
+          if (id.includes('/src/domains/users')) {
+            return 'domain-users';
+          }
+          
+          // Split by features
+          if (id.includes('/src/shared/performance')) {
+            return 'performance';
+          }
+          if (id.includes('/src/shared/security')) {
+            return 'security';
+          }
         }
       }
     },

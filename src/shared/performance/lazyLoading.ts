@@ -4,7 +4,7 @@
  */
 
 import { logger } from './../utils/logger';
-import React, { lazy, Suspense, ComponentType, ReactNode, useEffect, Component } from 'react';
+import React, { lazy, Suspense, ComponentType, ComponentProps, ReactNode, useEffect, Component } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 // ==================== TYPES ====================

@@ -3,14 +3,15 @@ import type { FC } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Loader } from 'lucide-react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../auth/context/AuthContext';
 import { apiClient } from '@lib/api';
 import { getUserRoleName, getUserPermissions } from '@shared/utils/user';
 
 interface SystemCheck { name: string;
   status: 'checking' | 'success' | 'error' | 'warning';
   message: string;
-  details?: string; }
+  details?: string;
+ }
 
 const SystemStatus: FC = () => { const { user, hasPermission } = useAuth();
   const [checks, setChecks] = useState<SystemCheck[]>([]);
@@ -70,13 +71,13 @@ const SystemStatus: FC = () => { const { user, hasPermission } = useAuth();
     }
 
     try { logger.info('🧪 Testing Users API with current token...');
-      logger.info('🔐 Token in localStorage:', !!localStorage.getItem('access_token'));
-      logger.info('👤 Current user:', user?.email, 'Role:', getUserRoleName(user));
-      logger.info('🛡️ Has user:read permission:', hasPermission('user:read'));
+      logger.info('🔐 Token in localStorage:', { hasToken: !!localStorage.getItem('access_token') });
+      logger.info('👤 Current user:', { email: user?.email, role: getUserRoleName(user) });
+      logger.info('🛡️ Has user:read permission:', { hasPermission: hasPermission('user:read') });
 
       const users = await apiClient.getUsers({ limit: 1 });
       updateCheck('Users API', 'success', 'Users API working', `Found ${users.length} user${users.length === 1 ? '' : 's'}`);
-    } catch (error) { logger.error('🚨 Users API test failed:', undefined, { error  });
+    } catch (error) { logger.error('🚨 Users API test failed:', error instanceof Error ? error : new Error(String(error)));
       updateCheck('Users API', 'error', 'Users API failed', error instanceof Error ? error.message : 'Unknown error');
     }
 

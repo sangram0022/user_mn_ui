@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { apiClient } from '@lib/api';
 import type { UserProfile as BaseUserProfile } from '@shared/types';

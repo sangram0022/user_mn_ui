@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { Eye, UserCheck, AlertTriangle, FileText } from 'lucide-react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../auth/context/AuthContext';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 
 const ModerationPage: FC = () => { const { hasPermission } = useAuth();

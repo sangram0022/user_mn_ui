@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import { Shield, AlertTriangle, Lock, Eye, Users, Activity, FileText, CheckCircle } from 'lucide-react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../auth/context/AuthContext';
 import { apiClient } from '@lib/api';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 

@@ -4,7 +4,7 @@
  */
 
 import { logger } from './../utils/logger';
-import { memo, useMemo, useCallback, useRef, useState, useEffect, Component } from 'react';
+import React, { memo, useMemo, useCallback, useRef, useState, useEffect, ComponentType, useTransition } from 'react';
 
 // ==================== MEMOIZATION UTILITIES ====================
 
@@ -53,7 +53,8 @@ export function useStableCallback<T extends (...args: unknown[]) => unknown>(
 export function createMemoComponent<P extends object>(
   Component: ComponentType<P>,
   areEqual?: (prevProps: P, nextProps: P) => boolean
-) { return memo(Component, areEqual); }
+) { return memo(Component, areEqual);
+ }
 
 /**
  * Smart memo that only re-renders on specific prop changes
@@ -157,10 +158,12 @@ export function useThrottledCallback<T extends (...args: unknown[]) => unknown>(
 export function useVirtualList<T>({ items,
   itemHeight,
   containerHeight,
-  overscan = 5, }: { items: T[];
+  overscan = 5,
+ }: { items: T[];
   itemHeight: number;
   containerHeight: number;
-  overscan?: number; }) { const [scrollTop, setScrollTop] = useState(0);
+  overscan?: number;
+ }) { const [scrollTop, setScrollTop] = useState(0);
 
   const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
   const endIndex = Math.min(
@@ -192,9 +195,11 @@ export function useVirtualList<T>({ items,
  */
 export function useWindowVirtualization<T>({ items,
   estimatedItemHeight,
-  getItemHeight, }: { items: T[];
+  getItemHeight,
+ }: { items: T[];
   estimatedItemHeight: number;
-  getItemHeight?: (index: number) => number; }) { const [measuredHeights, setMeasuredHeights] = useState<number[]>([]);
+  getItemHeight?: (index: number) => number;
+ }) { const [measuredHeights, setMeasuredHeights] = useState<number[]>([]);
   const [scrollTop, setScrollTop] = useState(0);
 
   const itemHeights = useMemo(() => {
@@ -447,13 +452,13 @@ export function useBatchedUpdates() { const [, setUpdates] = useState<Array<() =
 /**
  * Concurrent features helper
  */
-export function useConcurrentFeatures() { const [isPending, startTransition] = React.useTransition();
+export function useConcurrentFeatures() { const [isPending, startTransitionFn] = useTransition();
 
   const deferredUpdate = useCallback((updateFn: () => void) => {
-    startTransition(() => {
+    startTransitionFn(() => {
       updateFn();
     });
-  }, [startTransition]);
+  }, [startTransitionFn]);
 
   return { isPending,
     deferredUpdate,

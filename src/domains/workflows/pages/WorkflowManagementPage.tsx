@@ -2,7 +2,7 @@ import { logger } from './../../../shared/utils/logger';
 import type { FC } from 'react';
 import { useCallback, useEffect, useId, useState } from 'react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../auth/context/AuthContext';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 
 interface WorkflowAction { id: number;

@@ -27,9 +27,14 @@
     "allowUnreachableCode": false,
     "baseUrl": ".",
     "paths": {
-      "@app/*": ["src/app/*"],
-      "@features/*": ["src/domains/*"],
+      // DDD Architecture Paths
+      "@domains/*": ["src/domains/*"],
+      "@infrastructure/*": ["src/infrastructure/*"],
       "@shared/*": ["src/shared/*"],
+      "@app/*": ["src/app/*"],
+      
+      // Legacy paths (deprecated - migrate to DDD structure)
+      "@features/*": ["src/features/*"],
       "@widgets/*": ["src/widgets/*"],
       "@config/*": ["src/config/*"],
       "@contexts/*": ["src/contexts/*"],

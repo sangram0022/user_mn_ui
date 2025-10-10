@@ -1,10 +1,11 @@
 import type { FC, ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../domains/auth/context/AuthContext';
 import Loading from '@shared/ui/Loading';
 
-interface RouteGuardProps { children: ReactNode; }
+interface RouteGuardProps { children: ReactNode;
+ }
 
 const FullScreenLoader: FC = () => (
   <Loading fullScreen overlay text="Loading..." />

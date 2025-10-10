@@ -4,7 +4,7 @@
  */
 
 import { logger } from './../utils/logger';
-import { useEffect, useCallback, useRef, Component } from 'react';
+import React, { useEffect, useCallback, useRef, ComponentType, forwardRef, Profiler } from 'react';
 
 // Performance metrics types
 export interface PerformanceMetrics { renderTime: number;
@@ -23,7 +23,8 @@ export interface PerformanceConfig { trackRenders?: boolean;
   trackInteractions?: boolean;
   trackWebVitals?: boolean;
   reportThreshold?: number;
-  onMetricsUpdate?: (metrics: PerformanceMetrics) => void; }
+  onMetricsUpdate?: (metrics: PerformanceMetrics) => void;
+ }
 
 // Performance monitoring hook
 export function usePerformanceMonitor(config: PerformanceConfig = {}) { const {
@@ -179,7 +180,7 @@ export function usePerformanceMonitor(config: PerformanceConfig = {}) { const {
 export function withPerformanceMonitoring<P extends object>(
   WrappedComponent: ComponentType<P>,
   config: PerformanceConfig = {}
-) { const PerformanceMonitoredComponent = React.forwardRef<any, P>((props, ref) => {
+) { const PerformanceMonitoredComponent = forwardRef<any, P>((props, ref) => {
     const { trackRender, trackInteraction } = usePerformanceMonitor(config);
     
     useEffect(() => { trackRender();
@@ -231,11 +232,13 @@ export interface ProfilerProps { id: string;
     baseDuration: number,
     startTime: number,
     commitTime: number
-  ) => void; }
+  ) => void;
+ }
 
 export const PerformanceProfiler: React.FC<ProfilerProps> = ({ id, 
   children, 
-  onRender  }) => {
+  onRender 
+ }) => {
   const handleRender = useCallback((
     profileId: string,
     phase: 'mount' | 'update' | 'nested-update',
@@ -253,9 +256,9 @@ export const PerformanceProfiler: React.FC<ProfilerProps> = ({ id,
   }, [onRender]);
 
   return (
-    <React.Profiler id={id} onRender={handleRender}>
+    <Profiler id={id} onRender={handleRender}>
       {children}
-    </React.Profiler>
+    </Profiler>
   );
 };
 
@@ -265,7 +268,8 @@ export interface PerformanceBudget { renderTime: number;
   memoryUsage: number;
   lcp: number;
   fid: number;
-  cls: number; }
+  cls: number;
+ }
 
 export function checkPerformanceBudget(
   metrics: PerformanceMetrics,
@@ -305,4 +309,5 @@ export default { usePerformanceMonitor,
   withPerformanceMonitoring,
   PerformanceProfiler,
   analyzeBundleSize,
-  checkPerformanceBudget };
+  checkPerformanceBudget
+ };

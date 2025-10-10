@@ -2,7 +2,7 @@ import React, { useCallback, useState, useTransition, startTransition } from 're
 import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 
 interface LoginFormState { email: string;

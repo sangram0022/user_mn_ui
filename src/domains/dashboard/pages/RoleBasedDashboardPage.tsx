@@ -2,7 +2,7 @@ import { logger } from './../../../shared/utils/logger';
 import type { FC, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../auth/context/AuthContext';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import { Users,
   Shield,

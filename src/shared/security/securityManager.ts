@@ -396,7 +396,7 @@ export class SecurityManager {
 
     // Log to console in development
     if (this.config.development) {
-      logger.warn(`🚨 Security violation: ${type}`, violation);
+      logger.warn(`🚨 Security violation: ${type}`, { violation: JSON.stringify(violation) });
     }
 
     // Send to monitoring service in production

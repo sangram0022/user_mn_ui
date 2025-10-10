@@ -329,7 +329,7 @@ export const CacheUtils = { // Invalidate specific cache entries
         const data = await fetcher();
         globalCache.set(key, data, ttl);
       } catch (error) {
-        logger.warn(`Prefetch failed for key ${key}:`, error);
+        logger.warn(`Prefetch failed for key ${key}:`, { error: String(error) });
       }
     }
   }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../domains/auth/context/AuthContext';
 import { getUserRoleName } from '@shared/utils/user';
 import { Menu, 
   X, 
@@ -15,7 +15,8 @@ import { Menu,
   BarChart3,
   Workflow,
   FileText,
-  ChevronDown } from 'lucide-react';
+  ChevronDown
+ } from 'lucide-react';
 
 const Navigation = () => { const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);

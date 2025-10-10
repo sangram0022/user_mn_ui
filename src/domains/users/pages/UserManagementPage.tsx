@@ -3,7 +3,7 @@ import type { FC, FormEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Trash2, Eye, Users, UserCheck, UserX, Search, Filter } from 'lucide-react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '../../auth/context/AuthContext';
 import { apiClient } from '@lib/api';
 import { getUserPermissions, getUserRoleName } from '@shared/utils/user';
 import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@shared/types';
@@ -23,20 +23,23 @@ interface User { id: string;
   lifecycle_stage?: string | null;
   activity_score?: number | null;
   last_login_at?: string | null;
-  created_at: string; }
+  created_at: string;
+ }
 
 interface CreateUserData { email: string;
   password: string;
   username?: string;
   full_name?: string;
   role?: string;
-  is_active?: boolean; }
+  is_active?: boolean;
+ }
 
 interface UpdateUserData { email?: string;
   username?: string;
   full_name?: string;
   role?: string;
-  is_active?: boolean; }
+  is_active?: boolean;
+ }
 
 const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAuth();
   
@@ -327,7 +330,7 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
       
       await loadUsers();
     } catch (error) {
-      logger.error(`Action ${action} failed:`, error);
+      logger.error(`Action ${action} failed:`, error instanceof Error ? error : new Error(String(error)));
       setError(`Failed to ${action} user`);
     } finally { setActionLoading(null);
     }
@@ -880,7 +883,8 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
 const CreateUserModal: FC<{ roles: Role[];
   onSave: (data: CreateUserData) => void;
   onClose: () => void;
-  isLoading: boolean; }> = ({ roles, onSave, onClose, isLoading }) => { const [formData, setFormData] = useState<CreateUserData>({
+  isLoading: boolean;
+ }> = ({ roles, onSave, onClose, isLoading }) => { const [formData, setFormData] = useState<CreateUserData>({
     email: '',
     password: '',
     username: '',
@@ -1070,7 +1074,8 @@ const EditUserModal: FC<{ user: User;
   roles: Role[];
   onSave: (data: UpdateUserData) => void;
   onClose: () => void;
-  isLoading: boolean; }> = ({ user, roles, onSave, onClose, isLoading }) => { const [formData, setFormData] = useState<UpdateUserData>({
+  isLoading: boolean;
+ }> = ({ user, roles, onSave, onClose, isLoading }) => { const [formData, setFormData] = useState<UpdateUserData>({
     email: user.email,
     username: user.username || '',
     full_name: user.full_name || '',

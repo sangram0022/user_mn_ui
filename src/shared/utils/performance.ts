@@ -152,7 +152,7 @@ class PerformanceMonitor {
       observer.observe({ entryTypes: [type] });
       this.observers.set(type, observer);
     } catch (error) {
-      logger.warn(`Failed to create ${type} observer:`, error);
+      logger.warn(`Failed to create ${type} observer:`, { error: String(error) });
     }
   }
 
@@ -336,7 +336,7 @@ class PerformanceMonitor {
         return measure.duration;
       }
     } catch (error) {
-      logger.warn(`Failed to measure ${name}:`, error);
+      logger.warn(`Failed to measure ${name}:`, { error: String(error) });
     }
     
     return null;

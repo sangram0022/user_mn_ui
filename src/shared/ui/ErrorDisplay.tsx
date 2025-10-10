@@ -1,5 +1,5 @@
 import { logger } from './../utils/logger';
-import { useState, useEffect, Component } from 'react';
+import { useState, useEffect, Component, ComponentType } from 'react';
 import { AlertCircle,
   CheckCircle,
   Clock,
@@ -9,7 +9,8 @@ import { AlertCircle,
   WifiOff,
   X,
   RefreshCw,
-  AlertTriangle, } from 'lucide-react';
+  AlertTriangle,
+ } from 'lucide-react';
 import type { ErrorInfo } from '@shared/utils/error';
 import { ERROR_CATEGORY_CONFIG } from '@shared/utils/error';
 
@@ -19,7 +20,8 @@ interface ErrorDisplayProps { error: ErrorInfo;
   className?: string;
   showIcon?: boolean;
   showAction?: boolean;
-  variant?: 'inline' | 'toast' | 'banner' | 'modal'; }
+  variant?: 'inline' | 'toast' | 'banner' | 'modal';
+ }
 
 /**
  * Icon mapping for error categories
@@ -31,7 +33,8 @@ const ERROR_ICONS = { 'alert-circle': AlertCircle,
   server: Server,
   'shield-x': ShieldX,
   'wifi-off': WifiOff,
-  'alert-triangle': AlertTriangle, } as const;
+  'alert-triangle': AlertTriangle,
+ } as const;
 
 /**
  * Color scheme mapping for error categories
@@ -89,7 +92,8 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error,
   className = '',
   showIcon = true,
   showAction = true,
-  variant = 'inline', }) => {
+  variant = 'inline',
+ }) => {
   const categoryConfig = ERROR_CATEGORY_CONFIG[error.category];
   const colors = ERROR_COLORS[categoryConfig.color as keyof typeof ERROR_COLORS] || ERROR_COLORS.gray;
   const IconComponent = ERROR_ICONS[categoryConfig.icon as keyof typeof ERROR_ICONS] || AlertCircle;
@@ -188,12 +192,14 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error,
 };
 
 interface RateLimitErrorProps extends Omit<ErrorDisplayProps, 'error'> { retryAfter?: number;
-  onCountdownComplete?: () => void; }
+  onCountdownComplete?: () => void;
+ }
 
 export const RateLimitError: React.FC<RateLimitErrorProps> = ({ retryAfter = 60,
   onCountdownComplete,
   onRetry,
-  ...props }) => { const [countdown, setCountdown] = useState(retryAfter);
+  ...props
+ }) => { const [countdown, setCountdown] = useState(retryAfter);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -225,12 +231,14 @@ export const RateLimitError: React.FC<RateLimitErrorProps> = ({ retryAfter = 60,
 };
 
 interface ErrorToastProps extends ErrorDisplayProps { autoHideDelay?: number;
-  onAutoHide?: () => void; }
+  onAutoHide?: () => void;
+ }
 
 export const ErrorToast: React.FC<ErrorToastProps> = ({ autoHideDelay = 5000,
   onAutoHide,
   onClose,
-  ...props }) => { const [isVisible, setIsVisible] = useState(true);
+  ...props
+ }) => { const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     if (autoHideDelay > 0) {
@@ -266,7 +274,8 @@ interface ErrorBoundaryProps { children: React.ReactNode;
 }
 
 interface ErrorBoundaryState { hasError: boolean;
-  error: Error | null; }
+  error: Error | null;
+ }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> { override state: ErrorBoundaryState = { hasError: false, error: null };
 
