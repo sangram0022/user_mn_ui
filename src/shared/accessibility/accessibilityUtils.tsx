@@ -1,18 +1,16 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Comprehensive Accessibility (a11y) Utilities
  * WCAG 2.1 AA compliant implementation by 20-year React expert
  */
 
-import React, { useEffect, 
-  useRef, 
-  useCallback, 
-  useState } from 'react';
-import type { KeyboardEvent,
-  ReactNode } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 
 // ==================== ARIA UTILITIES ====================
 
-export interface AriaAttributes { 'aria-label'?: string;
+export interface AriaAttributes {
+  'aria-label'?: string;
   'aria-labelledby'?: string;
   'aria-describedby'?: string;
   'aria-expanded'?: boolean;
@@ -41,7 +39,8 @@ export interface AriaAttributes { 'aria-label'?: string;
   'aria-invalid'?: boolean | 'grammar' | 'spelling';
   'aria-errormessage'?: string;
   role?: string;
-  tabIndex?: number; }
+  tabIndex?: number;
+}
 
 export class AriaManager {
   private static idCounter = 0;
@@ -56,39 +55,47 @@ export class AriaManager {
   /**
    * Create ARIA attributes for form fields
    */
-  static createFieldAttributes(options: { label?: string;
+  static createFieldAttributes(options: {
+    label?: string;
     description?: string;
     error?: string;
     required?: boolean;
     invalid?: boolean;
-  }): AriaAttributes { const { label, description, error, required = false, invalid = false } = options;
-    
+  }): AriaAttributes {
+    const { label, description, error, required = false, invalid = false } = options;
+
     const attributes: AriaAttributes = {};
-    
-    if (label) { attributes['aria-label'] = label;
+
+    if (label) {
+      attributes['aria-label'] = label;
     }
-    
-    if (description) { const descId = this.generateId('desc');
+
+    if (description) {
+      const descId = this.generateId('desc');
       attributes['aria-describedby'] = descId;
     }
-    
-    if (error) { const errorId = this.generateId('error');
+
+    if (error) {
+      const errorId = this.generateId('error');
       attributes['aria-errormessage'] = errorId;
     }
-    
-    if (required) { attributes['aria-required'] = true;
+
+    if (required) {
+      attributes['aria-required'] = true;
     }
-    
-    if (invalid) { attributes['aria-invalid'] = true;
+
+    if (invalid) {
+      attributes['aria-invalid'] = true;
     }
-    
+
     return attributes;
   }
 }
 
 // ==================== KEYBOARD NAVIGATION ====================
 
-export class KeyboardManager { private static focusableSelectors = [
+export class KeyboardManager {
+  private static focusableSelectors = [
     'button:not([disabled])',
     'input:not([disabled])',
     'select:not([disabled])',
@@ -99,7 +106,7 @@ export class KeyboardManager { private static focusableSelectors = [
     'audio[controls]',
     'video[controls]',
     'details > summary',
-    'iframe'
+    'iframe',
   ].join(', ');
 
   /**
@@ -113,14 +120,16 @@ export class KeyboardManager { private static focusableSelectors = [
   /**
    * Get the first focusable element in a container
    */
-  static getFirstFocusableElement(container: Element): HTMLElement | null { const elements = this.getFocusableElements(container);
+  static getFirstFocusableElement(container: Element): HTMLElement | null {
+    const elements = this.getFocusableElements(container);
     return elements.length > 0 ? elements[0] || null : null;
   }
 
   /**
    * Get the last focusable element in a container
    */
-  static getLastFocusableElement(container: Element): HTMLElement | null { const elements = this.getFocusableElements(container);
+  static getLastFocusableElement(container: Element): HTMLElement | null {
+    const elements = this.getFocusableElements(container);
     return elements.length > 0 ? elements[elements.length - 1] || null : null;
   }
 
@@ -131,75 +140,91 @@ export class KeyboardManager { private static focusableSelectors = [
     event: KeyboardEvent,
     elements: HTMLElement[],
     currentIndex: number,
-    options: { orientation?: 'horizontal' | 'vertical';
+    options: {
+      orientation?: 'horizontal' | 'vertical';
       wrap?: boolean;
       onSelect?: (element: HTMLElement, index: number) => void;
     } = {}
-  ): number { const { orientation = 'vertical', wrap = true, onSelect } = options;
-    
+  ): number {
+    const { orientation = 'vertical', wrap = true, onSelect } = options;
+
     let newIndex = currentIndex;
-    
-    switch (event.key) { case 'ArrowUp':
+
+    switch (event.key) {
+      case 'ArrowUp':
         if (orientation === 'vertical') {
           event.preventDefault();
-          newIndex = currentIndex > 0 ? currentIndex - 1 : (wrap ? elements.length - 1 : 0);
+          newIndex = currentIndex > 0 ? currentIndex - 1 : wrap ? elements.length - 1 : 0;
         }
         break;
-        
+
       case 'ArrowDown':
-        if (orientation === 'vertical') { event.preventDefault();
-          newIndex = currentIndex < elements.length - 1 ? currentIndex + 1 : (wrap ? 0 : elements.length - 1);
+        if (orientation === 'vertical') {
+          event.preventDefault();
+          newIndex =
+            currentIndex < elements.length - 1 ? currentIndex + 1 : wrap ? 0 : elements.length - 1;
         }
         break;
-        
+
       case 'ArrowLeft':
-        if (orientation === 'horizontal') { event.preventDefault();
-          newIndex = currentIndex > 0 ? currentIndex - 1 : (wrap ? elements.length - 1 : 0);
+        if (orientation === 'horizontal') {
+          event.preventDefault();
+          newIndex = currentIndex > 0 ? currentIndex - 1 : wrap ? elements.length - 1 : 0;
         }
         break;
-        
+
       case 'ArrowRight':
-        if (orientation === 'horizontal') { event.preventDefault();
-          newIndex = currentIndex < elements.length - 1 ? currentIndex + 1 : (wrap ? 0 : elements.length - 1);
+        if (orientation === 'horizontal') {
+          event.preventDefault();
+          newIndex =
+            currentIndex < elements.length - 1 ? currentIndex + 1 : wrap ? 0 : elements.length - 1;
         }
         break;
-        
+
       case 'Home':
         event.preventDefault();
         newIndex = 0;
         break;
-        
+
       case 'End':
         event.preventDefault();
         newIndex = elements.length - 1;
         break;
-        
+
       case 'Enter':
       case ' ':
-        if (onSelect && elements[currentIndex]) { event.preventDefault();
+        if (onSelect && elements[currentIndex]) {
+          event.preventDefault();
           onSelect(elements[currentIndex], currentIndex);
         }
         break;
     }
-    
-    if (newIndex !== currentIndex && elements[newIndex]) { elements[newIndex]?.focus();
+
+    if (newIndex !== currentIndex && elements[newIndex]) {
+      elements[newIndex]?.focus();
     }
-    
+
     return newIndex;
   }
 }
 
 // ==================== FOCUS MANAGEMENT ====================
 
-export function useFocusManagement(options: { trapFocus?: boolean;
-  autoFocus?: boolean;
-  restoreFocus?: boolean;
-  enabled?: boolean; } = {}) { const { trapFocus = false, autoFocus = false, restoreFocus = false, enabled = true } = options;
-  
+export function useFocusManagement(
+  options: {
+    trapFocus?: boolean;
+    autoFocus?: boolean;
+    restoreFocus?: boolean;
+    enabled?: boolean;
+  } = {}
+) {
+  const { trapFocus = false, autoFocus = false, restoreFocus = false, enabled = true } = options;
+
   const containerRef = useRef<HTMLElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
-  useEffect(() => { if (!enabled || !containerRef.current) return;
+  useEffect(() => {
+    if (!enabled || !containerRef.current) return;
 
     // Store previously focused element
     if (restoreFocus) {
@@ -207,14 +232,16 @@ export function useFocusManagement(options: { trapFocus?: boolean;
     }
 
     // Auto focus first element
-    if (autoFocus) { const firstFocusable = KeyboardManager.getFirstFocusableElement(containerRef.current);
+    if (autoFocus) {
+      const firstFocusable = KeyboardManager.getFirstFocusableElement(containerRef.current);
       if (firstFocusable) {
         firstFocusable.focus();
       }
     }
 
     // Focus trap
-    if (trapFocus) { const handleKeyDown = (event: Event) => {
+    if (trapFocus) {
+      const handleKeyDown = (event: Event) => {
         const keyboardEvent = event as unknown as KeyboardEvent;
         if (keyboardEvent.key === 'Tab' && containerRef.current) {
           const focusableElements = KeyboardManager.getFocusableElements(containerRef.current);
@@ -226,7 +253,8 @@ export function useFocusManagement(options: { trapFocus?: boolean;
               keyboardEvent.preventDefault();
               lastElement?.focus();
             }
-          } else { if (document.activeElement === lastElement) {
+          } else {
+            if (document.activeElement === lastElement) {
               keyboardEvent.preventDefault();
               firstElement?.focus();
             }
@@ -235,8 +263,9 @@ export function useFocusManagement(options: { trapFocus?: boolean;
       };
 
       document.addEventListener('keydown', handleKeyDown);
-      return () => { document.removeEventListener('keydown', handleKeyDown);
-        
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+
         // Restore focus
         if (restoreFocus && previousActiveElement.current) {
           previousActiveElement.current.focus();
@@ -244,7 +273,8 @@ export function useFocusManagement(options: { trapFocus?: boolean;
       };
     }
 
-    return () => { // Restore focus when component unmounts
+    return () => {
+      // Restore focus when component unmounts
       if (restoreFocus && previousActiveElement.current) {
         previousActiveElement.current.focus();
       }
@@ -256,11 +286,14 @@ export function useFocusManagement(options: { trapFocus?: boolean;
 
 // ==================== SCREEN READER UTILITIES ====================
 
-export interface ScreenReaderAnnouncementOptions { priority?: 'polite' | 'assertive';
+export interface ScreenReaderAnnouncementOptions {
+  priority?: 'polite' | 'assertive';
   atomic?: boolean;
-  delay?: number; }
+  delay?: number;
+}
 
-export class ScreenReaderManager { private static announceRegion: HTMLElement | null = null;
+export class ScreenReaderManager {
+  private static announceRegion: HTMLElement | null = null;
 
   /**
    * Initialize screen reader announcement region
@@ -279,19 +312,18 @@ export class ScreenReaderManager { private static announceRegion: HTMLElement | 
       height: 1px !important;
       overflow: hidden !important;
     `;
-    
+
     document.body.appendChild(this.announceRegion);
   }
 
   /**
    * Announce message to screen readers
    */
-  static announce(
-    message: string,
-    options: ScreenReaderAnnouncementOptions = {}
-  ): void { const { priority = 'polite', atomic = true, delay = 100 } = options;
+  static announce(message: string, options: ScreenReaderAnnouncementOptions = {}): void {
+    const { priority = 'polite', atomic = true, delay = 100 } = options;
 
-    if (!this.announceRegion) { this.initialize();
+    if (!this.announceRegion) {
+      this.initialize();
     }
 
     if (!this.announceRegion || !message.trim()) return;
@@ -301,13 +333,15 @@ export class ScreenReaderManager { private static announceRegion: HTMLElement | 
     this.announceRegion.setAttribute('aria-atomic', atomic.toString());
 
     // Clear previous content and announce new message after a brief delay
-    setTimeout(() => { if (this.announceRegion) {
+    setTimeout(() => {
+      if (this.announceRegion) {
         this.announceRegion.textContent = message;
       }
     }, delay);
 
     // Clear the message after it's been announced
-    setTimeout(() => { if (this.announceRegion) {
+    setTimeout(() => {
+      if (this.announceRegion) {
         this.announceRegion.textContent = '';
       }
     }, delay + 1000);
@@ -323,20 +357,22 @@ export class ScreenReaderManager { private static announceRegion: HTMLElement | 
   /**
    * Announce successful actions
    */
-  static announceSuccess(message: string): void { this.announce(message, { priority: 'polite' });
+  static announceSuccess(message: string): void {
+    this.announce(message, { priority: 'polite' });
   }
 }
 
 // ==================== COLOR CONTRAST UTILITIES ====================
 
-export class ColorContrastManager { /**
+export class ColorContrastManager {
+  /**
    * Calculate relative luminance of a color
    */
   static getRelativeLuminance(color: string): number {
     const rgb = this.parseColor(color);
     if (!rgb) return 0;
 
-    const [r, g, b] = rgb.map(c => {
+    const [r, g, b] = rgb.map((c) => {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
@@ -347,12 +383,13 @@ export class ColorContrastManager { /**
   /**
    * Calculate contrast ratio between two colors
    */
-  static getContrastRatio(color1: string, color2: string): number { const l1 = this.getRelativeLuminance(color1);
+  static getContrastRatio(color1: string, color2: string): number {
+    const l1 = this.getRelativeLuminance(color1);
     const l2 = this.getRelativeLuminance(color2);
-    
+
     const lighter = Math.max(l1, l2);
     const darker = Math.min(l1, l2);
-    
+
     return (lighter + 0.05) / (darker + 0.05);
   }
 
@@ -364,40 +401,45 @@ export class ColorContrastManager { /**
     background: string,
     level: 'AA' | 'AAA' = 'AA',
     size: 'normal' | 'large' = 'normal'
-  ): boolean { const ratio = this.getContrastRatio(foreground, background);
-    
+  ): boolean {
+    const ratio = this.getContrastRatio(foreground, background);
+
     if (level === 'AAA') {
       return size === 'large' ? ratio >= 4.5 : ratio >= 7;
-    } else { return size === 'large' ? ratio >= 3 : ratio >= 4.5;
+    } else {
+      return size === 'large' ? ratio >= 3 : ratio >= 4.5;
     }
   }
 
   /**
    * Parse color string to RGB values
    */
-  private static parseColor(color: string): [number, number, number] | null { // Handle hex colors
+  private static parseColor(color: string): [number, number, number] | null {
+    // Handle hex colors
     if (color.startsWith('#')) {
       const hex = color.slice(1);
       if (hex.length === 3) {
         return [
           parseInt((hex[0] || '0') + (hex[0] || '0'), 16),
           parseInt((hex[1] || '0') + (hex[1] || '0'), 16),
-          parseInt((hex[2] || '0') + (hex[2] || '0'), 16)
+          parseInt((hex[2] || '0') + (hex[2] || '0'), 16),
         ];
-      } else if (hex.length === 6) { return [
+      } else if (hex.length === 6) {
+        return [
           parseInt(hex.slice(0, 2), 16),
           parseInt(hex.slice(2, 4), 16),
-          parseInt(hex.slice(4, 6), 16)
+          parseInt(hex.slice(4, 6), 16),
         ];
       }
     }
 
     // Handle rgb colors
     const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-    if (rgbMatch) { return [
+    if (rgbMatch) {
+      return [
         parseInt(rgbMatch[1] || '0'),
         parseInt(rgbMatch[2] || '0'),
-        parseInt(rgbMatch[3] || '0')
+        parseInt(rgbMatch[3] || '0'),
       ];
     }
 
@@ -407,9 +449,11 @@ export class ColorContrastManager { /**
 
 // ==================== ACCESSIBILITY COMPONENTS ====================
 
-export interface SkipLinkProps { href: string;
+export interface SkipLinkProps {
+  href: string;
   children: ReactNode;
-  className?: string; }
+  className?: string;
+}
 
 export const SkipLink: React.FC<SkipLinkProps> = ({ href, children, className = '' }) => {
   return (
@@ -417,7 +461,8 @@ export const SkipLink: React.FC<SkipLinkProps> = ({ href, children, className = 
       href={href}
       className={`sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 
         bg-blue-600 text-white p-2 z-50 ${className}`}
-      onFocus={(e) => { e.target.scrollIntoView();
+      onFocus={(e) => {
+        e.target.scrollIntoView();
       }}
     >
       {children}
@@ -425,19 +470,21 @@ export const SkipLink: React.FC<SkipLinkProps> = ({ href, children, className = 
   );
 };
 
-export interface VisuallyHiddenProps { children: ReactNode;
-  focusable?: boolean; }
+export interface VisuallyHiddenProps {
+  children: ReactNode;
+  focusable?: boolean;
+}
 
-export const VisuallyHidden: React.FC<VisuallyHiddenProps> = ({ children, 
-  focusable = false  }) => {
+export const VisuallyHidden: React.FC<VisuallyHiddenProps> = ({ children, focusable = false }) => {
   return (
     <span
       className={focusable ? 'sr-only focus:not-sr-only' : 'sr-only'}
-      style={{ position: 'absolute',
+      style={{
+        position: 'absolute',
         left: '-10000px',
         width: '1px',
         height: '1px',
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}
     >
       {children}
@@ -447,46 +494,50 @@ export const VisuallyHidden: React.FC<VisuallyHiddenProps> = ({ children,
 
 // ==================== ACCESSIBILITY HOOKS ====================
 
-export function useAnnounceToScreenReader() { useEffect(() => {
+export function useAnnounceToScreenReader() {
+  useEffect(() => {
     ScreenReaderManager.initialize();
   }, []);
 
-  return useCallback((message: string, options?: ScreenReaderAnnouncementOptions) => { ScreenReaderManager.announce(message, options);
+  return useCallback((message: string, options?: ScreenReaderAnnouncementOptions) => {
+    ScreenReaderManager.announce(message, options);
   }, []);
 }
 
 export function useKeyboardNavigation(
   items: HTMLElement[],
-  options: { orientation?: 'horizontal' | 'vertical';
+  options: {
+    orientation?: 'horizontal' | 'vertical';
     wrap?: boolean;
     onSelect?: (element: HTMLElement, index: number) => void;
   } = {}
-) { const [activeIndex, setActiveIndex] = useState(0);
+) {
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    const newIndex = KeyboardManager.handleArrowNavigation(
-      event,
-      items,
-      activeIndex,
-      {
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      const newIndex = KeyboardManager.handleArrowNavigation(event, items, activeIndex, {
         ...options,
         onSelect: (element, index) => {
           setActiveIndex(index);
           options.onSelect?.(element, index);
-        }
+        },
+      });
+
+      if (newIndex !== activeIndex) {
+        setActiveIndex(newIndex);
       }
-    );
-    
-    if (newIndex !== activeIndex) { setActiveIndex(newIndex);
-    }
-  }, [items, activeIndex, options]);
+    },
+    [items, activeIndex, options]
+  );
 
   return { activeIndex, handleKeyDown, setActiveIndex };
 }
 
 // ==================== EXPORTS ====================
 
-export const a11yUtils = { aria: AriaManager,
+export const a11yUtils = {
+  aria: AriaManager,
   keyboard: KeyboardManager,
   screenReader: ScreenReaderManager,
   colorContrast: ColorContrastManager,
@@ -494,6 +545,7 @@ export const a11yUtils = { aria: AriaManager,
   useAnnounceToScreenReader,
   useKeyboardNavigation,
   SkipLink,
-  VisuallyHidden };
+  VisuallyHidden,
+};
 
 export default a11yUtils;

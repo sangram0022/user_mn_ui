@@ -3,16 +3,17 @@
  * 20-year React expert implementation with enterprise-grade security
  */
 
-import { logger } from './../utils/logger';
-import { z } from 'zod';
-import DOMPurify from 'dompurify';
 import CryptoJS from 'crypto-js';
+import DOMPurify from 'dompurify';
+import { z } from 'zod';
+import { logger } from './../utils/logger';
 
 // ==================== VALIDATION SCHEMAS ====================
 
 // Base validation schemas
 export const baseSchemas = {
-  email: z.string()
+  email: z
+    .string()
     .min(1, 'Email is required')
     .email('Invalid email format')
     .max(254, 'Email too long')
@@ -21,15 +22,18 @@ export const baseSchemas = {
       'Invalid email format'
     ),
 
-  password: z.string()
+  password: z
+    .string()
     .min(8, 'Password must be at least 8 characters')
     .max(128, 'Password too long')
     .refine(
-      (password) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password),
+      (password) =>
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password),
       'Password must contain uppercase, lowercase, number, and special character'
     ),
 
-  username: z.string()
+  username: z
+    .string()
     .min(3, 'Username must be at least 3 characters')
     .max(30, 'Username too long')
     .refine(
@@ -37,88 +41,85 @@ export const baseSchemas = {
       'Username can only contain letters, numbers, hyphens, and underscores'
     ),
 
-  phone: z.string()
+  phone: z
+    .string()
     .optional()
-    .refine(
-      (phone) => !phone || /^\+?[\d\s\-\(\)]{10,}$/.test(phone),
-      'Invalid phone number format'
-    ),
+    .refine((phone) => !phone || /^\+?[\d\s\-()]{10,}$/.test(phone), 'Invalid phone number format'),
 
-  url: z.string()
+  url: z
+    .string()
     .optional()
-    .refine(
-      (url) => !url || /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(url),
-      'Invalid URL format'
-    ),
+    .refine((url) => !url || /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(url), 'Invalid URL format'),
 
-  name: z.string()
+  name: z
+    .string()
     .min(1, 'Name is required')
     .max(100, 'Name too long')
     .refine(
-      (name) => /^[a-zA-Z\s\-'\.]+$/.test(name),
+      (name) => /^[a-zA-Z\s\-'.]+$/.test(name),
       'Name can only contain letters, spaces, hyphens, apostrophes, and periods'
     ),
 
-  alphanumeric: z.string()
-    .refine(
-      (str) => /^[a-zA-Z0-9]+$/.test(str),
-      'Must contain only letters and numbers'
-    ),
+  alphanumeric: z
+    .string()
+    .refine((str) => /^[a-zA-Z0-9]+$/.test(str), 'Must contain only letters and numbers'),
 
-  safeText: z.string()
-    .refine(
-      (text) => !/[<>\"'&]/.test(text),
-      'Text contains potentially unsafe characters'
-    ),
+  safeText: z
+    .string()
+    .refine((text) => !/[<>"'&]/.test(text), 'Text contains potentially unsafe characters'),
 };
 
 // ==================== FORM VALIDATION SCHEMAS ====================
 
-export const authSchemas = { login: z.object({
+export const authSchemas = {
+  login: z.object({
     email: baseSchemas.email,
     password: z.string().min(1, 'Password is required'),
     rememberMe: z.boolean().optional(),
   }),
 
-  register: z.object({ firstName: baseSchemas.name,
-    lastName: baseSchemas.name,
-    email: baseSchemas.email,
-    username: baseSchemas.username,
-    password: baseSchemas.password,
-    confirmPassword: z.string(),
-    agreeToTerms: z.boolean().refine(val => val === true, 'Must agree to terms'),
-  }).refine(
-    (data) => data.password === data.confirmPassword,
-    { message: 'Passwords do not match',
+  register: z
+    .object({
+      firstName: baseSchemas.name,
+      lastName: baseSchemas.name,
+      email: baseSchemas.email,
+      username: baseSchemas.username,
+      password: baseSchemas.password,
+      confirmPassword: z.string(),
+      agreeToTerms: z.boolean().refine((val) => val === true, 'Must agree to terms'),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: 'Passwords do not match',
       path: ['confirmPassword'],
-    }
-  ),
+    }),
 
-  forgotPassword: z.object({ email: baseSchemas.email,
-  }),
+  forgotPassword: z.object({ email: baseSchemas.email }),
 
-  resetPassword: z.object({ password: baseSchemas.password,
-    confirmPassword: z.string(),
-    token: z.string().min(1, 'Reset token is required'),
-  }).refine(
-    (data) => data.password === data.confirmPassword,
-    { message: 'Passwords do not match',
+  resetPassword: z
+    .object({
+      password: baseSchemas.password,
+      confirmPassword: z.string(),
+      token: z.string().min(1, 'Reset token is required'),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: 'Passwords do not match',
       path: ['confirmPassword'],
-    }
-  ),
+    }),
 
-  changePassword: z.object({ currentPassword: z.string().min(1, 'Current password is required'),
-    newPassword: baseSchemas.password,
-    confirmPassword: z.string(),
-  }).refine(
-    (data) => data.newPassword === data.confirmPassword,
-    { message: 'Passwords do not match',
+  changePassword: z
+    .object({
+      currentPassword: z.string().min(1, 'Current password is required'),
+      newPassword: baseSchemas.password,
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: 'Passwords do not match',
       path: ['confirmPassword'],
-    }
-  ),
+    }),
 };
 
-export const userSchemas = { profile: z.object({
+export const userSchemas = {
+  profile: z.object({
     firstName: baseSchemas.name,
     lastName: baseSchemas.name,
     email: baseSchemas.email,
@@ -128,7 +129,8 @@ export const userSchemas = { profile: z.object({
     location: z.string().max(100, 'Location too long').optional(),
   }),
 
-  createUser: z.object({ firstName: baseSchemas.name,
+  createUser: z.object({
+    firstName: baseSchemas.name,
     lastName: baseSchemas.name,
     email: baseSchemas.email,
     username: baseSchemas.username,
@@ -136,7 +138,8 @@ export const userSchemas = { profile: z.object({
     isActive: z.boolean().optional().default(true),
   }),
 
-  updateUser: z.object({ id: z.string().uuid('Invalid user ID'),
+  updateUser: z.object({
+    id: z.string().uuid('Invalid user ID'),
     firstName: baseSchemas.name.optional(),
     lastName: baseSchemas.name.optional(),
     email: baseSchemas.email.optional(),
@@ -145,7 +148,8 @@ export const userSchemas = { profile: z.object({
   }),
 };
 
-export const systemSchemas = { settings: z.object({
+export const systemSchemas = {
+  settings: z.object({
     siteName: z.string().min(1, 'Site name is required').max(100),
     siteDescription: z.string().max(500).optional(),
     maintenanceMode: z.boolean().optional(),
@@ -154,7 +158,8 @@ export const systemSchemas = { settings: z.object({
     sessionTimeout: z.number().min(5).max(1440), // minutes
   }),
 
-  notification: z.object({ title: z.string().min(1, 'Title is required').max(100),
+  notification: z.object({
+    title: z.string().min(1, 'Title is required').max(100),
     message: z.string().min(1, 'Message is required').max(1000),
     type: z.enum(['info', 'success', 'warning', 'error']),
     priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
@@ -164,7 +169,8 @@ export const systemSchemas = { settings: z.object({
 
 // ==================== SANITIZATION UTILITIES ====================
 
-export class InputSanitizer { private static instance: InputSanitizer;
+export class InputSanitizer {
+  private static instance: InputSanitizer;
   private purifier: typeof DOMPurify;
 
   private constructor() {
@@ -172,13 +178,15 @@ export class InputSanitizer { private static instance: InputSanitizer;
     this.configurePurifier();
   }
 
-  public static getInstance(): InputSanitizer { if (!InputSanitizer.instance) {
+  public static getInstance(): InputSanitizer {
+    if (!InputSanitizer.instance) {
       InputSanitizer.instance = new InputSanitizer();
     }
     return InputSanitizer.instance;
   }
 
-  private configurePurifier(): void { // Configure DOMPurify for maximum security
+  private configurePurifier(): void {
+    // Configure DOMPurify for maximum security
     this.purifier.setConfig({
       ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u'],
       ALLOWED_ATTR: [],
@@ -187,7 +195,8 @@ export class InputSanitizer { private static instance: InputSanitizer;
     });
 
     // Add custom hooks for additional security
-    this.purifier.addHook('beforeSanitizeElements', (node) => { // Remove any script content
+    this.purifier.addHook('beforeSanitizeElements', (node) => {
+      // Remove any script content
       if (node.nodeName === 'SCRIPT') {
         if (node.parentNode) {
           node.parentNode.removeChild(node);
@@ -199,11 +208,10 @@ export class InputSanitizer { private static instance: InputSanitizer;
   /**
    * Sanitize HTML content to prevent XSS attacks
    */
-  sanitizeHtml(dirty: string, allowedTags?: string[]): string { if (!dirty || typeof dirty !== 'string') return '';
+  sanitizeHtml(dirty: string, allowedTags?: string[]): string {
+    if (!dirty || typeof dirty !== 'string') return '';
 
-    const config = allowedTags 
-      ? { ALLOWED_TAGS: allowedTags, ALLOWED_ATTR: [] }
-      : undefined;
+    const config = allowedTags ? { ALLOWED_TAGS: allowedTags, ALLOWED_ATTR: [] } : undefined;
 
     return this.purifier.sanitize(dirty, config);
   }
@@ -211,12 +219,13 @@ export class InputSanitizer { private static instance: InputSanitizer;
   /**
    * Sanitize plain text by removing/escaping dangerous characters
    */
-  sanitizeText(input: string): string { if (!input || typeof input !== 'string') return '';
+  sanitizeText(input: string): string {
+    if (!input || typeof input !== 'string') return '';
 
     return input
       .replace(/[<>]/g, '') // Remove angle brackets
       .replace(/[&]/g, '&amp;') // Escape ampersands
-      .replace(/['"]/g, (match) => match === '"' ? '&quot;' : '&#x27;') // Escape quotes
+      .replace(/['"]/g, (match) => (match === '"' ? '&quot;' : '&#x27;')) // Escape quotes
       .trim();
   }
 
@@ -240,14 +249,25 @@ export class InputSanitizer { private static instance: InputSanitizer;
     if (!input || typeof input !== 'string') return '';
 
     const sqlKeywords = [
-      'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'CREATE', 'ALTER',
-      'EXEC', 'EXECUTE', 'UNION', 'SCRIPT', 'DECLARE', 'CURSOR'
+      'SELECT',
+      'INSERT',
+      'UPDATE',
+      'DELETE',
+      'DROP',
+      'CREATE',
+      'ALTER',
+      'EXEC',
+      'EXECUTE',
+      'UNION',
+      'SCRIPT',
+      'DECLARE',
+      'CURSOR',
     ];
 
     let sanitized = input.trim();
-    
+
     // Remove SQL keywords (case insensitive)
-    sqlKeywords.forEach(keyword => {
+    sqlKeywords.forEach((keyword) => {
       const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
       sanitized = sanitized.replace(regex, '');
     });
@@ -265,7 +285,8 @@ export class InputSanitizer { private static instance: InputSanitizer;
   /**
    * Validate and sanitize email addresses
    */
-  sanitizeEmail(email: string): string { if (!email || typeof email !== 'string') return '';
+  sanitizeEmail(email: string): string {
+    if (!email || typeof email !== 'string') return '';
 
     return email
       .toLowerCase()
@@ -276,13 +297,14 @@ export class InputSanitizer { private static instance: InputSanitizer;
   /**
    * Sanitize URLs to prevent malicious redirects
    */
-  sanitizeUrl(url: string): string { if (!url || typeof url !== 'string') return '';
+  sanitizeUrl(url: string): string {
+    if (!url || typeof url !== 'string') return '';
 
     const trimmed = url.trim().toLowerCase();
-    
+
     // Block dangerous protocols
     const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:'];
-    if (dangerousProtocols.some(protocol => trimmed.startsWith(protocol))) {
+    if (dangerousProtocols.some((protocol) => trimmed.startsWith(protocol))) {
       return '';
     }
 
@@ -297,7 +319,8 @@ export class InputSanitizer { private static instance: InputSanitizer;
 
 // ==================== ENCRYPTION UTILITIES ====================
 
-export class DataEncryption { private static secretKey = process.env.REACT_APP_ENCRYPTION_KEY || 'default-secret-key';
+export class DataEncryption {
+  private static secretKey = process.env.REACT_APP_ENCRYPTION_KEY || 'default-secret-key';
 
   /**
    * Encrypt sensitive data before storing
@@ -305,7 +328,8 @@ export class DataEncryption { private static secretKey = process.env.REACT_APP_E
   static encrypt(data: string): string {
     try {
       return CryptoJS.AES.encrypt(data, this.secretKey).toString();
-    } catch (error) { logger.error('Encryption failed:', undefined, { error  });
+    } catch (error) {
+      logger.error('Encryption failed:', undefined, { error });
       return data; // Fallback to plain text in dev
     }
   }
@@ -313,10 +337,12 @@ export class DataEncryption { private static secretKey = process.env.REACT_APP_E
   /**
    * Decrypt sensitive data
    */
-  static decrypt(encryptedData: string): string { try {
+  static decrypt(encryptedData: string): string {
+    try {
       const bytes = CryptoJS.AES.decrypt(encryptedData, this.secretKey);
       return bytes.toString(CryptoJS.enc.Utf8);
-    } catch (error) { logger.error('Decryption failed:', undefined, { error  });
+    } catch (error) {
+      logger.error('Decryption failed:', undefined, { error });
       return encryptedData; // Fallback to encrypted text
     }
   }
@@ -324,49 +350,53 @@ export class DataEncryption { private static secretKey = process.env.REACT_APP_E
   /**
    * Hash sensitive data for comparison
    */
-  static hash(data: string): string { return CryptoJS.SHA256(data).toString();
+  static hash(data: string): string {
+    return CryptoJS.SHA256(data).toString();
   }
 
   /**
    * Generate secure random tokens
    */
-  static generateToken(length: number = 32): string { return CryptoJS.lib.WordArray.random(length).toString();
+  static generateToken(length: number = 32): string {
+    return CryptoJS.lib.WordArray.random(length).toString();
   }
 }
 
 // ==================== SECURE STORAGE ====================
 
-export class SecureStorage { private static sanitizer = InputSanitizer.getInstance();
+export class SecureStorage {
+  private static sanitizer = InputSanitizer.getInstance();
 
   /**
    * Securely store sensitive data in localStorage
    */
-  static setItem(key: string, value: any, encrypt: boolean = true): void {
+  static setItem(key: string, value: unknown, encrypt: boolean = true): void {
     try {
       const sanitizedKey = this.sanitizer.sanitizeText(key);
       const stringValue = JSON.stringify(value);
       const finalValue = encrypt ? DataEncryption.encrypt(stringValue) : stringValue;
-      
+
       localStorage.setItem(sanitizedKey, finalValue);
-    } catch (error) { logger.error('Secure storage set failed:', undefined, { error  });
+    } catch (error) {
+      logger.error('Secure storage set failed:', undefined, { error });
     }
   }
 
   /**
    * Securely retrieve data from localStorage
    */
-  static getItem<T>(key: string, encrypted: boolean = true): T | null { try {
+  static getItem<T>(key: string, encrypted: boolean = true): T | null {
+    try {
       const sanitizedKey = this.sanitizer.sanitizeText(key);
       const storedValue = localStorage.getItem(sanitizedKey);
-      
+
       if (!storedValue) return null;
 
-      const decryptedValue = encrypted 
-        ? DataEncryption.decrypt(storedValue)
-        : storedValue;
+      const decryptedValue = encrypted ? DataEncryption.decrypt(storedValue) : storedValue;
 
       return JSON.parse(decryptedValue);
-    } catch (error) { logger.error('Secure storage get failed:', undefined, { error  });
+    } catch (error) {
+      logger.error('Secure storage get failed:', undefined, { error });
       return null;
     }
   }
@@ -374,32 +404,41 @@ export class SecureStorage { private static sanitizer = InputSanitizer.getInstan
   /**
    * Remove item from secure storage
    */
-  static removeItem(key: string): void { try {
+  static removeItem(key: string): void {
+    try {
       const sanitizedKey = this.sanitizer.sanitizeText(key);
       localStorage.removeItem(sanitizedKey);
-    } catch (error) { logger.error('Secure storage remove failed:', undefined, { error  });
+    } catch (error) {
+      logger.error('Secure storage remove failed:', undefined, { error });
     }
   }
 
   /**
    * Clear all secure storage
    */
-  static clear(): void { try {
+  static clear(): void {
+    try {
       localStorage.clear();
-    } catch (error) { logger.error('Secure storage clear failed:', undefined, { error  });
+    } catch (error) {
+      logger.error('Secure storage clear failed:', undefined, { error });
     }
   }
 }
 
 // ==================== VALIDATION HOOKS ====================
 
-export function useValidation<T>(schema: z.ZodSchema<T>) { const validate = (data: unknown): { success: boolean; data?: T; errors?: Record<string, string> } => { try {
+export function useValidation<T>(schema: z.ZodSchema<T>) {
+  const validate = (
+    data: unknown
+  ): { success: boolean; data?: T; errors?: Record<string, string> } => {
+    try {
       const result = schema.parse(data);
       return { success: true, data: result };
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors: Record<string, string> = {};
-        error.issues.forEach((issue) => { const path = issue.path.join('.');
+        error.issues.forEach((issue) => {
+          const path = issue.path.join('.');
           errors[path] = issue.message;
         });
         return { success: false, errors };
@@ -408,7 +447,8 @@ export function useValidation<T>(schema: z.ZodSchema<T>) { const validate = (dat
     }
   };
 
-  const validateField = (fieldName: string, value: unknown): string | null => { try {
+  const validateField = (fieldName: string, value: unknown): string | null => {
+    try {
       // Extract field schema if possible
       if (schema instanceof z.ZodObject) {
         const fieldSchema = (schema.shape as any)[fieldName];
@@ -418,7 +458,8 @@ export function useValidation<T>(schema: z.ZodSchema<T>) { const validate = (dat
         }
       }
       return null;
-    } catch (error) { if (error instanceof z.ZodError) {
+    } catch (error) {
+      if (error instanceof z.ZodError) {
         return error.issues[0]?.message || 'Invalid value';
       }
       return 'Validation failed';
@@ -432,12 +473,11 @@ export function useValidation<T>(schema: z.ZodSchema<T>) { const validate = (dat
 
 export const sanitizer = InputSanitizer.getInstance();
 
-export { z,
-  type ZodSchema,
-  type ZodError, } from 'zod';
+export { z, type ZodError, type ZodSchema } from 'zod';
 
 // Export validation utilities
-export const validationUtils = { schemas: {
+export const validationUtils = {
+  schemas: {
     base: baseSchemas,
     auth: authSchemas,
     user: userSchemas,

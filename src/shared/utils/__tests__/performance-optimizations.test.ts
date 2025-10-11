@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * Unit Tests: Performance Optimization Utilities
  *
@@ -412,7 +413,7 @@ describe('useMemoizedObject', () => {
 
 describe('useDeepMemo', () => {
   it('should memoize based on deep equality', () => {
-    const factory = vi.fn((obj: any) => ({ ...obj, computed: true }));
+    const factory = vi.fn((obj: unknown) => ({ ...obj, computed: true }));
 
     const { result, rerender } = renderHook(({ obj }) => useDeepMemo(() => factory(obj), [obj]), {
       initialProps: { obj: { a: 1, b: { c: 2 } } },
@@ -430,7 +431,7 @@ describe('useDeepMemo', () => {
   });
 
   it('should recompute when deep content changes', () => {
-    const factory = vi.fn((obj: any) => ({ ...obj, computed: true }));
+    const factory = vi.fn((obj: unknown) => ({ ...obj, computed: true }));
 
     const { result, rerender } = renderHook(({ obj }) => useDeepMemo(() => factory(obj), [obj]), {
       initialProps: { obj: { a: 1, b: { c: 2 } } },

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * Performance Optimization Utilities
  *

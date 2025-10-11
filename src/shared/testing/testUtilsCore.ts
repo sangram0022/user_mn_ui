@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * Testing Utilities and Strategies (Non-JSX Version)
  * Expert-level testing implementation by 20-year React veteran
@@ -12,7 +13,8 @@
 /**
  * Mock user data factory
  */
-export const createMockUser = (overrides = {}) => ({ id: '1',
+export const createMockUser = (overrides = {}) => ({
+  id: '1',
   username: 'testuser',
   email: 'test@example.com',
   firstName: 'Test',
@@ -20,23 +22,28 @@ export const createMockUser = (overrides = {}) => ({ id: '1',
   role: 'user',
   isActive: true,
   createdAt: new Date().toISOString(),
-  ...overrides });
+  ...overrides,
+});
 
 /**
  * Mock API response factory
  */
-export const createMockApiResponse = <T>(data: T, overrides = {}) => ({ data,
+export const createMockApiResponse = <T>(data: T, overrides = {}) => ({
+  data,
   status: 'success',
   message: 'Operation successful',
-  ...overrides });
+  ...overrides,
+});
 
 /**
  * Mock error response factory
  */
-export const createMockErrorResponse = (message = 'An error occurred', code = 'ERROR') => ({ status: 'error',
+export const createMockErrorResponse = (message = 'An error occurred', code = 'ERROR') => ({
+  status: 'error',
   message,
   code,
-  details: null });
+  details: null,
+});
 
 // ==================== TEST HELPERS ====================
 
@@ -47,9 +54,10 @@ export const waitForElementToAppear = async (
   getByTestId: (testId: string) => HTMLElement,
   testId: string,
   timeout = 3000
-) => { return new Promise<HTMLElement>((resolve, reject) => {
+) => {
+  return new Promise<HTMLElement>((resolve, reject) => {
     const startTime = Date.now();
-    
+
     const checkElement = () => {
       try {
         const element = getByTestId(testId);
@@ -57,17 +65,18 @@ export const waitForElementToAppear = async (
           resolve(element);
           return;
         }
-      } catch (error) { // Element not found yet
+      } catch (error) {
+        // Element not found yet
       }
-      
+
       if (Date.now() - startTime > timeout) {
         reject(new Error(`Element with testId "${testId}" not found within ${timeout}ms`));
         return;
       }
-      
+
       setTimeout(checkElement, 100);
     };
-    
+
     checkElement();
   });
 };
@@ -81,28 +90,32 @@ export const createFormSubmissionTest = (formData: Record<string, string>) => ({
   validate: (form: HTMLFormElement) => {
     const formDataEntries = new FormData(form);
     const actualData: Record<string, string> = {};
-    
-    for (const [key, value] of formDataEntries.entries()) { actualData[key] = value.toString();
+
+    for (const [key, value] of formDataEntries.entries()) {
+      actualData[key] = value.toString();
     }
-    
-    return Object.entries(formData).every(([key, expectedValue]) => 
-      actualData[key] === expectedValue
+
+    return Object.entries(formData).every(
+      ([key, expectedValue]) => actualData[key] === expectedValue
     );
-  }
+  },
 });
 
 /**
  * Test navigation helper
  */
-export const createNavigationTest = (expectedPath: string) => ({ expectedPath,
-  validate: () => window.location.pathname === expectedPath });
+export const createNavigationTest = (expectedPath: string) => ({
+  expectedPath,
+  validate: () => window.location.pathname === expectedPath,
+});
 
 // ==================== ACCESSIBILITY TESTING ====================
 
 /**
  * Test keyboard navigation
  */
-export const createKeyboardNavigationTest = (container: HTMLElement) => { const focusableElements = container.querySelectorAll(
+export const createKeyboardNavigationTest = (container: HTMLElement) => {
+  const focusableElements = container.querySelectorAll(
     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
   );
 
@@ -112,9 +125,10 @@ export const createKeyboardNavigationTest = (container: HTMLElement) => { const 
       // This would need to be implemented with actual user events in a test
       return focusableElements.length > 0;
     },
-    testShiftTabNavigation: () => { // This would need to be implemented with actual user events in a test
+    testShiftTabNavigation: () => {
+      // This would need to be implemented with actual user events in a test
       return focusableElements.length > 0;
-    }
+    },
   };
 };
 
@@ -122,14 +136,15 @@ export const createKeyboardNavigationTest = (container: HTMLElement) => { const 
  * Test ARIA attributes
  */
 export const testAriaAttributes = (
-  element: HTMLElement, 
+  element: HTMLElement,
   expectedAttributes: Record<string, string>
 ) => {
   const results: Record<string, boolean> = {};
-  
-  Object.entries(expectedAttributes).forEach(([attribute, expectedValue]) => { results[attribute] = element.getAttribute(attribute) === expectedValue;
+
+  Object.entries(expectedAttributes).forEach(([attribute, expectedValue]) => {
+    results[attribute] = element.getAttribute(attribute) === expectedValue;
   });
-  
+
   return results;
 };
 
@@ -141,15 +156,16 @@ export const testAriaAttributes = (
 export const testRenderPerformance = (
   renderFunction: () => void,
   maxRenderTime = 16 // 16ms for 60fps
-) => { const startTime = performance.now();
+) => {
+  const startTime = performance.now();
   renderFunction();
   const endTime = performance.now();
   const renderTime = endTime - startTime;
-  
+
   return {
     renderTime,
     isWithinLimit: renderTime <= maxRenderTime,
-    maxRenderTime
+    maxRenderTime,
   };
 };
 
@@ -159,33 +175,36 @@ export const testRenderPerformance = (
 export const testMemoryUsage = async (
   testFunction: () => Promise<void>,
   maxMemoryIncrease = 10 * 1024 * 1024 // 10MB
-) => { // Type assertion for Chrome's memory API
+) => {
+  // Type assertion for Chrome's memory API
   const performance = window.performance as any;
-  
+
   if (!performance?.memory) {
     return {
       supported: false,
-      message: 'Memory testing not supported in this environment'
+      message: 'Memory testing not supported in this environment',
     };
   }
 
   const initialMemory = performance.memory.usedJSHeapSize;
   await testFunction();
-  
+
   // Force garbage collection if available
   const windowWithGC = window as any;
-  if (windowWithGC.gc) { windowWithGC.gc();
+  if (windowWithGC.gc) {
+    windowWithGC.gc();
   }
-  
+
   const finalMemory = performance.memory.usedJSHeapSize;
   const memoryIncrease = finalMemory - initialMemory;
-  
-  return { supported: true,
+
+  return {
+    supported: true,
     initialMemory,
     finalMemory,
     memoryIncrease,
     isWithinLimit: memoryIncrease <= maxMemoryIncrease,
-    maxMemoryIncrease
+    maxMemoryIncrease,
   };
 };
 
@@ -197,18 +216,20 @@ export const testMemoryUsage = async (
 export const testAsyncError = async (
   asyncFunction: () => Promise<any>,
   expectedErrorMessage: string
-) => { try {
+) => {
+  try {
     await asyncFunction();
     return {
       errorCaught: false,
-      message: 'Expected error was not thrown'
+      message: 'Expected error was not thrown',
     };
-  } catch (error) { const errorMessage = error instanceof Error ? error.message : String(error);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return {
       errorCaught: true,
       expectedMessage: expectedErrorMessage,
       actualMessage: errorMessage,
-      isExpectedError: errorMessage.includes(expectedErrorMessage)
+      isExpectedError: errorMessage.includes(expectedErrorMessage),
     };
   }
 };
@@ -218,7 +239,8 @@ export const testAsyncError = async (
 /**
  * Test XSS prevention
  */
-export const testXSSPrevention = (element: HTMLElement) => { const dangerousPatterns = [
+export const testXSSPrevention = (element: HTMLElement) => {
+  const dangerousPatterns = [
     '<script>',
     'javascript:',
     'onerror=',
@@ -227,33 +249,31 @@ export const testXSSPrevention = (element: HTMLElement) => { const dangerousPatt
     'onmouseover=',
     'data:text/html',
     'vbscript:',
-    'livescript:'
+    'livescript:',
   ];
 
   const innerHTML = element.innerHTML.toLowerCase();
   const textContent = element.textContent?.toLowerCase() || '';
-  
+
   return {
-    isSecure: !dangerousPatterns.some(pattern => 
-      innerHTML.includes(pattern) || textContent.includes(pattern)
+    isSecure: !dangerousPatterns.some(
+      (pattern) => innerHTML.includes(pattern) || textContent.includes(pattern)
     ),
-    detectedPatterns: dangerousPatterns.filter(pattern => 
-      innerHTML.includes(pattern) || textContent.includes(pattern)
-    )
+    detectedPatterns: dangerousPatterns.filter(
+      (pattern) => innerHTML.includes(pattern) || textContent.includes(pattern)
+    ),
   };
 };
 
 /**
  * Test input sanitization
  */
-export const testInputSanitization = (
-  inputValue: string,
-  expectedSanitizedValue: string
-) => { return {
+export const testInputSanitization = (inputValue: string, expectedSanitizedValue: string) => {
+  return {
     original: inputValue,
     expected: expectedSanitizedValue,
     isPropertySanitized: inputValue !== expectedSanitizedValue,
-    sanitizationWorked: inputValue === expectedSanitizedValue
+    sanitizationWorked: inputValue === expectedSanitizedValue,
   };
 };
 
@@ -263,16 +283,18 @@ export const testInputSanitization = (
  * Create user flow test configuration
  */
 export const createUserFlowTest = (
-  steps: Array<{ action: 'click' | 'type' | 'navigate' | 'wait';
+  steps: Array<{
+    action: 'click' | 'type' | 'navigate' | 'wait';
     selector?: string;
     value?: string;
     timeout?: number;
   }>
-) => { return {
+) => {
+  return {
     steps,
     validate: (currentStep: number) => currentStep >= 0 && currentStep < steps.length,
     getStep: (index: number) => steps[index],
-    totalSteps: steps.length
+    totalSteps: steps.length,
   };
 };
 
@@ -281,64 +303,60 @@ export const createUserFlowTest = (
 /**
  * Mock successful API response
  */
-export const mockSuccessResponse = <T>(data: T) => { return {
+export const mockSuccessResponse = <T>(data: T) => {
+  return {
     ok: true,
     status: 200,
     data: createMockApiResponse(data),
-    json: () => Promise.resolve(createMockApiResponse(data))
+    json: () => Promise.resolve(createMockApiResponse(data)),
   };
 };
 
 /**
  * Mock error API response
  */
-export const mockErrorResponse = (status = 500, message = 'Server Error') => { return {
+export const mockErrorResponse = (status = 500, message = 'Server Error') => {
+  return {
     ok: false,
     status,
     message,
-    error: new Error(message)
+    error: new Error(message),
   };
 };
 
 /**
  * Mock network delay
  */
-export const mockNetworkDelay = (delay = 100) => { return new Promise(resolve => setTimeout(resolve, delay)); };
+export const mockNetworkDelay = (delay = 100) => {
+  return new Promise((resolve) => setTimeout(resolve, delay));
+};
 
 // ==================== TEST CONFIGURATIONS ====================
 
 /**
  * Default test configurations
  */
-export const testConfigs = { performance: {
+export const testConfigs = {
+  performance: {
     maxRenderTime: 16, // 60fps
     maxMemoryIncrease: 10 * 1024 * 1024, // 10MB
   },
-  timeouts: { short: 1000,
-    medium: 3000,
-    long: 10000,
-  },
-  accessibility: { requiredAriaAttributes: ['aria-label', 'aria-describedby', 'role'],
+  timeouts: { short: 1000, medium: 3000, long: 10000 },
+  accessibility: {
+    requiredAriaAttributes: ['aria-label', 'aria-describedby', 'role'],
     keyboardNavigationDelay: 100,
   },
-  security: { xssPatterns: [
-      '<script>',
-      'javascript:',
-      'onerror=',
-      'onload=',
-    ],
-  },
+  security: { xssPatterns: ['<script>', 'javascript:', 'onerror=', 'onload='] },
 };
 
 // ==================== EXPORTS ====================
 
 // Test data generators
-export const testData = { createMockUser,
-  createMockApiResponse,
-  createMockErrorResponse };
+export const testData = { createMockUser, createMockApiResponse, createMockErrorResponse };
 
 // Test utilities
-export const testUtils = { waitForElementToAppear,
+export const testUtils = {
+  waitForElementToAppear,
   createFormSubmissionTest,
   createNavigationTest,
   createKeyboardNavigationTest,
@@ -348,11 +366,10 @@ export const testUtils = { waitForElementToAppear,
   testAsyncError,
   testXSSPrevention,
   testInputSanitization,
-  createUserFlowTest };
+  createUserFlowTest,
+};
 
 // Mock utilities
-export const mockUtils = { mockSuccessResponse,
-  mockErrorResponse,
-  mockNetworkDelay };
+export const mockUtils = { mockSuccessResponse, mockErrorResponse, mockNetworkDelay };
 
 // All exports are handled inline above

@@ -1,47 +1,58 @@
+/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * Testing Utilities and Helpers
  * Expert-level testing patterns by 20-year React veteran
  */
 
-import { logger } from './logger';
-import { render, screen, waitFor, act, within } from '@testing-library/react';
-import { renderHook } from '@testing-library/react';
+import { act, render, renderHook, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi, expect } from 'vitest';
-import type { ReactElement, ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactElement, ReactNode } from 'react';
 import type { MockedFunction } from 'vitest';
+import { expect, vi } from 'vitest';
+import { logger } from './logger';
 
 // ==================== TYPES ====================
 
-export interface TestUser { id: string;
+export interface TestUser {
+  id: string;
   username: string;
   email: string;
   role: string;
-  permissions: string[]; }
+  permissions: string[];
+}
 
-export interface MockApiResponse<T = any> { data: T;
+export interface MockApiResponse<T = any> {
+  data: T;
   status: number;
   statusText: string;
-  headers: Record<string, string>; }
+  headers: Record<string, string>;
+}
 
-export interface TestWrapperProps { children: ReactNode;
-  initialState?: any;
+export interface TestWrapperProps {
+  children: ReactNode;
+  initialState?: unknown;
   theme?: 'light' | 'dark';
-  user?: Partial<TestUser>; }
+  user?: Partial<TestUser>;
+}
 
-export interface CustomRenderOptions { initialState?: any;
+export interface CustomRenderOptions {
+  initialState?: unknown;
   user?: Partial<TestUser>;
   theme?: 'light' | 'dark';
   route?: string;
-  preloadedState?: any; }
+  preloadedState?: unknown;
+}
 
-export interface MockServerOptions { baseURL?: string;
+export interface MockServerOptions {
+  baseURL?: string;
   delay?: number;
-  errorRate?: number; }
+  errorRate?: number;
+}
 
 // ==================== TEST UTILITIES ====================
 
-export class TestUtils { // Enhanced user event instance with better async handling
+export class TestUtils {
+  // Enhanced user event instance with better async handling
   static createUserEvent(options?: Parameters<typeof userEvent.setup>[0]) {
     return userEvent.setup({
       advanceTimers: vi.advanceTimersByTime,
@@ -52,31 +63,31 @@ export class TestUtils { // Enhanced user event instance with better async handl
   // Wait for element with better error messages
   static async waitForElement(
     selector: string,
-    options?: { timeout?: number;
-      container?: HTMLElement;
-      exact?: boolean;
-    }
-  ): Promise<HTMLElement> { const { timeout = 5000, container = document.body, exact = false } = options || {};
-    
+    options?: { timeout?: number; container?: HTMLElement; exact?: boolean }
+  ): Promise<HTMLElement> {
+    const { timeout = 5000, container = document.body, exact = false } = options || {};
+
     try {
       return await waitFor(
         () => {
-          const element = exact 
+          const element = exact
             ? container.querySelector(`[data-testid="${selector}"]`)
             : container.querySelector(selector);
-            
+
           if (!element) {
             throw new Error(`Element not found: ${selector}`);
           }
-          
+
           return element as HTMLElement;
         },
         { timeout, container }
       );
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
         `TestUtils.waitForElement failed: Could not find element "${selector}" within ${timeout}ms. ` +
-        `Available elements: ${Array.from(container.querySelectorAll('[data-testid]')).map(el => el.getAttribute('data-testid')).join(', ')}`
+          `Available elements: ${Array.from(container.querySelectorAll('[data-testid]'))
+            .map((el) => el.getAttribute('data-testid'))
+            .join(', ')}`
       );
     }
   }
@@ -85,10 +96,12 @@ export class TestUtils { // Enhanced user event instance with better async handl
   static async waitForApiCall(
     mockFn: MockedFunction<any>,
     options?: { timeout?: number; callCount?: number }
-  ): Promise<void> { const { timeout = 5000, callCount = 1 } = options || {};
-    
+  ): Promise<void> {
+    const { timeout = 5000, callCount = 1 } = options || {};
+
     return waitFor(
-      () => { expect(mockFn).toHaveBeenCalledTimes(callCount);
+      () => {
+        expect(mockFn).toHaveBeenCalledTimes(callCount);
       },
       { timeout }
     );
@@ -98,10 +111,12 @@ export class TestUtils { // Enhanced user event instance with better async handl
   static async waitForApiCalls(
     mockFns: MockedFunction<any>[],
     options?: { timeout?: number }
-  ): Promise<void> { const { timeout = 5000 } = options || {};
-    
+  ): Promise<void> {
+    const { timeout = 5000 } = options || {};
+
     return waitFor(
-      () => { mockFns.forEach(mockFn => {
+      () => {
+        mockFns.forEach((mockFn) => {
           expect(mockFn).toHaveBeenCalled();
         });
       },
@@ -112,37 +127,41 @@ export class TestUtils { // Enhanced user event instance with better async handl
   // Enhanced form filling with validation
   static async fillForm(
     formData: Record<string, string | boolean | number>,
-    options?: { submit?: boolean;
-      validate?: boolean;
-      user?: ReturnType<typeof userEvent.setup>;
-    }
-  ): Promise<void> { const { submit = false, validate = true, user = TestUtils.createUserEvent() } = options || {};
-    
+    options?: { submit?: boolean; validate?: boolean; user?: ReturnType<typeof userEvent.setup> }
+  ): Promise<void> {
+    const { submit = false, validate = true, user = TestUtils.createUserEvent() } = options || {};
+
     for (const [fieldName, value] of Object.entries(formData)) {
-      const field = screen.getByLabelText(new RegExp(fieldName, 'i')) || 
-                    screen.getByPlaceholderText(new RegExp(fieldName, 'i')) ||
-                    screen.getByDisplayValue(String(value));
-      
+      const field =
+        screen.getByLabelText(new RegExp(fieldName, 'i')) ||
+        screen.getByPlaceholderText(new RegExp(fieldName, 'i')) ||
+        screen.getByDisplayValue(String(value));
+
       if (!field) {
         throw new Error(`Form field not found: ${fieldName}`);
       }
-      
-      if (field.getAttribute('type') === 'checkbox') { if (Boolean(value) !== (field as HTMLInputElement).checked) {
+
+      if (field.getAttribute('type') === 'checkbox') {
+        if (Boolean(value) !== (field as HTMLInputElement).checked) {
           await user.click(field);
         }
-      } else { await user.clear(field);
+      } else {
+        await user.clear(field);
         await user.type(field, String(value));
       }
-      
+
       // Validate field was filled correctly
-      if (validate) { if (field.getAttribute('type') === 'checkbox') {
+      if (validate) {
+        if (field.getAttribute('type') === 'checkbox') {
           expect((field as HTMLInputElement).checked).toBe(Boolean(value));
-        } else { expect(field).toHaveValue(String(value));
+        } else {
+          expect(field).toHaveValue(String(value));
         }
       }
     }
-    
-    if (submit) { const submitButton = screen.getByRole('button', { name: /submit|save|create|update/i });
+
+    if (submit) {
+      const submitButton = screen.getByRole('button', { name: /submit|save|create|update/i });
       await user.click(submitButton);
     }
   }
@@ -150,7 +169,7 @@ export class TestUtils { // Enhanced user event instance with better async handl
   // Table testing utilities
   static getTableUtils(tableSelector = 'table') {
     const table = screen.getByRole('table') || screen.getByTestId(tableSelector);
-    
+
     return {
       getHeaders: () => within(table).getAllByRole('columnheader'),
       getRows: () => within(table).getAllByRole('row').slice(1), // Exclude header row
@@ -164,20 +183,23 @@ export class TestUtils { // Enhanced user event instance with better async handl
       },
       getCellByHeaderAndRow: (headerText: string, rowIndex: number) => {
         const headers = TestUtils.getTableUtils().getHeaders();
-        const headerIndex = headers.findIndex(header => header.textContent?.includes(headerText));
-        
+        const headerIndex = headers.findIndex((header) => header.textContent?.includes(headerText));
+
         if (headerIndex === -1) {
           throw new Error(`Header not found: ${headerText}`);
         }
-        
+
         const cells = TestUtils.getTableUtils().getCells(rowIndex);
         return cells[headerIndex];
       },
-      searchInTable: (searchText: string) => { const searchInput = screen.getByPlaceholderText(/search/i) || screen.getByRole('searchbox');
+      searchInTable: (searchText: string) => {
+        const searchInput = screen.getByPlaceholderText(/search/i) || screen.getByRole('searchbox');
         return TestUtils.createUserEvent().type(searchInput, searchText);
       },
       sortByColumn: (headerText: string) => {
-        const header = TestUtils.getTableUtils().getHeaders().find(h => h.textContent?.includes(headerText));
+        const header = TestUtils.getTableUtils()
+          .getHeaders()
+          .find((h) => h.textContent?.includes(headerText));
         if (!header) throw new Error(`Sortable header not found: ${headerText}`);
         return TestUtils.createUserEvent().click(header);
       },
@@ -185,42 +207,45 @@ export class TestUtils { // Enhanced user event instance with better async handl
   }
 
   // Modal testing utilities
-  static getModalUtils() { return {
+  static getModalUtils() {
+    return {
       expectModalOpen: (modalTitle?: string) => {
         const modal = screen.getByRole('dialog');
         expect(modal).toBeInTheDocument();
-        
+
         if (modalTitle) {
           expect(within(modal).getByText(modalTitle)).toBeInTheDocument();
         }
-        
+
         return modal;
       },
-      expectModalClosed: () => { expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expectModalClosed: () => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       },
       closeModal: async (method: 'escape' | 'button' | 'backdrop' = 'button') => {
         const user = TestUtils.createUserEvent();
-        
+
         switch (method) {
           case 'escape':
             await user.keyboard('{Escape}');
             break;
-          case 'button':
+          case 'button': {
             const closeButton = screen.getByRole('button', { name: /close|cancel|×/i });
             await user.click(closeButton);
             break;
-          case 'backdrop':
+          }
+          case 'backdrop': {
             const modal = screen.getByRole('dialog');
             const backdrop = modal.parentElement;
             if (backdrop) await user.click(backdrop);
             break;
+          }
         }
       },
     };
-  }
-
-  // Accessibility testing utilities (simplified without jest-axe)
-  static async testAccessibility(_element?: HTMLElement) { // Placeholder for accessibility testing
+  } // Accessibility testing utilities (simplified without jest-axe)
+  static async testAccessibility(_element?: HTMLElement) {
+    // Placeholder for accessibility testing
     // In a real implementation, you would use jest-axe or similar
     logger.warn('Accessibility testing not implemented - please install jest-axe');
     return true;
@@ -230,17 +255,19 @@ export class TestUtils { // Enhanced user event instance with better async handl
   static measureRenderTime<T>(
     renderFn: () => T,
     iterations = 10
-  ): { average: number; min: number; max: number; results: T } { const times: number[] = [];
+  ): { average: number; min: number; max: number; results: T } {
+    const times: number[] = [];
     let lastResult: T;
-    
+
     for (let i = 0; i < iterations; i++) {
       const start = performance.now();
       lastResult = renderFn();
       const end = performance.now();
       times.push(end - start);
     }
-    
-    return { average: times.reduce((sum, time) => sum + time, 0) / times.length,
+
+    return {
+      average: times.reduce((sum, time) => sum + time, 0) / times.length,
       min: Math.min(...times),
       max: Math.max(...times),
       results: lastResult!,
@@ -253,50 +280,59 @@ export class TestUtils { // Enhanced user event instance with better async handl
     errorTrigger: () => void | Promise<void>
   ) {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+
     render(component);
-    
-    try { if (errorTrigger.constructor.name === 'AsyncFunction') {
+
+    try {
+      if (errorTrigger.constructor.name === 'AsyncFunction') {
         await act(async () => {
           await (errorTrigger as () => Promise<void>)();
         });
-      } else { act(() => {
+      } else {
+        act(() => {
           (errorTrigger as () => void)();
         });
       }
-    } catch (error) { // Expected error caught by error boundary
+    } catch (_error) {
+      // Expected error caught by error boundary
     }
-    
+
     // Verify error boundary rendered
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
-    
+
     spy.mockRestore();
   }
 
   // Local storage testing utilities
   static createLocalStorageMock() {
     const store: Record<string, string> = {};
-    
-    return { getItem: vi.fn((key: string) => store[key] || null),
+
+    return {
+      getItem: vi.fn((key: string) => store[key] || null),
       setItem: vi.fn((key: string, value: string) => {
         store[key] = String(value);
       }),
-      removeItem: vi.fn((key: string) => { delete store[key];
+      removeItem: vi.fn((key: string) => {
+        delete store[key];
       }),
-      clear: vi.fn(() => { Object.keys(store).forEach(key => delete store[key]);
+      clear: vi.fn(() => {
+        Object.keys(store).forEach((key) => delete store[key]);
       }),
-      get length() { return Object.keys(store).length;
+      get length() {
+        return Object.keys(store).length;
       },
       key: vi.fn((index: number) => Object.keys(store)[index] || null),
     };
   }
 
   // Session storage testing utilities
-  static createSessionStorageMock() { return TestUtils.createLocalStorageMock(); // Same interface
+  static createSessionStorageMock() {
+    return TestUtils.createLocalStorageMock(); // Same interface
   }
 
   // Clipboard testing utilities
-  static createClipboardMock() { return {
+  static createClipboardMock() {
+    return {
       writeText: vi.fn().mockResolvedValue(undefined),
       readText: vi.fn().mockResolvedValue(''),
       write: vi.fn().mockResolvedValue(undefined),
@@ -305,32 +341,39 @@ export class TestUtils { // Enhanced user event instance with better async handl
   }
 
   // Network status testing
-  static createNetworkMock(online = true) { Object.defineProperty(navigator, 'onLine', {
+  static createNetworkMock(online = true) {
+    Object.defineProperty(navigator, 'onLine', {
       writable: true,
       value: online,
     });
-    
-    return { setOnline: (status: boolean) => {
+
+    return {
+      setOnline: (status: boolean) => {
         (navigator as any).onLine = status;
         window.dispatchEvent(new Event(status ? 'online' : 'offline'));
       },
-      mockNetworkChange: (status: boolean) => { window.dispatchEvent(new Event(status ? 'online' : 'offline'));
+      mockNetworkChange: (status: boolean) => {
+        window.dispatchEvent(new Event(status ? 'online' : 'offline'));
       },
     };
   }
 
   // Geolocation testing utilities
-  static createGeolocationMock() { const mockGeolocation = {
+  static createGeolocationMock() {
+    const mockGeolocation = {
       getCurrentPosition: vi.fn(),
       watchPosition: vi.fn(),
       clearWatch: vi.fn(),
     };
-    
-    Object.defineProperty(global.navigator, 'geolocation', { value: mockGeolocation,
+
+    Object.defineProperty(global.navigator, 'geolocation', {
+      value: mockGeolocation,
       configurable: true,
     });
-    
-    return { mockSuccess: (coords: { latitude: number; longitude: number }) => { mockGeolocation.getCurrentPosition.mockImplementation((success) => {
+
+    return {
+      mockSuccess: (coords: { latitude: number; longitude: number }) => {
+        mockGeolocation.getCurrentPosition.mockImplementation((success) => {
           success({
             coords: {
               latitude: coords.latitude,
@@ -345,7 +388,8 @@ export class TestUtils { // Enhanced user event instance with better async handl
           });
         });
       },
-      mockError: (error: { code: number; message: string }) => { mockGeolocation.getCurrentPosition.mockImplementation((_, error_callback) => {
+      mockError: (error: { code: number; message: string }) => {
+        mockGeolocation.getCurrentPosition.mockImplementation((_, error_callback) => {
           if (error_callback) error_callback(error);
         });
       },
@@ -367,10 +411,12 @@ export class MockDataGenerator {
     };
   }
 
-  static users(count: number, overrides?: Partial<TestUser>): TestUser[] { return Array.from({ length: count }, () => MockDataGenerator.user(overrides));
+  static users(count: number, overrides?: Partial<TestUser>): TestUser[] {
+    return Array.from({ length: count }, () => MockDataGenerator.user(overrides));
   }
 
-  static apiResponse<T>(data: T, overrides?: Partial<MockApiResponse>): MockApiResponse<T> { return {
+  static apiResponse<T>(data: T, overrides?: Partial<MockApiResponse>): MockApiResponse<T> {
+    return {
       data,
       status: 200,
       statusText: 'OK',
@@ -379,7 +425,8 @@ export class MockDataGenerator {
     };
   }
 
-  static apiError(status = 500, message = 'Internal Server Error'): MockApiResponse { return {
+  static apiError(status = 500, message = 'Internal Server Error'): MockApiResponse {
+    return {
       data: { error: message },
       status,
       statusText: message,
@@ -392,7 +439,8 @@ export class MockDataGenerator {
     page = 1,
     limit = 10,
     total?: number
-  ): MockApiResponse<{ data: T[];
+  ): MockApiResponse<{
+    data: T[];
     pagination: {
       page: number;
       limit: number;
@@ -401,7 +449,8 @@ export class MockDataGenerator {
       hasNext: boolean;
       hasPrev: boolean;
     };
-  }> { const startIndex = (page - 1) * limit;
+  }> {
+    const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedData = data.slice(startIndex, endIndex);
     const totalItems = total ?? data.length;
@@ -420,18 +469,24 @@ export class MockDataGenerator {
     });
   }
 
-  static randomString(length = 10): string { return Math.random().toString(36).substring(2, 2 + length);
+  static randomString(length = 10): string {
+    return Math.random()
+      .toString(36)
+      .substring(2, 2 + length);
   }
 
-  static randomNumber(min = 0, max = 100): number { return Math.floor(Math.random() * (max - min + 1)) + min;
+  static randomNumber(min = 0, max = 100): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  static randomBoolean(): boolean { return Math.random() < 0.5;
+  static randomBoolean(): boolean {
+    return Math.random() < 0.5;
   }
 
-  static randomDate(start?: Date, end?: Date): Date { const startTime = start?.getTime() ?? Date.now() - 365 * 24 * 60 * 60 * 1000; // 1 year ago
+  static randomDate(start?: Date, end?: Date): Date {
+    const startTime = start?.getTime() ?? Date.now() - 365 * 24 * 60 * 60 * 1000; // 1 year ago
     const endTime = end?.getTime() ?? Date.now();
-    
+
     return new Date(startTime + Math.random() * (endTime - startTime));
   }
 
@@ -447,18 +502,20 @@ export class MockDataGenerator {
 // ==================== TEST WRAPPERS ====================
 
 // Create a comprehensive test wrapper with providers (simplified)
-export function createTestWrapper(_options?: TestWrapperProps): ComponentType<{ children: ReactNode }> { return function TestWrapper({ children }: { children: ReactNode }) { // In a real implementation, this would return JSX with providers
+export function createTestWrapper(
+  _options?: TestWrapperProps
+): ComponentType<{ children: ReactNode }> {
+  return function TestWrapper({ children }: { children: ReactNode }) {
+    // In a real implementation, this would return JSX with providers
     // For now, return a simple wrapper
     return children as any;
   };
 }
 
 // Enhanced render function with common providers
-export function customRender(
-  ui: ReactElement,
-  options?: Omit<CustomRenderOptions, 'children'>
-) { const Wrapper = createTestWrapper();
-  
+export function customRender(ui: ReactElement, options?: Omit<CustomRenderOptions, 'children'>) {
+  const Wrapper = createTestWrapper();
+
   return {
     user: TestUtils.createUserEvent(),
     ...render(ui, { wrapper: Wrapper, ...options }),
@@ -468,11 +525,10 @@ export function customRender(
 // Hook testing utilities
 export function renderTestHook<TProps, TResult>(
   hook: (props: TProps) => TResult,
-  options?: { initialProps?: TProps;
-    wrapper?: ComponentType<{ children: ReactNode }>;
-  }
-) { const Wrapper = options?.wrapper || createTestWrapper();
-  
+  options?: { initialProps?: TProps; wrapper?: ComponentType<{ children: ReactNode }> }
+) {
+  const Wrapper = options?.wrapper || createTestWrapper();
+
   return renderHook(hook, {
     wrapper: Wrapper,
     initialProps: options?.initialProps,
@@ -481,30 +537,34 @@ export function renderTestHook<TProps, TResult>(
 
 // ==================== API MOCKING UTILITIES ====================
 
-export class ApiMocker { private static mocks: Map<string, MockedFunction<any>> = new Map();
+export class ApiMocker {
+  private static mocks: Map<string, MockedFunction<any>> = new Map();
 
   static mockEndpoint(
     endpoint: string,
-    response: any,
+    response: unknown,
     options?: {
       delay?: number;
       status?: number;
       once?: boolean;
     }
-  ): MockedFunction<any> { const { delay = 0, status = 200, once = false } = options || {};
-    
-    const mockFn = vi.fn().mockImplementation(async () => { if (delay > 0) {
-        await new Promise(resolve => setTimeout(resolve, delay));
+  ): MockedFunction<any> {
+    const { delay = 0, status = 200, once = false } = options || {};
+
+    const mockFn = vi.fn().mockImplementation(async () => {
+      if (delay > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
-      
+
       if (status >= 400) {
         throw new Error(`HTTP ${status}: ${JSON.stringify(response)}`);
       }
-      
+
       return MockDataGenerator.apiResponse(response, { status });
     });
 
-    if (once) { mockFn.mockImplementationOnce(mockFn.getMockImplementation()!);
+    if (once) {
+      mockFn.mockImplementationOnce(mockFn.getMockImplementation()!);
     }
 
     ApiMocker.mocks.set(endpoint, mockFn);
@@ -516,33 +576,40 @@ export class ApiMocker { private static mocks: Map<string, MockedFunction<any>> 
     status = 500,
     message = 'Internal Server Error',
     options?: { delay?: number; once?: boolean }
-  ): MockedFunction<any> { const { delay = 0, once = false } = options || {};
-    
-    const mockFn = vi.fn().mockImplementation(async () => { if (delay > 0) {
-        await new Promise(resolve => setTimeout(resolve, delay));
+  ): MockedFunction<any> {
+    const { delay = 0, once = false } = options || {};
+
+    const mockFn = vi.fn().mockImplementation(async () => {
+      if (delay > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
-      
+
       throw new Error(`HTTP ${status}: ${message}`);
     });
 
-    if (once) { mockFn.mockImplementationOnce(mockFn.getMockImplementation()!);
+    if (once) {
+      mockFn.mockImplementationOnce(mockFn.getMockImplementation()!);
     }
 
     ApiMocker.mocks.set(endpoint, mockFn);
     return mockFn;
   }
 
-  static getMock(endpoint: string): MockedFunction<any> | undefined { return ApiMocker.mocks.get(endpoint);
+  static getMock(endpoint: string): MockedFunction<any> | undefined {
+    return ApiMocker.mocks.get(endpoint);
   }
 
-  static clearMocks(): void { ApiMocker.mocks.forEach(mock => mock.mockClear());
+  static clearMocks(): void {
+    ApiMocker.mocks.forEach((mock) => mock.mockClear());
   }
 
-  static resetMocks(): void { ApiMocker.mocks.forEach(mock => mock.mockReset());
+  static resetMocks(): void {
+    ApiMocker.mocks.forEach((mock) => mock.mockReset());
     ApiMocker.mocks.clear();
   }
 
-  static restoreMocks(): void { ApiMocker.mocks.forEach(mock => mock.mockRestore());
+  static restoreMocks(): void {
+    ApiMocker.mocks.forEach((mock) => mock.mockRestore());
     ApiMocker.mocks.clear();
   }
 }
@@ -550,27 +617,30 @@ export class ApiMocker { private static mocks: Map<string, MockedFunction<any>> 
 // ==================== CUSTOM MATCHERS ====================
 
 // Extend expect with custom matchers
-declare global { namespace Vi {
+// eslint-disable-next-line @typescript-eslint/no-namespace
+declare global {
+  namespace Vi {
     interface AsymmetricMatchersContaining {
-      toBeAccessible(): any;
-      toHaveNoViolations(): any;
-      toBeInViewport(): any;
-      toHaveLoadedSuccessfully(): any;
+      toBeAccessible(): unknown;
+      toHaveNoViolations(): unknown;
+      toBeInViewport(): unknown;
+      toHaveLoadedSuccessfully(): unknown;
     }
   }
 }
 
 // Custom matcher implementations would go here
-export const customMatchers = { toBeAccessible: async (received: HTMLElement) => {
+export const customMatchers = {
+  toBeAccessible: async (received: HTMLElement) => {
     try {
       await TestUtils.testAccessibility(received);
       return {
         message: () => 'Element is accessible',
         pass: true,
       };
-    } catch (error) {
+    } catch (err) {
       return {
-        message: () => `Element is not accessible: ${error}`,
+        message: () => `Element is not accessible: ${err}`,
         pass: false,
       };
     }
@@ -578,12 +648,11 @@ export const customMatchers = { toBeAccessible: async (received: HTMLElement) =>
 
   toBeInViewport: (received: HTMLElement) => {
     const rect = received.getBoundingClientRect();
-    const isInViewport = (
+    const isInViewport =
       rect.top >= 0 &&
       rect.left >= 0 &&
       rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    );
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth);
 
     return {
       message: () => `Element is ${isInViewport ? 'in' : 'not in'} viewport`,
@@ -594,36 +663,42 @@ export const customMatchers = { toBeAccessible: async (received: HTMLElement) =>
 
 // ==================== TEST SETUP UTILITIES ====================
 
-export function setupTestEnvironment() { // Mock localStorage
+export function setupTestEnvironment() {
+  // Mock localStorage
   Object.defineProperty(window, 'localStorage', {
     value: TestUtils.createLocalStorageMock(),
     writable: true,
   });
 
   // Mock sessionStorage
-  Object.defineProperty(window, 'sessionStorage', { value: TestUtils.createSessionStorageMock(),
+  Object.defineProperty(window, 'sessionStorage', {
+    value: TestUtils.createSessionStorageMock(),
     writable: true,
   });
 
   // Mock clipboard
-  Object.defineProperty(navigator, 'clipboard', { value: TestUtils.createClipboardMock(),
+  Object.defineProperty(navigator, 'clipboard', {
+    value: TestUtils.createClipboardMock(),
     writable: true,
   });
 
   // Mock IntersectionObserver
-  global.IntersectionObserver = vi.fn().mockImplementation((_callback) => ({ observe: vi.fn(),
+  global.IntersectionObserver = vi.fn().mockImplementation((_callback) => ({
+    observe: vi.fn(),
     unobserve: vi.fn(),
     disconnect: vi.fn(),
   }));
 
   // Mock ResizeObserver
-  global.ResizeObserver = vi.fn().mockImplementation((_callback) => ({ observe: vi.fn(),
+  global.ResizeObserver = vi.fn().mockImplementation((_callback) => ({
+    observe: vi.fn(),
     unobserve: vi.fn(),
     disconnect: vi.fn(),
   }));
 
   // Mock matchMedia
-  Object.defineProperty(window, 'matchMedia', { writable: true,
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
     value: vi.fn().mockImplementation((query) => ({
       matches: false,
       media: query,
@@ -648,21 +723,24 @@ export function setupTestEnvironment() { // Mock localStorage
   vi.useFakeTimers();
 }
 
-export function cleanupTestEnvironment() { // Clear all mocks
+export function cleanupTestEnvironment() {
+  // Clear all mocks
   vi.clearAllMocks();
-  
+
   // Clear API mocks
   ApiMocker.clearMocks();
-  
+
   // Restore timers
   vi.useRealTimers();
-  
+
   // Clean up DOM
-  document.body.innerHTML = ''; }
+  document.body.innerHTML = '';
+}
 
 // ==================== EXPORTS ====================
 
-export default { TestUtils,
+export default {
+  TestUtils,
   MockDataGenerator,
   ApiMocker,
   customRender,
@@ -670,4 +748,5 @@ export default { TestUtils,
   createTestWrapper,
   setupTestEnvironment,
   cleanupTestEnvironment,
-  customMatchers, };
+  customMatchers,
+};

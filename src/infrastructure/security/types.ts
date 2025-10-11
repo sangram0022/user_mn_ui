@@ -37,7 +37,7 @@ export interface Permission {
   name: string;
   resource: string;
   action: 'create' | 'read' | 'update' | 'delete' | 'execute';
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
 }
 
 export interface Role {
@@ -58,7 +58,7 @@ export interface AccessControl {
 export type PermissionCheck = (
   resource: string,
   action: string,
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 ) => boolean | Promise<boolean>;
 
 // Encryption

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Unit Tests for Authentication Store (Zustand)
  *
@@ -102,7 +103,7 @@ describe('Authentication Store', () => {
             email: 'wrong@example.com',
             password: 'wrongpassword',
           });
-        } catch (error) {
+        } catch (_) {
           // Expected to fail
         }
       });
@@ -175,7 +176,7 @@ describe('Authentication Store', () => {
             email: 'test@example.com',
             password: 'password',
           });
-        } catch (error) {
+        } catch (_) {
           // Expected to fail
         }
       });
@@ -312,7 +313,7 @@ describe('Authentication Store', () => {
       await act(async () => {
         try {
           await result.current.refreshAccessToken();
-        } catch (error) {
+        } catch (_) {
           // Expected to fail
         }
       });
@@ -376,7 +377,7 @@ describe('Authentication Store', () => {
             firstName: 'Test',
             lastName: 'User',
           });
-        } catch (error) {
+        } catch (_) {
           // Expected to fail
         }
       });
@@ -404,7 +405,7 @@ describe('Authentication Store', () => {
             email: 'wrong@example.com',
             password: 'wrongpassword',
           });
-        } catch (error) {
+        } catch (_) {
           // Expected to fail
         }
       });

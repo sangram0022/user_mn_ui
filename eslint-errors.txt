@@ -1,0 +1,348 @@
+﻿
+> user-management-working@0.0.0 lint
+> eslint .
+
+
+D:\code\reactjs\user_mn_ui\ZUSTAND_USAGE_EXAMPLES.tsx
+  221:63  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  231:65  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  262:39  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  354:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\code\reactjs\user_mn_ui\e2e\user-management.spec.ts
+  8:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\domains\authentication\domain-module.ts
+  120:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\domains\authentication\store\authStore.test.ts
+  105:18  error  'error' is defined but never used                   @typescript-eslint/no-unused-vars
+  178:18  error  'error' is defined but never used                   @typescript-eslint/no-unused-vars
+  315:18  error  'error' is defined but never used                   @typescript-eslint/no-unused-vars
+  379:18  error  'error' is defined but never used                   @typescript-eslint/no-unused-vars
+  407:18  error  'error' is defined but never used                   @typescript-eslint/no-unused-vars
+  480:23  error  'loadingResult' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\code\reactjs\user_mn_ui\src\infrastructure\api\apiClient.ts
+   21:34  error  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+   32:13  error  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+   61:17  error  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+   61:22  error  'url' is defined but never used. Allowed unused args must match /^_/u          @typescript-eslint/no-unused-vars
+   61:35  error  'config' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+   69:18  error  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+   69:23  error  'url' is defined but never used. Allowed unused args must match /^_/u          @typescript-eslint/no-unused-vars
+   69:36  error  'data' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+   69:43  error  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+   69:48  error  'config' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+   77:17  error  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+   77:22  error  'url' is defined but never used. Allowed unused args must match /^_/u          @typescript-eslint/no-unused-vars
+   77:35  error  'data' is defined but never used. Allowed unused args must match /^_/u         @typescript-eslint/no-unused-vars
+   77:42  error  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+   77:47  error  'config' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+   85:20  error  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+   85:25  error  'url' is defined but never used. Allowed unused args must match /^_/u          @typescript-eslint/no-unused-vars
+   85:38  error  'config' is defined but never used. Allowed unused args must match /^_/u       @typescript-eslint/no-unused-vars
+   93:25  error  'interceptor' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  100:26  error  'interceptor' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+D:\code\reactjs\user_mn_ui\src\infrastructure\api\types.ts
+  14:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\infrastructure\monitoring\types.ts
+  13:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  49:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  57:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\infrastructure\security\SecurityProvider.tsx
+  104:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  117:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  125:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\code\reactjs\user_mn_ui\src\infrastructure\security\types.ts
+  40:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  61:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\infrastructure\storage\StorageManager.ts
+  9:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\infrastructure\storage\types.ts
+  21:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\main.tsx
+  8:1  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+
+D:\code\reactjs\user_mn_ui\src\shared\accessibility\accessibilityUtils.tsx
+  197:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  458:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  466:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  497:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  508:16  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\code\reactjs\user_mn_ui\src\shared\components\GenericComponents.tsx
+  445:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\config\constants.ts
+  134:24  error  Unnecessary escape character: \(  no-useless-escape
+  134:26  error  Unnecessary escape character: \)  no-useless-escape
+
+D:\code\reactjs\user_mn_ui\src\shared\errors\ErrorBoundary.tsx
+  254:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  272:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\code\reactjs\user_mn_ui\src\shared\hooks\useAdvancedHooks.ts
+   48:16  error    'error' is defined but never used                                                                                                                        @typescript-eslint/no-unused-vars
+  208:6   warning  React Hook useEffect has a missing dependency: 'execute'. Either include it or remove the dependency array                                               react-hooks/exhaustive-deps
+  208:16  warning  React Hook useEffect has a spread element in its dependency array. This means we can't statically verify whether you've passed the correct dependencies  react-hooks/exhaustive-deps
+
+D:\code\reactjs\user_mn_ui\src\shared\loading\LoadingComponents.tsx
+  212:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\code\reactjs\user_mn_ui\src\shared\performance\PerformanceMonitor.tsx
+   30:17  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                       react-refresh/only-export-components
+   61:18  warning  The ref value 'metricsRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'metricsRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+   76:59  error    Unexpected any. Specify a different type                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+   77:18  error    Unexpected any. Specify a different type                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+   96:36  error    Unexpected any. Specify a different type                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  108:56  error    Unexpected any. Specify a different type                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  114:31  error    Unexpected any. Specify a different type                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  122:31  error    Unexpected any. Specify a different type                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  149:59  error    Unexpected any. Specify a different type                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  150:18  error    Unexpected any. Specify a different type                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  180:17  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                       react-refresh/only-export-components
+  183:54  error    Unexpected any. Specify a different type                                                                                                                                                                                                                             @typescript-eslint/no-explicit-any
+  203:17  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                       react-refresh/only-export-components
+  274:17  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                       react-refresh/only-export-components
+
+D:\code\reactjs\user_mn_ui\src\shared\performance\lazyLoading.ts
+   79:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  209:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  225:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  255:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  281:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  288:73  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\performance\optimizationUtils.tsx
+   25:82   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   26:60   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   32:54   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   99:26   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  124:53   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  130:100  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  136:82   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  167:40   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  168:25   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  181:57   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  187:57   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  187:73   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  195:48   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  217:34   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  217:45   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  241:51   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  241:61   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  247:12   error    React Hook "useCallback" cannot be called in a class component. React Hooks must be called in a React function component or a custom React Hook function                                                                                                                                                                                                                                   react-hooks/rules-of-hooks
+  254:7    warning  React Hook useCallback was passed a dependency list that is not an array literal. This means we can't statically verify whether you've passed the correct dependencies                                                                                                                                                                                                                     react-hooks/exhaustive-deps
+  254:7    warning  React Hook useCallback has missing dependencies: 'callback' and 'debugName'. Either include them or remove the dependency array. If 'callback' changes too often, find the parent component that defines it and wrap that definition in useCallback                                                                                                                                        react-hooks/exhaustive-deps
+  267:12   error    React Hook "useMemo" cannot be called in a class component. React Hooks must be called in a React function component or a custom React Hook function                                                                                                                                                                                                                                       react-hooks/rules-of-hooks
+  277:8    warning  React Hook useMemo was passed a dependency list that is not an array literal. This means we can't statically verify whether you've passed the correct dependencies                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+  277:8    warning  React Hook useMemo has missing dependencies: 'debugName' and 'factory'. Either include them or remove the dependency array. If 'factory' changes too often, find the parent component that defines it and wrap that definition in useCallback                                                                                                                                              react-hooks/exhaustive-deps
+  283:46   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  286:22   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  435:42   error    React Hook "useTransition" cannot be called in a class component. React Hooks must be called in a React function component or a custom React Hook function                                                                                                                                                                                                                                 react-hooks/rules-of-hooks
+  437:35   error    React Hook "useCallback" cannot be called in a class component. React Hooks must be called in a React function component or a custom React Hook function                                                                                                                                                                                                                                   react-hooks/rules-of-hooks
+  479:21   error    The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowObjectTypes' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead  @typescript-eslint/no-empty-object-type
+  482:40   error    The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowObjectTypes' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead  @typescript-eslint/no-empty-object-type
+  530:14   error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                             react-refresh/only-export-components
+  538:16   error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                             react-refresh/only-export-components
+
+D:\code\reactjs\user_mn_ui\src\shared\performance\performanceMonitoring.ts
+  272:16  error  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\code\reactjs\user_mn_ui\src\shared\performance\performanceOptimization.ts
+   24:6   warning  React Hook useMemo was passed a dependency list that is not an array literal. This means we can't statically verify whether you've passed the correct dependencies  react-hooks/exhaustive-deps
+   24:6   warning  React Hook useMemo has a missing dependency: 'deps'. Either include it or remove the dependency array                                                               react-hooks/exhaustive-deps
+  487:53  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  487:77  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+  506:40  error    Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\routing\simpleRoutes.tsx
+  15:10  error  Fast refresh only works when a file only exports components. Move your component(s) to a separate file  react-refresh/only-export-components
+
+D:\code\reactjs\user_mn_ui\src\shared\security\inputValidation.ts
+   43:40  error  Unnecessary escape character: \(          no-useless-escape
+   43:42  error  Unnecessary escape character: \)          no-useless-escape
+   58:31  error  Unnecessary escape character: \.          no-useless-escape
+   70:22  error  Unnecessary escape character: \"          no-useless-escape
+  344:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  414:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\security\securityHeaders.ts
+  335:40  error  Unexpected control character(s) in regular expression: \x00  no-control-regex
+
+D:\code\reactjs\user_mn_ui\src\shared\security\securityManager.ts
+  133:7  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+
+D:\code\reactjs\user_mn_ui\src\shared\store\appContext.tsx
+  452:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  459:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  467:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  481:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  490:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  500:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  512:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  525:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  534:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  545:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  556:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  560:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  564:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\code\reactjs\user_mn_ui\src\shared\testing\testUtilsCore.ts
+   63:16  error  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  167:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  180:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  202:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\types\UtilityTypes.ts
+   45:44   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+   45:54   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+   45:93   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+   50:44   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+   50:54   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+   50:81   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+   50:105  error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+   57:29   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+   91:45   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  100:44   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  107:32   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  117:48   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  123:32   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  129:34   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  130:42   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  136:55   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  186:24   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  188:25   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  195:28   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  204:31   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  214:27   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  224:51   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  224:61   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  232:51   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  232:61   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  239:30   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  244:35   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  338:33   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  344:33   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  350:34   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  356:33   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  356:63   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  362:32   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  362:47   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  368:35   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  368:50   error  The `Function` type accepts any function-like value.
+Prefer explicitly defining any function parameters and return type  @typescript-eslint/no-unsafe-function-type
+  407:38   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  407:58   error  Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\types\micro-frontend.types.ts
+   18:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   18:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   32:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   42:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   42:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  124:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\utils\GlobalErrorHandler.ts
+  116:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  322:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\utils\__tests__\performance-optimizations.test.ts
+   18:3   error  'useCleanupRegistry' is defined but never used                 @typescript-eslint/no-unused-vars
+   22:3   error  'useDeferredValue' is defined but never used                   @typescript-eslint/no-unused-vars
+   24:3   error  'useResizeObserver' is defined but never used                  @typescript-eslint/no-unused-vars
+   96:27  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+   97:30  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  100:34  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  101:37  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  415:33  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  433:33  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  466:11  error  'mockIntersectionObserver' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  481:11  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  489:28  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+  507:41  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\utils\__tests__\utilities.test.ts
+  19:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\utils\logger.ts
+  221:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\utils\performance-optimizations.ts
+  146:6   warning  React Hook useEffect was passed a dependency list that is not an array literal. This means we can't statically verify whether you've passed the correct dependencies                                                         react-hooks/exhaustive-deps
+  146:6   warning  React Hook useEffect has a missing dependency: 'effect'. Either include it or remove the dependency array. If 'effect' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+  230:57  error    Unexpected any. Specify a different type                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  230:67  error    Unexpected any. Specify a different type                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  234:10  warning  React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead                                                                                                                   react-hooks/exhaustive-deps
+  251:55  error    Unexpected any. Specify a different type                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  251:65  error    Unexpected any. Specify a different type                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  282:60  error    Unexpected any. Specify a different type                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  283:29  warning  React Hook useMemo has a missing dependency: 'obj'. Either include it or remove the dependency array                                                                                                                         react-hooks/exhaustive-deps
+  283:30  warning  React Hook useMemo has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                                       react-hooks/exhaustive-deps
+  306:23  error    Unexpected any. Specify a different type                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  306:31  error    Unexpected any. Specify a different type                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  356:81  error    Unexpected any. Specify a different type                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  357:47  error    Unexpected any. Specify a different type                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  371:30  error    Unexpected any. Specify a different type                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\shared\utils\testing.ts
+   23:38  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+   30:18  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+   35:55  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+   39:20  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+   81:14  error  'error' is defined but never used                  @typescript-eslint/no-unused-vars
+   91:28  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  104:29  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  214:13  error  Unexpected lexical declaration in case block       no-case-declarations
+  218:13  error  Unexpected lexical declaration in case block       no-case-declarations
+  219:13  error  Unexpected lexical declaration in case block       no-case-declarations
+  272:14  error  'error' is defined but never used                  @typescript-eslint/no-unused-vars
+  319:23  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  457:24  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  489:75  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  493:15  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  499:21  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  524:21  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  540:52  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  558:18  error  ES2015 module syntax is preferred over namespaces  @typescript-eslint/no-namespace
+  560:25  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  561:29  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  562:25  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  563:35  error  Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+
+D:\code\reactjs\user_mn_ui\src\test\utils\test-utils.tsx
+   42:12  error  Unexpected any. Specify a different type                                                                @typescript-eslint/no-explicit-any
+   81:10  error  Fast refresh only works when a file only exports components. Move your component(s) to a separate file  react-refresh/only-export-components
+  187:14  error  'error' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+  201:41  error  Unexpected any. Specify a different type                                                                @typescript-eslint/no-explicit-any
+  202:4   error  Unexpected any. Specify a different type                                                                @typescript-eslint/no-explicit-any
+  216:79  error  Unexpected any. Specify a different type                                                                @typescript-eslint/no-explicit-any
+  246:40  error  Unexpected any. Specify a different type                                                                @typescript-eslint/no-explicit-any
+  247:44  error  Unexpected any. Specify a different type                                                                @typescript-eslint/no-explicit-any
+  248:42  error  Unexpected any. Specify a different type                                                                @typescript-eslint/no-explicit-any
+  263:57  error  Unexpected any. Specify a different type                                                                @typescript-eslint/no-explicit-any
+  356:1   error  This rule can't verify that `export *` only exports components                                          react-refresh/only-export-components
+
+Γ£û 258 problems (244 errors, 14 warnings)
+

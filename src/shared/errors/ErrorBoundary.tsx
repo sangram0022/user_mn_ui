@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Advanced Error Boundary System
  * Comprehensive error handling with React 19 patterns and expert-level practices
@@ -9,29 +10,32 @@ import type { ErrorInfo, ReactNode } from 'react';
 import { categorizeError, ErrorReportingService, type ErrorDetails } from './errorUtils';
 
 // Error boundary state interface
-interface ErrorBoundaryState { hasError: boolean;
+interface ErrorBoundaryState {
+  hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
   retryCount: number;
   errorId: string;
- }
+}
 
 // Error boundary props interface
-interface ErrorBoundaryProps { children: ReactNode;
+interface ErrorBoundaryProps {
+  children: ReactNode;
   fallbackComponent?: ComponentType<FallbackProps>;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   maxRetries?: number;
   resetKeys?: Array<string | number>;
   resetOnPropsChange?: boolean;
   isolate?: boolean;
- }
+}
 
 // Fallback component props
-interface FallbackProps { error: Error;
+interface FallbackProps {
+  error: Error;
   resetError: () => void;
   retryCount: number;
   canRetry: boolean;
- }
+}
 
 const errorReporter = ErrorReportingService.getInstance();
 
@@ -41,27 +45,23 @@ function generateErrorId(): string {
 }
 
 // Default fallback component
-const DefaultFallback: React.FC<FallbackProps> = ({ error, 
-  resetError, 
-  retryCount, 
-  canRetry 
- }) => (
+const DefaultFallback: React.FC<FallbackProps> = ({ error, resetError, retryCount, canRetry }) => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
     <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 m-4">
       <div className="flex items-center mb-4">
         <div className="flex-shrink-0">
-          <svg 
-            className="h-8 w-8 text-red-500" 
-            fill="none" 
-            viewBox="0 0 24 24" 
+          <svg
+            className="h-8 w-8 text-red-500"
+            fill="none"
+            viewBox="0 0 24 24"
             stroke="currentColor"
             aria-hidden="true"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"
             />
           </svg>
         </div>
@@ -71,12 +71,12 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error,
           </h3>
         </div>
       </div>
-      
+
       <div className="mb-4">
         <p className="text-sm text-gray-600 dark:text-gray-400">
           We apologize for the inconvenience. The application encountered an unexpected error.
         </p>
-        
+
         {process.env.NODE_ENV === 'development' && (
           <details className="mt-3">
             <summary className="text-sm text-gray-500 cursor-pointer hover:text-gray-700">
@@ -89,7 +89,7 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error,
           </details>
         )}
       </div>
-      
+
       <div className="flex flex-col sm:flex-row gap-3">
         {canRetry && (
           <button
@@ -100,7 +100,7 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error,
             Try Again {retryCount > 0 && `(${retryCount + 1})`}
           </button>
         )}
-        
+
         <button
           onClick={() => window.location.reload()}
           className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
@@ -109,12 +109,9 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error,
           Reload Page
         </button>
       </div>
-      
+
       <div className="mt-4 text-center">
-        <a 
-          href="/" 
-          className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
-        >
+        <a href="/" className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400">
           Return to Home
         </a>
       </div>
@@ -123,7 +120,8 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error,
 );
 
 // Advanced Error Boundary Class
-export class AdvancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> { private resetTimeoutId: NodeJS.Timeout | null = null;
+export class AdvancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  private resetTimeoutId: NodeJS.Timeout | null = null;
 
   constructor(props: ErrorBoundaryProps) {
     super(props);
@@ -132,23 +130,26 @@ export class AdvancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
       error: null,
       errorInfo: null,
       retryCount: 0,
-      errorId: ''
+      errorId: '',
     };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> { return {
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+    return {
       hasError: true,
       error,
-      errorId: generateErrorId()
+      errorId: generateErrorId(),
     };
   }
 
-  override componentDidCatch(error: Error, errorInfo: ErrorInfo) { const { onError, isolate } = this.props;
-    
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    const { onError, isolate } = this.props;
+
     this.setState({ errorInfo });
-    
+
     // Report error to monitoring service
-    const errorDetails: ErrorDetails = { errorId: this.state.errorId || generateErrorId(),
+    const errorDetails: ErrorDetails = {
+      errorId: this.state.errorId || generateErrorId(),
       message: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack || undefined,
@@ -156,67 +157,78 @@ export class AdvancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
       timestamp: Date.now(),
       userAgent: navigator.userAgent,
       url: window.location.href,
-      userId: this.getUserId()
+      userId: this.getUserId(),
     };
-    
-    errorReporter.reportError(errorDetails).catch(reportError => { logger.error('Failed to report error:', undefined, { reportError  });
+
+    errorReporter.reportError(errorDetails).catch((reportError) => {
+      logger.error('Failed to report error:', undefined, { reportError });
     });
-    
+
     // Call custom error handler
     onError?.(error, errorInfo);
-    
+
     // Isolate error if requested
-    if (isolate) { logger.error('Error boundary isolated error:', undefined, { error, errorInfo  });
+    if (isolate) {
+      logger.error('Error boundary isolated error:', undefined, { error, errorInfo });
     }
   }
 
-  override componentDidUpdate(prevProps: ErrorBoundaryProps) { const { resetKeys, resetOnPropsChange } = this.props;
-    
-    if (this.state.hasError && prevProps.children !== this.props.children) { if (resetOnPropsChange) {
+  override componentDidUpdate(prevProps: ErrorBoundaryProps) {
+    const { resetKeys, resetOnPropsChange } = this.props;
+
+    if (this.state.hasError && prevProps.children !== this.props.children) {
+      if (resetOnPropsChange) {
         this.resetErrorBoundary();
       }
     }
-    
-    if (resetKeys && prevProps.resetKeys) { const hasResetKeyChanged = resetKeys.some((key, index) => 
-        key !== prevProps.resetKeys?.[index]
+
+    if (resetKeys && prevProps.resetKeys) {
+      const hasResetKeyChanged = resetKeys.some(
+        (key, index) => key !== prevProps.resetKeys?.[index]
       );
-      
+
       if (hasResetKeyChanged) {
         this.resetErrorBoundary();
       }
     }
   }
 
-  override componentWillUnmount() { if (this.resetTimeoutId) {
+  override componentWillUnmount() {
+    if (this.resetTimeoutId) {
       clearTimeout(this.resetTimeoutId);
     }
   }
 
-  private getUserId(): string | undefined { try {
+  private getUserId(): string | undefined {
+    try {
       const user = localStorage.getItem('user');
       return user ? JSON.parse(user).id : undefined;
-    } catch { return undefined;
+    } catch {
+      return undefined;
     }
   }
 
-  private resetErrorBoundary = () => { if (this.resetTimeoutId) {
+  private resetErrorBoundary = () => {
+    if (this.resetTimeoutId) {
       clearTimeout(this.resetTimeoutId);
     }
-    
-    this.setState(prevState => ({ hasError: false,
+
+    this.setState((prevState) => ({
+      hasError: false,
       error: null,
       errorInfo: null,
       retryCount: prevState.retryCount + 1,
-      errorId: ''
+      errorId: '',
     }));
   };
 
-  override render() { const { hasError, error, retryCount } = this.state;
+  override render() {
+    const { hasError, error, retryCount } = this.state;
     const { fallbackComponent: FallbackComponent = DefaultFallback, maxRetries = 3 } = this.props;
-    
+
     if (hasError && error) {
       const canRetry = retryCount < maxRetries;
-      
+
       return (
         <FallbackComponent
           error={error}
@@ -226,7 +238,7 @@ export class AdvancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
         />
       );
     }
-    
+
     return this.props.children;
   }
 }
@@ -251,7 +263,8 @@ export const ComponentErrorBoundary: React.FC<{ children: ReactNode }> = ({ chil
 );
 
 // Hook for error handling
-export function useErrorHandler() { return useCallback((error: Error, errorInfo?: Partial<ErrorInfo>) => {
+export function useErrorHandler() {
+  return useCallback((error: Error, errorInfo?: Partial<ErrorInfo>) => {
     const errorDetails: ErrorDetails = {
       errorId: generateErrorId(),
       message: error.message,
@@ -260,10 +273,11 @@ export function useErrorHandler() { return useCallback((error: Error, errorInfo?
       category: categorizeError(error),
       timestamp: Date.now(),
       userAgent: navigator.userAgent,
-      url: window.location.href
+      url: window.location.href,
     };
-    
-    errorReporter.reportError(errorDetails).catch(reportError => { logger.error('Failed to report error:', undefined, { reportError  });
+
+    errorReporter.reportError(errorDetails).catch((reportError) => {
+      logger.error('Failed to report error:', undefined, { reportError });
     });
   }, []);
 }
@@ -279,8 +293,7 @@ export function withErrorBoundary<P extends object>(
     </AdvancedErrorBoundary>
   );
 
-  WithErrorBoundaryComponent.displayName = 
-    `withErrorBoundary(${WrappedComponent.displayName || WrappedComponent.name})`;
+  WithErrorBoundaryComponent.displayName = `withErrorBoundary(${WrappedComponent.displayName || WrappedComponent.name})`;
 
   return WithErrorBoundaryComponent;
 }

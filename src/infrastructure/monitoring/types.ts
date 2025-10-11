@@ -10,7 +10,7 @@ export interface ErrorReport {
   message: string;
   stack?: string;
   severity: ErrorSeverity;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   timestamp: number;
   userId?: string;
   sessionId?: string;
@@ -46,7 +46,7 @@ export interface AnalyticsEvent {
   category: string;
   label?: string;
   value?: number;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
   timestamp: number;
 }
 
@@ -54,7 +54,7 @@ export interface UserProperties {
   userId?: string;
   email?: string;
   role?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TrackingOptions {

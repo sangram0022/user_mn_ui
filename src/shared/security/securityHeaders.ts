@@ -7,7 +7,8 @@ import { logger } from './../utils/logger';
 
 // ==================== CONTENT SECURITY POLICY ====================
 
-export interface CSPDirectives { defaultSrc?: string[];
+export interface CSPDirectives {
+  defaultSrc?: string[];
   scriptSrc?: string[];
   styleSrc?: string[];
   imgSrc?: string[];
@@ -25,9 +26,11 @@ export interface CSPDirectives { defaultSrc?: string[];
   reportUri?: string[];
   reportTo?: string[];
   upgradeInsecureRequests?: boolean;
-  blockAllMixedContent?: boolean; }
+  blockAllMixedContent?: boolean;
+}
 
-export class ContentSecurityPolicy { private static readonly NONCE_LENGTH = 16;
+export class ContentSecurityPolicy {
+  private static readonly NONCE_LENGTH = 16;
   private static nonce: string | null = null;
 
   /**
@@ -37,10 +40,11 @@ export class ContentSecurityPolicy { private static readonly NONCE_LENGTH = 16;
     if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
       const array = new Uint8Array(this.NONCE_LENGTH);
       window.crypto.getRandomValues(array);
-      this.nonce = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-    } else { // Fallback for environments without crypto API
-      this.nonce = Math.random().toString(36).substring(2, 15) + 
-                   Math.random().toString(36).substring(2, 15);
+      this.nonce = Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    } else {
+      // Fallback for environments without crypto API
+      this.nonce =
+        Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
     return this.nonce;
   }
@@ -48,7 +52,8 @@ export class ContentSecurityPolicy { private static readonly NONCE_LENGTH = 16;
   /**
    * Get the current nonce value
    */
-  static getCurrentNonce(): string | null { return this.nonce;
+  static getCurrentNonce(): string | null {
+    return this.nonce;
   }
 
   /**
@@ -57,133 +62,86 @@ export class ContentSecurityPolicy { private static readonly NONCE_LENGTH = 16;
   static getProductionCSP(): CSPDirectives {
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
     const wsUrl = process.env.REACT_APP_WEBSOCKET_URL || 'ws://localhost:3001';
-    
+
     return {
       defaultSrc: ["'self'"],
       scriptSrc: [
         "'self'",
         "'unsafe-inline'", // Required for React in development
         "'unsafe-eval'", // Required for development tools
-        "https://cdn.jsdelivr.net",
-        "https://unpkg.com",
-        ...(this.nonce ? [`'nonce-${this.nonce}'`] : [])
+        'https://cdn.jsdelivr.net',
+        'https://unpkg.com',
+        ...(this.nonce ? [`'nonce-${this.nonce}'`] : []),
       ],
       styleSrc: [
         "'self'",
         "'unsafe-inline'", // Required for styled-components and CSS-in-JS
-        "https://fonts.googleapis.com",
-        "https://cdn.jsdelivr.net"
+        'https://fonts.googleapis.com',
+        'https://cdn.jsdelivr.net',
       ],
       imgSrc: [
         "'self'",
-        "data:", // For base64 images
-        "blob:", // For generated images
-        "https:", // Allow HTTPS images
-        apiUrl
+        'data:', // For base64 images
+        'blob:', // For generated images
+        'https:', // Allow HTTPS images
+        apiUrl,
       ],
-      fontSrc: [
-        "'self'",
-        "https://fonts.gstatic.com",
-        "https://cdn.jsdelivr.net",
-        "data:"
-      ],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdn.jsdelivr.net', 'data:'],
       connectSrc: [
         "'self'",
         apiUrl,
         wsUrl,
-        "https://api.github.com", // If using GitHub API
-        "wss:", // WebSocket connections
-        "ws:" // WebSocket connections (dev)
+        'https://api.github.com', // If using GitHub API
+        'wss:', // WebSocket connections
+        'ws:', // WebSocket connections (dev)
       ],
       frameSrc: [
-        "'none'" // Prevent framing attacks
+        "'none'", // Prevent framing attacks
       ],
-      formAction: [
-        "'self'",
-        apiUrl
-      ],
-      baseUri: [
-        "'self'"
-      ],
+      formAction: ["'self'", apiUrl],
+      baseUri: ["'self'"],
       objectSrc: [
-        "'none'" // Prevent plugin execution
+        "'none'", // Prevent plugin execution
       ],
-      mediaSrc: [
-        "'self'",
-        "data:",
-        "blob:",
-        apiUrl
-      ],
-      manifestSrc: [
-        "'self'"
-      ],
+      mediaSrc: ["'self'", 'data:', 'blob:', apiUrl],
+      manifestSrc: ["'self'"],
       workerSrc: [
         "'self'",
-        "blob:" // For web workers
+        'blob:', // For web workers
       ],
-      childSrc: [
-        "'self'"
-      ],
+      childSrc: ["'self'"],
       frameAncestors: [
-        "'none'" // Prevent clickjacking
+        "'none'", // Prevent clickjacking
       ],
       upgradeInsecureRequests: true,
-      blockAllMixedContent: true
+      blockAllMixedContent: true,
     };
   }
 
   /**
    * Get development CSP directives (more permissive)
    */
-  static getDevelopmentCSP(): CSPDirectives { return {
+  static getDevelopmentCSP(): CSPDirectives {
+    return {
       defaultSrc: ["'self'"],
-      scriptSrc: [
-        "'self'",
-        "'unsafe-inline'",
-        "'unsafe-eval'",
-        "http:",
-        "https:",
-        "ws:",
-        "wss:"
-      ],
-      styleSrc: [
-        "'self'",
-        "'unsafe-inline'",
-        "http:",
-        "https:"
-      ],
-      imgSrc: [
-        "'self'",
-        "data:",
-        "blob:",
-        "http:",
-        "https:"
-      ],
-      fontSrc: [
-        "'self'",
-        "data:",
-        "http:",
-        "https:"
-      ],
-      connectSrc: [
-        "'self'",
-        "http:",
-        "https:",
-        "ws:",
-        "wss:"
-      ],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'http:', 'https:', 'ws:', 'wss:'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'http:', 'https:'],
+      imgSrc: ["'self'", 'data:', 'blob:', 'http:', 'https:'],
+      fontSrc: ["'self'", 'data:', 'http:', 'https:'],
+      connectSrc: ["'self'", 'http:', 'https:', 'ws:', 'wss:'],
       frameSrc: ["'self'"],
       formAction: ["'self'"],
       baseUri: ["'self'"],
       objectSrc: ["'none'"],
-      frameAncestors: ["'self'"]
+      frameAncestors: ["'self'"],
     };
   }
 
   /**
    * Convert CSP directives to header string
    */
-  static directivesToString(directives: CSPDirectives): string { const policies: string[] = [];
+  static directivesToString(directives: CSPDirectives): string {
+    const policies: string[] = [];
 
     Object.entries(directives).forEach(([key, value]) => {
       if (typeof value === 'boolean') {
@@ -205,11 +163,11 @@ export class ContentSecurityPolicy { private static readonly NONCE_LENGTH = 16;
   /**
    * Apply CSP to the document
    */
-  static apply(environment: 'development' | 'production' = 'production'): void { if (typeof document === 'undefined') return;
+  static apply(environment: 'development' | 'production' = 'production'): void {
+    if (typeof document === 'undefined') return;
 
-    const directives = environment === 'development' 
-      ? this.getDevelopmentCSP()
-      : this.getProductionCSP();
+    const directives =
+      environment === 'development' ? this.getDevelopmentCSP() : this.getProductionCSP();
 
     const cspString = this.directivesToString(directives);
 
@@ -229,7 +187,8 @@ export class ContentSecurityPolicy { private static readonly NONCE_LENGTH = 16;
 
 // ==================== SECURITY HEADERS ====================
 
-export interface SecurityHeaders { 'Strict-Transport-Security'?: string;
+export interface SecurityHeaders {
+  'Strict-Transport-Security'?: string;
   'X-Content-Type-Options'?: string;
   'X-Frame-Options'?: string;
   'X-XSS-Protection'?: string;
@@ -237,28 +196,30 @@ export interface SecurityHeaders { 'Strict-Transport-Security'?: string;
   'Permissions-Policy'?: string;
   'Cross-Origin-Embedder-Policy'?: string;
   'Cross-Origin-Opener-Policy'?: string;
-  'Cross-Origin-Resource-Policy'?: string; }
+  'Cross-Origin-Resource-Policy'?: string;
+}
 
-export class SecurityHeadersManager { /**
+export class SecurityHeadersManager {
+  /**
    * Get recommended security headers for production
    */
   static getProductionHeaders(): SecurityHeaders {
     return {
       // HSTS - Force HTTPS for 1 year
       'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-      
+
       // Prevent MIME type sniffing
       'X-Content-Type-Options': 'nosniff',
-      
+
       // Prevent clickjacking
       'X-Frame-Options': 'DENY',
-      
+
       // XSS Protection
       'X-XSS-Protection': '1; mode=block',
-      
+
       // Referrer policy
       'Referrer-Policy': 'strict-origin-when-cross-origin',
-      
+
       // Permissions policy (restrict dangerous features)
       'Permissions-Policy': [
         'camera=()',
@@ -275,47 +236,47 @@ export class SecurityHeadersManager { /**
         'accelerometer=()',
         'autoplay=()',
         'encrypted-media=()',
-        'picture-in-picture=()'
+        'picture-in-picture=()',
       ].join(', '),
-      
+
       // Cross-Origin policies
       'Cross-Origin-Embedder-Policy': 'require-corp',
       'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Resource-Policy': 'same-origin'
+      'Cross-Origin-Resource-Policy': 'same-origin',
     };
   }
 
   /**
    * Apply security headers to fetch requests
    */
-  static applyToFetch(headers: HeadersInit = {}): HeadersInit { const securityHeaders = this.getProductionHeaders();
+  static applyToFetch(headers: HeadersInit = {}): HeadersInit {
+    const securityHeaders = this.getProductionHeaders();
     return {
       ...headers,
-      ...securityHeaders
+      ...securityHeaders,
     };
   }
 
   /**
    * Validate if response has proper security headers
    */
-  static validateResponse(response: Response): { valid: boolean; missing: string[] } { const requiredHeaders = [
+  static validateResponse(response: Response): { valid: boolean; missing: string[] } {
+    const requiredHeaders = [
       'Strict-Transport-Security',
       'X-Content-Type-Options',
       'X-Frame-Options',
-      'Referrer-Policy'
+      'Referrer-Policy',
     ];
 
     const missing: string[] = [];
-    
-    requiredHeaders.forEach(header => {
+
+    requiredHeaders.forEach((header) => {
       if (!response.headers.get(header)) {
         missing.push(header);
       }
     });
 
-    return { valid: missing.length === 0,
-      missing
-    };
+    return { valid: missing.length === 0, missing };
   }
 }
 
@@ -327,11 +288,13 @@ export class RequestSanitizer {
    */
   static sanitizeHeaders(headers: Record<string, string>): Record<string, string> {
     const sanitized: Record<string, string> = {};
-    
-    Object.entries(headers).forEach(([key, value]) => { // Remove potentially dangerous characters from header names and values
+
+    Object.entries(headers).forEach(([key, value]) => {
+      // Remove potentially dangerous characters from header names and values
       const cleanKey = key.replace(/[^\w-]/g, '');
+      // eslint-disable-next-line no-control-regex
       const cleanValue = value.replace(/[\r\n\x00]/g, '');
-      
+
       if (cleanKey && cleanValue) {
         sanitized[cleanKey] = cleanValue;
       }
@@ -345,8 +308,9 @@ export class RequestSanitizer {
    */
   static sanitizeUrlParams(params: Record<string, unknown>): Record<string, string> {
     const sanitized: Record<string, string> = {};
-    
-    Object.entries(params).forEach(([key, value]) => { if (value != null) {
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value != null) {
         // Convert to string and encode
         const stringValue = String(value);
         sanitized[encodeURIComponent(key)] = encodeURIComponent(stringValue);
@@ -359,44 +323,51 @@ export class RequestSanitizer {
   /**
    * Validate and sanitize request body
    */
-  static sanitizeRequestBody(body: unknown): unknown { if (typeof body === 'string') {
+  static sanitizeRequestBody(body: unknown): unknown {
+    if (typeof body === 'string') {
       // For string bodies, ensure they don't contain dangerous content
       return body.replace(/[<>]/g, ''); // Basic XSS prevention
     }
-    
+
     if (typeof body === 'object' && body !== null) {
       // For object bodies, recursively sanitize
       const sanitized: Record<string, unknown> | unknown[] = Array.isArray(body) ? [] : {};
-      
-      Object.entries(body as Record<string, unknown>).forEach(([key, value]) => { if (typeof value === 'string') {
+
+      Object.entries(body as Record<string, unknown>).forEach(([key, value]) => {
+        if (typeof value === 'string') {
           (sanitized as Record<string, unknown>)[key] = value.replace(/[<>]/g, '');
-        } else if (typeof value === 'object' && value !== null) { (sanitized as Record<string, unknown>)[key] = this.sanitizeRequestBody(value);
-        } else { (sanitized as Record<string, unknown>)[key] = value;
+        } else if (typeof value === 'object' && value !== null) {
+          (sanitized as Record<string, unknown>)[key] = this.sanitizeRequestBody(value);
+        } else {
+          (sanitized as Record<string, unknown>)[key] = value;
         }
       });
-      
+
       return sanitized;
     }
-    
+
     return body;
   }
 }
 
 // ==================== CORS CONFIGURATION ====================
 
-export interface CORSConfig { origin: string[] | string | boolean;
+export interface CORSConfig {
+  origin: string[] | string | boolean;
   methods: string[];
   allowedHeaders: string[];
   credentials: boolean;
-  maxAge?: number; }
+  maxAge?: number;
+}
 
-export class CORSManager { /**
+export class CORSManager {
+  /**
    * Get production CORS configuration
    */
   static getProductionConfig(): CORSConfig {
     const allowedOrigins = [
       process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3000',
-      ...(process.env.REACT_APP_ALLOWED_ORIGINS?.split(',') || [])
+      ...(process.env.REACT_APP_ALLOWED_ORIGINS?.split(',') || []),
     ].filter(Boolean);
 
     return {
@@ -408,35 +379,39 @@ export class CORSManager { /**
         'X-Requested-With',
         'X-API-Key',
         'Accept',
-        'Origin'
+        'Origin',
       ],
       credentials: true,
-      maxAge: 86400 // 24 hours
+      maxAge: 86400, // 24 hours
     };
   }
 
   /**
    * Validate if origin is allowed
    */
-  static isOriginAllowed(origin: string): boolean { const config = this.getProductionConfig();
-    
+  static isOriginAllowed(origin: string): boolean {
+    const config = this.getProductionConfig();
+
     if (typeof config.origin === 'boolean') {
       return config.origin;
     }
-    
-    if (typeof config.origin === 'string') { return config.origin === origin;
+
+    if (typeof config.origin === 'string') {
+      return config.origin === origin;
     }
-    
-    if (Array.isArray(config.origin)) { return config.origin.includes(origin);
+
+    if (Array.isArray(config.origin)) {
+      return config.origin.includes(origin);
     }
-    
+
     return false;
   }
 }
 
 // ==================== SECURITY MONITORING ====================
 
-export class SecurityMonitor { private static violations: Array<{
+export class SecurityMonitor {
+  private static violations: Array<{
     type: string;
     details: Record<string, unknown>;
     timestamp: Date;
@@ -445,31 +420,36 @@ export class SecurityMonitor { private static violations: Array<{
   /**
    * Log security violations
    */
-  static logViolation(type: string, details: Record<string, unknown>): void { const violation = {
+  static logViolation(type: string, details: Record<string, unknown>): void {
+    const violation = {
       type,
       details,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    
+
     this.violations.push(violation);
-    
+
     // Keep only last 100 violations to prevent memory leaks
-    if (this.violations.length > 100) { this.violations = this.violations.slice(-100);
+    if (this.violations.length > 100) {
+      this.violations = this.violations.slice(-100);
     }
 
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') { logger.warn('Security Violation:', { violation  });
+    if (process.env.NODE_ENV === 'development') {
+      logger.warn('Security Violation:', { violation });
     }
 
     // In production, send to monitoring service
-    if (process.env.NODE_ENV === 'production') { this.reportToService(violation);
+    if (process.env.NODE_ENV === 'production') {
+      this.reportToService(violation);
     }
   }
 
   /**
    * Report violations to external monitoring service
    */
-  private static async reportToService(violation: Record<string, unknown>): Promise<void> { try {
+  private static async reportToService(violation: Record<string, unknown>): Promise<void> {
+    try {
       const endpoint = process.env.REACT_APP_SECURITY_MONITORING_ENDPOINT;
       if (!endpoint) return;
 
@@ -478,26 +458,30 @@ export class SecurityMonitor { private static violations: Array<{
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...violation,
+        body: JSON.stringify({
+          ...violation,
           userAgent: navigator.userAgent,
           url: window.location.href,
-          userId: this.getCurrentUserId()
-        })
+          userId: this.getCurrentUserId(),
+        }),
       });
-    } catch (error) { logger.error('Failed to report security violation:', undefined, { error  });
+    } catch (error) {
+      logger.error('Failed to report security violation:', undefined, { error });
     }
   }
 
   /**
    * Get current user ID for violation reporting
    */
-  private static getCurrentUserId(): string | null { try {
+  private static getCurrentUserId(): string | null {
+    try {
       const user = localStorage.getItem('user');
       if (user) {
         const userData = JSON.parse(user);
         return userData.id || null;
       }
-    } catch { // Ignore parsing errors
+    } catch {
+      // Ignore parsing errors
     }
     return null;
   }
@@ -505,22 +489,30 @@ export class SecurityMonitor { private static violations: Array<{
   /**
    * Get recent violations for debugging
    */
-  static getViolations(): Array<{ type: string; details: Record<string, unknown>; timestamp: Date }> { return [...this.violations];
+  static getViolations(): Array<{
+    type: string;
+    details: Record<string, unknown>;
+    timestamp: Date;
+  }> {
+    return [...this.violations];
   }
 
   /**
    * Clear violation history
    */
-  static clearViolations(): void { this.violations = [];
+  static clearViolations(): void {
+    this.violations = [];
   }
 }
 
 // ==================== EXPORTS ====================
 
-export const securityUtils = { csp: ContentSecurityPolicy,
+export const securityUtils = {
+  csp: ContentSecurityPolicy,
   headers: SecurityHeadersManager,
   sanitizer: RequestSanitizer,
   cors: CORSManager,
-  monitor: SecurityMonitor };
+  monitor: SecurityMonitor,
+};
 
 export default securityUtils;

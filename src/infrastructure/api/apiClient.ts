@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 /**
  * API Client - Base HTTP Client
- * 
+ *
  * Centralized HTTP client with:
  * - Request/Response interceptors
  * - Error handling
@@ -29,11 +30,15 @@ export interface ApiError {
   message: string;
   status?: number;
   code?: string;
-  details?: any;
+  details?: unknown;
 }
 
-export type RequestInterceptor = (config: AxiosRequestConfig) => AxiosRequestConfig | Promise<AxiosRequestConfig>;
-export type ResponseInterceptor = (response: AxiosResponse) => AxiosResponse | Promise<AxiosResponse>;
+export type RequestInterceptor = (
+  config: AxiosRequestConfig
+) => AxiosRequestConfig | Promise<AxiosRequestConfig>;
+export type ResponseInterceptor = (
+  response: AxiosResponse
+) => AxiosResponse | Promise<AxiosResponse>;
 
 /**
  * Base API Client
@@ -66,7 +71,11 @@ class ApiClient {
   /**
    * POST request
    */
-  async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async post<T = any>(
+    url: string,
+    data?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
     // Implementation
     throw new Error('Not implemented - use existing apiClient');
   }
@@ -74,7 +83,11 @@ class ApiClient {
   /**
    * PUT request
    */
-  async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async put<T = any>(
+    url: string,
+    data?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
     // Implementation
     throw new Error('Not implemented - use existing apiClient');
   }

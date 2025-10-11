@@ -29,7 +29,7 @@ export type ServiceRegistry = Record<string, unknown>;
 export interface StoreSlice<T = unknown> {
   name: string;
   initialState: T;
-  actions: Record<string, (...args: any[]) => void>;
+  actions: Record<string, (...args: unknown[]) => void>;
   selectors?: Record<string, (state: T) => unknown>;
 }
 

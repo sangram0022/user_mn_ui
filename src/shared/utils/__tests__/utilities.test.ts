@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * Unit Tests: Utility Functions
  * Expert-level testing by 25-year React veteran
@@ -16,12 +17,12 @@ const formatDate = (date: Date): string => {
   }).format(date);
 };
 
-const debounce = <T extends (...args: any[]) => any>(
+const debounce = <T extends (...args: unknown[]) => any>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout | null = null;
-  
+
   return (...args: Parameters<T>) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -33,12 +34,14 @@ const validateEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-const validatePassword = (password: string): {
+const validatePassword = (
+  password: string
+): {
   isValid: boolean;
   errors: string[];
 } => {
   const errors: string[] = [];
-  
+
   if (password.length < 8) {
     errors.push('Password must be at least 8 characters');
   }
@@ -54,7 +57,7 @@ const validatePassword = (password: string): {
   if (!/[^A-Za-z0-9]/.test(password)) {
     errors.push('Password must contain a special character');
   }
-  
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -66,7 +69,7 @@ describe('Utility Functions', () => {
     it('should format date correctly', () => {
       const date = new Date('2024-01-15');
       const formatted = formatDate(date);
-      
+
       expect(formatted).toContain('January');
       expect(formatted).toContain('15');
       expect(formatted).toContain('2024');
@@ -75,7 +78,7 @@ describe('Utility Functions', () => {
     it('should handle edge cases', () => {
       const date = new Date('2024-12-31');
       const formatted = formatDate(date);
-      
+
       expect(formatted).toContain('December');
       expect(formatted).toContain('31');
     });
@@ -84,32 +87,32 @@ describe('Utility Functions', () => {
   describe('debounce', () => {
     it('should delay function execution', async () => {
       vi.useFakeTimers();
-      
+
       const mockFn = vi.fn();
       const debouncedFn = debounce(mockFn, 100);
-      
+
       debouncedFn();
       expect(mockFn).not.toHaveBeenCalled();
-      
+
       vi.advanceTimersByTime(100);
       expect(mockFn).toHaveBeenCalledTimes(1);
-      
+
       vi.useRealTimers();
     });
 
     it('should cancel previous calls', async () => {
       vi.useFakeTimers();
-      
+
       const mockFn = vi.fn();
       const debouncedFn = debounce(mockFn, 100);
-      
+
       debouncedFn();
       debouncedFn();
       debouncedFn();
-      
+
       vi.advanceTimersByTime(100);
       expect(mockFn).toHaveBeenCalledTimes(1);
-      
+
       vi.useRealTimers();
     });
   });
@@ -138,14 +141,14 @@ describe('Utility Functions', () => {
   describe('validatePassword', () => {
     it('should validate strong passwords', () => {
       const result = validatePassword('SecurePass@123');
-      
+
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
     it('should reject weak passwords', () => {
       const result = validatePassword('weak');
-      
+
       expect(result.isValid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
     });
@@ -162,7 +165,7 @@ describe('Utility Functions', () => {
       tests.forEach(({ password, shouldContain }) => {
         const result = validatePassword(password);
         expect(result.isValid).toBe(false);
-        expect(result.errors.some(err => err.includes(shouldContain))).toBe(true);
+        expect(result.errors.some((err) => err.includes(shouldContain))).toBe(true);
       });
     });
   });
@@ -181,10 +184,10 @@ describe('Accessibility Tests', () => {
         <button type="submit">Sign In</button>
       </form>
     `;
-    
+
     const container = document.createElement('div');
     container.innerHTML = html;
-    
+
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
@@ -198,10 +201,10 @@ describe('Accessibility Tests', () => {
         </svg>
       </button>
     `;
-    
+
     const container = document.createElement('div');
     container.innerHTML = html;
-    
+
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });

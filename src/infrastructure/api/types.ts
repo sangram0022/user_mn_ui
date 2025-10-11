@@ -11,7 +11,7 @@ export interface ApiEndpoint {
 }
 
 export type QueryParams = Record<string, string | number | boolean | undefined>;
-export type RequestBody = Record<string, any> | FormData;
+export type RequestBody = Record<string, unknown> | FormData;
 
 export interface PaginationParams {
   page?: number;
@@ -25,7 +25,7 @@ export interface SortParams {
 }
 
 export interface FilterParams {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ApiRequestOptions {

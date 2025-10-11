@@ -5,38 +5,45 @@
 
 // ==================== WEB VITALS MONITORING ====================
 
-export interface WebVitalsMetrics { // Core Web Vitals
+export interface WebVitalsMetrics {
+  // Core Web Vitals
   LCP: number | null; // Largest Contentful Paint
   FID: number | null; // First Input Delay
   CLS: number | null; // Cumulative Layout Shift
-  
+
   // Additional metrics
   FCP: number | null; // First Contentful Paint
   TTFB: number | null; // Time to First Byte
   INP: number | null; // Interaction to Next Paint
-  
+
   // Custom metrics
   loadTime: number | null;
   renderTime: number | null;
-  interactiveTime: number | null; }
+  interactiveTime: number | null;
+}
 
-export interface PerformanceBudget { LCP: number; // Target: < 2.5s
+export interface PerformanceBudget {
+  LCP: number; // Target: < 2.5s
   FID: number; // Target: < 100ms
   CLS: number; // Target: < 0.1
   FCP: number; // Target: < 1.8s
   TTFB: number; // Target: < 600ms
   bundleSize: number; // Target: < 500KB
-  renderTime: number; // Target: < 16ms }
+  renderTime: number; // Target: < 16ms
+}
 
-export const defaultPerformanceBudget: PerformanceBudget = { LCP: 2500,
+export const defaultPerformanceBudget: PerformanceBudget = {
+  LCP: 2500,
   FID: 100,
   CLS: 0.1,
   FCP: 1800,
   TTFB: 600,
   bundleSize: 500 * 1024, // 500KB
-  renderTime: 16 };
+  renderTime: 16,
+};
 
-export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
+export class WebVitalsMonitor {
+  private static instance: WebVitalsMonitor;
   private metrics: WebVitalsMetrics = {
     LCP: null,
     FID: null,
@@ -46,16 +53,18 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
     INP: null,
     loadTime: null,
     renderTime: null,
-    interactiveTime: null
+    interactiveTime: null,
   };
   private budget: PerformanceBudget;
   private observers: PerformanceObserver[] = [];
   private callbacks: Array<(metrics: WebVitalsMetrics) => void> = [];
 
-  private constructor(budget: PerformanceBudget = defaultPerformanceBudget) { this.budget = budget;
+  private constructor(budget: PerformanceBudget = defaultPerformanceBudget) {
+    this.budget = budget;
   }
 
-  public static getInstance(budget?: PerformanceBudget): WebVitalsMonitor { if (!WebVitalsMonitor.instance) {
+  public static getInstance(budget?: PerformanceBudget): WebVitalsMonitor {
+    if (!WebVitalsMonitor.instance) {
       WebVitalsMonitor.instance = new WebVitalsMonitor(budget);
     }
     return WebVitalsMonitor.instance;
@@ -64,7 +73,8 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
   /**
    * Initialize Web Vitals monitoring
    */
-  public initialize(): void { if (typeof window === 'undefined' || !('PerformanceObserver' in window)) {
+  public initialize(): void {
+    if (typeof window === 'undefined' || !('PerformanceObserver' in window)) {
       logger.warn('PerformanceObserver not supported');
       return;
     }
@@ -83,11 +93,12 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
   /**
    * Measure Largest Contentful Paint (LCP)
    */
-  private measureLCP(): void { try {
+  private measureLCP(): void {
+    try {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         const lastEntry = entries[entries.length - 1] as PerformanceEntry & { startTime: number };
-        
+
         this.metrics.LCP = lastEntry.startTime;
         this.checkBudget('LCP', lastEntry.startTime);
         this.notifyCallbacks();
@@ -95,14 +106,16 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
 
       observer.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(observer);
-    } catch (error) { logger.warn('Failed to measure LCP:', { error  });
+    } catch (_) {
+      logger.warn('Failed to measure LCP:', { error });
     }
   }
 
   /**
    * Measure First Input Delay (FID)
    */
-  private measureFID(): void { try {
+  private measureFID(): void {
+    try {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry: PerformanceEntry) => {
@@ -116,23 +129,29 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
 
       observer.observe({ entryTypes: ['first-input'] });
       this.observers.push(observer);
-    } catch (error) { logger.warn('Failed to measure FID:', { error  });
+    } catch (_) {
+      logger.warn('Failed to measure FID:', { error });
     }
   }
 
   /**
    * Measure Cumulative Layout Shift (CLS)
    */
-  private measureCLS(): void { try {
+  private measureCLS(): void {
+    try {
       let clsValue = 0;
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry: PerformanceEntry) => {
-          const layoutEntry = entry as PerformanceEntry & { hadRecentInput: boolean; value: number };
-          if (!layoutEntry.hadRecentInput) { clsValue += layoutEntry.value;
+          const layoutEntry = entry as PerformanceEntry & {
+            hadRecentInput: boolean;
+            value: number;
+          };
+          if (!layoutEntry.hadRecentInput) {
+            clsValue += layoutEntry.value;
           }
         });
-        
+
         this.metrics.CLS = clsValue;
         this.checkBudget('CLS', clsValue);
         this.notifyCallbacks();
@@ -140,14 +159,16 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
 
       observer.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(observer);
-    } catch (error) { logger.warn('Failed to measure CLS:', { error  });
+    } catch (_) {
+      logger.warn('Failed to measure CLS:', { error });
     }
   }
 
   /**
    * Measure First Contentful Paint (FCP)
    */
-  private measureFCP(): void { try {
+  private measureFCP(): void {
+    try {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry) => {
@@ -161,36 +182,43 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
 
       observer.observe({ entryTypes: ['paint'] });
       this.observers.push(observer);
-    } catch (error) { logger.warn('Failed to measure FCP:', { error  });
+    } catch (_) {
+      logger.warn('Failed to measure FCP:', { error });
     }
   }
 
   /**
    * Measure Time to First Byte (TTFB)
    */
-  private measureTTFB(): void { try {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+  private measureTTFB(): void {
+    try {
+      const navigation = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
       if (navigation) {
         const ttfb = navigation.responseStart - navigation.requestStart;
         this.metrics.TTFB = ttfb;
         this.checkBudget('TTFB', ttfb);
         this.notifyCallbacks();
       }
-    } catch (error) { logger.warn('Failed to measure TTFB:', { error  });
+    } catch (_) {
+      logger.warn('Failed to measure TTFB:', { error });
     }
   }
 
   /**
    * Measure Interaction to Next Paint (INP)
    */
-  private measureINP(): void { try {
+  private measureINP(): void {
+    try {
       let maxINP = 0;
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry: PerformanceEntry) => {
           const interactionEntry = entry as PerformanceEntry & { processingEnd: number };
           const inp = interactionEntry.processingEnd - interactionEntry.startTime;
-          if (inp > maxINP) { maxINP = inp;
+          if (inp > maxINP) {
+            maxINP = inp;
             this.metrics.INP = inp;
             this.notifyCallbacks();
           }
@@ -199,16 +227,20 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
 
       observer.observe({ entryTypes: ['event'] });
       this.observers.push(observer);
-    } catch (error) { logger.warn('Failed to measure INP:', { error  });
+    } catch (_) {
+      logger.warn('Failed to measure INP:', { error });
     }
   }
 
   /**
    * Measure custom performance metrics
    */
-  private measureCustomMetrics(): void { // Measure total load time
+  private measureCustomMetrics(): void {
+    // Measure total load time
     window.addEventListener('load', () => {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const navigation = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
       if (navigation) {
         this.metrics.loadTime = navigation.loadEventEnd - navigation.fetchStart;
         this.notifyCallbacks();
@@ -225,23 +257,25 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
   /**
    * Measure render time using React DevTools profiler
    */
-  private measureRenderTime(): void { let renderStart = performance.now();
-    
+  private measureRenderTime(): void {
+    let renderStart = performance.now();
+
     const measureRender = () => {
       const renderEnd = performance.now();
       const renderTime = renderEnd - renderStart;
-      
+
       if (renderTime > this.budget.renderTime) {
         this.metrics.renderTime = renderTime;
         this.checkBudget('renderTime', renderTime);
         this.notifyCallbacks();
       }
-      
+
       renderStart = performance.now();
     };
 
     // Use requestAnimationFrame to measure render time
-    const scheduleRenderMeasurement = () => { requestAnimationFrame(measureRender);
+    const scheduleRenderMeasurement = () => {
+      requestAnimationFrame(measureRender);
       requestAnimationFrame(scheduleRenderMeasurement);
     };
 
@@ -251,7 +285,8 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
   /**
    * Measure time to interactive
    */
-  private measureTimeToInteractive(): void { let interactiveTime: number | null = null;
+  private measureTimeToInteractive(): void {
+    let interactiveTime: number | null = null;
     let longTasksEnd = 0;
 
     // Track long tasks
@@ -266,23 +301,29 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
 
         observer.observe({ entryTypes: ['longtask'] });
         this.observers.push(observer);
-      } catch (error) { logger.warn('Long task monitoring not supported');
+      } catch (_) {
+        logger.warn('Long task monitoring not supported');
       }
     }
 
     // Check if page is interactive
-    const checkInteractive = () => { const now = performance.now();
-      if (now - longTasksEnd > 5000 && !interactiveTime) { // 5 seconds without long tasks
+    const checkInteractive = () => {
+      const now = performance.now();
+      if (now - longTasksEnd > 5000 && !interactiveTime) {
+        // 5 seconds without long tasks
         interactiveTime = now;
         this.metrics.interactiveTime = interactiveTime;
         this.notifyCallbacks();
-      } else { setTimeout(checkInteractive, 1000);
+      } else {
+        setTimeout(checkInteractive, 1000);
       }
     };
 
     // Start checking after DOM is loaded
-    if (document.readyState === 'complete') { checkInteractive();
-    } else { window.addEventListener('load', checkInteractive);
+    if (document.readyState === 'complete') {
+      checkInteractive();
+    } else {
+      window.addEventListener('load', checkInteractive);
     }
   }
 
@@ -293,9 +334,10 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
     const threshold = this.budget[metric];
     if (value > threshold) {
       logger.warn(`⚠️ Performance budget exceeded for ${metric}: ${value}ms > ${threshold}ms`);
-      
+
       // Report to monitoring service
-      if (process.env.NODE_ENV === 'production') { this.reportPerformanceIssue(metric, value, threshold);
+      if (process.env.NODE_ENV === 'production') {
+        this.reportPerformanceIssue(metric, value, threshold);
       }
     }
   }
@@ -303,7 +345,12 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
   /**
    * Report performance issue to monitoring service
    */
-  private async reportPerformanceIssue(metric: string, value: number, threshold: number): Promise<void> { try {
+  private async reportPerformanceIssue(
+    metric: string,
+    value: number,
+    threshold: number
+  ): Promise<void> {
+    try {
       const endpoint = process.env.REACT_APP_PERFORMANCE_MONITORING_ENDPOINT;
       if (!endpoint) return;
 
@@ -312,47 +359,57 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ type: 'performance_budget_exceeded',
+        body: JSON.stringify({
+          type: 'performance_budget_exceeded',
           metric,
           value,
           threshold,
           userAgent: navigator.userAgent,
           url: window.location.href,
           timestamp: new Date().toISOString(),
-          ...this.getDeviceInfo()
-        })
+          ...this.getDeviceInfo(),
+        }),
       });
-    } catch (error) { logger.error('Failed to report performance issue:', undefined, { error  });
+    } catch (_) {
+      logger.error('Failed to report performance issue:', undefined, { error });
     }
   }
 
   /**
    * Get device and connection information
    */
-  private getDeviceInfo(): Record<string, unknown> { const info: Record<string, unknown> = {
+  private getDeviceInfo(): Record<string, unknown> {
+    const info: Record<string, unknown> = {
       viewport: {
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       },
-      screen: { width: screen.width,
-        height: screen.height
-      },
-      devicePixelRatio: window.devicePixelRatio
+      screen: { width: screen.width, height: screen.height },
+      devicePixelRatio: window.devicePixelRatio,
     };
 
     // Add connection info if available
-    if ('connection' in navigator) { const connection = (navigator as Navigator & { connection: Record<string, unknown> }).connection;
-      info.connection = { effectiveType: connection.effectiveType,
+    if ('connection' in navigator) {
+      const connection = (navigator as Navigator & { connection: Record<string, unknown> })
+        .connection;
+      info.connection = {
+        effectiveType: connection.effectiveType,
         downlink: connection.downlink,
-        rtt: connection.rtt
+        rtt: connection.rtt,
       };
     }
 
     // Add memory info if available
-    if ('memory' in performance) { const memory = (performance as Performance & { memory: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory;
-      info.memory = { usedJSHeapSize: memory.usedJSHeapSize,
+    if ('memory' in performance) {
+      const memory = (
+        performance as Performance & {
+          memory: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number };
+        }
+      ).memory;
+      info.memory = {
+        usedJSHeapSize: memory.usedJSHeapSize,
         totalJSHeapSize: memory.totalJSHeapSize,
-        jsHeapSizeLimit: memory.jsHeapSizeLimit
+        jsHeapSizeLimit: memory.jsHeapSizeLimit,
       };
     }
 
@@ -362,8 +419,9 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
   /**
    * Subscribe to metric updates
    */
-  public subscribe(callback: (metrics: WebVitalsMetrics) => void): () => void { this.callbacks.push(callback);
-    
+  public subscribe(callback: (metrics: WebVitalsMetrics) => void): () => void {
+    this.callbacks.push(callback);
+
     // Return unsubscribe function
     return () => {
       const index = this.callbacks.indexOf(callback);
@@ -376,10 +434,12 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
   /**
    * Notify all callbacks
    */
-  private notifyCallbacks(): void { this.callbacks.forEach(callback => {
+  private notifyCallbacks(): void {
+    this.callbacks.forEach((callback) => {
       try {
         callback({ ...this.metrics });
-      } catch (error) { logger.error('Error in performance callback:', undefined, { error  });
+      } catch (_) {
+        logger.error('Error in performance callback:', undefined, { error });
       }
     });
   }
@@ -387,38 +447,46 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
   /**
    * Get current metrics
    */
-  public getMetrics(): WebVitalsMetrics { return { ...this.metrics };
+  public getMetrics(): WebVitalsMetrics {
+    return { ...this.metrics };
   }
 
   /**
    * Get performance score (0-100)
    */
-  public getPerformanceScore(): number { const { LCP, FID, CLS, FCP } = this.metrics;
+  public getPerformanceScore(): number {
+    const { LCP, FID, CLS, FCP } = this.metrics;
     let score = 100;
-    
+
     // Deduct points based on Core Web Vitals
-    if (LCP && LCP > this.budget.LCP) { score -= Math.min(30, (LCP - this.budget.LCP) / 100);
+    if (LCP && LCP > this.budget.LCP) {
+      score -= Math.min(30, (LCP - this.budget.LCP) / 100);
     }
-    
-    if (FID && FID > this.budget.FID) { score -= Math.min(25, (FID - this.budget.FID) / 10);
+
+    if (FID && FID > this.budget.FID) {
+      score -= Math.min(25, (FID - this.budget.FID) / 10);
     }
-    
-    if (CLS && CLS > this.budget.CLS) { score -= Math.min(25, (CLS - this.budget.CLS) * 100);
+
+    if (CLS && CLS > this.budget.CLS) {
+      score -= Math.min(25, (CLS - this.budget.CLS) * 100);
     }
-    
-    if (FCP && FCP > this.budget.FCP) { score -= Math.min(20, (FCP - this.budget.FCP) / 100);
+
+    if (FCP && FCP > this.budget.FCP) {
+      score -= Math.min(20, (FCP - this.budget.FCP) / 100);
     }
-    
+
     return Math.max(0, Math.round(score));
   }
 
   /**
    * Clean up observers
    */
-  public dispose(): void { this.observers.forEach(observer => {
+  public dispose(): void {
+    this.observers.forEach((observer) => {
       try {
         observer.disconnect();
-      } catch (error) { logger.warn('Error disconnecting observer:', { error  });
+      } catch (_) {
+        logger.warn('Error disconnecting observer:', { error });
       }
     });
     this.observers = [];
@@ -428,7 +496,8 @@ export class WebVitalsMonitor { private static instance: WebVitalsMonitor;
 
 // ==================== BUNDLE ANALYSIS ====================
 
-export interface BundleAnalysis { totalSize: number;
+export interface BundleAnalysis {
+  totalSize: number;
   gzippedSize: number;
   chunks: Array<{
     name: string;
@@ -439,7 +508,8 @@ export interface BundleAnalysis { totalSize: number;
   recommendations: string[];
 }
 
-export class BundleAnalyzer { /**
+export class BundleAnalyzer {
+  /**
    * Analyze current bundle size
    */
   public static async analyzeBundleSize(): Promise<BundleAnalysis> {
@@ -448,13 +518,14 @@ export class BundleAnalyzer { /**
       gzippedSize: 0,
       chunks: [],
       duplicates: [],
-      recommendations: []
+      recommendations: [],
     };
 
-    try { // Get resource timing data
+    try {
+      // Get resource timing data
       const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-      
-      resources.forEach(resource => {
+
+      resources.forEach((resource) => {
         if (resource.name.includes('.js') || resource.name.includes('.css')) {
           analysis.totalSize += resource.transferSize || 0;
           analysis.gzippedSize += resource.encodedBodySize || 0;
@@ -463,8 +534,8 @@ export class BundleAnalyzer { /**
 
       // Generate recommendations
       analysis.recommendations = this.generateRecommendations(analysis);
-
-    } catch (error) { logger.error('Failed to analyze bundle:', undefined, { error  });
+    } catch (_) {
+      logger.error('Failed to analyze bundle:', undefined, { error });
     }
 
     return analysis;
@@ -473,17 +544,21 @@ export class BundleAnalyzer { /**
   /**
    * Generate optimization recommendations
    */
-  private static generateRecommendations(analysis: BundleAnalysis): string[] { const recommendations: string[] = [];
+  private static generateRecommendations(analysis: BundleAnalysis): string[] {
+    const recommendations: string[] = [];
 
-    if (analysis.totalSize > 500 * 1024) { // 500KB threshold
+    if (analysis.totalSize > 500 * 1024) {
+      // 500KB threshold
       recommendations.push('Bundle size is large. Consider code splitting and lazy loading.');
     }
 
-    if (analysis.gzippedSize > 150 * 1024) { // 150KB threshold
+    if (analysis.gzippedSize > 150 * 1024) {
+      // 150KB threshold
       recommendations.push('Gzipped size is large. Review dependencies and remove unused code.');
     }
 
-    if (analysis.duplicates.length > 0) { recommendations.push('Duplicate modules detected. Consider bundle optimization.');
+    if (analysis.duplicates.length > 0) {
+      recommendations.push('Duplicate modules detected. Consider bundle optimization.');
     }
 
     return recommendations;
@@ -495,29 +570,35 @@ export class BundleAnalyzer { /**
   public static monitorBundleSize(threshold: number = 500 * 1024): void {
     const checkBundleSize = async () => {
       const analysis = await this.analyzeBundleSize();
-      
+
       if (analysis.totalSize > threshold) {
-        logger.warn(`📦 Bundle size warning: ${(analysis.totalSize / 1024).toFixed(2)}KB > ${(threshold / 1024).toFixed(2)}KB`);
-        
+        logger.warn(
+          `📦 Bundle size warning: ${(analysis.totalSize / 1024).toFixed(2)}KB > ${(threshold / 1024).toFixed(2)}KB`
+        );
+
         // Report to monitoring service
-        if (process.env.NODE_ENV === 'production') { await this.reportBundleSize(analysis);
+        if (process.env.NODE_ENV === 'production') {
+          await this.reportBundleSize(analysis);
         }
       }
     };
 
     // Check bundle size periodically
     setInterval(checkBundleSize, 60000); // Every minute
-    
+
     // Check on page load
-    if (document.readyState === 'complete') { checkBundleSize();
-    } else { window.addEventListener('load', checkBundleSize);
+    if (document.readyState === 'complete') {
+      checkBundleSize();
+    } else {
+      window.addEventListener('load', checkBundleSize);
     }
   }
 
   /**
    * Report bundle size to monitoring service
    */
-  private static async reportBundleSize(analysis: BundleAnalysis): Promise<void> { try {
+  private static async reportBundleSize(analysis: BundleAnalysis): Promise<void> {
+    try {
       const endpoint = process.env.REACT_APP_PERFORMANCE_MONITORING_ENDPOINT;
       if (!endpoint) return;
 
@@ -526,21 +607,24 @@ export class BundleAnalyzer { /**
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ type: 'bundle_analysis',
+        body: JSON.stringify({
+          type: 'bundle_analysis',
           ...analysis,
           url: window.location.href,
           userAgent: navigator.userAgent,
-          timestamp: new Date().toISOString()
-        })
+          timestamp: new Date().toISOString(),
+        }),
       });
-    } catch (error) { logger.error('Failed to report bundle size:', undefined, { error  });
+    } catch (_) {
+      logger.error('Failed to report bundle size:', undefined, { error });
     }
   }
 }
 
 // ==================== PERFORMANCE HOOKS ====================
 
-export function useWebVitals(budget?: PerformanceBudget) { const [metrics, setMetrics] = useState<WebVitalsMetrics>({
+export function useWebVitals(budget?: PerformanceBudget) {
+  const [metrics, setMetrics] = useState<WebVitalsMetrics>({
     LCP: null,
     FID: null,
     CLS: null,
@@ -549,10 +633,11 @@ export function useWebVitals(budget?: PerformanceBudget) { const [metrics, setMe
     INP: null,
     loadTime: null,
     renderTime: null,
-    interactiveTime: null
+    interactiveTime: null,
   });
 
-  useEffect(() => { const monitor = WebVitalsMonitor.getInstance(budget);
+  useEffect(() => {
+    const monitor = WebVitalsMonitor.getInstance(budget);
     monitor.initialize();
 
     const unsubscribe = monitor.subscribe(setMetrics);
@@ -565,11 +650,12 @@ export function useWebVitals(budget?: PerformanceBudget) { const [metrics, setMe
   return metrics;
 }
 
-export function usePerformanceScore(budget?: PerformanceBudget) { const [score, setScore] = useState(100);
+export function usePerformanceScore(budget?: PerformanceBudget) {
+  const [score, setScore] = useState(100);
 
   useEffect(() => {
     const monitor = WebVitalsMonitor.getInstance(budget);
-    
+
     const unsubscribe = monitor.subscribe(() => {
       setScore(monitor.getPerformanceScore());
     });
@@ -580,7 +666,8 @@ export function usePerformanceScore(budget?: PerformanceBudget) { const [score, 
   return score;
 }
 
-export function useBundleAnalysis() { const [analysis, setAnalysis] = useState<BundleAnalysis | null>(null);
+export function useBundleAnalysis() {
+  const [analysis, setAnalysis] = useState<BundleAnalysis | null>(null);
 
   useEffect(() => {
     BundleAnalyzer.analyzeBundleSize().then(setAnalysis);
@@ -591,12 +678,14 @@ export function useBundleAnalysis() { const [analysis, setAnalysis] = useState<B
 
 // ==================== EXPORTS ====================
 
-export const performanceMonitoring = { WebVitalsMonitor,
+export const performanceMonitoring = {
+  WebVitalsMonitor,
   BundleAnalyzer,
   useWebVitals,
   usePerformanceScore,
   useBundleAnalysis,
-  defaultPerformanceBudget };
+  defaultPerformanceBudget,
+};
 
 export default performanceMonitoring;
 

@@ -24,5 +24,5 @@ export interface StorageItem<T = any> {
   value: T;
   timestamp: number;
   ttl?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

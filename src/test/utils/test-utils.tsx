@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Test Utilities
  *
@@ -39,7 +40,7 @@ interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
    */
   mockAuth?: {
     isAuthenticated: boolean;
-    user?: any;
+    user?: unknown;
     token?: string;
   };
 
@@ -184,7 +185,7 @@ export async function waitFor<T>(
     try {
       const result = await callback();
       if (result) return result;
-    } catch (error) {
+    } catch (_) {
       // Continue waiting
     }
     await new Promise((resolve) => setTimeout(resolve, interval));
@@ -198,7 +199,7 @@ export async function waitFor<T>(
  */
 export function createMockResponse<T>(
   data: T,
-  options: { success?: boolean; error?: any; status?: number } = {}
+  options: { success?: boolean; error?: unknown; status?: number } = {}
 ): any {
   const { success = true, error = null, status = 200 } = options;
 
@@ -260,7 +261,7 @@ export function createMockFile(name = 'test.png', size = 1024, type = 'image/png
 /**
  * Create mock FormData
  */
-export function createMockFormData(data: Record<string, any>): FormData {
+export function createMockFormData(data: Record<string, unknown>): FormData {
   const formData = new FormData();
   Object.entries(data).forEach(([key, value]) => {
     if (value instanceof File) {
