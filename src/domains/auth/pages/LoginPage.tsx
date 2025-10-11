@@ -1,9 +1,10 @@
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import React, { startTransition, useCallback, useState, useTransition } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useApiError } from '@hooks/errors/useApiError';
+import type { ApiErrorState } from '@hooks/errors/useApiError';
 import { ApiErrorAlert } from '@shared/components/errors/ApiErrorAlert';
+import { getErrorConfig } from '@shared/config/errorMessages';
 import { useAuth } from '../context/AuthContext';
 
 interface LoginFormState {
@@ -17,53 +18,80 @@ const LoginPage: React.FC = () => {
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isPending, startLoginTransition] = useTransition();
+  const [loginError, setLoginError] = useState<ApiErrorState | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { error, showError, clearError } = useApiError();
 
-  const handleInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = event.target;
-      setFormState((previous) => ({
-        ...previous,
-        [name]: value,
-      }));
+  useEffect(() => {
+    console.log('[LoginPage] Login error state changed:', loginError);
+  }, [loginError]);
 
-      if (error) {
-        clearError();
-      }
-    },
-    [clearError, error]
-  );
+  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormState((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+  }, []);
 
   const handleSubmit = useCallback(
-    (event: React.FormEvent<HTMLFormElement>) => {
+    async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      clearError();
+      setLoginError(null); // Clear any previous errors
+      setIsLoading(true);
 
-      startLoginTransition(() => {
-        void (async () => {
-          try {
-            await login({
-              email: formState.email,
-              password: formState.password,
-            });
-            navigate('/dashboard');
-          } catch (submissionError: unknown) {
-            showError(submissionError, 'LoginPage');
+      try {
+        await login({
+          email: formState.email,
+          password: formState.password,
+        });
+        navigate('/dashboard');
+      } catch (submissionError: unknown) {
+        console.log('[LoginPage] Caught error:', submissionError);
+
+        // Extract error code from the error object
+        let errorCode = 'UNKNOWN_ERROR';
+        let statusCode = 500;
+
+        if (submissionError && typeof submissionError === 'object') {
+          const err = submissionError as Record<string, unknown>;
+          if (typeof err.code === 'string') {
+            errorCode = err.code;
           }
-        })();
-      });
+          if (typeof err.status === 'number') {
+            statusCode = err.status;
+          }
+        }
+
+        console.log('[LoginPage] Extracted error code:', errorCode, 'status:', statusCode);
+
+        // Get user-friendly message from config
+        const errorConfig = getErrorConfig(errorCode);
+
+        // Set the error state directly
+        const errorState: ApiErrorState = {
+          code: errorConfig.code,
+          message: errorConfig.message,
+          description: errorConfig.description,
+          action: errorConfig.action,
+          statusCode: statusCode || errorConfig.statusCode,
+          recoverable: errorConfig.recoverable ?? true,
+          originalError: submissionError,
+        };
+
+        console.log('[LoginPage] Setting error state:', errorState);
+        setLoginError(errorState);
+      } finally {
+        setIsLoading(false);
+      }
     },
-    [clearError, formState.email, formState.password, showError, login, navigate]
+    [formState.email, formState.password, login, navigate]
   );
 
   const togglePasswordVisibility = useCallback(() => {
-    startTransition(() => {
-      setShowPassword((previous) => !previous);
-    });
+    setShowPassword((previous) => !previous);
   }, []);
 
   return (
@@ -155,11 +183,11 @@ const LoginPage: React.FC = () => {
               border: '1px solid rgba(229, 231, 235, 0.5)',
             }}
           >
-            {error && (
+            {loginError && (
               <div style={{ marginBottom: '1.5rem' }}>
                 <ApiErrorAlert
-                  error={error}
-                  onDismiss={clearError}
+                  error={loginError}
+                  onDismiss={() => setLoginError(null)}
                   showRetry={false}
                   showDescription={true}
                   showAction={true}
@@ -391,7 +419,7 @@ const LoginPage: React.FC = () => {
               <div>
                 <button
                   type="submit"
-                  disabled={isPending}
+                  disabled={isLoading}
                   style={{
                     position: 'relative',
                     width: '100%',
@@ -407,14 +435,14 @@ const LoginPage: React.FC = () => {
                     fontWeight: '500',
                     borderRadius: '0.5rem',
                     color: '#ffffff',
-                    background: isPending ? '#9ca3af' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                    cursor: isPending ? 'not-allowed' : 'pointer',
+                    background: isLoading ? '#9ca3af' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s ease',
                     boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.3)',
-                    opacity: isPending ? 0.5 : 1,
+                    opacity: isLoading ? 0.5 : 1,
                   }}
                   onMouseEnter={(e) => {
-                    if (!isPending) {
+                    if (!isLoading) {
                       e.currentTarget.style.transform = 'translateY(-2px)';
                       e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(59, 130, 246, 0.4)';
                     }
@@ -424,7 +452,7 @@ const LoginPage: React.FC = () => {
                     e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.3)';
                   }}
                 >
-                  {isPending ? (
+                  {isLoading ? (
                     <span style={{ display: 'flex', alignItems: 'center' }}>
                       <span
                         style={{

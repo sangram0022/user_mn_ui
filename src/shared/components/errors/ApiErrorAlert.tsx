@@ -40,7 +40,14 @@ export const ApiErrorAlert: React.FC<ApiErrorAlertProps> = ({
   showDescription = true,
   showAction = true,
 }) => {
-  if (!error) return null;
+  console.log('[ApiErrorAlert] Received error:', error);
+
+  if (!error) {
+    console.log('[ApiErrorAlert] No error, returning null');
+    return null;
+  }
+
+  console.log('[ApiErrorAlert] Rendering error alert with message:', error.message);
 
   const canRetry = showRetry && error.recoverable && onRetry;
 
