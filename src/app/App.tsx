@@ -1,11 +1,11 @@
 import '@app/App.css';
+import { AuthProvider } from '@domains/auth/providers/AuthProvider';
 import { notFoundRoute, routes } from '@routing/config';
 import { ProtectedRoute, PublicRoute } from '@routing/RouteGuards';
 import RouteRenderer from '@routing/RouteRenderer';
 import { SuspenseBoundary } from '@shared/components/ui';
 import { PageErrorBoundary as ErrorBoundary } from '@shared/errors/ErrorBoundary';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { AuthProvider } from '../contexts';
 
 const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode) => {
   switch (route.guard) {
@@ -22,7 +22,7 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <SuspenseBoundary loadingText="Loading application...">
             <Routes>
               {routes.map((route) => (

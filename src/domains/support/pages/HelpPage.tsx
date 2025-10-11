@@ -2,46 +2,130 @@ import type { FC } from 'react';
 
 import Breadcrumb from '@shared/ui/Breadcrumb';
 
-const HelpPage: FC = () => { return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+const HelpPage: FC = () => {
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '2rem 0' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
         <Breadcrumb />
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900">Help &amp; Support</h1>
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+            borderRadius: '0.5rem',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              padding: '1rem 1.5rem',
+              borderBottom: '1px solid #e5e7eb',
+            }}
+          >
+            <h1
+              style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                color: '#111827',
+              }}
+            >
+              Help &amp; Support
+            </h1>
           </div>
 
-          <div className="px-6 py-4">
-            <div className="space-y-6">
+          <div style={{ padding: '1rem 1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Frequently Asked Questions</h3>
-                <div className="mt-4 space-y-4">
+                <h3
+                  style={{
+                    fontSize: '1.125rem',
+                    fontWeight: '500',
+                    color: '#111827',
+                  }}
+                >
+                  Frequently Asked Questions
+                </h3>
+                <div
+                  style={{
+                    marginTop: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                  }}
+                >
                   <div>
-                    <h4 className="font-medium text-gray-900">How do I reset my password?</h4>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <h4
+                      style={{
+                        fontWeight: '500',
+                        color: '#111827',
+                      }}
+                    >
+                      How do I reset my password?
+                    </h4>
+                    <p
+                      style={{
+                        marginTop: '0.25rem',
+                        fontSize: '0.875rem',
+                        color: '#4b5563',
+                      }}
+                    >
                       You can reset your password from the login page by clicking "Forgot Password".
                     </p>
                   </div>
 
                   <div>
-                    <h4 className="font-medium text-gray-900">How do I update my profile?</h4>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <h4
+                      style={{
+                        fontWeight: '500',
+                        color: '#111827',
+                      }}
+                    >
+                      How do I update my profile?
+                    </h4>
+                    <p
+                      style={{
+                        marginTop: '0.25rem',
+                        fontSize: '0.875rem',
+                        color: '#4b5563',
+                      }}
+                    >
                       Go to your Profile page and click the edit button to update your information.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-medium text-gray-900">Contact Support</h3>
-                <p className="mt-1 text-sm text-gray-500">Need more help? Contact our support team at support@example.com</p>
+              <div
+                style={{
+                  borderTop: '1px solid #e5e7eb',
+                  paddingTop: '1.5rem',
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: '1.125rem',
+                    fontWeight: '500',
+                    color: '#111827',
+                  }}
+                >
+                  Contact Support
+                </h3>
+                <p
+                  style={{
+                    marginTop: '0.25rem',
+                    fontSize: '0.875rem',
+                    color: '#6b7280',
+                  }}
+                >
+                  Need more help? Contact our support team at support@example.com
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  ); };
+  );
+};
 
 export default HelpPage;

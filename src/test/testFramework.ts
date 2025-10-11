@@ -4,8 +4,8 @@
  * Provides comprehensive mocking, fixtures, and testing patterns
  */
 
-import { vi } from 'vitest';
 import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
 // ==================== TYPE DEFINITIONS ====================
 

@@ -5,12 +5,15 @@ import { AlertCircle, ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 
-interface LoginFormState { email: string;
-  password: string; }
+interface LoginFormState {
+  email: string;
+  password: string;
+}
 
-const LoginPage: React.FC = () => { const [formState, setFormState] = useState<LoginFormState>({
+const LoginPage: React.FC = () => {
+  const [formState, setFormState] = useState<LoginFormState>({
     email: '',
-    password: ''
+    password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startLoginTransition] = useTransition();
@@ -19,87 +22,210 @@ const LoginPage: React.FC = () => { const [formState, setFormState] = useState<L
   const { login } = useAuth();
   const { error, errorMessage, handleError, clearError } = useErrorHandler();
 
-  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => { const { name, value } = event.target;
-    setFormState((previous) => ({ ...previous,
-      [name]: value
-    }));
+  const handleInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = event.target;
+      setFormState((previous) => ({
+        ...previous,
+        [name]: value,
+      }));
 
-    if (error) { clearError();
-    }
-  }, [clearError, error]);
-
-  const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => { event.preventDefault();
-    clearError();
-
-    startLoginTransition(async () => {
-      try {
-        await login({
-          email: formState.email,
-          password: formState.password
-        });
-        navigate('/dashboard');
-      } catch (submissionError: unknown) { handleError(submissionError, 'LoginPage');
+      if (error) {
+        clearError();
       }
-    });
-  }, [clearError, formState.email, formState.password, handleError, login, navigate]);
+    },
+    [clearError, error]
+  );
 
-  const togglePasswordVisibility = useCallback(() => { startTransition(() => {
+  const handleSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      clearError();
+
+      startLoginTransition(async () => {
+        try {
+          await login({
+            email: formState.email,
+            password: formState.password,
+          });
+          navigate('/dashboard');
+        } catch (submissionError: unknown) {
+          handleError(submissionError, 'LoginPage');
+        }
+      });
+    },
+    [clearError, formState.email, formState.password, handleError, login, navigate]
+  );
+
+  const togglePasswordVisibility = useCallback(() => {
+    startTransition(() => {
       setShowPassword((previous) => !previous);
     });
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-md">
-        <div className="mb-6">
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #f3e8ff 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '3rem 1rem',
+      }}
+    >
+      <div
+        style={{
+          margin: '0 auto',
+          width: '100%',
+          maxWidth: '28rem',
+        }}
+      >
+        <div style={{ marginBottom: '1.5rem' }}>
           <Link
             to="/"
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 transition-colors duration-200"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              fontSize: '0.875rem',
+              color: '#6b7280',
+              textDecoration: 'none',
+              transition: 'color 0.2s ease',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#374151')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
           >
-            <ArrowLeft className="w-4 h-4 mr-2" aria-hidden />
+            <ArrowLeft
+              style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+              aria-hidden
+            />
             Back to Home
           </Link>
         </div>
 
-        <div className="text-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6">
-            <Lock className="w-8 h-8 text-white" aria-hidden />
+        <div style={{ textAlign: 'center' }}>
+          <div
+            style={{
+              margin: '0 auto 1.5rem',
+              width: '4rem',
+              height: '4rem',
+              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+              borderRadius: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.4)',
+            }}
+          >
+            <Lock style={{ width: '2rem', height: '2rem', color: 'white' }} aria-hidden />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          <h1
+            style={{
+              fontSize: '1.875rem',
+              fontWeight: 'bold',
+              letterSpacing: '-0.025em',
+              color: '#111827',
+            }}
+          >
             Welcome Back
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p
+            style={{
+              marginTop: '0.5rem',
+              fontSize: '0.875rem',
+              color: '#6b7280',
+            }}
+          >
             Sign in to your account to continue
           </p>
         </div>
 
-        <div className="mt-8">
-          <div className="bg-white py-8 px-6 shadow-xl rounded-2xl border border-gray-100">
+        <div style={{ marginTop: '2rem' }}>
+          <div
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              padding: '2rem 1.5rem',
+              boxShadow:
+                '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              borderRadius: '1rem',
+              border: '1px solid rgba(229, 231, 235, 0.5)',
+            }}
+          >
             {errorMessage && (
               <div
-                className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3"
+                style={{
+                  marginBottom: '1.5rem',
+                  padding: '1rem',
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '0.75rem',
+                }}
                 role="alert"
                 aria-live="assertive"
               >
-                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" aria-hidden />
+                <AlertCircle
+                  style={{
+                    width: '1.25rem',
+                    height: '1.25rem',
+                    color: '#dc2626',
+                    marginTop: '0.125rem',
+                  }}
+                  aria-hidden
+                />
                 <div>
-                  <p className="text-sm font-medium text-red-800">Authentication error</p>
-                  <p className="text-sm text-red-700 mt-1">{errorMessage}</p>
+                  <p style={{ fontSize: '0.875rem', fontWeight: '500', color: '#991b1b' }}>
+                    Authentication error
+                  </p>
+                  <p style={{ fontSize: '0.875rem', color: '#b91c1c', marginTop: '0.25rem' }}>
+                    {errorMessage}
+                  </p>
                   {error?.code && (
-                    <p className="text-xs text-red-600 mt-2">Code: {error.code}</p>
+                    <p style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: '0.5rem' }}>
+                      Code: {error.code}
+                    </p>
                   )}
                 </div>
               </div>
             )}
 
-            <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+            <form
+              onSubmit={handleSubmit}
+              noValidate
+              style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+            >
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem',
+                  }}
+                >
                   Email Address
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" aria-hidden />
+                <div style={{ position: 'relative' }}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      left: 0,
+                      paddingLeft: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    <Mail
+                      style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }}
+                      aria-hidden
+                    />
                   </div>
                   <input
                     id="email"
@@ -109,19 +235,64 @@ const LoginPage: React.FC = () => { const [formState, setFormState] = useState<L
                     required
                     value={formState.email}
                     onChange={handleInputChange}
-                    className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors duration-200"
+                    style={{
+                      appearance: 'none',
+                      position: 'relative',
+                      display: 'block',
+                      width: '100%',
+                      paddingLeft: '2.5rem',
+                      paddingRight: '0.75rem',
+                      paddingTop: '0.75rem',
+                      paddingBottom: '0.75rem',
+                      border: '1px solid #d1d5db',
+                      color: '#111827',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem',
+                      transition: 'all 0.2s ease',
+                      outline: 'none',
+                    }}
                     placeholder="Enter your email"
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#3b82f6';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#d1d5db';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  style={{
+                    display: 'block',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    color: '#374151',
+                    marginBottom: '0.5rem',
+                  }}
+                >
                   Password
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" aria-hidden />
+                <div style={{ position: 'relative' }}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      left: 0,
+                      paddingLeft: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    <Lock
+                      style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }}
+                      aria-hidden
+                    />
                   </div>
                   <input
                     id="password"
@@ -131,41 +302,109 @@ const LoginPage: React.FC = () => { const [formState, setFormState] = useState<L
                     required
                     value={formState.password}
                     onChange={handleInputChange}
-                    className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors duration-200"
+                    style={{
+                      appearance: 'none',
+                      position: 'relative',
+                      display: 'block',
+                      width: '100%',
+                      paddingLeft: '2.5rem',
+                      paddingRight: '2.5rem',
+                      paddingTop: '0.75rem',
+                      paddingBottom: '0.75rem',
+                      border: '1px solid #d1d5db',
+                      color: '#111827',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem',
+                      transition: 'all 0.2s ease',
+                      outline: 'none',
+                    }}
                     placeholder="Enter your password"
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#3b82f6';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#d1d5db';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
                     onClick={togglePasswordVisibility}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      right: 0,
+                      left: 'auto',
+                      paddingRight: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" aria-hidden />
+                      <EyeOff
+                        style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }}
+                        aria-hidden
+                      />
                     ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" aria-hidden />
+                      <Eye
+                        style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }}
+                        aria-hidden
+                      />
                     )}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                   <input
                     id="remember-me"
                     name="remember-me"
                     type="checkbox"
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    style={{
+                      height: '1rem',
+                      width: '1rem',
+                      color: '#3b82f6',
+                      borderColor: '#d1d5db',
+                      borderRadius: '0.25rem',
+                      cursor: 'pointer',
+                    }}
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                  <label
+                    htmlFor="remember-me"
+                    style={{
+                      marginLeft: '0.5rem',
+                      display: 'block',
+                      fontSize: '0.875rem',
+                      color: '#111827',
+                    }}
+                  >
                     Remember me
                   </label>
                 </div>
 
-                <div className="text-sm">
+                <div style={{ fontSize: '0.875rem' }}>
                   <Link
                     to="/forgot-password"
-                    className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
+                    style={{
+                      fontWeight: '500',
+                      color: '#3b82f6',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#2563eb')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#3b82f6')}
                   >
                     Forgot your password?
                   </Link>
@@ -176,11 +415,52 @@ const LoginPage: React.FC = () => { const [formState, setFormState] = useState<L
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingTop: '0.75rem',
+                    paddingBottom: '0.75rem',
+                    paddingLeft: '1rem',
+                    paddingRight: '1rem',
+                    border: 'none',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    borderRadius: '0.5rem',
+                    color: '#ffffff',
+                    background: isPending ? '#9ca3af' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                    cursor: isPending ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.3)',
+                    opacity: isPending ? 0.5 : 1,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isPending) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(59, 130, 246, 0.4)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.3)';
+                  }}
                 >
                   {isPending ? (
-                    <span className="flex items-center">
-                      <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" aria-hidden />
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          width: '1.25rem',
+                          height: '1.25rem',
+                          border: '2px solid white',
+                          borderTopColor: 'transparent',
+                          borderRadius: '9999px',
+                          animation: 'spin 1s linear infinite',
+                          marginRight: '0.5rem',
+                        }}
+                        aria-hidden
+                      />
                       Signing in...
                     </span>
                   ) : (
@@ -190,42 +470,108 @@ const LoginPage: React.FC = () => { const [formState, setFormState] = useState<L
               </div>
             </form>
 
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
+            <div style={{ marginTop: '1.5rem' }}>
+              <div style={{ position: 'relative' }}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div style={{ width: '100%', borderTop: '1px solid #d1d5db' }} />
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Don't have an account?</span>
+                <div
+                  style={{
+                    position: 'relative',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  <span
+                    style={{
+                      paddingLeft: '0.5rem',
+                      paddingRight: '0.5rem',
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      color: '#6b7280',
+                    }}
+                  >
+                    Don't have an account?
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-6 text-center">
+            <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
               <Link
                 to="/register"
-                className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
+                style={{
+                  fontWeight: '500',
+                  color: '#3b82f6',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#2563eb')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#3b82f6')}
               >
                 Create a new account
               </Link>
             </div>
           </div>
 
-          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h2 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials</h2>
-            <dl className="text-xs text-blue-700 space-y-1">
-              <div className="flex justify-between">
-                <dt className="font-semibold">Admin</dt>
+          <div
+            style={{
+              marginTop: '1.5rem',
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '0.5rem',
+              padding: '1rem',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: '#1e40af',
+                marginBottom: '0.5rem',
+              }}
+            >
+              Demo Credentials
+            </h2>
+            <dl style={{ fontSize: '0.75rem', color: '#1e3a8a' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginBottom: '0.25rem',
+                }}
+              >
+                <dt style={{ fontWeight: '600' }}>Admin</dt>
                 <dd>admin@example.com / admin123</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="font-semibold">User</dt>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <dt style={{ fontWeight: '600' }}>User</dt>
                 <dd>user@example.com / user123</dd>
               </div>
             </dl>
           </div>
         </div>
       </div>
+
+      <style>
+        {`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </div>
   );
 };

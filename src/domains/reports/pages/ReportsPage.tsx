@@ -4,44 +4,172 @@ import Breadcrumb from '@shared/ui/Breadcrumb';
 
 const ReportsPage: FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '2rem 0' }}>
+      <div style={{ maxWidth: '1536px', margin: '0 auto', padding: '0 1rem' }}>
         {/* Breadcrumb Navigation */}
         <Breadcrumb />
-        
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
+
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+            borderRadius: '0.5rem',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              padding: '1rem 1.5rem',
+              borderBottom: '1px solid #e5e7eb',
+            }}
+          >
+            <h1
+              style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                color: '#111827',
+              }}
+            >
+              Reports
+            </h1>
           </div>
-          
-          <div className="px-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">User Activity Report</h3>
-                <p className="text-sm text-gray-600 mb-4">
+
+          <div style={{ padding: '1rem 1.5rem' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '1.5rem',
+              }}
+            >
+              <div
+                style={{
+                  backgroundColor: '#f9fafb',
+                  padding: '1rem',
+                  borderRadius: '0.5rem',
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: '1.125rem',
+                    fontWeight: '500',
+                    color: '#111827',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  User Activity Report
+                </h3>
+                <p
+                  style={{
+                    fontSize: '0.875rem',
+                    color: '#4b5563',
+                    marginBottom: '1rem',
+                  }}
+                >
                   View detailed user activity and engagement metrics.
                 </p>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700">
+                <button
+                  style={{
+                    backgroundColor: '#2563eb',
+                    color: '#ffffff',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.875rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
+                >
                   Generate Report
                 </button>
               </div>
-              
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">System Usage Report</h3>
-                <p className="text-sm text-gray-600 mb-4">
+
+              <div
+                style={{
+                  backgroundColor: '#f9fafb',
+                  padding: '1rem',
+                  borderRadius: '0.5rem',
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: '1.125rem',
+                    fontWeight: '500',
+                    color: '#111827',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  System Usage Report
+                </h3>
+                <p
+                  style={{
+                    fontSize: '0.875rem',
+                    color: '#4b5563',
+                    marginBottom: '1rem',
+                  }}
+                >
                   Monitor system usage and performance metrics.
                 </p>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700">
+                <button
+                  style={{
+                    backgroundColor: '#2563eb',
+                    color: '#ffffff',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.875rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
+                >
                   Generate Report
                 </button>
               </div>
-              
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Security Report</h3>
-                <p className="text-sm text-gray-600 mb-4">
+
+              <div
+                style={{
+                  backgroundColor: '#f9fafb',
+                  padding: '1rem',
+                  borderRadius: '0.5rem',
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: '1.125rem',
+                    fontWeight: '500',
+                    color: '#111827',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  Security Report
+                </h3>
+                <p
+                  style={{
+                    fontSize: '0.875rem',
+                    color: '#4b5563',
+                    marginBottom: '1rem',
+                  }}
+                >
                   Review security events and access patterns.
                 </p>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700">
+                <button
+                  style={{
+                    backgroundColor: '#2563eb',
+                    color: '#ffffff',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.875rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
+                >
                   Generate Report
                 </button>
               </div>

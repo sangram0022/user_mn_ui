@@ -1,6 +1,5 @@
-import type { FC } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight,
+import {
+  ArrowRight,
   BarChart3,
   CheckCircle,
   ChevronRight,
@@ -8,9 +7,13 @@ import { ArrowRight,
   Shield,
   UserCheck,
   Users,
-  Workflow } from 'lucide-react';
+  Workflow,
+} from 'lucide-react';
+import type { FC } from 'react';
+import { Link } from 'react-router-dom';
 
-const HomePage: FC = () => { const features = [
+const HomePage: FC = () => {
+  const features = [
     {
       icon: Users,
       title: 'User Management',
@@ -18,29 +21,38 @@ const HomePage: FC = () => { const features = [
         'Complete CRUD operations for user accounts with role-based access control and advanced search capabilities.',
       highlights: ['User Registration', 'Profile Management', 'Role Assignment', 'Bulk Operations'],
     },
-    { icon: Shield,
+    {
+      icon: Shield,
       title: 'Security & Authentication',
-      description: 'Enterprise-grade security with JWT tokens, 2FA support, and comprehensive audit logging.',
+      description:
+        'Enterprise-grade security with JWT tokens, 2FA support, and comprehensive audit logging.',
       highlights: ['JWT Authentication', 'Two-Factor Auth', 'Session Management', 'Security Audit'],
     },
-    { icon: BarChart3,
+    {
+      icon: BarChart3,
       title: 'Analytics & Insights',
-      description: 'Comprehensive analytics dashboard with user behavior tracking, cohort analysis, and churn prediction.',
+      description:
+        'Comprehensive analytics dashboard with user behavior tracking, cohort analysis, and churn prediction.',
       highlights: ['User Analytics', 'Cohort Analysis', 'Churn Prediction', 'Activity Tracking'],
     },
-    { icon: Workflow,
+    {
+      icon: Workflow,
       title: 'Workflow Management',
-      description: 'Automated approval workflows for sensitive operations with customizable business rules.',
+      description:
+        'Automated approval workflows for sensitive operations with customizable business rules.',
       highlights: ['Approval Workflows', 'Business Rules', 'Process Automation', 'Task Management'],
     },
-    { icon: UserCheck,
+    {
+      icon: UserCheck,
       title: 'User Onboarding',
       description: 'Streamlined onboarding process with customizable steps and progress tracking.',
       highlights: ['Guided Onboarding', 'Progress Tracking', 'Custom Templates', 'Welcome Flows'],
     },
-    { icon: Settings,
+    {
+      icon: Settings,
       title: 'Compliance & Reporting',
-      description: 'Built-in compliance tools and comprehensive reporting for regulatory requirements.',
+      description:
+        'Built-in compliance tools and comprehensive reporting for regulatory requirements.',
       highlights: ['Compliance Reports', 'Data Export', 'Audit Trails', 'Regulatory Tools'],
     },
   ];
@@ -54,13 +66,15 @@ const HomePage: FC = () => { const features = [
 
   return (
     <div
-      style={{ minHeight: '100vh',
+      style={{
+        minHeight: '100vh',
         background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)',
         padding: '0',
       }}
     >
       <section
-        style={{ position: 'relative',
+        style={{
+          position: 'relative',
           padding: '5rem 1.5rem',
           maxWidth: '1280px',
           margin: '0 auto',
@@ -69,7 +83,8 @@ const HomePage: FC = () => { const features = [
       >
         <div>
           <h1
-            style={{ fontSize: '3.5rem',
+            style={{
+              fontSize: '3.5rem',
               fontWeight: 'bold',
               color: '#111827',
               marginBottom: '1.5rem',
@@ -78,17 +93,20 @@ const HomePage: FC = () => { const features = [
           >
             Enterprise User
             <span
-              style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+              style={{
+                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}
             >
-              {' '}Management
+              {' '}
+              Management
             </span>
           </h1>
           <p
-            style={{ marginTop: '1.5rem',
+            style={{
+              marginTop: '1.5rem',
               fontSize: '1.125rem',
               lineHeight: '1.75',
               color: '#6b7280',
@@ -100,7 +118,8 @@ const HomePage: FC = () => { const features = [
             workflow automation, and enterprise-grade security features.
           </p>
           <div
-            style={{ marginTop: '2.5rem',
+            style={{
+              marginTop: '2.5rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -110,7 +129,8 @@ const HomePage: FC = () => { const features = [
           >
             <Link
               to="/register"
-              style={{ display: 'inline-flex',
+              style={{
+                display: 'inline-flex',
                 alignItems: 'center',
                 padding: '0.75rem 1.5rem',
                 fontSize: '0.875rem',
@@ -124,11 +144,13 @@ const HomePage: FC = () => { const features = [
                 transition: 'all 0.2s ease',
                 cursor: 'pointer',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
               }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6, #8b5cf6)';
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6, #8b5cf6)';
                 e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
               }}
@@ -137,7 +159,8 @@ const HomePage: FC = () => { const features = [
             </Link>
             <Link
               to="/login"
-              style={{ display: 'inline-flex',
+              style={{
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.25rem',
                 fontSize: '0.875rem',
@@ -146,9 +169,11 @@ const HomePage: FC = () => { const features = [
                 textDecoration: 'none',
                 transition: 'color 0.2s ease',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#3b82f6';
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#3b82f6';
               }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = '#111827';
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#111827';
               }}
             >
               Sign In <ArrowRight style={{ width: '1rem', height: '1rem' }} />
@@ -157,7 +182,8 @@ const HomePage: FC = () => { const features = [
         </div>
 
         <div
-          style={{ marginTop: '5rem',
+          style={{
+            marginTop: '5rem',
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
             gap: '2rem',
@@ -166,7 +192,8 @@ const HomePage: FC = () => { const features = [
           {stats.map((stat, index) => (
             <div key={index} style={{ textAlign: 'center' }}>
               <div
-                style={{ fontSize: '2.25rem',
+                style={{
+                  fontSize: '2.25rem',
                   fontWeight: 'bold',
                   color: '#111827',
                   marginBottom: '0.5rem',
@@ -174,111 +201,313 @@ const HomePage: FC = () => { const features = [
               >
                 {stat.number}
               </div>
-              <div
-                style={{ fontSize: '0.875rem',
-                  color: '#6b7280',
-                }}
-              >
-                {stat.label}
-              </div>
+              <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>{stat.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="py-20 bg-white">
-        <div className="px-6 mx-auto max-w-7xl lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+      <section style={{ padding: '5rem 0', backgroundColor: '#ffffff' }}>
+        <div style={{ padding: '0 1.5rem', margin: '0 auto', maxWidth: '1280px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2
+              style={{
+                fontSize: '2.25rem',
+                fontWeight: 'bold',
+                color: '#111827',
+                lineHeight: '1.25',
+              }}
+            >
               Comprehensive Feature Set
             </h2>
-            <p className="mt-4 text-lg text-gray-600">Everything you need to manage users at enterprise scale</p>
+            <p style={{ marginTop: '1rem', fontSize: '1.125rem', color: '#4b5563' }}>
+              Everything you need to manage users at enterprise scale
+            </p>
           </div>
 
-          <div className="mt-16 grid gap-8 lg:grid-cols-3">
+          <div
+            style={{
+              marginTop: '4rem',
+              display: 'grid',
+              gap: '2rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            }}
+          >
             {features.map((feature, index) => (
-              <div key={index} className="relative group">
-                <div className="p-8 bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-300">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg">
-                      <feature.icon className="w-6 h-6 text-blue-600" />
+              <div key={index} style={{ position: 'relative' }}>
+                <article
+                  style={{
+                    padding: '2rem',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '1rem',
+                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                    e.currentTarget.style.borderColor = '#93c5fd';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+                    e.currentTarget.style.borderColor = '#e5e7eb';
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      marginBottom: '1rem',
+                    }}
+                  >
+                    <div
+                      style={{
+                        padding: '0.75rem',
+                        background: 'linear-gradient(135deg, #dbeafe, #f3e8ff)',
+                        borderRadius: '0.5rem',
+                      }}
+                      aria-hidden="true"
+                    >
+                      <feature.icon
+                        style={{ width: '1.5rem', height: '1.5rem', color: '#2563eb' }}
+                      />
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900">{feature.title}</h3>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827' }}>
+                      {feature.title}
+                    </h3>
                   </div>
 
-                  <p className="text-gray-600 mb-6">{feature.description}</p>
+                  <p style={{ color: '#4b5563', marginBottom: '1.5rem' }}>{feature.description}</p>
 
-                  <div className="space-y-2">
+                  <ul
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem',
+                      listStyle: 'none',
+                      padding: 0,
+                      margin: 0,
+                    }}
+                  >
                     {feature.highlights.map((highlight, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      <li
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          fontSize: '0.875rem',
+                          color: '#374151',
+                        }}
+                      >
+                        <CheckCircle
+                          style={{ width: '1rem', height: '1rem', color: '#10b981', flexShrink: 0 }}
+                          aria-hidden="true"
+                        />
                         {highlight}
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
 
-                  <div className="mt-6">
-                    <button className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1 group-hover:gap-2 transition-all duration-200">
-                      Learn More <ChevronRight className="w-4 h-4" />
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <button
+                      style={{
+                        color: '#2563eb',
+                        fontWeight: '500',
+                        fontSize: '0.875rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '0.5rem',
+                        transition: 'all 0.2s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#1d4ed8';
+                        e.currentTarget.style.gap = '0.5rem';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#2563eb';
+                        e.currentTarget.style.gap = '0.25rem';
+                      }}
+                      aria-label={`Learn more about ${feature.title}`}
+                    >
+                      Learn More{' '}
+                      <ChevronRight style={{ width: '1rem', height: '1rem' }} aria-hidden="true" />
                     </button>
                   </div>
-                </div>
+                </article>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20 bg-gray-50">
-        <div className="px-6 mx-auto max-w-7xl lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+      <section style={{ padding: '5rem 0', backgroundColor: '#f9fafb' }}>
+        <div style={{ padding: '0 1.5rem', margin: '0 auto', maxWidth: '1280px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2
+              style={{
+                fontSize: '2.25rem',
+                fontWeight: 'bold',
+                color: '#111827',
+                lineHeight: '1.25',
+              }}
+            >
               Built with Modern Technology
             </h2>
-            <p className="mt-4 text-lg text-gray-600">Powered by FastAPI, React, and enterprise-grade infrastructure</p>
+            <p style={{ marginTop: '1rem', fontSize: '1.125rem', color: '#4b5563' }}>
+              Powered by FastAPI, React, and enterprise-grade infrastructure
+            </p>
           </div>
 
-          <div className="mt-16 grid gap-8 lg:grid-cols-2">
-            <div className="p-8 bg-white rounded-2xl shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Backend Technologies</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full" />
-                  <span className="text-gray-700">FastAPI - High-performance Python API framework</span>
+          <div
+            style={{
+              marginTop: '4rem',
+              display: 'grid',
+              gap: '2rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            }}
+          >
+            <div
+              style={{
+                padding: '2rem',
+                backgroundColor: '#ffffff',
+                borderRadius: '1rem',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  marginBottom: '1rem',
+                }}
+              >
+                Backend Technologies
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '0.5rem',
+                      height: '0.5rem',
+                      backgroundColor: '#10b981',
+                      borderRadius: '9999px',
+                    }}
+                  />
+                  <span style={{ color: '#374151' }}>
+                    FastAPI - High-performance Python API framework
+                  </span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  <span className="text-gray-700">SQLAlchemy 2.0 - Modern ORM with async support</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '0.5rem',
+                      height: '0.5rem',
+                      backgroundColor: '#3b82f6',
+                      borderRadius: '9999px',
+                    }}
+                  />
+                  <span style={{ color: '#374151' }}>
+                    SQLAlchemy 2.0 - Modern ORM with async support
+                  </span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
-                  <span className="text-gray-700">JWT Authentication - Secure token-based auth</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '0.5rem',
+                      height: '0.5rem',
+                      backgroundColor: '#8b5cf6',
+                      borderRadius: '9999px',
+                    }}
+                  />
+                  <span style={{ color: '#374151' }}>
+                    JWT Authentication - Secure token-based auth
+                  </span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
-                  <span className="text-gray-700">Alembic - Database migration management</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '0.5rem',
+                      height: '0.5rem',
+                      backgroundColor: '#f97316',
+                      borderRadius: '9999px',
+                    }}
+                  />
+                  <span style={{ color: '#374151' }}>Alembic - Database migration management</span>
                 </div>
               </div>
             </div>
 
-            <div className="p-8 bg-white rounded-2xl shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Frontend Technologies</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-cyan-500 rounded-full" />
-                  <span className="text-gray-700">React 19 - Latest React with modern features</span>
+            <div
+              style={{
+                padding: '2rem',
+                backgroundColor: '#ffffff',
+                borderRadius: '1rem',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  marginBottom: '1rem',
+                }}
+              >
+                Frontend Technologies
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '0.5rem',
+                      height: '0.5rem',
+                      backgroundColor: '#06b6d4',
+                      borderRadius: '9999px',
+                    }}
+                  />
+                  <span style={{ color: '#374151' }}>
+                    React 19 - Latest React with modern features
+                  </span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full" />
-                  <span className="text-gray-700">TypeScript - Type-safe development</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '0.5rem',
+                      height: '0.5rem',
+                      backgroundColor: '#2563eb',
+                      borderRadius: '9999px',
+                    }}
+                  />
+                  <span style={{ color: '#374151' }}>TypeScript - Type-safe development</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                  <span className="text-gray-700">Tailwind CSS - Utility-first styling</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '0.5rem',
+                      height: '0.5rem',
+                      backgroundColor: '#10b981',
+                      borderRadius: '9999px',
+                    }}
+                  />
+                  <span style={{ color: '#374151' }}>Tailwind CSS - Utility-first styling</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-violet-500 rounded-full" />
-                  <span className="text-gray-700">Vite - Lightning fast build tool</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '0.5rem',
+                      height: '0.5rem',
+                      backgroundColor: '#8b5cf6',
+                      borderRadius: '9999px',
+                    }}
+                  />
+                  <span style={{ color: '#374151' }}>Vite - Lightning fast build tool</span>
                 </div>
               </div>
             </div>
@@ -286,20 +515,72 @@ const HomePage: FC = () => { const features = [
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="px-6 mx-auto max-w-7xl lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Ready to Get Started?</h2>
-          <p className="mt-4 text-lg text-blue-100">Join thousands of organizations already using our platform</p>
-          <div className="mt-8 flex items-center justify-center gap-x-6">
+      <section
+        style={{ padding: '5rem 0', background: 'linear-gradient(135deg, #2563eb, #8b5cf6)' }}
+      >
+        <div
+          style={{ padding: '0 1.5rem', margin: '0 auto', maxWidth: '1280px', textAlign: 'center' }}
+        >
+          <h2
+            style={{
+              fontSize: '2.25rem',
+              fontWeight: 'bold',
+              color: '#ffffff',
+              lineHeight: '1.25',
+            }}
+          >
+            Ready to Get Started?
+          </h2>
+          <p style={{ marginTop: '1rem', fontSize: '1.125rem', color: '#dbeafe' }}>
+            Join thousands of organizations already using our platform
+          </p>
+          <div
+            style={{
+              marginTop: '2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '1.5rem',
+              flexWrap: 'wrap',
+            }}
+          >
             <Link
               to="/register"
-              className="rounded-md bg-white px-6 py-3 text-sm font-semibold text-blue-600 shadow-sm hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all duration-200"
+              style={{
+                borderRadius: '0.375rem',
+                backgroundColor: '#ffffff',
+                padding: '0.75rem 1.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                color: '#2563eb',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#eff6ff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+              }}
             >
               Start Free Trial
             </Link>
             <Link
               to="/contact"
-              className="text-sm font-semibold leading-6 text-white hover:text-blue-100 transition-colors duration-200"
+              style={{
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                color: '#ffffff',
+                textDecoration: 'none',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#dbeafe';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#ffffff';
+              }}
             >
               Contact Sales <span aria-hidden="true">→</span>
             </Link>
