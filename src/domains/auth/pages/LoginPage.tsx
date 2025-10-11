@@ -1,8 +1,9 @@
-import { AlertCircle, ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import React, { startTransition, useCallback, useState, useTransition } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useErrorHandler } from '@hooks/errors/useErrorHandler';
+import { useApiError } from '@hooks/errors/useApiError';
+import { ApiErrorAlert } from '@shared/components/errors/ApiErrorAlert';
 import { useAuth } from '../context/AuthContext';
 
 interface LoginFormState {
@@ -20,7 +21,7 @@ const LoginPage: React.FC = () => {
 
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { error, errorMessage, handleError, clearError } = useErrorHandler();
+  const { error, showError, clearError } = useApiError();
 
   const handleInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,19 +43,21 @@ const LoginPage: React.FC = () => {
       event.preventDefault();
       clearError();
 
-      startLoginTransition(async () => {
-        try {
-          await login({
-            email: formState.email,
-            password: formState.password,
-          });
-          navigate('/dashboard');
-        } catch (submissionError: unknown) {
-          handleError(submissionError, 'LoginPage');
-        }
+      startLoginTransition(() => {
+        void (async () => {
+          try {
+            await login({
+              email: formState.email,
+              password: formState.password,
+            });
+            navigate('/dashboard');
+          } catch (submissionError: unknown) {
+            showError(submissionError, 'LoginPage');
+          }
+        })();
       });
     },
-    [clearError, formState.email, formState.password, handleError, login, navigate]
+    [clearError, formState.email, formState.password, showError, login, navigate]
   );
 
   const togglePasswordVisibility = useCallback(() => {
@@ -152,43 +155,15 @@ const LoginPage: React.FC = () => {
               border: '1px solid rgba(229, 231, 235, 0.5)',
             }}
           >
-            {errorMessage && (
-              <div
-                style={{
-                  marginBottom: '1.5rem',
-                  padding: '1rem',
-                  backgroundColor: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  borderRadius: '0.5rem',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.75rem',
-                }}
-                role="alert"
-                aria-live="assertive"
-              >
-                <AlertCircle
-                  style={{
-                    width: '1.25rem',
-                    height: '1.25rem',
-                    color: '#dc2626',
-                    marginTop: '0.125rem',
-                  }}
-                  aria-hidden
+            {error && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <ApiErrorAlert
+                  error={error}
+                  onDismiss={clearError}
+                  showRetry={false}
+                  showDescription={true}
+                  showAction={true}
                 />
-                <div>
-                  <p style={{ fontSize: '0.875rem', fontWeight: '500', color: '#991b1b' }}>
-                    Authentication error
-                  </p>
-                  <p style={{ fontSize: '0.875rem', color: '#b91c1c', marginTop: '0.25rem' }}>
-                    {errorMessage}
-                  </p>
-                  {error?.code && (
-                    <p style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: '0.5rem' }}>
-                      Code: {error.code}
-                    </p>
-                  )}
-                </div>
               </div>
             )}
 
