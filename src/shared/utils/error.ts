@@ -859,23 +859,39 @@ const normalizeNewErrorFormat = (
   fallbackMessage: string,
   status: number
 ): NormalizedApiError => {
-  const { status: apiStatus, message, detail } = payload;
+  // Handle nested error structure from backend
+  let actualPayload = payload;
+  if (payload && typeof payload === 'object' && 'error' in payload) {
+    actualPayload = (payload as Record<string, unknown>).error as ApiErrorResponse;
+  }
+
+  const { status: apiStatus, message, detail } = actualPayload;
 
   let normalizedMessage = fallbackMessage;
-  const code: string | undefined = payload.code;
-  const errors: Record<string, unknown> | undefined = payload.errors;
+  let code: string | undefined = actualPayload.code;
+  const errors: Record<string, unknown> | undefined = actualPayload.errors;
 
+  // Try to extract message from various locations
   if (typeof message === 'string') {
     normalizedMessage = message.trim() || fallbackMessage;
   } else if (typeof detail === 'string') {
     normalizedMessage = detail.trim() || fallbackMessage;
+  } else if (actualPayload.detail && typeof actualPayload.detail === 'object') {
+    // Handle nested detail object with message
+    const detailObj = actualPayload.detail as Record<string, unknown>;
+    if (typeof detailObj.message === 'string') {
+      normalizedMessage = detailObj.message.trim() || fallbackMessage;
+    }
+    if (typeof detailObj.error_code === 'string') {
+      code = detailObj.error_code;
+    }
   }
 
   return {
     status: typeof apiStatus === 'number' ? apiStatus : status,
     message: normalizedMessage,
     code,
-    detail,
+    detail: actualPayload.detail,
     errors,
     timestamp: new Date().toISOString(),
   };
