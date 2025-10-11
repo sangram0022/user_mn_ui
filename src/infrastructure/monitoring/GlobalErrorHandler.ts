@@ -2,7 +2,7 @@
  * Global error handler that provides a unified interface for handling errors
  */
 
-import { ErrorContext, errorTracker } from './ErrorTracker';
+import { ErrorContext, ErrorReport, errorTracker } from './ErrorTracker';
 import { logger } from './logger';
 
 export class GlobalErrorHandler {
@@ -33,7 +33,7 @@ export class GlobalErrorHandler {
     });
   }
 
-  private handleErrorReport(report: any): void {
+  private handleErrorReport(report: ErrorReport): void {
     // Log critical errors immediately
     if (report.severity === 'critical') {
       this.handleCriticalError(report);
@@ -48,7 +48,7 @@ export class GlobalErrorHandler {
     }
   }
 
-  private handleCriticalError(report: any): void {
+  private handleCriticalError(report: ErrorReport): void {
     logger.error(`CRITICAL ERROR: ${report.error.message}`, report.error, {
       errorId: report.id,
       component: report.context.component,
@@ -61,10 +61,10 @@ export class GlobalErrorHandler {
     }
   }
 
-  private sendToAnalytics(report: any): void {
+  private sendToAnalytics(report: ErrorReport): void {
     try {
       // Send error analytics
-      const globalWindow = window as any;
+      const globalWindow = window as Window & { gtag?: (...args: unknown[]) => void };
       if (globalWindow.gtag) {
         globalWindow.gtag('event', 'exception', {
           description: report.error.message,
@@ -76,12 +76,12 @@ export class GlobalErrorHandler {
 
       // Custom analytics tracking
       this.trackErrorEvent(report);
-    } catch (error) {
+    } catch {
       logger.warn('Failed to send error analytics');
     }
   }
 
-  private trackErrorEvent(report: any): void {
+  private trackErrorEvent(report: ErrorReport): void {
     // Custom error tracking logic
     const errorEvent = {
       type: 'error',
@@ -106,12 +106,12 @@ export class GlobalErrorHandler {
       }
 
       localStorage.setItem('error_events', JSON.stringify(errorEvents));
-    } catch (error) {
+    } catch {
       logger.warn('Failed to store error event');
     }
   }
 
-  private storeForDebugging(report: any): void {
+  private storeForDebugging(report: ErrorReport): void {
     try {
       const debugErrors = JSON.parse(localStorage.getItem('debug_errors') || '[]');
       debugErrors.unshift({
@@ -125,12 +125,12 @@ export class GlobalErrorHandler {
       }
 
       localStorage.setItem('debug_errors', JSON.stringify(debugErrors));
-    } catch (error) {
-      console.warn('Failed to store debug error:', error);
+    } catch {
+      console.warn('Failed to store debug error');
     }
   }
 
-  private notifyExternalService(report: any): void {
+  private notifyExternalService(report: ErrorReport): void {
     // Implement external service notification (e.g., Sentry, Bugsnag)
     try {
       fetch('/api/errors', {
@@ -149,7 +149,7 @@ export class GlobalErrorHandler {
       }).catch(() => {
         logger.warn('Failed to notify external error service');
       });
-    } catch (error) {
+    } catch {
       logger.warn('Failed to notify external error service');
     }
   }
@@ -179,7 +179,7 @@ export class GlobalErrorHandler {
 
   handleValidationError = (
     field: string,
-    value: any,
+    value: unknown,
     rule: string,
     context?: ErrorContext
   ): void => {
@@ -187,7 +187,10 @@ export class GlobalErrorHandler {
   };
 
   // Utility for error boundaries
-  handleReactError = (error: Error, errorInfo: any): void => {
+  handleReactError = (
+    error: Error,
+    errorInfo: { componentStack?: string; errorBoundary?: string }
+  ): void => {
     errorTracker.trackError(
       error,
       {
@@ -204,7 +207,7 @@ export class GlobalErrorHandler {
   };
 
   // Get error statistics
-  getErrorStats(): any {
+  getErrorStats(): Record<string, unknown> {
     return errorTracker.getErrorStats();
   }
 

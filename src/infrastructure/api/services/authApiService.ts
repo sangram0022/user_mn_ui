@@ -15,7 +15,7 @@ export interface AuthApiResponse {
 export interface AuthApiError {
   error_code: string;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 export const authApiService = {

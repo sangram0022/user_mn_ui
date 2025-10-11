@@ -23,8 +23,11 @@ export const usePerformance = (componentName: string, options: UsePerformanceOpt
   const lastRenderTime = useRef<number>(Date.now());
 
   useEffect(() => {
+    const startTime = mountTime.current;
+    const currentRenderCount = renderCount.current;
+
     if (trackMount) {
-      const mountDuration = Date.now() - mountTime.current;
+      const mountDuration = Date.now() - startTime;
       performanceMonitor.recordCustomMetric(
         `component.mount.${componentName}`,
         mountDuration,
@@ -37,14 +40,14 @@ export const usePerformance = (componentName: string, options: UsePerformanceOpt
 
     return () => {
       if (trackUnmount) {
-        const totalTime = Date.now() - mountTime.current;
+        const totalTime = Date.now() - startTime;
         performanceMonitor.recordCustomMetric(
           `component.lifetime.${componentName}`,
           totalTime,
           'ms',
           {
             component: componentName,
-            renderCount: renderCount.current,
+            renderCount: currentRenderCount,
           }
         );
 
@@ -114,18 +117,18 @@ export const useAnalytics = (pageName?: string, options: UseAnalyticsOptions = {
       action: string,
       label?: string,
       value?: number,
-      properties?: Record<string, any>
+      properties?: Record<string, unknown>
     ) => {
       analyticsTracker.track(name, category, action, label, value, properties);
     },
     []
   );
 
-  const trackUserAction = useCallback((action: string, properties?: Record<string, any>) => {
+  const trackUserAction = useCallback((action: string, properties?: Record<string, unknown>) => {
     analyticsTracker.trackUserAction(action, 'user_interaction', properties);
   }, []);
 
-  const trackError = useCallback((error: Error, context?: Record<string, any>) => {
+  const trackError = useCallback((error: Error, context?: Record<string, unknown>) => {
     analyticsTracker.trackError(error, context);
   }, []);
 
@@ -139,21 +142,21 @@ export const useAnalytics = (pageName?: string, options: UseAnalyticsOptions = {
 export interface UseErrorBoundaryOptions {
   componentName?: string;
   fallback?: React.ComponentType<{ error: Error; reset: () => void }>;
-  onError?: (error: Error, errorInfo: any) => void;
+  onError?: (error: Error, errorInfo: unknown) => void;
 }
 
 export const useErrorBoundary = (options: UseErrorBoundaryOptions = {}) => {
   const { componentName = 'UnknownComponent', onError } = options;
 
   const captureError = useCallback(
-    (error: Error, errorInfo?: any) => {
+    (error: Error, errorInfo?: unknown) => {
       // Track the error
       errorTracker.trackError(
         error,
         {
           component: componentName,
           action: 'component_error',
-          additionalData: errorInfo,
+          additionalData: errorInfo as Record<string, unknown>,
         },
         'high',
         true
@@ -181,7 +184,7 @@ export const useErrorBoundary = (options: UseErrorBoundaryOptions = {}) => {
 
 export interface UseWebVitalsOptions {
   trackAutomatically?: boolean;
-  onVitalChange?: (vital: any) => void;
+  onVitalChange?: (vital: unknown) => void;
 }
 
 export const useWebVitals = (options: UseWebVitalsOptions = {}) => {
@@ -367,7 +370,7 @@ export const useComponentMetrics = (
   });
 
   const trackPropChange = useCallback(
-    (propName: string, oldValue: any, newValue: any) => {
+    (propName: string, oldValue: unknown, newValue: unknown) => {
       if (trackProps) {
         metricsRef.current.propsChanges++;
 
@@ -388,7 +391,7 @@ export const useComponentMetrics = (
   );
 
   const trackStateChange = useCallback(
-    (stateName: string, oldValue: any, newValue: any) => {
+    (stateName: string, oldValue: unknown, newValue: unknown) => {
       if (trackState) {
         metricsRef.current.stateChanges++;
 

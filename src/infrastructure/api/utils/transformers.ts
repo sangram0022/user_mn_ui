@@ -9,7 +9,7 @@ export interface TransformOptions {
   dateFields?: string[];
 }
 
-export const transformKeys = (obj: any, toCamelCase: boolean): any => {
+export const transformKeys = (obj: unknown, toCamelCase: boolean): unknown => {
   if (obj === null || obj === undefined || typeof obj !== 'object') {
     return obj;
   }
@@ -18,7 +18,7 @@ export const transformKeys = (obj: any, toCamelCase: boolean): any => {
     return obj.map((item) => transformKeys(item, toCamelCase));
   }
 
-  const result: any = {};
+  const result: unknown = {};
 
   Object.keys(obj).forEach((key) => {
     const newKey = toCamelCase ? toCamelCase_fn(key) : toSnakeCase(key);
@@ -36,7 +36,7 @@ export const toSnakeCase = (str: string): string => {
   return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 };
 
-export const removeNullValues = (obj: any): any => {
+export const removeNullValues = (obj: unknown): unknown => {
   if (obj === null || obj === undefined) {
     return obj;
   }
@@ -46,7 +46,7 @@ export const removeNullValues = (obj: any): any => {
   }
 
   if (typeof obj === 'object') {
-    const result: any = {};
+    const result: unknown = {};
     Object.keys(obj).forEach((key) => {
       const value = removeNullValues(obj[key]);
       if (value !== null && value !== undefined) {
@@ -59,7 +59,7 @@ export const removeNullValues = (obj: any): any => {
   return obj;
 };
 
-export const transformDates = (obj: any, dateFields: string[]): any => {
+export const transformDates = (obj: unknown, dateFields: string[]): unknown => {
   if (obj === null || obj === undefined || typeof obj !== 'object') {
     return obj;
   }
@@ -68,13 +68,13 @@ export const transformDates = (obj: any, dateFields: string[]): any => {
     return obj.map((item) => transformDates(item, dateFields));
   }
 
-  const result: any = { ...obj };
+  const result: unknown = { ...obj };
 
   dateFields.forEach((field) => {
     if (result[field] && typeof result[field] === 'string') {
       try {
         result[field] = new Date(result[field]);
-      } catch (error) {
+      } catch {
         console.warn(`Failed to parse date field ${field}:`, result[field]);
       }
     }
@@ -90,7 +90,7 @@ export const transformDates = (obj: any, dateFields: string[]): any => {
   return result;
 };
 
-export const transformApiResponse = <T = any>(data: any, options: TransformOptions = {}): T => {
+export const transformApiResponse = <T>(data: unknown, options: TransformOptions = {}): T => {
   let result = data;
 
   // Transform keys
@@ -114,7 +114,7 @@ export const transformApiResponse = <T = any>(data: any, options: TransformOptio
 };
 
 // Predefined transformers for common use cases
-export const transformUser = (userData: any) => {
+export const transformUser = (userData: unknown) => {
   return transformApiResponse(userData, {
     camelCase: true,
     dateFields: ['created_at', 'updated_at', 'last_login_at'],
@@ -122,7 +122,7 @@ export const transformUser = (userData: any) => {
   });
 };
 
-export const transformAuthResponse = (authData: any) => {
+export const transformAuthResponse = (authData: unknown) => {
   return transformApiResponse(authData, {
     camelCase: true,
     dateFields: ['expires_at', 'last_login_at'],
@@ -130,7 +130,7 @@ export const transformAuthResponse = (authData: any) => {
   });
 };
 
-export const transformAuditLog = (auditData: any) => {
+export const transformAuditLog = (auditData: unknown) => {
   return transformApiResponse(auditData, {
     camelCase: true,
     dateFields: ['timestamp', 'created_at'],
@@ -138,7 +138,7 @@ export const transformAuditLog = (auditData: any) => {
   });
 };
 
-export const transformAnalyticsEvent = (eventData: any) => {
+export const transformAnalyticsEvent = (eventData: unknown) => {
   return transformApiResponse(eventData, {
     camelCase: true,
     dateFields: ['timestamp', 'created_at'],
@@ -146,7 +146,7 @@ export const transformAnalyticsEvent = (eventData: any) => {
   });
 };
 
-export const transformWorkflow = (workflowData: any) => {
+export const transformWorkflow = (workflowData: unknown) => {
   return transformApiResponse(workflowData, {
     camelCase: true,
     dateFields: ['created_at', 'updated_at', 'completed_at'],

@@ -15,7 +15,7 @@ export interface WorkflowStep {
   id: string;
   name: string;
   type: 'approval' | 'notification' | 'action' | 'condition';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   order: number;
 }
 
@@ -25,7 +25,7 @@ export interface WorkflowInstance {
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
   created_at: string;
   completed_at?: string;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   current_step?: string;
 }
 
@@ -75,7 +75,7 @@ export const workflowsApiService = {
 
   async executeWorkflow(
     workflowId: string,
-    context: Record<string, any>
+    context: Record<string, unknown>
   ): Promise<{ instance_id: string; message: string }> {
     const response = await apiClient.post<{ instance_id: string; message: string }>(
       `/workflows/${workflowId}/execute`,

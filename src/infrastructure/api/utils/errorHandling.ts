@@ -29,7 +29,7 @@ export class ApiError extends Error {
   }
 }
 
-export const handleApiError = (error: any): ApiError => {
+export const handleApiError = (error: unknown): ApiError => {
   // If it's already an ApiError, return it
   if (error instanceof ApiError) {
     return error;
@@ -64,11 +64,11 @@ export const handleApiError = (error: any): ApiError => {
   return new ApiError('UNKNOWN_ERROR', error.message || 'An unknown error occurred');
 };
 
-export const isApiError = (error: any): error is ApiError => {
+export const isApiError = (error: unknown): error is ApiError => {
   return error instanceof ApiError;
 };
 
-export const getErrorMessage = (error: any): string => {
+export const getErrorMessage = (error: unknown): string => {
   if (isApiError(error)) {
     return error.message;
   }
@@ -80,7 +80,7 @@ export const getErrorMessage = (error: any): string => {
   return 'An unknown error occurred';
 };
 
-export const getErrorDetails = (error: any): ApiErrorDetails[] => {
+export const getErrorDetails = (error: unknown): ApiErrorDetails[] => {
   if (isApiError(error) && error.details) {
     return error.details;
   }
@@ -88,7 +88,7 @@ export const getErrorDetails = (error: any): ApiErrorDetails[] => {
   return [];
 };
 
-export const isAuthError = (error: any): boolean => {
+export const isAuthError = (error: unknown): boolean => {
   if (isApiError(error)) {
     return error.status === 401 || error.errorCode === 'INVALID_CREDENTIALS';
   }
@@ -96,7 +96,7 @@ export const isAuthError = (error: any): boolean => {
   return false;
 };
 
-export const isValidationError = (error: any): boolean => {
+export const isValidationError = (error: unknown): boolean => {
   if (isApiError(error)) {
     return error.status === 400 || error.errorCode === 'VALIDATION_ERROR';
   }
@@ -104,7 +104,7 @@ export const isValidationError = (error: any): boolean => {
   return false;
 };
 
-export const isNotFoundError = (error: any): boolean => {
+export const isNotFoundError = (error: unknown): boolean => {
   if (isApiError(error)) {
     return error.status === 404;
   }
@@ -112,7 +112,7 @@ export const isNotFoundError = (error: any): boolean => {
   return false;
 };
 
-export const isServerError = (error: any): boolean => {
+export const isServerError = (error: unknown): boolean => {
   if (isApiError(error)) {
     return (error.status || 0) >= 500;
   }
@@ -120,7 +120,7 @@ export const isServerError = (error: any): boolean => {
   return false;
 };
 
-export const formatValidationErrors = (error: any): Record<string, string> => {
+export const formatValidationErrors = (error: unknown): Record<string, string> => {
   const result: Record<string, string> = {};
 
   if (isApiError(error) && error.details) {

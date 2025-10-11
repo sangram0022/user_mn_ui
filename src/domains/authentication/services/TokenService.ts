@@ -39,7 +39,7 @@ export class TokenService {
     }
   }
 
-  static getTokenPayload(token?: string): any {
+  static getTokenPayload(token?: string): Record<string, unknown> | null {
     const tokenToCheck = token || this.getToken();
 
     if (!tokenToCheck) {
@@ -56,7 +56,7 @@ export class TokenService {
 
   static getExpirationTime(token?: string): Date | null {
     const payload = this.getTokenPayload(token);
-    return payload?.exp ? new Date(payload.exp * 1000) : null;
+    return payload?.exp && typeof payload.exp === 'number' ? new Date(payload.exp * 1000) : null;
   }
 
   static isTokenValid(token?: string): boolean {

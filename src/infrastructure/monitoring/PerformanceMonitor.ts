@@ -9,7 +9,7 @@ export interface PerformanceMetric {
   value: number;
   unit: string;
   timestamp: Date;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export interface TimingMetric extends PerformanceMetric {
@@ -90,12 +90,14 @@ export class PerformanceMonitor {
       // Observe layout shifts
       const layoutShiftObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          this.recordLayoutShiftMetric(entry as any);
+          this.recordLayoutShiftMetric(
+            entry as PerformanceEntry & { value?: number; hadRecentInput?: boolean }
+          );
         }
       });
       layoutShiftObserver.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(layoutShiftObserver);
-    } catch (error) {
+    } catch {
       logger.warn('Failed to setup performance observers');
     }
   }
@@ -167,15 +169,17 @@ export class PerformanceMonitor {
     });
   }
 
-  private recordLayoutShiftMetric(entry: any): void {
+  private recordLayoutShiftMetric(
+    entry: PerformanceEntry & { value?: number; hadRecentInput?: boolean; sources?: unknown[] }
+  ): void {
     this.addMetric({
       name: 'layout.shift',
-      value: entry.value,
+      value: entry.value || 0,
       unit: 'score',
       timestamp: new Date(),
       context: {
         type: 'layout-shift',
-        hadRecentInput: entry.hadRecentInput,
+        hadRecentInput: entry.hadRecentInput || false,
         sources: entry.sources?.length || 0,
       },
     });
@@ -188,7 +192,13 @@ export class PerformanceMonitor {
     }
 
     const recordMemoryMetrics = () => {
-      const memoryInfo = (performance as any).memory;
+      const memoryInfo = (
+        performance as Performance & {
+          memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number };
+        }
+      ).memory;
+
+      if (!memoryInfo) return;
 
       const memoryMetric: MemoryMetric = {
         name: 'memory.usage',
@@ -220,7 +230,7 @@ export class PerformanceMonitor {
     this.timers.set(name, performance.now());
   }
 
-  endTimer(name: string, context?: Record<string, any>): number | null {
+  endTimer(name: string, context?: Record<string, unknown>): number | null {
     const startTime = this.timers.get(name);
     if (!startTime) {
       logger.warn(`Timer '${name}' not found`);
@@ -254,7 +264,7 @@ export class PerformanceMonitor {
     name: string,
     value: number,
     unit: string = 'count',
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): void {
     this.addMetric({
       name: `custom.${name}`,

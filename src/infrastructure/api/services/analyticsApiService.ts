@@ -5,7 +5,7 @@ export interface AnalyticsEvent {
   event_type: string;
   user_id?: string;
   timestamp: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   session_id?: string;
 }
 
@@ -28,13 +28,13 @@ export interface AnalyticsReport {
   data: {
     metrics: AnalyticsMetric[];
     events: AnalyticsEvent[];
-    summary: Record<string, any>;
+    summary: Record<string, unknown>;
   };
 }
 
 export interface CreateEventData {
   event_type: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
   user_id?: string;
   session_id?: string;
 }
@@ -89,7 +89,7 @@ export const analyticsApiService = {
       start: string;
       end: string;
     };
-    filters?: Record<string, any>;
+    filters?: Record<string, unknown>;
   }): Promise<{ report_id: string; message: string }> {
     const response = await apiClient.post<{ report_id: string; message: string }>(
       '/analytics/reports',
@@ -109,14 +109,14 @@ export const analyticsApiService = {
     total_events: number;
     total_sessions: number;
     last_activity: string;
-    activity_summary: Record<string, any>;
+    activity_summary: Record<string, unknown>;
   }> {
     const response = await apiClient.get<{
       user_id: string;
       total_events: number;
       total_sessions: number;
       last_activity: string;
-      activity_summary: Record<string, any>;
+      activity_summary: Record<string, unknown>;
     }>(`/analytics/users/${userId}`, { params });
     return response.data;
   },

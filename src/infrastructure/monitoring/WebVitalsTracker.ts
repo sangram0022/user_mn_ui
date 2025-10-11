@@ -44,7 +44,7 @@ class WebVitalsTracker {
       this.trackCLS();
       this.trackFCP();
       this.trackTTFB();
-    } catch (error) {
+    } catch {
       logger.warn('Failed to setup Web Vitals tracking');
     }
   }
@@ -62,7 +62,7 @@ class WebVitalsTracker {
 
       observer.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(observer);
-    } catch (error) {
+    } catch {
       logger.warn('LCP tracking not supported');
     }
   }
@@ -72,8 +72,8 @@ class WebVitalsTracker {
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
           if (entry.entryType === 'first-input') {
-            const fidEntry = entry as any;
-            const value = fidEntry.processingStart - fidEntry.startTime;
+            const fidEntry = entry as PerformanceEntry & { processingStart?: number };
+            const value = (fidEntry.processingStart || 0) - fidEntry.startTime;
 
             this.recordVital('FID', value, {
               entries: [entry],
@@ -84,7 +84,7 @@ class WebVitalsTracker {
 
       observer.observe({ entryTypes: ['first-input'], buffered: true });
       this.observers.push(observer);
-    } catch (error) {
+    } catch {
       logger.warn('FID tracking not supported');
     }
   }
@@ -92,17 +92,20 @@ class WebVitalsTracker {
   private trackCLS(): void {
     let clsValue = 0;
     let sessionValue = 0;
-    let sessionEntries: PerformanceEntry[] = [];
+    const sessionEntries: PerformanceEntry[] = [];
 
     try {
       const observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
           if (entry.entryType === 'layout-shift') {
-            const layoutShiftEntry = entry as any;
+            const layoutShiftEntry = entry as PerformanceEntry & {
+              hadRecentInput?: boolean;
+              value?: number;
+            };
 
             // Only count layout shifts without recent input
             if (!layoutShiftEntry.hadRecentInput) {
-              sessionValue += layoutShiftEntry.value;
+              sessionValue += layoutShiftEntry.value || 0;
               sessionEntries.push(entry);
 
               if (sessionValue > clsValue) {
@@ -118,7 +121,7 @@ class WebVitalsTracker {
 
       observer.observe({ entryTypes: ['layout-shift'], buffered: true });
       this.observers.push(observer);
-    } catch (error) {
+    } catch {
       logger.warn('CLS tracking not supported');
     }
   }
@@ -137,7 +140,7 @@ class WebVitalsTracker {
 
       observer.observe({ entryTypes: ['paint'], buffered: true });
       this.observers.push(observer);
-    } catch (error) {
+    } catch {
       logger.warn('FCP tracking not supported');
     }
   }
@@ -159,7 +162,7 @@ class WebVitalsTracker {
 
       observer.observe({ entryTypes: ['navigation'], buffered: true });
       this.observers.push(observer);
-    } catch (error) {
+    } catch {
       logger.warn('TTFB tracking not supported');
     }
   }
@@ -217,7 +220,7 @@ class WebVitalsTracker {
   private sendVitalToAnalytics(vital: WebVital): void {
     try {
       // Send to Google Analytics if available
-      const globalWindow = window as any;
+      const globalWindow = window as Window & { gtag?: (...args: unknown[]) => void };
       if (globalWindow.gtag) {
         globalWindow.gtag('event', vital.name, {
           event_category: 'Web Vitals',
@@ -229,7 +232,7 @@ class WebVitalsTracker {
 
       // Send to custom analytics
       this.sendToCustomAnalytics(vital);
-    } catch (error) {
+    } catch {
       logger.warn('Failed to send Web Vital to analytics');
     }
   }
@@ -251,7 +254,7 @@ class WebVitalsTracker {
       }
 
       localStorage.setItem('web_vitals', JSON.stringify(webVitalsData));
-    } catch (error) {
+    } catch {
       logger.warn('Failed to store Web Vital data');
     }
   }

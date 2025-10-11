@@ -13,7 +13,7 @@ export interface ErrorContext {
   userAgent?: string;
   timestamp?: Date;
   stackTrace?: string;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 export interface ErrorReport {
@@ -84,15 +84,17 @@ class ErrorTracker {
     });
 
     // Handle React error boundaries (if available)
-    const globalWindow = window as any;
+    const globalWindow = window as Window & {
+      ReactErrorBoundary?: { onError?: (error: Error, errorInfo: unknown) => void };
+    };
     if (globalWindow.ReactErrorBoundary) {
-      globalWindow.ReactErrorBoundary.onError = (error: Error, errorInfo: any) => {
+      globalWindow.ReactErrorBoundary.onError = (error: Error, errorInfo: unknown) => {
         this.trackError(
           error,
           {
             component: 'ReactErrorBoundary',
             action: 'component_error',
-            additionalData: errorInfo,
+            additionalData: errorInfo as Record<string, unknown>,
           },
           'critical',
           true
@@ -192,7 +194,7 @@ class ErrorTracker {
 
   trackValidationError(
     field: string,
-    value: any,
+    value: unknown,
     rule: string,
     context: Partial<ErrorContext> = {}
   ): string {

@@ -35,7 +35,7 @@ export const ResetPasswordPage: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
       setIsSuccess(true);
       setTimeout(() => navigate('/login'), 2000);
-    } catch (error) {
+    } catch {
       setError('Failed to reset password. Please try again.');
     } finally {
       setIsLoading(false);

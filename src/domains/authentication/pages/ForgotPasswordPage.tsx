@@ -16,7 +16,7 @@ export const ForgotPasswordPage: React.FC = () => {
       // TODO: Implement password reset API call
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
       setIsSubmitted(true);
-    } catch (error) {
+    } catch {
       setError('Failed to send reset email. Please try again.');
     } finally {
       setIsLoading(false);

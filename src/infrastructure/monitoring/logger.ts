@@ -13,7 +13,7 @@ export interface LogEntry {
   level: LogLevel;
   message: string;
   timestamp: Date;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   error?: Error;
   userId?: string;
   sessionId?: string;
@@ -52,26 +52,26 @@ class Logger {
     this.config = { ...this.config, ...config };
   }
 
-  debug(message: string, context?: Record<string, any>): void {
+  debug(message: string, context?: Record<string, unknown>): void {
     this.log(LogLevel.DEBUG, message, context);
   }
 
-  info(message: string, context?: Record<string, any>): void {
+  info(message: string, context?: Record<string, unknown>): void {
     this.log(LogLevel.INFO, message, context);
   }
 
-  warn(message: string, context?: Record<string, any>): void {
+  warn(message: string, context?: Record<string, unknown>): void {
     this.log(LogLevel.WARN, message, context);
   }
 
-  error(message: string, error?: Error, context?: Record<string, any>): void {
+  error(message: string, error?: Error, context?: Record<string, unknown>): void {
     this.log(LogLevel.ERROR, message, context, error);
   }
 
   private log(
     level: LogLevel,
     message: string,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
     error?: Error
   ): void {
     if (level < this.config.level) {
@@ -132,7 +132,7 @@ class Logger {
       }
 
       localStorage.setItem(this.config.storageKey!, JSON.stringify(updatedLogs));
-    } catch (error) {
+    } catch {
       console.warn('Failed to store log entry:', error);
     }
   }
@@ -178,7 +178,7 @@ class Logger {
           })),
         }),
       });
-    } catch (error) {
+    } catch {
       console.warn('Failed to send logs to remote endpoint:', error);
       // Re-add logs to buffer for retry
       this.logBuffer.unshift(...logsToSend);
@@ -189,12 +189,12 @@ class Logger {
     try {
       const stored = localStorage.getItem(this.config.storageKey!);
       if (stored) {
-        return JSON.parse(stored).map((entry: any) => ({
+        return JSON.parse(stored).map((entry: unknown) => ({
           ...entry,
           timestamp: new Date(entry.timestamp),
         }));
       }
-    } catch (error) {
+    } catch {
       console.warn('Failed to retrieve stored logs:', error);
     }
     return [];
@@ -203,7 +203,7 @@ class Logger {
   clearStoredLogs(): void {
     try {
       localStorage.removeItem(this.config.storageKey!);
-    } catch (error) {
+    } catch {
       console.warn('Failed to clear stored logs:', error);
     }
   }
@@ -216,7 +216,7 @@ class Logger {
         const user = JSON.parse(authData);
         return user.id || user.user_id;
       }
-    } catch (error) {
+    } catch {
       // Silent fail
     }
     return undefined;
@@ -231,7 +231,7 @@ class Logger {
         sessionStorage.setItem('session_id', sessionId);
       }
       return sessionId;
-    } catch (error) {
+    } catch {
       return undefined;
     }
   }

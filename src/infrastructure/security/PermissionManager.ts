@@ -11,13 +11,13 @@ export interface Permission {
   description: string;
   resource: string;
   action: string;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
 }
 
 export interface PermissionCheck {
   permission: string;
   resource?: string;
-  conditions?: Record<string, any>;
+  conditions?: Record<string, unknown>;
 }
 
 export interface AccessResult {
@@ -326,7 +326,7 @@ export class PermissionManager {
     resource: string,
     action: string,
     user?: AuthUser,
-    conditions?: Record<string, any>
+    conditions?: Record<string, unknown>
   ): AccessResult {
     const permissionId = `${resource}.${action}`;
     const result = this.checkPermission(permissionId, user);
@@ -353,8 +353,8 @@ export class PermissionManager {
   }
 
   private evaluateConditions(
-    permissionConditions: Record<string, any>,
-    requestConditions: Record<string, any>,
+    permissionConditions: Record<string, unknown>,
+    requestConditions: Record<string, unknown>,
     user?: AuthUser
   ): boolean {
     // Simple condition evaluation - can be extended for complex rules
@@ -436,7 +436,7 @@ export class PermissionManager {
     resource: string,
     action: string,
     user?: AuthUser,
-    conditions?: Record<string, any>
+    conditions?: Record<string, unknown>
   ): boolean {
     return this.checkResourceAccess(resource, action, user, conditions).granted;
   }
@@ -473,7 +473,7 @@ export class PermissionManager {
     };
   }
 
-  requireResourceAccess(resource: string, action: string, conditions?: Record<string, any>) {
+  requireResourceAccess(resource: string, action: string, conditions?: Record<string, unknown>) {
     return (user?: AuthUser): AccessResult => {
       return this.checkResourceAccess(resource, action, user, conditions);
     };

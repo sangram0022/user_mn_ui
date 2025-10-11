@@ -96,7 +96,7 @@ export class AuthManager {
           logger.info('Stored tokens expired, cleared auth state');
         }
       }
-    } catch (error) {
+    } catch {
       errorTracker.trackError(
         error as Error,
         { component: 'AuthManager', action: 'load_auth_state' },
@@ -120,7 +120,7 @@ export class AuthManager {
       } else {
         this.clearStoredAuthState();
       }
-    } catch (error) {
+    } catch {
       errorTracker.trackError(
         error as Error,
         { component: 'AuthManager', action: 'save_auth_state' },
@@ -200,7 +200,7 @@ export class AuthManager {
         logger.warn('Token refresh failed, logging out user');
         this.logout();
       }
-    } catch (error) {
+    } catch {
       errorTracker.trackError(
         error as Error,
         { component: 'AuthManager', action: 'refresh_tokens' },
@@ -220,7 +220,7 @@ export class AuthManager {
     this.listeners.forEach((listener) => {
       try {
         listener(this.authState);
-      } catch (error) {
+      } catch {
         errorTracker.trackError(
           error as Error,
           { component: 'AuthManager', action: 'notify_listeners' },
@@ -286,7 +286,7 @@ export class AuthManager {
 
         return { success: false, error: errorMessage };
       }
-    } catch (error) {
+    } catch {
       const errorMessage = 'Network error during login';
       errorTracker.trackError(
         error as Error,
@@ -330,7 +330,7 @@ export class AuthManager {
 
         return { success: false, error: errorMessage };
       }
-    } catch (error) {
+    } catch {
       const errorMessage = 'Network error during registration';
       errorTracker.trackError(
         error as Error,
@@ -361,7 +361,7 @@ export class AuthManager {
           // Silent fail for logout endpoint
         });
       }
-    } catch (error) {
+    } catch {
       // Silent fail
     }
 
@@ -388,7 +388,7 @@ export class AuthManager {
       } else {
         return { success: false, error: data.message || 'Failed to send reset email' };
       }
-    } catch (error) {
+    } catch {
       errorTracker.trackError(
         error as Error,
         { component: 'AuthManager', action: 'forgot_password' },
@@ -420,7 +420,7 @@ export class AuthManager {
       } else {
         return { success: false, error: data.message || 'Failed to reset password' };
       }
-    } catch (error) {
+    } catch {
       errorTracker.trackError(
         error as Error,
         { component: 'AuthManager', action: 'reset_password' },

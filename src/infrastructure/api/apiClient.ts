@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * API Client - Base HTTP Client
  *
@@ -73,7 +73,7 @@ class ApiClient {
   /**
    * POST request
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   async post<T = any>(
     _url: string,
     _data?: unknown,
@@ -86,7 +86,7 @@ class ApiClient {
   /**
    * PUT request
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   async put<T = any>(
     _url: string,
     _data?: unknown,
@@ -99,7 +99,7 @@ class ApiClient {
   /**
    * DELETE request
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   async delete<T = any>(_url: string, _config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     // Implementation
     throw new Error('Not implemented - use existing apiClient');
@@ -108,7 +108,7 @@ class ApiClient {
   /**
    * Add request interceptor
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   addRequestInterceptor(_interceptor: RequestInterceptor): void {
     // Implementation
   }
@@ -116,7 +116,7 @@ class ApiClient {
   /**
    * Add response interceptor
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   addResponseInterceptor(_interceptor: ResponseInterceptor): void {
     // Implementation
   }

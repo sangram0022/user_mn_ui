@@ -1,114 +1,111 @@
 /**
  * Custom React Hook: usePagination
- * 
+ *
  * Manages pagination state and provides helper functions for
  * navigating through paginated data.
- * 
+ *
  * @example
  * ```tsx
  * const pagination = usePagination({ pageSize: 20 });
- * 
+ *
  * // Fetch data
  * const data = await apiClient.getUsers({ *   skip: pagination.skip,
  *   limit: pagination.limit
  * });
- * 
+ *
  * // Update total
  * pagination.setTotal(data.total);
- * 
+ *
  * // Navigate
  * <button onClick={pagination.nextPage}>Next</button>
  * ```
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
-export interface PaginationState { page: number;
-  pageSize: number;
-  total: number; }
-
-export interface UsePaginationOptions { initialPage?: number;
-  pageSize?: number;
-  initialTotal?: number; }
-
-export interface UsePaginationResult { // Current state
-  page: number;
-  pageSize: number;
-  total: number;
-  skip: number;
-  limit: number;
-  
-  // Computed values
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-  
-  // Actions
-  setPage: (page: number) => void;
-  setTotal: (total: number) => void;
-  setPageSize: (pageSize: number) => void;
-  nextPage: () => void;
-  previousPage: () => void;
-  reset: () => void; }
-
-/**
- * Hook for managing pagination state
- */
-export function usePagination(options: UsePaginationOptions = {}): UsePaginationResult { const {
-    initialPage = 0,
-    pageSize: initialPageSize = 25,
-    initialTotal = 0
-  } = options;
-
-  const [page, setPageState] = useState(initialPage);
-  const [pageSize, setPageSizeState] = useState(initialPageSize);
-  const [total, setTotal] = useState(initialTotal);
-
-  // Computed values
-  const skip = useMemo(() => page * pageSize, [page, pageSize]);
-  const limit = pageSize;
-  const totalPages = useMemo(() => Math.ceil(total / pageSize) || 1, [total, pageSize]);
-  const hasNextPage = useMemo(() => page < totalPages - 1, [page, totalPages]);
-  const hasPreviousPage = useMemo(() => page > 0, [page]);
-
-  // Actions
-  const setPage = useCallback((newPage: number) => { setPageState(Math.max(0, newPage));
-  }, []);
-
-  const setPageSize = useCallback((newPageSize: number) => { setPageSizeState(newPageSize);
-    setPageState(0); // Reset to first page when page size changes
-  }, []);
-
-  const nextPage = useCallback(() => { if (hasNextPage) {
-      setPageState(prev => prev + 1);
-    }
-  }, [hasNextPage]);
-
-  const previousPage = useCallback(() => { if (hasPreviousPage) {
-      setPageState(prev => prev - 1);
-    }
-  }, [hasPreviousPage]);
-
-  const reset = useCallback(() => { setPageState(initialPage);
-    setPageSizeState(initialPageSize);
-    setTotal(initialTotal);
-  }, [initialPage, initialPageSize, initialTotal]);
-
-  return { page,
-    pageSize,
-    total,
-    skip,
-    limit,
-    totalPages,
-    hasNextPage,
-    hasPreviousPage,
-    setPage,
-    setTotal,
-    setPageSize,
-    nextPage,
-    previousPage,
-    reset
-  };
+interface UsePaginationOptions {
+  initialPage?: number;
+  initialLimit?: number;
+  totalItems?: number;
 }
+
+export const usePagination = (options: UsePaginationOptions = {}) => {
+  const { initialPage = 1, initialLimit = 10, totalItems = 0 } = options;
+
+  const [page, setPage] = useState(initialPage);
+  const [limit, setLimit] = useState(initialLimit);
+  const [total, setTotal] = useState(totalItems);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(total / limit);
+  }, [total, limit]);
+
+  const hasNext = useMemo(() => {
+    return page < totalPages;
+  }, [page, totalPages]);
+
+  const hasPrev = useMemo(() => {
+    return page > 1;
+  }, [page]);
+
+  const offset = useMemo(() => {
+    return (page - 1) * limit;
+  }, [page, limit]);
+
+  const nextPage = useCallback(() => {
+    if (hasNext) {
+      setPage((p: number) => p + 1);
+    }
+  }, [hasNext]);
+
+  const prevPage = useCallback(() => {
+    if (hasPrev) {
+      setPage((p: number) => p - 1);
+    }
+  }, [hasPrev]);
+
+  const goToPage = useCallback(
+    (pageNumber: number) => {
+      if (pageNumber >= 1 && pageNumber <= totalPages) {
+        setPage(pageNumber);
+      }
+    },
+    [totalPages]
+  );
+
+  const changeLimit = useCallback((newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1); // Reset to first page when limit changes
+  }, []);
+
+  const updateTotal = useCallback((newTotal: number) => {
+    setTotal(newTotal);
+  }, []);
+
+  const reset = useCallback(() => {
+    setPage(initialPage);
+    setLimit(initialLimit);
+  }, [initialPage, initialLimit]);
+
+  return {
+    page,
+    limit,
+    total,
+    totalPages,
+    hasNext,
+    hasPrev,
+    offset,
+    nextPage,
+    prevPage,
+    goToPage,
+    changeLimit,
+    updateTotal,
+    reset,
+    paginationParams: {
+      page,
+      limit,
+    },
+  };
+};
 
 export default usePagination;

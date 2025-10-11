@@ -14,7 +14,7 @@ export interface AnalyticsEvent {
   timestamp: Date;
   userId?: string;
   sessionId?: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 export interface PageViewEvent {
@@ -85,7 +85,7 @@ class AnalyticsTracker {
           startTime: this.currentSession.startTime.toISOString(),
         })
       );
-    } catch (error) {
+    } catch {
       logger.warn('Failed to store analytics session');
     }
 
@@ -198,7 +198,7 @@ class AnalyticsTracker {
     action: string,
     label?: string,
     value?: number,
-    properties?: Record<string, any>
+    properties?: Record<string, unknown>
   ): void {
     const event: AnalyticsEvent = {
       id: this.generateEventId(),
@@ -278,12 +278,12 @@ class AnalyticsTracker {
   trackUserAction(
     action: string,
     category: string = 'user_action',
-    properties?: Record<string, any>
+    properties?: Record<string, unknown>
   ): void {
     this.track(action, category, action, undefined, undefined, properties);
   }
 
-  trackError(error: Error, context?: Record<string, any>): void {
+  trackError(error: Error, context?: Record<string, unknown>): void {
     this.track('error', 'application', 'error_occurred', error.message, undefined, {
       stack: error.stack,
       name: error.name,
@@ -298,14 +298,14 @@ class AnalyticsTracker {
     });
   }
 
-  trackCustomEvent(name: string, properties?: Record<string, any>): void {
+  trackCustomEvent(name: string, properties?: Record<string, unknown>): void {
     this.track(name, 'custom', name, undefined, undefined, properties);
   }
 
   private sendToExternalAnalytics(event: AnalyticsEvent): void {
     try {
       // Send to Google Analytics if available
-      const globalWindow = window as any;
+      const globalWindow = window as Window & { gtag?: (...args: unknown[]) => void };
       if (globalWindow.gtag) {
         globalWindow.gtag('event', event.action, {
           event_category: event.category,
@@ -317,21 +317,21 @@ class AnalyticsTracker {
 
       // Send to other analytics services
       this.sendToCustomAnalytics(event);
-    } catch (error) {
+    } catch {
       logger.warn('Failed to send event to external analytics');
     }
   }
 
   private sendPageViewToExternalAnalytics(pageView: PageViewEvent): void {
     try {
-      const globalWindow = window as any;
+      const globalWindow = window as Window & { gtag?: (...args: unknown[]) => void };
       if (globalWindow.gtag) {
         globalWindow.gtag('config', 'GA_MEASUREMENT_ID', {
           page_title: pageView.title,
           page_location: window.location.href,
         });
       }
-    } catch (error) {
+    } catch {
       logger.warn('Failed to send page view to external analytics');
     }
   }
@@ -351,7 +351,7 @@ class AnalyticsTracker {
       }
 
       localStorage.setItem('analytics_events', JSON.stringify(analyticsData));
-    } catch (error) {
+    } catch {
       logger.warn('Failed to store analytics event');
     }
   }
@@ -388,7 +388,7 @@ class AnalyticsTracker {
 
       // Clear sent events
       localStorage.removeItem('analytics_events');
-    } catch (error) {
+    } catch {
       logger.warn('Failed to send analytics batch to server');
     }
   }
@@ -469,7 +469,7 @@ class AnalyticsTracker {
         const user = JSON.parse(authData);
         return user.id || user.user_id;
       }
-    } catch (error) {
+    } catch {
       // Silent fail
     }
     return undefined;
