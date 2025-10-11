@@ -1,27 +1,153 @@
-import { afterEach, expect, vi } from 'vitest';
+/**
+ * Vitest Test Setup
+ *
+ * This file runs before each test file and sets up:
+ * - React Testing Library
+ * - MSW (Mock Service Worker) for API mocking
+ * - Custom matchers and utilities
+ * - Global test configuration
+ */
+
+import '@testing-library/jest-dom';
+import { afterEach, beforeAll, afterAll, expect, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import { setupServer } from 'msw/node';
+import { handlers } from './mocks/handlers';
 
+// Extend expect with jest-dom matchers
 expect.extend(matchers);
 
-afterEach(() => { cleanup(); });
+// ============================================================================
+// MSW Server Setup
+// ============================================================================
 
-declare global { interface Window {
+/**
+ * Create MSW server with default handlers
+ * This intercepts HTTP requests during tests and returns mocked responses
+ */
+export const server = setupServer(...handlers);
+
+// Start MSW server before all tests
+beforeAll(() => {
+  server.listen({
+    onUnhandledRequest: 'warn', // Warn about unhandled requests
+  });
+});
+
+// Reset handlers after each test to ensure test isolation
+afterEach(() => {
+  server.resetHandlers();
+  cleanup(); // Clean up React Testing Library
+  localStorage.clear(); // Clear localStorage between tests
+  sessionStorage.clear(); // Clear sessionStorage between tests
+});
+
+// Close MSW server after all tests
+afterAll(() => {
+  server.close();
+});
+
+// ============================================================================
+// Global Test Configuration
+// ============================================================================
+
+declare global {
+  interface Window {
     matchMedia: (query: string) => MediaQueryList;
   }
 }
 
-if (!window.matchMedia) { Object.defineProperty(window, 'matchMedia', {
+/**
+ * Mock window.matchMedia (not available in jsdom)
+ */
+if (!window.matchMedia) {
+  Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: vi.fn().mockImplementation((query: string) => ({
       matches: false,
       media: query,
       onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
+      addListener: vi.fn(), // deprecated
+      removeListener: vi.fn(), // deprecated
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
     })),
   });
 }
+
+/**
+ * Mock window.scrollTo (not available in jsdom)
+ */
+Object.defineProperty(window, 'scrollTo', {
+  writable: true,
+  value: vi.fn(),
+});
+
+/**
+ * Mock IntersectionObserver (not available in jsdom)
+ */
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+  root: null,
+  rootMargin: '',
+  thresholds: [],
+  takeRecords: vi.fn().mockReturnValue([]),
+})) as unknown as typeof IntersectionObserver;
+
+/**
+ * Mock ResizeObserver (not available in jsdom)
+ */
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+})) as unknown as typeof ResizeObserver;
+
+/**
+ * Mock crypto.randomUUID (not available in older jsdom versions)
+ */
+if (!globalThis.crypto) {
+  globalThis.crypto = {} as Crypto;
+}
+
+if (!globalThis.crypto.randomUUID) {
+  globalThis.crypto.randomUUID = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  };
+}
+
+/**
+ * Set default test environment variables
+ */
+process.env.VITE_API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+process.env.NODE_ENV = 'test';
+
+// ============================================================================
+// Custom Test Utilities
+// ============================================================================
+
+/**
+ * Wait for async updates in tests
+ */
+export const waitForNextUpdate = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+/**
+ * Create mock file for file upload tests
+ */
+export const createMockFile = (name = 'test.png', size = 1024, type = 'image/png'): File => {
+  const blob = new Blob(['a'.repeat(size)], { type });
+  return new File([blob], name, { type });
+};
+
+/**
+ * Test ID selector helper
+ */
+export const testId = (id: string) => `[data-testid="${id}"]`;

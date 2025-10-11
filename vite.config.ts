@@ -75,30 +75,42 @@ export default defineConfig({
     }
   },
   
-  // Build optimizations
+  // Build optimizations (Enhanced for Performance)
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: process.env.NODE_ENV === 'development',
     minify: 'esbuild',
     
+    // CSS code splitting
+    cssCodeSplit: true,
+    
     // Rollup options for enhanced code splitting
     rollupOptions: {
       output: {
+        // Optimized chunk naming for better caching
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+        
         manualChunks(id) {
           // Vendor chunks for better caching and lazy loading
           if (id.includes('node_modules')) {
-            // React core
-            if (id.includes('react') || id.includes('react-dom')) {
+            // React core (smallest, most frequently used)
+            if (id.includes('react/') || id.includes('react-dom/')) {
               return 'react-vendor';
             }
             // Router
             if (id.includes('react-router')) {
               return 'router-vendor';
             }
-            // Icons
+            // Icons (optimize separately)
             if (id.includes('lucide-react')) {
               return 'icons-vendor';
+            }
+            // State management
+            if (id.includes('zustand')) {
+              return 'state-vendor';
             }
             // Security and validation
             if (id.includes('zod') || id.includes('dompurify') || id.includes('crypto-js')) {
@@ -112,33 +124,89 @@ export default defineConfig({
             return 'vendor';
           }
           
-          // Split large application modules
-          if (id.includes('/src/domains/workflows')) {
-            return 'domain-workflows';
-          }
-          if (id.includes('/src/domains/analytics')) {
-            return 'domain-analytics';
-          }
-          if (id.includes('/src/domains/users')) {
-            return 'domain-users';
+          // === DDD DOMAIN SPLITTING (Route-based lazy loading) ===
+          
+          // Authentication domain
+          if (id.includes('/src/domains/authentication') || id.includes('/src/domains/auth')) {
+            return 'domain-authentication';
           }
           
-          // Split by features
-          if (id.includes('/src/shared/performance')) {
-            return 'performance';
+          // User management domain
+          if (id.includes('/src/domains/user-management') || id.includes('/src/domains/users')) {
+            return 'domain-user-management';
           }
-          if (id.includes('/src/shared/security')) {
-            return 'security';
+          
+          // Workflow engine domain
+          if (id.includes('/src/domains/workflow-engine') || id.includes('/src/domains/workflows')) {
+            return 'domain-workflow-engine';
+          }
+          
+          // Analytics dashboard domain
+          if (id.includes('/src/domains/analytics-dashboard') || id.includes('/src/domains/analytics') || id.includes('/src/domains/dashboard')) {
+            return 'domain-analytics-dashboard';
+          }
+          
+          // System administration domain
+          if (id.includes('/src/domains/system-administration') || 
+              id.includes('/src/domains/settings') || 
+              id.includes('/src/domains/security') ||
+              id.includes('/src/domains/moderation')) {
+            return 'domain-system-administration';
+          }
+          
+          // === INFRASTRUCTURE SPLITTING ===
+          
+          // Infrastructure API
+          if (id.includes('/src/infrastructure/api')) {
+            return 'infrastructure-api';
+          }
+          
+          // Infrastructure storage
+          if (id.includes('/src/infrastructure/storage')) {
+            return 'infrastructure-storage';
+          }
+          
+          // Infrastructure monitoring
+          if (id.includes('/src/infrastructure/monitoring')) {
+            return 'infrastructure-monitoring';
+          }
+          
+          // Infrastructure security
+          if (id.includes('/src/infrastructure/security')) {
+            return 'infrastructure-security';
+          }
+          
+          // === SHARED CODE SPLITTING ===
+          
+          // Shared UI components (heavy)
+          if (id.includes('/src/shared/ui')) {
+            return 'shared-ui';
+          }
+          
+          // Shared performance utilities
+          if (id.includes('/src/shared/performance')) {
+            return 'shared-performance';
+          }
+          
+          // Shared utilities
+          if (id.includes('/src/shared/utils')) {
+            return 'shared-utils';
           }
         }
       }
     },
     
     // Performance optimizations
-    chunkSizeWarningLimit: 600, // Warn if chunk > 600KB
+    chunkSizeWarningLimit: 500, // Reduced from 600KB for better performance
     
     // Target modern browsers for better optimization
-    target: ['es2020', 'chrome80', 'firefox78', 'safari14']
+    target: ['es2020', 'chrome80', 'firefox78', 'safari14'],
+    
+    // Additional optimizations
+    reportCompressedSize: true,
+    
+    // Disable CSS minification in development for faster builds
+    cssMinify: process.env.NODE_ENV !== 'development'
   },
   
   // CSS processing
