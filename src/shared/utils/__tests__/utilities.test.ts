@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * Unit Tests: Utility Functions
  * Expert-level testing by 25-year React veteran
@@ -17,6 +16,7 @@ const formatDate = (date: Date): string => {
   }).format(date);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const debounce = <T extends (...args: unknown[]) => any>(
   func: T,
   wait: number

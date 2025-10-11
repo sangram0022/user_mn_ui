@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * Testing Utilities and Helpers
  * Expert-level testing patterns by 20-year React veteran
@@ -617,8 +617,8 @@ export class ApiMocker {
 // ==================== CUSTOM MATCHERS ====================
 
 // Extend expect with custom matchers
-// eslint-disable-next-line @typescript-eslint/no-namespace
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Vi {
     interface AsymmetricMatchersContaining {
       toBeAccessible(): unknown;

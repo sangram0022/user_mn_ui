@@ -6,10 +6,10 @@
  * with necessary providers (Router, Auth, Theme, etc.)
  */
 
-import { ReactElement, ReactNode } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
+import { ReactElement, ReactNode } from 'react';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
 // ============================================================================
@@ -185,7 +185,7 @@ export async function waitFor<T>(
     try {
       const result = await callback();
       if (result) return result;
-    } catch (_) {
+    } catch {
       // Continue waiting
     }
     await new Promise((resolve) => setTimeout(resolve, interval));
@@ -200,6 +200,7 @@ export async function waitFor<T>(
 export function createMockResponse<T>(
   data: T,
   options: { success?: boolean; error?: unknown; status?: number } = {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
   const { success = true, error = null, status = 200 } = options;
 
@@ -214,6 +215,7 @@ export function createMockResponse<T>(
 /**
  * Create mock error response
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createMockError(code: string, message: string, status = 400): any {
   return createMockResponse(null, {
     success: false,
@@ -244,8 +246,11 @@ export function mockConsole() {
   });
 
   return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getLogCalls: () => (console.log as any).mock.calls,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getErrorCalls: () => (console.error as any).mock.calls,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getWarnCalls: () => (console.warn as any).mock.calls,
   };
 }

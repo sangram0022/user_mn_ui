@@ -18,9 +18,9 @@ export interface StorageOptions {
 }
 
 export type StorageKey = string;
-export type StorageValue = any;
+export type StorageValue = unknown;
 
-export interface StorageItem<T = any> {
+export interface StorageItem<T = unknown> {
   value: T;
   timestamp: number;
   ttl?: number;

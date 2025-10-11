@@ -451,6 +451,7 @@ export function useValidation<T>(schema: z.ZodSchema<T>) {
     try {
       // Extract field schema if possible
       if (schema instanceof z.ZodObject) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const fieldSchema = (schema.shape as any)[fieldName];
         if (fieldSchema) {
           fieldSchema.parse(value);

@@ -106,7 +106,7 @@ export class WebVitalsMonitor {
 
       observer.observe({ entryTypes: ['largest-contentful-paint'] });
       this.observers.push(observer);
-    } catch (_) {
+    } catch {
       logger.warn('Failed to measure LCP:', { error });
     }
   }
@@ -129,7 +129,7 @@ export class WebVitalsMonitor {
 
       observer.observe({ entryTypes: ['first-input'] });
       this.observers.push(observer);
-    } catch (_) {
+    } catch {
       logger.warn('Failed to measure FID:', { error });
     }
   }
@@ -159,7 +159,7 @@ export class WebVitalsMonitor {
 
       observer.observe({ entryTypes: ['layout-shift'] });
       this.observers.push(observer);
-    } catch (_) {
+    } catch {
       logger.warn('Failed to measure CLS:', { error });
     }
   }
@@ -182,7 +182,7 @@ export class WebVitalsMonitor {
 
       observer.observe({ entryTypes: ['paint'] });
       this.observers.push(observer);
-    } catch (_) {
+    } catch {
       logger.warn('Failed to measure FCP:', { error });
     }
   }
@@ -201,7 +201,7 @@ export class WebVitalsMonitor {
         this.checkBudget('TTFB', ttfb);
         this.notifyCallbacks();
       }
-    } catch (_) {
+    } catch {
       logger.warn('Failed to measure TTFB:', { error });
     }
   }
@@ -227,7 +227,7 @@ export class WebVitalsMonitor {
 
       observer.observe({ entryTypes: ['event'] });
       this.observers.push(observer);
-    } catch (_) {
+    } catch {
       logger.warn('Failed to measure INP:', { error });
     }
   }
@@ -301,7 +301,7 @@ export class WebVitalsMonitor {
 
         observer.observe({ entryTypes: ['longtask'] });
         this.observers.push(observer);
-      } catch (_) {
+      } catch {
         logger.warn('Long task monitoring not supported');
       }
     }
@@ -370,7 +370,7 @@ export class WebVitalsMonitor {
           ...this.getDeviceInfo(),
         }),
       });
-    } catch (_) {
+    } catch {
       logger.error('Failed to report performance issue:', undefined, { error });
     }
   }
@@ -438,7 +438,7 @@ export class WebVitalsMonitor {
     this.callbacks.forEach((callback) => {
       try {
         callback({ ...this.metrics });
-      } catch (_) {
+      } catch {
         logger.error('Error in performance callback:', undefined, { error });
       }
     });
@@ -485,7 +485,7 @@ export class WebVitalsMonitor {
     this.observers.forEach((observer) => {
       try {
         observer.disconnect();
-      } catch (_) {
+      } catch {
         logger.warn('Error disconnecting observer:', { error });
       }
     });
@@ -534,7 +534,7 @@ export class BundleAnalyzer {
 
       // Generate recommendations
       analysis.recommendations = this.generateRecommendations(analysis);
-    } catch (_) {
+    } catch {
       logger.error('Failed to analyze bundle:', undefined, { error });
     }
 
@@ -615,7 +615,7 @@ export class BundleAnalyzer {
           timestamp: new Date().toISOString(),
         }),
       });
-    } catch (_) {
+    } catch {
       logger.error('Failed to report bundle size:', undefined, { error });
     }
   }

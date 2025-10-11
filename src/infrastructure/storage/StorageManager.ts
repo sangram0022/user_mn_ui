@@ -1,12 +1,12 @@
 /**
  * Storage Manager - Unified Storage Interface
- * 
+ *
  * Provides a consistent API for different storage mechanisms
  */
 
 import type { StorageAdapter, StorageOptions } from './types';
 
-export class StorageManager<T = any> {
+export class StorageManager<T = unknown> {
   private adapter: StorageAdapter;
   private options: StorageOptions;
 
@@ -26,7 +26,7 @@ export class StorageManager<T = any> {
   async get(key: string): Promise<T | null> {
     const fullKey = this.getFullKey(key);
     const value = await this.adapter.get(fullKey);
-    
+
     if (!value) return null;
 
     // Check TTL

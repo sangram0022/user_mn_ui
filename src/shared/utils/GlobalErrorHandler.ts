@@ -45,11 +45,15 @@ export class GlobalErrorHandler {
     // Handle uncaught errors
     if (typeof window !== 'undefined') {
       window.addEventListener('error', (event) => {
-        this.handleError(event.error || new Error(event.message), {
-          component: 'Global',
-          action: 'Uncaught Error',
-        }, 'critical');
-        
+        this.handleError(
+          event.error || new Error(event.message),
+          {
+            component: 'Global',
+            action: 'Uncaught Error',
+          },
+          'critical'
+        );
+
         // Prevent default browser error handling
         event.preventDefault();
       });
@@ -64,7 +68,7 @@ export class GlobalErrorHandler {
           },
           'high'
         );
-        
+
         event.preventDefault();
       });
     }
@@ -109,10 +113,11 @@ export class GlobalErrorHandler {
    */
   private logError(report: ErrorReport): void {
     const { error, context, severity } = report;
-    
+
     logger.error(
       `[${severity.toUpperCase()}] ${error.message}`,
       error,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       context as any
     );
 
@@ -144,7 +149,7 @@ export class GlobalErrorHandler {
    */
   private scheduleReporting(): void {
     this.isReporting = true;
-    
+
     setTimeout(() => {
       this.flushQueue();
       this.isReporting = false;
@@ -176,7 +181,7 @@ export class GlobalErrorHandler {
     if (import.meta.env.DEV) {
       logger.debug('Would report errors to monitoring', {
         count: reports.length,
-        errors: reports.map(r => r.error.message),
+        errors: reports.map((r) => r.error.message),
       });
       return;
     }
@@ -189,7 +194,7 @@ export class GlobalErrorHandler {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          errors: reports.map(r => ({
+          errors: reports.map((r) => ({
             message: r.error.message,
             stack: r.error.stack,
             context: r.context,
@@ -250,7 +255,7 @@ export class GlobalErrorHandler {
 
     // Permission errors
     if (error.message.includes('403') || error.message.includes('forbidden')) {
-      return 'You don\'t have permission to perform this action.';
+      return "You don't have permission to perform this action.";
     }
 
     // Not found errors
@@ -306,7 +311,11 @@ export class GlobalErrorHandler {
   /**
    * Manual error reporting
    */
-  public static report(error: Error, context?: ErrorContext, severity?: ErrorReport['severity']): void {
+  public static report(
+    error: Error,
+    context?: ErrorContext,
+    severity?: ErrorReport['severity']
+  ): void {
     GlobalErrorHandler.getInstance().handleError(error, context, severity);
   }
 }
@@ -319,6 +328,7 @@ export const reportError = GlobalErrorHandler.report.bind(GlobalErrorHandler);
 
 // Development helper
 if (import.meta.env.DEV) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).errorHandler = globalErrorHandler;
   logger.info('Global Error Handler initialized', { environment: 'development' });
 }

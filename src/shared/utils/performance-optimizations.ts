@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/exhaustive-deps */
 /**
  * Performance Optimization Utilities
  *
@@ -8,7 +8,7 @@
  * @module shared/utils/performance-optimizations
  */
 
-import { useEffect, useRef, useCallback, useMemo, DependencyList } from 'react';
+import { DependencyList, useCallback, useEffect, useMemo, useRef } from 'react';
 
 // ============================================================================
 // MEMORY OPTIMIZATION

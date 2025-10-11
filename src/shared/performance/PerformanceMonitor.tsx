@@ -4,8 +4,8 @@
  * React 19 performance metrics and monitoring utilities
  */
 
+import React, { ComponentType, forwardRef, Profiler, useCallback, useEffect, useRef } from 'react';
 import { logger } from './../utils/logger';
-import React, { useEffect, useCallback, useRef, ComponentType, forwardRef, Profiler } from 'react';
 
 // Performance metrics types
 export interface PerformanceMetrics {
@@ -63,7 +63,10 @@ export function usePerformanceMonitor(config: PerformanceConfig = {}) {
 
     return () => {
       const mountTime = performance.now() - mountStartRef.current;
-      metricsRef.current.componentMount = mountTime;
+      // Copy ref to local variable for cleanup
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const currentMetrics = metricsRef.current;
+      currentMetrics.componentMount = mountTime;
 
       if (mountTime > reportThreshold) {
         logger.warn(`Slow component mount detected: ${mountTime.toFixed(2)}ms`);
@@ -78,7 +81,9 @@ export function usePerformanceMonitor(config: PerformanceConfig = {}) {
     renderStartRef.current = performance.now();
 
     // Use React 19's scheduler postTask for accurate measurement
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('scheduler' in window && 'postTask' in (window as any).scheduler) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).scheduler.postTask(
         () => {
           const renderTime = performance.now() - renderStartRef.current;
@@ -103,6 +108,7 @@ export function usePerformanceMonitor(config: PerformanceConfig = {}) {
   const trackMemoryUsage = useCallback(() => {
     if (!trackMemory || !('memory' in performance)) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const memory = (performance as any).memory;
     if (memory) {
       metricsRef.current.memoryUsage = memory.usedJSHeapSize / 1024 / 1024; // MB
@@ -116,6 +122,7 @@ export function usePerformanceMonitor(config: PerformanceConfig = {}) {
     // LCP (Largest Contentful Paint)
     const lcpObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const lastEntry = entries[entries.length - 1] as any;
       metricsRef.current.coreWebVitals.lcp = lastEntry.startTime;
     });
@@ -123,7 +130,7 @@ export function usePerformanceMonitor(config: PerformanceConfig = {}) {
     // FID (First Input Delay)
     const fidObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      entries.forEach((entry: any) => {
+      entries.forEach((entry: unknown) => {
         metricsRef.current.coreWebVitals.fid = entry.processingStart - entry.startTime;
       });
     });
@@ -132,7 +139,7 @@ export function usePerformanceMonitor(config: PerformanceConfig = {}) {
     let clsValue = 0;
     const clsObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      entries.forEach((entry: any) => {
+      entries.forEach((entry: unknown) => {
         if (!entry.hadRecentInput) {
           clsValue += entry.value;
           metricsRef.current.coreWebVitals.cls = clsValue;
@@ -163,7 +170,9 @@ export function usePerformanceMonitor(config: PerformanceConfig = {}) {
       const startTime = performance.now();
 
       // Use React 19's scheduler for accurate measurement
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ('scheduler' in window && 'postTask' in (window as any).scheduler) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).scheduler.postTask(
           () => {
             const delay = performance.now() - startTime;
@@ -206,6 +215,7 @@ export function withPerformanceMonitoring<P extends object>(
   WrappedComponent: ComponentType<P>,
   config: PerformanceConfig = {}
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const PerformanceMonitoredComponent = forwardRef<any, P>((props, ref) => {
     const { trackRender, trackInteraction } = usePerformanceMonitor(config);
 

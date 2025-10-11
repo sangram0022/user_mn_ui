@@ -15,7 +15,7 @@ import type { RouteObject } from 'react-router-dom';
  */
 export type ComponentRegistry = Record<
   string,
-  ComponentType<any> | LazyExoticComponent<ComponentType<any>>
+  ComponentType<unknown> | LazyExoticComponent<ComponentType<unknown>>
 >;
 
 /**
@@ -39,7 +39,7 @@ export interface StoreSlice<T = unknown> {
 export interface RouteConfig {
   path: string;
   element?: React.ReactNode;
-  Component?: ComponentType<any> | LazyExoticComponent<ComponentType<any>>;
+  Component?: ComponentType<unknown> | LazyExoticComponent<ComponentType<unknown>>;
   children?: RouteConfig[];
   index?: boolean;
   caseSensitive?: boolean;
@@ -118,10 +118,10 @@ export interface DomainModuleLoaderConfig {
   remoteUrl?: string;
 
   /** Fallback component on load error */
-  fallback?: ComponentType<any>;
+  fallback?: ComponentType<unknown>;
 
   /** Loading component */
-  loading?: ComponentType<any>;
+  loading?: ComponentType<unknown>;
 
   /** Max retry attempts */
   maxRetries?: number;

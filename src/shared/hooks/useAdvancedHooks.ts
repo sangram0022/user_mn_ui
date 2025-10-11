@@ -3,9 +3,10 @@
  * Comprehensive reusable logic with React 19 features
  */
 
-import { logger } from './../utils/logger';
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logger } from './../utils/logger';
+import { error } from 'console';
 
 // Enhanced Authentication Hook
 export interface UseAuthOptions {
@@ -51,7 +52,7 @@ export function useEnhancedAuth(options: UseAuthOptions = {}) {
         } else {
           setAuthState((prev) => ({ ...prev, loading: false }));
         }
-      } catch (_) {
+      } catch {
         setAuthState((prev) => ({ ...prev, loading: false }));
       }
     };
@@ -101,7 +102,7 @@ export function useEnhancedAuth(options: UseAuthOptions = {}) {
       });
 
       return { success: true };
-    } catch (_) {
+    } catch {
       setAuthState((prev) => ({ ...prev, loading: false }));
       throw error;
     }
@@ -194,7 +195,7 @@ export function useAdvancedApi<T>(
 
           onSuccess?.(result);
           return result;
-        } catch (_) {
+        } catch {
           if (attempt < retryCount) {
             await new Promise((resolve) => setTimeout(resolve, retryDelay * (attempt + 1)));
             return attemptRequest(attempt + 1);
@@ -223,6 +224,7 @@ export function useAdvancedApi<T>(
         abortControllerRef.current.abort();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, ...dependencies]);
 
   const mutate = useCallback(
@@ -235,7 +237,7 @@ export function useAdvancedApi<T>(
       if (shouldRevalidate) {
         try {
           await execute();
-        } catch (_) {
+        } catch {
           // Revert optimistic update on error
           if (optimistic) {
             setState((prev) => ({ ...prev, data: state.data }));
@@ -338,7 +340,7 @@ export function useEnhancedForm<T extends Record<string, unknown>>(options: UseF
         }
 
         await onSubmit(values);
-      } catch (_) {
+      } catch {
         logger.error('Form submission error:', undefined, { error });
       } finally {
         setIsSubmitting(false);
@@ -431,7 +433,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
-    } catch (_) {
+    } catch {
       logger.error(
         `Error reading localStorage key "${key}":`,
         error instanceof Error ? error : new Error(String(error))
@@ -446,7 +448,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
         const valueToStore = value instanceof Function ? value(storedValue) : value;
         setStoredValue(valueToStore);
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
-      } catch (_) {
+      } catch {
         logger.error(
           `Error setting localStorage key "${key}":`,
           error instanceof Error ? error : new Error(String(error))
@@ -460,7 +462,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     try {
       window.localStorage.removeItem(key);
       setStoredValue(initialValue);
-    } catch (_) {
+    } catch {
       logger.error(
         `Error removing localStorage key "${key}":`,
         error instanceof Error ? error : new Error(String(error))

@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * Unit Tests: Performance Optimization Utilities
  *
@@ -9,23 +9,20 @@
  * - Custom hooks (useStableCallback, useIntersectionObserver, etc.)
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
 import {
-  WeakCache,
-  LRUCache,
   CleanupRegistry,
+  LRUCache,
   useCleanupEffect,
-  useCleanupRegistry,
-  useStableCallback,
-  useMemoizedObject,
   useDeepMemo,
-  useDeferredValue,
   useIntersectionObserver,
-  useResizeObserver,
+  useMemoizedObject,
   useRenderCount,
+  useStableCallback,
   useWhyDidYouUpdate,
+  WeakCache,
 } from '@shared/utils/performance-optimizations';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ============================================================================
 // WeakCache Tests

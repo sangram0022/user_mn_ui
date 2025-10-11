@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Testing Utilities and Strategies (Non-JSX Version)
  * Expert-level testing implementation by 20-year React veteran
@@ -65,7 +65,7 @@ export const waitForElementToAppear = async (
           resolve(element);
           return;
         }
-      } catch (error) {
+      } catch {
         // Element not found yet
       }
 

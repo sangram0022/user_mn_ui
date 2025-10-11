@@ -1,20 +1,21 @@
-/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * Lazy Loading and Code Splitting
  * Expert-level performance optimization by 20-year React veteran
  */
 
-import { logger } from './../utils/logger';
 import React, {
-  lazy,
-  Suspense,
-  ComponentType,
-  ComponentProps,
-  ReactNode,
-  useEffect,
   Component,
+  ComponentProps,
+  ComponentType,
+  lazy,
+  ReactNode,
+  Suspense,
+  useEffect,
 } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { logger } from './../utils/logger';
+import { error } from 'console';
 
 // ==================== TYPES ====================
 

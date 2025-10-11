@@ -1,20 +1,20 @@
-/* eslint-disable react-refresh/only-export-components, react-hooks/exhaustive-deps, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 /**
  * Performance Optimization Utilities
  * Expert-level performance enhancements by 20-year React veteran
  */
 
-import { logger } from './../utils/logger';
 import React, {
+  ComponentType,
   memo,
-  useMemo,
   useCallback,
+  useEffect,
+  useMemo,
   useRef,
   useState,
-  useEffect,
-  ComponentType,
   useTransition,
 } from 'react';
+import { logger } from './../utils/logger';
 
 // ==================== MEMOIZATION UTILITIES ====================
 
@@ -365,7 +365,7 @@ export function createDynamicImport<T>(
       try {
         return await importFunction();
       } catch (_error) {
-        lastError = error as Error;
+        lastError = _error as Error;
 
         if (i < retries - 1) {
           await new Promise((resolve) => setTimeout(resolve, delay * (i + 1)));
@@ -546,7 +546,9 @@ export function useRenderProfiler(componentName: string) {
     }
 
     // Send to performance monitoring service
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (typeof window !== 'undefined' && (window as any).gtag) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).gtag('event', 'render_performance', {
         component: componentName,
         render_time: renderTime,
@@ -568,6 +570,7 @@ export function useMemoryMonitor() {
   useEffect(() => {
     const updateMemoryInfo = () => {
       if ('memory' in performance) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const memory = (performance as any).memory;
         setMemoryInfo({
           used: memory.usedJSHeapSize,

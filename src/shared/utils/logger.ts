@@ -51,7 +51,12 @@ class Logger {
     }
   }
 
-  private formatMessage(level: LogLevel, message: string, context?: LogContext, error?: Error): LogMessage {
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    context?: LogContext,
+    error?: Error
+  ): LogMessage {
     return {
       level,
       message,
@@ -67,7 +72,7 @@ class Logger {
 
   private addToBuffer(logMessage: LogMessage): void {
     this.logBuffer.push(logMessage);
-    
+
     // Keep buffer size manageable
     if (this.logBuffer.length > this.maxBufferSize) {
       this.logBuffer = this.logBuffer.slice(-this.maxBufferSize);
@@ -116,7 +121,7 @@ class Logger {
     }
 
     const prefix = `[${logMessage.timestamp}] ${logMessage.level.toUpperCase()}:`;
-    
+
     switch (logMessage.level) {
       case 'debug':
         if (this.isDevelopment) {
@@ -135,7 +140,11 @@ class Logger {
         break;
       case 'error':
         if (this.isDevelopment) {
-          console.error(`❌ ${prefix}`, logMessage.message, logMessage.error || logMessage.context || '');
+          console.error(
+            `❌ ${prefix}`,
+            logMessage.message,
+            logMessage.error || logMessage.context || ''
+          );
         }
         break;
     }
@@ -159,7 +168,7 @@ class Logger {
   error(message: string, error?: Error, context?: LogContext): void {
     const logMessage = this.formatMessage('error', message, context, error);
     this.outputLog(logMessage);
-    
+
     // Report critical errors immediately in production
     if (!this.isDevelopment) {
       this.reportCriticalError(logMessage);
@@ -191,7 +200,7 @@ class Logger {
   // Critical error reporting for production
   private async reportCriticalError(logMessage: LogMessage): Promise<void> {
     if (this.isDevelopment) return;
-    
+
     try {
       await fetch('/api/errors/critical', {
         method: 'POST',
@@ -213,11 +222,13 @@ export const log = {
   debug: (message: string, context?: LogContext) => logger.debug(message, context),
   info: (message: string, context?: LogContext) => logger.info(message, context),
   warn: (message: string, context?: LogContext) => logger.warn(message, context),
-  error: (message: string, error?: Error, context?: LogContext) => logger.error(message, error, context),
+  error: (message: string, error?: Error, context?: LogContext) =>
+    logger.error(message, error, context),
 };
 
 // Development helper
 if (import.meta.env.DEV) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (globalThis as any).logger = logger;
   logger.info('Enhanced Logger initialized', { environment: 'development' });
 }
