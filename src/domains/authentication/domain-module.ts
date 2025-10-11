@@ -7,8 +7,8 @@
  * @module domains/authentication/domain-module
  */
 
-import { lazy } from 'react';
 import type { DomainModule } from '@shared/types/micro-frontend.types';
+import { lazy } from 'react';
 
 /**
  * Authentication Domain Module
@@ -117,8 +117,8 @@ export const AuthenticationDomain: DomainModule = {
       refreshToken: () => {},
     },
     selectors: {
-      user: (state: unknown) => state.user,
-      isAuthenticated: (state: unknown) => state.isAuthenticated,
+      user: (state: any) => state.user,
+      isAuthenticated: (state: any) => state.isAuthenticated,
     },
   },
 

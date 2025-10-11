@@ -1,10 +1,10 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
-import tseslint from 'typescript-eslint'
-import { globalIgnores } from 'eslint/config'
+import js from '@eslint/js';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import { globalIgnores } from 'eslint/config';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config([
   globalIgnores(['dist']),
@@ -29,7 +29,7 @@ export default tseslint.config([
       'jsx-a11y/mouse-events-have-key-events': 'warn',
       'jsx-a11y/no-static-element-interactions': 'warn',
       'jsx-a11y/click-events-have-key-events': 'warn',
-      '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
-])
+]);

@@ -15,10 +15,10 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import type {
-  User,
   AuthToken,
   LoginCredentials,
   RegisterData,
+  User,
   UserSession,
 } from '../types/auth.types';
 
@@ -41,6 +41,7 @@ export interface AuthState {
   refreshToken: () => Promise<void>;
   updateUser: (user: Partial<User>) => void;
   clearError: () => void;
+  reset: () => void;
 
   // Session management
   extendSession: () => Promise<void>;
@@ -212,6 +213,18 @@ export const useAuthStore = create<AuthState>()(
         // Clear Error Action
         clearError: () => {
           set({ error: null });
+        },
+
+        // Reset Action
+        reset: () => {
+          set({
+            user: null,
+            token: null,
+            session: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: null,
+          });
         },
 
         // Extend Session Action

@@ -39,7 +39,7 @@ export interface StoreSlice<T = unknown> {
 export interface RouteConfig {
   path: string;
   element?: React.ReactNode;
-  Component?: ComponentType<unknown> | LazyExoticComponent<ComponentType<unknown>>;
+  Component?: ComponentType<any> | LazyExoticComponent<ComponentType<any>>;
   children?: RouteConfig[];
   index?: boolean;
   caseSensitive?: boolean;
