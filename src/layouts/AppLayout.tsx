@@ -9,15 +9,58 @@ export interface AppLayoutProps {
 }
 
 const AppLayout: FC<AppLayoutProps> = ({ children }) => (
-  <div className="min-h-screen bg-gray-50 flex flex-col">
+  <div
+    style={{
+      minHeight: '100vh',
+      backgroundColor: '#f9fafb',
+      display: 'flex',
+      flexDirection: 'column',
+    }}
+  >
     <a
       href="#main-content"
-      className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-md focus:bg-white focus:text-blue-600 focus:shadow-lg"
+      style={{
+        position: 'absolute',
+        left: '-999px',
+        top: 'auto',
+        width: '1px',
+        height: '1px',
+        overflow: 'hidden',
+        zIndex: 50,
+      }}
+      onFocus={(e) => {
+        e.currentTarget.style.position = 'absolute';
+        e.currentTarget.style.top = '1rem';
+        e.currentTarget.style.left = '1rem';
+        e.currentTarget.style.width = 'auto';
+        e.currentTarget.style.height = 'auto';
+        e.currentTarget.style.padding = '0.5rem 1rem';
+        e.currentTarget.style.borderRadius = '0.375rem';
+        e.currentTarget.style.backgroundColor = '#ffffff';
+        e.currentTarget.style.color = '#2563eb';
+        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.left = '-999px';
+        e.currentTarget.style.top = 'auto';
+        e.currentTarget.style.width = '1px';
+        e.currentTarget.style.height = '1px';
+        e.currentTarget.style.padding = '0';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
     >
       Skip to main content
     </a>
     <PrimaryNavigation />
-    <main id="main-content" role="main" tabIndex={-1} className="flex-1 focus:outline-none">
+    <main
+      id="main-content"
+      role="main"
+      tabIndex={-1}
+      style={{
+        flex: 1,
+        outline: 'none',
+      }}
+    >
       {children}
     </main>
     <Footer />

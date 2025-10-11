@@ -250,6 +250,7 @@ const LoginPage: React.FC = () => {
                       fontSize: '0.875rem',
                       transition: 'all 0.2s ease',
                       outline: 'none',
+                      boxSizing: 'border-box',
                     }}
                     placeholder="Enter your email"
                     onFocus={(e) => {
@@ -317,6 +318,7 @@ const LoginPage: React.FC = () => {
                       fontSize: '0.875rem',
                       transition: 'all 0.2s ease',
                       outline: 'none',
+                      boxSizing: 'border-box',
                     }}
                     placeholder="Enter your password"
                     onFocus={(e) => {
@@ -519,48 +521,6 @@ const LoginPage: React.FC = () => {
                 Create a new account
               </Link>
             </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: '1.5rem',
-              backgroundColor: '#eff6ff',
-              border: '1px solid #bfdbfe',
-              borderRadius: '0.5rem',
-              padding: '1rem',
-            }}
-          >
-            <h2
-              style={{
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#1e40af',
-                marginBottom: '0.5rem',
-              }}
-            >
-              Demo Credentials
-            </h2>
-            <dl style={{ fontSize: '0.75rem', color: '#1e3a8a' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '0.25rem',
-                }}
-              >
-                <dt style={{ fontWeight: '600' }}>Admin</dt>
-                <dd>admin@example.com / admin123</dd>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <dt style={{ fontWeight: '600' }}>User</dt>
-                <dd>user@example.com / user123</dd>
-              </div>
-            </dl>
           </div>
         </div>
       </div>

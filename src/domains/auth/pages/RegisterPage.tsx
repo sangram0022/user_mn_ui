@@ -717,6 +717,7 @@ const RegisterPage: React.FC = () => {
                     fontSize: '0.875rem',
                     transition: 'all 0.2s ease',
                     outline: 'none',
+                    boxSizing: 'border-box',
                   }}
                   placeholder="Enter your first name"
                   onFocus={(e) => {
@@ -782,6 +783,7 @@ const RegisterPage: React.FC = () => {
                     fontSize: '0.875rem',
                     transition: 'all 0.2s ease',
                     outline: 'none',
+                    boxSizing: 'border-box',
                   }}
                   placeholder="Enter your last name"
                   onFocus={(e) => {
@@ -847,6 +849,7 @@ const RegisterPage: React.FC = () => {
                     fontSize: '0.875rem',
                     transition: 'all 0.2s ease',
                     outline: 'none',
+                    boxSizing: 'border-box',
                   }}
                   placeholder="Enter your email"
                   onFocus={(e) => {
@@ -912,6 +915,7 @@ const RegisterPage: React.FC = () => {
                     fontSize: '0.875rem',
                     transition: 'all 0.2s ease',
                     outline: 'none',
+                    boxSizing: 'border-box',
                   }}
                   placeholder="Create a password"
                   onFocus={(e) => {
@@ -1002,6 +1006,7 @@ const RegisterPage: React.FC = () => {
                     fontSize: '0.875rem',
                     transition: 'all 0.2s ease',
                     outline: 'none',
+                    boxSizing: 'border-box',
                   }}
                   placeholder="Confirm your password"
                   onFocus={(e) => {
