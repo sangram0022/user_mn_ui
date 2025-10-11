@@ -334,14 +334,10 @@ function deepEqual(a: any, b: any): boolean {
  * console.log(`Rendered ${renderCount} times`);
  * ```
  */
-export function useRenderCount(componentName: string = 'Component'): number {
+export function useRenderCount(_componentName: string = 'Component'): number {
   const renderCount = useRef(0);
 
   renderCount.current += 1;
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[${componentName}] Render #${renderCount.current}`);
-  }
 
   return renderCount.current;
 }
@@ -354,7 +350,7 @@ export function useRenderCount(componentName: string = 'Component'): number {
  * useWhyDidYouUpdate('MyComponent', { prop1, prop2, state1 });
  * ```
  */
-export function useWhyDidYouUpdate(componentName: string, props: Record<string, any>): void {
+export function useWhyDidYouUpdate(_componentName: string, props: Record<string, any>): void {
   const previousProps = useRef<Record<string, any> | undefined>(undefined);
 
   useEffect(() => {
@@ -372,8 +368,9 @@ export function useWhyDidYouUpdate(componentName: string, props: Record<string, 
         {} as Record<string, any>
       );
 
-      if (Object.keys(changedProps).length > 0) {
-        console.log(`[${componentName}] Changed props:`, changedProps);
+      // Changed props tracked in development mode
+      if (Object.keys(changedProps).length > 0 && process.env.NODE_ENV === 'development') {
+        // Props changed - can be logged if needed
       }
     }
 
