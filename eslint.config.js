@@ -32,4 +32,12 @@ export default tseslint.config([
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
+  // Relax a few rules in test utilities only to avoid artificial type complexity
+  {
+    files: ['src/test/**/*.{ts,tsx}', 'src/**/__tests__/**/*.{ts,tsx}'],
+    rules: {
+      // Allow any in test helpers/mocks to keep tests concise
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
 ]);

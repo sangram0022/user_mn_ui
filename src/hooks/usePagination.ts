@@ -25,16 +25,18 @@ import { useCallback, useMemo, useState } from 'react';
 
 interface UsePaginationOptions {
   initialPage?: number;
-  initialLimit?: number;
-  totalItems?: number;
+  initialLimit?: number; // legacy
+  totalItems?: number; // legacy
+  initialTotal?: number;
+  pageSize?: number;
 }
 
 export const usePagination = (options: UsePaginationOptions = {}) => {
-  const { initialPage = 1, initialLimit = 10, totalItems = 0 } = options;
+  const { initialPage = 1, initialLimit = 10, totalItems = 0, initialTotal, pageSize } = options;
 
   const [page, setPage] = useState(initialPage);
-  const [limit, setLimit] = useState(initialLimit);
-  const [total, setTotal] = useState(totalItems);
+  const [limit, setLimit] = useState(pageSize ?? initialLimit);
+  const [total, setTotal] = useState(initialTotal ?? totalItems);
 
   const totalPages = useMemo(() => {
     return Math.ceil(total / limit);
@@ -89,15 +91,19 @@ export const usePagination = (options: UsePaginationOptions = {}) => {
 
   return {
     page,
+    pageSize: limit,
     limit,
     total,
     totalPages,
     hasNext,
     hasPrev,
     offset,
+    skip: offset,
     nextPage,
     prevPage,
+    previousPage: prevPage,
     goToPage,
+    setPage,
     changeLimit,
     updateTotal,
     reset,

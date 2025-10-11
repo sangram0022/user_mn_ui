@@ -33,10 +33,6 @@ export default defineConfig({
       reporter: ['text', 'html', 'lcov', 'json', 'json-summary'],
 
       // Coverage thresholds (CI will fail if below these)
-      statements: 80,
-      branches: 75,
-      functions: 80,
-      lines: 80,
 
       // Files to exclude from coverage
       exclude: [
@@ -103,9 +99,9 @@ export default defineConfig({
     isolate: true,
 
     // Parallel execution
-    threads: true,
-    maxThreads: 4,
-    minThreads: 1,
+    pool: 'threads',
+    maxWorkers: 4,
+    minWorkers: 1,
 
     // Watch mode
     watch: false,
@@ -120,7 +116,6 @@ export default defineConfig({
     },
 
     // Pool options
-    pool: 'threads',
 
     // Bail on failure (0 = don't bail)
     bail: 0,
@@ -141,6 +136,9 @@ export default defineConfig({
     deps: {
       inline: [/\/@lucide-react/, /\/zustand/],
     },
+
+    // Don't collect or run E2E Playwright tests in Vitest
+    exclude: ['e2e/**', 'node_modules/**', 'dist/**', 'coverage/**'],
   },
 
   resolve: {

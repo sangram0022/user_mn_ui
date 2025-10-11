@@ -2,8 +2,8 @@
  * Unit Tests: Utility Functions
  * Expert-level testing by 25-year React veteran
  */
-import { describe, it, expect, vi } from 'vitest';
 import { axe, toHaveNoViolations } from 'jest-axe';
+import { describe, expect, it, vi } from 'vitest';
 
 expect.extend(toHaveNoViolations);
 
@@ -16,8 +16,7 @@ const formatDate = (date: Date): string => {
   }).format(date);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const debounce = <T extends (...args: unknown[]) => any>(
+const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
@@ -155,7 +154,8 @@ describe('Utility Functions', () => {
 
     it('should validate all password requirements', () => {
       const tests = [
-        { password: 'short1A!', shouldContain: 'at least 8 characters' },
+        // 7 characters to fail the min length rule
+        { password: 'Short1!', shouldContain: 'at least 8 characters' },
         { password: 'nouppercase1!', shouldContain: 'uppercase letter' },
         { password: 'NOLOWERCASE1!', shouldContain: 'lowercase letter' },
         { password: 'NoNumbers!', shouldContain: 'number' },

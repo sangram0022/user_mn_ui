@@ -297,7 +297,7 @@ export function useOptimizedCallback<T extends (...args: unknown[]) => unknown>(
   const { debugName } = options;
 
   return useCallback((...args: Parameters<T>) => {
-    if (process.env.NODE_ENV === 'development' && debugName) {
+    if (import.meta.env.DEV && debugName) {
       logger.debug(`Executing callback: ${debugName}`, { args: args.map(String).join(', ') });
     }
     return callback(...args);
@@ -319,7 +319,7 @@ export function useOptimizedMemo<T>(
     const result = factory();
     const end = performance.now();
 
-    if (process.env.NODE_ENV === 'development' && debugName) {
+    if (import.meta.env.DEV && debugName) {
       logger.debug(`Memo computation: ${debugName} took ${end - start}ms`);
     }
 
@@ -549,7 +549,7 @@ class ErrorBoundary extends Component<PropsWithChildren<object>, ErrorBoundarySt
     logger.error('Lazy component loading error:', enrichedError);
 
     // Report to monitoring service in production
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.PROD) {
       const productionError = new Error(`Component failed to load: ${error.message}`);
       productionError.stack = error.stack;
       logger.error('Component failed to load:', productionError);

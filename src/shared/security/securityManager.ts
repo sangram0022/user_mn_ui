@@ -50,7 +50,7 @@ export class SecurityManager {
       enableA11y: true,
       enableMonitoring: true,
       enableRuntimeProtection: true,
-      development: process.env.NODE_ENV === 'development',
+      development: import.meta.env.DEV,
       ...config,
     };
 

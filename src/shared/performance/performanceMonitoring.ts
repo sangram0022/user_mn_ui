@@ -336,7 +336,7 @@ export class WebVitalsMonitor {
       logger.warn(`⚠️ Performance budget exceeded for ${metric}: ${value}ms > ${threshold}ms`);
 
       // Report to monitoring service
-      if (process.env.NODE_ENV === 'production') {
+      if (import.meta.env.PROD) {
         this.reportPerformanceIssue(metric, value, threshold);
       }
     }
@@ -351,7 +351,7 @@ export class WebVitalsMonitor {
     threshold: number
   ): Promise<void> {
     try {
-      const endpoint = process.env.REACT_APP_PERFORMANCE_MONITORING_ENDPOINT;
+      const endpoint = import.meta.env.VITE_PERFORMANCE_MONITORING_ENDPOINT;
       if (!endpoint) return;
 
       await fetch(endpoint, {
@@ -577,7 +577,7 @@ export class BundleAnalyzer {
         );
 
         // Report to monitoring service
-        if (process.env.NODE_ENV === 'production') {
+        if (import.meta.env.PROD) {
           await this.reportBundleSize(analysis);
         }
       }
@@ -599,7 +599,7 @@ export class BundleAnalyzer {
    */
   private static async reportBundleSize(analysis: BundleAnalysis): Promise<void> {
     try {
-      const endpoint = process.env.REACT_APP_PERFORMANCE_MONITORING_ENDPOINT;
+      const endpoint = import.meta.env.VITE_PERFORMANCE_MONITORING_ENDPOINT;
       if (!endpoint) return;
 
       await fetch(endpoint, {
@@ -690,5 +690,6 @@ export const performanceMonitoring = {
 export default performanceMonitoring;
 
 // React import for hooks
+import { useEffect, useState } from 'react';
 import { logger } from './../utils/logger';
-import { useState, useEffect } from 'react';
+import { error } from 'console';

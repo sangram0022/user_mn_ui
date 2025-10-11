@@ -4,9 +4,9 @@
  * Comprehensive error handling with React 19 patterns and expert-level practices
  */
 
-import { logger } from './../utils/logger';
-import { Component, ComponentType, useCallback } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import { Component, ComponentType, useCallback } from 'react';
+import { logger } from './../utils/logger';
 import { categorizeError, ErrorReportingService, type ErrorDetails } from './errorUtils';
 
 // Error boundary state interface
@@ -77,7 +77,7 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error, resetError, retryCoun
           We apologize for the inconvenience. The application encountered an unexpected error.
         </p>
 
-        {process.env.NODE_ENV === 'development' && (
+        {import.meta.env.DEV && (
           <details className="mt-3">
             <summary className="text-sm text-gray-500 cursor-pointer hover:text-gray-700">
               Error Details (Development)

@@ -60,8 +60,8 @@ export class ContentSecurityPolicy {
    * Get production-ready CSP directives
    */
   static getProductionCSP(): CSPDirectives {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-    const wsUrl = process.env.REACT_APP_WEBSOCKET_URL || 'ws://localhost:3001';
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+    const wsUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:3001';
 
     return {
       defaultSrc: ["'self'"],
@@ -366,8 +366,8 @@ export class CORSManager {
    */
   static getProductionConfig(): CORSConfig {
     const allowedOrigins = [
-      process.env.REACT_APP_FRONTEND_URL || 'http://localhost:3000',
-      ...(process.env.REACT_APP_ALLOWED_ORIGINS?.split(',') || []),
+      import.meta.env.VITE_FRONTEND_URL || 'http://localhost:5173',
+      ...(import.meta.env.VITE_ALLOWED_ORIGINS?.split(',') || []),
     ].filter(Boolean);
 
     return {
@@ -435,12 +435,12 @@ export class SecurityMonitor {
     }
 
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       logger.warn('Security Violation:', { violation });
     }
 
     // In production, send to monitoring service
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.PROD) {
       this.reportToService(violation);
     }
   }
@@ -450,7 +450,7 @@ export class SecurityMonitor {
    */
   private static async reportToService(violation: Record<string, unknown>): Promise<void> {
     try {
-      const endpoint = process.env.REACT_APP_SECURITY_MONITORING_ENDPOINT;
+      const endpoint = import.meta.env.VITE_SECURITY_MONITORING_ENDPOINT;
       if (!endpoint) return;
 
       await fetch(endpoint, {

@@ -4,7 +4,7 @@
  */
 
 export const API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'https://api.yourdomain.com/api/v1',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8001/api/v1',
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,

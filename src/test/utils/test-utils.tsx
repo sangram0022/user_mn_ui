@@ -200,7 +200,6 @@ export async function waitFor<T>(
 export function createMockResponse<T>(
   data: T,
   options: { success?: boolean; error?: unknown; status?: number } = {}
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
   const { success = true, error = null, status = 200 } = options;
 
@@ -215,7 +214,6 @@ export function createMockResponse<T>(
 /**
  * Create mock error response
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createMockError(code: string, message: string, status = 400): any {
   return createMockResponse(null, {
     success: false,
@@ -246,11 +244,8 @@ export function mockConsole() {
   });
 
   return {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getLogCalls: () => (console.log as any).mock.calls,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getErrorCalls: () => (console.error as any).mock.calls,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getWarnCalls: () => (console.warn as any).mock.calls,
   };
 }

@@ -320,7 +320,7 @@ export class InputSanitizer {
 // ==================== ENCRYPTION UTILITIES ====================
 
 export class DataEncryption {
-  private static secretKey = process.env.REACT_APP_ENCRYPTION_KEY || 'default-secret-key';
+  private static secretKey = import.meta.env.VITE_ENCRYPTION_KEY || 'default-secret-key';
 
   /**
    * Encrypt sensitive data before storing

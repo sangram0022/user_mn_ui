@@ -6,17 +6,17 @@
 // ==================== ENVIRONMENT CONFIGURATION ====================
 
 export const ENV = {
-  NODE_ENV: process.env['NODE_ENV'] || 'development',
-  API_BASE_URL: process.env['VITE_API_BASE_URL'] || 'http://localhost:3001/api',
-  APP_URL: process.env['VITE_APP_URL'] || 'http://localhost:5173',
-  VERSION: process.env['VITE_APP_VERSION'] || '1.0.0',
-  BUILD_TIME: process.env['VITE_BUILD_TIME'] || new Date().toISOString(),
-  DEBUG: process.env['VITE_DEBUG'] === 'true',
+  NODE_ENV: import.meta.env.MODE || 'development',
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
+  APP_URL: import.meta.env.VITE_APP_URL || 'http://localhost:5173',
+  VERSION: import.meta.env.VITE_APP_VERSION || '1.0.0',
+  BUILD_TIME: import.meta.env.VITE_BUILD_TIME || new Date().toISOString(),
+  DEBUG: import.meta.env.VITE_DEBUG === 'true',
 } as const;
 
-export const isDevelopment = ENV.NODE_ENV === 'development';
-export const isProduction = ENV.NODE_ENV === 'production';
-export const isTest = ENV.NODE_ENV === 'test';
+export const isDevelopment = import.meta.env.DEV;
+export const isProduction = import.meta.env.PROD;
+export const isTest = import.meta.env.MODE === 'test';
 
 // ==================== API CONFIGURATION ====================
 
