@@ -285,6 +285,15 @@ export class ApiClient {
       const errorPayload = await this.parseJson(response);
       const normalized = normalizeApiError(response.status, response.statusText, errorPayload);
 
+      // Debug logging for error code extraction
+      if (import.meta.env.DEV) {
+        logger.info('[API] Error normalization', {
+          errorPayload,
+          normalized,
+          extractedCode: normalized.code,
+        });
+      }
+
       throw new ApiError({
         status: normalized.status,
         message: normalized.message,

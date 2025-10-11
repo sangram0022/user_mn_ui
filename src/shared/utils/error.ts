@@ -861,8 +861,12 @@ const normalizeNewErrorFormat = (
 ): NormalizedApiError => {
   // Handle nested error structure from backend
   let actualPayload = payload;
+  let originalPayload: Record<string, unknown> | undefined;
+
   if (payload && typeof payload === 'object' && 'error' in payload) {
-    actualPayload = (payload as Record<string, unknown>).error as ApiErrorResponse;
+    originalPayload = payload as unknown as Record<string, unknown>;
+    actualPayload =
+      ((originalPayload as Record<string, unknown>).error as ApiErrorResponse) || payload;
   }
 
   const { status: apiStatus, message, detail } = actualPayload;
@@ -884,6 +888,17 @@ const normalizeNewErrorFormat = (
     }
     if (typeof detailObj.error_code === 'string') {
       code = detailObj.error_code;
+    }
+  }
+
+  // Also check original payload's detail for error_code (in case of nested structure)
+  if (!code && originalPayload && 'detail' in originalPayload) {
+    const originalDetail = originalPayload.detail;
+    if (originalDetail && typeof originalDetail === 'object') {
+      const detailObj = originalDetail as Record<string, unknown>;
+      if (typeof detailObj.error_code === 'string') {
+        code = detailObj.error_code;
+      }
     }
   }
 

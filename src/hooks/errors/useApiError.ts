@@ -137,6 +137,20 @@ export function useApiError(): UseApiErrorReturn {
     const code = extractErrorCode(errorInput);
     const statusCode = extractStatusCode(errorInput);
 
+    // Debug logging
+    if (import.meta.env.DEV) {
+      logger.info('[useApiError] Extracting error code', {
+        errorInput,
+        extractedCode: code,
+        statusCode,
+        hasCodeProperty: errorInput && typeof errorInput === 'object' && 'code' in errorInput,
+        codeValue:
+          errorInput && typeof errorInput === 'object' && 'code' in errorInput
+            ? (errorInput as Record<string, unknown>).code
+            : undefined,
+      });
+    }
+
     // Get user-friendly message from our config (NOT from backend response)
     const errorConfig = getErrorConfig(code);
 
