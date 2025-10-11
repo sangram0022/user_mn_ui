@@ -1,25 +1,28 @@
-import { logger } from './../../../shared/utils/logger';
 import type { FC, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { logger } from './../../../shared/utils/logger';
 
-import { useAuth } from '../../auth/context/AuthContext';
 import Breadcrumb from '@shared/ui/Breadcrumb';
-import { Users,
-  Shield,
+import { getUserRoleName } from '@shared/utils/user';
+import {
+  AlertTriangle,
   BarChart3,
-  Workflow,
-  UserCheck,
-  Settings,
+  CheckCircle,
+  Clock,
   Crown,
   Eye,
   FileText,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  TrendingUp, } from 'lucide-react';
-import { getUserRoleName } from '@shared/utils/user';
+  Settings,
+  Shield,
+  TrendingUp,
+  UserCheck,
+  Users,
+  Workflow,
+} from 'lucide-react';
+import { useAuth } from '../../auth/context/AuthContext';
 
-const RoleBasedDashboard: FC = () => { const { user } = useAuth();
+const RoleBasedDashboard: FC = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   if (!user) return null;
@@ -27,7 +30,7 @@ const RoleBasedDashboard: FC = () => { const { user } = useAuth();
   const handleFeatureClick = (href: string, event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     logger.info(`🧭 Dashboard navigation clicked: ${href}`);
-    logger.info('🔧 Using navigate() to route to:', { href  });
+    logger.info('🔧 Using navigate() to route to:', { href });
     navigate(href);
   };
 
@@ -37,49 +40,56 @@ const RoleBasedDashboard: FC = () => { const { user } = useAuth();
   const isUser = roleName === 'user';
 
   const adminFeatures = [
-    { title: 'User Management',
+    {
+      title: 'User Management',
       description: 'Complete control over user accounts, roles, and permissions',
       icon: Users,
       href: '/users',
       color: 'blue',
       stats: '1,234 Users',
     },
-    { title: 'System Analytics',
+    {
+      title: 'System Analytics',
       description: 'Comprehensive system insights and performance metrics',
       icon: BarChart3,
       href: '/analytics',
       color: 'purple',
       stats: '99.9% Uptime',
     },
-    { title: 'Workflow Management',
+    {
+      title: 'Workflow Management',
       description: 'Manage approval workflows and business processes',
       icon: Workflow,
       href: '/workflows',
       color: 'green',
       stats: '23 Pending',
     },
-    { title: 'Security Center',
+    {
+      title: 'Security Center',
       description: 'Security monitoring, audit logs, and compliance',
       icon: Shield,
       href: '/security',
       color: 'red',
       stats: '5 Alerts',
     },
-    { title: 'System Settings',
+    {
+      title: 'System Settings',
       description: 'Global system configuration and preferences',
       icon: Settings,
       href: '/settings',
       color: 'gray',
       stats: 'Updated 2h ago',
     },
-    { title: 'Reports & Export',
+    {
+      title: 'Reports & Export',
       description: 'Generate reports and export system data',
       icon: FileText,
       href: '/reports',
       color: 'indigo',
       stats: '12 Reports',
     },
-    { title: 'System Status',
+    {
+      title: 'System Status',
       description: 'Check system health and component status',
       icon: CheckCircle,
       href: '/status',
@@ -89,28 +99,32 @@ const RoleBasedDashboard: FC = () => { const { user } = useAuth();
   ];
 
   const moderatorFeatures = [
-    { title: 'User Moderation',
+    {
+      title: 'User Moderation',
       description: 'Review and moderate user activities and content',
       icon: Eye,
       href: '/moderation',
       color: 'blue',
       stats: '8 Reviews',
     },
-    { title: 'Approval Workflows',
+    {
+      title: 'Approval Workflows',
       description: 'Handle pending approvals and user requests',
       icon: UserCheck,
       href: '/approvals',
       color: 'orange',
       stats: '15 Pending',
     },
-    { title: 'Activity Analytics',
+    {
+      title: 'Activity Analytics',
       description: 'Monitor user engagement and platform activity',
       icon: BarChart3,
       href: '/analytics',
       color: 'purple',
       stats: 'Last 7 days',
     },
-    { title: 'Content Reports',
+    {
+      title: 'Content Reports',
       description: 'Review reported content and take action',
       icon: AlertTriangle,
       href: '/reports',
@@ -120,28 +134,32 @@ const RoleBasedDashboard: FC = () => { const { user } = useAuth();
   ];
 
   const userFeatures = [
-    { title: 'My Profile',
+    {
+      title: 'My Profile',
       description: 'View and update your profile information',
       icon: Users,
       href: '/profile',
       color: 'blue',
       stats: 'Complete',
     },
-    { title: 'Activity Dashboard',
+    {
+      title: 'Activity Dashboard',
       description: 'Track your activity and engagement metrics',
       icon: TrendingUp,
       href: '/activity',
       color: 'green',
       stats: '85% Active',
     },
-    { title: 'My Workflows',
+    {
+      title: 'My Workflows',
       description: 'View your submitted requests and their status',
       icon: Clock,
       href: '/my-workflows',
       color: 'orange',
       stats: '2 In Progress',
     },
-    { title: 'Account Settings',
+    {
+      title: 'Account Settings',
       description: 'Manage your account preferences and security',
       icon: Settings,
       href: '/account',
@@ -150,12 +168,14 @@ const RoleBasedDashboard: FC = () => { const { user } = useAuth();
     },
   ];
 
-  const getFeatures = () => { if (isAdmin) return adminFeatures;
+  const getFeatures = () => {
+    if (isAdmin) return adminFeatures;
     if (isModerator) return moderatorFeatures;
     return userFeatures;
   };
 
-  const getRoleInfo = () => { if (isAdmin)
+  const getRoleInfo = () => {
+    if (isAdmin)
       return {
         title: 'Administrator Dashboard',
         description: 'You have full administrative access to the system',
@@ -163,12 +183,14 @@ const RoleBasedDashboard: FC = () => { const { user } = useAuth();
         color: 'text-yellow-600 bg-yellow-100',
       } as const;
     if (isModerator)
-      return { title: 'Moderator Dashboard',
+      return {
+        title: 'Moderator Dashboard',
         description: 'You can moderate users and manage content',
         icon: Shield,
         color: 'text-blue-600 bg-blue-100',
       } as const;
-    return { title: 'My Dashboard',
+    return {
+      title: 'My Dashboard',
       description: 'Access your personalized features and tools',
       icon: Users,
       color: 'text-green-600 bg-green-100',
@@ -179,75 +201,147 @@ const RoleBasedDashboard: FC = () => { const { user } = useAuth();
   const roleInfo = getRoleInfo();
   const RoleIcon = roleInfo.icon;
 
-  const getColorClasses = (color: string) => { const colors = {
-      blue: 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100',
-      purple: 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100',
-      green: 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100',
-      red: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100',
-      orange: 'bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100',
-      gray: 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100',
-      indigo: 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100',
-      emerald: 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100',
-    } as const;
-    return colors[color as keyof typeof colors] || colors.gray;
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className={`inline-flex items-center space-x-3 px-4 py-3 rounded-lg ${roleInfo.color}`}>
-            <RoleIcon className="w-6 h-6" />
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '2rem 1rem' }}>
+        <div style={{ marginBottom: '2rem' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '1rem',
+              borderRadius: '0.5rem',
+              backgroundColor: roleInfo.color.includes('yellow')
+                ? '#fef3c7'
+                : roleInfo.color.includes('blue')
+                  ? '#dbeafe'
+                  : '#dcfce7',
+              color: roleInfo.color.includes('yellow')
+                ? '#92400e'
+                : roleInfo.color.includes('blue')
+                  ? '#1e40af'
+                  : '#166534',
+            }}
+          >
+            <RoleIcon style={{ width: '1.5rem', height: '1.5rem' }} />
             <div>
-              <h1 className="text-2xl font-bold">{roleInfo.title}</h1>
-              <p className="text-sm opacity-80">{roleInfo.description}</p>
+              <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{roleInfo.title}</h1>
+              <p style={{ fontSize: '0.875rem', opacity: 0.8 }}>{roleInfo.description}</p>
             </div>
           </div>
         </div>
 
         {isAdmin && (
-          <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <Users className="w-6 h-6 text-blue-600" />
+          <div
+            style={{
+              marginBottom: '2rem',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '1.5rem',
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '0.5rem',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                border: '1px solid #e5e7eb',
+                padding: '1.5rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div
+                  style={{
+                    padding: '0.75rem',
+                    backgroundColor: '#dbeafe',
+                    borderRadius: '0.5rem',
+                  }}
+                >
+                  <Users style={{ width: '1.5rem', height: '1.5rem', color: '#2563eb' }} />
                 </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">1,234</div>
-                  <div className="text-sm text-gray-500">Total Users</div>
+                <div style={{ marginLeft: '1rem' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>
+                    1,234
+                  </div>
+                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Total Users</div>
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '0.5rem',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                border: '1px solid #e5e7eb',
+                padding: '1.5rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div
+                  style={{
+                    padding: '0.75rem',
+                    backgroundColor: '#dcfce7',
+                    borderRadius: '0.5rem',
+                  }}
+                >
+                  <CheckCircle style={{ width: '1.5rem', height: '1.5rem', color: '#16a34a' }} />
                 </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">99.9%</div>
-                  <div className="text-sm text-gray-500">System Uptime</div>
+                <div style={{ marginLeft: '1rem' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>
+                    99.9%
+                  </div>
+                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>System Uptime</div>
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-orange-100 rounded-lg">
-                  <Clock className="w-6 h-6 text-orange-600" />
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '0.5rem',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                border: '1px solid #e5e7eb',
+                padding: '1.5rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div
+                  style={{
+                    padding: '0.75rem',
+                    backgroundColor: '#fed7aa',
+                    borderRadius: '0.5rem',
+                  }}
+                >
+                  <Clock style={{ width: '1.5rem', height: '1.5rem', color: '#ea580c' }} />
                 </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">23</div>
-                  <div className="text-sm text-gray-500">Pending Approvals</div>
+                <div style={{ marginLeft: '1rem' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>23</div>
+                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Pending Approvals</div>
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-red-100 rounded-lg">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '0.5rem',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                border: '1px solid #e5e7eb',
+                padding: '1.5rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div
+                  style={{
+                    padding: '0.75rem',
+                    backgroundColor: '#fecaca',
+                    borderRadius: '0.5rem',
+                  }}
+                >
+                  <AlertTriangle style={{ width: '1.5rem', height: '1.5rem', color: '#dc2626' }} />
                 </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">5</div>
-                  <div className="text-sm text-gray-500">Security Alerts</div>
+                <div style={{ marginLeft: '1rem' }}>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>5</div>
+                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Security Alerts</div>
                 </div>
               </div>
             </div>
@@ -256,26 +350,86 @@ const RoleBasedDashboard: FC = () => { const { user } = useAuth();
 
         <Breadcrumb />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map(feature => {
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '1.5rem',
+          }}
+        >
+          {features.map((feature) => {
             const Icon = feature.icon;
             return (
               <Link
                 key={feature.href}
                 to={feature.href}
-                onClick={event => handleFeatureClick(feature.href, event)}
-                className={`block p-6 rounded-lg border-2 transition-all duration-200 transform hover:scale-105 hover:shadow-lg ${getColorClasses(feature.color)}`}
+                onClick={(event) => handleFeatureClick(feature.href, event)}
+                style={{
+                  display: 'block',
+                  padding: '1.5rem',
+                  borderRadius: '0.5rem',
+                  border: '2px solid #e5e7eb',
+                  transition: 'all 0.2s ease',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  backgroundColor: 'white',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                  e.currentTarget.style.boxShadow =
+                    '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+                  e.currentTarget.style.borderColor =
+                    feature.color === 'blue'
+                      ? '#3b82f6'
+                      : feature.color === 'green'
+                        ? '#10b981'
+                        : feature.color === 'purple'
+                          ? '#8b5cf6'
+                          : '#6b7280';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow =
+                    '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
+                  e.currentTarget.style.borderColor = '#e5e7eb';
+                }}
               >
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <Icon className="w-8 h-8" />
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                  <div style={{ flexShrink: 0 }}>
+                    <Icon
+                      style={{
+                        width: '2rem',
+                        height: '2rem',
+                        color:
+                          feature.color === 'blue'
+                            ? '#3b82f6'
+                            : feature.color === 'green'
+                              ? '#10b981'
+                              : feature.color === 'purple'
+                                ? '#8b5cf6'
+                                : '#6b7280',
+                      }}
+                    />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-sm opacity-80 mb-3">{feature.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium opacity-60">{feature.stats}</span>
-                      <span className="text-xs font-medium">→</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                      {feature.title}
+                    </h3>
+                    <p style={{ fontSize: '0.875rem', opacity: 0.8, marginBottom: '0.75rem' }}>
+                      {feature.description}
+                    </p>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <span style={{ fontSize: '0.75rem', fontWeight: '500', opacity: 0.6 }}>
+                        {feature.stats}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '500' }}>→</span>
                     </div>
                   </div>
                 </div>
@@ -284,11 +438,34 @@ const RoleBasedDashboard: FC = () => { const { user } = useAuth();
           })}
         </div>
 
-        <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div
+          style={{
+            marginTop: '2rem',
+            background: 'linear-gradient(135deg, #eff6ff 0%, #f3e8ff 100%)',
+            borderRadius: '0.5rem',
+            padding: '1.5rem',
+            border: '1px solid #bfdbfe',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: '#111827',
+              marginBottom: '1rem',
+            }}
+          >
             {isAdmin ? 'Admin Tips' : isModerator ? 'Moderator Tips' : 'Getting Started'}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '1rem',
+              fontSize: '0.875rem',
+              color: '#374151',
+            }}
+          >
             {isAdmin && (
               <>
                 <div>• Use the Security Center to monitor system threats</div>

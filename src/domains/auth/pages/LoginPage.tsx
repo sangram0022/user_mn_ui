@@ -1,9 +1,9 @@
-import React, { useCallback, useState, useTransition, startTransition } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import React, { startTransition, useCallback, useState, useTransition } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginFormState {
   email: string;

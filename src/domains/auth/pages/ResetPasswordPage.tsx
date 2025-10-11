@@ -1,16 +1,17 @@
-import { logger } from './../../../shared/utils/logger';
+import { CheckCircle, Eye, EyeOff, Loader, Lock } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Eye, EyeOff, Loader, Lock } from 'lucide-react';
+import { logger } from './../../../shared/utils/logger';
 
+import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { apiClient } from '@lib/api';
 import ErrorAlert from '@shared/ui/ErrorAlert';
-import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 
-const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchParams();
+const ResetPasswordPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -20,69 +21,81 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
   const [token, setToken] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => { const tokenParam = searchParams.get('token');
+  useEffect(() => {
+    const tokenParam = searchParams.get('token');
     if (!tokenParam) {
       handleError(new Error('Invalid or missing reset token'));
-    } else { setToken(tokenParam);
+    } else {
+      setToken(tokenParam);
     }
   }, [searchParams, handleError]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
     if (!token) {
       handleError(new Error('Invalid reset token'));
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) { handleError(new Error('Passwords do not match'));
+    if (formData.password !== formData.confirmPassword) {
+      handleError(new Error('Passwords do not match'));
       return;
     }
 
-    if (formData.password.length < 6) { handleError(new Error('Password must be at least 6 characters long'));
+    if (formData.password.length < 6) {
+      handleError(new Error('Password must be at least 6 characters long'));
       return;
     }
 
     setIsLoading(true);
     clearError();
 
-    try { const response = await apiClient.resetPassword({
+    try {
+      const response = await apiClient.resetPassword({
         token,
         new_password: formData.password,
-        confirm_password: formData.confirmPassword
+        confirm_password: formData.confirmPassword,
       });
 
-      if (!response.message) { logger.warn('Password reset response missing message payload');
+      if (!response.message) {
+        logger.warn('Password reset response missing message payload');
       }
 
       setIsSuccess(true);
-      window.setTimeout(() => { navigate('/login', {
+      window.setTimeout(() => {
+        navigate('/login', {
           state: {
             message:
-              response.message ?? 'Password reset successful! Please log in with your new password.'
-          }
+              response.message ??
+              'Password reset successful! Please log in with your new password.',
+          },
         });
       }, 3000);
-    } catch (err: unknown) { handleError(err);
-    } finally { setIsLoading(false);
+    } catch (err: unknown) {
+      handleError(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => { const { name, value } = event.target;
-    setFormData(prev => ({ ...prev,
-      [name]: value
-    }));
-    if (error) { clearError();
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) {
+      clearError();
     }
   };
 
-  if (!token && !error) { return (
+  if (!token && !error) {
+    return (
       <div
         style={{
           minHeight: '100vh',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#f9fafb'
+          backgroundColor: '#f9fafb',
         }}
       >
         <Loader style={{ width: '2rem', height: '2rem', animation: 'spin 1s linear infinite' }} />
@@ -90,7 +103,8 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
     );
   }
 
-  if (isSuccess) { return (
+  if (isSuccess) {
+    return (
       <div
         style={{
           minHeight: '100vh',
@@ -98,57 +112,49 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          padding: '3rem 1.5rem'
+          padding: '3rem 1.5rem',
         }}
       >
-        <div
-          style={{ margin: '0 auto',
-            width: '100%',
-            maxWidth: '28rem',
-            textAlign: 'center'
-          }}
-        >
+        <div style={{ margin: '0 auto', width: '100%', maxWidth: '28rem', textAlign: 'center' }}>
           <div
-            style={{ width: '4rem',
+            style={{
+              width: '4rem',
               height: '4rem',
               backgroundColor: '#10b981',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto 1.5rem'
+              margin: '0 auto 1.5rem',
             }}
           >
             <CheckCircle style={{ width: '2rem', height: '2rem', color: 'white' }} />
           </div>
 
-          <h2
-            style={{ fontSize: '1.875rem',
+          <h1
+            style={{
+              fontSize: '1.875rem',
               fontWeight: 'bold',
               color: '#111827',
-              marginBottom: '0.5rem'
+              marginBottom: '0.5rem',
             }}
           >
             Password Reset Successful!
-          </h2>
+          </h1>
 
-          <p
-            style={{ fontSize: '0.875rem',
-              color: '#6b7280',
-              marginBottom: '1.5rem'
-            }}
-          >
+          <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem' }}>
             Your password has been successfully reset. Redirecting to login...
           </p>
 
           <div
-            style={{ width: '2rem',
+            style={{
+              width: '2rem',
               height: '2rem',
               border: '4px solid #3b82f6',
               borderTop: '4px solid transparent',
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
-              margin: '0 auto'
+              margin: '0 auto',
             }}
           />
         </div>
@@ -158,58 +164,51 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
 
   return (
     <div
-      style={{ minHeight: '100vh',
+      style={{
+        minHeight: '100vh',
         background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        padding: '3rem 1.5rem'
+        padding: '3rem 1.5rem',
       }}
     >
-      <div
-        style={{ margin: '0 auto',
-          width: '100%',
-          maxWidth: '28rem'
-        }}
-      >
+      <div style={{ margin: '0 auto', width: '100%', maxWidth: '28rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div
-            style={{ width: '4rem',
+            style={{
+              width: '4rem',
               height: '4rem',
               backgroundColor: '#3b82f6',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto 1rem'
+              margin: '0 auto 1rem',
             }}
           >
             <Lock style={{ width: '2rem', height: '2rem', color: 'white' }} />
           </div>
-          <h2
-            style={{ fontSize: '1.875rem',
+          <h1
+            style={{
+              fontSize: '1.875rem',
               fontWeight: 'bold',
               color: '#111827',
-              marginBottom: '0.5rem'
+              marginBottom: '0.5rem',
             }}
           >
             Reset Your Password
-          </h2>
-          <p
-            style={{ fontSize: '0.875rem',
-              color: '#6b7280'
-            }}
-          >
-            Enter your new password below
-          </p>
+          </h1>
+          <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>Enter your new password below</p>
         </div>
 
         <div
-          style={{ backgroundColor: 'white',
+          style={{
+            backgroundColor: 'white',
             padding: '2rem',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             borderRadius: '1rem',
-            border: '1px solid #f3f4f6'
+            border: '1px solid #f3f4f6',
           }}
         >
           {error && (
@@ -222,11 +221,12 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
             <div style={{ marginBottom: '1.5rem' }}>
               <label
                 htmlFor="password"
-                style={{ display: 'block',
+                style={{
+                  display: 'block',
                   fontSize: '0.875rem',
                   fontWeight: '500',
                   color: '#374151',
-                  marginBottom: '0.5rem'
+                  marginBottom: '0.5rem',
                 }}
               >
                 New Password
@@ -240,7 +240,8 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  style={{ width: '100%',
+                  style={{
+                    width: '100%',
                     padding: '0.75rem 1rem',
                     paddingLeft: '2.5rem',
                     paddingRight: '2.5rem',
@@ -251,24 +252,26 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
                     borderRadius: '0.5rem',
                     boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                     transition: 'all 0.2s ease',
-                    outline: 'none'
+                    outline: 'none',
                   }}
                   placeholder="Enter your new password"
                 />
                 <Lock
-                  style={{ position: 'absolute',
+                  style={{
+                    position: 'absolute',
                     left: '0.75rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
                     width: '1rem',
                     height: '1rem',
-                    color: '#9ca3af'
+                    color: '#9ca3af',
                   }}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(prev => !prev)}
-                  style={{ position: 'absolute',
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  style={{
+                    position: 'absolute',
                     right: '0.75rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
@@ -276,7 +279,7 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
                     border: 'none',
                     background: 'transparent',
                     cursor: 'pointer',
-                    color: '#9ca3af'
+                    color: '#9ca3af',
                   }}
                 >
                   {showPassword ? (
@@ -286,12 +289,7 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
                   )}
                 </button>
               </div>
-              <p
-                style={{ fontSize: '0.75rem',
-                  color: '#6b7280',
-                  marginTop: '0.25rem'
-                }}
-              >
+              <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
                 Must be at least 6 characters long
               </p>
             </div>
@@ -299,11 +297,12 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
             <div style={{ marginBottom: '1.5rem' }}>
               <label
                 htmlFor="confirmPassword"
-                style={{ display: 'block',
+                style={{
+                  display: 'block',
                   fontSize: '0.875rem',
                   fontWeight: '500',
                   color: '#374151',
-                  marginBottom: '0.5rem'
+                  marginBottom: '0.5rem',
                 }}
               >
                 Confirm New Password
@@ -317,7 +316,8 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  style={{ width: '100%',
+                  style={{
+                    width: '100%',
                     padding: '0.75rem 1rem',
                     paddingLeft: '2.5rem',
                     paddingRight: '2.5rem',
@@ -328,24 +328,26 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
                     borderRadius: '0.5rem',
                     boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                     transition: 'all 0.2s ease',
-                    outline: 'none'
+                    outline: 'none',
                   }}
                   placeholder="Confirm your new password"
                 />
                 <Lock
-                  style={{ position: 'absolute',
+                  style={{
+                    position: 'absolute',
                     left: '0.75rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
                     width: '1rem',
                     height: '1rem',
-                    color: '#9ca3af'
+                    color: '#9ca3af',
                   }}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(prev => !prev)}
-                  style={{ position: 'absolute',
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  style={{
+                    position: 'absolute',
                     right: '0.75rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
@@ -353,7 +355,7 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
                     border: 'none',
                     background: 'transparent',
                     cursor: 'pointer',
-                    color: '#9ca3af'
+                    color: '#9ca3af',
                   }}
                 >
                   {showConfirmPassword ? (
@@ -368,7 +370,8 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
             <button
               type="submit"
               disabled={isLoading || !formData.password || !formData.confirmPassword}
-              style={{ width: '100%',
+              style={{
+                width: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -387,16 +390,13 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
                   isLoading || !formData.password || !formData.confirmPassword
                     ? 'not-allowed'
                     : 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
               }}
             >
               {isLoading ? (
                 <>
                   <Loader
-                    style={{ width: '1rem',
-                      height: '1rem',
-                      animation: 'spin 1s linear infinite'
-                    }}
+                    style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }}
                   />
                   Resetting Password...
                 </>
@@ -407,27 +407,22 @@ const ResetPasswordPage: React.FC = () => { const [searchParams] = useSearchPara
           </form>
 
           <div
-            style={{ marginTop: '1.5rem',
+            style={{
+              marginTop: '1.5rem',
               display: 'flex',
               justifyContent: 'space-between',
-              fontSize: '0.875rem'
+              fontSize: '0.875rem',
             }}
           >
             <Link
               to="/login"
-              style={{ fontWeight: '500',
-                color: '#3b82f6',
-                textDecoration: 'none'
-              }}
+              style={{ fontWeight: '500', color: '#3b82f6', textDecoration: 'none' }}
             >
               Back to login
             </Link>
             <Link
               to="/forgot-password"
-              style={{ fontWeight: '500',
-                color: '#3b82f6',
-                textDecoration: 'none'
-              }}
+              style={{ fontWeight: '500', color: '#3b82f6', textDecoration: 'none' }}
             >
               Request new link
             </Link>

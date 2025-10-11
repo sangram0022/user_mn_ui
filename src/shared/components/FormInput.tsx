@@ -1,5 +1,5 @@
-import React, { useState, type CSSProperties } from 'react';
 import { LucideIcon } from 'lucide-react';
+import React, { useState, type CSSProperties } from 'react';
 
 export interface FormInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'style'> {
   label: string;
