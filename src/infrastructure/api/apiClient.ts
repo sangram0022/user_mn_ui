@@ -11,6 +11,7 @@
  */
 
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { BACKEND_CONFIG } from '../../shared/config/api';
 
 export interface ApiClientConfig {
   baseURL: string;
@@ -124,7 +125,7 @@ class ApiClient {
 
 // Singleton instance
 const apiClient = new ApiClient({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
+  baseURL: BACKEND_CONFIG.API_BASE_URL,
   timeout: 30000,
   withCredentials: true,
 });

@@ -1,28 +1,38 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../../domains/auth/context/AuthContext';
 import { getUserRoleName } from '@shared/utils/user';
 import {
-  Menu,
-  X,
-  User,
-  LogOut,
-  Settings,
-  HelpCircle,
-  UserCircle,
-  Home,
-  Users,
   BarChart3,
-  Workflow,
-  FileText,
   ChevronDown,
+  FileText,
+  HelpCircle,
+  Home,
+  LogOut,
+  Menu,
+  Settings,
+  User,
+  UserCircle,
+  Users,
+  Workflow,
+  X,
 } from 'lucide-react';
+import { useAuth } from '../../domains/auth/context/AuthContext';
 
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -169,12 +179,9 @@ const Navigation = () => {
 
             {/* Desktop Navigation */}
             <div
-              style={
-                {
-                  display: 'none',
-                  '@media (min-width: 768px)': { display: 'flex' },
-                } as React.CSSProperties
-              }
+              style={{
+                display: isDesktop ? 'flex' : 'none',
+              }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 {navigationItems.map((item) => {
@@ -267,13 +274,10 @@ const Navigation = () => {
                       </span>
                     </div>
                     <div
-                      style={
-                        {
-                          display: 'none',
-                          '@media (min-width: 768px)': { display: 'block' },
-                          textAlign: 'left',
-                        } as React.CSSProperties
-                      }
+                      style={{
+                        display: isDesktop ? 'block' : 'none',
+                        textAlign: 'left',
+                      }}
                     >
                       <div
                         style={{
@@ -471,8 +475,7 @@ const Navigation = () => {
                 aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
                 style={
                   {
-                    display: 'block',
-                    '@media (min-width: 768px)': { display: 'none' },
+                    display: isDesktop ? 'none' : 'block',
                     padding: '0.5rem',
                     borderRadius: '0.5rem',
                     color: '#374151',
@@ -506,15 +509,12 @@ const Navigation = () => {
               id={mobileMenuId}
               role="menu"
               aria-label="Mobile navigation"
-              style={
-                {
-                  display: 'block',
-                  '@media (min-width: 768px)': { display: 'none' },
-                  borderTop: '1px solid #e5e7eb',
-                  paddingTop: '1rem',
-                  paddingBottom: '1rem',
-                } as React.CSSProperties
-              }
+              style={{
+                display: isDesktop ? 'none' : 'block',
+                borderTop: '1px solid #e5e7eb',
+                paddingTop: '1rem',
+                paddingBottom: '1rem',
+              }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                 {navigationItems.map((item) => {

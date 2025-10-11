@@ -3,9 +3,11 @@
  * Centralized constants for the entire application
  */
 
+import { BACKEND_CONFIG } from '../config/api';
+
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
+  BASE_URL: BACKEND_CONFIG.API_BASE_URL,
   TIMEOUT: 15000,
   RETRY_ATTEMPTS: 3,
   CACHE_TTL: 5 * 60 * 1000, // 5 minutes

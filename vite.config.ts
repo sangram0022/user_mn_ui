@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
+import { defineConfig } from 'vite';
 import { analyzer } from 'vite-bundle-analyzer';
 
 // https://vite.dev/config/
@@ -56,7 +56,7 @@ export default defineConfig({
     // Proxy API requests to backend to avoid CORS issues
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'http://127.0.0.1:8001',
         changeOrigin: true,
         secure: false,
         // Remove the /api prefix when forwarding to backend since backend already includes /api/v1

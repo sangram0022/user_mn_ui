@@ -3,9 +3,11 @@
  * Centralized access to environment variables with type safety
  */
 
+import { BACKEND_CONFIG } from '../shared/config/api';
+
 export const env = {
   // API Configuration
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
+  API_BASE_URL: BACKEND_CONFIG.API_BASE_URL,
 
   // Application Environment
   MODE: import.meta.env.MODE,

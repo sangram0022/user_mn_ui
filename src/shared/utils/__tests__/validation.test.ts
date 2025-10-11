@@ -8,20 +8,20 @@
  * - Regex patterns
  */
 
-import { describe, it, expect } from 'vitest';
 import {
-  validateField,
-  validateForm,
+  EMAIL_REGEX,
   hasFormErrors,
   isFormValid,
-  EMAIL_REGEX,
-  STRONG_PASSWORD_REGEX,
   PHONE_REGEX,
+  STRONG_PASSWORD_REGEX,
   URL_REGEX,
+  validateField,
+  validateForm,
   ValidationRules,
-  type ValidationRule,
   type FormState,
+  type ValidationRule,
 } from '@shared/utils/validation';
+import { describe, expect, it } from 'vitest';
 
 // ============================================================================
 // Regex Pattern Tests
@@ -352,7 +352,7 @@ describe('ValidationRules', () => {
   it('should have basic password validation rule', () => {
     expect(ValidationRules.password).toBeDefined();
     expect(ValidationRules.password.required).toBe(true);
-    expect(ValidationRules.password.minLength).toBe(6);
+    expect(ValidationRules.password.minLength).toBe(8);
     expect(ValidationRules.password.custom).toBeDefined();
   });
 

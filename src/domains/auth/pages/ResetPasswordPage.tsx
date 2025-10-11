@@ -43,8 +43,8 @@ const ResetPasswordPage: React.FC = () => {
       return;
     }
 
-    if (formData.password.length < 6) {
-      handleError(new Error('Password must be at least 6 characters long'));
+    if (formData.password.length < 8) {
+      handleError(new Error('Password must be at least 8 characters long'));
       return;
     }
 
@@ -290,7 +290,7 @@ const ResetPasswordPage: React.FC = () => {
                 </button>
               </div>
               <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
-                Must be at least 6 characters long
+                Must be at least 8 characters long
               </p>
             </div>
 

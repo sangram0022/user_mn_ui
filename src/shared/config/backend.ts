@@ -7,27 +7,20 @@ import { logger } from './../utils/logger';
  * Backend Server Configuration
  * Change these values to point to different environments
  */
-export const BACKEND_SERVER_CONFIG = { // Development Configuration
+export const BACKEND_SERVER_CONFIG = {
+  // Development Configuration
   DEV: {
     PROTOCOL: 'http',
     HOST: 'localhost',
     PORT: 5173,
-    API_PREFIX: '/api/v1'
+    API_PREFIX: '/api/v1',
   },
-  
+
   // Production Configuration (when deployed)
-  PROD: { PROTOCOL: 'https',
-    HOST: 'your-domain.com',
-    PORT: null,
-    API_PREFIX: '/api/v1'
-  },
-  
+  PROD: { PROTOCOL: 'https', HOST: 'your-domain.com', PORT: null, API_PREFIX: '/api/v1' },
+
   // Direct Backend (for testing)
-  DIRECT: { PROTOCOL: 'http',
-    HOST: '127.0.0.1',
-    PORT: 8000,
-    API_PREFIX: '/api/v1'
-  }
+  DIRECT: { PROTOCOL: 'http', HOST: '127.0.0.1', PORT: 8001, API_PREFIX: '/api/v1' },
 } as const;
 
 /**
@@ -57,14 +50,15 @@ export const HEALTH_CHECK_URL = `${API_BASE_URL.replace('/api/v1', '/api/v1/heal
 /**
  * Common API Endpoints
  */
-export const API_ENDPOINTS = { // Authentication
+export const API_ENDPOINTS = {
+  // Authentication
   AUTH: {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
     REFRESH: '/auth/refresh',
     LOGOUT: '/auth/logout',
   },
-  
+
   // Users
   USERS: {
     BASE: '/users',
@@ -72,35 +66,37 @@ export const API_ENDPOINTS = { // Authentication
     ME: '/users/me',
     CHANGE_PASSWORD: '/users/change-password',
   },
-  
+
   // Roles
   ROLES: {
     BASE: '/roles',
     BY_ID: (id: string) => `/roles/${id}`,
   },
-  
+
   // Admin
-  ADMIN: { DASHBOARD: '/admin/dashboard',
+  ADMIN: {
+    DASHBOARD: '/admin/dashboard',
     USERS: '/admin/users',
     ANALYTICS: '/admin/analytics',
     SETTINGS: '/admin/settings',
   },
-  
+
   // System
-  SYSTEM: { HEALTH: '/health',
-    STATUS: '/status',
-  }
+  SYSTEM: { HEALTH: '/health', STATUS: '/status' },
 } as const;
 
 /**
  * Debug information
  */
-export const getApiDebugInfo = () => { logger.info('🔧 API Configuration Debug:');
-  logger.info('Current Environment', { env: CURRENT_ENV  });
-  logger.info('API Base URL', { url: API_BASE_URL  });
-  logger.info('Health Check URL', { url: HEALTH_CHECK_URL  });
-  logger.info('Full Config', { config: BACKEND_SERVER_CONFIG[CURRENT_ENV]  });
+export const getApiDebugInfo = () => {
+  logger.info('🔧 API Configuration Debug:');
+  logger.info('Current Environment', { env: CURRENT_ENV });
+  logger.info('API Base URL', { url: API_BASE_URL });
+  logger.info('Health Check URL', { url: HEALTH_CHECK_URL });
+  logger.info('Full Config', { config: BACKEND_SERVER_CONFIG[CURRENT_ENV] });
 };
 
 // Auto-log configuration in development
-if (import.meta.env.DEV) { getApiDebugInfo(); }
+if (import.meta.env.DEV) {
+  getApiDebugInfo();
+}

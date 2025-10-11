@@ -3,16 +3,16 @@
 
 export const BACKEND_CONFIG = {
   // Backend Base URL - Change this single value to update entire app
-  BASE_URL: import.meta.env['VITE_BACKEND_URL'] || 'http://127.0.0.1:8000',
-  API_BASE_URL: import.meta.env.DEV 
-    ? '/api/v1'  // Use proxy in development
-    : (import.meta.env['VITE_BACKEND_URL'] 
-        ? `${import.meta.env['VITE_BACKEND_URL']}/api/v1`
-        : 'http://127.0.0.1:8000/api/v1'),
-  
+  BASE_URL: import.meta.env['VITE_BACKEND_URL'] || 'http://127.0.0.1:8001',
+  API_BASE_URL: import.meta.env.DEV
+    ? '/api/v1' // Use proxy in development
+    : import.meta.env['VITE_BACKEND_URL']
+      ? `${import.meta.env['VITE_BACKEND_URL']}/api/v1`
+      : 'http://127.0.0.1:8001/api/v1',
+
   // For development with proxy
   USE_PROXY: import.meta.env.DEV,
-  
+
   // Timeout settings
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
@@ -20,23 +20,25 @@ export const BACKEND_CONFIG = {
 } as const;
 
 // Get the appropriate base URL based on environment
-export const getApiBaseUrl = (): string => { if (BACKEND_CONFIG.USE_PROXY && import.meta.env.DEV) {
+export const getApiBaseUrl = (): string => {
+  if (BACKEND_CONFIG.USE_PROXY && import.meta.env.DEV) {
     return '/api/v1'; // Use proxy in development
   }
   return BACKEND_CONFIG.API_BASE_URL; // Use absolute URL in production
 };
 
 // API Endpoints - All endpoints from backend_api.json
-export const API_ENDPOINTS = { // Authentication Endpoints
+export const API_ENDPOINTS = {
+  // Authentication Endpoints
   AUTH: {
     REGISTER: '/auth/register',
-    LOGIN: '/auth/login', 
+    LOGIN: '/auth/login',
     REFRESH: '/auth/refresh',
     LOGOUT: '/auth/logout',
     ME: '/auth/me',
     HEALTH: '/auth/health',
   },
-  
+
   // User Management Endpoints
   USERS: {
     BASE: '/users/',
@@ -46,14 +48,13 @@ export const API_ENDPOINTS = { // Authentication Endpoints
     PASSWORD_RESET_CONFIRM: '/users/password-reset/confirm',
     CHANGE_PASSWORD: '/users/change-password',
   },
-  
+
   // Admin Endpoints
-  ADMIN: { STATS: '/admin/stats',
-    HEALTH: '/admin/health',
-  },
-  
+  ADMIN: { STATS: '/admin/stats', HEALTH: '/admin/health' },
+
   // Health Monitoring Endpoints
-  HEALTH: { BASIC: '/health/',
+  HEALTH: {
+    BASIC: '/health/',
     DETAILED: '/health/detailed',
     METRICS: '/health/metrics',
     PERFORMANCE: '/health/performance',
@@ -63,7 +64,7 @@ export const API_ENDPOINTS = { // Authentication Endpoints
     CONFIGURATION: '/health/configuration',
     API: '/health',
   },
-  
+
   // Root Endpoints
   ROOT: '/',
 } as const;

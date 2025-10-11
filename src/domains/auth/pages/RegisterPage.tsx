@@ -126,9 +126,9 @@ const RegisterPage: React.FC = () => {
       return false;
     }
 
-    if (formData.password.length < 6) {
+    if (formData.password.length < 8) {
       handleError(
-        new Error('Password must be at least 6 characters long. Please choose a stronger password.')
+        new Error('Password must be at least 8 characters long. Please choose a stronger password.')
       );
       return false;
     }
@@ -156,18 +156,22 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await apiClient.auth.register({
+      console.log('[RegisterPage] Submitting registration...');
+      const response = await apiClient.register({
         email: formData.email,
         password: formData.password,
-        full_name: `${formData.firstName} ${formData.lastName}`,
-        terms_accepted: formData.terms_accepted,
+        confirm_password: formData.confirmPassword,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
       });
+      console.log('[RegisterPage] Registration response:', response);
 
       const feedback = buildRegistrationFeedback(response);
       setRegistrationFeedback(feedback);
       setSuccess(true);
       return;
     } catch (err: unknown) {
+      console.error('[RegisterPage] Registration error:', err);
       handleError(err);
       setSuccess(false);
       setRegistrationFeedback(null);
@@ -951,7 +955,7 @@ const RegisterPage: React.FC = () => {
                 </button>
               </div>
               <p style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: '#6b7280' }}>
-                Must be at least 6 characters long
+                Must be at least 8 characters long
               </p>
             </div>
 

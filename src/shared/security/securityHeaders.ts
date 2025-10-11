@@ -1,3 +1,4 @@
+import { BACKEND_CONFIG } from '../config/api';
 import { logger } from './../utils/logger';
 
 /**
@@ -60,7 +61,7 @@ export class ContentSecurityPolicy {
    * Get production-ready CSP directives
    */
   static getProductionCSP(): CSPDirectives {
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+    const apiUrl = BACKEND_CONFIG.BASE_URL;
     const wsUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:3001';
 
     return {
