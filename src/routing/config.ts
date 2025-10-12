@@ -32,20 +32,21 @@ const LazyRoleBasedDashboard = lazy(
 );
 const LazyUserManagementEnhanced = lazy(() => import('../domains/users/pages/UserManagementPage'));
 const LazyProfilePage = lazy(() => import('../domains/profile/pages/ProfilePage'));
+const LazyHomePage = lazy(() => import('../domains/home/pages/HomePage'));
 const LazyNotFoundPage = lazy(() => import('@shared/pages/NotFoundPage'));
 
 export const routes: RouteConfig[] = [
   {
     path: '/',
-    component: LazyRoleBasedDashboard,
-    layout: 'default',
-    guard: 'protected',
-    title: 'Dashboard',
-    description: 'Welcome to the User Management System dashboard.',
-    suspenseFallback: createElement(DashboardSkeleton, {
-      heading: 'Loading dashboard',
-      actionCount: 3,
-      descriptionLines: 2,
+    component: LazyHomePage,
+    layout: 'none',
+    guard: 'public',
+    title: 'Home',
+    description: 'Welcome to the User Management System - Secure user administration platform.',
+    suspenseFallback: createElement(PageSkeleton, {
+      heading: 'Loading home page',
+      actionCount: 2,
+      descriptionLines: 1,
     }),
   },
   {
