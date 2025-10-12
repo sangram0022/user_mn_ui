@@ -62,7 +62,7 @@ const LoginPage: React.FC = () => {
   }, []);
 
   return (
-    <div
+    <main
       style={{
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #f3e8ff 100%)',
@@ -497,7 +497,7 @@ const LoginPage: React.FC = () => {
           }
         `}
       </style>
-    </div>
+    </main>
   );
 };
 
