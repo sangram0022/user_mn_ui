@@ -1,4 +1,4 @@
-import { ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -82,16 +82,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #f3e8ff 100%)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '3rem 1rem',
-      }}
-    >
+    <>
       <div
         style={{
           margin: '0 auto',
@@ -99,26 +90,6 @@ const LoginPage: React.FC = () => {
           maxWidth: '28rem',
         }}
       >
-        {/* Back to Home Link */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <Link
-            to="/"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              fontSize: '0.875rem',
-              color: '#6b7280',
-              textDecoration: 'none',
-              transition: 'color 0.2s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#374151')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-          >
-            <ArrowLeft style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
-            Back to Home
-          </Link>
-        </div>
-
         {/* Logo and Title */}
         <div style={{ textAlign: 'center' }}>
           <div
@@ -521,7 +492,7 @@ const LoginPage: React.FC = () => {
           }
         `}
       </style>
-    </div>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import { Shield, Menu, X, ChevronDown, LogOut, UserCircle, Settings } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, Settings, Shield, UserCircle, X } from 'lucide-react';
 import type { FC } from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';

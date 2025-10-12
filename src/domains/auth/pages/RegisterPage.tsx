@@ -1,6 +1,5 @@
 import {
   AlertTriangle,
-  ArrowLeft,
   CheckCircle,
   Clock,
   Eye,
@@ -181,289 +180,275 @@ const RegisterPage: React.FC = () => {
     return (
       <div
         style={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #f3e8ff 100%)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          padding: '3rem 1rem',
+          margin: '0 auto',
+          width: '100%',
+          maxWidth: '48rem',
         }}
       >
         <div
           style={{
-            margin: '0 auto',
-            width: '100%',
-            maxWidth: '48rem',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            borderRadius: '1rem',
+            border: '1px solid rgba(229, 231, 235, 0.5)',
+            padding: '2.5rem',
           }}
         >
-          <div
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              boxShadow:
-                '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-              borderRadius: '1rem',
-              border: '1px solid rgba(229, 231, 235, 0.5)',
-              padding: '2.5rem',
-            }}
-          >
-            <div style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  margin: '0 auto 1.5rem',
-                  width: '4rem',
-                  height: '4rem',
-                  backgroundColor: '#10b981',
-                  borderRadius: '9999px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.4)',
-                }}
-              >
-                <CheckCircle style={{ width: '2rem', height: '2rem', color: 'white' }} />
-              </div>
-              <h2
-                style={{
-                  fontSize: '1.875rem',
-                  fontWeight: 'bold',
-                  letterSpacing: '-0.025em',
-                  color: '#111827',
-                }}
-              >
-                {registrationFeedback.title}
-              </h2>
-              <p style={{ marginTop: '0.5rem', color: '#6b7280' }}>
-                {registrationFeedback.subtitle}
-              </p>
-              <p style={{ marginTop: '1rem', fontSize: '1rem', color: '#374151' }}>
-                {registrationFeedback.message}
-              </p>
-              <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#6b7280' }}>
-                Account email:{' '}
-                <span style={{ fontWeight: '500', color: '#111827' }}>
-                  {registrationFeedback.email}
-                </span>
-              </p>
-              {redirectCountdown !== null && (
-                <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#3b82f6' }}>
-                  We'll take you to the login screen in {redirectCountdown} second
-                  {redirectCountdown === 1 ? '' : 's'}.
-                </p>
-              )}
-            </div>
-
-            <section
+          <div style={{ textAlign: 'center' }}>
+            <div
               style={{
-                marginTop: '2rem',
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '0.75rem',
-                padding: '1.5rem',
+                margin: '0 auto 1.5rem',
+                width: '4rem',
+                height: '4rem',
+                backgroundColor: '#10b981',
+                borderRadius: '9999px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.4)',
               }}
             >
-              <h3
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: '600',
-                  color: '#64748b',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                Account snapshot
-              </h3>
-              <dl
-                style={{
-                  marginTop: '1rem',
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '1rem',
-                }}
-              >
-                {registrationFeedback.highlights.map((highlight) => (
-                  <div
-                    key={highlight.label}
+              <CheckCircle style={{ width: '2rem', height: '2rem', color: 'white' }} />
+            </div>
+            <h2
+              style={{
+                fontSize: '1.875rem',
+                fontWeight: 'bold',
+                letterSpacing: '-0.025em',
+                color: '#111827',
+              }}
+            >
+              {registrationFeedback.title}
+            </h2>
+            <p style={{ marginTop: '0.5rem', color: '#6b7280' }}>{registrationFeedback.subtitle}</p>
+            <p style={{ marginTop: '1rem', fontSize: '1rem', color: '#374151' }}>
+              {registrationFeedback.message}
+            </p>
+            <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#6b7280' }}>
+              Account email:{' '}
+              <span style={{ fontWeight: '500', color: '#111827' }}>
+                {registrationFeedback.email}
+              </span>
+            </p>
+            {redirectCountdown !== null && (
+              <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#3b82f6' }}>
+                We'll take you to the login screen in {redirectCountdown} second
+                {redirectCountdown === 1 ? '' : 's'}.
+              </p>
+            )}
+          </div>
+
+          <section
+            style={{
+              marginTop: '2rem',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '0.75rem',
+              padding: '1.5rem',
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                color: '#64748b',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Account snapshot
+            </h3>
+            <dl
+              style={{
+                marginTop: '1rem',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '1rem',
+              }}
+            >
+              {registrationFeedback.highlights.map((highlight) => (
+                <div
+                  key={highlight.label}
+                  style={{
+                    borderRadius: '0.5rem',
+                    border: '1px solid #e2e8f0',
+                    backgroundColor: '#ffffff',
+                    padding: '1rem',
+                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                  }}
+                >
+                  <dt
                     style={{
-                      borderRadius: '0.5rem',
+                      fontSize: '0.75rem',
+                      fontWeight: '500',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: '#64748b',
+                    }}
+                  >
+                    {highlight.label}
+                  </dt>
+                  <dd
+                    style={{
+                      marginTop: '0.25rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      color: '#0f172a',
+                      wordBreak: 'break-words',
+                    }}
+                  >
+                    {highlight.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <section style={{ marginTop: '2rem' }}>
+            <h3
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                color: '#64748b',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Next steps
+            </h3>
+            <div
+              style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+            >
+              {registrationFeedback.nextSteps.map((step) => {
+                const IconComponent = FEEDBACK_ICON_MAP[step.icon] ?? Info;
+                return (
+                  <div
+                    key={step.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '0.75rem',
+                      borderRadius: '0.75rem',
                       border: '1px solid #e2e8f0',
                       backgroundColor: '#ffffff',
                       padding: '1rem',
                       boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                     }}
                   >
-                    <dt
-                      style={{
-                        fontSize: '0.75rem',
-                        fontWeight: '500',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        color: '#64748b',
-                      }}
-                    >
-                      {highlight.label}
-                    </dt>
-                    <dd
+                    <div
                       style={{
                         marginTop: '0.25rem',
-                        fontSize: '0.875rem',
-                        fontWeight: '600',
-                        color: '#0f172a',
-                        wordBreak: 'break-words',
-                      }}
-                    >
-                      {highlight.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-
-            <section style={{ marginTop: '2rem' }}>
-              <h3
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: '600',
-                  color: '#64748b',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                Next steps
-              </h3>
-              <div
-                style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
-              >
-                {registrationFeedback.nextSteps.map((step) => {
-                  const IconComponent = FEEDBACK_ICON_MAP[step.icon] ?? Info;
-                  return (
-                    <div
-                      key={step.id}
-                      style={{
                         display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '0.75rem',
-                        borderRadius: '0.75rem',
-                        border: '1px solid #e2e8f0',
-                        backgroundColor: '#ffffff',
-                        padding: '1rem',
-                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        height: '2.5rem',
+                        width: '2.5rem',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '9999px',
+                        backgroundColor: '#eff6ff',
                       }}
                     >
-                      <div
+                      <IconComponent
+                        style={{ height: '1.25rem', width: '1.25rem', color: '#3b82f6' }}
+                      />
+                    </div>
+                    <div>
+                      <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#0f172a' }}>
+                        {step.title}
+                      </h4>
+                      <p
                         style={{
                           marginTop: '0.25rem',
-                          display: 'flex',
-                          height: '2.5rem',
-                          width: '2.5rem',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: '9999px',
-                          backgroundColor: '#eff6ff',
+                          fontSize: '0.875rem',
+                          color: '#64748b',
+                          lineHeight: '1.5',
                         }}
                       >
-                        <IconComponent
-                          style={{ height: '1.25rem', width: '1.25rem', color: '#3b82f6' }}
-                        />
-                      </div>
-                      <div>
-                        <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#0f172a' }}>
-                          {step.title}
-                        </h4>
-                        <p
-                          style={{
-                            marginTop: '0.25rem',
-                            fontSize: '0.875rem',
-                            color: '#64748b',
-                            lineHeight: '1.5',
-                          }}
-                        >
-                          {step.description}
-                        </p>
-                      </div>
+                        {step.description}
+                      </p>
                     </div>
-                  );
-                })}
-              </div>
-            </section>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
 
-            <div
+          <div
+            style={{
+              marginTop: '2rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem',
+            }}
+          >
+            <button
+              type="button"
+              onClick={handleProceedToLogin}
               style={{
-                marginTop: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                borderRadius: '0.5rem',
+                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                paddingLeft: '1.25rem',
+                paddingRight: '1.25rem',
+                paddingTop: '0.75rem',
+                paddingBottom: '0.75rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                color: '#ffffff',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                transition: 'all 0.2s ease',
+                border: 'none',
+                cursor: 'pointer',
+                outline: 'none',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.5)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
               }}
             >
+              <LogIn style={{ height: '1rem', width: '1rem' }} />
+              {redirectCountdown !== null ? `Go to login (${redirectCountdown}s)` : 'Go to login'}
+            </button>
+            {redirectCountdown !== null && (
               <button
                 type="button"
-                onClick={handleProceedToLogin}
+                onClick={() => setRedirectCountdown(null)}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.5rem',
                   borderRadius: '0.5rem',
-                  background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                  border: '1px solid #e5e7eb',
                   paddingLeft: '1.25rem',
                   paddingRight: '1.25rem',
                   paddingTop: '0.75rem',
                   paddingBottom: '0.75rem',
                   fontSize: '0.875rem',
                   fontWeight: '600',
-                  color: '#ffffff',
-                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                  transition: 'all 0.2s ease',
-                  border: 'none',
+                  color: '#374151',
+                  backgroundColor: 'transparent',
+                  transition: 'background-color 0.2s ease',
                   cursor: 'pointer',
-                  outline: 'none',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.5)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
-                <LogIn style={{ height: '1rem', width: '1rem' }} />
-                {redirectCountdown !== null ? `Go to login (${redirectCountdown}s)` : 'Go to login'}
+                Stay on this page
               </button>
-              {redirectCountdown !== null && (
-                <button
-                  type="button"
-                  onClick={() => setRedirectCountdown(null)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '0.5rem',
-                    border: '1px solid #e5e7eb',
-                    paddingLeft: '1.25rem',
-                    paddingRight: '1.25rem',
-                    paddingTop: '0.75rem',
-                    paddingBottom: '0.75rem',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    color: '#374151',
-                    backgroundColor: 'transparent',
-                    transition: 'background-color 0.2s ease',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  Stay on this page
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -559,16 +544,7 @@ const RegisterPage: React.FC = () => {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #f3e8ff 100%)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '3rem 1rem',
-      }}
-    >
+    <>
       <div
         style={{
           margin: '0 auto',
@@ -576,26 +552,6 @@ const RegisterPage: React.FC = () => {
           maxWidth: '28rem',
         }}
       >
-        {/* Back to Home Link */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <Link
-            to="/"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              fontSize: '0.875rem',
-              color: '#6b7280',
-              textDecoration: 'none',
-              transition: 'color 0.2s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#374151')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-          >
-            <ArrowLeft style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
-            Back to Home
-          </Link>
-        </div>
-
         {/* Logo and Title */}
         <div style={{ textAlign: 'center' }}>
           <div
@@ -1203,7 +1159,7 @@ const RegisterPage: React.FC = () => {
           }
         `}
       </style>
-    </div>
+    </>
   );
 };
 

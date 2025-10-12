@@ -10,10 +10,7 @@ export interface AuthLayoutProps {
 const AuthLayout: FC<AuthLayoutProps> = ({ children }) => (
   <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 via-white to-gray-100">
     <Header />
-    <main
-      className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
-      role="main"
-    >
+    <main className="flex-1 flex items-center justify-center py-4 px-4 sm:px-6 lg:px-8" role="main">
       {children}
     </main>
     <Footer />
