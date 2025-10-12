@@ -1,14 +1,18 @@
 // Centralized API Configuration
 // Single source of truth for all backend URLs
 
+import { BACKEND_SERVER_CONFIG } from './backend';
+
 export const BACKEND_CONFIG = {
   // Backend Base URL - Change this single value to update entire app
-  BASE_URL: import.meta.env['VITE_BACKEND_URL'] || 'http://127.0.0.1:8001',
+  BASE_URL:
+    import.meta.env['VITE_BACKEND_URL'] ||
+    `http://${BACKEND_SERVER_CONFIG.DIRECT.HOST}:${BACKEND_SERVER_CONFIG.DIRECT.PORT}`,
   API_BASE_URL: import.meta.env.DEV
     ? '/api/v1' // Use proxy in development
     : import.meta.env['VITE_BACKEND_URL']
       ? `${import.meta.env['VITE_BACKEND_URL']}/api/v1`
-      : 'http://127.0.0.1:8001/api/v1',
+      : `http://${BACKEND_SERVER_CONFIG.DIRECT.HOST}:${BACKEND_SERVER_CONFIG.DIRECT.PORT}/api/v1`,
 
   // For development with proxy
   USE_PROXY: import.meta.env.DEV,

@@ -3,9 +3,11 @@ import { GlobalErrorBoundary } from '@app/GlobalErrorBoundary';
 import { AuthProvider } from '@domains/auth/providers/AuthProvider';
 import { notFoundRoute, routes } from '@routing/config';
 import { ProtectedRoute, PublicRoute } from '@routing/RouteGuards';
+import { RoutePreloadTrigger } from '@routing/routePreloader';
 import RouteRenderer from '@routing/RouteRenderer';
+import PerformanceMonitor from '@shared/components/PerformanceMonitor';
 import { PageErrorBoundary as ErrorBoundary } from '@shared/errors/ErrorBoundary';
-import SuspenseBoundary from '@shared/ui/SuspenseBoundary';
+import { useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
 const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode) => {
@@ -20,12 +22,42 @@ const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode)
 };
 
 function App() {
+  // Initialize performance optimizations
+  useEffect(() => {
+    // Preconnect to API
+    if (typeof document !== 'undefined') {
+      const preconnect = document.createElement('link');
+      preconnect.rel = 'preconnect';
+      preconnect.href = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8001';
+      document.head.appendChild(preconnect);
+    }
+
+    // Report Web Vitals in production
+    if (import.meta.env.PROD) {
+      import('web-vitals')
+        .then(({ onCLS, onFID, onFCP, onLCP, onTTFB, onINP }) => {
+          const reportMetric = (metric: { name: string; value: number }) => {
+            console.log(`[Web Vitals] ${metric.name}:`, metric.value);
+          };
+          onCLS(reportMetric);
+          onFID(reportMetric);
+          onFCP(reportMetric);
+          onLCP(reportMetric);
+          onTTFB(reportMetric);
+          onINP(reportMetric);
+        })
+        .catch(() => {
+          // Silently ignore
+        });
+    }
+  }, []);
+
   return (
     <GlobalErrorBoundary>
       <ErrorBoundary>
         <AuthProvider>
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <SuspenseBoundary loadingText="Loading application...">
+            <RoutePreloadTrigger>
               <Routes>
                 {routes.map((route) => (
                   <Route
@@ -36,10 +68,11 @@ function App() {
                 ))}
                 <Route path="*" element={<RouteRenderer route={notFoundRoute} />} />
               </Routes>
-            </SuspenseBoundary>
+            </RoutePreloadTrigger>
           </Router>
         </AuthProvider>
       </ErrorBoundary>
+      <PerformanceMonitor />
     </GlobalErrorBoundary>
   );
 }

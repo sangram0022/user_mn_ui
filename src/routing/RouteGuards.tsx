@@ -1,25 +1,14 @@
 import type { FC, ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 
-import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../domains/auth/context/AuthContext';
 
 interface RouteGuardProps {
   children: ReactNode;
 }
 
-const FullScreenLoader: FC = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <LoadingSpinner size="lg" />
-  </div>
-);
-
 export const ProtectedRoute: FC<RouteGuardProps> = ({ children }) => {
-  const { user, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <FullScreenLoader />;
-  }
+  const { user } = useAuth();
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -29,12 +18,11 @@ export const ProtectedRoute: FC<RouteGuardProps> = ({ children }) => {
 };
 
 export const PublicRoute: FC<RouteGuardProps> = ({ children }) => {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
 
-  if (isLoading) {
-    return <FullScreenLoader />;
-  }
-
+  // For public routes (login/register), don't show full-screen loader
+  // The page itself will handle loading states (e.g., button spinner)
+  // Only redirect if user is already authenticated
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }

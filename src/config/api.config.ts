@@ -3,8 +3,12 @@
  * Centralized configuration for API endpoints and settings
  */
 
+import { BACKEND_SERVER_CONFIG } from '../shared/config/backend';
+
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8001/api/v1',
+  BASE_URL:
+    import.meta.env.VITE_API_BASE_URL ||
+    `http://${BACKEND_SERVER_CONFIG.DIRECT.HOST}:${BACKEND_SERVER_CONFIG.DIRECT.PORT}/api/v1`,
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,

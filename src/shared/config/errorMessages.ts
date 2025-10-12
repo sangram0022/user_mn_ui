@@ -30,6 +30,14 @@ export interface ErrorMessageConfig {
  * Authentication & Authorization Errors
  */
 export const AUTH_ERRORS: Record<string, ErrorMessageConfig> = {
+  AUTH_LOGIN_FAILED: {
+    code: 'AUTH_LOGIN_FAILED',
+    message: 'Login failed',
+    description: 'We encountered an unexpected issue while trying to sign you in.',
+    action: 'Please try again in a few moments. If the problem continues, contact support.',
+    recoverable: true,
+    statusCode: 500,
+  },
   INVALID_CREDENTIALS: {
     code: 'INVALID_CREDENTIALS',
     message: 'Invalid email or password',

@@ -3,11 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Preconnect to API origin for faster requests -->
+    <link rel="preconnect" href="http://127.0.0.1:8001" crossorigin />
+    <link rel="dns-prefetch" href="http://127.0.0.1:8001" />
+
+    <!-- Critical CSS inline (reduces render-blocking) -->
+    <style>
+      /* Immediate paint styles to prevent FOUC */
+      #root {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+      }
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      /* Loading spinner for instant feedback */
+      .initial-loader {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+
     <title>User Management System</title>
+    <meta
+      name="description"
+      content="Fast, secure user management system with enterprise-grade features"
+    />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+    <!-- Resource hints for critical assets -->
+    <link rel="modulepreload" href="/src/main.tsx" />
+    <link rel="modulepreload" href="/src/app/App.tsx" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Instant loading indicator -->
+      <div class="initial-loader">
+        <div class="spinner"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

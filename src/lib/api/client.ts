@@ -1,3 +1,4 @@
+import { tokenService } from '@shared/services/auth/tokenService';
 import type {
   AdminUsersQuery,
   AuditLog,
@@ -310,6 +311,10 @@ export class ApiClient {
   }
 
   setSessionTokens(loginResponse: LoginResponse): void {
+    // Use enterprise token service for secure storage
+    tokenService.storeTokens(loginResponse);
+
+    // Also maintain backward compatibility with existing session storage
     const session: StoredSession = {
       accessToken: loginResponse.access_token,
       refreshToken: loginResponse.refresh_token,
@@ -320,11 +325,16 @@ export class ApiClient {
   }
 
   clearSession(): void {
+    // Clear using enterprise token service
+    tokenService.clearTokens();
+
+    // Also clear legacy session storage
     this.persistSession(null);
   }
 
   isAuthenticated(): boolean {
-    return Boolean(this.session?.accessToken);
+    // Use enterprise token service for authentication check
+    return tokenService.isAuthenticated();
   }
 
   async login(

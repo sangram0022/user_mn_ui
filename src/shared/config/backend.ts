@@ -4,6 +4,21 @@ import { logger } from './../utils/logger';
 // Single source of truth for all backend API URLs
 
 /**
+ * Get backend configuration from environment variables with defaults
+ */
+const getBackendConfig = () => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8001';
+  const url = new URL(backendUrl);
+
+  return {
+    PROTOCOL: url.protocol.replace(':', ''),
+    HOST: url.hostname,
+    PORT: url.port ? parseInt(url.port) : null,
+    API_PREFIX: '/api/v1',
+  };
+};
+
+/**
  * Backend Server Configuration
  * Change these values to point to different environments
  */
@@ -19,8 +34,8 @@ export const BACKEND_SERVER_CONFIG = {
   // Production Configuration (when deployed)
   PROD: { PROTOCOL: 'https', HOST: 'your-domain.com', PORT: null, API_PREFIX: '/api/v1' },
 
-  // Direct Backend (for testing)
-  DIRECT: { PROTOCOL: 'http', HOST: '127.0.0.1', PORT: 8001, API_PREFIX: '/api/v1' },
+  // Direct Backend (for testing) - Uses environment variables
+  DIRECT: getBackendConfig(),
 } as const;
 
 /**
