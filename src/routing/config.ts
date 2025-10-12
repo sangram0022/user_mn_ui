@@ -1,3 +1,4 @@
+import { DashboardSkeleton, PageSkeleton, TableSkeleton } from '@shared/ui/Skeleton';
 import {
   createElement,
   lazy,
@@ -5,7 +6,6 @@ import {
   type LazyExoticComponent,
   type ReactNode,
 } from 'react';
-import { DashboardSkeleton, PageSkeleton, TableSkeleton } from '@shared/ui/Skeleton';
 
 export type RouteGuard = 'public' | 'protected' | 'none';
 export type RouteLayout = 'default' | 'auth' | 'none';
