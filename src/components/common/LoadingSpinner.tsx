@@ -1,59 +1,46 @@
+/**
+ * LoadingSpinner Component
+ *
+ * Simple, performant loading spinner using Tailwind CSS animations.
+ * Converted from styled-components for better performance.
+ *
+ * @author Senior UI/UX Architect
+ * @created October 12, 2025
+ */
+
 import React from 'react';
-import styled from 'styled-components';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
-  color?: string;
   className?: string;
+  color?: string;
 }
 
-const SpinnerContainer = styled.div<{ size: string }>`
-  display: inline-block;
-  width: ${(props) => {
-    switch (props.size) {
-      case 'sm':
-        return '1rem';
-      case 'lg':
-        return '3rem';
-      default:
-        return '2rem';
-    }
-  }};
-  height: ${(props) => {
-    switch (props.size) {
-      case 'sm':
-        return '1rem';
-      case 'lg':
-        return '3rem';
-      default:
-        return '2rem';
-    }
-  }};
-`;
+const sizeClasses = {
+  sm: 'h-4 w-4 border-2',
+  md: 'h-8 w-8 border-2',
+  lg: 'h-12 w-12 border-4',
+};
 
-const Spinner = styled.div<{ color: string }>`
-  width: 100%;
-  height: 100%;
-  border: 2px solid ${(props) => props.theme.colors.light};
-  border-top: 2px solid ${(props) => props.color || props.theme.colors.primary};
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-`;
-
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', color, className }) => {
+/**
+ * Loading spinner with size variants
+ *
+ * @example
+ * ```tsx
+ * <LoadingSpinner size="md" />
+ * <LoadingSpinner size="lg" color="text-blue-600" />
+ * ```
+ */
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = 'md',
+  className = '',
+  color = 'border-t-blue-600',
+}) => {
   return (
-    <SpinnerContainer size={size} className={className} role="status" aria-label="Loading">
-      <Spinner color={color} />
-    </SpinnerContainer>
+    <div className={`inline-block ${className}`} role="status" aria-label="Loading">
+      <div className={`${sizeClasses[size]} border-gray-200 ${color} rounded-full animate-spin`} />
+      <span className="sr-only">Loading...</span>
+    </div>
   );
 };
 

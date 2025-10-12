@@ -1,11 +1,12 @@
 /**
  * GDPR Compliance Service
  * Handles data export and account deletion requests
+ * Refactored to use unified apiClient from lib/api/client.ts
  */
 
+import { apiClient } from '@lib/api';
 import { API_ENDPOINTS } from '../config/api.config';
 import { DeleteAccountRequest, DeleteAccountResponse, ExportDataRequest } from '../types/api.types';
-import apiService from './api.service';
 
 class GdprService {
   /**
@@ -14,10 +15,22 @@ class GdprService {
    * @returns Blob containing exported data
    */
   async exportMyData(data: ExportDataRequest): Promise<Blob> {
-    const response = await apiService.post(API_ENDPOINTS.GDPR.EXPORT_DATA, data, {
-      responseType: 'blob',
+    // Use apiClient.execute with custom handling for blob response
+    const url = `${API_ENDPOINTS.GDPR.EXPORT_DATA}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
+      },
+      body: JSON.stringify(data),
     });
-    return response as unknown as Blob;
+
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.statusText}`);
+    }
+
+    return response.blob();
   }
 
   /**
@@ -25,7 +38,10 @@ class GdprService {
    * @param data Deletion request with confirmation
    */
   async deleteMyAccount(data: DeleteAccountRequest): Promise<DeleteAccountResponse> {
-    return apiService.delete<DeleteAccountResponse>(API_ENDPOINTS.GDPR.DELETE_ACCOUNT, { data });
+    return apiClient.execute<DeleteAccountResponse>(API_ENDPOINTS.GDPR.DELETE_ACCOUNT, {
+      method: 'DELETE',
+      body: JSON.stringify(data),
+    });
   }
 
   /**

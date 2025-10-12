@@ -1,25 +1,29 @@
 /**
  * Custom Hooks Index
- * 
+ *
  * Central export point for all custom React hooks.
  * These hooks encapsulate common patterns and reduce boilerplate.
  */
 
+// Form submission management (NEW - Critical Fix)
+export { useFormSubmission } from './useFormSubmission';
+export type {
+  FormSubmissionResult,
+  FormSubmissionState,
+  UseFormSubmissionOptions,
+} from './useFormSubmission';
+
 // Async operation management
 export { useAsyncOperation } from './useAsyncOperation';
-export type { AsyncOperationOptions,
-  UseAsyncOperationResult } from './useAsyncOperation';
+export type { AsyncOperationOptions, UseAsyncOperationResult } from './useAsyncOperation';
 
 // Pagination management
 export { usePagination } from './usePagination';
-export type { PaginationState,
-  UsePaginationOptions,
-  UsePaginationResult } from './usePagination';
+export type { PaginationState, UsePaginationOptions, UsePaginationResult } from './usePagination';
 
 // Form state management
 export { useFormState } from './useFormState';
-export type { UseFormStateOptions,
-  UseFormStateResult } from './useFormState';
+export type { UseFormStateOptions, UseFormStateResult } from './useFormState';
 
 // Error handling (existing)
 export { useErrorHandler, useErrorMessage } from './errors/useErrorHandler';

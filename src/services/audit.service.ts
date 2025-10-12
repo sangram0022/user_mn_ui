@@ -1,11 +1,12 @@
 /**
  * Audit Service
  * Handles audit log queries and summary statistics
+ * Refactored to use unified apiClient from lib/api/client.ts
  */
 
+import { apiClient } from '@lib/api';
 import { API_ENDPOINTS } from '../config/api.config';
 import { AuditLog, AuditLogQueryParams, AuditSummary, PaginatedResponse } from '../types/api.types';
-import apiService from './api.service';
 
 class AuditService {
   /**
@@ -13,14 +14,26 @@ class AuditService {
    * @param params Query parameters for filtering audit logs
    */
   async getAuditLogs(params?: AuditLogQueryParams): Promise<PaginatedResponse<AuditLog>> {
-    return apiService.get<PaginatedResponse<AuditLog>>(API_ENDPOINTS.AUDIT.LOGS, { params });
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      });
+    }
+
+    const query = searchParams.toString();
+    const path = query ? `${API_ENDPOINTS.AUDIT.LOGS}?${query}` : API_ENDPOINTS.AUDIT.LOGS;
+
+    return apiClient.execute<PaginatedResponse<AuditLog>>(path);
   }
 
   /**
    * Get audit summary statistics
    */
   async getAuditSummary(): Promise<AuditSummary> {
-    return apiService.get<AuditSummary>(API_ENDPOINTS.AUDIT.SUMMARY);
+    return apiClient.execute<AuditSummary>(API_ENDPOINTS.AUDIT.SUMMARY);
   }
 
   /**
@@ -78,11 +91,32 @@ class AuditService {
    * @param params Query parameters for filtering
    */
   async exportAuditLogs(params?: AuditLogQueryParams): Promise<Blob> {
-    const response = await apiService.get(`${API_ENDPOINTS.AUDIT.LOGS}/export`, {
-      params,
-      responseType: 'blob',
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      });
+    }
+
+    const query = searchParams.toString();
+    const path = query
+      ? `${API_ENDPOINTS.AUDIT.LOGS}/export?${query}`
+      : `${API_ENDPOINTS.AUDIT.LOGS}/export`;
+
+    // Fetch blob response directly
+    const response = await fetch(path, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
+      },
     });
-    return response as unknown as Blob;
+
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.statusText}`);
+    }
+
+    return response.blob();
   }
 }
 

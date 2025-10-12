@@ -1,11 +1,12 @@
 /**
  * Bulk Operations Service
  * Handles bulk user creation and validation operations
+ * Refactored to use unified apiClient from lib/api/client.ts
  */
 
+import { apiClient } from '@lib/api';
 import { API_ENDPOINTS } from '../config/api.config';
 import { BulkCreateRequest, BulkOperationResponse } from '../types/api.types';
-import apiService from './api.service';
 
 class BulkService {
   /**
@@ -13,7 +14,10 @@ class BulkService {
    * @param data Bulk creation request with user items
    */
   async createUsers(data: BulkCreateRequest): Promise<BulkOperationResponse> {
-    return apiService.post<BulkOperationResponse>(API_ENDPOINTS.BULK.CREATE_USERS, data);
+    return apiClient.execute<BulkOperationResponse>(API_ENDPOINTS.BULK.CREATE_USERS, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   /**
@@ -21,7 +25,10 @@ class BulkService {
    * @param data Bulk creation request with user items to validate
    */
   async validateUsers(data: BulkCreateRequest): Promise<BulkOperationResponse> {
-    return apiService.post<BulkOperationResponse>(API_ENDPOINTS.BULK.VALIDATE_USERS, data);
+    return apiClient.execute<BulkOperationResponse>(API_ENDPOINTS.BULK.VALIDATE_USERS, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   /**

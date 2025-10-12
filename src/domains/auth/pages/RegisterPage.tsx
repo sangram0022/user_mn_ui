@@ -156,7 +156,6 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      console.log('[RegisterPage] Submitting registration...');
       const response = await apiClient.register({
         email: formData.email,
         password: formData.password,
@@ -164,14 +163,12 @@ const RegisterPage: React.FC = () => {
         first_name: formData.firstName,
         last_name: formData.lastName,
       });
-      console.log('[RegisterPage] Registration response:', response);
 
       const feedback = buildRegistrationFeedback(response);
       setRegistrationFeedback(feedback);
       setSuccess(true);
       return;
     } catch (err: unknown) {
-      console.error('[RegisterPage] Registration error:', err);
       handleError(err);
       setSuccess(false);
       setRegistrationFeedback(null);

@@ -65,8 +65,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     try {
       const response = await authService.login(credentials);
+
+      // ✅ Check if login was actually successful
+      if (!response.access_token) {
+        throw new Error('Login failed: No access token received');
+      }
+
       setUser(authService.getCurrentUser());
       return response;
+    } catch (error) {
+      // ✅ Properly propagate errors - don't swallow them
+      setUser(null);
+      throw error;
     } finally {
       setIsLoading(false);
     }

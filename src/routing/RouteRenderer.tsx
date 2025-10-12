@@ -1,19 +1,22 @@
-import { Suspense, useEffect } from 'react';
 import type { ComponentType, FC, ReactNode } from 'react';
+import { Suspense, useEffect } from 'react';
 
 import AppLayout from '@layouts/AppLayout';
 import AuthLayout from '@layouts/AuthLayout';
 import { PageErrorBoundary as ErrorBoundary } from '@shared/errors/ErrorBoundary';
-import Loading from '@shared/ui/Loading';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import type { RouteConfig } from './config';
 
 const PlainLayout: FC<{ children: ReactNode }> = ({ children }) => <>{children}</>;
 
-const layoutComponents: Record<RouteConfig['layout'], ComponentType<{ children: ReactNode }>> = { default: AppLayout,
+const layoutComponents: Record<RouteConfig['layout'], ComponentType<{ children: ReactNode }>> = {
+  default: AppLayout,
   auth: AuthLayout,
-  none: PlainLayout, };
+  none: PlainLayout,
+};
 
-const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => { const {
+const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => {
+  const {
     component: Component,
     layout,
     title,
@@ -30,7 +33,8 @@ const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => { const {
       document.title = formattedTitle;
     }
 
-    if (description) { const metaDescription = document.querySelector('meta[name="description"]');
+    if (description) {
+      const metaDescription = document.querySelector('meta[name="description"]');
       if (metaDescription) {
         metaDescription.setAttribute('content', description);
       }
@@ -41,7 +45,7 @@ const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => { const {
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={suspenseFallback ?? <Loading fullScreen overlay text="Loading page..." />}>
+      <Suspense fallback={suspenseFallback ?? <LoadingSpinner size="lg" />}>
         <LayoutComponent>
           <Component />
         </LayoutComponent>

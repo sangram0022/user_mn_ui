@@ -1,8 +1,13 @@
 /**
  * User Management Service
  * Handles user profile and admin user management operations
+ * Refactored to use unified apiClient from lib/api/client.ts
+ *
+ * NOTE: This service uses apiClient.execute() for endpoints not yet
+ * fully mapped in apiClient, maintaining backward compatibility.
  */
 
+import { apiClient } from '@lib/api';
 import { API_ENDPOINTS } from '../config/api.config';
 import {
   AdminStats,
@@ -22,7 +27,6 @@ import {
   UserListParams,
   UserProfile,
 } from '../types/api.types';
-import apiService from './api.service';
 
 class UserService {
   // ==================== Profile Endpoints ====================
@@ -31,14 +35,17 @@ class UserService {
    * Get current user's profile
    */
   async getMyProfile(): Promise<UserProfile> {
-    return apiService.get<UserProfile>(API_ENDPOINTS.PROFILE.ME);
+    return apiClient.execute<UserProfile>(API_ENDPOINTS.PROFILE.ME);
   }
 
   /**
    * Update current user's profile
    */
   async updateMyProfile(data: UpdateProfileRequest): Promise<UserProfile> {
-    return apiService.put<UserProfile>(API_ENDPOINTS.PROFILE.ME, data);
+    return apiClient.execute<UserProfile>(API_ENDPOINTS.PROFILE.ME, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   }
 
   // ==================== Admin User Management ====================
@@ -47,49 +54,75 @@ class UserService {
    * Get list of users (admin only)
    */
   async getUsers(params?: UserListParams): Promise<User[]> {
-    return apiService.get<User[]>(API_ENDPOINTS.ADMIN.USERS, { params });
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      });
+    }
+
+    const query = searchParams.toString();
+    const path = query ? `${API_ENDPOINTS.ADMIN.USERS}?${query}` : API_ENDPOINTS.ADMIN.USERS;
+
+    return apiClient.execute<User[]>(path);
   }
 
   /**
    * Get user by ID (admin only)
    */
   async getUserById(userId: string): Promise<User> {
-    return apiService.get<User>(API_ENDPOINTS.ADMIN.USER_DETAIL(userId));
+    return apiClient.execute<User>(API_ENDPOINTS.ADMIN.USER_DETAIL(userId));
   }
 
   /**
    * Create new user (admin only)
    */
   async createUser(data: CreateUserRequest): Promise<CreateUserResponse> {
-    return apiService.post<CreateUserResponse>(API_ENDPOINTS.ADMIN.USERS, data);
+    return apiClient.execute<CreateUserResponse>(API_ENDPOINTS.ADMIN.USERS, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   /**
    * Update user (admin only)
    */
   async updateUser(userId: string, data: UpdateUserRequest): Promise<User> {
-    return apiService.put<User>(API_ENDPOINTS.ADMIN.USER_DETAIL(userId), data);
+    return apiClient.execute<User>(API_ENDPOINTS.ADMIN.USER_DETAIL(userId), {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   }
 
   /**
    * Delete user (admin only)
    */
   async deleteUser(userId: string): Promise<DeleteUserResponse> {
-    return apiService.delete<DeleteUserResponse>(API_ENDPOINTS.ADMIN.USER_DETAIL(userId));
+    return apiClient.execute<DeleteUserResponse>(API_ENDPOINTS.ADMIN.USER_DETAIL(userId), {
+      method: 'DELETE',
+    });
   }
 
   /**
    * Approve user (admin only)
    */
   async approveUser(data: ApproveUserRequest): Promise<ApproveUserResponse> {
-    return apiService.post<ApproveUserResponse>(API_ENDPOINTS.ADMIN.APPROVE_USER, data);
+    return apiClient.execute<ApproveUserResponse>(API_ENDPOINTS.ADMIN.APPROVE_USER, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   /**
    * Reject user (admin only)
    */
   async rejectUser(userId: string, data: RejectUserRequest): Promise<RejectUserResponse> {
-    return apiService.post<RejectUserResponse>(API_ENDPOINTS.ADMIN.REJECT_USER(userId), data);
+    return apiClient.execute<RejectUserResponse>(API_ENDPOINTS.ADMIN.REJECT_USER(userId), {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   // ==================== Roles & Permissions ====================
@@ -98,7 +131,7 @@ class UserService {
    * Get available roles
    */
   async getRoles(): Promise<Role[]> {
-    return apiService.get<Role[]>(API_ENDPOINTS.ADMIN.ROLES);
+    return apiClient.execute<Role[]>(API_ENDPOINTS.ADMIN.ROLES);
   }
 
   // ==================== Statistics ====================
@@ -107,7 +140,7 @@ class UserService {
    * Get admin statistics
    */
   async getAdminStats(): Promise<AdminStats> {
-    return apiService.get<AdminStats>(API_ENDPOINTS.ADMIN.STATS);
+    return apiClient.execute<AdminStats>(API_ENDPOINTS.ADMIN.STATS);
   }
 
   // ==================== Audit Logs (Admin) ====================
@@ -116,7 +149,21 @@ class UserService {
    * Get audit logs (admin only)
    */
   async getAdminAuditLogs(params?: AuditLogListParams): Promise<AuditLog[]> {
-    return apiService.get<AuditLog[]>(API_ENDPOINTS.ADMIN.AUDIT_LOGS, { params });
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      });
+    }
+
+    const query = searchParams.toString();
+    const path = query
+      ? `${API_ENDPOINTS.ADMIN.AUDIT_LOGS}?${query}`
+      : API_ENDPOINTS.ADMIN.AUDIT_LOGS;
+
+    return apiClient.execute<AuditLog[]>(path);
   }
 }
 

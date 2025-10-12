@@ -1,114 +1,227 @@
-import React from 'react';
+/**
+ * Skeleton Loading Components
+ *
+ * Provides skeleton loaders for better perceived performance.
+ * Shows content placeholders while data is loading.
+ *
+ * @author Senior React Developer
+ * @created October 12, 2025
+ */
 
-interface SkeletonProps { className?: string;
-  variant?: 'text' | 'rectangular' | 'circular';
-  width?: number | string;
-  height?: number | string; }
+import type { FC } from 'react';
 
-export const Skeleton: React.FC<SkeletonProps> = ({ className = '',
-  variant = 'text',
-  width,
-  height, }) => {
-  const style: React.CSSProperties = {};
+interface SkeletonProps {
+  className?: string;
+}
 
-  if (width) {
-    style.width = typeof width === 'number' ? `${width}px` : width;
-  }
+/**
+ * Base skeleton component for shimmer effect
+ */
+export const Skeleton: FC<SkeletonProps> = ({ className = '' }) => (
+  <div className={`animate-pulse bg-gray-200 rounded ${className}`} aria-hidden="true" />
+);
 
-  if (height) {
-    style.height = typeof height === 'number' ? `${height}px` : height;
-  }
-
-  const variantClasses = { text: 'h-4 rounded-md',
-    rectangular: 'rounded-lg',
-    circular: 'rounded-full',
-  } as const;
-
-  return (
-    <span
-      className={`animate-pulse bg-slate-200 ${variantClasses[variant]} ${className}`.trim()}
-      style={style}
-      aria-hidden="true"
-      data-testid="skeleton"
-    />
-  );
-};
-
-interface PageSkeletonProps { heading?: string;
+/**
+ * Page skeleton with heading and action buttons
+ */
+interface PageSkeletonProps {
+  heading?: string;
+  actionCount?: number;
   descriptionLines?: number;
-  actionCount?: number; }
+}
 
-export const PageSkeleton: React.FC<PageSkeletonProps> = ({ heading = 'Loading content',
-  descriptionLines = 3,
-  actionCount = 2, }) => {
-  return (
-    <section className="min-h-[50vh] px-6 py-12">
-      <div className="mx-auto max-w-5xl space-y-8">
-        <header className="space-y-4">
-          <p className="text-sm font-medium uppercase tracking-wide text-slate-400">{heading}</p>
-          <div className="space-y-3">
-            <Skeleton variant="text" className="w-64 h-8" />
-            {Array.from({ length: descriptionLines }).map((_, index) => (
-              <Skeleton key={index} variant="text" className="w-full h-4" />
-            ))}
-          </div>
-        </header>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          {Array.from({ length: actionCount }).map((_, index) => (
-            <div key={index} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <Skeleton variant="text" className="mb-4 h-6 w-52" />
-              <div className="space-y-2">
-                <Skeleton variant="text" className="h-4 w-full" />
-                <Skeleton variant="text" className="h-4 w-3/4" />
-                <Skeleton variant="text" className="h-4 w-2/3" />
-              </div>
-              <Skeleton variant="rectangular" className="mt-6 h-10 w-32" />
+export const PageSkeleton: FC<PageSkeletonProps> = ({
+  heading = 'Loading',
+  actionCount = 0,
+  descriptionLines = 0,
+}) => (
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="status" aria-label={heading}>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-3 flex-1">
+          <Skeleton className="h-8 w-64" />
+          {descriptionLines > 0 && (
+            <div className="space-y-2">
+              {Array.from({ length: descriptionLines }).map((_, i) => (
+                <Skeleton key={i} className="h-4 w-96" />
+              ))}
             </div>
-          ))}
+          )}
         </div>
-      </div>
-    </section>
-  );
-};
-
-interface TableSkeletonProps { columns?: number;
-  rows?: number; }
-
-export const TableSkeleton: React.FC<TableSkeletonProps> = ({ columns = 4, rows = 5 }) => { return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div className="grid grid-cols-1 gap-3 border-b border-slate-200 bg-slate-50 p-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: columns }).map((_, index) => (
-          <Skeleton key={index} variant="text" className="h-4 w-3/4" />
-        ))}
-      </div>
-      <div className="divide-y divide-slate-200">
-        {Array.from({ length: rows }).map((_, rowIndex) => (
-          <div key={rowIndex} className="grid gap-3 px-4 py-3 md:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: columns }).map((_, colIndex) => (
-              <Skeleton key={`${rowIndex}-${colIndex}`} variant="text" className="h-4 w-full" />
+        {actionCount > 0 && (
+          <div className="flex space-x-3">
+            {Array.from({ length: actionCount }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-24" />
             ))}
           </div>
-        ))}
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="space-y-4">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-4/6" />
+        </div>
       </div>
     </div>
-  );
-};
-
-export const DashboardSkeleton: React.FC = () => (
-  <div className="space-y-8 px-6 py-10">
-    <Skeleton variant="text" className="h-10 w-48" />
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <Skeleton variant="rectangular" className="mb-4 h-12 w-12 rounded-full" />
-          <Skeleton variant="text" className="mb-2 h-5 w-32" />
-          <Skeleton variant="text" className="h-4 w-24" />
-        </div>
-      ))}
-    </div>
-    <TableSkeleton rows={4} />
   </div>
 );
 
-export default Skeleton;
+/**
+ * Dashboard skeleton with metrics and charts
+ */
+interface DashboardSkeletonProps {
+  heading?: string;
+  actionCount?: number;
+  descriptionLines?: number;
+}
+
+export const DashboardSkeleton: FC<DashboardSkeletonProps> = ({
+  heading = 'Loading dashboard',
+  actionCount = 3,
+  descriptionLines = 2,
+}) => (
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="status" aria-label={heading}>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-3">
+          <Skeleton className="h-8 w-64" />
+          {descriptionLines > 0 && (
+            <div className="space-y-2">
+              {Array.from({ length: descriptionLines }).map((_, i) => (
+                <Skeleton key={i} className="h-4 w-96" />
+              ))}
+            </div>
+          )}
+        </div>
+        {actionCount > 0 && (
+          <div className="flex space-x-3">
+            {Array.from({ length: actionCount }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-24" />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-white shadow rounded-lg p-6">
+            <Skeleton className="h-4 w-24 mb-4" />
+            <Skeleton className="h-8 w-32 mb-2" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        ))}
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="bg-white shadow rounded-lg p-6">
+            <Skeleton className="h-6 w-48 mb-4" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+/**
+ * Table skeleton for data tables
+ */
+interface TableSkeletonProps {
+  rows?: number;
+  columns?: number;
+}
+
+export const TableSkeleton: FC<TableSkeletonProps> = ({ rows = 5, columns = 4 }) => (
+  <div
+    className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+    role="status"
+    aria-label="Loading table"
+  >
+    <div className="bg-white shadow rounded-lg overflow-hidden">
+      {/* Table Header */}
+      <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
+        <div className="flex space-x-4">
+          {Array.from({ length: columns }).map((_, i) => (
+            <Skeleton key={i} className="h-5 flex-1" />
+          ))}
+        </div>
+      </div>
+
+      {/* Table Rows */}
+      <div className="divide-y divide-gray-200">
+        {Array.from({ length: rows }).map((_, rowIndex) => (
+          <div key={rowIndex} className="px-6 py-4">
+            <div className="flex space-x-4">
+              {Array.from({ length: columns }).map((_, colIndex) => (
+                <Skeleton key={colIndex} className="h-4 flex-1" />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+/**
+ * Card skeleton for card layouts
+ */
+interface CardSkeletonProps {
+  count?: number;
+}
+
+export const CardSkeleton: FC<CardSkeletonProps> = ({ count = 3 }) => (
+  <div
+    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    role="status"
+    aria-label="Loading cards"
+  >
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} className="bg-white shadow rounded-lg p-6">
+        <Skeleton className="h-6 w-48 mb-4" />
+        <div className="space-y-3">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-4/6" />
+        </div>
+        <div className="mt-6 flex space-x-3">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+/**
+ * Form skeleton for form layouts
+ */
+interface FormSkeletonProps {
+  fields?: number;
+}
+
+export const FormSkeleton: FC<FormSkeletonProps> = ({ fields = 4 }) => (
+  <div className="bg-white shadow rounded-lg p-6" role="status" aria-label="Loading form">
+    <div className="space-y-6">
+      <Skeleton className="h-8 w-48 mb-6" />
+      {Array.from({ length: fields }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ))}
+      <div className="flex space-x-3 pt-4">
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-24" />
+      </div>
+    </div>
+  </div>
+);

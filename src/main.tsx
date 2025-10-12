@@ -1,11 +1,7 @@
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './app/App';
-import { globalErrorHandler } from './shared/utils/GlobalErrorHandler';
 import './styles/index.css';
-
-// Initialize global error handler
-void globalErrorHandler;
 
 if (import.meta.env.DEV) {
   void import('@axe-core/react')

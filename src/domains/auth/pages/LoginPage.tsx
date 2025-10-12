@@ -1,10 +1,9 @@
 import { ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import type { ApiErrorState } from '@hooks/errors/useApiError';
-import { ApiErrorAlert } from '@shared/components/errors/ApiErrorAlert';
-import { getErrorConfig } from '@shared/config/errorMessages';
+import { useFormSubmission } from '@hooks/useFormSubmission';
+import { ErrorAlert } from '@shared/ui/EnhancedErrorAlert';
 import { useAuth } from '../context/AuthContext';
 
 interface LoginFormState {
@@ -18,76 +17,44 @@ const LoginPage: React.FC = () => {
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState<ApiErrorState | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  useEffect(() => {
-    console.log('[LoginPage] Login error state changed:', loginError);
-  }, [loginError]);
+  // Use unified form submission hook - NO MORE PAGE REFRESH ON ERRORS
+  const { isLoading, error, submit, clearError } = useFormSubmission({
+    onSuccess: () => {
+      // Only navigate on successful login
+      navigate('/dashboard', { replace: true });
+    },
+  });
 
-  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setFormState((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-  }, []);
+  const handleInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = event.target;
+      setFormState((previous) => ({ ...previous, [name]: value }));
+
+      // Clear error when user starts typing
+      if (error) {
+        clearError();
+      }
+    },
+    [error, clearError]
+  );
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      setLoginError(null); // Clear any previous errors
-      setIsLoading(true);
+      event.stopPropagation();
 
-      try {
-        await login({
+      // Submit form using the hook
+      await submit(() =>
+        login({
           email: formState.email,
           password: formState.password,
-        });
-        navigate('/dashboard');
-      } catch (submissionError: unknown) {
-        console.log('[LoginPage] Caught error:', submissionError);
-
-        // Extract error code from the error object
-        let errorCode = 'UNKNOWN_ERROR';
-        let statusCode = 500;
-
-        if (submissionError && typeof submissionError === 'object') {
-          const err = submissionError as Record<string, unknown>;
-          if (typeof err.code === 'string') {
-            errorCode = err.code;
-          }
-          if (typeof err.status === 'number') {
-            statusCode = err.status;
-          }
-        }
-
-        console.log('[LoginPage] Extracted error code:', errorCode, 'status:', statusCode);
-
-        // Get user-friendly message from config
-        const errorConfig = getErrorConfig(errorCode);
-
-        // Set the error state directly
-        const errorState: ApiErrorState = {
-          code: errorConfig.code,
-          message: errorConfig.message,
-          description: errorConfig.description,
-          action: errorConfig.action,
-          statusCode: statusCode || errorConfig.statusCode,
-          recoverable: errorConfig.recoverable ?? true,
-          originalError: submissionError,
-        };
-
-        console.log('[LoginPage] Setting error state:', errorState);
-        setLoginError(errorState);
-      } finally {
-        setIsLoading(false);
-      }
+        })
+      );
     },
-    [formState.email, formState.password, login, navigate]
+    [formState, login, submit]
   );
 
   const togglePasswordVisibility = useCallback(() => {
@@ -183,15 +150,10 @@ const LoginPage: React.FC = () => {
               border: '1px solid rgba(229, 231, 235, 0.5)',
             }}
           >
-            {loginError && (
+            {/* Error Display - Stays visible, no page refresh */}
+            {error && (
               <div style={{ marginBottom: '1.5rem' }}>
-                <ApiErrorAlert
-                  error={loginError}
-                  onDismiss={() => setLoginError(null)}
-                  showRetry={false}
-                  showDescription={true}
-                  showAction={true}
-                />
+                <ErrorAlert error={error} onDismiss={clearError} showDetails={true} />
               </div>
             )}
 

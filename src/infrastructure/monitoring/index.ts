@@ -10,7 +10,6 @@ export { LogLevel, logger } from './logger';
 
 // Error Tracking
 export { errorTracker } from './ErrorTracker';
-export { globalErrorHandler } from './GlobalErrorHandler';
 
 // Performance Monitoring
 export { performanceMonitor } from './PerformanceMonitor';

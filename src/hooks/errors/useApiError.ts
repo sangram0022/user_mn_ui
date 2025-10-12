@@ -167,18 +167,16 @@ export function useApiError(): UseApiErrorReturn {
 
     setError(errorState);
 
-    // Debug logging
-    if (import.meta.env.DEV) {
-      console.log('[useApiError] Error state set:', errorState);
-    }
-
     // Log error for debugging (but don't show backend messages to user)
-    logger.error(`[${context || 'API Error'}] ${errorConfig.code}`, {
-      code: errorConfig.code,
-      statusCode,
-      userMessage: errorConfig.message,
-      originalError: errorInput,
-    });
+    logger.error(
+      `[${context || 'API Error'}] ${errorConfig.code}`,
+      errorInput instanceof Error ? errorInput : undefined,
+      {
+        code: errorConfig.code,
+        statusCode,
+        userMessage: errorConfig.message,
+      }
+    );
   }, []);
 
   const clearError = useCallback(() => {
