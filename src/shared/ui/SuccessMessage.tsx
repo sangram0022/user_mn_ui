@@ -1,10 +1,3 @@
-import {
-  authContainer,
-  centeredText,
-  heading,
-  iconContainerSuccess,
-  iconStyle,
-} from '@shared/styles/authStyles';
 import { CheckCircle, LogIn } from 'lucide-react';
 import React from 'react';
 import { AuthButton } from './AuthButton';
@@ -25,21 +18,21 @@ export const SuccessMessage: React.FC<SuccessMessageProps> = ({
   countdown,
 }) => {
   return (
-    <div style={{ ...authContainer, ...centeredText }}>
-      <div style={iconContainerSuccess}>
-        <CheckCircle style={iconStyle} />
+    <div className="mx-auto w-full max-w-md text-center">
+      <div className="mx-auto mb-6 w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/40">
+        <CheckCircle className="w-8 h-8 text-white" />
       </div>
-      <h2 style={heading}>{title}</h2>
-      <p style={{ marginTop: '1rem', color: '#6b7280' }}>{message}</p>
+      <h2 className="text-3xl font-bold tracking-tight text-gray-900">{title}</h2>
+      <p className="mt-4 text-gray-600">{message}</p>
       {countdown !== null && countdown !== undefined && (
-        <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#3b82f6' }}>
+        <p className="mt-2 text-sm text-blue-500">
           Redirecting in {countdown} second{countdown === 1 ? '' : 's'}...
         </p>
       )}
       {onButtonClick && (
-        <div style={{ marginTop: '1.5rem' }}>
+        <div className="mt-6">
           <AuthButton type="button" variant="primary" onClick={onButtonClick} fullWidth={false}>
-            <LogIn style={{ height: '1rem', width: '1rem' }} />
+            <LogIn className="h-4 w-4" />
             {buttonText}
           </AuthButton>
         </div>

@@ -1,17 +1,3 @@
-import {
-  formLabel,
-  helperText,
-  inputBase,
-  inputBlurStyle,
-  inputFocusStyle,
-  inputIconContainer,
-  inputIconStyle,
-  inputWithIcon,
-  inputWithIconAndButton,
-  inputWrapper,
-  requiredIndicator,
-  toggleButton,
-} from '@shared/styles/authStyles';
 import type { LucideIcon } from 'lucide-react';
 import React from 'react';
 
@@ -46,23 +32,15 @@ export const FormInput: React.FC<FormInputProps> = ({
   ToggleIcon,
   onToggle,
 }) => {
-  const [isFocused, setIsFocused] = React.useState(false);
-
-  const getInputStyle = () => {
-    if (Icon && ToggleIcon) return inputWithIconAndButton;
-    if (Icon) return inputWithIcon;
-    return inputBase;
-  };
-
   return (
     <div>
-      <label htmlFor={id} style={formLabel}>
-        {label} {required && <span style={requiredIndicator}>*</span>}
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
-      <div style={inputWrapper}>
+      <div className="relative">
         {Icon && (
-          <div style={inputIconContainer}>
-            <Icon style={inputIconStyle} />
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Icon className="h-5 w-5 text-gray-400" />
           </div>
         )}
         <input
@@ -73,21 +51,28 @@ export const FormInput: React.FC<FormInputProps> = ({
           required={required}
           value={value}
           onChange={onChange}
-          style={{
-            ...getInputStyle(),
-            ...(isFocused ? inputFocusStyle : inputBlurStyle),
-          }}
+          className={`
+            block w-full rounded-lg border border-gray-300 
+            ${Icon ? 'pl-10' : 'pl-3'} 
+            ${ToggleIcon ? 'pr-12' : 'pr-3'} 
+            py-3 text-gray-900 text-sm
+            shadow-sm transition-all duration-200
+            focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none
+            placeholder:text-gray-400
+          `}
           placeholder={placeholder}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
         />
         {ToggleIcon && onToggle && (
-          <button type="button" onClick={onToggle} style={toggleButton}>
+          <button
+            type="button"
+            onClick={onToggle}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center bg-transparent border-none cursor-pointer"
+          >
             {ToggleIcon}
           </button>
         )}
       </div>
-      {helperTextContent && <p style={helperText}>{helperTextContent}</p>}
+      {helperTextContent && <p className="mt-1 text-xs text-gray-600">{helperTextContent}</p>}
     </div>
   );
 };

@@ -3,19 +3,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
-import {
-  authCard,
-  authContainer,
-  centeredText,
-  formContainer,
-  heading,
-  iconContainerGradient,
-  iconStyle,
-  inputIconStyle,
-  linkPrimary,
-  spaceBetween,
-  subheading,
-} from '@shared/styles/authStyles';
 import { AuthButton } from '@shared/ui/AuthButton';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { FormInput } from '@shared/ui/FormInput';
@@ -96,27 +83,27 @@ const LoginPage: React.FC = () => {
 
   return (
     <>
-      <div style={authContainer}>
+      <div className="mx-auto w-full max-w-md">
         {/* Logo and Title */}
-        <div style={centeredText}>
-          <div style={iconContainerGradient}>
-            <Lock style={iconStyle} />
+        <div className="text-center">
+          <div className="mx-auto mb-6 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/40">
+            <Lock className="w-8 h-8 text-white" />
           </div>
-          <h2 style={heading}>Welcome Back</h2>
-          <p style={subheading}>Sign in to your account to continue</p>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">Welcome Back</h2>
+          <p className="mt-2 text-sm text-gray-600">Sign in to your account to continue</p>
         </div>
       </div>
 
-      <div style={{ ...authContainer, marginTop: '2rem' }}>
-        <div style={authCard}>
+      <div className="mx-auto w-full max-w-md mt-8">
+        <div className="bg-white/95 backdrop-blur-sm p-8 shadow-xl rounded-2xl border border-gray-200/50">
           {/* Error Alert */}
           {error && (
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div className="mb-6">
               <ErrorAlert error={error} />
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={formContainer}>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             {/* Email Field */}
             <FormInput
               id="email"
@@ -145,22 +132,19 @@ const LoginPage: React.FC = () => {
               Icon={Lock}
               helperTextContent="Must be at least 8 characters long"
               ToggleIcon={
-                showPassword ? <EyeOff style={inputIconStyle} /> : <Eye style={inputIconStyle} />
+                showPassword ? (
+                  <EyeOff className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <Eye className="h-5 w-5 text-gray-400" />
+                )
               }
               onToggle={() => setShowPassword(!showPassword)}
             />
 
-            <div style={spaceBetween}>
+            <div className="flex items-center justify-between gap-4 flex-wrap">
               <label
                 htmlFor="remember-me-checkbox"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.875rem',
-                  color: '#111827',
-                  cursor: 'pointer',
-                }}
+                className="inline-flex items-center gap-2 text-sm text-gray-900 cursor-pointer"
               >
                 <input
                   id="remember-me-checkbox"
@@ -168,22 +152,14 @@ const LoginPage: React.FC = () => {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleChange}
-                  style={{
-                    height: '1rem',
-                    width: '1rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.25rem',
-                    accentColor: '#3b82f6',
-                  }}
+                  className="w-4 h-4 border border-gray-300 rounded accent-blue-500"
                 />
                 Remember me
               </label>
 
               <Link
                 to="/forgot-password"
-                style={linkPrimary}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#2563eb')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#3b82f6')}
+                className="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors"
               >
                 Forgot your password?
               </Link>
@@ -196,46 +172,22 @@ const LoginPage: React.FC = () => {
           </form>
 
           {/* Divider */}
-          <div style={{ marginTop: '2rem' }}>
-            <div style={{ position: 'relative' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <div style={{ width: '100%', borderTop: '1px solid #d1d5db' }} />
+          <div className="mt-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
               </div>
-              <div
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  fontSize: '0.875rem',
-                }}
-              >
-                <span
-                  style={{
-                    padding: '0 0.5rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    color: '#6b7280',
-                  }}
-                >
-                  Don't have an account?
-                </span>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white/95 text-gray-600">Don't have an account?</span>
               </div>
             </div>
           </div>
 
           {/* Sign Up Link */}
-          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+          <div className="mt-6 text-center">
             <Link
               to="/register"
-              style={linkPrimary}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#2563eb')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#3b82f6')}
+              className="font-medium text-blue-500 hover:text-blue-600 transition-colors"
             >
               Create a new account
             </Link>
