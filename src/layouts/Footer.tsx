@@ -10,216 +10,73 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer
-      style={{
-        background: 'linear-gradient(135deg, #111827 0%, #1f2937 50%, #111827 100%)',
-        color: '#ffffff',
-        marginTop: 'auto',
-        borderTop: '4px solid #3b82f6',
-      }}
-    >
+    <footer className="mt-auto border-t-4 border-blue-500 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       {/* Main Footer Content */}
-      <div
-        style={{
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '3rem 1rem',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '2rem',
-          }}
-        >
+      <div className="mx-auto max-w-7xl px-4 py-12">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Company Info */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Shield style={{ width: '2rem', height: '2rem', color: '#60a5fa' }} />
-              <h3
-                style={{
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  background: 'linear-gradient(135deg, #60a5fa, #a78bfa)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <Shield className="h-8 w-8 text-blue-400" />
+              <h3 className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-2xl font-bold text-transparent">
                 UserManagement
               </h3>
             </div>
-            <p
-              style={{
-                color: '#9ca3af',
-                fontSize: '0.875rem',
-                lineHeight: '1.5',
-              }}
-            >
+            <p className="text-sm leading-relaxed text-gray-400">
               Enterprise-grade user management system with advanced role-based access control,
               workflow automation, and compliance tracking.
             </p>
 
             {/* Social Links */}
-            <div style={{ display: 'flex', gap: '0.75rem', paddingTop: '0.5rem' }}>
+            <div className="flex gap-3 pt-2">
               <a
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  width: '2.5rem',
-                  height: '2.5rem',
-                  borderRadius: '0.5rem',
-                  backgroundColor: '#1f2937',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2563eb';
-                  e.currentTarget.style.transform = 'scale(1.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1f2937';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-gray-800 transition-all duration-200 hover:scale-110 hover:bg-blue-600"
                 aria-label="GitHub"
               >
-                <Github style={{ width: '1.25rem', height: '1.25rem' }} />
+                <Github className="h-5 w-5" />
               </a>
               <a
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  width: '2.5rem',
-                  height: '2.5rem',
-                  borderRadius: '0.5rem',
-                  backgroundColor: '#1f2937',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#60a5fa';
-                  e.currentTarget.style.transform = 'scale(1.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1f2937';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-gray-800 transition-all duration-200 hover:scale-110 hover:bg-blue-400"
                 aria-label="Twitter"
               >
-                <Twitter style={{ width: '1.25rem', height: '1.25rem' }} />
+                <Twitter className="h-5 w-5" />
               </a>
               <a
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  width: '2.5rem',
-                  height: '2.5rem',
-                  borderRadius: '0.5rem',
-                  backgroundColor: '#1f2937',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1d4ed8';
-                  e.currentTarget.style.transform = 'scale(1.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1f2937';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-gray-800 transition-all duration-200 hover:scale-110 hover:bg-blue-800"
                 aria-label="LinkedIn"
               >
-                <Linkedin style={{ width: '1.25rem', height: '1.25rem' }} />
+                <Linkedin className="h-5 w-5" />
               </a>
               <a
                 href="mailto:support@usermgmt.com"
-                style={{
-                  width: '2.5rem',
-                  height: '2.5rem',
-                  borderRadius: '0.5rem',
-                  backgroundColor: '#1f2937',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#059669';
-                  e.currentTarget.style.transform = 'scale(1.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1f2937';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-gray-800 transition-all duration-200 hover:scale-110 hover:bg-emerald-600"
                 aria-label="Email"
               >
-                <Mail style={{ width: '1.25rem', height: '1.25rem' }} />
+                <Mail className="h-5 w-5" />
               </a>
             </div>
 
             {/* System Status Badge */}
-            <div
-              style={{
-                backgroundColor: 'rgba(31, 41, 55, 0.5)',
-                borderRadius: '0.5rem',
-                padding: '0.75rem',
-                border: '1px solid #374151',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  fontSize: '0.75rem',
-                }}
-              >
-                <span style={{ color: '#9ca3af' }}>Status:</span>
-                <span
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    color: '#4ade80',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: '0.5rem',
-                      height: '0.5rem',
-                      backgroundColor: '#4ade80',
-                      borderRadius: '9999px',
-                      marginRight: '0.5rem',
-                      animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    }}
-                  ></span>
+            <div className="rounded-lg border border-gray-700 bg-gray-800/50 p-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-400">Status:</span>
+                <span className="flex items-center text-green-400">
+                  <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-green-400"></span>
                   All Systems Operational
                 </span>
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  fontSize: '0.75rem',
-                  marginTop: '0.5rem',
-                }}
-              >
-                <span style={{ color: '#9ca3af' }}>Version:</span>
-                <span style={{ color: '#d1d5db' }}>
+              <div className="mt-2 flex items-center justify-between text-xs">
+                <span className="text-gray-400">Version:</span>
+                <span className="text-gray-300">
                   {apiVersion} • Build {buildVersion}
                 </span>
               </div>
@@ -228,141 +85,62 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
 
           {/* Product Links */}
           <div>
-            <h4
-              style={{
-                fontSize: '1.125rem',
-                fontWeight: '600',
-                marginBottom: '1rem',
-                color: '#e5e7eb',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <Zap
-                style={{
-                  width: '1.25rem',
-                  height: '1.25rem',
-                  marginRight: '0.5rem',
-                  color: '#facc15',
-                }}
-              />
+            <h4 className="mb-4 flex items-center text-lg font-semibold text-gray-200">
+              <Zap className="mr-2 h-5 w-5 text-yellow-400" />
               Product
             </h4>
-            <ul
-              style={{
-                listStyle: 'none',
-                padding: 0,
-                margin: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-              }}
-            >
+            <ul className="m-0 flex list-none flex-col gap-3 p-0">
               <li>
                 <Link
                   to="/dashboard"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Dashboard
                 </Link>
               </li>
               <li>
                 <Link
                   to="/users"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   User Management
                 </Link>
               </li>
               <li>
                 <Link
                   to="/analytics"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Analytics
                 </Link>
               </li>
               <li>
                 <Link
                   to="/workflows"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Workflows
                 </Link>
               </li>
               <li>
                 <Link
                   to="/security"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Security Center
                 </Link>
               </li>
               <li>
                 <a
                   href="#pricing"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Pricing
                 </a>
               </li>
@@ -371,141 +149,62 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
 
           {/* Company Links */}
           <div>
-            <h4
-              style={{
-                fontSize: '1.125rem',
-                fontWeight: '600',
-                marginBottom: '1rem',
-                color: '#e5e7eb',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <Users
-                style={{
-                  width: '1.25rem',
-                  height: '1.25rem',
-                  marginRight: '0.5rem',
-                  color: '#c084fc',
-                }}
-              />
+            <h4 className="mb-4 flex items-center text-lg font-semibold text-gray-200">
+              <Users className="mr-2 h-5 w-5 text-purple-400" />
               Company
             </h4>
-            <ul
-              style={{
-                listStyle: 'none',
-                padding: 0,
-                margin: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-              }}
-            >
+            <ul className="m-0 flex list-none flex-col gap-3 p-0">
               <li>
                 <a
                   href="#about"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   About Us
                 </a>
               </li>
               <li>
                 <a
                   href="#careers"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Careers
                 </a>
               </li>
               <li>
                 <a
                   href="#blog"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Blog
                 </a>
               </li>
               <li>
                 <a
                   href="#press"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Press Kit
                 </a>
               </li>
               <li>
                 <a
                   href="#contact"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Contact Us
                 </a>
               </li>
               <li>
                 <a
                   href="#partners"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Partners
                 </a>
               </li>
@@ -514,141 +213,62 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
 
           {/* Legal & Support */}
           <div>
-            <h4
-              style={{
-                fontSize: '1.125rem',
-                fontWeight: '600',
-                marginBottom: '1rem',
-                color: '#e5e7eb',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <BarChart
-                style={{
-                  width: '1.25rem',
-                  height: '1.25rem',
-                  marginRight: '0.5rem',
-                  color: '#4ade80',
-                }}
-              />
+            <h4 className="mb-4 flex items-center text-lg font-semibold text-gray-200">
+              <BarChart className="mr-2 h-5 w-5 text-green-400" />
               Legal & Support
             </h4>
-            <ul
-              style={{
-                listStyle: 'none',
-                padding: 0,
-                margin: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-              }}
-            >
+            <ul className="m-0 flex list-none flex-col gap-3 p-0">
               <li>
                 <a
                   href="#privacy"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Privacy Policy
                 </a>
               </li>
               <li>
                 <a
                   href="#terms"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Terms of Service
                 </a>
               </li>
               <li>
                 <a
                   href="#cookies"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Cookie Policy
                 </a>
               </li>
               <li>
                 <a
                   href="#gdpr"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   GDPR Compliance
                 </a>
               </li>
               <li>
                 <Link
                   to="/help"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   Help Center
                 </Link>
               </li>
               <li>
                 <a
                   href="#api-docs"
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.875rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
                 >
-                  <span style={{ marginRight: '0.5rem' }}>→</span>
+                  <span className="mr-2">→</span>
                   API Documentation
                 </a>
               </li>
@@ -657,142 +277,57 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
         </div>
 
         {/* Features Banner */}
-        <div
-          style={{
-            marginTop: '2rem',
-            background: 'linear-gradient(to right, rgba(30, 58, 138, 0.3), rgba(88, 28, 135, 0.3))',
-            borderRadius: '0.5rem',
-            padding: '1rem',
-            border: '1px solid rgba(30, 64, 175, 0.5)',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '1.5rem',
-              fontSize: '0.875rem',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', color: '#d1d5db' }}>
-              <Shield
-                style={{ width: '1rem', height: '1rem', marginRight: '0.5rem', color: '#60a5fa' }}
-              />
+        <div className="mt-8 rounded-lg border border-blue-800/50 bg-gradient-to-r from-blue-900/30 to-purple-900/30 p-4">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            <div className="flex items-center text-gray-300">
+              <Shield className="mr-2 h-4 w-4 text-blue-400" />
               Enterprise Security
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', color: '#d1d5db' }}>
-              <Users
-                style={{ width: '1rem', height: '1rem', marginRight: '0.5rem', color: '#c084fc' }}
-              />
+            <div className="flex items-center text-gray-300">
+              <Users className="mr-2 h-4 w-4 text-purple-400" />
               Role-Based Access
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', color: '#d1d5db' }}>
-              <Zap
-                style={{ width: '1rem', height: '1rem', marginRight: '0.5rem', color: '#facc15' }}
-              />
+            <div className="flex items-center text-gray-300">
+              <Zap className="mr-2 h-4 w-4 text-yellow-400" />
               Workflow Automation
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', color: '#d1d5db' }}>
-              <BarChart
-                style={{ width: '1rem', height: '1rem', marginRight: '0.5rem', color: '#4ade80' }}
-              />
+            <div className="flex items-center text-gray-300">
+              <BarChart className="mr-2 h-4 w-4 text-green-400" />
               Advanced Analytics
             </div>
           </div>
         </div>
 
         {/* Divider */}
-        <div
-          style={{
-            borderTop: '1px solid #374151',
-            marginTop: '2rem',
-            paddingTop: '2rem',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: window.innerWidth >= 768 ? 'row' : 'column',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: '1rem',
-            }}
-          >
+        <div className="mt-8 border-t border-gray-700 pt-8">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             {/* Copyright */}
-            <div
-              style={{
-                color: '#9ca3af',
-                fontSize: '0.875rem',
-                display: 'flex',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: '0.5rem',
-              }}
-            >
+            <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-400">
               <span>© {currentYear} UserManagement System. All rights reserved.</span>
-              <span style={{ display: window.innerWidth >= 768 ? 'inline' : 'none' }}>•</span>
-              <span style={{ display: 'flex', alignItems: 'center' }}>
-                Made with{' '}
-                <Heart
-                  style={{
-                    width: '1rem',
-                    height: '1rem',
-                    margin: '0 0.25rem',
-                    color: '#ef4444',
-                    fill: 'currentColor',
-                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                  }}
-                />{' '}
+              <span className="hidden md:inline">•</span>
+              <span className="flex items-center">
+                Made with <Heart className="mx-1 h-4 w-4 animate-pulse fill-current text-red-500" />{' '}
                 by the UMS Team
               </span>
             </div>
 
             {/* Additional Links */}
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: '1rem',
-                fontSize: '0.875rem',
-              }}
-            >
+            <div className="flex flex-wrap justify-center gap-4 text-sm">
               <a
                 href="#sitemap"
-                style={{
-                  color: '#9ca3af',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                className="text-gray-400 no-underline transition-colors duration-200 hover:text-white"
               >
                 Sitemap
               </a>
               <a
                 href="#status"
-                style={{
-                  color: '#9ca3af',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                className="text-gray-400 no-underline transition-colors duration-200 hover:text-white"
               >
                 System Status
               </a>
               <a
                 href="#changelog"
-                style={{
-                  color: '#9ca3af',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                className="text-gray-400 no-underline transition-colors duration-200 hover:text-white"
               >
                 Changelog
               </a>
@@ -802,21 +337,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
       </div>
 
       {/* Decorative Bottom Border */}
-      <div
-        style={{
-          height: '0.25rem',
-          background: 'linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899)',
-        }}
-      ></div>
-
-      <style>
-        {`
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-          }
-        `}
-      </style>
+      <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
     </footer>
   );
 };
