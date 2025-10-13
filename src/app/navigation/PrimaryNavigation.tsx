@@ -75,115 +75,31 @@ const Navigation = () => {
     <>
       <a
         href="#main-content"
-        style={{
-          position: 'absolute',
-          left: '-999px',
-          top: 'auto',
-          width: '1px',
-          height: '1px',
-          overflow: 'hidden',
-          zIndex: 100,
-          color: '#1d4ed8',
-          backgroundColor: 'transparent',
-          borderRadius: '0',
-        }}
-        onFocus={(event) => {
-          event.currentTarget.style.left = '1rem';
-          event.currentTarget.style.top = '0.5rem';
-          event.currentTarget.style.width = 'auto';
-          event.currentTarget.style.height = 'auto';
-          event.currentTarget.style.padding = '0.5rem 1rem';
-          event.currentTarget.style.backgroundColor = '#1d4ed8';
-          event.currentTarget.style.color = '#ffffff';
-          event.currentTarget.style.borderRadius = '0.375rem';
-        }}
-        onBlur={(event) => {
-          event.currentTarget.style.left = '-999px';
-          event.currentTarget.style.top = 'auto';
-          event.currentTarget.style.width = '1px';
-          event.currentTarget.style.height = '1px';
-          event.currentTarget.style.padding = '0';
-          event.currentTarget.style.backgroundColor = 'transparent';
-          event.currentTarget.style.color = '#1d4ed8';
-          event.currentTarget.style.borderRadius = '0';
-        }}
+        className="absolute left-[-999px] top-auto z-[100] h-px w-px overflow-hidden rounded-none bg-transparent text-blue-700 focus:left-4 focus:top-2 focus:h-auto focus:w-auto focus:rounded-md focus:bg-blue-700 focus:px-4 focus:py-2 focus:text-white"
       >
         Skip to main content
       </a>
       <nav
         aria-label="Primary navigation"
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          borderBottom: '1px solid #e5e7eb',
-          position: 'sticky',
-          top: 0,
-          zIndex: 50,
-        }}
+        className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 shadow-md backdrop-blur-md"
       >
-        <div
-          style={{
-            maxWidth: '1280px',
-            margin: '0 auto',
-            padding: '0 1rem',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              height: '4rem',
-              alignItems: 'center',
-            }}
-          >
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="flex h-16 items-center justify-between">
             {/* Logo and Brand */}
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Link
-                to="/"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  textDecoration: 'none',
-                }}
-              >
-                <div
-                  style={{
-                    width: '2.5rem',
-                    height: '2.5rem',
-                    background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                    borderRadius: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)',
-                  }}
-                >
-                  <User style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} />
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center gap-3 no-underline">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/30">
+                  <User className="h-6 w-6 text-white" />
                 </div>
-                <span
-                  style={{
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
+                <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
                   UserMgmt
                 </span>
               </Link>
             </div>
 
             {/* Desktop Navigation */}
-            <div
-              style={{
-                display: isDesktop ? 'flex' : 'none',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className={isDesktop ? 'flex' : 'hidden'}>
+              <div className="flex items-center gap-2">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
@@ -192,33 +108,13 @@ const Navigation = () => {
                       key={item.name}
                       to={item.href}
                       role="menuitem"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '0.5rem',
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        textDecoration: 'none',
-                        transition: 'all 0.2s ease',
-                        color: active ? '#2563eb' : '#374151',
-                        backgroundColor: active ? '#eff6ff' : 'transparent',
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!active) {
-                          e.currentTarget.style.color = '#2563eb';
-                          e.currentTarget.style.backgroundColor = '#f9fafb';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!active) {
-                          e.currentTarget.style.color = '#374151';
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                        }
-                      }}
+                      className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium no-underline transition-all duration-200 ${
+                        active
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                      }`}
                     >
-                      <Icon style={{ width: '1rem', height: '1rem' }} />
+                      <Icon className="h-4 w-4" />
                       <span>{item.name}</span>
                     </Link>
                   );
