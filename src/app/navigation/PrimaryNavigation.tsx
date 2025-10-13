@@ -123,78 +123,32 @@ const Navigation = () => {
             </div>
 
             {/* Right side - User menu or Login button */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div className="flex items-center gap-4">
               {user ? (
                 /* User is logged in - show user menu */
-                <div style={{ position: 'relative' }}>
+                <div className="relative">
                   <button
                     type="button"
                     aria-haspopup="menu"
                     aria-expanded={isUserMenuOpen}
                     aria-controls={userMenuId}
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.5rem',
-                      borderRadius: '0.75rem',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    className="flex cursor-pointer items-center gap-2 rounded-xl border-none bg-transparent p-2 transition-colors duration-200 hover:bg-gray-50"
                   >
-                    <div
-                      style={{
-                        width: '2.5rem',
-                        height: '2.5rem',
-                        background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                        borderRadius: '9999px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: '#ffffff',
-                          fontSize: '0.875rem',
-                          fontWeight: '500',
-                        }}
-                      >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-md">
+                      <span className="text-sm font-medium text-white">
                         {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    <div
-                      style={{
-                        display: isDesktop ? 'block' : 'none',
-                        textAlign: 'left',
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: '0.875rem',
-                          fontWeight: '500',
-                          color: '#111827',
-                        }}
-                      >
+                    <div className={`text-left ${isDesktop ? 'block' : 'hidden'}`}>
+                      <div className="text-sm font-medium text-gray-900">
                         {user.full_name || user.username || 'User'}
                       </div>
-                      <div
-                        style={{
-                          fontSize: '0.75rem',
-                          color: '#6b7280',
-                          textTransform: 'capitalize',
-                        }}
-                      >
+                      <div className="text-xs capitalize text-gray-500">
                         {getUserRoleName(user) || 'Member'}
                       </div>
                     </div>
-                    <ChevronDown style={{ width: '1rem', height: '1rem', color: '#6b7280' }} />
+                    <ChevronDown className="h-4 w-4 text-gray-500" />
                   </button>
 
                   {/* User Dropdown Menu */}
@@ -203,43 +157,13 @@ const Navigation = () => {
                       id={userMenuId}
                       role="menu"
                       aria-label="User menu"
-                      style={{
-                        position: 'absolute',
-                        right: 0,
-                        marginTop: '0.5rem',
-                        width: '14rem',
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '0.75rem',
-                        boxShadow:
-                          '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                        padding: '0.25rem',
-                        zIndex: 50,
-                      }}
+                      className="absolute right-0 z-50 mt-2 w-56 rounded-xl border border-gray-200 bg-white p-1 shadow-xl"
                     >
-                      <div
-                        style={{
-                          padding: '0.75rem 1rem',
-                          borderBottom: '1px solid #f3f4f6',
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            color: '#111827',
-                          }}
-                        >
+                      <div className="border-b border-gray-100 px-4 py-3">
+                        <div className="text-sm font-medium text-gray-900">
                           {user.full_name || user.username || 'User'}
                         </div>
-                        <div
-                          style={{
-                            fontSize: '0.875rem',
-                            color: '#6b7280',
-                          }}
-                        >
-                          {user.email}
-                        </div>
+                        <div className="text-sm text-gray-500">{user.email}</div>
                       </div>
 
                       {userMenuItems.map((item) => {
@@ -250,62 +174,22 @@ const Navigation = () => {
                             to={item.href}
                             role="menuitem"
                             onClick={() => setIsUserMenuOpen(false)}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem',
-                              padding: '0.625rem 1rem',
-                              fontSize: '0.875rem',
-                              color: '#374151',
-                              textDecoration: 'none',
-                              borderRadius: '0.375rem',
-                              transition: 'background-color 0.2s ease',
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.backgroundColor = '#f9fafb')
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.backgroundColor = 'transparent')
-                            }
+                            className="flex items-center gap-2 rounded-md px-4 py-2.5 text-sm text-gray-700 no-underline transition-colors duration-200 hover:bg-gray-50"
                           >
-                            <Icon style={{ width: '1rem', height: '1rem' }} />
+                            <Icon className="h-4 w-4" />
                             <span>{item.name}</span>
                           </Link>
                         );
                       })}
 
-                      <div
-                        style={{
-                          borderTop: '1px solid #f3f4f6',
-                          marginTop: '0.25rem',
-                          paddingTop: '0.25rem',
-                        }}
-                      >
+                      <div className="mt-1 border-t border-gray-100 pt-1">
                         <button
                           type="button"
                           onClick={handleLogout}
                           role="menuitem"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            width: '100%',
-                            padding: '0.625rem 1rem',
-                            fontSize: '0.875rem',
-                            color: '#dc2626',
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            borderRadius: '0.375rem',
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                            transition: 'background-color 0.2s ease',
-                          }}
-                          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#fef2f2')}
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.backgroundColor = 'transparent')
-                          }
+                          className="flex w-full cursor-pointer items-center gap-2 rounded-md border-none bg-transparent px-4 py-2.5 text-left text-sm text-red-600 transition-colors duration-200 hover:bg-red-50"
                         >
-                          <LogOut style={{ width: '1rem', height: '1rem' }} />
+                          <LogOut className="h-4 w-4" />
                           <span>Sign Out</span>
                         </button>
                       </div>
@@ -314,48 +198,16 @@ const Navigation = () => {
                 </div>
               ) : (
                 /* User is not logged in - show login/register buttons */
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className="flex items-center gap-3">
                   <Link
                     to="/login"
-                    style={{
-                      color: '#374151',
-                      padding: '0.5rem 0.75rem',
-                      borderRadius: '0.5rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
-                      textDecoration: 'none',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = '#2563eb';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = '#374151';
-                    }}
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 no-underline transition-all duration-200 hover:text-blue-600"
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/register"
-                    style={{
-                      background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                      color: '#ffffff',
-                      padding: '0.625rem 1.25rem',
-                      borderRadius: '0.5rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
-                      textDecoration: 'none',
-                      boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(59, 130, 246, 0.3)';
-                    }}
+                    className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-5 py-2.5 text-sm font-medium text-white no-underline shadow-lg shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-500/40"
                   >
                     Get Started
                   </Link>
@@ -369,32 +221,11 @@ const Navigation = () => {
                 aria-expanded={isMobileMenuOpen}
                 aria-controls={mobileMenuId}
                 aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-                style={
-                  {
-                    display: isDesktop ? 'none' : 'block',
-                    padding: '0.5rem',
-                    borderRadius: '0.5rem',
-                    color: '#374151',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  } as React.CSSProperties
-                }
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#2563eb';
-                  e.currentTarget.style.backgroundColor = '#f9fafb';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#374151';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
+                className={`cursor-pointer rounded-lg border-none bg-transparent p-2 text-gray-700 transition-all duration-200 hover:bg-gray-50 hover:text-blue-600 ${
+                  isDesktop ? 'hidden' : 'block'
+                }`}
               >
-                {isMobileMenuOpen ? (
-                  <X style={{ width: '1.5rem', height: '1.5rem' }} />
-                ) : (
-                  <Menu style={{ width: '1.5rem', height: '1.5rem' }} />
-                )}
+                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
@@ -405,14 +236,9 @@ const Navigation = () => {
               id={mobileMenuId}
               role="menu"
               aria-label="Mobile navigation"
-              style={{
-                display: isDesktop ? 'none' : 'block',
-                borderTop: '1px solid #e5e7eb',
-                paddingTop: '1rem',
-                paddingBottom: '1rem',
-              }}
+              className={`border-t border-gray-200 py-4 ${isDesktop ? 'hidden' : 'block'}`}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <div className="flex flex-col gap-1">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
@@ -422,33 +248,13 @@ const Navigation = () => {
                       to={item.href}
                       role="menuitem"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.75rem',
-                        borderRadius: '0.5rem',
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                        textDecoration: 'none',
-                        transition: 'all 0.2s ease',
-                        color: active ? '#2563eb' : '#374151',
-                        backgroundColor: active ? '#eff6ff' : 'transparent',
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!active) {
-                          e.currentTarget.style.color = '#2563eb';
-                          e.currentTarget.style.backgroundColor = '#f9fafb';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!active) {
-                          e.currentTarget.style.color = '#374151';
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                        }
-                      }}
+                      className={`flex items-center gap-2 rounded-lg px-3 py-3 text-base font-medium no-underline transition-all duration-200 ${
+                        active
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                      }`}
                     >
-                      <Icon style={{ width: '1.25rem', height: '1.25rem' }} />
+                      <Icon className="h-5 w-5" />
                       <span>{item.name}</span>
                     </Link>
                   );
@@ -457,31 +263,12 @@ const Navigation = () => {
 
               {/* Mobile User Menu */}
               {user && (
-                <div
-                  style={{
-                    marginTop: '1rem',
-                    paddingTop: '1rem',
-                    borderTop: '1px solid #e5e7eb',
-                  }}
-                >
-                  <div style={{ padding: '0.75rem' }}>
-                    <div
-                      style={{
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                        color: '#111827',
-                      }}
-                    >
+                <div className="mt-4 border-t border-gray-200 pt-4">
+                  <div className="px-3 py-3">
+                    <div className="text-base font-medium text-gray-900">
                       {user.full_name || user.username || 'User'}
                     </div>
-                    <div
-                      style={{
-                        fontSize: '0.875rem',
-                        color: '#6b7280',
-                      }}
-                    >
-                      {user.email}
-                    </div>
+                    <div className="text-sm text-gray-500">{user.email}</div>
                   </div>
 
                   {userMenuItems.map((item) => {
@@ -492,27 +279,9 @@ const Navigation = () => {
                         to={item.href}
                         role="menuitem"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          padding: '0.75rem',
-                          fontSize: '1rem',
-                          color: '#374151',
-                          textDecoration: 'none',
-                          borderRadius: '0.5rem',
-                          transition: 'all 0.2s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#2563eb';
-                          e.currentTarget.style.backgroundColor = '#f9fafb';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#374151';
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                        }}
+                        className="flex items-center gap-2 rounded-lg px-3 py-3 text-base text-gray-700 no-underline transition-all duration-200 hover:bg-gray-50 hover:text-blue-600"
                       >
-                        <Icon style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <Icon className="h-5 w-5" />
                         <span>{item.name}</span>
                       </Link>
                     );
@@ -525,25 +294,9 @@ const Navigation = () => {
                       setIsMobileMenuOpen(false);
                     }}
                     role="menuitem"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      width: '100%',
-                      padding: '0.75rem',
-                      fontSize: '1rem',
-                      color: '#dc2626',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'background-color 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#fef2f2')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg border-none bg-transparent px-3 py-3 text-left text-base text-red-600 transition-colors duration-200 hover:bg-red-50"
                   >
-                    <LogOut style={{ width: '1.25rem', height: '1.25rem' }} />
+                    <LogOut className="h-5 w-5" />
                     <span>Sign Out</span>
                   </button>
                 </div>
@@ -551,64 +304,18 @@ const Navigation = () => {
 
               {/* Mobile Login/Register for non-authenticated users */}
               {!user && (
-                <div
-                  style={{
-                    marginTop: '1rem',
-                    paddingTop: '1rem',
-                    borderTop: '1px solid #e5e7eb',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.5rem',
-                  }}
-                >
+                <div className="mt-4 flex flex-col gap-2 border-t border-gray-200 pt-4">
                   <Link
                     to="/login"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    style={{
-                      display: 'block',
-                      padding: '0.75rem',
-                      fontSize: '1rem',
-                      color: '#374151',
-                      textDecoration: 'none',
-                      borderRadius: '0.5rem',
-                      transition: 'all 0.2s ease',
-                      textAlign: 'center',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = '#2563eb';
-                      e.currentTarget.style.backgroundColor = '#f9fafb';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = '#374151';
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
+                    className="block rounded-lg px-3 py-3 text-center text-base text-gray-700 no-underline transition-all duration-200 hover:bg-gray-50 hover:text-blue-600"
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    style={{
-                      display: 'block',
-                      padding: '0.75rem',
-                      fontSize: '1rem',
-                      fontWeight: '500',
-                      color: '#ffffff',
-                      background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                      borderRadius: '0.5rem',
-                      textDecoration: 'none',
-                      textAlign: 'center',
-                      boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(59, 130, 246, 0.3)';
-                    }}
+                    className="block rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 px-3 py-3 text-center text-base font-medium text-white no-underline shadow-lg shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-500/40"
                   >
                     Get Started
                   </Link>
@@ -621,13 +328,7 @@ const Navigation = () => {
         {/* Overlay for mobile menu and dropdowns */}
         {(isMobileMenuOpen || isUserMenuOpen) && (
           <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 40,
-              backgroundColor: 'rgba(0, 0, 0, 0.25)',
-              backdropFilter: 'blur(2px)',
-            }}
+            className="fixed inset-0 z-40 bg-black/25 backdrop-blur-sm"
             onClick={() => {
               setIsMobileMenuOpen(false);
               setIsUserMenuOpen(false);
