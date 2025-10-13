@@ -204,81 +204,28 @@ const ProfilePage: FC = () => {
 
   function renderProfileTab() {
     return (
-      <div style={{ padding: '1.5rem' }}>
+      <div className="p-6">
         {/* Profile Header */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1.5rem',
-            marginBottom: '2rem',
-            paddingBottom: '1.5rem',
-            borderBottom: '1px solid #e5e7eb',
-          }}
-        >
+        <div className="mb-8 flex items-center gap-6 border-b border-gray-200 pb-6">
           {/* Avatar */}
-          <div
-            style={{
-              width: '5rem',
-              height: '5rem',
-              backgroundColor: '#3b82f6',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative',
-            }}
-          >
-            <UserIcon style={{ width: '2.5rem', height: '2.5rem', color: 'white' }} />
-            <button
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                width: '1.5rem',
-                height: '1.5rem',
-                backgroundColor: '#10b981',
-                borderRadius: '50%',
-                border: '2px solid white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-              }}
-            >
-              <Camera style={{ width: '0.75rem', height: '0.75rem', color: 'white' }} />
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-blue-500">
+            <UserIcon className="h-10 w-10 text-white" />
+            <button className="absolute bottom-0 right-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-green-500">
+              <Camera className="h-3 w-3 text-white" />
             </button>
           </div>
 
           {/* Profile Info */}
-          <div style={{ flex: 1 }}>
-            <h2
-              style={{
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                color: '#111827',
-                margin: '0 0 0.25rem',
-              }}
-            >
+          <div className="flex-1">
+            <h2 className="mb-1 text-2xl font-bold text-gray-900">
               {profile?.full_name || profile?.username || 'User'}
             </h2>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 0.5rem' }}>
-              {profile?.email}
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  color: '#10b981',
-                  backgroundColor: '#dcfce7',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '0.25rem',
-                  fontWeight: '500',
-                }}
-              >
+            <p className="mb-2 text-sm text-gray-500">{profile?.email}</p>
+            <div className="flex items-center gap-4">
+              <span className="rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-600">
                 ✓ Verified
               </span>
-              <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+              <span className="text-xs text-gray-500">
                 Member since {new Date(profile?.created_at || '').toLocaleDateString()}
               </span>
             </div>
@@ -287,29 +234,20 @@ const ProfilePage: FC = () => {
           {/* Edit Button */}
           <button
             onClick={() => setIsEditing(!isEditing)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: isEditing ? '#dc2626' : '#3b82f6',
-              backgroundColor: 'white',
-              border: `1px solid ${isEditing ? '#dc2626' : '#3b82f6'}`,
-              borderRadius: '0.5rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
+            className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
+              isEditing
+                ? 'border-red-600 bg-white text-red-600 hover:bg-red-50'
+                : 'border-blue-500 bg-white text-blue-500 hover:bg-blue-50'
+            }`}
           >
             {isEditing ? (
               <>
-                <X style={{ width: '1rem', height: '1rem' }} />
+                <X className="h-4 w-4" />
                 Cancel
               </>
             ) : (
               <>
-                <Edit3 style={{ width: '1rem', height: '1rem' }} />
+                <Edit3 className="h-4 w-4" />
                 Edit Profile
               </>
             )}
@@ -317,20 +255,14 @@ const ProfilePage: FC = () => {
         </div>
 
         {/* Profile Form */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div className="grid grid-cols-2 gap-6">
           {/* Full Name */}
           <div>
             {isEditing ? (
               <>
                 <label
                   htmlFor={fullNameInputId}
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="mb-2 block text-sm font-medium text-gray-700"
                 >
                   Full Name
                 </label>
@@ -339,16 +271,7 @@ const ProfilePage: FC = () => {
                   type="text"
                   value={editForm.full_name}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, full_name: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: 'white',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    outline: 'none',
-                  }}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="Enter your full name"
                 />
               </>
@@ -356,27 +279,11 @@ const ProfilePage: FC = () => {
               <div role="group" aria-labelledby={`${fullNameInputId}-label`}>
                 <p
                   id={`${fullNameInputId}-label`}
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="mb-2 block text-sm font-medium text-gray-700"
                 >
                   Full Name
                 </p>
-                <p
-                  style={{
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: '#f9fafb',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                    margin: 0,
-                  }}
-                >
+                <p className="m-0 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
                   {profile?.full_name || 'Not specified'}
                 </p>
               </div>
@@ -389,13 +296,7 @@ const ProfilePage: FC = () => {
               <>
                 <label
                   htmlFor={usernameInputId}
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="mb-2 block text-sm font-medium text-gray-700"
                 >
                   Username
                 </label>
@@ -404,16 +305,7 @@ const ProfilePage: FC = () => {
                   type="text"
                   value={editForm.username}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, username: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: 'white',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    outline: 'none',
-                  }}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="Enter your username"
                 />
               </>
@@ -421,27 +313,11 @@ const ProfilePage: FC = () => {
               <div role="group" aria-labelledby={`${usernameInputId}-label`}>
                 <p
                   id={`${usernameInputId}-label`}
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="mb-2 block text-sm font-medium text-gray-700"
                 >
                   Username
                 </p>
-                <p
-                  style={{
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: '#f9fafb',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                    margin: 0,
-                  }}
-                >
+                <p className="m-0 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
                   {profile?.username || 'Not specified'}
                 </p>
               </div>
@@ -449,18 +325,12 @@ const ProfilePage: FC = () => {
           </div>
 
           {/* Bio - Full Width */}
-          <div style={{ gridColumn: '1 / -1' }}>
+          <div className="col-span-full">
             {isEditing ? (
               <>
                 <label
                   htmlFor={bioInputId}
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="mb-2 block text-sm font-medium text-gray-700"
                 >
                   Bio
                 </label>
@@ -469,17 +339,7 @@ const ProfilePage: FC = () => {
                   value={editForm.bio}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, bio: e.target.value }))}
                   rows={3}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: 'white',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    outline: 'none',
-                    resize: 'vertical',
-                  }}
+                  className="w-full resize-vertical rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="Tell us about yourself..."
                 />
               </>
@@ -487,28 +347,11 @@ const ProfilePage: FC = () => {
               <div role="group" aria-labelledby={`${bioInputId}-label`}>
                 <p
                   id={`${bioInputId}-label`}
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="mb-2 block text-sm font-medium text-gray-700"
                 >
                   Bio
                 </p>
-                <p
-                  style={{
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: '#f9fafb',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                    margin: 0,
-                    minHeight: '4rem',
-                  }}
-                >
+                <p className="m-0 min-h-16 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
                   {profile?.bio || 'No bio provided'}
                 </p>
               </div>
@@ -521,22 +364,9 @@ const ProfilePage: FC = () => {
               <>
                 <label
                   htmlFor={locationInputId}
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="mb-2 block text-sm font-medium text-gray-700"
                 >
-                  <MapPin
-                    style={{
-                      width: '1rem',
-                      height: '1rem',
-                      display: 'inline',
-                      marginRight: '0.5rem',
-                    }}
-                  />
+                  <MapPin className="mr-2 inline h-4 w-4" />
                   Location
                 </label>
                 <input
@@ -544,16 +374,7 @@ const ProfilePage: FC = () => {
                   type="text"
                   value={editForm.location}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, location: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: 'white',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    outline: 'none',
-                  }}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="Your location"
                 />
               </>
@@ -561,35 +382,12 @@ const ProfilePage: FC = () => {
               <div role="group" aria-labelledby={`${locationInputId}-label`}>
                 <p
                   id={`${locationInputId}-label`}
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="mb-2 block text-sm font-medium text-gray-700"
                 >
-                  <MapPin
-                    style={{
-                      width: '1rem',
-                      height: '1rem',
-                      display: 'inline',
-                      marginRight: '0.5rem',
-                    }}
-                  />
+                  <MapPin className="mr-2 inline h-4 w-4" />
                   Location
                 </p>
-                <p
-                  style={{
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: '#f9fafb',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                    margin: 0,
-                  }}
-                >
+                <p className="m-0 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
                   {profile?.location || 'Not specified'}
                 </p>
               </div>
@@ -602,22 +400,9 @@ const ProfilePage: FC = () => {
               <>
                 <label
                   htmlFor={websiteInputId}
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="mb-2 block text-sm font-medium text-gray-700"
                 >
-                  <Globe
-                    style={{
-                      width: '1rem',
-                      height: '1rem',
-                      display: 'inline',
-                      marginRight: '0.5rem',
-                    }}
-                  />
+                  <Globe className="mr-2 inline h-4 w-4" />
                   Website
                 </label>
                 <input
@@ -625,16 +410,7 @@ const ProfilePage: FC = () => {
                   type="url"
                   value={editForm.website}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, website: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: 'white',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    outline: 'none',
-                  }}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="https://your-website.com"
                 />
               </>
@@ -642,41 +418,18 @@ const ProfilePage: FC = () => {
               <div role="group" aria-labelledby={`${websiteInputId}-label`}>
                 <p
                   id={`${websiteInputId}-label`}
-                  style={{
-                    display: 'block',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="mb-2 block text-sm font-medium text-gray-700"
                 >
-                  <Globe
-                    style={{
-                      width: '1rem',
-                      height: '1rem',
-                      display: 'inline',
-                      marginRight: '0.5rem',
-                    }}
-                  />
+                  <Globe className="mr-2 inline h-4 w-4" />
                   Website
                 </p>
-                <p
-                  style={{
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: '#f9fafb',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                    margin: 0,
-                  }}
-                >
+                <p className="m-0 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
                   {profile?.website ? (
                     <a
                       href={profile.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#3b82f6' }}
+                      className="text-blue-500"
                     >
                       {profile.website}
                     </a>
@@ -691,39 +444,16 @@ const ProfilePage: FC = () => {
 
         {/* Save Button */}
         {isEditing && (
-          <div
-            style={{
-              marginTop: '2rem',
-              paddingTop: '1.5rem',
-              borderTop: '1px solid #e5e7eb',
-              display: 'flex',
-              justifyContent: 'flex-end',
-            }}
-          >
+          <div className="mt-8 flex justify-end border-t border-gray-200 pt-6">
             <button
               onClick={handleSaveProfile}
               disabled={isSaving}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem 1.5rem',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                color: 'white',
-                background: isSaving ? '#9ca3af' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                border: 'none',
-                borderRadius: '0.5rem',
-                cursor: isSaving ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s ease',
-              }}
+              className="flex cursor-pointer items-center gap-2 rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
             >
               {isSaving ? (
-                <Loader
-                  style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }}
-                />
+                <Loader className="h-4 w-4 animate-spin" />
               ) : (
-                <Save style={{ width: '1rem', height: '1rem' }} />
+                <Save className="h-4 w-4" />
               )}
               {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -735,79 +465,44 @@ const ProfilePage: FC = () => {
 
   function renderSecurityTab() {
     return (
-      <div style={{ padding: '1.5rem' }}>
+      <div className="p-6">
         {/* Security Overview */}
-        <div
-          style={{
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #bae6fd',
-            borderRadius: '0.5rem',
-            padding: '1rem',
-            marginBottom: '2rem',
-          }}
-        >
-          <h3
-            style={{ fontSize: '1rem', fontWeight: '600', color: '#0369a1', margin: '0 0 0.5rem' }}
-          >
-            Security Status
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0369a1' }}>
+        <div className="mb-8 rounded-lg border border-sky-200 bg-sky-50 p-4">
+          <h3 className="mb-2 m-0 text-base font-semibold text-sky-700">Security Status</h3>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-sky-700">
                 {securitySettings?.two_factor_enabled ? '✓' : '⚠️'}
               </div>
-              <p style={{ fontSize: '0.75rem', color: '#0369a1', margin: 0 }}>Two-Factor Auth</p>
+              <p className="m-0 text-xs text-sky-700">Two-Factor Auth</p>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0369a1' }}>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-sky-700">
                 {securitySettings?.active_sessions || 0}
               </div>
-              <p style={{ fontSize: '0.75rem', color: '#0369a1', margin: 0 }}>Active Sessions</p>
+              <p className="m-0 text-xs text-sky-700">Active Sessions</p>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#0369a1' }}>✓</div>
-              <p style={{ fontSize: '0.75rem', color: '#0369a1', margin: 0 }}>Email Verified</p>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-sky-700">✓</div>
+              <p className="m-0 text-xs text-sky-700">Email Verified</p>
             </div>
           </div>
         </div>
 
         {/* Change Password */}
-        <div
-          style={{
-            backgroundColor: 'white',
-            border: '1px solid #e5e7eb',
-            borderRadius: '0.5rem',
-            padding: '1.5rem',
-            marginBottom: '1.5rem',
-          }}
-        >
-          <h3
-            style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: '#111827',
-              margin: '0 0 1rem',
-            }}
-          >
-            Change Password
-          </h3>
+        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">Change Password</h3>
 
-          <div style={{ display: 'grid', gap: '1rem' }}>
+          <div className="grid gap-4">
             {/* Current Password */}
             <div>
               <label
                 htmlFor={currentPasswordInputId}
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem',
-                }}
+                className="mb-2 block text-sm font-medium text-gray-700"
               >
                 Current Password
               </label>
-              <div style={{ position: 'relative' }}>
+              <div className="relative">
                 <input
                   id={currentPasswordInputId}
                   type={showPasswords.current ? 'text' : 'password'}
@@ -815,38 +510,18 @@ const ProfilePage: FC = () => {
                   onChange={(e) =>
                     setPasswordForm((prev) => ({ ...prev, current_password: e.target.value }))
                   }
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    paddingRight: '2.5rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: 'white',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    outline: 'none',
-                  }}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="Enter current password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasswords((prev) => ({ ...prev, current: !prev.current }))}
-                  style={{
-                    position: 'absolute',
-                    right: '0.75rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    padding: 0,
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    color: '#9ca3af',
-                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
                 >
                   {showPasswords.current ? (
-                    <EyeOff style={{ width: '1rem', height: '1rem' }} />
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <Eye style={{ width: '1rem', height: '1rem' }} />
+                    <Eye className="h-4 w-4" />
                   )}
                 </button>
               </div>
@@ -856,17 +531,11 @@ const ProfilePage: FC = () => {
             <div>
               <label
                 htmlFor={newPasswordInputId}
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem',
-                }}
+                className="mb-2 block text-sm font-medium text-gray-700"
               >
                 New Password
               </label>
-              <div style={{ position: 'relative' }}>
+              <div className="relative">
                 <input
                   id={newPasswordInputId}
                   type={showPasswords.new ? 'text' : 'password'}
@@ -874,39 +543,15 @@ const ProfilePage: FC = () => {
                   onChange={(e) =>
                     setPasswordForm((prev) => ({ ...prev, new_password: e.target.value }))
                   }
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    paddingRight: '2.5rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: 'white',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    outline: 'none',
-                  }}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="Enter new password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasswords((prev) => ({ ...prev, new: !prev.new }))}
-                  style={{
-                    position: 'absolute',
-                    right: '0.75rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    padding: 0,
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    color: '#9ca3af',
-                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
                 >
-                  {showPasswords.new ? (
-                    <EyeOff style={{ width: '1rem', height: '1rem' }} />
-                  ) : (
-                    <Eye style={{ width: '1rem', height: '1rem' }} />
-                  )}
+                  {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
@@ -915,17 +560,11 @@ const ProfilePage: FC = () => {
             <div>
               <label
                 htmlFor={confirmPasswordInputId}
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem',
-                }}
+                className="mb-2 block text-sm font-medium text-gray-700"
               >
                 Confirm New Password
               </label>
-              <div style={{ position: 'relative' }}>
+              <div className="relative">
                 <input
                   id={confirmPasswordInputId}
                   type={showPasswords.confirm ? 'text' : 'password'}
@@ -933,38 +572,18 @@ const ProfilePage: FC = () => {
                   onChange={(e) =>
                     setPasswordForm((prev) => ({ ...prev, confirm_password: e.target.value }))
                   }
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    paddingRight: '2.5rem',
-                    fontSize: '0.875rem',
-                    color: '#111827',
-                    backgroundColor: 'white',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    outline: 'none',
-                  }}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="Confirm new password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasswords((prev) => ({ ...prev, confirm: !prev.confirm }))}
-                  style={{
-                    position: 'absolute',
-                    right: '0.75rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    padding: 0,
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    color: '#9ca3af',
-                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
                 >
                   {showPasswords.confirm ? (
-                    <EyeOff style={{ width: '1rem', height: '1rem' }} />
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <Eye style={{ width: '1rem', height: '1rem' }} />
+                    <Eye className="h-4 w-4" />
                   )}
                 </button>
               </div>
@@ -979,40 +598,19 @@ const ProfilePage: FC = () => {
                 !passwordForm.new_password ||
                 !passwordForm.confirm_password
               }
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem 1rem',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                color: 'white',
-                background:
-                  isSaving ||
-                  !passwordForm.current_password ||
-                  !passwordForm.new_password ||
-                  !passwordForm.confirm_password
-                    ? '#9ca3af'
-                    : 'linear-gradient(135deg, #dc2626, #991b1b)',
-                border: 'none',
-                borderRadius: '0.5rem',
-                cursor:
-                  isSaving ||
-                  !passwordForm.current_password ||
-                  !passwordForm.new_password ||
-                  !passwordForm.confirm_password
-                    ? 'not-allowed'
-                    : 'pointer',
-                transition: 'all 0.2s ease',
-                justifySelf: 'start',
-              }}
+              className={`justify-self-start flex items-center gap-2 rounded-lg border-none px-4 py-3 text-sm font-semibold text-white transition-all duration-200 ${
+                isSaving ||
+                !passwordForm.current_password ||
+                !passwordForm.new_password ||
+                !passwordForm.confirm_password
+                  ? 'cursor-not-allowed bg-gray-400'
+                  : 'cursor-pointer bg-gradient-to-br from-red-600 to-red-800 hover:from-red-700 hover:to-red-900'
+              }`}
             >
               {isSaving ? (
-                <Loader
-                  style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }}
-                />
+                <Loader className="h-4 w-4 animate-spin" />
               ) : (
-                <Shield style={{ width: '1rem', height: '1rem' }} />
+                <Shield className="h-4 w-4" />
               )}
               {isSaving ? 'Changing...' : 'Change Password'}
             </button>
@@ -1024,33 +622,15 @@ const ProfilePage: FC = () => {
 
   function renderPreferencesTab() {
     return (
-      <div style={{ padding: '1.5rem' }}>
+      <div className="p-6">
         {/* Notification Settings */}
-        <div
-          style={{
-            backgroundColor: 'white',
-            border: '1px solid #e5e7eb',
-            borderRadius: '0.5rem',
-            padding: '1.5rem',
-            marginBottom: '1.5rem',
-          }}
-        >
-          <h3
-            style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: '#111827',
-              margin: '0 0 1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <Bell style={{ width: '1.25rem', height: '1.25rem' }} />
+        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
+          <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
+            <Bell className="h-5 w-5" />
             Notification Preferences
           </h3>
 
-          <div style={{ display: 'grid', gap: '1rem' }}>
+          <div className="grid gap-4">
             {[
               {
                 id: 'email_notifications',
@@ -1068,69 +648,26 @@ const ProfilePage: FC = () => {
                 description: 'Receive product updates and newsletters',
               },
             ].map(({ id, label, description }) => (
-              <div
-                key={id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '1rem',
-                  backgroundColor: '#f9fafb',
-                  borderRadius: '0.5rem',
-                }}
-              >
+              <div key={id} className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
                 <div>
-                  <h4
-                    style={{
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
-                      color: '#111827',
-                      margin: '0 0 0.25rem',
-                    }}
-                  >
-                    {label}
-                  </h4>
-                  <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: 0 }}>{description}</p>
+                  <h4 className="mb-1 text-sm font-medium text-gray-900">{label}</h4>
+                  <p className="m-0 text-xs text-gray-600">{description}</p>
                 </div>
-                <label
-                  aria-label={label}
-                  style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    width: '3rem',
-                    height: '1.5rem',
-                  }}
-                >
+                <label aria-label={label} className="relative inline-block h-6 w-12">
                   <input
                     type="checkbox"
                     defaultChecked={id === 'email_notifications'}
-                    style={{ opacity: 0, width: 0, height: 0 }}
+                    className="h-0 w-0 opacity-0"
                   />
                   <span
-                    style={{
-                      position: 'absolute',
-                      cursor: 'pointer',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: id === 'email_notifications' ? '#3b82f6' : '#cbd5e1',
-                      borderRadius: '1.5rem',
-                      transition: '0.4s',
-                    }}
+                    className={`absolute bottom-0 left-0 right-0 top-0 cursor-pointer rounded-3xl transition-all duration-400 ${
+                      id === 'email_notifications' ? 'bg-blue-500' : 'bg-gray-300'
+                    }`}
                   >
                     <span
-                      style={{
-                        position: 'absolute',
-                        content: '',
-                        height: '1.125rem',
-                        width: '1.125rem',
-                        left: id === 'email_notifications' ? '1.75rem' : '0.125rem',
-                        bottom: '0.125rem',
-                        backgroundColor: 'white',
-                        borderRadius: '50%',
-                        transition: '0.4s',
-                      }}
+                      className={`absolute bottom-0.5 h-[1.125rem] w-[1.125rem] rounded-full bg-white transition-all duration-400 ${
+                        id === 'email_notifications' ? 'left-7' : 'left-0.5'
+                      }`}
                     />
                   </span>
                 </label>
@@ -1140,30 +677,13 @@ const ProfilePage: FC = () => {
         </div>
 
         {/* Theme Settings */}
-        <div
-          style={{
-            backgroundColor: 'white',
-            border: '1px solid #e5e7eb',
-            borderRadius: '0.5rem',
-            padding: '1.5rem',
-          }}
-        >
-          <h3
-            style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: '#111827',
-              margin: '0 0 1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <Settings style={{ width: '1.25rem', height: '1.25rem' }} />
+        <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
+            <Settings className="h-5 w-5" />
             Appearance
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+          <div className="grid grid-cols-3 gap-4">
             {[
               { value: 'light', label: '☀️ Light', active: true },
               { value: 'dark', label: '🌙 Dark', active: false },
@@ -1171,17 +691,11 @@ const ProfilePage: FC = () => {
             ].map(({ value, label, active }) => (
               <button
                 key={value}
-                style={{
-                  padding: '1rem',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: active ? '#3b82f6' : '#6b7280',
-                  backgroundColor: active ? '#eff6ff' : '#f9fafb',
-                  border: `1px solid ${active ? '#3b82f6' : '#e5e7eb'}`,
-                  borderRadius: '0.5rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
+                className={`cursor-pointer rounded-lg border p-4 text-sm font-medium transition-all duration-200 ${
+                  active
+                    ? 'border-blue-500 bg-blue-50 text-blue-500'
+                    : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
               >
                 {label}
               </button>
@@ -1194,83 +708,44 @@ const ProfilePage: FC = () => {
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#f9fafb',
-        }}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <Loader
-            style={{
-              width: '2rem',
-              height: '2rem',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 1rem',
-            }}
-          />
-          <p style={{ color: '#6b7280' }}>Loading profile...</p>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader className="mx-auto mb-4 h-8 w-8 animate-spin" />
+          <p className="text-gray-600">Loading profile...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '2rem 1rem' }}>
-      <div style={{ maxWidth: '64rem', margin: '0 auto' }}>
+    <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="mx-auto max-w-4xl">
         {/* Breadcrumb Navigation */}
         <Breadcrumb />
 
         {/* Header */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h1
-            style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111827', margin: '0 0 0.5rem' }}
-          >
-            Profile Settings
-          </h1>
-          <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
-            Manage your account settings and preferences
-          </p>
+        <div className="mb-8">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">Profile Settings</h1>
+          <p className="m-0 text-sm text-gray-600">Manage your account settings and preferences</p>
         </div>
 
         {/* Alerts */}
         {error && (
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div className="mb-6">
             <ErrorAlert error={error} />
           </div>
         )}
 
         {success && (
-          <div
-            style={{
-              marginBottom: '1.5rem',
-              padding: '1rem',
-              backgroundColor: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              borderRadius: '0.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-            }}
-          >
-            <CheckCircle style={{ width: '1.25rem', height: '1.25rem', color: '#10b981' }} />
-            <p style={{ fontSize: '0.875rem', color: '#065f46', margin: 0 }}>{success}</p>
+          <div className="mb-6 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <p className="m-0 text-sm text-green-800">{success}</p>
           </div>
         )}
 
         {/* Tab Navigation */}
-        <div
-          style={{
-            backgroundColor: 'white',
-            borderRadius: '0.5rem',
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-            overflow: 'hidden',
-          }}
-        >
-          <nav style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
+        <div className="overflow-hidden rounded-lg bg-white shadow-sm">
+          <nav className="flex border-b border-gray-200">
             {[
               { id: 'profile', label: 'Profile', icon: UserIcon },
               { id: 'security', label: 'Security', icon: Shield },
@@ -1279,24 +754,13 @@ const ProfilePage: FC = () => {
               <button
                 key={id}
                 onClick={() => setActiveTab(id as 'profile' | 'security' | 'preferences')}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  padding: '1rem',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: activeTab === id ? '#3b82f6' : '#6b7280',
-                  backgroundColor: activeTab === id ? '#f8fafc' : 'transparent',
-                  border: 'none',
-                  borderBottom: activeTab === id ? '2px solid #3b82f6' : '2px solid transparent',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
+                className={`flex flex-1 items-center justify-center gap-2 border-b-2 border-none p-4 text-sm font-medium transition-all duration-200 ${
+                  activeTab === id
+                    ? 'border-b-blue-500 bg-slate-50 text-blue-500'
+                    : 'border-transparent bg-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
               >
-                <Icon style={{ width: '1rem', height: '1rem' }} />
+                <Icon className="h-4 w-4" />
                 {label}
               </button>
             ))}
