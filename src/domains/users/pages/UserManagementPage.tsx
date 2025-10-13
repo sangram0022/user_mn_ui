@@ -1,16 +1,17 @@
-import { logger } from './../../../shared/utils/logger';
+import { Eye, Filter, Plus, Search, Trash2, UserCheck, Users, UserX } from 'lucide-react';
 import type { FC, FormEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, Trash2, Eye, Users, UserCheck, UserX, Search, Filter } from 'lucide-react';
+import { logger } from './../../../shared/utils/logger';
 
-import { useAuth } from '../../auth/context/AuthContext';
 import { apiClient } from '@lib/api';
-import { getUserPermissions, getUserRoleName } from '@shared/utils/user';
 import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@shared/types';
+import { getUserPermissions, getUserRoleName } from '@shared/utils/user';
+import { useAuth } from '../../auth/context/AuthContext';
 
 type Role = UserRole;
 
-interface User { id: string;
+interface User {
+  id: string;
   email: string;
   username?: string | null;
   full_name?: string | null;
@@ -24,61 +25,79 @@ interface User { id: string;
   activity_score?: number | null;
   last_login_at?: string | null;
   created_at: string;
- }
+}
 
-interface CreateUserData { email: string;
+interface CreateUserData {
+  email: string;
   password: string;
   username?: string;
   full_name?: string;
   role?: string;
   is_active?: boolean;
- }
+}
 
-interface UpdateUserData { email?: string;
+interface UpdateUserData {
+  email?: string;
   username?: string;
   full_name?: string;
   role?: string;
   is_active?: boolean;
- }
+}
 
-const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAuth();
-  
-  const debugEnabled = useMemo(() => { if (!import.meta.env.DEV) {
+const UserManagementEnhanced: FC = () => {
+  const { hasPermission, user } = useAuth();
+
+  const debugEnabled = useMemo(() => {
+    if (!import.meta.env.DEV) {
       return false;
     }
 
-    if (typeof window === 'undefined') { return false;
+    if (typeof window === 'undefined') {
+      return false;
     }
 
-    try { return window.sessionStorage.getItem('DEBUG_USER_MANAGEMENT') === 'true';
-    } catch { return false;
+    try {
+      return window.sessionStorage.getItem('DEBUG_USER_MANAGEMENT') === 'true';
+    } catch {
+      return false;
     }
   }, []);
 
-  const debugLog = useCallback((...args: unknown[]) => { if (debugEnabled) {
-      logger.debug('[UserManagementEnhanced]', { ...args  });
-    }
-  }, [debugEnabled]);
+  const debugLog = useCallback(
+    (...args: unknown[]) => {
+      if (debugEnabled) {
+        logger.debug('[UserManagementEnhanced]', { ...args });
+      }
+    },
+    [debugEnabled]
+  );
 
-  useEffect(() => { if (!debugEnabled) {
+  useEffect(() => {
+    if (!debugEnabled) {
       return;
     }
 
-    debugLog('Permission snapshot', { user,
+    debugLog('Permission snapshot', {
+      user,
       role: user?.role,
       isSuperuser: user?.is_superuser,
       permissions: getUserPermissions(user),
       hasUserRead: hasPermission('user:read'),
       isAdmin: hasPermission('admin'),
-      roleName: getUserRoleName(user)
+      roleName: getUserRoleName(user),
     });
 
-    debugLog(user ? 'Component rendering with active user context' : 'Component rendering without user context');
+    debugLog(
+      user
+        ? 'Component rendering with active user context'
+        : 'Component rendering without user context'
+    );
   }, [debugEnabled, debugLog, hasPermission, user]);
-  
+
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
-  const roleMap = useMemo(() => { const map = new Map<string, Role>();
+  const roleMap = useMemo(() => {
+    const map = new Map<string, Role>();
     roles.forEach((role) => {
       map.set(role.name, role);
       map.set(role.name.toLowerCase(), role);
@@ -95,12 +114,8 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [filterActive, setFilterActive] = useState<boolean | undefined>(undefined);
-  const [pagination, setPagination] = useState({ skip: 0,
-    limit: 20,
-    total: 0,
-    hasMore: false
-  });
-  
+  const [pagination, setPagination] = useState({ skip: 0, limit: 20, total: 0, hasMore: false });
+
   // Modals and selections
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
@@ -108,7 +123,8 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set<string>());
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const buildCreateUserRequest = useCallback((data: CreateUserData): CreateUserRequest => { const trimmedName = data.full_name?.trim();
+  const buildCreateUserRequest = useCallback((data: CreateUserData): CreateUserRequest => {
+    const trimmedName = data.full_name?.trim();
     const nameSegments = trimmedName ? trimmedName.split(' ') : [];
     const firstName = nameSegments[0] ?? data.email.split('@')[0] ?? 'First';
     const lastName = nameSegments.length > 1 ? nameSegments.slice(1).join(' ') : 'User';
@@ -122,29 +138,33 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
       last_name: lastName || 'User',
       role: role && role.length > 0 ? role : undefined,
       is_active: data.is_active ?? true,
-      username: username && username.length > 0 ? username : undefined
+      username: username && username.length > 0 ? username : undefined,
     };
   }, []);
 
   const buildUpdateUserRequest = useCallback((data: UpdateUserData): UpdateUserRequest => {
     const request: UpdateUserRequest = {};
 
-    if (data.role) { const trimmedRole = data.role.trim();
+    if (data.role) {
+      const trimmedRole = data.role.trim();
       if (trimmedRole) {
         request.role = trimmedRole;
       }
     }
 
-    if (typeof data.is_active === 'boolean') { request.is_active = data.is_active;
+    if (typeof data.is_active === 'boolean') {
+      request.is_active = data.is_active;
     }
 
-    if (typeof data.username === 'string') { const trimmed = data.username.trim();
+    if (typeof data.username === 'string') {
+      const trimmed = data.username.trim();
       if (trimmed) {
         request.username = trimmed;
       }
     }
 
-    if (data.full_name) { const trimmed = data.full_name.trim();
+    if (data.full_name) {
+      const trimmed = data.full_name.trim();
       if (trimmed) {
         request.full_name = trimmed;
         const segments = trimmed.split(' ');
@@ -159,31 +179,35 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
   }, []);
 
   // Define functions before useEffect
-  const loadUsers = useCallback(async () => { let tokenAvailable = false;
+  const loadUsers = useCallback(async () => {
+    let tokenAvailable = false;
     if (typeof window !== 'undefined') {
       try {
         tokenAvailable = !!window.localStorage.getItem('access_token');
-      } catch { tokenAvailable = false;
+      } catch {
+        tokenAvailable = false;
       }
     }
 
-    debugLog('Loading users', { tokenAvailable,
+    debugLog('Loading users', {
+      tokenAvailable,
       permissions: getUserPermissions(user),
       params: {
         skip: pagination.skip,
         limit: pagination.limit,
         searchTerm,
         filterRole,
-        filterActive
-      }
+        filterActive,
+      },
     });
-    
-    try { setIsLoading(true);
+
+    try {
+      setIsLoading(true);
       setError(null);
 
       const params: Record<string, string | number | boolean> = {
         skip: pagination.skip,
-        limit: pagination.limit
+        limit: pagination.limit,
       };
 
       if (searchTerm) params['search'] = searchTerm;
@@ -191,33 +215,39 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
       if (filterActive !== undefined) params['is_active'] = filterActive;
 
       debugLog('Requesting users with params', params);
-      
+
       const summaries = await apiClient.getUsers(params);
 
-      const mappedUsers = summaries.map((summary: UserSummary, index) => { const roleCandidates = [
+      const mappedUsers = summaries.map((summary: UserSummary, index) => {
+        const roleCandidates = [
           summary.role,
           summary.role?.toLowerCase(),
           summary.role_name,
           summary.role_name?.toLowerCase(),
-          summary.id != null ? String(summary.id) : undefined
+          summary.id != null ? String(summary.id) : undefined,
         ].filter((candidate): candidate is string => Boolean(candidate));
 
-        const resolvedRole = roleCandidates.reduce<Role | undefined>((acc, key) => {
-          if (acc) {
-            return acc;
-          }
-          return roleMap.get(key);
-        }, undefined) ?? { id: typeof summary.id === 'number' ? summary.id : index + 1,
-          name: summary.role,
-          description: summary.role_name ?? summary.role,
-          permissions: []
-        } satisfies Role;
+        const resolvedRole =
+          roleCandidates.reduce<Role | undefined>((acc, key) => {
+            if (acc) {
+              return acc;
+            }
+            return roleMap.get(key);
+          }, undefined) ??
+          ({
+            id: typeof summary.id === 'number' ? summary.id : index + 1,
+            name: summary.role,
+            description: summary.role_name ?? summary.role,
+            permissions: [],
+          } satisfies Role);
 
         const fallbackName = `${summary.first_name ?? ''} ${summary.last_name ?? ''}`.trim();
 
-        const userId = summary.user_id ?? (summary.id != null ? String(summary.id) : String(index + 1));
+        const userId =
+          summary.user_id ?? (summary.id != null ? String(summary.id) : String(index + 1));
 
-        return { id: userId,
+        return {
+          id: userId,
           email: summary.email,
           username: summary.username ?? null,
           full_name: summary.full_name ?? (fallbackName || summary.email),
@@ -230,91 +260,122 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
           lifecycle_stage: summary.role_name ?? null,
           activity_score: null,
           last_login_at: summary.last_login_at ?? null,
-          created_at: summary.created_at
+          created_at: summary.created_at,
         } satisfies User;
       });
 
-      debugLog('Users loaded successfully', { count: mappedUsers.length
-      });
+      debugLog('Users loaded successfully', { count: mappedUsers.length });
 
       setUsers(mappedUsers);
-      setPagination(prev => ({ ...prev,
+      setPagination((prev) => ({
+        ...prev,
         total: mappedUsers.length,
-        hasMore: mappedUsers.length >= prev.limit
+        hasMore: mappedUsers.length >= prev.limit,
       }));
-    } catch (err: unknown) { const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      logger.error('Failed to load users', undefined, { err  });
-      
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      logger.error('Failed to load users', undefined, { err });
+
       setError(`Failed to load users: ${errorMessage}`);
-      
+
       // If it's an authentication error, provide specific guidance
-      if (errorMessage.includes('401') || errorMessage.includes('Authentication') || errorMessage.includes('Unauthorized')) { setError('Authentication error: Please try logging out and logging back in. If the problem persists, contact your administrator.');
+      if (
+        errorMessage.includes('401') ||
+        errorMessage.includes('Authentication') ||
+        errorMessage.includes('Unauthorized')
+      ) {
+        setError(
+          'Authentication error: Please try logging out and logging back in. If the problem persists, contact your administrator.'
+        );
       }
-    } finally { setIsLoading(false);
+    } finally {
+      setIsLoading(false);
       debugLog('loadUsers completed');
     }
-  }, [debugLog, filterActive, filterRole, pagination.limit, pagination.skip, roleMap, searchTerm, user]);
+  }, [
+    debugLog,
+    filterActive,
+    filterRole,
+    pagination.limit,
+    pagination.skip,
+    roleMap,
+    searchTerm,
+    user,
+  ]);
 
-  const loadRoles = useCallback(async () => { try {
+  const loadRoles = useCallback(async () => {
+    try {
       debugLog('Loading roles from backend...');
       const fetchedRoles = await apiClient.getRoles();
 
       const normalizedRoles = fetchedRoles.map((role, index) => ({
         ...role,
-        id: typeof role.id === 'number' ? role.id : Number.parseInt(String(role.id), 10) || index + 1,
-        permissions: role.permissions ?? []
+        id:
+          typeof role.id === 'number' ? role.id : Number.parseInt(String(role.id), 10) || index + 1,
+        permissions: role.permissions ?? [],
       }));
 
       debugLog('Roles loaded successfully', normalizedRoles);
       setRoles(normalizedRoles);
-    } catch (err) { logger.error('Failed to load roles', undefined, { err  });
+    } catch (err) {
+      logger.error('Failed to load roles', undefined, { err });
       // Fallback to default roles if backend fails
       setRoles([
         { id: 1, name: 'admin', description: 'Administrator', permissions: ['admin'] },
         { id: 2, name: 'user', description: 'Standard User', permissions: [] },
-        { id: 3, name: 'manager', description: 'Manager', permissions: ['user:read', 'user:write'] }
+        {
+          id: 3,
+          name: 'manager',
+          description: 'Manager',
+          permissions: ['user:read', 'user:write'],
+        },
       ]);
     }
   }, [debugLog]);
 
-  useEffect(() => { debugLog('UserManagementEnhanced mounted', {
+  useEffect(() => {
+    debugLog('UserManagementEnhanced mounted', {
       userEmail: user?.email,
-      hasAdminPermission: hasPermission('admin')
+      hasAdminPermission: hasPermission('admin'),
     });
     loadRoles();
   }, [debugLog, hasPermission, loadRoles, user?.email]);
 
-  useEffect(() => { loadUsers();
+  useEffect(() => {
+    loadUsers();
   }, [loadUsers]);
 
-  useEffect(() => { setPagination(prev => {
+  useEffect(() => {
+    setPagination((prev) => {
       if (prev.skip === 0) {
         return prev;
       }
 
-      return { ...prev,
-        skip: 0
-      };
+      return { ...prev, skip: 0 };
     });
   }, [filterActive, filterRole, searchTerm]);
 
   const handleUserAction = async (action: string, userId: string, data?: UpdateUserData) => {
     try {
-  setActionLoading(`${action}-${userId}`);
-      
-      switch (action) { case 'activate':
+      setActionLoading(`${action}-${userId}`);
+
+      switch (action) {
+        case 'activate':
           await apiClient.updateUser(userId, { is_active: true });
           break;
         case 'deactivate':
           await apiClient.updateUser(userId, { is_active: false });
           break;
         case 'delete':
-          if (window.confirm('Are you sure you want to delete this user?')) { await apiClient.deleteUser(userId);
-          } else { return;
+          if (window.confirm('Are you sure you want to delete this user?')) {
+            await apiClient.deleteUser(userId);
+          } else {
+            return;
           }
           break;
         case 'update':
-          if (data) { const payload = buildUpdateUserRequest(data);
+          if (data) {
+            const payload = buildUpdateUserRequest(data);
             if (Object.keys(payload).length === 0) {
               debugLog('No changes detected for user update, skipping API call', payload);
               break;
@@ -324,179 +385,139 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
           }
           break;
         default:
-          if (import.meta.env.DEV) { logger.warn('Unknown action:', { action  });
+          if (import.meta.env.DEV) {
+            logger.warn('Unknown action:', { action });
           }
       }
-      
+
       await loadUsers();
     } catch (error) {
-      logger.error(`Action ${action} failed:`, error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        `Action ${action} failed:`,
+        error instanceof Error ? error : new Error(String(error))
+      );
       setError(`Failed to ${action} user`);
-    } finally { setActionLoading(null);
+    } finally {
+      setActionLoading(null);
     }
   };
 
-  const handleCreateUser = async (userData: CreateUserData) => { try {
+  const handleCreateUser = async (userData: CreateUserData) => {
+    try {
       setActionLoading('create-user');
       await apiClient.createUser(buildCreateUserRequest(userData));
       setShowCreateModal(false);
       await loadUsers();
-    } catch (error) { logger.error('Create user failed:', undefined, { error  });
+    } catch (error) {
+      logger.error('Create user failed:', undefined, { error });
       setError('Failed to create user');
-    } finally { setActionLoading(null);
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleBulkDelete = async () => {
     if (selectedUsers.size === 0) return;
-    
-    if (window.confirm(`Are you sure you want to delete ${selectedUsers.size} users?`)) { try {
+
+    if (window.confirm(`Are you sure you want to delete ${selectedUsers.size} users?`)) {
+      try {
         setActionLoading('bulk-delete');
-        
-        await Promise.all(
-          Array.from(selectedUsers, userId => apiClient.deleteUser(userId))
-        );
-        
-  setSelectedUsers(new Set<string>());
+
+        await Promise.all(Array.from(selectedUsers, (userId) => apiClient.deleteUser(userId)));
+
+        setSelectedUsers(new Set<string>());
         await loadUsers();
-      } catch (error) { logger.error('Bulk delete failed:', undefined, { error  });
+      } catch (error) {
+        logger.error('Bulk delete failed:', undefined, { error });
         setError('Failed to delete some users');
-      } finally { setActionLoading(null);
+      } finally {
+        setActionLoading(null);
       }
     }
   };
 
-  const handleSelectUser = (userId: string, selected: boolean) => { setSelectedUsers(prev => {
+  const handleSelectUser = (userId: string, selected: boolean) => {
+    setSelectedUsers((prev) => {
       const newSet = new Set(prev);
       if (selected) {
         newSet.add(userId);
-      } else { newSet.delete(userId);
+      } else {
+        newSet.delete(userId);
       }
       return newSet;
     });
   };
 
-  const handleSelectAll = (selected: boolean) => { if (selected) {
-      setSelectedUsers(new Set<string>(users.map(user => user.id)));
-    } else { setSelectedUsers(new Set<string>());
+  const handleSelectAll = (selected: boolean) => {
+    if (selected) {
+      setSelectedUsers(new Set<string>(users.map((user) => user.id)));
+    } else {
+      setSelectedUsers(new Set<string>());
     }
   };
 
-  if (!hasPermission('user:read') && !user?.is_superuser) { debugLog('Access denied - insufficient permissions', {
+  if (!hasPermission('user:read') && !user?.is_superuser) {
+    debugLog('Access denied - insufficient permissions', {
       user,
       isSuperuser: user?.is_superuser,
       permissions: {
         'user:read': hasPermission('user:read'),
         admin: hasPermission('admin'),
         'user:write': hasPermission('user:write'),
-        'user:delete': hasPermission('user:delete')
-      }
+        'user:delete': hasPermission('user:delete'),
+      },
     });
     return (
-      <div style={{ textAlign: 'center',
-        padding: '3rem',
-        background: '#fef2f2',
-        borderRadius: '12px',
-        border: '1px solid #fecaca'
-      }}>
-        <h3 style={{ color: '#dc2626', marginBottom: '1rem' }}>
-          ⛔ Access Denied
-        </h3>
-        <p style={{ color: '#7f1d1d' }}>
-          You don't have permission to manage users.
-        </p>
-        <p style={{ color: '#7f1d1d', fontSize: '0.875rem', marginTop: '1rem' }}>
-          Required: user:read permission
-        </p>
+      <div className="rounded-xl border border-red-200 bg-red-50 p-12 text-center">
+        <h3 className="mb-4 text-red-600">⛔ Access Denied</h3>
+        <p className="text-red-900">You don't have permission to manage users.</p>
+        <p className="mt-4 text-sm text-red-900">Required: user:read permission</p>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="mx-auto max-w-7xl p-8">
       {/* Header */}
-      <div style={{ display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem'
-      }}>
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 style={{ margin: '0 0 0.5rem 0',
-            color: '#111827',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}>
-            <Users className="w-6 h-6" />
+          <h1 className="mb-2 flex items-center gap-2 text-gray-900">
+            <Users className="h-6 w-6" />
             User Management
           </h1>
-          <p style={{ margin: 0, color: '#6b7280' }}>
+          <p className="m-0 text-gray-600">
             Manage user accounts, roles, and permissions ({users.length} total users)
           </p>
         </div>
-        
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+
+        <div className="flex items-center gap-4">
           {/* Bulk Actions */}
           {selectedUsers.size > 0 && (
-            <div style={{ display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              background: '#e0f2fe',
-              borderRadius: '8px',
-              color: '#0277bd'
-            }}>
+            <div className="flex items-center gap-2 rounded-lg bg-sky-100 px-4 py-2 text-sky-700">
               <span>{selectedUsers.size} selected</span>
               <button
                 onClick={handleBulkDelete}
                 disabled={actionLoading === 'bulk-delete'}
-                style={{ padding: '0.25rem 0.5rem',
-                  background: '#f44336',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '0.75rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem'
-                }}
+                className="flex cursor-pointer items-center gap-1 rounded border-none bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Trash2 className="w-3 h-3" />
+                <Trash2 className="h-3 w-3" />
                 {actionLoading === 'bulk-delete' ? 'Deleting...' : 'Delete'}
               </button>
               <button
                 onClick={() => setSelectedUsers(new Set<string>())}
-                style={{ padding: '0.25rem 0.5rem',
-                  background: '#666',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '0.75rem'
-                }}
+                className="cursor-pointer rounded border-none bg-gray-600 px-2 py-1 text-xs text-white hover:bg-gray-700"
               >
                 Clear
               </button>
             </div>
           )}
-          
+
           {hasPermission('user:write') && (
             <button
               onClick={() => setShowCreateModal(true)}
-              style={{ padding: '0.75rem 1.5rem',
-                background: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontWeight: '500'
-              }}
+              className="flex items-center gap-2 rounded-lg border-none bg-blue-500 px-6 py-3 font-medium text-white hover:bg-blue-600"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="h-4 w-4" />
               Create New User
             </button>
           )}
@@ -504,26 +525,12 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
       </div>
 
       {/* Filters */}
-      <div style={{ background: '#f9fafb',
-        padding: '1.5rem',
-        borderRadius: '12px',
-        border: '1px solid #e5e7eb',
-        marginBottom: '2rem'
-      }}>
-        <div style={{ display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '1rem',
-          alignItems: 'end'
-        }}>
+      <div className="mb-8 rounded-xl border border-gray-200 bg-gray-50 p-6">
+        <div className="grid items-end gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <label style={{ display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem',
-              color: '#374151',
-              fontWeight: '500'
-            }}>
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>
-                <Search className="w-4 h-4 inline mr-2" />
+                <Search className="mr-2 inline h-4 w-4" />
                 Search Users
               </span>
               <input
@@ -531,41 +538,24 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
                 placeholder="Search by email, username..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </label>
           </div>
 
           <div>
-            <label style={{ display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem',
-              color: '#374151',
-              fontWeight: '500'
-            }}>
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>
-                <Filter className="w-4 h-4 inline mr-2" />
+                <Filter className="mr-2 inline h-4 w-4" />
                 Filter by Role
               </span>
               <select
                 value={filterRole}
                 onChange={(e) => setFilterRole(e.target.value)}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               >
                 <option value="">All Roles</option>
-                {roles.map(role => (
+                {roles.map((role) => (
                   <option key={role.id} value={role.name}>
                     {role.name}
                   </option>
@@ -575,25 +565,15 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
           </div>
 
           <div>
-            <label style={{ display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem',
-              color: '#374151',
-              fontWeight: '500'
-            }}>
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Status</span>
               <select
                 value={filterActive === undefined ? '' : filterActive.toString()}
-                onChange={(e) => { const value = e.target.value;
+                onChange={(e) => {
+                  const value = e.target.value;
                   setFilterActive(value === '' ? undefined : value === 'true');
                 }}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               >
                 <option value="">All Status</option>
                 <option value="true">Active</option>
@@ -603,18 +583,12 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
           </div>
 
           <button
-            onClick={() => { setSearchTerm('');
+            onClick={() => {
+              setSearchTerm('');
               setFilterRole('');
               setFilterActive(undefined);
             }}
-            style={{ padding: '0.75rem 1rem',
-              background: '#6b7280',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
+            className="cursor-pointer rounded-md border-none bg-gray-600 px-4 py-3 font-medium text-white hover:bg-gray-700"
           >
             Clear Filters
           </button>
@@ -622,178 +596,143 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
       </div>
 
       {error && (
-        <div style={{ background: '#fef2f2',
-          border: '1px solid #fecaca',
-          borderRadius: '8px',
-          padding: '1rem',
-          marginBottom: '1.5rem',
-          color: '#dc2626'
-        }}>
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
           {error}
         </div>
       )}
 
       {/* Users Table */}
-      <div style={{ background: 'white',
-        borderRadius: '12px',
-        border: '1px solid #e5e7eb',
-        overflow: 'hidden'
-      }}>
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
         {isLoading ? (
-          <div style={{ padding: '3rem', textAlign: 'center' }}>
-            <div style={{ color: '#6b7280' }}>Loading users...</div>
+          <div className="p-12 text-center">
+            <div className="text-gray-600">Loading users...</div>
           </div>
         ) : users.length === 0 ? (
-          <div style={{ padding: '3rem', textAlign: 'center' }}>
-            <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-            <h3 style={{ color: '#111827', marginBottom: '0.5rem' }}>No users found</h3>
-            <p style={{ color: '#6b7280' }}>
+          <div className="p-12 text-center">
+            <Users className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+            <h3 className="mb-2 text-gray-900">No users found</h3>
+            <p className="text-gray-600">
               {searchTerm || filterRole || filterActive !== undefined
                 ? 'Try adjusting your filters'
-                : 'Get started by creating your first user'
-              }
+                : 'Get started by creating your first user'}
             </p>
           </div>
         ) : (
           <>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
                 <thead>
-                  <tr style={{ background: '#f9fafb',
-                    borderBottom: '2px solid #e5e7eb'
-                  }}>
-                    <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>
+                  <tr className="border-b-2 border-gray-200 bg-gray-50">
+                    <th className="p-4 text-left font-semibold text-gray-700">
                       <input
                         type="checkbox"
                         checked={selectedUsers.size === users.length && users.length > 0}
                         onChange={(e) => handleSelectAll(e.target.checked)}
-                        style={{ marginRight: '0.5rem' }}
+                        className="mr-2"
                       />
                       User
                     </th>
-                    <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>Role</th>
-                    <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>Status</th>
-                    <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>Created</th>
-                    <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>Actions</th>
+                    <th className="p-4 text-left font-semibold text-gray-700">Role</th>
+                    <th className="p-4 text-left font-semibold text-gray-700">Status</th>
+                    <th className="p-4 text-left font-semibold text-gray-700">Created</th>
+                    <th className="p-4 text-left font-semibold text-gray-700">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user, index) => (
                     <tr
                       key={user.id}
-                      style={{ background: index % 2 === 0 ? 'white' : '#f9fafb',
-                        borderBottom: '1px solid #e5e7eb'
-                      }}
+                      className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
                     >
-                      <td style={{ padding: '1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
                           <input
                             type="checkbox"
                             checked={selectedUsers.has(user.id)}
                             onChange={(e) => handleSelectUser(user.id, e.target.checked)}
                           />
                           <div>
-                            <div style={{ fontWeight: '500', color: '#111827' }}>
+                            <div className="font-medium text-gray-900">
                               {user.full_name || user.username || user.email}
                             </div>
-                            <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                              {user.email}
-                            </div>
+                            <div className="text-sm text-gray-600">{user.email}</div>
                           </div>
                         </div>
                       </td>
-                      <td style={{ padding: '1rem' }}>
-                        <span style={{ background: user.role.name === 'admin' ? '#e0f2fe' : '#f0f9ff',
-                          color: user.role.name === 'admin' ? '#0277bd' : '#0369a1',
-                          padding: '0.25rem 0.75rem',
-                          borderRadius: '1rem',
-                          fontSize: '0.875rem',
-                          fontWeight: '500'
-                        }}>
+                      <td className="p-4">
+                        <span
+                          className={`rounded-2xl px-3 py-1 text-sm font-medium ${
+                            user.role.name === 'admin'
+                              ? 'bg-sky-100 text-sky-700'
+                              : 'bg-blue-50 text-sky-600'
+                          }`}
+                        >
                           {user.role.name}
                         </span>
                       </td>
-                      <td style={{ padding: '1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
                           {user.is_active ? (
-                            <UserCheck className="w-4 h-4 text-green-600" />
+                            <UserCheck className="h-4 w-4 text-green-600" />
                           ) : (
-                            <UserX className="w-4 h-4 text-red-600" />
+                            <UserX className="h-4 w-4 text-red-600" />
                           )}
-                          <span style={{ color: user.is_active ? '#059669' : '#dc2626',
-                            fontWeight: '500'
-                          }}>
+                          <span
+                            className={`font-medium ${
+                              user.is_active ? 'text-green-600' : 'text-red-600'
+                            }`}
+                          >
                             {user.is_active ? 'Active' : 'Inactive'}
                           </span>
                         </div>
                       </td>
-                      <td style={{ padding: '1rem', color: '#6b7280' }}>
+                      <td className="p-4 text-gray-600">
                         {new Date(user.created_at).toLocaleDateString()}
                       </td>
-                      <td style={{ padding: '1rem' }}>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <td className="p-4">
+                        <div className="flex gap-2">
                           <button
-                            onClick={() => { setSelectedUser(user);
+                            onClick={() => {
+                              setSelectedUser(user);
                               setShowUserModal(true);
                             }}
-                            style={{ padding: '0.5rem',
-                              background: '#3b82f6',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.25rem'
-                            }}
+                            className="flex cursor-pointer items-center gap-1 rounded border-none bg-blue-500 p-2 text-white hover:bg-blue-600"
                             title="View/Edit User"
                           >
-                            <Eye className="w-3 h-3" />
+                            <Eye className="h-3 w-3" />
                           </button>
-                          
+
                           {hasPermission('user:write') && (
                             <>
                               <button
-                                onClick={() => handleUserAction(
-                                  user.is_active ? 'deactivate' : 'activate',
-                                  user.id
-                                )}
+                                onClick={() =>
+                                  handleUserAction(
+                                    user.is_active ? 'deactivate' : 'activate',
+                                    user.id
+                                  )
+                                }
                                 disabled={actionLoading?.includes(user.id)}
-                                style={{ padding: '0.5rem',
-                                  background: user.is_active ? '#f59e0b' : '#10b981',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '0.25rem'
-                                }}
+                                className={`flex cursor-pointer items-center gap-1 rounded border-none p-2 text-white disabled:cursor-not-allowed disabled:opacity-50 ${
+                                  user.is_active
+                                    ? 'bg-amber-500 hover:bg-amber-600'
+                                    : 'bg-green-500 hover:bg-green-600'
+                                }`}
                                 title={user.is_active ? 'Deactivate User' : 'Activate User'}
                               >
                                 {user.is_active ? (
-                                  <UserX className="w-3 h-3" />
+                                  <UserX className="h-3 w-3" />
                                 ) : (
-                                  <UserCheck className="w-3 h-3" />
+                                  <UserCheck className="h-3 w-3" />
                                 )}
                               </button>
-                              
+
                               <button
                                 onClick={() => handleUserAction('delete', user.id)}
                                 disabled={actionLoading?.includes(user.id)}
-                                style={{ padding: '0.5rem',
-                                  background: '#ef4444',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '0.25rem'
-                                }}
+                                className="flex cursor-pointer items-center gap-1 rounded border-none bg-red-500 p-2 text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 title="Delete User"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="h-3 w-3" />
                               </button>
                             </>
                           )}
@@ -806,44 +745,42 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
             </div>
 
             {/* Pagination */}
-            <div style={{ display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '1rem 2rem',
-              borderTop: '1px solid #e5e7eb',
-              background: '#f9fafb'
-            }}>
-              <div style={{ color: '#6b7280' }}>
-                Showing {pagination.skip + 1} - {Math.min(pagination.skip + pagination.limit, pagination.total)} of {pagination.total}
+            <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-8 py-4">
+              <div className="text-gray-600">
+                Showing {pagination.skip + 1} -{' '}
+                {Math.min(pagination.skip + pagination.limit, pagination.total)} of{' '}
+                {pagination.total}
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div className="flex gap-2">
                 <button
-                  onClick={() => setPagination(prev => ({ ...prev,
-                    skip: Math.max(0, prev.skip - prev.limit)
-                  }))}
+                  onClick={() =>
+                    setPagination((prev) => ({
+                      ...prev,
+                      skip: Math.max(0, prev.skip - prev.limit),
+                    }))
+                  }
                   disabled={pagination.skip === 0}
-                  style={{ padding: '0.5rem 1rem',
-                    background: pagination.skip === 0 ? '#d1d5db' : '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: pagination.skip === 0 ? 'not-allowed' : 'pointer'
-                  }}
+                  className={`rounded-md border-none px-4 py-2 text-white ${
+                    pagination.skip === 0
+                      ? 'cursor-not-allowed bg-gray-300'
+                      : 'cursor-pointer bg-blue-500 hover:bg-blue-600'
+                  }`}
                 >
                   Previous
                 </button>
                 <button
-                  onClick={() => setPagination(prev => ({ ...prev,
-                    skip: prev.skip + prev.limit
-                  }))}
+                  onClick={() =>
+                    setPagination((prev) => ({
+                      ...prev,
+                      skip: prev.skip + prev.limit,
+                    }))
+                  }
                   disabled={!pagination.hasMore}
-                  style={{ padding: '0.5rem 1rem',
-                    background: !pagination.hasMore ? '#d1d5db' : '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: !pagination.hasMore ? 'not-allowed' : 'pointer'
-                  }}
+                  className={`rounded-md border-none px-4 py-2 text-white ${
+                    !pagination.hasMore
+                      ? 'cursor-not-allowed bg-gray-300'
+                      : 'cursor-pointer bg-blue-500 hover:bg-blue-600'
+                  }`}
                 >
                   Next
                 </button>
@@ -868,7 +805,8 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
         <EditUserModal
           user={selectedUser}
           roles={roles}
-          onSave={(data) => { handleUserAction('update', selectedUser.id, data);
+          onSave={(data) => {
+            handleUserAction('update', selectedUser.id, data);
             setShowUserModal(false);
           }}
           onClose={() => setShowUserModal(false)}
@@ -880,136 +818,92 @@ const UserManagementEnhanced: FC = () => { const { hasPermission, user } = useAu
 };
 
 // Create User Modal Component
-const CreateUserModal: FC<{ roles: Role[];
+const CreateUserModal: FC<{
+  roles: Role[];
   onSave: (data: CreateUserData) => void;
   onClose: () => void;
   isLoading: boolean;
- }> = ({ roles, onSave, onClose, isLoading }) => { const [formData, setFormData] = useState<CreateUserData>({
+}> = ({ roles, onSave, onClose, isLoading }) => {
+  const [formData, setFormData] = useState<CreateUserData>({
     email: '',
     password: '',
     username: '',
     full_name: '',
     role: 'user',
-    is_active: true
+    is_active: true,
   });
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => { e.preventDefault();
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     onSave(formData);
   };
 
   return (
-    <div style={{ position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000
-    }}>
-      <div style={{ background: 'white',
-        borderRadius: '12px',
-        padding: '2rem',
-        width: '90%',
-        maxWidth: '500px',
-        maxHeight: '90vh',
-        overflowY: 'auto'
-      }}>
-        <h2 style={{ margin: '0 0 1.5rem 0', color: '#111827' }}>Create New User</h2>
-        
+    <div className="fixed bottom-0 left-0 right-0 top-0 z-[1000] flex items-center justify-center bg-black/50">
+      <div className="max-h-[90vh] w-[90%] max-w-[500px] overflow-y-auto rounded-xl bg-white p-8">
+        <h2 className="mb-6 text-gray-900">Create New User</h2>
+
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+          <div className="mb-4">
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Email *</span>
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 required
               />
             </label>
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+          <div className="mb-4">
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Password *</span>
               <input
                 type="password"
                 value={formData.password}
-                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 required
                 minLength={8}
               />
             </label>
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+          <div className="mb-4">
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Username</span>
               <input
                 type="text"
                 value={formData.username}
-                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </label>
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+          <div className="mb-4">
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Full Name</span>
               <input
                 type="text"
                 value={formData.full_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                onChange={(e) => setFormData((prev) => ({ ...prev, full_name: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </label>
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+          <div className="mb-4">
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Role</span>
               <select
                 value={formData.role}
-                onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               >
-                {roles.map(role => (
+                {roles.map((role) => (
                   <option key={role.id} value={role.name}>
                     {role.name} - {role.description}
                   </option>
@@ -1018,47 +912,30 @@ const CreateUserModal: FC<{ roles: Role[];
             </label>
           </div>
 
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={{ display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: '#374151',
-              cursor: 'pointer'
-            }}>
+          <div className="mb-8">
+            <label className="flex cursor-pointer items-center gap-2 text-gray-700">
               <input
                 type="checkbox"
                 checked={formData.is_active}
-                onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.checked }))}
               />
               Active User
             </label>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+          <div className="flex justify-end gap-4">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              style={{ padding: '0.75rem 1.5rem',
-                background: '#6b7280',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
+              className="cursor-pointer rounded-md border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              style={{ padding: '0.75rem 1.5rem',
-                background: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
+              className="cursor-pointer rounded-md border-none bg-blue-500 px-6 py-3 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? 'Creating...' : 'Create User'}
             </button>
@@ -1070,115 +947,77 @@ const CreateUserModal: FC<{ roles: Role[];
 };
 
 // Edit User Modal Component
-const EditUserModal: FC<{ user: User;
+const EditUserModal: FC<{
+  user: User;
   roles: Role[];
   onSave: (data: UpdateUserData) => void;
   onClose: () => void;
   isLoading: boolean;
- }> = ({ user, roles, onSave, onClose, isLoading }) => { const [formData, setFormData] = useState<UpdateUserData>({
+}> = ({ user, roles, onSave, onClose, isLoading }) => {
+  const [formData, setFormData] = useState<UpdateUserData>({
     email: user.email,
     username: user.username || '',
     full_name: user.full_name || '',
     role: user.role.name,
-    is_active: user.is_active
+    is_active: user.is_active,
   });
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => { e.preventDefault();
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     onSave(formData);
   };
 
   return (
-    <div style={{ position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000
-    }}>
-      <div style={{ background: 'white',
-        borderRadius: '12px',
-        padding: '2rem',
-        width: '90%',
-        maxWidth: '500px',
-        maxHeight: '90vh',
-        overflowY: 'auto'
-      }}>
-        <h2 style={{ margin: '0 0 1.5rem 0', color: '#111827' }}>Edit User</h2>
-        
+    <div className="fixed bottom-0 left-0 right-0 top-0 z-[1000] flex items-center justify-center bg-black/50">
+      <div className="max-h-[90vh] w-[90%] max-w-[500px] overflow-y-auto rounded-xl bg-white p-8">
+        <h2 className="mb-6 text-gray-900">Edit User</h2>
+
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+          <div className="mb-4">
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Email</span>
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </label>
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+          <div className="mb-4">
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Username</span>
               <input
                 type="text"
                 value={formData.username}
-                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </label>
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+          <div className="mb-4">
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Full Name</span>
               <input
                 type="text"
                 value={formData.full_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                onChange={(e) => setFormData((prev) => ({ ...prev, full_name: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </label>
           </div>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#374151', fontWeight: '500' }}>
+          <div className="mb-4">
+            <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Role</span>
               <select
                 value={formData.role}
-                onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
-                style={{ width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: 'white',
-                  color: '#111827'
-                }}
+                onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               >
-                {roles.map(role => (
+                {roles.map((role) => (
                   <option key={role.id} value={role.name}>
                     {role.name} - {role.description}
                   </option>
@@ -1187,47 +1026,30 @@ const EditUserModal: FC<{ user: User;
             </label>
           </div>
 
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={{ display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: '#374151',
-              cursor: 'pointer'
-            }}>
+          <div className="mb-8">
+            <label className="flex cursor-pointer items-center gap-2 text-gray-700">
               <input
                 type="checkbox"
                 checked={formData.is_active}
-                onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.checked }))}
               />
               Active User
             </label>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+          <div className="flex justify-end gap-4">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              style={{ padding: '0.75rem 1.5rem',
-                background: '#6b7280',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
+              className="cursor-pointer rounded-md border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              style={{ padding: '0.75rem 1.5rem',
-                background: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
+              className="cursor-pointer rounded-md border-none bg-blue-500 px-6 py-3 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? 'Updating...' : 'Update User'}
             </button>
