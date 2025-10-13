@@ -194,126 +194,43 @@ const RegisterPage: React.FC = () => {
 
   if (success && registrationFeedback) {
     return (
-      <div
-        style={{
-          margin: '0 auto',
-          width: '100%',
-          maxWidth: '48rem',
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            borderRadius: '1rem',
-            border: '1px solid rgba(229, 231, 235, 0.5)',
-            padding: '2.5rem',
-          }}
-        >
-          <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                margin: '0 auto 1.5rem',
-                width: '4rem',
-                height: '4rem',
-                backgroundColor: '#10b981',
-                borderRadius: '9999px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.4)',
-              }}
-            >
-              <CheckCircle style={{ width: '2rem', height: '2rem', color: 'white' }} />
+      <div className="mx-auto w-full max-w-3xl">
+        <div className="rounded-2xl border border-gray-200/50 bg-white/95 p-10 shadow-2xl backdrop-blur-sm">
+          <div className="text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/40">
+              <CheckCircle className="h-8 w-8 text-white" />
             </div>
-            <h2
-              style={{
-                fontSize: '1.875rem',
-                fontWeight: 'bold',
-                letterSpacing: '-0.025em',
-                color: '#111827',
-              }}
-            >
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900">
               {registrationFeedback.title}
             </h2>
-            <p style={{ marginTop: '0.5rem', color: '#6b7280' }}>{registrationFeedback.subtitle}</p>
-            <p style={{ marginTop: '1rem', fontSize: '1rem', color: '#374151' }}>
-              {registrationFeedback.message}
-            </p>
-            <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#6b7280' }}>
+            <p className="mt-2 text-gray-500">{registrationFeedback.subtitle}</p>
+            <p className="mt-4 text-base text-gray-700">{registrationFeedback.message}</p>
+            <p className="mt-3 text-sm text-gray-500">
               Account email:{' '}
-              <span style={{ fontWeight: '500', color: '#111827' }}>
-                {registrationFeedback.email}
-              </span>
+              <span className="font-medium text-gray-900">{registrationFeedback.email}</span>
             </p>
             {redirectCountdown !== null && (
-              <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#3b82f6' }}>
+              <p className="mt-2 text-sm text-blue-500">
                 We'll take you to the login screen in {redirectCountdown} second
                 {redirectCountdown === 1 ? '' : 's'}.
               </p>
             )}
           </div>
 
-          <section
-            style={{
-              marginTop: '2rem',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '0.75rem',
-              padding: '1.5rem',
-            }}
-          >
-            <h3
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                color: '#64748b',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
+          <section className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Account snapshot
             </h3>
-            <dl
-              style={{
-                marginTop: '1rem',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem',
-              }}
-            >
+            <dl className="mt-4 grid gap-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
               {registrationFeedback.highlights.map((highlight) => (
                 <div
                   key={highlight.label}
-                  style={{
-                    borderRadius: '0.5rem',
-                    border: '1px solid #e2e8f0',
-                    backgroundColor: '#ffffff',
-                    padding: '1rem',
-                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                  }}
+                  className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
                 >
-                  <dt
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: '500',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      color: '#64748b',
-                    }}
-                  >
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
                     {highlight.label}
                   </dt>
-                  <dd
-                    style={{
-                      marginTop: '0.25rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '600',
-                      color: '#0f172a',
-                      wordBreak: 'break-word',
-                    }}
-                  >
+                  <dd className="mt-1 break-words text-sm font-semibold text-slate-900">
                     {highlight.value}
                   </dd>
                 </div>
@@ -321,63 +238,24 @@ const RegisterPage: React.FC = () => {
             </dl>
           </section>
 
-          <section style={{ marginTop: '2rem' }}>
-            <h3
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                color: '#64748b',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
+          <section className="mt-8">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Next steps
             </h3>
-            <div
-              style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
-            >
+            <div className="mt-4 flex flex-col gap-4">
               {registrationFeedback.nextSteps.map((step) => {
                 const IconComponent = FEEDBACK_ICON_MAP[step.icon] ?? Info;
                 return (
                   <div
                     key={step.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: '0.75rem',
-                      borderRadius: '0.75rem',
-                      border: '1px solid #e2e8f0',
-                      backgroundColor: '#ffffff',
-                      padding: '1rem',
-                      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                    }}
+                    className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
                   >
-                    <div
-                      style={{
-                        marginTop: '0.25rem',
-                        display: 'flex',
-                        height: '2.5rem',
-                        width: '2.5rem',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '9999px',
-                        backgroundColor: '#eff6ff',
-                      }}
-                    >
-                      <IconComponent className="w-5 h-5 text-blue-500" />
+                    <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
+                      <IconComponent className="h-5 w-5 text-blue-500" />
                     </div>
                     <div>
-                      <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#0f172a' }}>
-                        {step.title}
-                      </h4>
-                      <p
-                        style={{
-                          marginTop: '0.25rem',
-                          fontSize: '0.875rem',
-                          color: '#64748b',
-                          lineHeight: '1.5',
-                        }}
-                      >
+                      <h4 className="text-sm font-semibold text-slate-900">{step.title}</h4>
+                      <p className="mt-1 text-sm leading-relaxed text-slate-500">
                         {step.description}
                       </p>
                     </div>
@@ -387,78 +265,20 @@ const RegisterPage: React.FC = () => {
             </div>
           </section>
 
-          <div
-            style={{
-              marginTop: '2rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.75rem',
-            }}
-          >
+          <div className="mt-8 flex flex-col gap-3">
             <button
               type="button"
               onClick={handleProceedToLogin}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                borderRadius: '0.5rem',
-                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                paddingLeft: '1.25rem',
-                paddingRight: '1.25rem',
-                paddingTop: '0.75rem',
-                paddingBottom: '0.75rem',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                color: '#ffffff',
-                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                transition: 'all 0.2s ease',
-                border: 'none',
-                cursor: 'pointer',
-                outline: 'none',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.5)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-              }}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-3 text-sm font-semibold text-white shadow-sm outline-none transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.5)]"
             >
-              <LogIn style={{ height: '1rem', width: '1rem' }} />
+              <LogIn className="h-4 w-4" />
               {redirectCountdown !== null ? `Go to login (${redirectCountdown}s)` : 'Go to login'}
             </button>
             {redirectCountdown !== null && (
               <button
                 type="button"
                 onClick={() => setRedirectCountdown(null)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '0.5rem',
-                  border: '1px solid #e5e7eb',
-                  paddingLeft: '1.25rem',
-                  paddingRight: '1.25rem',
-                  paddingTop: '0.75rem',
-                  paddingBottom: '0.75rem',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  color: '#374151',
-                  backgroundColor: 'transparent',
-                  transition: 'background-color 0.2s ease',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-transparent px-5 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
               >
                 Stay on this page
               </button>
@@ -471,85 +291,23 @@ const RegisterPage: React.FC = () => {
 
   if (success) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #f3e8ff 100%)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          padding: '3rem 1rem',
-        }}
-      >
-        <div
-          style={{
-            margin: '0 auto',
-            width: '100%',
-            maxWidth: '28rem',
-            textAlign: 'center',
-          }}
-        >
-          <div
-            style={{
-              margin: '0 auto 1.5rem',
-              width: '4rem',
-              height: '4rem',
-              backgroundColor: '#10b981',
-              borderRadius: '9999px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.4)',
-            }}
-          >
-            <CheckCircle style={{ width: '2rem', height: '2rem', color: 'white' }} />
+      <div className="flex min-h-screen flex-col justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-12">
+        <div className="mx-auto w-full max-w-md text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/40">
+            <CheckCircle className="h-8 w-8 text-white" />
           </div>
-          <h2
-            style={{
-              fontSize: '1.875rem',
-              fontWeight: 'bold',
-              letterSpacing: '-0.025em',
-              color: '#111827',
-            }}
-          >
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
             Registration Successful!
           </h2>
-          <p style={{ marginTop: '1rem', color: '#6b7280' }}>
+          <p className="mt-4 text-gray-500">
             Your account has been created successfully. You can now head to the login page.
           </p>
           <button
             type="button"
             onClick={handleProceedToLogin}
-            style={{
-              marginTop: '1.5rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              borderRadius: '0.5rem',
-              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-              paddingLeft: '1.25rem',
-              paddingRight: '1.25rem',
-              paddingTop: '0.75rem',
-              paddingBottom: '0.75rem',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              color: '#ffffff',
-              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-              transition: 'all 0.2s ease',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-            }}
+            className="mt-6 inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40"
           >
-            <LogIn style={{ height: '1rem', width: '1rem' }} />
+            <LogIn className="h-4 w-4" />
             Go to login
           </button>
         </div>
@@ -559,112 +317,37 @@ const RegisterPage: React.FC = () => {
 
   return (
     <>
-      <div
-        style={{
-          margin: '0 auto',
-          width: '100%',
-          maxWidth: '28rem',
-        }}
-      >
+      <div className="mx-auto w-full max-w-md">
         {/* Logo and Title */}
-        <div style={{ textAlign: 'center' }}>
-          <div
-            style={{
-              margin: '0 auto 1.5rem',
-              width: '4rem',
-              height: '4rem',
-              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-              borderRadius: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.4)',
-            }}
-          >
-            <User style={{ width: '2rem', height: '2rem', color: 'white' }} />
+        <div className="text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg shadow-blue-500/40">
+            <User className="h-8 w-8 text-white" />
           </div>
-          <h2
-            style={{
-              fontSize: '1.875rem',
-              fontWeight: 'bold',
-              letterSpacing: '-0.025em',
-              color: '#111827',
-            }}
-          >
-            Create Your Account
-          </h2>
-          <p
-            style={{
-              marginTop: '0.5rem',
-              fontSize: '0.875rem',
-              color: '#6b7280',
-            }}
-          >
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">Create Your Account</h2>
+          <p className="mt-2 text-sm text-gray-500">
             Get started with our user management platform
           </p>
         </div>
       </div>
 
-      <div
-        style={{
-          marginTop: '2rem',
-          margin: '2rem auto 0',
-          width: '100%',
-          maxWidth: '28rem',
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            paddingTop: '2rem',
-            paddingBottom: '2rem',
-            paddingLeft: '1.5rem',
-            paddingRight: '1.5rem',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            borderRadius: '1rem',
-            border: '1px solid rgba(229, 231, 235, 0.5)',
-          }}
-        >
+      <div className="mx-auto mt-8 w-full max-w-md">
+        <div className="rounded-2xl border border-gray-200/50 bg-white/95 px-6 py-8 shadow-2xl backdrop-blur-sm">
           {/* Error Alert */}
           {error && (
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div className="mb-6">
               <ErrorAlert error={error} />
             </div>
           )}
 
-          <form
-            onSubmit={handleSubmit}
-            style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
-          >
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             {/* First Name Field */}
             <div>
-              <label
-                htmlFor="firstName"
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                First Name <span style={{ color: '#ef4444' }}>*</span>
+              <label htmlFor="firstName" className="mb-2 block text-sm font-medium text-gray-700">
+                First Name <span className="text-red-500">*</span>
               </label>
-              <div style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    paddingLeft: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  <User style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }} />
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   id="firstName"
@@ -674,63 +357,20 @@ const RegisterPage: React.FC = () => {
                   required
                   value={formData.firstName}
                   onChange={handleChange}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    paddingLeft: '2.5rem',
-                    paddingRight: '0.75rem',
-                    paddingTop: '0.75rem',
-                    paddingBottom: '0.75rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                    color: '#111827',
-                    fontSize: '0.875rem',
-                    transition: 'all 0.2s ease',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
+                  className="block w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 text-sm text-gray-900 shadow-sm outline-none transition-all focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
                   placeholder="Enter your first name"
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#3b82f6';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#d1d5db';
-                    e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                  }}
                 />
               </div>
             </div>
 
             {/* Last Name Field */}
             <div>
-              <label
-                htmlFor="lastName"
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                Last Name <span style={{ color: '#ef4444' }}>*</span>
+              <label htmlFor="lastName" className="mb-2 block text-sm font-medium text-gray-700">
+                Last Name <span className="text-red-500">*</span>
               </label>
-              <div style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    paddingLeft: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  <User style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }} />
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   id="lastName"
@@ -740,63 +380,20 @@ const RegisterPage: React.FC = () => {
                   required
                   value={formData.lastName}
                   onChange={handleChange}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    paddingLeft: '2.5rem',
-                    paddingRight: '0.75rem',
-                    paddingTop: '0.75rem',
-                    paddingBottom: '0.75rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                    color: '#111827',
-                    fontSize: '0.875rem',
-                    transition: 'all 0.2s ease',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
+                  className="block w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 text-sm text-gray-900 shadow-sm outline-none transition-all focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
                   placeholder="Enter your last name"
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#3b82f6';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#d1d5db';
-                    e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                  }}
                 />
               </div>
             </div>
 
             {/* Email Field */}
             <div>
-              <label
-                htmlFor="email"
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                Email Address <span style={{ color: '#ef4444' }}>*</span>
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
+                Email Address <span className="text-red-500">*</span>
               </label>
-              <div style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    paddingLeft: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  <Mail style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }} />
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   id="email"
@@ -806,63 +403,20 @@ const RegisterPage: React.FC = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    paddingLeft: '2.5rem',
-                    paddingRight: '0.75rem',
-                    paddingTop: '0.75rem',
-                    paddingBottom: '0.75rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                    color: '#111827',
-                    fontSize: '0.875rem',
-                    transition: 'all 0.2s ease',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
+                  className="block w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 text-sm text-gray-900 shadow-sm outline-none transition-all focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
                   placeholder="Enter your email"
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#3b82f6';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#d1d5db';
-                    e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                  }}
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div>
-              <label
-                htmlFor="password"
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                Password <span style={{ color: '#ef4444' }}>*</span>
+              <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
+                Password <span className="text-red-500">*</span>
               </label>
-              <div style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    paddingLeft: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  <Lock style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }} />
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   id="password"
@@ -872,88 +426,35 @@ const RegisterPage: React.FC = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    paddingLeft: '2.5rem',
-                    paddingRight: '3rem',
-                    paddingTop: '0.75rem',
-                    paddingBottom: '0.75rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                    color: '#111827',
-                    fontSize: '0.875rem',
-                    transition: 'all 0.2s ease',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
+                  className="block w-full rounded-lg border border-gray-300 py-3 pl-10 pr-12 text-sm text-gray-900 shadow-sm outline-none transition-all focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
                   placeholder="Create a password"
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#3b82f6';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#d1d5db';
-                    e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    right: 0,
-                    paddingRight: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  className="absolute inset-y-0 right-0 flex cursor-pointer items-center border-none bg-transparent pr-3"
                 >
                   {showPassword ? (
-                    <EyeOff style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }} />
+                    <EyeOff className="h-5 w-5 text-gray-400" />
                   ) : (
-                    <Eye style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }} />
+                    <Eye className="h-5 w-5 text-gray-400" />
                   )}
                 </button>
               </div>
-              <p style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: '#6b7280' }}>
-                Must be at least 8 characters long
-              </p>
+              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters long</p>
             </div>
 
             {/* Confirm Password Field */}
             <div>
               <label
                 htmlFor="confirmPassword"
-                style={{
-                  display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '0.5rem',
-                }}
+                className="mb-2 block text-sm font-medium text-gray-700"
               >
-                Confirm Password <span style={{ color: '#ef4444' }}>*</span>
+                Confirm Password <span className="text-red-500">*</span>
               </label>
-              <div style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    paddingLeft: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  <Lock style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }} />
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   id="confirmPassword"
@@ -963,59 +464,25 @@ const RegisterPage: React.FC = () => {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    paddingLeft: '2.5rem',
-                    paddingRight: '3rem',
-                    paddingTop: '0.75rem',
-                    paddingBottom: '0.75rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                    color: '#111827',
-                    fontSize: '0.875rem',
-                    transition: 'all 0.2s ease',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
+                  className="block w-full rounded-lg border border-gray-300 py-3 pl-10 pr-12 text-sm text-gray-900 shadow-sm outline-none transition-all focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
                   placeholder="Confirm your password"
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#3b82f6';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#d1d5db';
-                    e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    right: 0,
-                    paddingRight: '0.75rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  className="absolute inset-y-0 right-0 flex cursor-pointer items-center border-none bg-transparent pr-3"
                 >
                   {showConfirmPassword ? (
-                    <EyeOff style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }} />
+                    <EyeOff className="h-5 w-5 text-gray-400" />
                   ) : (
-                    <Eye style={{ height: '1.25rem', width: '1.25rem', color: '#9ca3af' }} />
+                    <Eye className="h-5 w-5 text-gray-400" />
                   )}
                 </button>
               </div>
             </div>
 
             {/* Terms and Conditions */}
-            <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <div className="flex items-start">
               <input
                 id="terms_accepted"
                 name="terms_accepted"
@@ -1023,30 +490,15 @@ const RegisterPage: React.FC = () => {
                 required
                 checked={formData.terms_accepted}
                 onChange={handleChange}
-                style={{
-                  height: '1rem',
-                  width: '1rem',
-                  color: '#3b82f6',
-                  borderColor: '#d1d5db',
-                  borderRadius: '0.25rem',
-                  marginTop: '0.25rem',
-                  cursor: 'pointer',
-                }}
+                className="mt-1 h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-500"
               />
-              <label
-                htmlFor="terms_accepted"
-                style={{
-                  marginLeft: '0.75rem',
-                  fontSize: '0.875rem',
-                  color: '#374151',
-                }}
-              >
+              <label htmlFor="terms_accepted" className="ml-3 text-sm text-gray-700">
                 I agree to the{' '}
-                <Link to="/terms" style={{ color: '#3b82f6', textDecoration: 'none' }}>
+                <Link to="/terms" className="text-blue-500 no-underline">
                   Terms and Conditions
                 </Link>{' '}
                 and{' '}
-                <Link to="/privacy" style={{ color: '#3b82f6', textDecoration: 'none' }}>
+                <Link to="/privacy" className="text-blue-500 no-underline">
                   Privacy Policy
                 </Link>
               </label>
@@ -1057,49 +509,11 @@ const RegisterPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  paddingTop: '0.75rem',
-                  paddingBottom: '0.75rem',
-                  paddingLeft: '1rem',
-                  paddingRight: '1rem',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  color: '#ffffff',
-                  background: isLoading ? '#9ca3af' : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s ease',
-                  opacity: isLoading ? 0.5 : 1,
-                }}
-                onMouseEnter={(e) => {
-                  if (!isLoading) {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.4)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-                }}
+                className="flex w-full cursor-pointer justify-center rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-3 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
               >
                 {isLoading ? (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div
-                      style={{
-                        width: '1.25rem',
-                        height: '1.25rem',
-                        border: '2px solid white',
-                        borderTopColor: 'transparent',
-                        borderRadius: '9999px',
-                        animation: 'spin 1s linear infinite',
-                        marginRight: '0.5rem',
-                      }}
-                    ></div>
+                  <div className="flex items-center">
+                    <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                     Creating account...
                   </div>
                 ) : (
@@ -1110,69 +524,28 @@ const RegisterPage: React.FC = () => {
           </form>
 
           {/* Divider */}
-          <div style={{ marginTop: '2rem' }}>
-            <div style={{ position: 'relative' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  left: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <div style={{ width: '100%', borderTop: '1px solid #d1d5db' }} />
+          <div className="mt-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
               </div>
-              <div
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  fontSize: '0.875rem',
-                }}
-              >
-                <span
-                  style={{
-                    paddingLeft: '0.5rem',
-                    paddingRight: '0.5rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    color: '#6b7280',
-                  }}
-                >
-                  Already have an account?
-                </span>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white/95 px-2 text-gray-500">Already have an account?</span>
               </div>
             </div>
           </div>
 
           {/* Sign In Link */}
-          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+          <div className="mt-6 text-center">
             <Link
               to="/login"
-              style={{
-                fontWeight: '500',
-                color: '#3b82f6',
-                textDecoration: 'none',
-                transition: 'color 0.2s ease',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#2563eb')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#3b82f6')}
+              className="font-medium text-blue-500 no-underline transition-colors hover:text-blue-600"
             >
               Sign in to your account
             </Link>
           </div>
         </div>
       </div>
-
-      <style>
-        {`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
     </>
   );
 };
