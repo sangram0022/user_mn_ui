@@ -202,146 +202,69 @@ const RoleBasedDashboard: FC = () => {
   const RoleIcon = roleInfo.icon;
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '2rem 1rem' }}>
-        <div style={{ marginBottom: '2rem' }}>
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <div className="mb-8">
           <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '1rem',
-              borderRadius: '0.5rem',
-              backgroundColor: roleInfo.color.includes('yellow')
-                ? '#fef3c7'
+            className={`inline-flex items-center gap-3 rounded-lg p-4 ${
+              roleInfo.color.includes('yellow')
+                ? 'bg-amber-100 text-amber-800'
                 : roleInfo.color.includes('blue')
-                  ? '#dbeafe'
-                  : '#dcfce7',
-              color: roleInfo.color.includes('yellow')
-                ? '#92400e'
-                : roleInfo.color.includes('blue')
-                  ? '#1e40af'
-                  : '#166534',
-            }}
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-green-100 text-green-800'
+            }`}
           >
-            <RoleIcon style={{ width: '1.5rem', height: '1.5rem' }} />
+            <RoleIcon className="h-6 w-6" />
             <div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{roleInfo.title}</h1>
-              <p style={{ fontSize: '0.875rem', opacity: 0.8 }}>{roleInfo.description}</p>
+              <h1 className="text-2xl font-bold">{roleInfo.title}</h1>
+              <p className="text-sm opacity-80">{roleInfo.description}</p>
             </div>
           </div>
         </div>
 
         {isAdmin && (
-          <div
-            style={{
-              marginBottom: '2rem',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-              gap: '1.5rem',
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '0.5rem',
-                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                padding: '1.5rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div
-                  style={{
-                    padding: '0.75rem',
-                    backgroundColor: '#dbeafe',
-                    borderRadius: '0.5rem',
-                  }}
-                >
-                  <Users style={{ width: '1.5rem', height: '1.5rem', color: '#2563eb' }} />
+          <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center">
+                <div className="rounded-lg bg-blue-100 p-3">
+                  <Users className="h-6 w-6 text-blue-600" />
                 </div>
-                <div style={{ marginLeft: '1rem' }}>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>
-                    1,234
-                  </div>
-                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Total Users</div>
+                <div className="ml-4">
+                  <div className="text-2xl font-bold text-gray-900">1,234</div>
+                  <div className="text-sm text-gray-500">Total Users</div>
                 </div>
               </div>
             </div>
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '0.5rem',
-                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                padding: '1.5rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div
-                  style={{
-                    padding: '0.75rem',
-                    backgroundColor: '#dcfce7',
-                    borderRadius: '0.5rem',
-                  }}
-                >
-                  <CheckCircle style={{ width: '1.5rem', height: '1.5rem', color: '#16a34a' }} />
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center">
+                <div className="rounded-lg bg-green-100 p-3">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
                 </div>
-                <div style={{ marginLeft: '1rem' }}>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>
-                    99.9%
-                  </div>
-                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>System Uptime</div>
+                <div className="ml-4">
+                  <div className="text-2xl font-bold text-gray-900">99.9%</div>
+                  <div className="text-sm text-gray-500">System Uptime</div>
                 </div>
               </div>
             </div>
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '0.5rem',
-                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                padding: '1.5rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div
-                  style={{
-                    padding: '0.75rem',
-                    backgroundColor: '#fed7aa',
-                    borderRadius: '0.5rem',
-                  }}
-                >
-                  <Clock style={{ width: '1.5rem', height: '1.5rem', color: '#ea580c' }} />
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center">
+                <div className="rounded-lg bg-orange-100 p-3">
+                  <Clock className="h-6 w-6 text-orange-600" />
                 </div>
-                <div style={{ marginLeft: '1rem' }}>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>23</div>
-                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Pending Approvals</div>
+                <div className="ml-4">
+                  <div className="text-2xl font-bold text-gray-900">23</div>
+                  <div className="text-sm text-gray-500">Pending Approvals</div>
                 </div>
               </div>
             </div>
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '0.5rem',
-                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                border: '1px solid #e5e7eb',
-                padding: '1.5rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div
-                  style={{
-                    padding: '0.75rem',
-                    backgroundColor: '#fecaca',
-                    borderRadius: '0.5rem',
-                  }}
-                >
-                  <AlertTriangle style={{ width: '1.5rem', height: '1.5rem', color: '#dc2626' }} />
+            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center">
+                <div className="rounded-lg bg-red-100 p-3">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
-                <div style={{ marginLeft: '1rem' }}>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>5</div>
-                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Security Alerts</div>
+                <div className="ml-4">
+                  <div className="text-2xl font-bold text-gray-900">5</div>
+                  <div className="text-sm text-gray-500">Security Alerts</div>
                 </div>
               </div>
             </div>
@@ -350,13 +273,7 @@ const RoleBasedDashboard: FC = () => {
 
         <Breadcrumb />
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '1.5rem',
-          }}
-        >
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
@@ -364,72 +281,36 @@ const RoleBasedDashboard: FC = () => {
                 key={feature.href}
                 to={feature.href}
                 onClick={(event) => handleFeatureClick(feature.href, event)}
-                style={{
-                  display: 'block',
-                  padding: '1.5rem',
-                  borderRadius: '0.5rem',
-                  border: '2px solid #e5e7eb',
-                  transition: 'all 0.2s ease',
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  backgroundColor: 'white',
-                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                  e.currentTarget.style.boxShadow =
-                    '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-                  e.currentTarget.style.borderColor =
-                    feature.color === 'blue'
-                      ? '#3b82f6'
-                      : feature.color === 'green'
-                        ? '#10b981'
-                        : feature.color === 'purple'
-                          ? '#8b5cf6'
-                          : '#6b7280';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow =
-                    '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
-                  e.currentTarget.style.borderColor = '#e5e7eb';
-                }}
+                className={`group block rounded-lg border-2 border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg no-underline text-inherit hover:border-${
+                  feature.color === 'blue'
+                    ? 'blue-500'
+                    : feature.color === 'green'
+                      ? 'green-500'
+                      : feature.color === 'purple'
+                        ? 'purple-500'
+                        : 'gray-400'
+                }`}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                  <div style={{ flexShrink: 0 }}>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0">
                     <Icon
-                      style={{
-                        width: '2rem',
-                        height: '2rem',
-                        color:
-                          feature.color === 'blue'
-                            ? '#3b82f6'
-                            : feature.color === 'green'
-                              ? '#10b981'
-                              : feature.color === 'purple'
-                                ? '#8b5cf6'
-                                : '#6b7280',
-                      }}
+                      className={`h-8 w-8 ${
+                        feature.color === 'blue'
+                          ? 'text-blue-500'
+                          : feature.color === 'green'
+                            ? 'text-green-500'
+                            : feature.color === 'purple'
+                              ? 'text-purple-500'
+                              : 'text-gray-500'
+                      }`}
                     />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                      {feature.title}
-                    </h3>
-                    <p style={{ fontSize: '0.875rem', opacity: 0.8, marginBottom: '0.75rem' }}>
-                      {feature.description}
-                    </p>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <span style={{ fontSize: '0.75rem', fontWeight: '500', opacity: 0.6 }}>
-                        {feature.stats}
-                      </span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '500' }}>→</span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
+                    <p className="mb-3 text-sm opacity-80">{feature.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium opacity-60">{feature.stats}</span>
+                      <span className="text-xs font-medium">→</span>
                     </div>
                   </div>
                 </div>
@@ -438,34 +319,11 @@ const RoleBasedDashboard: FC = () => {
           })}
         </div>
 
-        <div
-          style={{
-            marginTop: '2rem',
-            background: 'linear-gradient(135deg, #eff6ff 0%, #f3e8ff 100%)',
-            borderRadius: '0.5rem',
-            padding: '1.5rem',
-            border: '1px solid #bfdbfe',
-          }}
-        >
-          <h3
-            style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: '#111827',
-              marginBottom: '1rem',
-            }}
-          >
+        <div className="mt-8 rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">
             {isAdmin ? 'Admin Tips' : isModerator ? 'Moderator Tips' : 'Getting Started'}
           </h3>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-              gap: '1rem',
-              fontSize: '0.875rem',
-              color: '#374151',
-            }}
-          >
+          <div className="grid grid-cols-1 gap-4 text-sm text-gray-700 md:grid-cols-2">
             {isAdmin && (
               <>
                 <div>• Use the Security Center to monitor system threats</div>
