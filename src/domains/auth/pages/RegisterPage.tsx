@@ -18,6 +18,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { apiClient } from '@lib/api';
 import ErrorAlert from '@shared/ui/ErrorAlert';
+import {
+  validateEmail,
+  validatePassword,
+  validatePasswordMatch,
+  validateRequired,
+} from '@shared/utils/formValidation';
 import type { FeedbackIcon, RegistrationFeedback } from '../utils/registrationFeedback';
 import { buildRegistrationFeedback } from '../utils/registrationFeedback';
 
@@ -113,31 +119,41 @@ const RegisterPage: React.FC = () => {
   };
 
   const validateForm = () => {
-    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
-      handleError(new Error('Please fill in all required fields.'));
+    const firstNameValidation = validateRequired(formData.firstName, 'First name');
+    if (!firstNameValidation.isValid) {
+      handleError(new Error(firstNameValidation.error));
       return false;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      handleError(
-        new Error('Passwords do not match. Please make sure both password fields are identical.')
-      );
+    const lastNameValidation = validateRequired(formData.lastName, 'Last name');
+    if (!lastNameValidation.isValid) {
+      handleError(new Error(lastNameValidation.error));
       return false;
     }
 
-    if (formData.password.length < 8) {
-      handleError(
-        new Error('Password must be at least 8 characters long. Please choose a stronger password.')
-      );
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.isValid) {
+      handleError(new Error(emailValidation.error));
+      return false;
+    }
+
+    const passwordValidation = validatePassword(formData.password, 8);
+    if (!passwordValidation.isValid) {
+      handleError(new Error(passwordValidation.error));
+      return false;
+    }
+
+    const passwordMatchValidation = validatePasswordMatch(
+      formData.password,
+      formData.confirmPassword
+    );
+    if (!passwordMatchValidation.isValid) {
+      handleError(new Error(passwordMatchValidation.error));
       return false;
     }
 
     if (!formData.terms_accepted) {
-      handleError(
-        new Error(
-          'You must accept the Terms and Conditions to register. Please review and accept them to proceed.'
-        )
-      );
+      handleError(new Error('You must accept the Terms and Conditions to register'));
       return false;
     }
 
@@ -295,7 +311,7 @@ const RegisterPage: React.FC = () => {
                       fontSize: '0.875rem',
                       fontWeight: '600',
                       color: '#0f172a',
-                      wordBreak: 'break-words',
+                      wordBreak: 'break-word',
                     }}
                   >
                     {highlight.value}
@@ -348,9 +364,7 @@ const RegisterPage: React.FC = () => {
                         backgroundColor: '#eff6ff',
                       }}
                     >
-                      <IconComponent
-                        style={{ height: '1.25rem', width: '1.25rem', color: '#3b82f6' }}
-                      />
+                      <IconComponent className="w-5 h-5 text-blue-500" />
                     </div>
                     <div>
                       <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#0f172a' }}>
