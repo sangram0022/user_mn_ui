@@ -9,11 +9,13 @@
  * - Memory management
  * - Network optimization
  *
+ * React 19 Migration: All memoization removed - React Compiler handles optimization
+ *
  * @version 3.0.0
  * @author Senior UI Performance Engineer
  */
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { logger } from './logger';
 
 // ============================================================================
@@ -208,17 +210,17 @@ export const useThrottle = <T extends (...args: unknown[]) => unknown>(
   delay: number
 ): T => {
   const lastRun = useRef(Date.now());
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
 
-  return useCallback(
-    ((...args) => {
-      const now = Date.now();
-      if (now - lastRun.current >= delay) {
-        callback(...args);
-        lastRun.current = now;
-      }
-    }) as T,
-    [callback, delay]
-  );
+  // Convert useCallback to plain function
+  return ((...args) => {
+    const now = Date.now();
+    if (now - lastRun.current >= delay) {
+      callbackRef.current(...args);
+      lastRun.current = now;
+    }
+  }) as T;
 };
 
 /**
@@ -333,7 +335,12 @@ export class LRUCache<K, V> {
  * Hook for LRU cached values
  */
 export const useLRUCache = <K, V>(maxSize: number): LRUCache<K, V> => {
-  return useMemo(() => new LRUCache<K, V>(maxSize), [maxSize]);
+  // Convert useMemo to useRef for instance caching
+  const cacheRef = useRef<LRUCache<K, V> | null>(null);
+  if (!cacheRef.current) {
+    cacheRef.current = new LRUCache<K, V>(maxSize);
+  }
+  return cacheRef.current;
 };
 
 // ============================================================================
@@ -466,7 +473,8 @@ export const reportWebVitals = (metric: {
  * Use View Transitions API for smooth page transitions
  */
 export const useViewTransition = (): ((callback: () => void) => void) => {
-  return useCallback((callback: () => void) => {
+  // Convert useCallback to plain function
+  return (callback: () => void) => {
     if (typeof document === 'undefined') {
       callback();
       return;
@@ -483,7 +491,7 @@ export const useViewTransition = (): ((callback: () => void) => void) => {
       // Fallback for browsers without support
       callback();
     }
-  }, []);
+  };
 };
 
 // ============================================================================
@@ -511,9 +519,10 @@ export const useVirtualScroll = <T>(
   const offsetY = visibleStart * itemHeight;
   const totalHeight = items.length * itemHeight;
 
-  const onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+  // Convert useCallback to plain function
+  const onScroll = (e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
-  }, []);
+  };
 
   return {
     visibleItems,
