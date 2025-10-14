@@ -1,8 +1,10 @@
 /**
  * Monitoring hooks for React components
+ *
+ * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { analyticsTracker } from '../AnalyticsTracker';
 import { errorTracker } from '../ErrorTracker';
 import { logger } from '../logger';
@@ -76,18 +78,15 @@ export const usePerformance = (componentName: string, options: UsePerformanceOpt
     }
   });
 
-  const startTimer = useCallback(
-    (operationName: string) => {
-      const timerName = `${componentName}.${operationName}`;
-      performanceMonitor.startTimer(timerName);
-      return timerName;
-    },
-    [componentName]
-  );
+  const startTimer = (operationName: string) => {
+    const timerName = `${componentName}.${operationName}`;
+    performanceMonitor.startTimer(timerName);
+    return timerName;
+  };
 
-  const endTimer = useCallback((timerName: string) => {
+  const endTimer = (timerName: string) => {
     return performanceMonitor.endTimer(timerName);
-  }, []);
+  };
 
   return {
     startTimer,
@@ -110,27 +109,24 @@ export const useAnalytics = (pageName?: string, options: UseAnalyticsOptions = {
     }
   }, [pageName, trackPageView]);
 
-  const trackEvent = useCallback(
-    (
-      name: string,
-      category: string,
-      action: string,
-      label?: string,
-      value?: number,
-      properties?: Record<string, unknown>
-    ) => {
-      analyticsTracker.track(name, category, action, label, value, properties);
-    },
-    []
-  );
+  const trackEvent = (
+    name: string,
+    category: string,
+    action: string,
+    label?: string,
+    value?: number,
+    properties?: Record<string, unknown>
+  ) => {
+    analyticsTracker.track(name, category, action, label, value, properties);
+  };
 
-  const trackUserAction = useCallback((action: string, properties?: Record<string, unknown>) => {
+  const trackUserAction = (action: string, properties?: Record<string, unknown>) => {
     analyticsTracker.trackUserAction(action, 'user_interaction', properties);
-  }, []);
+  };
 
-  const trackError = useCallback((error: Error, context?: Record<string, unknown>) => {
+  const trackError = (error: Error, context?: Record<string, unknown>) => {
     analyticsTracker.trackError(error, context);
-  }, []);
+  };
 
   return {
     trackEvent,
@@ -148,33 +144,30 @@ export interface UseErrorBoundaryOptions {
 export const useErrorBoundary = (options: UseErrorBoundaryOptions = {}) => {
   const { componentName = 'UnknownComponent', onError } = options;
 
-  const captureError = useCallback(
-    (error: Error, errorInfo?: unknown) => {
-      // Track the error
-      errorTracker.trackError(
-        error,
-        {
-          component: componentName,
-          action: 'component_error',
-          additionalData: errorInfo as Record<string, unknown>,
-        },
-        'high',
-        true
-      );
+  const captureError = (error: Error, errorInfo?: unknown) => {
+    // Track the error
+    errorTracker.trackError(
+      error,
+      {
+        component: componentName,
+        action: 'component_error',
+        additionalData: errorInfo as Record<string, unknown>,
+      },
+      'high',
+      true
+    );
 
-      // Call custom error handler
-      if (onError) {
-        onError(error, errorInfo);
-      }
+    // Call custom error handler
+    if (onError) {
+      onError(error, errorInfo);
+    }
 
-      logger.error(`Error in component ${componentName}: ${error.message}`, error);
-    },
-    [componentName, onError]
-  );
+    logger.error(`Error in component ${componentName}: ${error.message}`, error);
+  };
 
-  const resetError = useCallback(() => {
+  const resetError = () => {
     logger.info(`Error boundary reset for component ${componentName}`);
-  }, [componentName]);
+  };
 
   return {
     captureError,
@@ -203,11 +196,11 @@ export const useWebVitals = (options: UseWebVitalsOptions = {}) => {
     return undefined;
   }, [onVitalChange]);
 
-  const getVitals = useCallback(() => {
+  const getVitals = () => {
     // This would need to be imported from WebVitalsTracker
     // return webVitalsTracker.getAllVitals();
     return {};
-  }, []);
+  };
 
   return {
     getVitals,
@@ -223,48 +216,40 @@ export interface UseNetworkMonitoringOptions {
 export const useNetworkMonitoring = (options: UseNetworkMonitoringOptions = {}) => {
   const { trackRequests = true, trackResponses = true, trackErrors = true } = options;
 
-  const trackRequest = useCallback(
-    (url: string, method: string, startTime: number, requestSize?: number) => {
-      if (trackRequests) {
-        performanceMonitor.recordCustomMetric(
-          'network.request.start',
-          Date.now() - startTime,
-          'ms',
-          {
-            url,
-            method,
-            requestSize,
-          }
-        );
-      }
-    },
-    [trackRequests]
-  );
+  const trackRequest = (url: string, method: string, startTime: number, requestSize?: number) => {
+    if (trackRequests) {
+      performanceMonitor.recordCustomMetric('network.request.start', Date.now() - startTime, 'ms', {
+        url,
+        method,
+        requestSize,
+      });
+    }
+  };
 
-  const trackResponse = useCallback(
-    (url: string, method: string, status: number, duration: number, responseSize?: number) => {
-      if (trackResponses) {
-        performanceMonitor.recordNetworkMetric(
-          url,
-          method,
-          status,
-          duration,
-          undefined,
-          responseSize
-        );
-      }
-    },
-    [trackResponses]
-  );
+  const trackResponse = (
+    url: string,
+    method: string,
+    status: number,
+    duration: number,
+    responseSize?: number
+  ) => {
+    if (trackResponses) {
+      performanceMonitor.recordNetworkMetric(
+        url,
+        method,
+        status,
+        duration,
+        undefined,
+        responseSize
+      );
+    }
+  };
 
-  const trackNetworkError = useCallback(
-    (url: string, method: string, error: Error) => {
-      if (trackErrors) {
-        errorTracker.trackApiError(error, url, method);
-      }
-    },
-    [trackErrors]
-  );
+  const trackNetworkError = (url: string, method: string, error: Error) => {
+    if (trackErrors) {
+      errorTracker.trackApiError(error, url, method);
+    }
+  };
 
   return {
     trackRequest,
@@ -323,13 +308,13 @@ export const useUserSession = (options: UseUserSessionOptions = {}) => {
     };
   }, [trackActions, sessionTimeout]);
 
-  const getCurrentSession = useCallback(() => {
+  const getCurrentSession = () => {
     return analyticsTracker.getCurrentSession();
-  }, []);
+  };
 
-  const endSession = useCallback(() => {
+  const endSession = () => {
     analyticsTracker.endSession();
-  }, []);
+  };
 
   return {
     getCurrentSession,
@@ -369,51 +354,35 @@ export const useComponentMetrics = (
     }
   });
 
-  const trackPropChange = useCallback(
-    (propName: string, oldValue: unknown, newValue: unknown) => {
-      if (trackProps) {
-        metricsRef.current.propsChanges++;
+  const trackPropChange = (propName: string, oldValue: unknown, newValue: unknown) => {
+    if (trackProps) {
+      metricsRef.current.propsChanges++;
 
-        performanceMonitor.recordCustomMetric(
-          `component.prop.change.${componentName}`,
-          1,
-          'count',
-          {
-            component: componentName,
-            propName,
-            hadValue: oldValue !== undefined,
-            hasValue: newValue !== undefined,
-          }
-        );
-      }
-    },
-    [componentName, trackProps]
-  );
+      performanceMonitor.recordCustomMetric(`component.prop.change.${componentName}`, 1, 'count', {
+        component: componentName,
+        propName,
+        hadValue: oldValue !== undefined,
+        hasValue: newValue !== undefined,
+      });
+    }
+  };
 
-  const trackStateChange = useCallback(
-    (stateName: string, oldValue: unknown, newValue: unknown) => {
-      if (trackState) {
-        metricsRef.current.stateChanges++;
+  const trackStateChange = (stateName: string, oldValue: unknown, newValue: unknown) => {
+    if (trackState) {
+      metricsRef.current.stateChanges++;
 
-        performanceMonitor.recordCustomMetric(
-          `component.state.change.${componentName}`,
-          1,
-          'count',
-          {
-            component: componentName,
-            stateName,
-            hadValue: oldValue !== undefined,
-            hasValue: newValue !== undefined,
-          }
-        );
-      }
-    },
-    [componentName, trackState]
-  );
+      performanceMonitor.recordCustomMetric(`component.state.change.${componentName}`, 1, 'count', {
+        component: componentName,
+        stateName,
+        hadValue: oldValue !== undefined,
+        hasValue: newValue !== undefined,
+      });
+    }
+  };
 
-  const getMetrics = useCallback(() => {
+  const getMetrics = () => {
     return { ...metricsRef.current };
-  }, []);
+  };
 
   return {
     trackPropChange,
