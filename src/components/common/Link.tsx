@@ -6,12 +6,13 @@
  * - Reduces navigation delay
  * - Seamless user experience
  *
+ * React 19: No memoization needed - React Compiler handles optimization
+ *
  * @author Senior React Architect
  * @version 1.0.0
  */
 
 import { routePreloader } from '@routing/routePreloader';
-import { useCallback } from 'react';
 import { Link as RouterLink, type LinkProps } from 'react-router-dom';
 
 export interface OptimizedLinkProps extends LinkProps {
@@ -36,25 +37,19 @@ export const Link = ({
 }: OptimizedLinkProps) => {
   const path = typeof to === 'string' ? to : to.pathname || '';
 
-  const handleMouseEnter = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
-      if (preload && path) {
-        routePreloader.preloadRoute(path);
-      }
-      onMouseEnter?.(e);
-    },
-    [path, preload, onMouseEnter]
-  );
+  const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (preload && path) {
+      routePreloader.preloadRoute(path);
+    }
+    onMouseEnter?.(e);
+  };
 
-  const handleFocus = useCallback(
-    (e: React.FocusEvent<HTMLAnchorElement>) => {
-      if (preload && path) {
-        routePreloader.preloadRoute(path);
-      }
-      onFocus?.(e);
-    },
-    [path, preload, onFocus]
-  );
+  const handleFocus = (e: React.FocusEvent<HTMLAnchorElement>) => {
+    if (preload && path) {
+      routePreloader.preloadRoute(path);
+    }
+    onFocus?.(e);
+  };
 
   return <RouterLink to={to} onMouseEnter={handleMouseEnter} onFocus={handleFocus} {...props} />;
 };

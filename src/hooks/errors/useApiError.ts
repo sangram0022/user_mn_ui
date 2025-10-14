@@ -4,6 +4,8 @@
  * This hook provides a consistent way to handle API errors across the application.
  * It automatically maps error codes to user-friendly messages.
  *
+ * React 19: No memoization needed - React Compiler handles optimization
+ *
  * Usage:
  * ```tsx
  * const { error, showError, clearError } = useApiError();
@@ -21,7 +23,7 @@
 
 import { getErrorConfig } from '@shared/config/errorMessages';
 import { logger } from '@shared/utils/logger';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 export interface ApiErrorState {
   /** Error code from backend */
@@ -132,7 +134,7 @@ function extractStatusCode(error: unknown): number | undefined {
 export function useApiError(): UseApiErrorReturn {
   const [error, setError] = useState<ApiErrorState | null>(null);
 
-  const showError = useCallback((errorInput: unknown, context?: string) => {
+  const showError = (errorInput: unknown, context?: string) => {
     // Extract error code from various formats
     const code = extractErrorCode(errorInput);
     const statusCode = extractStatusCode(errorInput);
@@ -177,11 +179,11 @@ export function useApiError(): UseApiErrorReturn {
         userMessage: errorConfig.message,
       }
     );
-  }, []);
+  };
 
-  const clearError = useCallback(() => {
+  const clearError = () => {
     setError(null);
-  }, []);
+  };
 
   return {
     error,

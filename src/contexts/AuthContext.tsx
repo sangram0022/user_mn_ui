@@ -1,9 +1,11 @@
 /**
  * Authentication Context
  * Provides authentication state and methods throughout the application
+ *
+ * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import React, { createContext, ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { createContext, ReactNode, useEffect, useState } from 'react';
 import authService from '../services/auth.service';
 import {
   LoginRequest,
@@ -61,7 +63,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => window.removeEventListener('auth:error', handleAuthError);
   }, []);
 
-  const login = useCallback(async (credentials: LoginRequest) => {
+  const login = async (credentials: LoginRequest) => {
     setIsLoading(true);
     try {
       const response = await authService.login(credentials);
@@ -80,18 +82,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  const register = useCallback(async (userData: RegisterRequest) => {
+  const register = async (userData: RegisterRequest) => {
     setIsLoading(true);
     try {
       return await authService.register(userData);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  const logout = useCallback(async () => {
+  const logout = async () => {
     setIsLoading(true);
     try {
       await authService.logout();
@@ -99,18 +101,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  const refreshUser = useCallback(() => {
+  const refreshUser = () => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
-  }, []);
+  };
 
-  const hasRole = useCallback((role: string) => authService.hasRole(role), []);
-  const hasAnyRole = useCallback((roles: string[]) => authService.hasAnyRole(roles), []);
-  const isAdmin = useCallback(() => authService.isAdmin(), []);
-  const isVerified = useCallback(() => authService.isVerified(), []);
-  const isApproved = useCallback(() => authService.isApproved(), []);
+  const hasRole = (role: string) => authService.hasRole(role);
+  const hasAnyRole = (roles: string[]) => authService.hasAnyRole(roles);
+  const isAdmin = () => authService.isAdmin();
+  const isVerified = () => authService.isVerified();
+  const isApproved = () => authService.isApproved();
 
   const value: AuthContextType = {
     user,
