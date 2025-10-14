@@ -1,9 +1,11 @@
 /**
  * Custom Hook: useAuth
  * Manages authentication state and operations
+ *
+ * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
 import {
@@ -34,27 +36,24 @@ export const useAuth = () => {
     return () => window.removeEventListener('auth:error', handleAuthError);
   }, []);
 
-  const login = useCallback(
-    async (credentials: LoginRequest) => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await authService.login(credentials);
-        setUser(authService.getCurrentUser());
-        navigate('/dashboard');
-        return response;
-      } catch (err: unknown) {
-        const errorMessage = err.error?.message || 'Login failed. Please try again.';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [navigate]
-  );
+  const login = async (credentials: LoginRequest) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authService.login(credentials);
+      setUser(authService.getCurrentUser());
+      navigate('/dashboard');
+      return response;
+    } catch (err: unknown) {
+      const errorMessage = err.error?.message || 'Login failed. Please try again.';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const register = useCallback(async (userData: RegisterRequest) => {
+  const register = async (userData: RegisterRequest) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -67,9 +66,9 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  const logout = useCallback(async () => {
+  const logout = async () => {
     setIsLoading(true);
     try {
       await authService.logout();
@@ -84,9 +83,9 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate]);
+  };
 
-  const changePassword = useCallback(async (data: ChangePasswordRequest) => {
+  const changePassword = async (data: ChangePasswordRequest) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -99,9 +98,9 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  const requestPasswordReset = useCallback(async (data: PasswordResetRequest) => {
+  const requestPasswordReset = async (data: PasswordResetRequest) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -114,9 +113,9 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  const resetPassword = useCallback(async (data: ResetPasswordRequest) => {
+  const resetPassword = async (data: ResetPasswordRequest) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -129,9 +128,9 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  const verifyEmail = useCallback(async (token: string) => {
+  const verifyEmail = async (token: string) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -144,9 +143,9 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  const resendVerification = useCallback(async (email: string) => {
+  const resendVerification = async (email: string) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -159,11 +158,11 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
-  const clearError = useCallback(() => {
+  const clearError = () => {
     setError(null);
-  }, []);
+  };
 
   return {
     user,

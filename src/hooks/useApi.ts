@@ -1,9 +1,11 @@
 /**
  * Custom Hook: useApi
  * Generic hook for API calls with loading and error states
+ *
+ * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ApiError } from '../types/api.types';
 
 interface UseApiOptions<T> {
@@ -35,7 +37,7 @@ export function useApi<T>(apiCall: () => Promise<T>, options: UseApiOptions<T> =
     };
   }, []);
 
-  const execute = useCallback(async () => {
+  const execute = async () => {
     // Abort previous request if exists
     abortControllerRef.current?.abort();
     abortControllerRef.current = new AbortController();
@@ -68,7 +70,7 @@ export function useApi<T>(apiCall: () => Promise<T>, options: UseApiOptions<T> =
         setLoading(false);
       }
     }
-  }, [apiCall, onSuccess, onError]);
+  };
 
   useEffect(() => {
     if (autoFetch) {
@@ -77,15 +79,15 @@ export function useApi<T>(apiCall: () => Promise<T>, options: UseApiOptions<T> =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
-  const refetch = useCallback(() => {
+  const refetch = () => {
     return execute();
-  }, [execute]);
+  };
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setData(null);
     setError(null);
     setLoading(false);
-  }, []);
+  };
 
   return {
     data,

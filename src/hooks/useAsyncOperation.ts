@@ -4,20 +4,24 @@
  * Manages loading, error, and success states for async operations.
  * Reduces boilerplate code for common async patterns in components.
  *
+ * React 19: No memoization needed - React Compiler handles optimization
+ *
  * @example
  * ```tsx
  * const { execute, isLoading, error, clearError } = useAsyncOperation();
  *
- * const handleSubmit = async () => { *   await execute(async () => {
+ * const handleSubmit = async () => {
+ *   await execute(async () => {
  *     await apiClient.createUser(formData);
- *   }, { *     onSuccess: () => logger.info('User created'),
+ *   }, {
+ *     onSuccess: () => logger.info('User created'),
  *     onError: (err) => logger.error(err)
  *   });
  * };
  * ```
  */
 
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 export interface AsyncOperationOptions<T = void> {
   onSuccess?: (result: T) => void | Promise<void>;
@@ -46,52 +50,49 @@ export function useAsyncOperation<T = void>(): UseAsyncOperationResult<T> {
   const [error, setError] = useState<Error | null>(null);
   const [data, setData] = useState<T | null>(null);
 
-  const clearError = useCallback(() => {
+  const clearError = () => {
     setError(null);
-  }, []);
+  };
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setIsLoading(false);
     setError(null);
     setData(null);
-  }, []);
+  };
 
-  const execute = useCallback(
-    async (
-      operation: () => Promise<T>,
-      options?: AsyncOperationOptions<T>
-    ): Promise<T | undefined> => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const execute = async (
+    operation: () => Promise<T>,
+    options?: AsyncOperationOptions<T>
+  ): Promise<T | undefined> => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const result = await operation();
-        setData(result as T);
+      const result = await operation();
+      setData(result as T);
 
-        if (options?.onSuccess) {
-          await options.onSuccess(result);
-        }
-
-        return result;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Operation failed');
-        setError(error);
-
-        if (options?.onError) {
-          await options.onError(error);
-        }
-
-        return undefined;
-      } finally {
-        setIsLoading(false);
-
-        if (options?.onFinally) {
-          await options.onFinally();
-        }
+      if (options?.onSuccess) {
+        await options.onSuccess(result);
       }
-    },
-    []
-  );
+
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Operation failed');
+      setError(error);
+
+      if (options?.onError) {
+        await options.onError(error);
+      }
+
+      return undefined;
+    } finally {
+      setIsLoading(false);
+
+      if (options?.onFinally) {
+        await options.onFinally();
+      }
+    }
+  };
 
   // Build return object with a dynamic getter for `error` that supports
   // test expectations: first access returns data (on success) or error (on failure),
