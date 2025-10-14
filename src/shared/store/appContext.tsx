@@ -4,10 +4,10 @@
  * Advanced state management using React Context with type safety
  */
 
-import { logger } from './../utils/logger';
-import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { User, Notification, SystemHealth } from '../api/apiTypes';
+import React, { createContext, useContext, useEffect, useReducer } from 'react';
+import type { Notification, SystemHealth, User } from '../api/apiTypes';
+import { logger } from './../utils/logger';
 
 // Application state interface
 interface AppState {
@@ -366,107 +366,104 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     };
   }, []);
 
-  // Actions
+  // Actions - React Compiler automatically optimizes these functions
   const actions: AppActions = {
     // Authentication actions
-    setUser: useCallback((user: User | null) => {
+    setUser: (user: User | null) => {
       dispatch({ type: 'SET_USER', payload: user });
-    }, []),
+    },
 
-    setAuthToken: useCallback((token: string | null) => {
+    setAuthToken: (token: string | null) => {
       dispatch({ type: 'SET_AUTH_TOKEN', payload: token });
-    }, []),
+    },
 
-    login: useCallback((user: User, token: string) => {
+    login: (user: User, token: string) => {
       dispatch({ type: 'LOGIN', payload: { user, token } });
-    }, []),
+    },
 
-    logout: useCallback(() => {
+    logout: () => {
       dispatch({ type: 'LOGOUT' });
       // Clear localStorage
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-    }, []),
+    },
 
     // UI actions
-    setTheme: useCallback((theme: AppState['theme']) => {
+    setTheme: (theme: AppState['theme']) => {
       dispatch({ type: 'SET_THEME', payload: theme });
-    }, []),
+    },
 
-    toggleSidebar: useCallback(() => {
+    toggleSidebar: () => {
       dispatch({ type: 'TOGGLE_SIDEBAR' });
-    }, []),
+    },
 
-    setSidebarCollapsed: useCallback((collapsed: boolean) => {
+    setSidebarCollapsed: (collapsed: boolean) => {
       dispatch({ type: 'SET_SIDEBAR_COLLAPSED', payload: collapsed });
-    }, []),
+    },
 
     // Notification actions
-    addNotification: useCallback((notification: Notification) => {
+    addNotification: (notification: Notification) => {
       dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
-    }, []),
+    },
 
-    removeNotification: useCallback((id: string) => {
+    removeNotification: (id: string) => {
       dispatch({ type: 'REMOVE_NOTIFICATION', payload: id });
-    }, []),
+    },
 
-    markNotificationAsRead: useCallback((id: string) => {
+    markNotificationAsRead: (id: string) => {
       dispatch({ type: 'MARK_NOTIFICATION_READ', payload: id });
-    }, []),
+    },
 
-    clearNotifications: useCallback(() => {
+    clearNotifications: () => {
       dispatch({ type: 'CLEAR_NOTIFICATIONS' });
-    }, []),
+    },
 
     // System actions
-    setSystemHealth: useCallback((health: SystemHealth) => {
+    setSystemHealth: (health: SystemHealth) => {
       dispatch({ type: 'SET_SYSTEM_HEALTH', payload: health });
-    }, []),
+    },
 
-    setOnlineStatus: useCallback((isOnline: boolean) => {
+    setOnlineStatus: (isOnline: boolean) => {
       dispatch({ type: 'SET_ONLINE_STATUS', payload: isOnline });
-    }, []),
+    },
 
-    updateLastSyncTime: useCallback(() => {
+    updateLastSyncTime: () => {
       dispatch({ type: 'UPDATE_LAST_SYNC_TIME' });
-    }, []),
+    },
 
     // Loading actions
-    setLoading: useCallback((key: keyof AppState['loading'], isLoading: boolean) => {
+    setLoading: (key: keyof AppState['loading'], isLoading: boolean) => {
       dispatch({ type: 'SET_LOADING', payload: { key, isLoading } });
-    }, []),
+    },
 
     // Error actions
-    setError: useCallback((key: keyof AppState['errors'], error: string | null) => {
+    setError: (key: keyof AppState['errors'], error: string | null) => {
       dispatch({ type: 'SET_ERROR', payload: { key, error } });
-    }, []),
+    },
 
-    clearError: useCallback((key: keyof AppState['errors']) => {
+    clearError: (key: keyof AppState['errors']) => {
       dispatch({ type: 'CLEAR_ERROR', payload: key });
-    }, []),
+    },
 
-    clearAllErrors: useCallback(() => {
+    clearAllErrors: () => {
       dispatch({ type: 'CLEAR_ALL_ERRORS' });
-    }, []),
+    },
 
     // Cache actions
-    updateCacheTimestamp: useCallback((key: keyof AppState['cache']) => {
+    updateCacheTimestamp: (key: keyof AppState['cache']) => {
       dispatch({ type: 'UPDATE_CACHE_TIMESTAMP', payload: key });
-    }, []),
+    },
 
-    isCacheValid: useCallback(
-      (key: keyof AppState['cache'], ttl: number) => {
-        const timestamp = state.cache[key];
-        if (!timestamp) return false;
-        return Date.now() - timestamp < ttl;
-      },
-      [state.cache]
-    ),
+    isCacheValid: (key: keyof AppState['cache'], ttl: number) => {
+      const timestamp = state.cache[key];
+      if (!timestamp) return false;
+      return Date.now() - timestamp < ttl;
+    },
 
     // Utility actions
-    reset: useCallback(() => {
+    reset: () => {
       dispatch({ type: 'RESET' });
-    }, []),
+    },
   };
 
   return (

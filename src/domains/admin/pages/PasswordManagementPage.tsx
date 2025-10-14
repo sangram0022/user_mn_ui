@@ -21,7 +21,7 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import { useCallback, useEffect, useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -168,14 +168,14 @@ const PasswordPolicyEditor: FC<{
   const [editedPolicy, setEditedPolicy] = useState<PasswordPolicy>(policy);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     setIsSaving(true);
     try {
       await onSave(editedPolicy);
     } finally {
       setIsSaving(false);
     }
-  }, [editedPolicy, onSave]);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -362,7 +362,7 @@ const BulkPasswordResetModal: FC<{
   const [forceChange, setForceChange] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = async () => {
     const emails = userEmails
       .split('\n')
       .map((email) => email.trim())
@@ -377,7 +377,7 @@ const BulkPasswordResetModal: FC<{
     } finally {
       setIsSubmitting(false);
     }
-  }, [userEmails, forceChange, onSubmit, onClose]);
+  };
 
   if (!isOpen) return null;
 
@@ -474,7 +474,7 @@ const PasswordManagementPage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadPasswordData = useCallback(async () => {
+  const loadPasswordData = async () => {
     if (!canManagePasswords) return;
 
     setIsLoading(true);
@@ -493,60 +493,48 @@ const PasswordManagementPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [canManagePasswords, handleError]);
+  };
 
   // ============================================================================
   // Action Functions
   // ============================================================================
 
-  const handleSavePolicy = useCallback(
-    async (policy: PasswordPolicy) => {
-      try {
-        await adminService.updatePasswordPolicy(policy);
-        setPasswordPolicy(policy);
-        setShowPolicyEditor(false);
-      } catch (error) {
-        handleError(error, 'Failed to update password policy');
-      }
-    },
-    [handleError]
-  );
+  const handleSavePolicy = async (policy: PasswordPolicy) => {
+    try {
+      await adminService.updatePasswordPolicy(policy);
+      setPasswordPolicy(policy);
+      setShowPolicyEditor(false);
+    } catch (error) {
+      handleError(error, 'Failed to update password policy');
+    }
+  };
 
-  const handleBulkReset = useCallback(
-    async (userIds: string[], forceChange: boolean) => {
-      try {
-        await adminService.bulkPasswordReset(userIds, forceChange);
-        await loadPasswordData();
-      } catch (error) {
-        handleError(error, 'Failed to process bulk password reset');
-      }
-    },
-    [handleError, loadPasswordData]
-  );
+  const handleBulkReset = async (userIds: string[], forceChange: boolean) => {
+    try {
+      await adminService.bulkPasswordReset(userIds, forceChange);
+      await loadPasswordData();
+    } catch (error) {
+      handleError(error, 'Failed to process bulk password reset');
+    }
+  };
 
-  const handleUnlockAccount = useCallback(
-    async (userId: string) => {
-      try {
-        await adminService.unlockUserAccount(userId);
-        await loadPasswordData();
-      } catch (error) {
-        handleError(error, 'Failed to unlock user account');
-      }
-    },
-    [handleError, loadPasswordData]
-  );
+  const handleUnlockAccount = async (userId: string) => {
+    try {
+      await adminService.unlockUserAccount(userId);
+      await loadPasswordData();
+    } catch (error) {
+      handleError(error, 'Failed to unlock user account');
+    }
+  };
 
-  const handleForcePasswordChange = useCallback(
-    async (userId: string) => {
-      try {
-        await adminService.forcePasswordChange(userId);
-        await loadPasswordData();
-      } catch (error) {
-        handleError(error, 'Failed to force password change');
-      }
-    },
-    [handleError, loadPasswordData]
-  );
+  const handleForcePasswordChange = async (userId: string) => {
+    try {
+      await adminService.forcePasswordChange(userId);
+      await loadPasswordData();
+    } catch (error) {
+      handleError(error, 'Failed to force password change');
+    }
+  };
 
   // ============================================================================
   // Filter Functions

@@ -13,6 +13,22 @@ export default defineConfig(({ mode }) => {
       react({
         // Use automatic JSX runtime
         jsxRuntime: 'automatic',
+        // ✅ React 19: Enable React Compiler for automatic memoization
+        babel: {
+          plugins: [
+            [
+              'babel-plugin-react-compiler',
+              {
+                // Compiler options
+                runtimeModule: 'react-compiler-runtime',
+                // Enable change detection for debugging in development
+                environment: {
+                  enableChangeDetectionForDebugging: mode === 'development',
+                },
+              },
+            ],
+          ],
+        },
       }),
       // Bundle analyzer - only in analysis mode
       process.env.ANALYZE === 'true' &&
@@ -234,13 +250,74 @@ export default defineConfig(({ mode }) => {
     preview: {
       port: 4173,
       open: true,
-      // Production-like security headers
+      // ✅ Enhanced production-like security headers
       headers: {
+        // Prevent MIME type sniffing
         'X-Content-Type-Options': 'nosniff',
+
+        // Prevent embedding in iframes (clickjacking protection)
         'X-Frame-Options': 'DENY',
+
+        // Enable browser XSS protection
         'X-XSS-Protection': '1; mode=block',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+
+        // Force HTTPS (1 year)
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+
+        // Control referrer information
         'Referrer-Policy': 'strict-origin-when-cross-origin',
+
+        // ✅ Enhanced Content Security Policy (CSP)
+        'Content-Security-Policy': [
+          // Default: Only allow resources from same origin
+          "default-src 'self'",
+
+          // Scripts: Allow self and inline (required for Vite)
+          // TODO: Remove 'unsafe-inline' by using nonces in production
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+
+          // Styles: Allow self and inline (required for styled components)
+          "style-src 'self' 'unsafe-inline'",
+
+          // Images: Allow self, data URLs, and https
+          "img-src 'self' data: https:",
+
+          // Fonts: Allow self
+          "font-src 'self'",
+
+          // AJAX/WebSocket: Allow self and API endpoint
+          `connect-src 'self' ${env.VITE_BACKEND_URL || 'http://127.0.0.1:8001'}`,
+
+          // Frames: Disallow all
+          "frame-src 'none'",
+
+          // Prevent parent frame access
+          "frame-ancestors 'none'",
+
+          // Media: Allow self
+          "media-src 'self'",
+
+          // Objects: Disallow all (Flash, etc.)
+          "object-src 'none'",
+
+          // Forms: Only submit to self
+          "form-action 'self'",
+
+          // Upgrade insecure requests to HTTPS
+          'upgrade-insecure-requests',
+
+          // Block mixed content
+          'block-all-mixed-content',
+        ].join('; '),
+
+        // ✅ Permissions Policy (formerly Feature-Policy)
+        'Permissions-Policy': [
+          'camera=()',
+          'microphone=()',
+          'geolocation=()',
+          'payment=()',
+          'usb=()',
+        ].join(', '),
       },
     },
 

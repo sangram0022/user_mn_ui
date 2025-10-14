@@ -20,12 +20,79 @@ import { LocaleSelector } from '../../components/common/LocaleSelector';
 import { useAuth } from '../../domains/auth';
 import { useLocalization } from '../../hooks/localization/useLocalization';
 
+// Types
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+interface NavItemProps extends NavigationItem {
+  isActive: boolean;
+  onClick?: () => void;
+}
+
+interface UserMenuItemProps extends NavigationItem {
+  onClick?: () => void;
+}
+
+// React Compiler automatically optimizes these components
+const NavItem = ({ name, href, icon: Icon, isActive, onClick }: NavItemProps) => (
+  <Link
+    to={href}
+    role="menuitem"
+    onClick={onClick}
+    aria-current={isActive ? 'page' : undefined}
+    className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium no-underline transition-all duration-200 ${
+      isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+    }`}
+  >
+    <Icon className="h-4 w-4" />
+    <span>{name}</span>
+  </Link>
+);
+NavItem.displayName = 'NavItem';
+
+const MobileNavItem = ({ name, href, icon: Icon, isActive, onClick }: NavItemProps) => (
+  <Link
+    to={href}
+    role="menuitem"
+    onClick={onClick}
+    aria-current={isActive ? 'page' : undefined}
+    className={`flex items-center gap-2 rounded-lg px-3 py-3 text-base font-medium no-underline transition-all duration-200 ${
+      isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+    }`}
+  >
+    <Icon className="h-5 w-5" />
+    <span>{name}</span>
+  </Link>
+);
+MobileNavItem.displayName = 'MobileNavItem';
+
+const UserMenuItem = ({ name, href, icon: Icon, onClick }: UserMenuItemProps) => (
+  <Link
+    to={href}
+    role="menuitem"
+    onClick={onClick}
+    className="flex items-center gap-2 rounded-md px-4 py-2.5 text-sm text-gray-700 no-underline transition-colors duration-200 hover:bg-gray-50"
+  >
+    <Icon className="h-4 w-4" />
+    <span>{name}</span>
+  </Link>
+);
+UserMenuItem.displayName = 'UserMenuItem';
+
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
   const { user, logout } = useAuth();
   const { t } = useLocalization();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const mobileMenuId = 'mobile-navigation';
+  const userMenuId = 'user-menu';
 
   useEffect(() => {
     const handleResize = () => {
@@ -35,19 +102,15 @@ const Navigation = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  const location = useLocation();
-  const navigate = useNavigate();
 
-  const mobileMenuId = 'mobile-navigation';
-  const userMenuId = 'user-menu';
-
+  // React Compiler automatically optimizes these functions
   const handleLogout = () => {
     logout();
     navigate('/');
     setIsUserMenuOpen(false);
   };
 
-  const navigationItems = [
+  const navigationItems: NavigationItem[] = [
     { name: t('navigation.home'), href: '/', icon: Home },
     ...(user
       ? [
@@ -60,11 +123,10 @@ const Navigation = () => {
       : []),
   ];
 
-  // Admin navigation items - shown only for admin users
-  const adminNavigationItems =
+  const adminNavigationItems: NavigationItem[] =
     user?.role === 'admin' ? [{ name: t('navigation.admin'), href: '/admin', icon: Settings }] : [];
 
-  const userMenuItems = [
+  const userMenuItems: NavigationItem[] = [
     { name: t('navigation.profile'), href: '/profile', icon: UserCircle },
     { name: t('navigation.settings'), href: '/settings', icon: Settings },
     { name: t('navigation.helpAndSupport'), href: '/help', icon: HelpCircle },
@@ -76,6 +138,21 @@ const Navigation = () => {
     }
     return location.pathname.startsWith(href);
   };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  const closeUserMenu = () => {
+    setIsUserMenuOpen(false);
+  };
+
+  const closeAllMenus = () => {
+    setIsMobileMenuOpen(false);
+    setIsUserMenuOpen(false);
+  };
+
+  const allNavigationItems: NavigationItem[] = [...navigationItems, ...adminNavigationItems];
 
   return (
     <>
@@ -106,25 +183,9 @@ const Navigation = () => {
             {/* Desktop Navigation */}
             <div className={isDesktop ? 'flex' : 'hidden'}>
               <div className="flex items-center gap-2">
-                {[...navigationItems, ...adminNavigationItems].map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      role="menuitem"
-                      className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium no-underline transition-all duration-200 ${
-                        active
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span>{item.name}</span>
-                    </Link>
-                  );
-                })}
+                {allNavigationItems.map((item) => (
+                  <NavItem key={item.href} {...item} isActive={isActive(item.href)} />
+                ))}
               </div>
             </div>
 
@@ -173,21 +234,9 @@ const Navigation = () => {
                         <div className="text-sm text-gray-500">{user.email}</div>
                       </div>
 
-                      {userMenuItems.map((item) => {
-                        const Icon = item.icon;
-                        return (
-                          <Link
-                            key={item.name}
-                            to={item.href}
-                            role="menuitem"
-                            onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center gap-2 rounded-md px-4 py-2.5 text-sm text-gray-700 no-underline transition-colors duration-200 hover:bg-gray-50"
-                          >
-                            <Icon className="h-4 w-4" />
-                            <span>{item.name}</span>
-                          </Link>
-                        );
-                      })}
+                      {userMenuItems.map((item) => (
+                        <UserMenuItem key={item.href} {...item} onClick={closeUserMenu} />
+                      ))}
 
                       <div className="mt-1 border-t border-gray-100 pt-1">
                         <button
@@ -246,26 +295,14 @@ const Navigation = () => {
               className={`border-t border-gray-200 py-4 ${isDesktop ? 'hidden' : 'block'}`}
             >
               <div className="flex flex-col gap-1">
-                {[...navigationItems, ...adminNavigationItems].map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      role="menuitem"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-2 rounded-lg px-3 py-3 text-base font-medium no-underline transition-all duration-200 ${
-                        active
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                      <span>{item.name}</span>
-                    </Link>
-                  );
-                })}
+                {allNavigationItems.map((item) => (
+                  <MobileNavItem
+                    key={item.href}
+                    {...item}
+                    isActive={isActive(item.href)}
+                    onClick={closeMobileMenu}
+                  />
+                ))}
               </div>
 
               {/* Mobile User Menu */}
@@ -278,27 +315,24 @@ const Navigation = () => {
                     <div className="text-sm text-gray-500">{user.email}</div>
                   </div>
 
-                  {userMenuItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        role="menuitem"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-2 rounded-lg px-3 py-3 text-base text-gray-700 no-underline transition-all duration-200 hover:bg-gray-50 hover:text-blue-600"
-                      >
-                        <Icon className="h-5 w-5" />
-                        <span>{item.name}</span>
-                      </Link>
-                    );
-                  })}
+                  {userMenuItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      role="menuitem"
+                      onClick={closeMobileMenu}
+                      className="flex items-center gap-2 rounded-lg px-3 py-3 text-base text-gray-700 no-underline transition-all duration-200 hover:bg-gray-50 hover:text-blue-600"
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.name}</span>
+                    </Link>
+                  ))}
 
                   <button
                     type="button"
                     onClick={() => {
                       handleLogout();
-                      setIsMobileMenuOpen(false);
+                      closeMobileMenu();
                     }}
                     role="menuitem"
                     className="flex w-full cursor-pointer items-center gap-2 rounded-lg border-none bg-transparent px-3 py-3 text-left text-base text-red-600 transition-colors duration-200 hover:bg-red-50"
@@ -314,14 +348,14 @@ const Navigation = () => {
                 <div className="mt-4 flex flex-col gap-2 border-t border-gray-200 pt-4">
                   <Link
                     to="/login"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={closeMobileMenu}
                     className="block rounded-lg px-3 py-3 text-center text-base text-gray-700 no-underline transition-all duration-200 hover:bg-gray-50 hover:text-blue-600"
                   >
                     Sign In
                   </Link>
                   <Link
                     to="/register"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={closeMobileMenu}
                     className="block rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 px-3 py-3 text-center text-base font-medium text-white no-underline shadow-lg shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-500/40"
                   >
                     Get Started
@@ -336,10 +370,7 @@ const Navigation = () => {
         {(isMobileMenuOpen || isUserMenuOpen) && (
           <div
             className="fixed inset-0 z-40 bg-black/25 backdrop-blur-sm"
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              setIsUserMenuOpen(false);
-            }}
+            onClick={closeAllMenus}
             role="presentation"
           />
         )}
@@ -347,5 +378,6 @@ const Navigation = () => {
     </>
   );
 };
+Navigation.displayName = 'Navigation';
 
 export default Navigation;

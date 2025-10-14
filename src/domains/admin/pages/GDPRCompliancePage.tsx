@@ -21,7 +21,7 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import { useCallback, useEffect, useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -295,16 +295,13 @@ const DeletionRequestsTable: FC<{
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  const handleReject = useCallback(
-    (requestId: string) => {
-      if (rejectionReason.trim()) {
-        onReject(requestId, rejectionReason);
-        setRejectingId(null);
-        setRejectionReason('');
-      }
-    },
-    [onReject, rejectionReason]
-  );
+  const handleReject = (requestId: string) => {
+    if (rejectionReason.trim()) {
+      onReject(requestId, rejectionReason);
+      setRejectingId(null);
+      setRejectionReason('');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -528,7 +525,7 @@ const GDPRCompliancePage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadGDPRData = useCallback(async () => {
+  const loadGDPRData = async () => {
     if (!canManageGDPR) return;
 
     setIsLoading(true);
@@ -549,46 +546,37 @@ const GDPRCompliancePage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [canManageGDPR, handleError]);
+  };
 
   // ============================================================================
   // Action Functions
   // ============================================================================
 
-  const handleDownloadExport = useCallback(
-    async (requestId: string) => {
-      try {
-        await adminService.downloadDataExport(requestId);
-      } catch (error) {
-        handleError(error, 'Failed to download export');
-      }
-    },
-    [handleError]
-  );
+  const handleDownloadExport = async (requestId: string) => {
+    try {
+      await adminService.downloadDataExport(requestId);
+    } catch (error) {
+      handleError(error, 'Failed to download export');
+    }
+  };
 
-  const handleApproveDeletion = useCallback(
-    async (requestId: string) => {
-      try {
-        await adminService.approveDeletionRequest(requestId);
-        await loadGDPRData();
-      } catch (error) {
-        handleError(error, 'Failed to approve deletion request');
-      }
-    },
-    [handleError, loadGDPRData]
-  );
+  const handleApproveDeletion = async (requestId: string) => {
+    try {
+      await adminService.approveDeletionRequest(requestId);
+      await loadGDPRData();
+    } catch (error) {
+      handleError(error, 'Failed to approve deletion request');
+    }
+  };
 
-  const handleRejectDeletion = useCallback(
-    async (requestId: string, reason: string) => {
-      try {
-        await adminService.rejectDeletionRequest(requestId, reason);
-        await loadGDPRData();
-      } catch (error) {
-        handleError(error, 'Failed to reject deletion request');
-      }
-    },
-    [handleError, loadGDPRData]
-  );
+  const handleRejectDeletion = async (requestId: string, reason: string) => {
+    try {
+      await adminService.rejectDeletionRequest(requestId, reason);
+      await loadGDPRData();
+    } catch (error) {
+      handleError(error, 'Failed to reject deletion request');
+    }
+  };
 
   // ============================================================================
   // Filter Functions
@@ -624,7 +612,8 @@ const GDPRCompliancePage: FC = () => {
 
   useEffect(() => {
     loadGDPRData();
-  }, [loadGDPRData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ============================================================================
   // Render

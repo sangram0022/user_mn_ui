@@ -9,14 +9,30 @@
  */
 
 import '@testing-library/jest-dom';
-import { afterEach, beforeAll, afterAll, expect, vi } from 'vitest';
-import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import { cleanup } from '@testing-library/react';
 import { setupServer } from 'msw/node';
+import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from 'vitest';
 import { handlers } from './mocks/handlers';
 
 // Extend expect with jest-dom matchers
 expect.extend(matchers);
+
+// ============================================================================
+// DOM Setup
+// ============================================================================
+
+/**
+ * Ensure document.body exists before each test
+ * Fixes: "Cannot read properties of null (reading 'appendChild')" errors
+ */
+beforeEach(() => {
+  // Ensure document.body exists
+  if (!document.body) {
+    const body = document.createElement('body');
+    document.documentElement.appendChild(body);
+  }
+});
 
 // ============================================================================
 // MSW Server Setup
@@ -115,13 +131,13 @@ if (!globalThis.crypto) {
 }
 
 if (!globalThis.crypto.randomUUID) {
-  globalThis.crypto.randomUUID = () => {
+  globalThis.crypto.randomUUID = (() => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
       const r = (Math.random() * 16) | 0;
       const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
-  };
+  }) as () => `${string}-${string}-${string}-${string}-${string}`;
 }
 
 /**

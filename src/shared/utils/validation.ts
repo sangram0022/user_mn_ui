@@ -198,8 +198,9 @@ export const passwordConfirmation = (password: string) => ({
 
 /**
  * Custom hook for form validation with React 19 features
+ * React Compiler automatically optimizes these functions
  */
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { logger } from './logger';
 
 export interface UseFormValidationProps {
@@ -219,112 +220,95 @@ export const useFormValidation = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Create form state from current values
-  const formState = useMemo(() => {
-    const state: FormState = {};
-    Object.keys(values).forEach((key) => {
-      state[key] = {
-        value: values[key],
-        error: errors[key],
-        touched: touched[key],
-        rules: validationRules[key],
-      };
-    });
-    return state;
-  }, [values, errors, touched, validationRules]);
+  const formState: FormState = {};
+  Object.keys(values).forEach((key) => {
+    formState[key] = {
+      value: values[key],
+      error: errors[key],
+      touched: touched[key],
+      rules: validationRules[key],
+    };
+  });
 
   // Validate single field
-  const validateSingleField = useCallback(
-    (name: string, value: ValidationValue) => {
-      const rules = validationRules[name];
-      if (rules) {
-        return validateField(value, rules);
-      }
-      return null;
-    },
-    [validationRules]
-  );
+  const validateSingleField = (name: string, value: ValidationValue) => {
+    const rules = validationRules[name];
+    if (rules) {
+      return validateField(value, rules);
+    }
+    return null;
+  };
 
   // Handle field change
-  const handleChange = useCallback(
-    (name: string, value: ValidationValue) => {
-      setValues((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (name: string, value: ValidationValue) => {
+    setValues((prev) => ({ ...prev, [name]: value }));
 
-      // Clear error when user starts typing
-      if (errors[name]) {
-        setErrors((prev) => ({ ...prev, [name]: '' }));
-      }
-    },
-    [errors]
-  );
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
 
   // Handle field blur
-  const handleBlur = useCallback(
-    (name: string) => {
-      setTouched((prev) => ({ ...prev, [name]: true }));
+  const handleBlur = (name: string) => {
+    setTouched((prev) => ({ ...prev, [name]: true }));
 
-      const error = validateSingleField(name, values[name]);
-      if (error) {
-        setErrors((prev) => ({ ...prev, [name]: error }));
-      }
-    },
-    [validateSingleField, values]
-  );
+    const error = validateSingleField(name, values[name]);
+    if (error) {
+      setErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  };
 
   // Validate entire form
-  const validate = useCallback(() => {
+  const validate = () => {
     const formErrors = validateForm(formState);
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
-  }, [formState]);
+  };
 
   // Handle form submission
-  const handleSubmit = useCallback(
-    async (e?: React.FormEvent) => {
-      if (e) {
-        e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+
+    setIsSubmitting(true);
+
+    // Mark all fields as touched
+    const allTouched: Record<string, boolean> = {};
+    Object.keys(values).forEach((key) => {
+      allTouched[key] = true;
+    });
+    setTouched(allTouched);
+
+    // Validate form
+    const isValid = validate();
+
+    if (isValid && onSubmit) {
+      try {
+        await onSubmit(values);
+      } catch (error) {
+        logger.error(
+          'Form submission error',
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
+    }
 
-      setIsSubmitting(true);
-
-      // Mark all fields as touched
-      const allTouched: Record<string, boolean> = {};
-      Object.keys(values).forEach((key) => {
-        allTouched[key] = true;
-      });
-      setTouched(allTouched);
-
-      // Validate form
-      const isValid = validate();
-
-      if (isValid && onSubmit) {
-        try {
-          await onSubmit(values);
-        } catch (error) {
-          logger.error(
-            'Form submission error',
-            error instanceof Error ? error : new Error(String(error))
-          );
-        }
-      }
-
-      setIsSubmitting(false);
-      return isValid;
-    },
-    [values, validate, onSubmit]
-  );
+    setIsSubmitting(false);
+    return isValid;
+  };
 
   // Reset form
-  const reset = useCallback(() => {
+  const reset = () => {
     setValues(initialValues);
     setErrors({});
     setTouched({});
     setIsSubmitting(false);
-  }, [initialValues]);
+  };
 
   // Check if form is valid
-  const isValid = useMemo(() => {
-    return isFormValid(formState);
-  }, [formState]);
+  const isValid = isFormValid(formState);
 
   return {
     values,

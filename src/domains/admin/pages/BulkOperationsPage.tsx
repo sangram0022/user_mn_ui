@@ -22,7 +22,7 @@ import {
   Users,
   XCircle,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState, type FC } from 'react';
+import { useEffect, useRef, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -193,41 +193,35 @@ const FileUploadArea: FC<{
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
-  }, []);
+  };
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
+  const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-  }, []);
+  };
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragOver(false);
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
 
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        const file = files[0];
-        if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-          onFileSelect(file);
-        }
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+        onFileSelect(file);
       }
-    },
-    [onFileSelect]
-  );
+    }
+  };
 
-  const handleFileInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (files && files.length > 0) {
-        onFileSelect(files[0]);
-      }
-    },
-    [onFileSelect]
-  );
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      onFileSelect(files[0]);
+    }
+  };
 
   if (isUploading && progress) {
     return (
@@ -596,7 +590,7 @@ const BulkOperationsPage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadOperations = useCallback(async () => {
+  const loadOperations = async () => {
     if (!canManageBulkOps) return;
 
     setIsLoading(true);
@@ -608,72 +602,69 @@ const BulkOperationsPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [canManageBulkOps, handleError]);
+  };
 
   // ============================================================================
   // File Upload & Validation
   // ============================================================================
 
-  const handleFileSelect = useCallback(
-    async (file: File) => {
-      setIsUploading(true);
-      setUploadProgress({ loaded: 0, total: file.size, percentage: 0 });
+  const handleFileSelect = async (file: File) => {
+    setIsUploading(true);
+    setUploadProgress({ loaded: 0, total: file.size, percentage: 0 });
 
-      try {
-        // Simulate upload progress
-        const interval = setInterval(() => {
-          setUploadProgress((prev) => {
-            if (!prev) return prev;
-            const newLoaded = Math.min(prev.loaded + file.size * 0.1, file.size);
-            return {
-              ...prev,
-              loaded: newLoaded,
-              percentage: Math.round((newLoaded / file.size) * 100),
-            };
-          });
-        }, 200);
+    try {
+      // Simulate upload progress
+      const interval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (!prev) return prev;
+          const newLoaded = Math.min(prev.loaded + file.size * 0.1, file.size);
+          return {
+            ...prev,
+            loaded: newLoaded,
+            percentage: Math.round((newLoaded / file.size) * 100),
+          };
+        });
+      }, 200);
 
-        // Simulate validation
-        setTimeout(async () => {
-          clearInterval(interval);
-          setIsUploading(false);
-          setUploadProgress(undefined);
-          setIsValidating(true);
-
-          try {
-            const mockValidationResult: ValidationResult = {
-              is_valid: true,
-              valid_count: 2,
-              invalid_count: 0,
-              total_count: 2,
-              errors: [],
-              warnings: [],
-              preview: [
-                { row: 1, email: 'user1@example.com', first_name: 'John', last_name: 'Doe' },
-                { row: 2, email: 'user2@example.com', first_name: 'Jane', last_name: 'Smith' },
-              ],
-            };
-            setValidation(mockValidationResult);
-          } catch (error) {
-            handleError(error, 'Failed to validate file');
-          } finally {
-            setIsValidating(false);
-          }
-        }, 2000);
-      } catch (error) {
-        handleError(error, 'Failed to upload file');
+      // Simulate validation
+      setTimeout(async () => {
+        clearInterval(interval);
         setIsUploading(false);
         setUploadProgress(undefined);
-      }
-    },
-    [handleError]
-  );
+        setIsValidating(true);
+
+        try {
+          const mockValidationResult: ValidationResult = {
+            is_valid: true,
+            valid_count: 2,
+            invalid_count: 0,
+            total_count: 2,
+            errors: [],
+            warnings: [],
+            preview: [
+              { row: 1, email: 'user1@example.com', first_name: 'John', last_name: 'Doe' },
+              { row: 2, email: 'user2@example.com', first_name: 'Jane', last_name: 'Smith' },
+            ],
+          };
+          setValidation(mockValidationResult);
+        } catch (error) {
+          handleError(error, 'Failed to validate file');
+        } finally {
+          setIsValidating(false);
+        }
+      }, 2000);
+    } catch (error) {
+      handleError(error, 'Failed to upload file');
+      setIsUploading(false);
+      setUploadProgress(undefined);
+    }
+  };
 
   // ============================================================================
   // Operation Management
   // ============================================================================
 
-  const handleProceedWithImport = useCallback(async () => {
+  const handleProceedWithImport = async () => {
     if (!validation) return;
 
     setIsProcessing(true);
@@ -698,43 +689,34 @@ const BulkOperationsPage: FC = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [validation, handleError]);
+  };
 
-  const handlePauseResume = useCallback(
-    async (operationId: string) => {
-      try {
-        await adminService.pauseResumeOperation(operationId);
-        await loadOperations();
-      } catch (error) {
-        handleError(error, 'Failed to pause/resume operation');
-      }
-    },
-    [handleError, loadOperations]
-  );
+  const handlePauseResume = async (operationId: string) => {
+    try {
+      await adminService.pauseResumeOperation(operationId);
+      await loadOperations();
+    } catch (error) {
+      handleError(error, 'Failed to pause/resume operation');
+    }
+  };
 
-  const handleCancel = useCallback(
-    async (operationId: string) => {
-      try {
-        await adminService.cancelOperation(operationId);
-        await loadOperations();
-      } catch (error) {
-        handleError(error, 'Failed to cancel operation');
-      }
-    },
-    [handleError, loadOperations]
-  );
+  const handleCancel = async (operationId: string) => {
+    try {
+      await adminService.cancelOperation(operationId);
+      await loadOperations();
+    } catch (error) {
+      handleError(error, 'Failed to cancel operation');
+    }
+  };
 
-  const handleRollback = useCallback(
-    async (operationId: string) => {
-      try {
-        await adminService.rollbackOperation(operationId);
-        await loadOperations();
-      } catch (error) {
-        handleError(error, 'Failed to rollback operation');
-      }
-    },
-    [handleError, loadOperations]
-  );
+  const handleRollback = async (operationId: string) => {
+    try {
+      await adminService.rollbackOperation(operationId);
+      await loadOperations();
+    } catch (error) {
+      handleError(error, 'Failed to rollback operation');
+    }
+  };
 
   // ============================================================================
   // Effects
@@ -742,7 +724,8 @@ const BulkOperationsPage: FC = () => {
 
   useEffect(() => {
     loadOperations();
-  }, [loadOperations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-refresh operations when there are active ones
   useEffect(() => {

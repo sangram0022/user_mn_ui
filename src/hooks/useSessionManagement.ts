@@ -8,7 +8,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from 'src/domains/auth';
 

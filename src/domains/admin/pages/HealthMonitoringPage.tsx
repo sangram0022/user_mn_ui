@@ -25,7 +25,7 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import { useCallback, useEffect, useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -396,7 +396,7 @@ const HealthMonitoringPage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadHealthData = useCallback(async () => {
+  const loadHealthData = async () => {
     if (!canViewHealth) return;
 
     try {
@@ -416,43 +416,37 @@ const HealthMonitoringPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [canViewHealth, handleError]);
+  };
 
   // ============================================================================
   // Action Functions
   // ============================================================================
 
-  const handleAcknowledgeAlert = useCallback(
-    async (alertId: string) => {
-      try {
-        await adminService.acknowledgeAlert(alertId);
-        await loadHealthData();
-      } catch (error) {
-        handleError(error, 'Failed to acknowledge alert');
-      }
-    },
-    [handleError, loadHealthData]
-  );
+  const handleAcknowledgeAlert = async (alertId: string) => {
+    try {
+      await adminService.acknowledgeAlert(alertId);
+      await loadHealthData();
+    } catch (error) {
+      handleError(error, 'Failed to acknowledge alert');
+    }
+  };
 
-  const handleResolveAlert = useCallback(
-    async (alertId: string) => {
-      try {
-        await adminService.resolveAlert(alertId);
-        await loadHealthData();
-      } catch (error) {
-        handleError(error, 'Failed to resolve alert');
-      }
-    },
-    [handleError, loadHealthData]
-  );
+  const handleResolveAlert = async (alertId: string) => {
+    try {
+      await adminService.resolveAlert(alertId);
+      await loadHealthData();
+    } catch (error) {
+      handleError(error, 'Failed to resolve alert');
+    }
+  };
 
-  const handleExportReport = useCallback(async () => {
+  const handleExportReport = async () => {
     try {
       await adminService.exportHealthReport();
     } catch (error) {
       handleError(error, 'Failed to export health report');
     }
-  }, [handleError]);
+  };
 
   // ============================================================================
   // Effects
@@ -460,7 +454,8 @@ const HealthMonitoringPage: FC = () => {
 
   useEffect(() => {
     loadHealthData();
-  }, [loadHealthData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-refresh every 30 seconds
   useEffect(() => {

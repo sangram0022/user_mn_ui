@@ -1,16 +1,14 @@
 import { Lock } from 'lucide-react';
+import { useActionState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import {
   PasswordInput,
   SubmitButton,
   TextInput,
   useFormState,
-  useLoadingState,
   usePasswordVisibility,
 } from '@shared/index';
-import ErrorAlert from '@shared/ui/ErrorAlert';
 import { validateEmail, validatePassword } from '@shared/utils/formValidation';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,68 +18,94 @@ interface LoginFormData {
   rememberMe: boolean;
 }
 
+interface LoginState {
+  success: boolean;
+  error: string | null;
+}
+
+// Server action for login - runs outside React component
+async function loginAction(prevState: LoginState, formData: FormData): Promise<LoginState> {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  // Validate inputs
+  const emailValidation = validateEmail(email);
+  if (!emailValidation.isValid) {
+    return {
+      success: false,
+      error: emailValidation.error || 'Invalid email address',
+    };
+  }
+
+  const passwordValidation = validatePassword(password, 8);
+  if (!passwordValidation.isValid) {
+    return {
+      success: false,
+      error: passwordValidation.error || 'Password must be at least 8 characters',
+    };
+  }
+
+  // Note: Actual login call will be made in the component using useAuth
+  // This validates the inputs first
+  return {
+    success: true,
+    error: null,
+  };
+}
+
 const LoginPage: React.FC = () => {
-  const { formData, updateField, errors, setFieldError, clearErrors } = useFormState<LoginFormData>(
-    {
-      email: '',
-      password: '',
-      rememberMe: false,
-    }
-  );
+  const { formData, updateField } = useFormState<LoginFormData>({
+    email: '',
+    password: '',
+    rememberMe: false,
+  });
 
   const { showPassword, togglePasswordVisibility } = usePasswordVisibility();
-  const { isLoading, withLoading } = useLoadingState();
-  const { error, handleError, clearError } = useErrorHandler();
 
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
 
-  const validateForm = () => {
-    clearErrors();
-    let isValid = true;
+  // Use React 19's useActionState for form handling
+  const [state, submitAction, isPending] = useActionState(loginAction, {
+    success: false,
+    error: null,
+  });
 
-    const emailValidation = validateEmail(formData.email);
-    if (!emailValidation.isValid) {
-      setFieldError('email', emailValidation.error || 'Invalid email');
-      isValid = false;
+  // Navigate on successful login
+  useEffect(() => {
+    if (state.success && !state.error) {
+      // Perform actual login with auth context
+      const performLogin = async () => {
+        try {
+          await authLogin({
+            email: formData.email,
+            password: formData.password,
+          });
+
+          // Small delay to ensure state is fully updated
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          // Navigate to dashboard after successful login
+          navigate('/dashboard', { replace: true });
+        } catch (error) {
+          // Error will be handled by the auth context
+          console.error('Login failed:', error);
+        }
+      };
+
+      performLogin();
     }
-
-    const passwordValidation = validatePassword(formData.password, 8);
-    if (!passwordValidation.isValid) {
-      setFieldError(
-        'password',
-        passwordValidation.error || 'Password must be at least 8 characters'
-      );
-      isValid = false;
-    }
-
-    return isValid;
-  };
+  }, [state.success, state.error, authLogin, formData.email, formData.password, navigate]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    clearError();
 
-    if (!validateForm()) {
-      return;
-    }
+    // Create FormData from the form
+    const form = event.currentTarget;
+    const formDataObj = new FormData(form);
 
-    try {
-      await withLoading(async () => {
-        await authLogin({
-          email: formData.email,
-          password: formData.password,
-        });
-
-        // Small delay to ensure state is fully updated
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        // Navigate to dashboard after successful login
-        navigate('/dashboard', { replace: true });
-      });
-    } catch (err: unknown) {
-      handleError(err);
-    }
+    // Manually call the action
+    await submitAction(formDataObj);
   };
 
   return (
@@ -100,9 +124,11 @@ const LoginPage: React.FC = () => {
       <div className="mx-auto w-full max-w-md mt-8">
         <div className="bg-white/95 backdrop-blur-sm p-8 shadow-xl rounded-2xl border border-gray-200/50">
           {/* Error Alert */}
-          {error && (
+          {state.error && (
             <div className="mb-6">
-              <ErrorAlert error={error} />
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+                {state.error}
+              </div>
             </div>
           )}
 
@@ -113,7 +139,6 @@ const LoginPage: React.FC = () => {
               type="email"
               value={formData.email}
               onChange={(value) => updateField('email', value)}
-              error={errors.email}
               required
               placeholder="Enter your email"
               autoComplete="email"
@@ -126,7 +151,6 @@ const LoginPage: React.FC = () => {
               onChange={(value) => updateField('password', value)}
               showPassword={showPassword}
               onToggleVisibility={togglePasswordVisibility}
-              error={errors.password}
               required
               placeholder="Enter your password"
               autoComplete="current-password"
@@ -157,7 +181,7 @@ const LoginPage: React.FC = () => {
             </div>
 
             {/* Submit Button */}
-            <SubmitButton isLoading={isLoading}>Sign In</SubmitButton>
+            <SubmitButton isLoading={isPending}>Sign In</SubmitButton>
           </form>
 
           {/* Divider */}

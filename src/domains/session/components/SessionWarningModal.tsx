@@ -1,5 +1,11 @@
+/**
+ * Session Warning Modal
+ *
+ * React 19: No memoization needed - React Compiler handles optimization
+ */
+
 import { Clock, LogOut, RefreshCcw } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface SessionWarningModalProps {
   isOpen: boolean;
@@ -16,16 +22,6 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
 }) => {
   const [timeLeft, setTimeLeft] = useState(Math.floor(remainingTime / 1000));
   const extendButtonRef = useRef<HTMLButtonElement | null>(null);
-
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onLogout();
-      }
-    },
-    [onLogout]
-  );
 
   useEffect(() => {
     if (isOpen && remainingTime > 0) {
@@ -46,15 +42,22 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
   }, [isOpen, remainingTime, onLogout]);
 
   useEffect(() => {
+    const handleKeyDownEffect = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onLogout();
+      }
+    };
+
     if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keydown', handleKeyDownEffect);
       extendButtonRef.current?.focus();
     }
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDownEffect);
     };
-  }, [isOpen, handleKeyDown]);
+  }, [isOpen, onLogout]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

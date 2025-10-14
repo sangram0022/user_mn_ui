@@ -3,8 +3,11 @@ import { logger } from './logger';
 
 import { ApiError } from '@lib/api/error';
 import type { ApiErrorResponse, ParsedError } from '@shared/types/error';
-import errorMessages from '../../locales/en/errors.json';
+import errorMessagesFile from '../../locales/en/errors.json';
 export type { ApiErrorResponse, ParsedError } from '@shared/types/error';
+
+// Extract error messages from JSON structure
+const errorMessages = errorMessagesFile.errors as Record<string, string>;
 
 export interface ErrorInfo {
   code: string;
@@ -580,9 +583,14 @@ const mapStatusCodeToError = (statusCode: number): string => {
 };
 
 export const getErrorMessage = (errorCode: string): string => {
+  if (!errorCode) {
+    return errorMessages.UNKNOWN_ERROR || 'An unexpected error occurred. Please try again.';
+  }
+
   const message = errorMessages[errorCode as keyof typeof errorMessages];
-  // Prefer UNKNOWN_ERROR as the default as per tests
-  return message || errorMessages.UNKNOWN_ERROR;
+  return (
+    message || errorMessages.UNKNOWN_ERROR || 'An unexpected error occurred. Please try again.'
+  );
 };
 
 const determineErrorSeverity = (

@@ -2,10 +2,12 @@
 /**
  * Advanced Error Boundary System
  * Comprehensive error handling with React 19 patterns and expert-level practices
+ *
+ * React 19: No memoization needed - React Compiler handles optimization
  */
 
 import type { ErrorInfo, ReactNode } from 'react';
-import { Component, ComponentType, useCallback } from 'react';
+import { Component, ComponentType } from 'react';
 import { logger } from './../utils/logger';
 import { categorizeError, ErrorReportingService, type ErrorDetails } from './errorUtils';
 
@@ -264,7 +266,7 @@ export const ComponentErrorBoundary: React.FC<{ children: ReactNode }> = ({ chil
 
 // Hook for error handling
 export function useErrorHandler() {
-  return useCallback((error: Error, errorInfo?: Partial<ErrorInfo>) => {
+  return (error: Error, errorInfo?: Partial<ErrorInfo>) => {
     const errorDetails: ErrorDetails = {
       errorId: generateErrorId(),
       message: error.message,
@@ -279,7 +281,7 @@ export function useErrorHandler() {
     errorReporter.reportError(errorDetails).catch((reportError) => {
       logger.error('Failed to report error:', undefined, { reportError });
     });
-  }, []);
+  };
 }
 
 // HOC for error boundary

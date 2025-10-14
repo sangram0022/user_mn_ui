@@ -1,15 +1,16 @@
 /**
  * Common form state management hooks
  * Eliminates duplication of form-related useState patterns
+ * React 19 Compiler automatically optimizes these functions
  */
 
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 // Generic loading state hook
 export const useLoadingState = (initialLoading = false) => {
   const [isLoading, setIsLoading] = useState(initialLoading);
 
-  const withLoading = useCallback(async <T>(fn: () => Promise<T>): Promise<T> => {
+  const withLoading = async <T>(fn: () => Promise<T>): Promise<T> => {
     setIsLoading(true);
     try {
       const result = await fn();
@@ -17,7 +18,7 @@ export const useLoadingState = (initialLoading = false) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   return {
     isLoading,
@@ -32,30 +33,27 @@ export const useFormState = <T extends Record<string, unknown>>(initialData: T) 
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
 
-  const updateField = useCallback(
-    (field: keyof T, value: T[keyof T]) => {
-      setFormData((prev) => ({ ...prev, [field]: value }));
-      setTouched((prev) => ({ ...prev, [field]: true }));
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }));
-      }
-    },
-    [errors]
-  );
+  const updateField = (field: keyof T, value: T[keyof T]) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
 
-  const setFieldError = useCallback((field: keyof T, error: string) => {
+  const setFieldError = (field: keyof T, error: string) => {
     setErrors((prev) => ({ ...prev, [field]: error }));
-  }, []);
+  };
 
-  const clearErrors = useCallback(() => {
+  const clearErrors = () => {
     setErrors({});
-  }, []);
+  };
 
-  const resetForm = useCallback(() => {
+  const resetForm = () => {
     setFormData(initialData);
     setErrors({});
     setTouched({});
-  }, [initialData]);
+  };
 
   return {
     formData,
@@ -75,13 +73,13 @@ export const usePasswordVisibility = (initialState = false) => {
   const [showPassword, setShowPassword] = useState(initialState);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const togglePasswordVisibility = useCallback(() => {
+  const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
-  }, []);
+  };
 
-  const toggleConfirmPasswordVisibility = useCallback(() => {
+  const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword((prev) => !prev);
-  }, []);
+  };
 
   return {
     showPassword,
@@ -98,20 +96,20 @@ export const useFeedbackState = () => {
   const [success, setSuccess] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
-  const showSuccess = useCallback((message: string) => {
+  const showSuccess = (message: string) => {
     setSuccess(message);
     setError(null);
-  }, []);
+  };
 
-  const showError = useCallback((message: string) => {
+  const showError = (message: string) => {
     setError(message);
     setSuccess('');
-  }, []);
+  };
 
-  const clearFeedback = useCallback(() => {
+  const clearFeedback = () => {
     setSuccess('');
     setError(null);
-  }, []);
+  };
 
   return {
     success,
@@ -128,9 +126,9 @@ export const useFeedbackState = () => {
 export const useModalState = (initialOpen = false) => {
   const [isOpen, setIsOpen] = useState(initialOpen);
 
-  const openModal = useCallback(() => setIsOpen(true), []);
-  const closeModal = useCallback(() => setIsOpen(false), []);
-  const toggleModal = useCallback(() => setIsOpen((prev) => !prev), []);
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
+  const toggleModal = () => setIsOpen((prev) => !prev);
 
   return {
     isOpen,
@@ -145,19 +143,19 @@ export const useModalState = (initialOpen = false) => {
 export const useSelectionState = <T>(initialSelection: Set<T> = new Set()) => {
   const [selected, setSelected] = useState<Set<T>>(initialSelection);
 
-  const selectItem = useCallback((item: T) => {
+  const selectItem = (item: T) => {
     setSelected((prev) => new Set(prev).add(item));
-  }, []);
+  };
 
-  const unselectItem = useCallback((item: T) => {
+  const unselectItem = (item: T) => {
     setSelected((prev) => {
       const newSet = new Set(prev);
       newSet.delete(item);
       return newSet;
     });
-  }, []);
+  };
 
-  const toggleSelection = useCallback((item: T) => {
+  const toggleSelection = (item: T) => {
     setSelected((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(item)) {
@@ -167,15 +165,15 @@ export const useSelectionState = <T>(initialSelection: Set<T> = new Set()) => {
       }
       return newSet;
     });
-  }, []);
+  };
 
-  const clearSelection = useCallback(() => {
+  const clearSelection = () => {
     setSelected(new Set());
-  }, []);
+  };
 
-  const selectAll = useCallback((items: T[]) => {
+  const selectAll = (items: T[]) => {
     setSelected(new Set(items));
-  }, []);
+  };
 
   return {
     selected,
@@ -199,30 +197,30 @@ export const usePaginationState = (initialPage = 0, initialLimit = 20) => {
     hasMore: false,
   });
 
-  const setPage = useCallback((page: number) => {
+  const setPage = (page: number) => {
     setPagination((prev) => ({
       ...prev,
       skip: page * prev.limit,
     }));
-  }, []);
+  };
 
-  const setLimit = useCallback((limit: number) => {
+  const setLimit = (limit: number) => {
     setPagination((prev) => ({
       ...prev,
       limit,
       skip: 0, // Reset to first page when limit changes
     }));
-  }, []);
+  };
 
-  const updateTotal = useCallback((total: number) => {
+  const updateTotal = (total: number) => {
     setPagination((prev) => ({
       ...prev,
       total,
       hasMore: prev.skip + prev.limit < total,
     }));
-  }, []);
+  };
 
-  const nextPage = useCallback(() => {
+  const nextPage = () => {
     setPagination((prev) => {
       if (!prev.hasMore) return prev;
       return {
@@ -230,9 +228,9 @@ export const usePaginationState = (initialPage = 0, initialLimit = 20) => {
         skip: prev.skip + prev.limit,
       };
     });
-  }, []);
+  };
 
-  const prevPage = useCallback(() => {
+  const prevPage = () => {
     setPagination((prev) => {
       if (prev.skip === 0) return prev;
       return {
@@ -240,7 +238,7 @@ export const usePaginationState = (initialPage = 0, initialLimit = 20) => {
         skip: Math.max(0, prev.skip - prev.limit),
       };
     });
-  }, []);
+  };
 
   return {
     pagination,
