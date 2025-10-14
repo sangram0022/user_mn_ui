@@ -1,11 +1,9 @@
 import type { FC } from 'react';
-import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { useActionState, useEffect, useId, useState } from 'react';
 
-import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { apiClient } from '@lib/api';
 import type { UserProfile as BaseUserProfile } from '@shared/types';
 import Breadcrumb from '@shared/ui/Breadcrumb';
-import ErrorAlert from '@shared/ui/ErrorAlert';
 import {
   Bell,
   Camera,
@@ -41,16 +39,114 @@ interface SecuritySettings {
   active_sessions: number;
 }
 
+// Server action for profile update
+interface ProfileUpdateState {
+  success: boolean;
+  error: string | null;
+}
+
+async function updateProfileAction(
+  _prevState: ProfileUpdateState,
+  formData: FormData
+): Promise<ProfileUpdateState> {
+  const full_name = formData.get('full_name') as string;
+  const username = formData.get('username') as string;
+  const bio = formData.get('bio') as string;
+  const location = formData.get('location') as string;
+  const website = formData.get('website') as string;
+  const linkedin = formData.get('linkedin') as string;
+  const twitter = formData.get('twitter') as string;
+  const github = formData.get('github') as string;
+
+  try {
+    await apiClient.updateUserProfile({
+      full_name,
+      username,
+      bio,
+      location,
+      website,
+      social_links: {
+        linkedin,
+        twitter,
+        github,
+      },
+    } as Partial<ApiUserProfile>);
+
+    return { success: true, error: null };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
+    return { success: false, error: errorMessage };
+  }
+}
+
+// Server action for password change
+interface PasswordChangeState {
+  success: boolean;
+  error: string | null;
+}
+
+async function changePasswordAction(
+  _prevState: PasswordChangeState,
+  formData: FormData
+): Promise<PasswordChangeState> {
+  const current_password = formData.get('current_password') as string;
+  const new_password = formData.get('new_password') as string;
+  const confirm_password = formData.get('confirm_password') as string;
+
+  // Validation
+  if (new_password !== confirm_password) {
+    return { success: false, error: 'New passwords do not match' };
+  }
+
+  if (new_password.length < 8) {
+    return { success: false, error: 'Password must be at least 8 characters long' };
+  }
+
+  try {
+    const response = await apiClient.changePassword({
+      current_password,
+      new_password,
+      confirm_password,
+    });
+
+    if (response.success !== false) {
+      return { success: true, error: null };
+    } else {
+      return { success: false, error: response.message || 'Failed to change password' };
+    }
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to change password';
+    return { success: false, error: errorMessage };
+  }
+}
+
 const ProfilePage: FC = () => {
   const { refreshProfile } = useAuth();
   const [profile, setProfile] = useState<ApiUserProfile | null>(null);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const { error, handleError, clearError } = useErrorHandler();
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences'>('profile');
+
+  // Use React 19's useActionState for profile update
+  const [profileState, submitProfileAction, isProfilePending] = useActionState(
+    updateProfileAction,
+    {
+      success: false,
+      error: null,
+    }
+  );
+
+  // Use React 19's useActionState for password change
+  const [passwordState, submitPasswordAction, isPasswordPending] = useActionState(
+    changePasswordAction,
+    {
+      success: false,
+      error: null,
+    }
+  );
+
   const fullNameInputId = useId();
   const usernameInputId = useId();
   const bioInputId = useId();
@@ -87,10 +183,9 @@ const ProfilePage: FC = () => {
   });
 
   // Load profile data
-  const loadProfile = useCallback(async () => {
+  const loadProfile = async () => {
     try {
       setIsLoading(true);
-      clearError();
 
       const profileData = (await apiClient.getUserProfile()) as ApiUserProfile;
       setProfile(profileData);
@@ -116,91 +211,67 @@ const ProfilePage: FC = () => {
         active_sessions: 2,
       });
     } catch (err: unknown) {
-      handleError(err);
+      console.error('Failed to load profile:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [clearError, handleError]);
+  };
 
   useEffect(() => {
     loadProfile();
-  }, [loadProfile]);
+  }, []);
 
-  // Save profile changes
-  const handleSaveProfile = async () => {
-    try {
-      setIsSaving(true);
-      clearError();
-
-      await apiClient.updateUserProfile(editForm);
-
+  // Handle successful profile update
+  useEffect(() => {
+    if (profileState.success) {
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
-      await loadProfile();
-      await refreshProfile();
-
+      loadProfile();
+      refreshProfile();
       setTimeout(() => setSuccess(''), 3000);
-    } catch (err: unknown) {
-      handleError(err);
-    } finally {
-      setIsSaving(false);
     }
+  }, [profileState.success, loadProfile, refreshProfile]);
+
+  // Handle successful password change
+  useEffect(() => {
+    if (passwordState.success) {
+      setSuccess('Password changed successfully!');
+      setPasswordForm({
+        current_password: '',
+        new_password: '',
+        confirm_password: '',
+      });
+      setTimeout(() => setSuccess(''), 3000);
+    }
+  }, [passwordState.success]);
+
+  // Save profile changes
+  const handleSaveProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formDataObj = new FormData(e.currentTarget);
+    await submitProfileAction(formDataObj);
   };
 
   // Change password
-  const handleChangePassword = async () => {
-    if (passwordForm.new_password !== passwordForm.confirm_password) {
-      handleError(new Error('New passwords do not match'));
-      return;
-    }
-
-    if (passwordForm.new_password.length < 8) {
-      handleError(new Error('Password must be at least 8 characters long'));
-      return;
-    }
-
-    try {
-      setIsSaving(true);
-      clearError();
-
-      const response = await apiClient.changePassword({
-        current_password: passwordForm.current_password,
-        new_password: passwordForm.new_password,
-        confirm_password: passwordForm.confirm_password,
-      });
-
-      if (response.success !== false) {
-        setSuccess('Password changed successfully!');
-        setPasswordForm({
-          current_password: '',
-          new_password: '',
-          confirm_password: '',
-        });
-        setTimeout(() => setSuccess(''), 3000);
-      } else {
-        handleError(new Error(response.message || 'Failed to change password'));
-      }
-    } catch (err: unknown) {
-      handleError(err);
-    } finally {
-      setIsSaving(false);
-    }
+  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formDataObj = new FormData(e.currentTarget);
+    await submitPasswordAction(formDataObj);
   };
 
-  // Memoized tab content for performance
-  const tabContent = useMemo(() => {
-    switch (activeTab) {
-      case 'profile':
-        return renderProfileTab();
-      case 'security':
-        return renderSecurityTab();
-      case 'preferences':
-        return renderPreferencesTab();
-      default:
-        return null;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  // Determine tab content
+  let tabContent = null;
+  switch (activeTab) {
+    case 'profile':
+      tabContent = renderProfileTab();
+      break;
+    case 'security':
+      tabContent = renderSecurityTab();
+      break;
+    case 'preferences':
+      tabContent = renderPreferencesTab();
+      break;
+  }
 
   function renderProfileTab() {
     return (
@@ -444,20 +515,30 @@ const ProfilePage: FC = () => {
 
         {/* Save Button */}
         {isEditing && (
-          <div className="mt-8 flex justify-end border-t border-gray-200 pt-6">
+          <form
+            onSubmit={handleSaveProfile}
+            className="mt-8 flex justify-end border-t border-gray-200 pt-6"
+          >
+            {/* Inline error display */}
+            {profileState.error && (
+              <div className="mr-4 flex-1 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+                {profileState.error}
+              </div>
+            )}
+
             <button
-              onClick={handleSaveProfile}
-              disabled={isSaving}
+              type="submit"
+              disabled={isProfilePending}
               className="flex cursor-pointer items-center gap-2 rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
             >
-              {isSaving ? (
+              {isProfilePending ? (
                 <Loader className="h-4 w-4 animate-spin" />
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isProfilePending ? 'Saving...' : 'Save Changes'}
             </button>
-          </div>
+          </form>
         )}
       </div>
     );
@@ -490,8 +571,18 @@ const ProfilePage: FC = () => {
         </div>
 
         {/* Change Password */}
-        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
+        <form
+          onSubmit={handleChangePassword}
+          className="mb-6 rounded-lg border border-gray-200 bg-white p-6"
+        >
           <h3 className="mb-4 text-lg font-semibold text-gray-900">Change Password</h3>
+
+          {/* Inline error display */}
+          {passwordState.error && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+              {passwordState.error}
+            </div>
+          )}
 
           <div className="grid gap-4">
             {/* Current Password */}
@@ -505,6 +596,7 @@ const ProfilePage: FC = () => {
               <div className="relative">
                 <input
                   id={currentPasswordInputId}
+                  name="current_password"
                   type={showPasswords.current ? 'text' : 'password'}
                   value={passwordForm.current_password}
                   onChange={(e) =>
@@ -512,6 +604,7 @@ const ProfilePage: FC = () => {
                   }
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="Enter current password"
+                  required
                 />
                 <button
                   type="button"
@@ -538,6 +631,7 @@ const ProfilePage: FC = () => {
               <div className="relative">
                 <input
                   id={newPasswordInputId}
+                  name="new_password"
                   type={showPasswords.new ? 'text' : 'password'}
                   value={passwordForm.new_password}
                   onChange={(e) =>
@@ -545,6 +639,8 @@ const ProfilePage: FC = () => {
                   }
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="Enter new password"
+                  required
+                  minLength={8}
                 />
                 <button
                   type="button"
@@ -567,6 +663,7 @@ const ProfilePage: FC = () => {
               <div className="relative">
                 <input
                   id={confirmPasswordInputId}
+                  name="confirm_password"
                   type={showPasswords.confirm ? 'text' : 'password'}
                   value={passwordForm.confirm_password}
                   onChange={(e) =>
@@ -574,6 +671,7 @@ const ProfilePage: FC = () => {
                   }
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                   placeholder="Confirm new password"
+                  required
                 />
                 <button
                   type="button"
@@ -591,15 +689,15 @@ const ProfilePage: FC = () => {
 
             {/* Change Password Button */}
             <button
-              onClick={handleChangePassword}
+              type="submit"
               disabled={
-                isSaving ||
+                isPasswordPending ||
                 !passwordForm.current_password ||
                 !passwordForm.new_password ||
                 !passwordForm.confirm_password
               }
               className={`justify-self-start flex items-center gap-2 rounded-lg border-none px-4 py-3 text-sm font-semibold text-white transition-all duration-200 ${
-                isSaving ||
+                isPasswordPending ||
                 !passwordForm.current_password ||
                 !passwordForm.new_password ||
                 !passwordForm.confirm_password
@@ -607,15 +705,15 @@ const ProfilePage: FC = () => {
                   : 'cursor-pointer bg-gradient-to-br from-red-600 to-red-800 hover:from-red-700 hover:to-red-900'
               }`}
             >
-              {isSaving ? (
+              {isPasswordPending ? (
                 <Loader className="h-4 w-4 animate-spin" />
               ) : (
                 <Shield className="h-4 w-4" />
               )}
-              {isSaving ? 'Changing...' : 'Change Password'}
+              {isPasswordPending ? 'Changing...' : 'Change Password'}
             </button>
           </div>
-        </div>
+        </form>
       </div>
     );
   }
@@ -730,12 +828,6 @@ const ProfilePage: FC = () => {
         </div>
 
         {/* Alerts */}
-        {error && (
-          <div className="mb-6">
-            <ErrorAlert error={error} />
-          </div>
-        )}
-
         {success && (
           <div className="mb-6 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
             <CheckCircle className="h-5 w-5 text-green-500" />

@@ -1,6 +1,6 @@
 import { Eye, Filter, Plus, Search, Trash2, UserCheck, Users, UserX } from 'lucide-react';
 import type { FC, FormEvent } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useActionState, useDeferredValue, useEffect, useState, useTransition } from 'react';
 import { logger } from './../../../shared/utils/logger';
 
 import { apiClient } from '@lib/api';
@@ -47,7 +47,7 @@ interface UpdateUserData {
 const UserManagementEnhanced: FC = () => {
   const { hasPermission, user } = useAuth();
 
-  const debugEnabled = useMemo(() => {
+  const debugEnabled = (() => {
     if (!import.meta.env.DEV) {
       return false;
     }
@@ -61,16 +61,13 @@ const UserManagementEnhanced: FC = () => {
     } catch {
       return false;
     }
-  }, []);
+  })();
 
-  const debugLog = useCallback(
-    (...args: unknown[]) => {
-      if (debugEnabled) {
-        logger.debug('[UserManagementEnhanced]', { ...args });
-      }
-    },
-    [debugEnabled]
-  );
+  const debugLog = (...args: unknown[]) => {
+    if (debugEnabled) {
+      logger.debug('[UserManagementEnhanced]', { ...args });
+    }
+  };
 
   useEffect(() => {
     if (!debugEnabled) {
@@ -92,11 +89,12 @@ const UserManagementEnhanced: FC = () => {
         ? 'Component rendering with active user context'
         : 'Component rendering without user context'
     );
-  }, [debugEnabled, debugLog, hasPermission, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debugEnabled, hasPermission, user]);
 
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
-  const roleMap = useMemo(() => {
+  const roleMap = (() => {
     const map = new Map<string, Role>();
     roles.forEach((role) => {
       map.set(role.name, role);
@@ -108,10 +106,17 @@ const UserManagementEnhanced: FC = () => {
       }
     });
     return map;
-  }, [roles]);
+  })();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // ✅ React 18: useDeferredValue for search to avoid blocking input
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+
+  // ✅ React 18: useTransition for filter changes
+  const [isPending, startTransition] = useTransition();
+
   const [filterRole, setFilterRole] = useState('');
   const [filterActive, setFilterActive] = useState<boolean | undefined>(undefined);
   const [pagination, setPagination] = useState({ skip: 0, limit: 20, total: 0, hasMore: false });
@@ -123,7 +128,7 @@ const UserManagementEnhanced: FC = () => {
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set<string>());
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const buildCreateUserRequest = useCallback((data: CreateUserData): CreateUserRequest => {
+  const buildCreateUserRequest = (data: CreateUserData): CreateUserRequest => {
     const trimmedName = data.full_name?.trim();
     const nameSegments = trimmedName ? trimmedName.split(' ') : [];
     const firstName = nameSegments[0] ?? data.email.split('@')[0] ?? 'First';
@@ -140,9 +145,9 @@ const UserManagementEnhanced: FC = () => {
       is_active: data.is_active ?? true,
       username: username && username.length > 0 ? username : undefined,
     };
-  }, []);
+  };
 
-  const buildUpdateUserRequest = useCallback((data: UpdateUserData): UpdateUserRequest => {
+  const buildUpdateUserRequest = (data: UpdateUserData): UpdateUserRequest => {
     const request: UpdateUserRequest = {};
 
     if (data.role) {
@@ -176,29 +181,16 @@ const UserManagementEnhanced: FC = () => {
     }
 
     return request;
-  }, []);
+  };
 
   // Define functions before useEffect
-  const loadUsers = useCallback(async () => {
-    let tokenAvailable = false;
-    if (typeof window !== 'undefined') {
-      try {
-        tokenAvailable = !!window.localStorage.getItem('access_token');
-      } catch {
-        tokenAvailable = false;
-      }
-    }
-
-    debugLog('Loading users', {
-      tokenAvailable,
-      permissions: getUserPermissions(user),
-      params: {
-        skip: pagination.skip,
-        limit: pagination.limit,
-        searchTerm,
-        filterRole,
-        filterActive,
-      },
+  const loadUsers = async () => {
+    debugLog('Loading users...', {
+      skip: pagination.skip,
+      limit: pagination.limit,
+      searchTerm: deferredSearchTerm, // ✅ Use deferred value
+      filterRole,
+      filterActive,
     });
 
     try {
@@ -210,7 +202,7 @@ const UserManagementEnhanced: FC = () => {
         limit: pagination.limit,
       };
 
-      if (searchTerm) params['search'] = searchTerm;
+      if (deferredSearchTerm) params['search'] = deferredSearchTerm; // ✅ Use deferred value
       if (filterRole) params['role'] = filterRole;
       if (filterActive !== undefined) params['is_active'] = filterActive;
 
@@ -292,18 +284,9 @@ const UserManagementEnhanced: FC = () => {
       setIsLoading(false);
       debugLog('loadUsers completed');
     }
-  }, [
-    debugLog,
-    filterActive,
-    filterRole,
-    pagination.limit,
-    pagination.skip,
-    roleMap,
-    searchTerm,
-    user,
-  ]);
+  };
 
-  const loadRoles = useCallback(async () => {
+  const loadRoles = async () => {
     try {
       debugLog('Loading roles from backend...');
       const fetchedRoles = await apiClient.getRoles();
@@ -331,7 +314,7 @@ const UserManagementEnhanced: FC = () => {
         },
       ]);
     }
-  }, [debugLog]);
+  };
 
   useEffect(() => {
     debugLog('UserManagementEnhanced mounted', {
@@ -532,6 +515,10 @@ const UserManagementEnhanced: FC = () => {
               <span>
                 <Search className="mr-2 inline h-4 w-4" />
                 Search Users
+                {/* ✅ Show pending indicator when search is deferred */}
+                {searchTerm !== deferredSearchTerm && (
+                  <span className="ml-2 text-xs text-blue-600">Searching...</span>
+                )}
               </span>
               <input
                 type="text"
@@ -548,10 +535,17 @@ const UserManagementEnhanced: FC = () => {
               <span>
                 <Filter className="mr-2 inline h-4 w-4" />
                 Filter by Role
+                {/* ✅ Show transition pending indicator */}
+                {isPending && <span className="ml-2 text-xs text-blue-600">Updating...</span>}
               </span>
               <select
                 value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
+                onChange={(e) => {
+                  // ✅ React 18: Mark filter change as non-urgent
+                  startTransition(() => {
+                    setFilterRole(e.target.value);
+                  });
+                }}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               >
                 <option value="">All Roles</option>
@@ -817,13 +811,67 @@ const UserManagementEnhanced: FC = () => {
   );
 };
 
-// Create User Modal Component
+// Server action for creating user
+interface CreateUserState {
+  success: boolean;
+  error: string | null;
+  data?: UserSummary;
+}
+
+async function createUserAction(
+  prevState: CreateUserState,
+  formData: FormData
+): Promise<CreateUserState> {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const username = formData.get('username') as string;
+  const fullName = formData.get('full_name') as string;
+  const role = formData.get('role') as string;
+  const isActive = formData.get('is_active') === 'true';
+
+  // Basic validation
+  if (!email || !password) {
+    return { success: false, error: 'Email and password are required', data: undefined };
+  }
+
+  if (password.length < 8) {
+    return { success: false, error: 'Password must be at least 8 characters', data: undefined };
+  }
+
+  // Build request
+  const trimmedName = fullName?.trim();
+  const nameSegments = trimmedName ? trimmedName.split(' ') : [];
+  const firstName = nameSegments[0] ?? email.split('@')[0] ?? 'First';
+  const lastName = nameSegments.length > 1 ? nameSegments.slice(1).join(' ') : 'User';
+  const trimmedUsername = username?.trim();
+  const trimmedRole = role?.trim();
+
+  const request: CreateUserRequest = {
+    email,
+    password,
+    first_name: firstName || 'First',
+    last_name: lastName || 'User',
+    role: trimmedRole && trimmedRole.length > 0 ? trimmedRole : undefined,
+    is_active: isActive ?? true,
+    username: trimmedUsername && trimmedUsername.length > 0 ? trimmedUsername : undefined,
+  };
+
+  try {
+    const user = await apiClient.createUser(request);
+    return { success: true, error: null, data: user };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create user';
+    logger.error('Create user failed:', undefined, { error });
+    return { success: false, error: errorMessage, data: undefined };
+  }
+}
+
 const CreateUserModal: FC<{
   roles: Role[];
   onSave: (data: CreateUserData) => void;
   onClose: () => void;
   isLoading: boolean;
-}> = ({ roles, onSave, onClose, isLoading }) => {
+}> = ({ roles, onSave, onClose }) => {
   const [formData, setFormData] = useState<CreateUserData>({
     email: '',
     password: '',
@@ -833,9 +881,34 @@ const CreateUserModal: FC<{
     is_active: true,
   });
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // Use React 19's useActionState for form handling
+  const [state, submitAction, isPending] = useActionState(createUserAction, {
+    success: false,
+    error: null,
+    data: undefined,
+  });
+
+  // Handle successful user creation
+  useEffect(() => {
+    if (state.success && state.data) {
+      // Call the parent's onSave to refresh the user list
+      onSave(formData);
+      onClose();
+    }
+  }, [state.success, state.data, formData, onSave, onClose]);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSave(formData);
+
+    // Create FormData from the form
+    const form = e.currentTarget;
+    const formDataObj = new FormData(form);
+
+    // Add is_active to FormData
+    formDataObj.set('is_active', formData.is_active ? 'true' : 'false');
+
+    // Manually call the action
+    await submitAction(formDataObj);
   };
 
   return (
@@ -843,12 +916,20 @@ const CreateUserModal: FC<{
       <div className="max-h-[90vh] w-[90%] max-w-[500px] overflow-y-auto rounded-xl bg-white p-8">
         <h2 className="mb-6 text-gray-900">Create New User</h2>
 
+        {/* Error Alert */}
+        {state.error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+            {state.error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Email *</span>
               <input
                 type="email"
+                name="email"
                 value={formData.email}
                 onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -862,6 +943,7 @@ const CreateUserModal: FC<{
               <span>Password *</span>
               <input
                 type="password"
+                name="password"
                 value={formData.password}
                 onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -876,6 +958,7 @@ const CreateUserModal: FC<{
               <span>Username</span>
               <input
                 type="text"
+                name="username"
                 value={formData.username}
                 onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -888,6 +971,7 @@ const CreateUserModal: FC<{
               <span>Full Name</span>
               <input
                 type="text"
+                name="full_name"
                 value={formData.full_name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, full_name: e.target.value }))}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -899,6 +983,7 @@ const CreateUserModal: FC<{
             <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Role</span>
               <select
+                name="role"
                 value={formData.role}
                 onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -916,6 +1001,7 @@ const CreateUserModal: FC<{
             <label className="flex cursor-pointer items-center gap-2 text-gray-700">
               <input
                 type="checkbox"
+                name="is_active"
                 checked={formData.is_active}
                 onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.checked }))}
               />
@@ -927,17 +1013,17 @@ const CreateUserModal: FC<{
             <button
               type="button"
               onClick={onClose}
-              disabled={isLoading}
+              disabled={isPending}
               className="cursor-pointer rounded-md border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isPending}
               className="cursor-pointer rounded-md border-none bg-blue-500 px-6 py-3 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isLoading ? 'Creating...' : 'Create User'}
+              {isPending ? 'Creating...' : 'Create User'}
             </button>
           </div>
         </form>

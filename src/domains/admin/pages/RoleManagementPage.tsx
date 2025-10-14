@@ -8,7 +8,7 @@
  */
 
 import { Lock, Plus, Search, Shield, Trash2, UserPlus, X } from 'lucide-react';
-import { useCallback, useEffect, useState, type FC } from 'react';
+import { useActionState, useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -38,12 +38,6 @@ interface Permission {
   description?: string;
 }
 
-interface RoleFormData {
-  role_name: string;
-  description: string;
-  permissions: string[];
-}
-
 interface AssignRoleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -55,48 +49,95 @@ interface CreateRoleModalProps {
   isOpen: boolean;
   onClose: () => void;
   permissions: Permission[];
-  onSubmit: (roleData: RoleFormData) => Promise<void>;
-  isLoading: boolean;
+  onSuccess?: () => void;
+}
+
+// Server action for role creation
+interface CreateRoleState {
+  success: boolean;
+  error: string | null;
+  roleId?: string;
+}
+
+async function createRoleAction(
+  _prevState: CreateRoleState,
+  formData: FormData
+): Promise<CreateRoleState> {
+  const role_name = formData.get('role_name') as string;
+  const description = formData.get('description') as string;
+  const permissions = formData.getAll('permissions') as string[];
+
+  // Validation
+  if (!role_name || !description) {
+    return {
+      success: false,
+      error: 'Role name and description are required',
+    };
+  }
+
+  if (permissions.length === 0) {
+    return {
+      success: false,
+      error: 'At least one permission must be selected',
+    };
+  }
+
+  try {
+    const result = await adminService.createRole({
+      role_name,
+      description,
+      permissions,
+    });
+
+    return {
+      success: true,
+      error: null,
+      roleId: result.role_id,
+    };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create role';
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
 }
 
 // ============================================================================
 // Components
 // ============================================================================
 
-const CreateRoleModal: FC<CreateRoleModalProps> = ({
-  isOpen,
-  onClose,
-  permissions,
-  onSubmit,
-  isLoading,
-}) => {
+const CreateRoleModal: FC<CreateRoleModalProps> = ({ isOpen, onClose, permissions, onSuccess }) => {
   const { t } = useLocalization();
-  const [formData, setFormData] = useState<RoleFormData>({
-    role_name: '',
-    description: '',
-    permissions: [],
-  });
   const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set());
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await onSubmit({
-      ...formData,
-      permissions: Array.from(selectedPermissions),
-    });
-    setFormData({ role_name: '', description: '', permissions: [] });
-    setSelectedPermissions(new Set());
-    onClose();
-  };
+  // Use React 19's useActionState for role creation
+  const [state, submitAction, isPending] = useActionState(createRoleAction, {
+    success: false,
+    error: null,
+  });
 
-  const togglePermission = (permissionId: string) => {
-    const newSelected = new Set(selectedPermissions);
-    if (newSelected.has(permissionId)) {
-      newSelected.delete(permissionId);
-    } else {
-      newSelected.add(permissionId);
+  // Auto-close and reset on success
+  useEffect(() => {
+    if (state.success) {
+      // Reset form
+      setSelectedPermissions(new Set());
+      onSuccess?.();
+      onClose();
     }
-    setSelectedPermissions(newSelected);
+  }, [state.success, onSuccess, onClose]);
+
+  // Toggle permission selection
+  const togglePermission = (permissionId: string) => {
+    setSelectedPermissions((prev) => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(permissionId)) {
+        newSelected.delete(permissionId);
+      } else {
+        newSelected.add(permissionId);
+      }
+      return newSelected;
+    });
   };
 
   if (!isOpen) return null;
@@ -113,16 +154,29 @@ const CreateRoleModal: FC<CreateRoleModalProps> = ({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+        <form action={submitAction} className="flex flex-col h-full">
           <div className="px-6 py-4 flex-1 overflow-y-auto">
+            {/* Inline error display */}
+            {state.error && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+                {state.error}
+              </div>
+            )}
+
             {/* Role Name */}
-            <TextInput
-              label={t('roles.roleName')}
-              value={formData.role_name}
-              onChange={(value) => setFormData({ ...formData, role_name: value })}
-              placeholder={t('roles.enterRoleName')}
-              required
-            />
+            <div className="mb-4">
+              <label htmlFor="role_name" className="block text-sm font-medium text-gray-700 mb-1">
+                {t('roles.roleName')}
+              </label>
+              <input
+                id="role_name"
+                name="role_name"
+                type="text"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder={t('roles.enterRoleName')}
+                required
+              />
+            </div>
 
             {/* Description */}
             <div className="mb-4">
@@ -131,8 +185,7 @@ const CreateRoleModal: FC<CreateRoleModalProps> = ({
               </label>
               <textarea
                 id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                name="description"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder={t('roles.enterRoleDescription')}
                 rows={3}
@@ -153,6 +206,8 @@ const CreateRoleModal: FC<CreateRoleModalProps> = ({
                   >
                     <input
                       type="checkbox"
+                      name="permissions"
+                      value={permission.permission_id}
                       checked={selectedPermissions.has(permission.permission_id)}
                       onChange={() => togglePermission(permission.permission_id)}
                       className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -184,10 +239,10 @@ const CreateRoleModal: FC<CreateRoleModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isLoading || !formData.role_name || !formData.description}
+              disabled={isPending || selectedPermissions.size === 0}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {isLoading ? t('roles.creating') : t('roles.createRole')}
+              {isPending ? t('roles.creating') : t('roles.createRole')}
             </button>
           </div>
         </form>
@@ -324,7 +379,7 @@ const RoleManagementPage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadRoles = useCallback(async () => {
+  const loadRoles = async () => {
     if (!canViewRoles) return;
 
     try {
@@ -333,9 +388,9 @@ const RoleManagementPage: FC = () => {
     } catch (error) {
       handleError(error, t('roles.failedToLoadRoles'));
     }
-  }, [canViewRoles, handleError, t]);
+  };
 
-  const loadPermissions = useCallback(async () => {
+  const loadPermissions = async () => {
     if (!canViewRoles) return;
 
     try {
@@ -344,9 +399,9 @@ const RoleManagementPage: FC = () => {
     } catch (error) {
       handleError(error, t('roles.failedToLoadPermissions'));
     }
-  }, [canViewRoles, handleError, t]);
+  };
 
-  const loadAllData = useCallback(async () => {
+  const loadAllData = async () => {
     setIsLoading(true);
     clearError();
 
@@ -355,48 +410,30 @@ const RoleManagementPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [loadRoles, loadPermissions, clearError]);
+  };
 
   // ============================================================================
   // Action Functions
   // ============================================================================
 
-  const handleCreateRole = useCallback(
-    async (roleData: RoleFormData) => {
-      try {
-        await adminService.createRole(roleData);
-        await loadRoles();
-      } catch (error) {
-        handleError(error, t('roles.failedToCreateRole'));
-      }
-    },
-    [loadRoles, handleError, t]
-  );
+  const handleDeleteRole = async (roleId: string) => {
+    if (!confirm(t('roles.confirmDeleteRole'))) return;
 
-  const handleDeleteRole = useCallback(
-    async (roleId: string) => {
-      if (!confirm(t('roles.confirmDeleteRole'))) return;
+    try {
+      await adminService.deleteRole(roleId);
+      await loadRoles();
+    } catch (error) {
+      handleError(error, t('roles.failedToDeleteRole'));
+    }
+  };
 
-      try {
-        await adminService.deleteRole(roleId);
-        await loadRoles();
-      } catch (error) {
-        handleError(error, t('roles.failedToDeleteRole'));
-      }
-    },
-    [loadRoles, handleError, t]
-  );
-
-  const handleAssignRole = useCallback(
-    async (userId: string, roleId: string, expiresAt?: string) => {
-      try {
-        await adminService.assignRole(userId, roleId, expiresAt);
-      } catch (error) {
-        handleError(error, t('roles.failedToAssignRole'));
-      }
-    },
-    [handleError, t]
-  );
+  const handleAssignRole = async (userId: string, roleId: string, expiresAt?: string) => {
+    try {
+      await adminService.assignRole(userId, roleId, expiresAt);
+    } catch (error) {
+      handleError(error, t('roles.failedToAssignRole'));
+    }
+  };
 
   // ============================================================================
   // Filter Functions
@@ -639,8 +676,7 @@ const RoleManagementPage: FC = () => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         permissions={permissions}
-        onSubmit={handleCreateRole}
-        isLoading={false}
+        onSuccess={loadRoles}
       />
 
       <AssignRoleModal

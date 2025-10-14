@@ -12,12 +12,10 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import React, { ComponentType, useCallback, useEffect, useState } from 'react';
+import React, { ComponentType, useActionState, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { apiClient } from '@lib/api';
-import ErrorAlert from '@shared/ui/ErrorAlert';
 import {
   validateEmail,
   validatePassword,
@@ -38,6 +36,97 @@ const FEEDBACK_ICON_MAP: Record<FeedbackIcon, ComponentType<{ className?: string
   error: XCircle,
 };
 
+interface RegisterState {
+  success: boolean;
+  error: string | null;
+  feedback: RegistrationFeedback | null;
+}
+
+// Server action for registration
+async function registerAction(
+  prevState: RegisterState,
+  formData: FormData
+): Promise<RegisterState> {
+  const firstName = formData.get('firstName') as string;
+  const lastName = formData.get('lastName') as string;
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const confirmPassword = formData.get('confirmPassword') as string;
+  const termsAccepted = formData.get('terms_accepted') === 'true';
+
+  // Validate inputs
+  const firstNameValidation = validateRequired(firstName, 'First name');
+  if (!firstNameValidation.isValid) {
+    return {
+      success: false,
+      error: firstNameValidation.error || 'First name is required',
+      feedback: null,
+    };
+  }
+
+  const lastNameValidation = validateRequired(lastName, 'Last name');
+  if (!lastNameValidation.isValid) {
+    return {
+      success: false,
+      error: lastNameValidation.error || 'Last name is required',
+      feedback: null,
+    };
+  }
+
+  const emailValidation = validateEmail(email);
+  if (!emailValidation.isValid) {
+    return { success: false, error: emailValidation.error || 'Invalid email', feedback: null };
+  }
+
+  const passwordValidation = validatePassword(password, 8);
+  if (!passwordValidation.isValid) {
+    return {
+      success: false,
+      error: passwordValidation.error || 'Password must be at least 8 characters',
+      feedback: null,
+    };
+  }
+
+  const passwordMatchValidation = validatePasswordMatch(password, confirmPassword);
+  if (!passwordMatchValidation.isValid) {
+    return {
+      success: false,
+      error: passwordMatchValidation.error || 'Passwords do not match',
+      feedback: null,
+    };
+  }
+
+  if (!termsAccepted) {
+    return {
+      success: false,
+      error: 'You must accept the Terms and Conditions to register',
+      feedback: null,
+    };
+  }
+
+  // Perform registration
+  try {
+    const response = await apiClient.register({
+      email,
+      password,
+      confirm_password: confirmPassword,
+      first_name: firstName,
+      last_name: lastName,
+    });
+
+    const feedback = buildRegistrationFeedback(response);
+    return { success: true, error: null, feedback };
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Registration failed. Please try again.';
+    return {
+      success: false,
+      error: errorMessage,
+      feedback: null,
+    };
+  }
+}
+
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -49,18 +138,20 @@ const RegisterPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { error, handleError, clearError } = useErrorHandler();
-  const [success, setSuccess] = useState(false);
-  const [registrationFeedback, setRegistrationFeedback] = useState<RegistrationFeedback | null>(
-    null
-  );
+
+  // Use React 19's useActionState for form handling
+  const [state, submitAction, isPending] = useActionState(registerAction, {
+    success: false,
+    error: null,
+    feedback: null,
+  });
+
   const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
   const [hasNavigated, setHasNavigated] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleProceedToLogin = useCallback(() => {
+  const handleProceedToLogin = () => {
     setHasNavigated((prev) => {
       if (!prev) {
         setRedirectCountdown(null);
@@ -70,23 +161,24 @@ const RegisterPage: React.FC = () => {
       }
       return true;
     });
-  }, [navigate]);
+  };
 
+  // Handle countdown and redirection
   useEffect(() => {
-    if (!success || !registrationFeedback) {
+    if (!state.success || !state.feedback) {
       return;
     }
 
-    if (registrationFeedback.redirectSeconds === null) {
+    if (state.feedback.redirectSeconds === null) {
       setRedirectCountdown(null);
       return;
     }
 
-    setRedirectCountdown(registrationFeedback.redirectSeconds);
-  }, [success, registrationFeedback]);
+    setRedirectCountdown(state.feedback.redirectSeconds);
+  }, [state.success, state.feedback]);
 
   useEffect(() => {
-    if (!success || hasNavigated) {
+    if (!state.success || hasNavigated) {
       return;
     }
 
@@ -104,7 +196,7 @@ const RegisterPage: React.FC = () => {
     }, 1000);
 
     return () => window.clearTimeout(timer);
-  }, [success, redirectCountdown, hasNavigated, handleProceedToLogin]);
+  }, [state.success, redirectCountdown, hasNavigated, handleProceedToLogin]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
@@ -112,87 +204,23 @@ const RegisterPage: React.FC = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
-
-    if (error) {
-      clearError();
-    }
-  };
-
-  const validateForm = () => {
-    const firstNameValidation = validateRequired(formData.firstName, 'First name');
-    if (!firstNameValidation.isValid) {
-      handleError(new Error(firstNameValidation.error));
-      return false;
-    }
-
-    const lastNameValidation = validateRequired(formData.lastName, 'Last name');
-    if (!lastNameValidation.isValid) {
-      handleError(new Error(lastNameValidation.error));
-      return false;
-    }
-
-    const emailValidation = validateEmail(formData.email);
-    if (!emailValidation.isValid) {
-      handleError(new Error(emailValidation.error));
-      return false;
-    }
-
-    const passwordValidation = validatePassword(formData.password, 8);
-    if (!passwordValidation.isValid) {
-      handleError(new Error(passwordValidation.error));
-      return false;
-    }
-
-    const passwordMatchValidation = validatePasswordMatch(
-      formData.password,
-      formData.confirmPassword
-    );
-    if (!passwordMatchValidation.isValid) {
-      handleError(new Error(passwordMatchValidation.error));
-      return false;
-    }
-
-    if (!formData.terms_accepted) {
-      handleError(new Error('You must accept the Terms and Conditions to register'));
-      return false;
-    }
-
-    return true;
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    clearError();
 
-    if (!validateForm()) {
-      return;
-    }
+    // Create FormData from the form
+    const form = event.currentTarget;
+    const formDataObj = new FormData(form);
 
-    setIsLoading(true);
+    // Add terms_accepted to FormData
+    formDataObj.set('terms_accepted', formData.terms_accepted ? 'true' : 'false');
 
-    try {
-      const response = await apiClient.register({
-        email: formData.email,
-        password: formData.password,
-        confirm_password: formData.confirmPassword,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-      });
-
-      const feedback = buildRegistrationFeedback(response);
-      setRegistrationFeedback(feedback);
-      setSuccess(true);
-      return;
-    } catch (err: unknown) {
-      handleError(err);
-      setSuccess(false);
-      setRegistrationFeedback(null);
-    } finally {
-      setIsLoading(false);
-    }
+    // Manually call the action
+    await submitAction(formDataObj);
   };
 
-  if (success && registrationFeedback) {
+  if (state.success && state.feedback) {
     return (
       <div className="mx-auto w-full max-w-3xl">
         <div className="rounded-2xl border border-gray-200/50 bg-white/95 p-10 shadow-2xl backdrop-blur-sm">
@@ -201,13 +229,13 @@ const RegisterPage: React.FC = () => {
               <CheckCircle className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-              {registrationFeedback.title}
+              {state.feedback.title}
             </h2>
-            <p className="mt-2 text-gray-500">{registrationFeedback.subtitle}</p>
-            <p className="mt-4 text-base text-gray-700">{registrationFeedback.message}</p>
+            <p className="mt-2 text-gray-500">{state.feedback.subtitle}</p>
+            <p className="mt-4 text-base text-gray-700">{state.feedback.message}</p>
             <p className="mt-3 text-sm text-gray-500">
               Account email:{' '}
-              <span className="font-medium text-gray-900">{registrationFeedback.email}</span>
+              <span className="font-medium text-gray-900">{state.feedback.email}</span>
             </p>
             {redirectCountdown !== null && (
               <p className="mt-2 text-sm text-blue-500">
@@ -222,7 +250,7 @@ const RegisterPage: React.FC = () => {
               Account snapshot
             </h3>
             <dl className="mt-4 grid gap-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
-              {registrationFeedback.highlights.map((highlight) => (
+              {state.feedback.highlights.map((highlight: { label: string; value: string }) => (
                 <div
                   key={highlight.label}
                   className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
@@ -243,25 +271,27 @@ const RegisterPage: React.FC = () => {
               Next steps
             </h3>
             <div className="mt-4 flex flex-col gap-4">
-              {registrationFeedback.nextSteps.map((step) => {
-                const IconComponent = FEEDBACK_ICON_MAP[step.icon] ?? Info;
-                return (
-                  <div
-                    key={step.id}
-                    className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-                  >
-                    <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
-                      <IconComponent className="h-5 w-5 text-blue-500" />
+              {state.feedback.nextSteps.map(
+                (step: { id: string; title: string; description: string; icon: FeedbackIcon }) => {
+                  const IconComponent = FEEDBACK_ICON_MAP[step.icon] ?? Info;
+                  return (
+                    <div
+                      key={step.id}
+                      className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                    >
+                      <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
+                        <IconComponent className="h-5 w-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-slate-900">{step.title}</h4>
+                        <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                          {step.description}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-slate-900">{step.title}</h4>
-                      <p className="mt-1 text-sm leading-relaxed text-slate-500">
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
             </div>
           </section>
 
@@ -289,7 +319,7 @@ const RegisterPage: React.FC = () => {
     );
   }
 
-  if (success) {
+  if (state.success && !state.feedback) {
     return (
       <div className="flex min-h-screen flex-col justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-12">
         <div className="mx-auto w-full max-w-md text-center">
@@ -333,9 +363,11 @@ const RegisterPage: React.FC = () => {
       <div className="mx-auto mt-8 w-full max-w-md">
         <div className="rounded-2xl border border-gray-200/50 bg-white/95 px-6 py-8 shadow-2xl backdrop-blur-sm">
           {/* Error Alert */}
-          {error && (
+          {state.error && (
             <div className="mb-6">
-              <ErrorAlert error={error} />
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+                {state.error}
+              </div>
             </div>
           )}
 
@@ -508,10 +540,10 @@ const RegisterPage: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isPending}
                 className="flex w-full cursor-pointer justify-center rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-3 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
               >
-                {isLoading ? (
+                {isPending ? (
                   <div className="flex items-center">
                     <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                     Creating account...
