@@ -1,31 +1,29 @@
 import { Eye, Filter, Plus, Search, Trash2, UserCheck, Users, UserX } from 'lucide-react';
 import type { FC, FormEvent } from 'react';
-import { useActionState, useDeferredValue, useEffect, useState, useTransition } from 'react';
+import {
+  useActionState,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useState,
+  useTransition,
+} from 'react';
 import { logger } from './../../../shared/utils/logger';
 
 import { apiClient } from '@lib/api';
 import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@shared/types';
+import { formatDate } from '@shared/utils';
 import { getUserPermissions, getUserRoleName } from '@shared/utils/user';
 import { useAuth } from '../../auth';
+import {
+  useOptimisticUserManagement,
+  type OptimisticUser,
+} from '../hooks/useOptimisticUserManagement';
 
 type Role = UserRole;
 
-interface User {
-  id: string;
-  email: string;
-  username?: string | null;
-  full_name?: string | null;
-  first_name: string;
-  last_name: string;
-  is_active: boolean;
-  is_verified: boolean;
-  is_approved: boolean;
-  role: Role;
-  lifecycle_stage?: string | null;
-  activity_score?: number | null;
-  last_login_at?: string | null;
-  created_at: string;
-}
+// Use OptimisticUser from the hook instead of local interface
+type User = OptimisticUser;
 
 interface CreateUserData {
   email: string;
@@ -63,11 +61,14 @@ const UserManagementEnhanced: FC = () => {
     }
   })();
 
-  const debugLog = (...args: unknown[]) => {
-    if (debugEnabled) {
-      logger.debug('[UserManagementEnhanced]', { ...args });
-    }
-  };
+  const debugLog = useCallback(
+    (...args: unknown[]) => {
+      if (debugEnabled) {
+        logger.debug('[UserManagementEnhanced]', { ...args });
+      }
+    },
+    [debugEnabled]
+  );
 
   useEffect(() => {
     if (!debugEnabled) {
@@ -78,10 +79,10 @@ const UserManagementEnhanced: FC = () => {
       user,
       role: user?.role,
       isSuperuser: user?.is_superuser,
-      permissions: getUserPermissions(user),
+      permissions: user ? getUserPermissions(user) : [],
       hasUserRead: hasPermission('user:read'),
       isAdmin: hasPermission('admin'),
-      roleName: getUserRoleName(user),
+      roleName: user ? getUserRoleName(user) : 'unknown',
     });
 
     debugLog(
@@ -89,10 +90,21 @@ const UserManagementEnhanced: FC = () => {
         ? 'Component rendering with active user context'
         : 'Component rendering without user context'
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debugEnabled, hasPermission, user]);
+  }, [debugEnabled, debugLog, hasPermission, user]);
 
-  const [users, setUsers] = useState<User[]>([]);
+  // ✅ React 19: Optimistic User Management with instant UI updates
+  const {
+    users,
+    setUsers,
+    createUser: createUserOptimistic,
+    updateUser: updateUserOptimistic,
+    deleteUser: deleteUserOptimistic,
+    toggleUserStatus: toggleUserStatusOptimistic,
+    bulkDelete: bulkDeleteOptimistic,
+    isOptimistic,
+  } = useOptimisticUserManagement([]);
+
+  // ✅ React 19: Consolidated state (11 useState → 5 state groups)
   const [roles, setRoles] = useState<Role[]>([]);
   const roleMap = (() => {
     const map = new Map<string, Role>();
@@ -107,25 +119,36 @@ const UserManagementEnhanced: FC = () => {
     });
     return map;
   })();
+
+  // 1. Server data state
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
 
-  // ✅ React 18: useDeferredValue for search to avoid blocking input
-  const deferredSearchTerm = useDeferredValue(searchTerm);
+  // 2. Filters state (consolidated 3 → 1)
+  const [filters, setFilters] = useState({
+    searchTerm: '',
+    role: '',
+    isActive: undefined as boolean | undefined,
+  });
 
-  // ✅ React 18: useTransition for filter changes
+  // ✅ React 19: useDeferredValue for search to avoid blocking input
+  const deferredSearchTerm = useDeferredValue(filters.searchTerm);
+
+  // ✅ React 19: useTransition for filter changes
   const [isPending, startTransition] = useTransition();
 
-  const [filterRole, setFilterRole] = useState('');
-  const [filterActive, setFilterActive] = useState<boolean | undefined>(undefined);
+  // 3. Pagination state
   const [pagination, setPagination] = useState({ skip: 0, limit: 20, total: 0, hasMore: false });
 
-  // Modals and selections
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showUserModal, setShowUserModal] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set<string>());
+  // 4. UI state (consolidated 4 → 1)
+  const [uiState, setUIState] = useState({
+    selectedUser: null as User | null,
+    showUserModal: false,
+    showCreateModal: false,
+    selectedUsers: new Set<string>(),
+  });
+
+  // 5. Action loading state
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const buildCreateUserRequest = (data: CreateUserData): CreateUserRequest => {
@@ -184,13 +207,13 @@ const UserManagementEnhanced: FC = () => {
   };
 
   // Define functions before useEffect
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     debugLog('Loading users...', {
       skip: pagination.skip,
       limit: pagination.limit,
       searchTerm: deferredSearchTerm, // ✅ Use deferred value
-      filterRole,
-      filterActive,
+      filterRole: filters.role, // ✅ From consolidated state
+      filterActive: filters.isActive, // ✅ From consolidated state
     });
 
     try {
@@ -203,8 +226,8 @@ const UserManagementEnhanced: FC = () => {
       };
 
       if (deferredSearchTerm) params['search'] = deferredSearchTerm; // ✅ Use deferred value
-      if (filterRole) params['role'] = filterRole;
-      if (filterActive !== undefined) params['is_active'] = filterActive;
+      if (filters.role) params['role'] = filters.role; // ✅ From consolidated state
+      if (filters.isActive !== undefined) params['is_active'] = filters.isActive; // ✅ From consolidated state
 
       debugLog('Requesting users with params', params);
 
@@ -284,9 +307,18 @@ const UserManagementEnhanced: FC = () => {
       setIsLoading(false);
       debugLog('loadUsers completed');
     }
-  };
+  }, [
+    debugLog,
+    pagination.skip,
+    pagination.limit,
+    deferredSearchTerm,
+    filters.role,
+    filters.isActive,
+    roleMap,
+    setUsers,
+  ]);
 
-  const loadRoles = async () => {
+  const loadRoles = useCallback(async () => {
     try {
       debugLog('Loading roles from backend...');
       const fetchedRoles = await apiClient.getRoles();
@@ -314,7 +346,7 @@ const UserManagementEnhanced: FC = () => {
         },
       ]);
     }
-  };
+  }, [debugLog]);
 
   useEffect(() => {
     debugLog('UserManagementEnhanced mounted', {
@@ -336,7 +368,7 @@ const UserManagementEnhanced: FC = () => {
 
       return { ...prev, skip: 0 };
     });
-  }, [filterActive, filterRole, searchTerm]);
+  }, [filters.isActive, filters.role, filters.searchTerm]); // ✅ React 19: Consolidated state dependencies
 
   const handleUserAction = async (action: string, userId: string, data?: UpdateUserData) => {
     try {
@@ -344,14 +376,17 @@ const UserManagementEnhanced: FC = () => {
 
       switch (action) {
         case 'activate':
-          await apiClient.updateUser(userId, { is_active: true });
+          // ✅ React 19: Optimistic status toggle - instant UI update
+          await toggleUserStatusOptimistic(userId, false);
           break;
         case 'deactivate':
-          await apiClient.updateUser(userId, { is_active: false });
+          // ✅ React 19: Optimistic status toggle - instant UI update
+          await toggleUserStatusOptimistic(userId, true);
           break;
         case 'delete':
           if (window.confirm('Are you sure you want to delete this user?')) {
-            await apiClient.deleteUser(userId);
+            // ✅ React 19: Optimistic delete - instant UI update
+            await deleteUserOptimistic(userId);
           } else {
             return;
           }
@@ -364,7 +399,8 @@ const UserManagementEnhanced: FC = () => {
               break;
             }
 
-            await apiClient.updateUser(userId, payload);
+            // ✅ React 19: Optimistic update - instant UI update
+            await updateUserOptimistic(userId, payload);
           }
           break;
         default:
@@ -373,13 +409,14 @@ const UserManagementEnhanced: FC = () => {
           }
       }
 
-      await loadUsers();
+      // ✅ No need to call loadUsers() - optimistic updates already handled it!
     } catch (error) {
       logger.error(
         `Action ${action} failed:`,
         error instanceof Error ? error : new Error(String(error))
       );
       setError(`Failed to ${action} user`);
+      // ✅ UI automatically rolls back on error
     } finally {
       setActionLoading(null);
     }
@@ -388,31 +425,35 @@ const UserManagementEnhanced: FC = () => {
   const handleCreateUser = async (userData: CreateUserData) => {
     try {
       setActionLoading('create-user');
-      await apiClient.createUser(buildCreateUserRequest(userData));
-      setShowCreateModal(false);
-      await loadUsers();
+      // ✅ React 19: Optimistic create - instant UI update
+      await createUserOptimistic(buildCreateUserRequest(userData));
+      setUIState((prev) => ({ ...prev, showCreateModal: false })); // ✅ Consolidated state
+      // ✅ No need to call loadUsers() - optimistic updates already handled it!
     } catch (error) {
       logger.error('Create user failed:', undefined, { error });
       setError('Failed to create user');
+      // ✅ UI automatically rolls back on error
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleBulkDelete = async () => {
-    if (selectedUsers.size === 0) return;
+    if (uiState.selectedUsers.size === 0) return; // ✅ Consolidated state
 
-    if (window.confirm(`Are you sure you want to delete ${selectedUsers.size} users?`)) {
+    if (window.confirm(`Are you sure you want to delete ${uiState.selectedUsers.size} users?`)) {
       try {
         setActionLoading('bulk-delete');
 
-        await Promise.all(Array.from(selectedUsers, (userId) => apiClient.deleteUser(userId)));
+        // ✅ React 19: Optimistic bulk delete - instant UI update
+        await bulkDeleteOptimistic(Array.from(uiState.selectedUsers)); // ✅ Consolidated state
 
-        setSelectedUsers(new Set<string>());
-        await loadUsers();
+        setUIState((prev) => ({ ...prev, selectedUsers: new Set<string>() })); // ✅ Consolidated state
+        // ✅ No need to call loadUsers() - optimistic updates already handled it!
       } catch (error) {
         logger.error('Bulk delete failed:', undefined, { error });
         setError('Failed to delete some users');
+        // ✅ UI automatically rolls back on error
       } finally {
         setActionLoading(null);
       }
@@ -420,22 +461,25 @@ const UserManagementEnhanced: FC = () => {
   };
 
   const handleSelectUser = (userId: string, selected: boolean) => {
-    setSelectedUsers((prev) => {
-      const newSet = new Set(prev);
+    setUIState((prev) => {
+      const newSet = new Set(prev.selectedUsers);
       if (selected) {
         newSet.add(userId);
       } else {
         newSet.delete(userId);
       }
-      return newSet;
+      return { ...prev, selectedUsers: newSet }; // ✅ Return full state object
     });
   };
 
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
-      setSelectedUsers(new Set<string>(users.map((user) => user.id)));
+      setUIState((prev) => ({
+        ...prev,
+        selectedUsers: new Set<string>(users.map((user) => user.id)),
+      }));
     } else {
-      setSelectedUsers(new Set<string>());
+      setUIState((prev) => ({ ...prev, selectedUsers: new Set<string>() }));
     }
   };
 
@@ -474,10 +518,10 @@ const UserManagementEnhanced: FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Bulk Actions */}
-          {selectedUsers.size > 0 && (
+          {/* Bulk Actions - using consolidated state */}
+          {uiState.selectedUsers.size > 0 && (
             <div className="flex items-center gap-2 rounded-lg bg-sky-100 px-4 py-2 text-sky-700">
-              <span>{selectedUsers.size} selected</span>
+              <span>{uiState.selectedUsers.size} selected</span>
               <button
                 onClick={handleBulkDelete}
                 disabled={actionLoading === 'bulk-delete'}
@@ -487,7 +531,9 @@ const UserManagementEnhanced: FC = () => {
                 {actionLoading === 'bulk-delete' ? 'Deleting...' : 'Delete'}
               </button>
               <button
-                onClick={() => setSelectedUsers(new Set<string>())}
+                onClick={() =>
+                  setUIState((prev) => ({ ...prev, selectedUsers: new Set<string>() }))
+                }
                 className="cursor-pointer rounded border-none bg-gray-600 px-2 py-1 text-xs text-white hover:bg-gray-700"
               >
                 Clear
@@ -497,7 +543,7 @@ const UserManagementEnhanced: FC = () => {
 
           {hasPermission('user:write') && (
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => setUIState((prev) => ({ ...prev, showCreateModal: true }))}
               className="flex items-center gap-2 rounded-lg border-none bg-blue-500 px-6 py-3 font-medium text-white hover:bg-blue-600"
             >
               <Plus className="h-4 w-4" />
@@ -516,15 +562,15 @@ const UserManagementEnhanced: FC = () => {
                 <Search className="mr-2 inline h-4 w-4" />
                 Search Users
                 {/* ✅ Show pending indicator when search is deferred */}
-                {searchTerm !== deferredSearchTerm && (
+                {filters.searchTerm !== deferredSearchTerm && (
                   <span className="ml-2 text-xs text-blue-600">Searching...</span>
                 )}
               </span>
               <input
                 type="text"
                 placeholder="Search by email, username..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={filters.searchTerm}
+                onChange={(e) => setFilters((prev) => ({ ...prev, searchTerm: e.target.value }))}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </label>
@@ -539,11 +585,11 @@ const UserManagementEnhanced: FC = () => {
                 {isPending && <span className="ml-2 text-xs text-blue-600">Updating...</span>}
               </span>
               <select
-                value={filterRole}
+                value={filters.role}
                 onChange={(e) => {
-                  // ✅ React 18: Mark filter change as non-urgent
+                  // ✅ React 19: Mark filter change as non-urgent
                   startTransition(() => {
-                    setFilterRole(e.target.value);
+                    setFilters((prev) => ({ ...prev, role: e.target.value }));
                   });
                 }}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -562,10 +608,13 @@ const UserManagementEnhanced: FC = () => {
             <label className="flex flex-col gap-2 font-medium text-gray-700">
               <span>Status</span>
               <select
-                value={filterActive === undefined ? '' : filterActive.toString()}
+                value={filters.isActive === undefined ? '' : filters.isActive.toString()}
                 onChange={(e) => {
                   const value = e.target.value;
-                  setFilterActive(value === '' ? undefined : value === 'true');
+                  setFilters((prev) => ({
+                    ...prev,
+                    isActive: value === '' ? undefined : value === 'true',
+                  }));
                 }}
                 className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               >
@@ -578,9 +627,7 @@ const UserManagementEnhanced: FC = () => {
 
           <button
             onClick={() => {
-              setSearchTerm('');
-              setFilterRole('');
-              setFilterActive(undefined);
+              setFilters({ searchTerm: '', role: '', isActive: undefined });
             }}
             className="cursor-pointer rounded-md border-none bg-gray-600 px-4 py-3 font-medium text-white hover:bg-gray-700"
           >
@@ -606,7 +653,7 @@ const UserManagementEnhanced: FC = () => {
             <Users className="mx-auto mb-4 h-12 w-12 text-gray-400" />
             <h3 className="mb-2 text-gray-900">No users found</h3>
             <p className="text-gray-600">
-              {searchTerm || filterRole || filterActive !== undefined
+              {filters.searchTerm || filters.role || filters.isActive !== undefined
                 ? 'Try adjusting your filters'
                 : 'Get started by creating your first user'}
             </p>
@@ -620,7 +667,7 @@ const UserManagementEnhanced: FC = () => {
                     <th className="p-4 text-left font-semibold text-gray-700">
                       <input
                         type="checkbox"
-                        checked={selectedUsers.size === users.length && users.length > 0}
+                        checked={uiState.selectedUsers.size === users.length && users.length > 0}
                         onChange={(e) => handleSelectAll(e.target.checked)}
                         className="mr-2"
                       />
@@ -636,18 +683,27 @@ const UserManagementEnhanced: FC = () => {
                   {users.map((user, index) => (
                     <tr
                       key={user.id}
-                      className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                      className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${
+                        isOptimistic(user) ? 'opacity-60 transition-opacity' : ''
+                      }`}
                     >
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <input
                             type="checkbox"
-                            checked={selectedUsers.has(user.id)}
+                            checked={uiState.selectedUsers.has(user.id)}
                             onChange={(e) => handleSelectUser(user.id, e.target.checked)}
+                            disabled={isOptimistic(user)}
                           />
                           <div>
-                            <div className="font-medium text-gray-900">
+                            <div className="font-medium text-gray-900 flex items-center gap-2">
                               {user.full_name || user.username || user.email}
+                              {/* ✅ React 19: Visual indicator for optimistic updates */}
+                              {isOptimistic(user) && (
+                                <span className="text-xs text-amber-600 font-normal animate-pulse">
+                                  Saving...
+                                </span>
+                              )}
                             </div>
                             <div className="text-sm text-gray-600">{user.email}</div>
                           </div>
@@ -680,15 +736,16 @@ const UserManagementEnhanced: FC = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="p-4 text-gray-600">
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </td>
+                      <td className="p-4 text-gray-600">{formatDate(user.created_at)}</td>
                       <td className="p-4">
                         <div className="flex gap-2">
                           <button
                             onClick={() => {
-                              setSelectedUser(user);
-                              setShowUserModal(true);
+                              setUIState((prev) => ({
+                                ...prev,
+                                selectedUser: user,
+                                showUserModal: true,
+                              }));
                             }}
                             className="flex cursor-pointer items-center gap-1 rounded border-none bg-blue-500 p-2 text-white hover:bg-blue-600"
                             title="View/Edit User"
@@ -785,26 +842,26 @@ const UserManagementEnhanced: FC = () => {
       </div>
 
       {/* Create User Modal */}
-      {showCreateModal && (
+      {uiState.showCreateModal && (
         <CreateUserModal
           roles={roles}
           onSave={handleCreateUser}
-          onClose={() => setShowCreateModal(false)}
+          onClose={() => setUIState((prev) => ({ ...prev, showCreateModal: false }))}
           isLoading={actionLoading === 'create-user'}
         />
       )}
 
       {/* Edit User Modal */}
-      {showUserModal && selectedUser && (
+      {uiState.showUserModal && uiState.selectedUser && (
         <EditUserModal
-          user={selectedUser}
+          user={uiState.selectedUser}
           roles={roles}
           onSave={(data) => {
-            handleUserAction('update', selectedUser.id, data);
-            setShowUserModal(false);
+            handleUserAction('update', uiState.selectedUser!.id, data);
+            setUIState((prev) => ({ ...prev, showUserModal: false }));
           }}
-          onClose={() => setShowUserModal(false)}
-          isLoading={actionLoading?.includes(selectedUser.id) || false}
+          onClose={() => setUIState((prev) => ({ ...prev, showUserModal: false }))}
+          isLoading={actionLoading?.includes(uiState.selectedUser.id) || false}
         />
       )}
     </div>
@@ -819,7 +876,7 @@ interface CreateUserState {
 }
 
 async function createUserAction(
-  prevState: CreateUserState,
+  _prevState: CreateUserState,
   formData: FormData
 ): Promise<CreateUserState> {
   const email = formData.get('email') as string;

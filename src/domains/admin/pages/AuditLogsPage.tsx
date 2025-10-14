@@ -24,13 +24,14 @@ import {
   Shield,
   User,
 } from 'lucide-react';
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { Skeleton } from '@shared/ui/Skeleton';
+import { formatDateTime, formatTimestamp } from '@shared/utils';
 import { adminService } from '../../../services/admin-backend.service';
 
 // ============================================================================
@@ -46,14 +47,6 @@ interface AuditLogEntry {
   severity: string;
   details?: Record<string, unknown>;
 }
-
-// Commented out unused interface
-// interface AuditLogsResponse {
-//   logs: AuditLogEntry[];
-//   total: number;
-//   page: number;
-//   limit: number;
-// }
 
 interface AuditFilters {
   action?: string;
@@ -128,14 +121,6 @@ const AuditLogRow: FC<{ log: AuditLogEntry; onViewDetails: (log: AuditLogEntry) 
   log,
   onViewDetails,
 }) => {
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return {
-      date: date.toLocaleDateString(),
-      time: date.toLocaleTimeString(),
-    };
-  };
-
   const { date, time } = formatTimestamp(log.timestamp);
 
   return (
@@ -178,9 +163,9 @@ const DetailsModal: FC<{
   if (!isOpen || !log) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+    <div className="modal-container">
+      <div className="modal-content">
+        <div className="modal-header">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">Audit Log Details</h3>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
@@ -189,7 +174,7 @@ const DetailsModal: FC<{
           </div>
         </div>
 
-        <div className="px-6 py-4 overflow-y-auto">
+        <div className="modal-body">
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -220,7 +205,7 @@ const DetailsModal: FC<{
               </div>
               <div>
                 <h4 className="text-sm font-medium text-gray-700 mb-1">Timestamp</h4>
-                <p className="text-sm text-gray-900">{new Date(log.timestamp).toLocaleString()}</p>
+                <p className="text-sm text-gray-900">{formatDateTime(log.timestamp)}</p>
               </div>
             </div>
 
@@ -235,7 +220,7 @@ const DetailsModal: FC<{
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+        <div className="modal-footer">
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
@@ -375,7 +360,7 @@ const AuditLogsPage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadAuditLogs = async () => {
+  const loadAuditLogs = useCallback(async () => {
     if (!canViewAuditLogs) return;
 
     setIsLoading(true);
@@ -388,9 +373,9 @@ const AuditLogsPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [canViewAuditLogs, filters, handleError]);
 
-  const loadSummary = async () => {
+  const loadSummary = useCallback(async () => {
     if (!canViewAuditLogs) return;
 
     try {
@@ -399,7 +384,7 @@ const AuditLogsPage: FC = () => {
     } catch (error) {
       handleError(error, 'Failed to load audit summary');
     }
-  };
+  }, [canViewAuditLogs, handleError]);
 
   // ============================================================================
   // Filter Functions
@@ -435,8 +420,7 @@ const AuditLogsPage: FC = () => {
 
   const handleExport = async () => {
     try {
-      // This would typically call an export API
-      console.log('Exporting audit logs with filters:', filters);
+      // TODO: Implement export functionality
       // await adminService.exportAuditLogs(filters);
     } catch (error) {
       handleError(error, 'Failed to export audit logs');
@@ -449,13 +433,11 @@ const AuditLogsPage: FC = () => {
 
   useEffect(() => {
     loadAuditLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [filters, loadAuditLogs]);
 
   useEffect(() => {
     loadSummary();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadSummary]);
 
   // ============================================================================
   // Render
@@ -531,7 +513,7 @@ const AuditLogsPage: FC = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="section-container">
               <div className="flex items-center">
                 <AlertCircle className="w-8 h-8 text-red-600" />
                 <div className="ml-4">
@@ -542,7 +524,7 @@ const AuditLogsPage: FC = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="section-container">
               <div className="flex items-center">
                 <AlertTriangle className="w-8 h-8 text-yellow-600" />
                 <div className="ml-4">
@@ -553,7 +535,7 @@ const AuditLogsPage: FC = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="section-container">
               <div className="flex items-center">
                 <CheckCircle className="w-8 h-8 text-green-600" />
                 <div className="ml-4">
@@ -568,7 +550,7 @@ const AuditLogsPage: FC = () => {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border mb-6">
+        <div className="section-container-mb">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900 flex items-center">
               <Filter className="w-5 h-5 mr-2" />

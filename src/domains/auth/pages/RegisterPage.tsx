@@ -12,7 +12,7 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import React, { ComponentType, useActionState, useEffect, useState } from 'react';
+import React, { ComponentType, useActionState, useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { apiClient } from '@lib/api';
@@ -151,7 +151,7 @@ const RegisterPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const handleProceedToLogin = () => {
+  const handleProceedToLogin = useCallback(() => {
     setHasNavigated((prev) => {
       if (!prev) {
         setRedirectCountdown(null);
@@ -161,7 +161,7 @@ const RegisterPage: React.FC = () => {
       }
       return true;
     });
-  };
+  }, [navigate]);
 
   // Handle countdown and redirection
   useEffect(() => {

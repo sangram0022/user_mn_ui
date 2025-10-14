@@ -6,13 +6,13 @@ import {
   PasswordInput,
   SubmitButton,
   TextInput,
-  useFormState,
+  useFormFields, // ✅ React 19: Renamed from useFormState
   usePasswordVisibility,
 } from '@shared/index';
 import { validateEmail, validatePassword } from '@shared/utils/formValidation';
 import { useAuth } from '../context/AuthContext';
 
-interface LoginFormData {
+interface LoginFormData extends Record<string, unknown> {
   email: string;
   password: string;
   rememberMe: boolean;
@@ -54,7 +54,7 @@ async function loginAction(prevState: LoginState, formData: FormData): Promise<L
 }
 
 const LoginPage: React.FC = () => {
-  const { formData, updateField } = useFormState<LoginFormData>({
+  const { formData, updateField } = useFormFields<LoginFormData>({
     email: '',
     password: '',
     rememberMe: false,

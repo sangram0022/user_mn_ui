@@ -6,6 +6,7 @@ import { notFoundRoute, routes } from '@routing/config';
 import { ProtectedRoute, PublicRoute } from '@routing/RouteGuards';
 import { RoutePreloadTrigger } from '@routing/routePreloader';
 import RouteRenderer from '@routing/RouteRenderer';
+import { initializePreloading, preloadPredictedRoutes } from '@routing/useNavigationPreload';
 import PerformanceMonitor from '@shared/components/PerformanceMonitor';
 import { PageErrorBoundary as ErrorBoundary } from '@shared/errors/ErrorBoundary';
 import { useEffect } from 'react';
@@ -25,6 +26,12 @@ const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode)
 function App() {
   // Initialize performance optimizations
   useEffect(() => {
+    // ✅ React 19: Initialize navigation preloading system
+    initializePreloading();
+
+    // ✅ React 19: Preload commonly accessed routes
+    preloadPredictedRoutes('/');
+
     // Preconnect to API
     if (typeof document !== 'undefined') {
       const preconnect = document.createElement('link');

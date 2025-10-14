@@ -5,7 +5,7 @@
  * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError } from '../types/api.types';
 
 interface UseApiOptions<T> {
@@ -37,7 +37,7 @@ export function useApi<T>(apiCall: () => Promise<T>, options: UseApiOptions<T> =
     };
   }, []);
 
-  const execute = async () => {
+  const execute = useCallback(async () => {
     // Abort previous request if exists
     abortControllerRef.current?.abort();
     abortControllerRef.current = new AbortController();
@@ -70,14 +70,14 @@ export function useApi<T>(apiCall: () => Promise<T>, options: UseApiOptions<T> =
         setLoading(false);
       }
     }
-  };
+  }, [apiCall, onSuccess, onError]);
 
   useEffect(() => {
     if (autoFetch) {
       execute();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [autoFetch, execute, ...deps]);
 
   const refetch = () => {
     return execute();

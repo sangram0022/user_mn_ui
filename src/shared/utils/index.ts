@@ -19,6 +19,9 @@ export * from './user';
 // Performance utilities
 export * from './performance';
 
+// Date utilities
+export * from './dateUtils';
+
 // Class name utilities
 export { clsx, cn } from './classNames';
 

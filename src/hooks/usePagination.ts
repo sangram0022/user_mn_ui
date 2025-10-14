@@ -4,12 +4,15 @@
  * Manages pagination state and provides helper functions for
  * navigating through paginated data.
  *
+ * React 19: No memoization needed - React Compiler handles optimization
+ *
  * @example
  * ```tsx
  * const pagination = usePagination({ pageSize: 20 });
  *
  * // Fetch data
- * const data = await apiClient.getUsers({ *   skip: pagination.skip,
+ * const data = await apiClient.getUsers({
+ *   skip: pagination.skip,
  *   limit: pagination.limit
  * });
  *
@@ -21,7 +24,7 @@
  * ```
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 
 interface UsePaginationOptions {
   initialPage?: number;
@@ -38,56 +41,42 @@ export const usePagination = (options: UsePaginationOptions = {}) => {
   const [limit, setLimit] = useState(pageSize ?? initialLimit);
   const [total, setTotal] = useState(initialTotal ?? totalItems);
 
-  const totalPages = useMemo(() => {
-    return Math.ceil(total / limit);
-  }, [total, limit]);
+  const totalPages = Math.ceil(total / limit);
+  const hasNext = page < totalPages;
+  const hasPrev = page > 1;
+  const offset = (page - 1) * limit;
 
-  const hasNext = useMemo(() => {
-    return page < totalPages;
-  }, [page, totalPages]);
-
-  const hasPrev = useMemo(() => {
-    return page > 1;
-  }, [page]);
-
-  const offset = useMemo(() => {
-    return (page - 1) * limit;
-  }, [page, limit]);
-
-  const nextPage = useCallback(() => {
+  const nextPage = () => {
     if (hasNext) {
       setPage((p: number) => p + 1);
     }
-  }, [hasNext]);
+  };
 
-  const prevPage = useCallback(() => {
+  const prevPage = () => {
     if (hasPrev) {
       setPage((p: number) => p - 1);
     }
-  }, [hasPrev]);
+  };
 
-  const goToPage = useCallback(
-    (pageNumber: number) => {
-      if (pageNumber >= 1 && pageNumber <= totalPages) {
-        setPage(pageNumber);
-      }
-    },
-    [totalPages]
-  );
+  const goToPage = (pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setPage(pageNumber);
+    }
+  };
 
-  const changeLimit = useCallback((newLimit: number) => {
+  const changeLimit = (newLimit: number) => {
     setLimit(newLimit);
     setPage(1); // Reset to first page when limit changes
-  }, []);
+  };
 
-  const updateTotal = useCallback((newTotal: number) => {
+  const updateTotal = (newTotal: number) => {
     setTotal(newTotal);
-  }, []);
+  };
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setPage(initialPage);
     setLimit(initialLimit);
-  }, [initialPage, initialLimit]);
+  };
 
   return {
     page,

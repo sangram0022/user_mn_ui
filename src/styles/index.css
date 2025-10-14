@@ -4,6 +4,9 @@
 /* Tailwind CSS v4 imports */
 @import 'tailwindcss';
 
+/* Import common utility classes */
+@import './common-classes.css';
+
 /* Base styles */
 html {
   font-family:

@@ -22,13 +22,14 @@ import {
   Users,
   XCircle,
 } from 'lucide-react';
-import { useEffect, useRef, useState, type FC } from 'react';
+import { useCallback, useEffect, useRef, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { Skeleton } from '@shared/ui/Skeleton';
+import { formatDateTime } from '@shared/utils';
 import { adminService } from '../../../services/admin-backend.service';
 
 // ============================================================================
@@ -553,10 +554,8 @@ const OperationsList: FC<{
             />
           ) : (
             <div className="text-sm text-gray-500">
-              <p>Created: {new Date(operation.created_at).toLocaleString()}</p>
-              {operation.completed_at && (
-                <p>Completed: {new Date(operation.completed_at).toLocaleString()}</p>
-              )}
+              <p>Created: {formatDateTime(operation.created_at)}</p>
+              {operation.completed_at && <p>Completed: {formatDateTime(operation.completed_at)}</p>}
             </div>
           )}
         </div>
@@ -590,7 +589,7 @@ const BulkOperationsPage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadOperations = async () => {
+  const loadOperations = useCallback(async () => {
     if (!canManageBulkOps) return;
 
     setIsLoading(true);
@@ -602,7 +601,7 @@ const BulkOperationsPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [canManageBulkOps, handleError]);
 
   // ============================================================================
   // File Upload & Validation
@@ -724,8 +723,7 @@ const BulkOperationsPage: FC = () => {
 
   useEffect(() => {
     loadOperations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadOperations]);
 
   // Auto-refresh operations when there are active ones
   useEffect(() => {

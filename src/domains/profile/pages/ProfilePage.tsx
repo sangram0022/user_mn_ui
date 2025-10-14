@@ -1,9 +1,10 @@
 import type { FC } from 'react';
-import { useActionState, useEffect, useId, useState } from 'react';
+import { useActionState, useCallback, useEffect, useId, useState } from 'react';
 
 import { apiClient } from '@lib/api';
 import type { UserProfile as BaseUserProfile } from '@shared/types';
 import Breadcrumb from '@shared/ui/Breadcrumb';
+import { formatDate } from '@shared/utils';
 import {
   Bell,
   Camera,
@@ -183,7 +184,8 @@ const ProfilePage: FC = () => {
   });
 
   // Load profile data
-  const loadProfile = async () => {
+
+  const loadProfile = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -210,16 +212,16 @@ const ProfilePage: FC = () => {
         last_password_change: '2024-01-15T10:30:00Z',
         active_sessions: 2,
       });
-    } catch (err: unknown) {
-      console.error('Failed to load profile:', err);
+    } catch {
+      // Silently fail - error handling can be added if needed
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadProfile();
-  }, []);
+  }, [loadProfile]);
 
   // Handle successful profile update
   useEffect(() => {
@@ -297,7 +299,7 @@ const ProfilePage: FC = () => {
                 ✓ Verified
               </span>
               <span className="text-xs text-gray-500">
-                Member since {new Date(profile?.created_at || '').toLocaleDateString()}
+                Member since {formatDate(profile?.created_at || '')}
               </span>
             </div>
           </div>

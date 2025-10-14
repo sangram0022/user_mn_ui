@@ -1,16 +1,18 @@
 /**
  * useLocalStorage Hook
  * React hook for localStorage with type safety and reactivity
+ *
+ * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((val: T) => T)) => void, () => void] {
   // Get from localStorage or use initial value
-  const readValue = useCallback((): T => {
+  const readValue = (): T => {
     if (typeof window === 'undefined') {
       return initialValue;
     }
@@ -22,34 +24,31 @@ export function useLocalStorage<T>(
       console.warn(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
-  }, [key, initialValue]);
+  };
 
   const [storedValue, setStoredValue] = useState<T>(readValue);
 
   // Return a wrapped version of useState's setter function that
   // persists the new value to localStorage.
-  const setValue = useCallback(
-    (value: T | ((val: T) => T)) => {
-      try {
-        // Allow value to be a function so we have same API as useState
-        const valueToStore = value instanceof Function ? value(storedValue) : value;
+  const setValue = (value: T | ((val: T) => T)) => {
+    try {
+      // Allow value to be a function so we have same API as useState
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
 
-        // Save state
-        setStoredValue(valueToStore);
+      // Save state
+      setStoredValue(valueToStore);
 
-        // Save to localStorage
-        if (typeof window !== 'undefined') {
-          window.localStorage.setItem(key, JSON.stringify(valueToStore));
-        }
-      } catch (error) {
-        console.warn(`Error setting localStorage key "${key}":`, error);
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
       }
-    },
-    [key, storedValue]
-  );
+    } catch (error) {
+      console.warn(`Error setting localStorage key "${key}":`, error);
+    }
+  };
 
   // Remove from localStorage
-  const removeValue = useCallback(() => {
+  const removeValue = () => {
     try {
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key);
@@ -58,7 +57,7 @@ export function useLocalStorage<T>(
     } catch (error) {
       console.warn(`Error removing localStorage key "${key}":`, error);
     }
-  }, [key, initialValue]);
+  };
 
   // Listen for changes in other tabs/windows
   useEffect(() => {

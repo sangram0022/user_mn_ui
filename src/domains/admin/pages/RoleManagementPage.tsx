@@ -8,7 +8,7 @@
  */
 
 import { Lock, Plus, Search, Shield, Trash2, UserPlus, X } from 'lucide-react';
-import { useActionState, useEffect, useState, type FC } from 'react';
+import { useActionState, useCallback, useEffect, useOptimistic, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -28,6 +28,7 @@ interface Role {
   role_name: string;
   description: string;
   permissions: string[];
+  isOptimistic?: boolean; // ✅ React 19: Add optimistic flag
 }
 
 interface Permission {
@@ -364,6 +365,18 @@ const RoleManagementPage: FC = () => {
 
   // State
   const [roles, setRoles] = useState<Role[]>([]);
+
+  // ✅ React 19: useOptimistic for instant UI updates
+  const [optimisticRoles, updateOptimisticRoles] = useOptimistic(
+    roles,
+    (state: Role[], action: { type: 'delete'; roleId: string }) => {
+      if (action.type === 'delete') {
+        return state.filter((role) => role.role_id !== action.roleId);
+      }
+      return state;
+    }
+  );
+
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -379,7 +392,7 @@ const RoleManagementPage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadRoles = async () => {
+  const loadRoles = useCallback(async () => {
     if (!canViewRoles) return;
 
     try {
@@ -388,9 +401,9 @@ const RoleManagementPage: FC = () => {
     } catch (error) {
       handleError(error, t('roles.failedToLoadRoles'));
     }
-  };
+  }, [canViewRoles, handleError, t]);
 
-  const loadPermissions = async () => {
+  const loadPermissions = useCallback(async () => {
     if (!canViewRoles) return;
 
     try {
@@ -399,9 +412,9 @@ const RoleManagementPage: FC = () => {
     } catch (error) {
       handleError(error, t('roles.failedToLoadPermissions'));
     }
-  };
+  }, [canViewRoles, handleError, t]);
 
-  const loadAllData = async () => {
+  const loadAllData = useCallback(async () => {
     setIsLoading(true);
     clearError();
 
@@ -410,7 +423,7 @@ const RoleManagementPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [clearError, loadRoles, loadPermissions]);
 
   // ============================================================================
   // Action Functions
@@ -419,11 +432,18 @@ const RoleManagementPage: FC = () => {
   const handleDeleteRole = async (roleId: string) => {
     if (!confirm(t('roles.confirmDeleteRole'))) return;
 
+    // ✅ React 19: Optimistic delete - instant UI update
+    updateOptimisticRoles({ type: 'delete', roleId });
+
     try {
       await adminService.deleteRole(roleId);
-      await loadRoles();
+      // Confirm deletion in real state
+      setRoles((prev) => prev.filter((role) => role.role_id !== roleId));
     } catch (error) {
       handleError(error, t('roles.failedToDeleteRole'));
+      // ✅ UI automatically rolls back on error
+      // Re-load to restore the role
+      await loadRoles();
     }
   };
 
@@ -439,7 +459,8 @@ const RoleManagementPage: FC = () => {
   // Filter Functions
   // ============================================================================
 
-  const filteredRoles = roles.filter((role) => {
+  // ✅ React 19: Use optimisticRoles for instant UI updates
+  const filteredRoles = optimisticRoles.filter((role) => {
     const matchesSearch =
       role.role_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       role.description.toLowerCase().includes(searchTerm.toLowerCase());

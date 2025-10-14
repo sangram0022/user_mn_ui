@@ -21,13 +21,14 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { Skeleton } from '@shared/ui/Skeleton';
+import { formatDate } from '@shared/utils';
 import { adminService } from '../../../services/admin-backend.service';
 
 // ============================================================================
@@ -245,10 +246,10 @@ const ExportRequestsTable: FC<{
                   <StatusBadge status={request.status} type="export" />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {new Date(request.created_at).toLocaleDateString()}
+                  {formatDate(request.created_at)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {request.expires_at ? new Date(request.expires_at).toLocaleDateString() : 'N/A'}
+                  {request.expires_at ? formatDate(request.expires_at) : 'N/A'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
@@ -403,7 +404,7 @@ const DeletionRequestsTable: FC<{
                   <StatusBadge status={request.status} type="deletion" />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {new Date(request.created_at).toLocaleDateString()}
+                  {formatDate(request.created_at)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {request.consent_confirmed ? (
@@ -525,7 +526,7 @@ const GDPRCompliancePage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadGDPRData = async () => {
+  const loadGDPRData = useCallback(async () => {
     if (!canManageGDPR) return;
 
     setIsLoading(true);
@@ -546,7 +547,7 @@ const GDPRCompliancePage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [canManageGDPR, handleError]);
 
   // ============================================================================
   // Action Functions
@@ -612,8 +613,7 @@ const GDPRCompliancePage: FC = () => {
 
   useEffect(() => {
     loadGDPRData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadGDPRData]);
 
   // ============================================================================
   // Render
@@ -868,8 +868,8 @@ const GDPRCompliancePage: FC = () => {
                             )}
                             <div className="text-sm text-gray-500">
                               {record.granted
-                                ? new Date(record.granted_at!).toLocaleDateString()
-                                : new Date(record.withdrawn_at!).toLocaleDateString()}
+                                ? formatDate(record.granted_at!)
+                                : formatDate(record.withdrawn_at!)}
                             </div>
                           </div>
                         </div>

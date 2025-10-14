@@ -4,13 +4,15 @@
  * Unified form submission handler with proper error handling and loading states.
  * Prevents page refreshes on errors and maintains error state visibility.
  *
+ * React 19: No memoization needed - React Compiler handles optimization
+ *
  * @author Senior UI/UX Architect
  * @created October 12, 2025
  */
 
 import { ApiError } from '@lib/api/error';
 import { logger } from '@shared/utils/logger';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 export interface FormSubmissionState<T = unknown> {
   isLoading: boolean;
@@ -58,74 +60,71 @@ export function useFormSubmission<T = unknown>(options: UseFormSubmissionOptions
     data: null,
   });
 
-  const submit = useCallback(
-    async (apiCall: () => Promise<T>): Promise<FormSubmissionResult<T>> => {
-      // Clear previous error and set loading
-      setState((prev) => ({
-        ...prev,
-        isLoading: true,
-        error: options.resetOnSubmit ? null : prev.error,
-      }));
+  const submit = async (apiCall: () => Promise<T>): Promise<FormSubmissionResult<T>> => {
+    // Clear previous error and set loading
+    setState((prev) => ({
+      ...prev,
+      isLoading: true,
+      error: options.resetOnSubmit ? null : prev.error,
+    }));
 
-      try {
-        const result = await apiCall();
+    try {
+      const result = await apiCall();
 
-        // Success: Update state with data
-        setState({
-          isLoading: false,
-          error: null,
-          data: result,
-        });
+      // Success: Update state with data
+      setState({
+        isLoading: false,
+        error: null,
+        data: result,
+      });
 
-        // Call success callback if provided
-        if (options.onSuccess) {
-          await options.onSuccess(result);
-        }
-
-        return { success: true, data: result };
-      } catch (error) {
-        // Error: Extract and set error state
-        const apiError =
-          error instanceof ApiError
-            ? error
-            : new ApiError({
-                status: 500,
-                message: error instanceof Error ? error.message : 'Unknown error occurred',
-                code: 'UNKNOWN_ERROR',
-              });
-
-        setState({
-          isLoading: false,
-          error: apiError,
-          data: null,
-        });
-
-        // Call error callback if provided
-        if (options.onError) {
-          options.onError(apiError);
-        }
-
-        // Log error for monitoring (only in development)
-        if (import.meta.env.DEV) {
-          logger.error('Form submission failed', apiError, {
-            errorCode: apiError.code,
-            status: apiError.status,
-          });
-        }
-
-        return { success: false, error: apiError };
+      // Call success callback if provided
+      if (options.onSuccess) {
+        await options.onSuccess(result);
       }
-    },
-    [options]
-  );
 
-  const clearError = useCallback(() => {
+      return { success: true, data: result };
+    } catch (error) {
+      // Error: Extract and set error state
+      const apiError =
+        error instanceof ApiError
+          ? error
+          : new ApiError({
+              status: 500,
+              message: error instanceof Error ? error.message : 'Unknown error occurred',
+              code: 'UNKNOWN_ERROR',
+            });
+
+      setState({
+        isLoading: false,
+        error: apiError,
+        data: null,
+      });
+
+      // Call error callback if provided
+      if (options.onError) {
+        options.onError(apiError);
+      }
+
+      // Log error for monitoring (only in development)
+      if (import.meta.env.DEV) {
+        logger.error('Form submission failed', apiError, {
+          errorCode: apiError.code,
+          status: apiError.status,
+        });
+      }
+
+      return { success: false, error: apiError };
+    }
+  };
+
+  const clearError = () => {
     setState((prev) => ({ ...prev, error: null }));
-  }, []);
+  };
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setState({ isLoading: false, error: null, data: null });
-  }, []);
+  };
 
   return {
     ...state,

@@ -21,7 +21,7 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -45,31 +45,6 @@ interface PasswordPolicy {
   lockout_attempts: number;
   lockout_duration_minutes: number;
 }
-
-// Interfaces for future implementation
-// interface PasswordResetRequest {
-//   request_id: string;
-//   user_id: string;
-//   email: string;
-//   requested_at: string;
-//   expires_at: string;
-//   status: 'pending' | 'used' | 'expired' | 'cancelled';
-//   requested_by: 'user' | 'admin';
-//   admin_id?: string;
-//   ip_address: string;
-// }
-
-// interface SecurityEvent {
-//   event_id: string;
-//   user_id: string;
-//   email: string;
-//   event_type: 'password_change' | 'failed_login' | 'account_locked' | 'password_breach' | 'suspicious_login';
-//   timestamp: string;
-//   ip_address: string;
-//   user_agent?: string;
-//   details: Record<string, unknown>;
-//   risk_level: 'low' | 'medium' | 'high' | 'critical';
-// }
 
 interface UserPasswordStatus {
   user_id: string;
@@ -474,7 +449,7 @@ const PasswordManagementPage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadPasswordData = async () => {
+  const loadPasswordData = useCallback(async () => {
     if (!canManagePasswords) return;
 
     setIsLoading(true);
@@ -493,7 +468,7 @@ const PasswordManagementPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [canManagePasswords, handleError]);
 
   // ============================================================================
   // Action Functions

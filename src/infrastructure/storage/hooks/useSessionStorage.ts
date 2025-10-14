@@ -1,16 +1,18 @@
 /**
  * useSessionStorage Hook
  * React hook for sessionStorage with type safety and reactivity
+ *
+ * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 export function useSessionStorage<T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((val: T) => T)) => void, () => void] {
   // Get from sessionStorage or use initial value
-  const readValue = useCallback((): T => {
+  const readValue = (): T => {
     if (typeof window === 'undefined') {
       return initialValue;
     }
@@ -22,34 +24,31 @@ export function useSessionStorage<T>(
       console.warn(`Error reading sessionStorage key "${key}":`, error);
       return initialValue;
     }
-  }, [key, initialValue]);
+  };
 
   const [storedValue, setStoredValue] = useState<T>(readValue);
 
   // Return a wrapped version of useState's setter function that
   // persists the new value to sessionStorage.
-  const setValue = useCallback(
-    (value: T | ((val: T) => T)) => {
-      try {
-        // Allow value to be a function so we have same API as useState
-        const valueToStore = value instanceof Function ? value(storedValue) : value;
+  const setValue = (value: T | ((val: T) => T)) => {
+    try {
+      // Allow value to be a function so we have same API as useState
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
 
-        // Save state
-        setStoredValue(valueToStore);
+      // Save state
+      setStoredValue(valueToStore);
 
-        // Save to sessionStorage
-        if (typeof window !== 'undefined') {
-          window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
-        }
-      } catch (error) {
-        console.warn(`Error setting sessionStorage key "${key}":`, error);
+      // Save to sessionStorage
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
       }
-    },
-    [key, storedValue]
-  );
+    } catch (error) {
+      console.warn(`Error setting sessionStorage key "${key}":`, error);
+    }
+  };
 
   // Remove from sessionStorage
-  const removeValue = useCallback(() => {
+  const removeValue = () => {
     try {
       if (typeof window !== 'undefined') {
         window.sessionStorage.removeItem(key);
@@ -58,7 +57,7 @@ export function useSessionStorage<T>(
     } catch (error) {
       console.warn(`Error removing sessionStorage key "${key}":`, error);
     }
-  }, [key, initialValue]);
+  };
 
   return [storedValue, setValue, removeValue];
 }

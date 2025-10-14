@@ -25,13 +25,14 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { Skeleton } from '@shared/ui/Skeleton';
+import { formatDateTime, formatTime } from '@shared/utils';
 import { adminService } from '../../../services/admin-backend.service';
 
 // ============================================================================
@@ -260,9 +261,7 @@ const ServiceCard: FC<{
         </div>
         <div>
           <p className="text-gray-500">Last Check</p>
-          <p className="font-medium text-gray-900">
-            {new Date(service.last_check).toLocaleTimeString()}
-          </p>
+          <p className="font-medium text-gray-900">{formatTime(service.last_check)}</p>
         </div>
       </div>
 
@@ -342,7 +341,7 @@ const AlertCard: FC<{
             <h4 className="font-medium text-gray-900 mb-1">{alert.title}</h4>
             <p className="text-sm text-gray-600 mb-2">{alert.message}</p>
             <p className="text-xs text-gray-500">
-              {new Date(alert.timestamp).toLocaleString()}
+              {formatDateTime(alert.timestamp)}
               {alert.acknowledged && alert.acknowledged_by && (
                 <span className="ml-2">• Acknowledged by {alert.acknowledged_by}</span>
               )}
@@ -396,7 +395,7 @@ const HealthMonitoringPage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadHealthData = async () => {
+  const loadHealthData = useCallback(async () => {
     if (!canViewHealth) return;
 
     try {
@@ -416,7 +415,7 @@ const HealthMonitoringPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [canViewHealth, handleError]);
 
   // ============================================================================
   // Action Functions
@@ -454,8 +453,7 @@ const HealthMonitoringPage: FC = () => {
 
   useEffect(() => {
     loadHealthData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadHealthData]);
 
   // Auto-refresh every 30 seconds
   useEffect(() => {

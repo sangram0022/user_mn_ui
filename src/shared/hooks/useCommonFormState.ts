@@ -28,7 +28,8 @@ export const useLoadingState = (initialLoading = false) => {
 };
 
 // Form data state with validation
-export const useFormState = <T extends Record<string, unknown>>(initialData: T) => {
+// ✅ React 19: Renamed from useFormState to avoid conflict with React 19's deprecated hook
+export const useFormFields = <T extends Record<string, unknown>>(initialData: T) => {
   const [formData, setFormData] = useState<T>(initialData);
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
@@ -255,12 +256,4 @@ export const usePaginationState = (initialPage = 0, initialLimit = 20) => {
   };
 };
 
-export default {
-  useLoadingState,
-  useFormState,
-  usePasswordVisibility,
-  useFeedbackState,
-  useModalState,
-  useSelectionState,
-  usePaginationState,
-};
+// Re-export for convenience - ✅ React 19: useFormFields renamed from useFormState

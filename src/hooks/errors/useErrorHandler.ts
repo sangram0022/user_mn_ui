@@ -4,15 +4,15 @@
  * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import { useState } from 'react';
+import type { ParsedError } from '@shared/types/error';
 import {
-  parseApiError,
+  errorLogger,
   formatErrorForDisplay,
   isAuthError,
-  errorLogger,
+  parseApiError,
 } from '@shared/utils/error';
 import { logger } from '@shared/utils/logger';
-import type { ParsedError } from '@shared/types/error';
+import { useState } from 'react';
 
 interface UseErrorHandlerReturn {
   error: ParsedError | null;

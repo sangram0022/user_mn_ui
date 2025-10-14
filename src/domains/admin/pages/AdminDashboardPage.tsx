@@ -21,7 +21,7 @@ import {
   UserCheck,
   Users,
 } from 'lucide-react';
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -29,6 +29,7 @@ import { useLocalization } from '@hooks/localization/useLocalization';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { Skeleton } from '@shared/ui/Skeleton';
+import { formatTime } from '@shared/utils';
 import { adminService } from '../../../services/admin-backend.service';
 
 // ============================================================================
@@ -94,7 +95,7 @@ const StatCard: FC<StatCardProps> = ({ title, value, icon, trend, color, loading
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border p-6">
+      <div className="section-container">
         <Skeleton className="h-4 w-24 mb-2" />
         <Skeleton className="h-8 w-16 mb-2" />
         <Skeleton className="h-3 w-16" />
@@ -103,7 +104,7 @@ const StatCard: FC<StatCardProps> = ({ title, value, icon, trend, color, loading
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6">
+    <div className="section-container">
       <div className="flex items-center">
         <div className={`p-3 rounded-lg ${colorClasses[color]}`}>{icon}</div>
         <div className="ml-4 flex-1">
@@ -187,7 +188,7 @@ const AdminDashboardPage: FC = () => {
   // Data Loading Functions
   // ============================================================================
 
-  const loadAdminStats = async () => {
+  const loadAdminStats = useCallback(async () => {
     if (!canViewAdminData) return;
 
     try {
@@ -196,9 +197,9 @@ const AdminDashboardPage: FC = () => {
     } catch (error) {
       handleError(error, 'Failed to load admin statistics');
     }
-  };
+  }, [canViewAdminData, handleError]);
 
-  const loadSystemHealth = async () => {
+  const loadSystemHealth = useCallback(async () => {
     try {
       const [db, metrics] = await Promise.all([
         adminService.getDatabaseHealth(),
@@ -209,9 +210,9 @@ const AdminDashboardPage: FC = () => {
     } catch (error) {
       handleError(error, 'Failed to load system health data');
     }
-  };
+  }, [handleError]);
 
-  const loadAuditSummary = async () => {
+  const loadAuditSummary = useCallback(async () => {
     if (!canViewAuditLogs) return;
 
     try {
@@ -220,9 +221,9 @@ const AdminDashboardPage: FC = () => {
     } catch (error) {
       handleError(error, 'Failed to load audit summary');
     }
-  };
+  }, [canViewAuditLogs, handleError]);
 
-  const loadAllData = async () => {
+  const loadAllData = useCallback(async () => {
     setIsLoading(true);
     clearError();
 
@@ -231,7 +232,7 @@ const AdminDashboardPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [loadAdminStats, loadSystemHealth, loadAuditSummary, clearError]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -248,8 +249,7 @@ const AdminDashboardPage: FC = () => {
 
   useEffect(() => {
     loadAllData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadAllData]);
 
   // Auto-refresh every 30 seconds for health data
   useEffect(() => {
@@ -341,7 +341,7 @@ const AdminDashboardPage: FC = () => {
         {/* System Health Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Database Health */}
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="card-white">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center">
                 <Database className="w-5 h-5 text-blue-600 mr-2" />
@@ -372,9 +372,7 @@ const AdminDashboardPage: FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">{t('dashboard.lastCheck')}</span>
-                    <span className="text-sm font-medium">
-                      {new Date(dbHealth.timestamp).toLocaleTimeString()}
-                    </span>
+                    <span className="text-sm font-medium">{formatTime(dbHealth.timestamp)}</span>
                   </div>
                 </div>
               ) : (
@@ -384,7 +382,7 @@ const AdminDashboardPage: FC = () => {
           </div>
 
           {/* System Metrics */}
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="card-white">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center">
                 <Monitor className="w-5 h-5 text-green-600 mr-2" />
@@ -433,7 +431,7 @@ const AdminDashboardPage: FC = () => {
 
         {/* Recent Activity */}
         {canViewAuditLogs && auditSummary && (
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="card-white">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center">
                 <Activity className="w-5 h-5 text-purple-600 mr-2" />
@@ -467,7 +465,7 @@ const AdminDashboardPage: FC = () => {
                         )}
                       </div>
                       <span className="text-xs text-gray-500">
-                        {new Date(activity.timestamp).toLocaleTimeString()}
+                        {formatTime(activity.timestamp)}
                       </span>
                     </div>
                   ))}

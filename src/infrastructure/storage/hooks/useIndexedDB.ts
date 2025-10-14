@@ -1,9 +1,11 @@
 /**
  * useIndexedDB Hook
  * React hook for IndexedDB with type safety and reactivity
+ *
+ * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IndexedDBAdapter } from '../adapters/IndexedDBAdapter';
 
 const defaultAdapter = new IndexedDBAdapter();
@@ -43,26 +45,23 @@ export function useIndexedDB<T>(
   }, [key, initialValue, adapter]);
 
   // Set value in IndexedDB
-  const setValue = useCallback(
-    async (value: T): Promise<void> => {
-      try {
-        setLoading(true);
-        await adapter.set(key, JSON.stringify(value));
-        setStoredValue(value);
-        setError(null);
-      } catch (err) {
-        console.warn(`Error setting IndexedDB key "${key}":`, err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [key, adapter]
-  );
+  const setValue = async (value: T): Promise<void> => {
+    try {
+      setLoading(true);
+      await adapter.set(key, JSON.stringify(value));
+      setStoredValue(value);
+      setError(null);
+    } catch (err) {
+      console.warn(`Error setting IndexedDB key "${key}":`, err);
+      setError(err instanceof Error ? err : new Error('Unknown error'));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Remove value from IndexedDB
-  const removeValue = useCallback(async (): Promise<void> => {
+  const removeValue = async (): Promise<void> => {
     try {
       setLoading(true);
       await adapter.remove(key);
@@ -75,7 +74,7 @@ export function useIndexedDB<T>(
     } finally {
       setLoading(false);
     }
-  }, [key, initialValue, adapter]);
+  };
 
   return [storedValue, setValue, removeValue, loading, error];
 }
