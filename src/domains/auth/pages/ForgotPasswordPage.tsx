@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { apiClient } from '@lib/api';
+import { Button } from '@shared/components/ui';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 
 const ForgotPasswordPage: React.FC = () => {
@@ -43,78 +44,28 @@ const ForgotPasswordPage: React.FC = () => {
 
   if (isSuccess) {
     return (
-      <div
-        style={{
-          margin: '0 auto',
-          width: '100%',
-          maxWidth: '28rem',
-          textAlign: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: '4rem',
-            height: '4rem',
-            backgroundColor: '#10b981',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1.5rem',
-          }}
-        >
-          <CheckCircle style={{ width: '2rem', height: '2rem', color: 'white' }} />
+      <div className="mx-auto w-full max-w-md text-center">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500">
+          <CheckCircle className="h-8 w-8 text-white" />
         </div>
 
-        <h1
-          style={{
-            fontSize: '1.875rem',
-            fontWeight: 'bold',
-            color: '#111827',
-            marginBottom: '0.5rem',
-          }}
-        >
-          Check Your Email
-        </h1>
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">Check Your Email</h1>
 
-        <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+        <p className="mb-6 text-sm text-gray-500">
           We've sent a password reset link to <strong>{email}</strong>
         </p>
 
-        <div
-          style={{
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #bae6fd',
-            borderRadius: '0.5rem',
-            padding: '1rem',
-            marginBottom: '1.5rem',
-          }}
-        >
-          <p style={{ fontSize: '0.875rem', color: '#0369a1', margin: 0 }}>
+        <div className="mb-6 rounded-lg border border-sky-200 bg-sky-50 p-4">
+          <p className="m-0 text-sm text-sky-700">
             The reset link will expire in 1 hour. If you don't see the email, check your spam
             folder.
           </p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <button
-            type="button"
-            onClick={() => navigate('/login')}
-            style={{
-              width: '100%',
-              padding: '0.75rem 1rem',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              color: 'white',
-              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-              border: 'none',
-              borderRadius: '0.5rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
+        <div className="flex flex-col gap-3">
+          <Button onClick={() => navigate('/login')} fullWidth size="lg">
             Back to Login
-          </button>
+          </Button>
 
           <button
             type="button"
@@ -122,18 +73,7 @@ const ForgotPasswordPage: React.FC = () => {
               setIsSuccess(false);
               setEmail('');
             }}
-            style={{
-              width: '100%',
-              padding: '0.75rem 1rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: '#6b7280',
-              backgroundColor: 'white',
-              border: '1px solid #d1d5db',
-              borderRadius: '0.5rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
+            className="w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-500 transition-all duration-200 hover:bg-gray-50"
           >
             Send Another Email
           </button>
@@ -143,86 +83,40 @@ const ForgotPasswordPage: React.FC = () => {
   }
 
   return (
-    <div style={{ margin: '0 auto', width: '100%', maxWidth: '28rem' }}>
-      <div style={{ marginBottom: '1.5rem' }}>
+    <div className="mx-auto w-full max-w-md">
+      <div className="mb-6">
         <Link
           to="/login"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            color: '#6b7280',
-            textDecoration: 'none',
-            transition: 'color 0.2s ease',
-          }}
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 no-underline transition-colors duration-200 hover:text-gray-700"
         >
-          <ArrowLeft style={{ width: '1rem', height: '1rem' }} />
+          <ArrowLeft className="h-4 w-4" />
           Back to Login
         </Link>
       </div>
 
-      <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <div
-          style={{
-            width: '4rem',
-            height: '4rem',
-            backgroundColor: '#3b82f6',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1rem',
-          }}
-        >
-          <Mail style={{ width: '2rem', height: '2rem', color: 'white' }} />
+      <header className="mb-8 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-500">
+          <Mail className="h-8 w-8 text-white" />
         </div>
-        <h1
-          style={{
-            fontSize: '1.875rem',
-            fontWeight: 'bold',
-            color: '#111827',
-            marginBottom: '0.5rem',
-          }}
-        >
-          Reset Password
-        </h1>
-        <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">Reset Password</h1>
+        <p className="text-sm text-gray-500">
           Enter your email address and we'll send you a link to reset your password
         </p>
       </header>
 
-      <div
-        style={{
-          backgroundColor: 'white',
-          padding: '2rem',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          borderRadius: '1rem',
-          border: '1px solid #f3f4f6',
-        }}
-      >
+      <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-2xl">
         {error && (
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div className="mb-6">
             <ErrorAlert error={error} />
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label
-              htmlFor="email"
-              style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem',
-              }}
-            >
+          <div className="mb-6">
+            <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
               Email Address
             </label>
-            <div style={{ position: 'relative' }}>
+            <div className="relative">
               <input
                 id="email"
                 name="email"
@@ -231,63 +125,25 @@ const ForgotPasswordPage: React.FC = () => {
                 required
                 value={email}
                 onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  paddingLeft: '2.5rem',
-                  fontSize: '0.875rem',
-                  color: '#111827',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.5rem',
-                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                }}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pl-10 text-sm text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 placeholder="Enter your email address"
               />
-              <Mail
-                style={{
-                  position: 'absolute',
-                  left: '0.75rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: '1rem',
-                  height: '1rem',
-                  color: '#9ca3af',
-                }}
-              />
+              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             </div>
           </div>
 
           <button
             type="submit"
             disabled={isLoading || !email.trim()}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem 1rem',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              color: 'white',
-              background:
-                isLoading || !email.trim()
-                  ? '#9ca3af'
-                  : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-              border: 'none',
-              borderRadius: '0.5rem',
-              cursor: isLoading || !email.trim() ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease',
-            }}
+            className={`flex w-full items-center justify-center gap-2 rounded-lg border-none px-4 py-3 text-sm font-semibold text-white transition-all duration-200 ${
+              isLoading || !email.trim()
+                ? 'cursor-not-allowed bg-gray-400'
+                : 'cursor-pointer bg-gradient-to-br from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
+            }`}
           >
             {isLoading ? (
               <>
-                <Loader
-                  style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }}
-                />
+                <Loader className="h-4 w-4 animate-spin" />
                 Sending Reset Link...
               </>
             ) : (
@@ -296,16 +152,9 @@ const ForgotPasswordPage: React.FC = () => {
           </button>
         </form>
 
-        <div
-          style={{
-            marginTop: '1.5rem',
-            textAlign: 'center',
-            fontSize: '0.875rem',
-            color: '#6b7280',
-          }}
-        >
+        <div className="mt-6 text-center text-sm text-gray-500">
           Remember your password?{' '}
-          <Link to="/login" style={{ fontWeight: '500', color: '#3b82f6', textDecoration: 'none' }}>
+          <Link to="/login" className="font-medium text-blue-500 no-underline hover:text-blue-600">
             Sign in
           </Link>
         </div>

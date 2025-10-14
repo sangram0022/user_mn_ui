@@ -6,7 +6,7 @@ import { logger } from './../../../shared/utils/logger';
 import { apiClient } from '@lib/api';
 import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@shared/types';
 import { getUserPermissions, getUserRoleName } from '@shared/utils/user';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useAuth } from '../../auth';
 
 type Role = UserRole;
 

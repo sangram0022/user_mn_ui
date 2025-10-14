@@ -1,5 +1,7 @@
+import { logger } from '@shared/utils/logger';
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import type { Metric } from 'web-vitals';
 import App from './app/App';
 import './styles/index.css';
 
@@ -7,12 +9,22 @@ import './styles/index.css';
 if (import.meta.env.PROD) {
   import('web-vitals')
     .then(({ onCLS, onFID, onFCP, onLCP, onTTFB, onINP }) => {
-      onCLS(console.log);
-      onFID(console.log);
-      onFCP(console.log);
-      onLCP(console.log);
-      onTTFB(console.log);
-      onINP(console.log);
+      const reportMetric = (metric: Metric) => {
+        logger.info('[Web Vitals]', {
+          name: metric.name,
+          value: metric.value,
+          rating: metric.rating,
+          delta: metric.delta,
+          id: metric.id,
+        });
+      };
+
+      onCLS(reportMetric);
+      onFID(reportMetric);
+      onFCP(reportMetric);
+      onLCP(reportMetric);
+      onTTFB(reportMetric);
+      onINP(reportMetric);
     })
     .catch(() => {
       // Silently ignore web vitals setup failures

@@ -8,7 +8,7 @@ import {
 } from 'react';
 
 export type RouteGuard = 'public' | 'protected' | 'none';
-export type RouteLayout = 'default' | 'auth' | 'none';
+export type RouteLayout = 'default' | 'auth' | 'admin' | 'none';
 
 export interface RouteConfig {
   path: string;
@@ -34,6 +34,17 @@ const LazyUserManagementEnhanced = lazy(() => import('../domains/users/pages/Use
 const LazyProfilePage = lazy(() => import('../domains/profile/pages/ProfilePage'));
 const LazyHomePage = lazy(() => import('../domains/home/pages/HomePage'));
 const LazyNotFoundPage = lazy(() => import('@shared/pages/NotFoundPage'));
+
+// Admin Pages - Lazy loaded for better performance
+const LazyAdminDashboardPage = lazy(() => import('../domains/admin/pages/AdminDashboardPage'));
+const LazyAuditLogsPage = lazy(() => import('../domains/admin/pages/AuditLogsPage'));
+const LazyBulkOperationsPage = lazy(() => import('../domains/admin/pages/BulkOperationsPage'));
+const LazyRoleManagementPage = lazy(() => import('../domains/admin/pages/RoleManagementPage'));
+const LazyGDPRCompliancePage = lazy(() => import('../domains/admin/pages/GDPRCompliancePage'));
+const LazyHealthMonitoringPage = lazy(() => import('../domains/admin/pages/HealthMonitoringPage'));
+const LazyPasswordManagementPage = lazy(
+  () => import('../domains/admin/pages/PasswordManagementPage')
+);
 
 export const routes: RouteConfig[] = [
   {
@@ -174,6 +185,94 @@ export const routes: RouteConfig[] = [
     suspenseFallback: createElement(PageSkeleton, {
       heading: 'Loading profile',
       actionCount: 2,
+    }),
+  },
+
+  // ============================================================================
+  // Admin Routes - Protected and require admin permissions
+  // ============================================================================
+  {
+    path: '/admin',
+    component: LazyAdminDashboardPage,
+    layout: 'admin',
+    guard: 'protected',
+    title: 'Admin Dashboard',
+    description: 'Administrative dashboard with system overview and quick actions.',
+    suspenseFallback: createElement(DashboardSkeleton),
+  },
+  {
+    path: '/admin/dashboard',
+    component: LazyAdminDashboardPage,
+    layout: 'admin',
+    guard: 'protected',
+    title: 'Admin Dashboard',
+    description: 'Administrative dashboard with system overview and quick actions.',
+    suspenseFallback: createElement(DashboardSkeleton),
+  },
+  {
+    path: '/admin/roles',
+    component: LazyRoleManagementPage,
+    layout: 'admin',
+    guard: 'protected',
+    title: 'Role Management',
+    description: 'Manage user roles, permissions, and access control policies.',
+    suspenseFallback: createElement(TableSkeleton, { rows: 8, columns: 4 }),
+  },
+  {
+    path: '/admin/audit-logs',
+    component: LazyAuditLogsPage,
+    layout: 'admin',
+    guard: 'protected',
+    title: 'Audit Logs',
+    description: 'View and search system audit logs and user activity trails.',
+    suspenseFallback: createElement(TableSkeleton, { rows: 10, columns: 6 }),
+  },
+  {
+    path: '/admin/bulk-operations',
+    component: LazyBulkOperationsPage,
+    layout: 'admin',
+    guard: 'protected',
+    title: 'Bulk Operations',
+    description: 'Perform bulk user operations and batch processing tasks.',
+    suspenseFallback: createElement(PageSkeleton, {
+      heading: 'Loading bulk operations',
+      actionCount: 3,
+      descriptionLines: 2,
+    }),
+  },
+  {
+    path: '/admin/gdpr-compliance',
+    component: LazyGDPRCompliancePage,
+    layout: 'admin',
+    guard: 'protected',
+    title: 'GDPR Compliance',
+    description: 'Manage data protection requests, exports, and consent tracking.',
+    suspenseFallback: createElement(PageSkeleton, {
+      heading: 'Loading GDPR compliance',
+      actionCount: 2,
+      descriptionLines: 3,
+    }),
+  },
+  {
+    path: '/admin/health-monitoring',
+    component: LazyHealthMonitoringPage,
+    layout: 'admin',
+    guard: 'protected',
+    title: 'Health Monitoring',
+    description: 'Monitor system health, performance metrics, and service status.',
+    suspenseFallback: createElement(DashboardSkeleton),
+  },
+  {
+    path: '/admin/password-management',
+    component: LazyPasswordManagementPage,
+    layout: 'admin',
+    guard: 'protected',
+    title: 'Password Management',
+    description: 'Manage password policies, security settings, and user credentials.',
+    suspenseFallback: createElement(PageSkeleton, {
+      heading: 'Loading password management',
+      actionCount: 2,
+      descriptionLines: 2,
     }),
   },
 ];

@@ -89,139 +89,55 @@ const ResetPasswordPage: React.FC = () => {
 
   if (!token && !error) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#f9fafb',
-        }}
-      >
-        <Loader style={{ width: '2rem', height: '2rem', animation: 'spin 1s linear infinite' }} />
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <Loader className="h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   if (isSuccess) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          padding: '3rem 1.5rem',
-        }}
-      >
-        <div style={{ margin: '0 auto', width: '100%', maxWidth: '28rem', textAlign: 'center' }}>
-          <div
-            style={{
-              width: '4rem',
-              height: '4rem',
-              backgroundColor: '#10b981',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.5rem',
-            }}
-          >
-            <CheckCircle style={{ width: '2rem', height: '2rem', color: 'white' }} />
+      <div className="flex min-h-screen flex-col justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-6 py-12">
+        <div className="mx-auto w-full max-w-md text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500">
+            <CheckCircle className="h-8 w-8 text-white" />
           </div>
 
-          <h1
-            style={{
-              fontSize: '1.875rem',
-              fontWeight: 'bold',
-              color: '#111827',
-              marginBottom: '0.5rem',
-            }}
-          >
-            Password Reset Successful!
-          </h1>
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">Password Reset Successful!</h1>
 
-          <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+          <p className="mb-6 text-sm text-gray-500">
             Your password has been successfully reset. Redirecting to login...
           </p>
 
-          <div
-            style={{
-              width: '2rem',
-              height: '2rem',
-              border: '4px solid #3b82f6',
-              borderTop: '4px solid transparent',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto',
-            }}
-          />
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ margin: '0 auto', width: '100%', maxWidth: '28rem' }}>
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <div
-          style={{
-            width: '4rem',
-            height: '4rem',
-            backgroundColor: '#3b82f6',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1rem',
-          }}
-        >
-          <Lock style={{ width: '2rem', height: '2rem', color: 'white' }} />
+    <div className="mx-auto w-full max-w-md">
+      <div className="mb-8 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-500">
+          <Lock className="h-8 w-8 text-white" />
         </div>
-        <h1
-          style={{
-            fontSize: '1.875rem',
-            fontWeight: 'bold',
-            color: '#111827',
-            marginBottom: '0.5rem',
-          }}
-        >
-          Reset Your Password
-        </h1>
-        <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>Enter your new password below</p>
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">Reset Your Password</h1>
+        <p className="text-sm text-gray-500">Enter your new password below</p>
       </div>
 
-      <div
-        style={{
-          backgroundColor: 'white',
-          padding: '2rem',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          borderRadius: '1rem',
-          border: '1px solid #f3f4f6',
-        }}
-      >
+      <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-2xl">
         {error && (
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div className="mb-6">
             <ErrorAlert error={error} />
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label
-              htmlFor="password"
-              style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem',
-              }}
-            >
+          <div className="mb-6">
+            <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
               New Password
             </label>
-            <div style={{ position: 'relative' }}>
+            <div className="relative">
               <input
                 id="password"
                 name="password"
@@ -230,74 +146,29 @@ const ResetPasswordPage: React.FC = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  paddingLeft: '2.5rem',
-                  paddingRight: '2.5rem',
-                  fontSize: '0.875rem',
-                  color: '#111827',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.5rem',
-                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                }}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pl-10 pr-10 text-sm text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 placeholder="Enter your new password"
               />
-              <Lock
-                style={{
-                  position: 'absolute',
-                  left: '0.75rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: '1rem',
-                  height: '1rem',
-                  color: '#9ca3af',
-                }}
-              />
+              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                style={{
-                  position: 'absolute',
-                  right: '0.75rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  padding: 0,
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  color: '#9ca3af',
-                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? (
-                  <EyeOff style={{ width: '1rem', height: '1rem' }} />
-                ) : (
-                  <Eye style={{ width: '1rem', height: '1rem' }} />
-                )}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
-              Must be at least 8 characters long
-            </p>
+            <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters long</p>
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div className="mb-6">
             <label
               htmlFor="confirmPassword"
-              style={{
-                display: 'block',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '0.5rem',
-              }}
+              className="mb-2 block text-sm font-medium text-gray-700"
             >
               Confirm New Password
             </label>
-            <div style={{ position: 'relative' }}>
+            <div className="relative">
               <input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -306,53 +177,16 @@ const ResetPasswordPage: React.FC = () => {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  paddingLeft: '2.5rem',
-                  paddingRight: '2.5rem',
-                  fontSize: '0.875rem',
-                  color: '#111827',
-                  backgroundColor: 'white',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.5rem',
-                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                }}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pl-10 pr-10 text-sm text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 placeholder="Confirm your new password"
               />
-              <Lock
-                style={{
-                  position: 'absolute',
-                  left: '0.75rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: '1rem',
-                  height: '1rem',
-                  color: '#9ca3af',
-                }}
-              />
+              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
-                style={{
-                  position: 'absolute',
-                  right: '0.75rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  padding: 0,
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  color: '#9ca3af',
-                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
               >
-                {showConfirmPassword ? (
-                  <EyeOff style={{ width: '1rem', height: '1rem' }} />
-                ) : (
-                  <Eye style={{ width: '1rem', height: '1rem' }} />
-                )}
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
@@ -360,34 +194,15 @@ const ResetPasswordPage: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading || !formData.password || !formData.confirmPassword}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem 1rem',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              color: 'white',
-              background:
-                isLoading || !formData.password || !formData.confirmPassword
-                  ? '#9ca3af'
-                  : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-              border: 'none',
-              borderRadius: '0.5rem',
-              cursor:
-                isLoading || !formData.password || !formData.confirmPassword
-                  ? 'not-allowed'
-                  : 'pointer',
-              transition: 'all 0.2s ease',
-            }}
+            className={`flex w-full items-center justify-center gap-2 rounded-lg border-none px-4 py-3 text-sm font-semibold text-white transition-all ${
+              isLoading || !formData.password || !formData.confirmPassword
+                ? 'cursor-not-allowed bg-gray-400'
+                : 'cursor-pointer bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
+            }`}
           >
             {isLoading ? (
               <>
-                <Loader
-                  style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }}
-                />
+                <Loader className="h-4 w-4 animate-spin" />
                 Resetting Password...
               </>
             ) : (
@@ -396,20 +211,13 @@ const ResetPasswordPage: React.FC = () => {
           </button>
         </form>
 
-        <div
-          style={{
-            marginTop: '1.5rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.875rem',
-          }}
-        >
-          <Link to="/login" style={{ fontWeight: '500', color: '#3b82f6', textDecoration: 'none' }}>
+        <div className="mt-6 flex justify-between text-sm">
+          <Link to="/login" className="font-medium text-blue-500 no-underline hover:text-blue-600">
             Back to login
           </Link>
           <Link
             to="/forgot-password"
-            style={{ fontWeight: '500', color: '#3b82f6', textDecoration: 'none' }}
+            className="font-medium text-blue-500 no-underline hover:text-blue-600"
           >
             Request new link
           </Link>

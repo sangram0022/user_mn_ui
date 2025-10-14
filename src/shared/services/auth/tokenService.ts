@@ -14,7 +14,7 @@
  */
 
 import type { LoginResponse } from '@shared/types';
-import { logger } from '@shared/utils/logger';
+import { logger } from '@shared/utils';
 
 // Cookie configuration
 const COOKIE_CONFIG = {

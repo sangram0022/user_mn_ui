@@ -48,8 +48,7 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({
 
   return (
     <div
-      className="rounded-lg border border-red-200 bg-red-50 p-4"
-      style={{ marginBottom: className ? undefined : '1rem' }}
+      className={`rounded-lg border border-red-200 bg-red-50 p-4 ${className ? '' : 'mb-4'}`}
       role="alert"
       aria-live="assertive"
     >

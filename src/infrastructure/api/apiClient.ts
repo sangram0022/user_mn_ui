@@ -10,8 +10,8 @@
  * - Request cancellation
  */
 
+import { BACKEND_CONFIG } from '@shared/config/api';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { BACKEND_CONFIG } from '../../shared/config/api';
 
 export interface ApiClientConfig {
   baseURL: string;

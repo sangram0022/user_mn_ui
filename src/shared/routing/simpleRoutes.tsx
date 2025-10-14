@@ -9,8 +9,13 @@ import { createBrowserRouter, RouteObject } from 'react-router-dom';
 import { PageErrorBoundary } from '../errors/ErrorBoundary';
 import { SkeletonLoader } from '../performance/lazyLoading';
 
-// Lazy load the only existing component
-const DesignSystemDemo = React.lazy(() => import('../../components/DesignSystemDemo'));
+// Simple placeholder component
+const SimplePlaceholder = () => (
+  <div className="text-center py-12">
+    <h1 className="text-3xl font-bold text-gray-900 mb-4">Welcome</h1>
+    <p className="text-gray-600">This is a simple routing setup.</p>
+  </div>
+);
 
 // Simple layout component
 function Layout({ children }: { children: React.ReactNode }) {
@@ -40,7 +45,7 @@ const routes: RouteObject[] = [
     path: '/',
     element: (
       <Layout>
-        <DesignSystemDemo />
+        <SimplePlaceholder />
       </Layout>
     ),
   },
@@ -48,7 +53,7 @@ const routes: RouteObject[] = [
     path: '/design-system',
     element: (
       <Layout>
-        <DesignSystemDemo />
+        <SimplePlaceholder />
       </Layout>
     ),
   },

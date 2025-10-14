@@ -1,3 +1,4 @@
+import { BACKEND_CONFIG } from '@shared/config/api';
 import { tokenService } from '@shared/services/auth/tokenService';
 import type {
   AdminUsersQuery,
@@ -20,7 +21,6 @@ import type {
   UserSummary,
 } from '@shared/types';
 import { normalizeApiError } from '@shared/utils/error';
-import { BACKEND_CONFIG } from '../../shared/config/api';
 import { logger } from './../../shared/utils/logger';
 
 import { ApiError } from './error';

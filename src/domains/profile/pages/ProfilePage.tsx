@@ -22,7 +22,7 @@ import {
   User as UserIcon,
   X,
 } from 'lucide-react';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useAuth } from '../../auth';
 
 type ApiUserProfile = BaseUserProfile & {
   bio?: string | null;

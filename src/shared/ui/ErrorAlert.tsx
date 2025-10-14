@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
-import { AlertCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import type { ErrorDisplayProps } from '@shared/types/error';
-import { parseApiError, getErrorSeverity } from '@shared/utils/error';
+import { getErrorSeverity, parseApiError } from '@shared/utils';
+import { AlertCircle, AlertTriangle, Info, X, XCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 /**
  * ErrorAlert Component
  * Displays error messages with appropriate styling and icons
  */
-const ErrorAlert: React.FC<ErrorDisplayProps> = ({ error, onDismiss, className = '' }) => { if (!error) return null;
+const ErrorAlert: React.FC<ErrorDisplayProps> = ({ error, onDismiss, className = '' }) => {
+  if (!error) return null;
 
   const parsedError =
     typeof error === 'string'
@@ -16,20 +17,23 @@ const ErrorAlert: React.FC<ErrorDisplayProps> = ({ error, onDismiss, className =
 
   const severity = getErrorSeverity(parsedError);
 
-  const severityConfig = { error: {
+  const severityConfig = {
+    error: {
       bgColor: 'bg-red-50',
       borderColor: 'border-red-200',
       textColor: 'text-red-800',
       iconColor: 'text-red-600',
       Icon: XCircle,
     },
-    warning: { bgColor: 'bg-amber-50',
+    warning: {
+      bgColor: 'bg-amber-50',
       borderColor: 'border-amber-200',
       textColor: 'text-amber-800',
       iconColor: 'text-amber-600',
       Icon: AlertTriangle,
     },
-    info: { bgColor: 'bg-blue-50',
+    info: {
+      bgColor: 'bg-blue-50',
       borderColor: 'border-blue-200',
       textColor: 'text-blue-800',
       iconColor: 'text-blue-600',
@@ -97,7 +101,11 @@ export const ErrorBanner: React.FC<ErrorDisplayProps> = ({ error, onDismiss }) =
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 animate-in slide-in-from-top">
-      <ErrorAlert error={error} onDismiss={onDismiss} className="rounded-none border-x-0 border-t-0" />
+      <ErrorAlert
+        error={error}
+        onDismiss={onDismiss}
+        className="rounded-none border-x-0 border-t-0"
+      />
     </div>
   );
 };
@@ -106,9 +114,12 @@ export const ErrorBanner: React.FC<ErrorDisplayProps> = ({ error, onDismiss }) =
  * ErrorToast Component
  * Toast-style error notification
  */
-export const ErrorToast: React.FC<ErrorDisplayProps & { duration?: number }> = ({ error,
+export const ErrorToast: React.FC<ErrorDisplayProps & { duration?: number }> = ({
+  error,
   onDismiss,
-  duration = 5000, }) => { const [isVisible, setIsVisible] = useState(true);
+  duration = 5000,
+}) => {
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     if (duration && onDismiss) {

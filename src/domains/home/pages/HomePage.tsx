@@ -2,7 +2,7 @@ import { ArrowRight, BarChart3, Lock, Shield, Users } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import Header from '../../../components/common/Header';
+import Header from '@shared/components/Header';
 
 const HomePage: React.FC = () => {
   return (

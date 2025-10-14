@@ -6,8 +6,15 @@
  * @module domains/user-management/store
  */
 
+import { logger } from '@shared/utils/logger';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { userService } from '../../../services/user-backend.service';
+import {
+  mapManagedUserToUpdateRequest,
+  mapUsersToManagedUsers,
+  mapUserToManagedUser,
+} from '../mappers/userMappers';
 
 /**
  * User for management (different from authenticated user)
@@ -22,6 +29,13 @@ export interface ManagedUser {
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
+}
+
+/**
+ * User creation data (includes password for new users)
+ */
+export interface CreateManagedUser extends Omit<ManagedUser, 'id' | 'createdAt' | 'updatedAt'> {
+  password: string;
 }
 
 /**
@@ -60,7 +74,7 @@ export interface UserManagementState {
   // Actions
   fetchUsers: (filters?: UserFilters) => Promise<void>;
   fetchUser: (id: string) => Promise<void>;
-  createUser: (user: Omit<ManagedUser, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  createUser: (user: CreateManagedUser) => Promise<void>;
   updateUser: (id: string, updates: Partial<ManagedUser>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
   suspendUser: (id: string) => Promise<void>;
@@ -108,33 +122,69 @@ export const useUserManagementStore = create<UserManagementState>()(
 
         try {
           const { pagination } = get();
-          const queryParams = new URLSearchParams({
-            page: pagination.page.toString(),
-            pageSize: pagination.pageSize.toString(),
-            ...filters,
+
+          // Call actual backend API
+          const users = await userService.getUsers({
+            page: pagination.page,
+            page_size: pagination.pageSize,
+            role: filters?.role,
+            is_active:
+              filters?.status === 'active'
+                ? true
+                : filters?.status === 'inactive'
+                  ? false
+                  : undefined,
+            search: filters?.search,
           });
 
-          // TODO: Replace with actual API call
-          const response = await fetch(`/api/users?${queryParams}`);
+          // Map backend User[] to ManagedUser[]
+          const managedUsers = mapUsersToManagedUsers(users);
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch users');
+          // Filter by search term if provided (client-side filtering)
+          let filteredUsers = managedUsers;
+          if (filters?.search) {
+            const searchLower = filters.search.toLowerCase();
+            filteredUsers = managedUsers.filter(
+              (user) =>
+                user.email.toLowerCase().includes(searchLower) ||
+                user.firstName.toLowerCase().includes(searchLower) ||
+                user.lastName.toLowerCase().includes(searchLower)
+            );
           }
 
-          const data = await response.json();
+          // Sort if specified
+          if (filters?.sortBy) {
+            filteredUsers.sort((a, b) => {
+              const aVal = a[filters.sortBy!];
+              const bVal = b[filters.sortBy!];
+              if (aVal === undefined || bVal === undefined) return 0;
+              const order = filters.sortOrder === 'desc' ? -1 : 1;
+              return (aVal > bVal ? 1 : -1) * order;
+            });
+          }
 
           set({
-            users: data.users,
+            users: filteredUsers,
             pagination: {
               ...pagination,
-              total: data.total,
-              totalPages: data.totalPages,
+              total: filteredUsers.length,
+              totalPages: Math.ceil(filteredUsers.length / pagination.pageSize),
             },
             isLoading: false,
           });
+
+          logger.info('[UserManagement] Successfully fetched users', {
+            count: filteredUsers.length,
+          });
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to fetch users';
+          logger.error(
+            '[UserManagement] Failed to fetch users',
+            error instanceof Error ? error : new Error(errorMessage)
+          );
+
           set({
-            error: error instanceof Error ? error.message : 'Failed to fetch users',
+            error: errorMessage,
             isLoading: false,
           });
           throw error;
@@ -146,22 +196,27 @@ export const useUserManagementStore = create<UserManagementState>()(
         set({ isLoading: true, error: null });
 
         try {
-          // TODO: Replace with actual API call
-          const response = await fetch(`/api/users/${id}`);
+          // Call actual backend API
+          const user = await userService.getUserById(id);
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch user');
-          }
-
-          const user = await response.json();
+          // Map backend User to ManagedUser
+          const managedUser = mapUserToManagedUser(user);
 
           set({
-            selectedUser: user,
+            selectedUser: managedUser,
             isLoading: false,
           });
+
+          logger.info('[UserManagement] Successfully fetched user', { userId: id });
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to fetch user';
+          logger.error(
+            '[UserManagement] Failed to fetch user',
+            error instanceof Error ? error : new Error(errorMessage)
+          );
+
           set({
-            error: error instanceof Error ? error.message : 'Failed to fetch user',
+            error: errorMessage,
             isLoading: false,
           });
           throw error;
@@ -173,24 +228,34 @@ export const useUserManagementStore = create<UserManagementState>()(
         set({ isLoading: true, error: null });
 
         try {
-          // TODO: Replace with actual API call
-          const response = await fetch('/api/users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData),
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to create user');
+          // Validate that password is provided in userData
+          if (!userData.password) {
+            throw new Error('Password is required to create a user');
           }
+
+          // Call actual backend API
+          await userService.createUser({
+            email: userData.email,
+            password: userData.password,
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            role: userData.role,
+          });
 
           // Refresh user list
           await get().fetchUsers(get().filters);
 
           set({ isLoading: false });
+          logger.info('[UserManagement] Successfully created user', { email: userData.email });
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to create user';
+          logger.error(
+            '[UserManagement] Failed to create user',
+            error instanceof Error ? error : new Error(errorMessage)
+          );
+
           set({
-            error: error instanceof Error ? error.message : 'Failed to create user',
+            error: errorMessage,
             isLoading: false,
           });
           throw error;
@@ -202,16 +267,11 @@ export const useUserManagementStore = create<UserManagementState>()(
         set({ isLoading: true, error: null });
 
         try {
-          // TODO: Replace with actual API call
-          const response = await fetch(`/api/users/${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updates),
-          });
+          // Map frontend updates to backend format
+          const backendUpdates = mapManagedUserToUpdateRequest(updates);
 
-          if (!response.ok) {
-            throw new Error('Failed to update user');
-          }
+          // Call actual backend API
+          await userService.updateUser(id, backendUpdates);
 
           // Update local state
           set((state) => ({
@@ -222,9 +282,17 @@ export const useUserManagementStore = create<UserManagementState>()(
                 : state.selectedUser,
             isLoading: false,
           }));
+
+          logger.info('[UserManagement] Successfully updated user', { userId: id });
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to update user';
+          logger.error(
+            '[UserManagement] Failed to update user',
+            error instanceof Error ? error : new Error(errorMessage)
+          );
+
           set({
-            error: error instanceof Error ? error.message : 'Failed to update user',
+            error: errorMessage,
             isLoading: false,
           });
           throw error;
@@ -236,14 +304,8 @@ export const useUserManagementStore = create<UserManagementState>()(
         set({ isLoading: true, error: null });
 
         try {
-          // TODO: Replace with actual API call
-          const response = await fetch(`/api/users/${id}`, {
-            method: 'DELETE',
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to delete user');
-          }
+          // Call actual backend API
+          await userService.deleteUser(id);
 
           // Remove from local state
           set((state) => ({
@@ -251,9 +313,17 @@ export const useUserManagementStore = create<UserManagementState>()(
             selectedUser: state.selectedUser?.id === id ? null : state.selectedUser,
             isLoading: false,
           }));
+
+          logger.info('[UserManagement] Successfully deleted user', { userId: id });
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to delete user';
+          logger.error(
+            '[UserManagement] Failed to delete user',
+            error instanceof Error ? error : new Error(errorMessage)
+          );
+
           set({
-            error: error instanceof Error ? error.message : 'Failed to delete user',
+            error: errorMessage,
             isLoading: false,
           });
           throw error;

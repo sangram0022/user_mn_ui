@@ -2,6 +2,7 @@ import type { ComponentType, FC, ReactNode } from 'react';
 import { Suspense, useEffect, useState, useTransition } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import AdminLayout from '@domains/admin/layouts/AdminLayout';
 import AppLayout from '@layouts/AppLayout';
 import AuthLayout from '@layouts/AuthLayout';
 import { PageErrorBoundary as ErrorBoundary } from '@shared/errors/ErrorBoundary';
@@ -13,6 +14,7 @@ const PlainLayout: FC<{ children: ReactNode }> = ({ children }) => <>{children}<
 const layoutComponents: Record<RouteConfig['layout'], ComponentType<{ children: ReactNode }>> = {
   default: AppLayout,
   auth: AuthLayout,
+  admin: AdminLayout,
   none: PlainLayout,
 };
 

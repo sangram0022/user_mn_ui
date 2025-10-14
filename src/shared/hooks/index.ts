@@ -4,18 +4,25 @@
 export { useApi } from './useApi';
 export type { ApiState, UseApiOptions } from './useApi';
 
+export { useAsyncOperation, useAsyncState } from './useAsyncState';
+export type { AsyncOperationOptions, AsyncState } from './useAsyncState';
+
 export { useForm } from './useForm';
-export type { FormField, UseFormOptions, FormState } from './useForm';
+export type { FormField, FormState, UseFormOptions } from './useForm';
 
 export { useLoading } from './useLoading';
 export type { UseLoadingOptions } from './useLoading';
 
 export { useLocalStorage, useSessionStorage } from './useStorage';
 
-export { useOptimisticUpdates, 
-  useAdvancedFormState, 
-  useOptimisticList  } from './useReact19Features';
-export type { OptimisticAction, 
-  UseOptimisticUpdatesOptions, 
+export {
+  useAdvancedFormState,
+  useOptimisticList,
+  useOptimisticUpdates,
+} from './useReact19Features';
+export type {
+  OptimisticAction,
+  OptimisticListItem,
   UseAdvancedFormStateOptions,
-  OptimisticListItem  } from './useReact19Features';
+  UseOptimisticUpdatesOptions,
+} from './useReact19Features';

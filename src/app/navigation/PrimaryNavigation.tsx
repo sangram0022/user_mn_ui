@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import { getUserRoleName } from '@shared/utils/user';
 import {
   BarChart3,
   ChevronDown,
@@ -17,13 +16,16 @@ import {
   Workflow,
   X,
 } from 'lucide-react';
-import { useAuth } from '../../domains/auth/context/AuthContext';
+import { LocaleSelector } from '../../components/common/LocaleSelector';
+import { useAuth } from '../../domains/auth';
+import { useLocalization } from '../../hooks/localization/useLocalization';
 
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
   const { user, logout } = useAuth();
+  const { t } = useLocalization();
 
   useEffect(() => {
     const handleResize = () => {
@@ -46,22 +48,26 @@ const Navigation = () => {
   };
 
   const navigationItems = [
-    { name: 'Home', href: '/', icon: Home },
+    { name: t('navigation.home'), href: '/', icon: Home },
     ...(user
       ? [
-          { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
-          { name: 'Users', href: '/users', icon: Users },
-          { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-          { name: 'Workflows', href: '/workflows', icon: Workflow },
-          { name: 'Reports', href: '/reports', icon: FileText },
+          { name: t('navigation.dashboard'), href: '/dashboard', icon: BarChart3 },
+          { name: t('navigation.users'), href: '/users', icon: Users },
+          { name: t('navigation.analytics'), href: '/analytics', icon: BarChart3 },
+          { name: t('navigation.workflows'), href: '/workflows', icon: Workflow },
+          { name: t('navigation.reports'), href: '/reports', icon: FileText },
         ]
       : []),
   ];
 
+  // Admin navigation items - shown only for admin users
+  const adminNavigationItems =
+    user?.role === 'admin' ? [{ name: t('navigation.admin'), href: '/admin', icon: Settings }] : [];
+
   const userMenuItems = [
-    { name: 'Profile', href: '/profile', icon: UserCircle },
-    { name: 'Settings', href: '/settings', icon: Settings },
-    { name: 'Help & Support', href: '/help', icon: HelpCircle },
+    { name: t('navigation.profile'), href: '/profile', icon: UserCircle },
+    { name: t('navigation.settings'), href: '/settings', icon: Settings },
+    { name: t('navigation.helpAndSupport'), href: '/help', icon: HelpCircle },
   ];
 
   const isActive = (href: string) => {
@@ -77,10 +83,10 @@ const Navigation = () => {
         href="#main-content"
         className="absolute left-[-999px] top-auto z-[100] h-px w-px overflow-hidden rounded-none bg-transparent text-blue-700 focus:left-4 focus:top-2 focus:h-auto focus:w-auto focus:rounded-md focus:bg-blue-700 focus:px-4 focus:py-2 focus:text-white"
       >
-        Skip to main content
+        {t('navigation.skipToMainContent')}
       </a>
       <nav
-        aria-label="Primary navigation"
+        aria-label={t('navigation.primaryNavigation')}
         className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 shadow-md backdrop-blur-md"
       >
         <div className="mx-auto max-w-7xl px-4">
@@ -92,7 +98,7 @@ const Navigation = () => {
                   <User className="h-6 w-6 text-white" />
                 </div>
                 <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-2xl font-bold text-transparent">
-                  UserMgmt
+                  {t('navigation.userMgmt')}
                 </span>
               </Link>
             </div>
@@ -100,7 +106,7 @@ const Navigation = () => {
             {/* Desktop Navigation */}
             <div className={isDesktop ? 'flex' : 'hidden'}>
               <div className="flex items-center gap-2">
-                {navigationItems.map((item) => {
+                {[...navigationItems, ...adminNavigationItems].map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
                   return (
@@ -122,8 +128,9 @@ const Navigation = () => {
               </div>
             </div>
 
-            {/* Right side - User menu or Login button */}
+            {/* Right side - Locale selector and User menu */}
             <div className="flex items-center gap-4">
+              <LocaleSelector />
               {user ? (
                 /* User is logged in - show user menu */
                 <div className="relative">
@@ -145,7 +152,7 @@ const Navigation = () => {
                         {user.full_name || user.username || 'User'}
                       </div>
                       <div className="text-xs capitalize text-gray-500">
-                        {getUserRoleName(user) || 'Member'}
+                        {typeof user.role === 'string' ? user.role : user.role?.name || 'Member'}
                       </div>
                     </div>
                     <ChevronDown className="h-4 w-4 text-gray-500" />
@@ -190,7 +197,7 @@ const Navigation = () => {
                           className="flex w-full cursor-pointer items-center gap-2 rounded-md border-none bg-transparent px-4 py-2.5 text-left text-sm text-red-600 transition-colors duration-200 hover:bg-red-50"
                         >
                           <LogOut className="h-4 w-4" />
-                          <span>Sign Out</span>
+                          <span>{t('auth.signOut')}</span>
                         </button>
                       </div>
                     </div>
@@ -239,7 +246,7 @@ const Navigation = () => {
               className={`border-t border-gray-200 py-4 ${isDesktop ? 'hidden' : 'block'}`}
             >
               <div className="flex flex-col gap-1">
-                {navigationItems.map((item) => {
+                {[...navigationItems, ...adminNavigationItems].map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
                   return (

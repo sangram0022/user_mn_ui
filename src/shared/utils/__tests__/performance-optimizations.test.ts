@@ -1,102 +1,100 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
- * Unit Tests: Performance Optimization Utilities
+ * Unit Tests: Advanced Performance Optimization Utilities
  *
  * Tests all performance utilities including:
- * - WeakCache
- * - LRUCache
- * - CleanupRegistry
- * - Custom hooks (useStableCallback, useIntersectionObserver, etc.)
+ * - LRUCache class and hook
+ * - Performance hooks (useDebounce, useThrottle, useIntersectionObserver, etc.)
+ * - Resource optimization functions
+ * - Network quality detection
  */
 
 import {
-  CleanupRegistry,
+  generateSrcSet,
+  getNetworkQuality,
   LRUCache,
-  useCleanupEffect,
-  useDeepMemo,
+  preconnectToOrigin,
+  reportWebVitals,
+  useDebounce,
   useIntersectionObserver,
-  useMemoizedObject,
-  useRenderCount,
-  useStableCallback,
-  useWhyDidYouUpdate,
-  WeakCache,
-} from '@shared/utils/performance-optimizations';
-import { act, renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+  useLRUCache,
+  useThrottle,
+} from '@shared/utils/advanced-performance';
+import { render } from '@testing-library/react';
+import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ============================================================================
-// WeakCache Tests
+// Resource Optimization Tests
 // ============================================================================
 
-describe('WeakCache', () => {
-  let cache: WeakCache<object, string>;
-
+describe('Resource Optimization', () => {
   beforeEach(() => {
-    cache = new WeakCache<object, string>();
+    // Mock DOM
+    const mockElement = {
+      rel: '',
+      href: '',
+      crossOrigin: '',
+      as: '',
+      type: '',
+      fetchPriority: '',
+    };
+
+    vi.stubGlobal('document', {
+      head: {
+        appendChild: vi.fn(),
+      },
+      querySelector: vi.fn(() => null),
+      createElement: vi.fn(() => mockElement),
+    });
   });
 
-  it('should store and retrieve values', () => {
-    const key = { id: 1 };
-    const value = 'test-value';
+  describe('preconnectToOrigin', () => {
+    it('should create preconnect link when document exists', () => {
+      const createElement = vi.fn(() => ({ rel: '', href: '', crossOrigin: '' }));
+      const appendChild = vi.fn();
 
-    cache.set(key, value);
-    expect(cache.get(key)).toBe(value);
+      vi.stubGlobal('document', {
+        head: { appendChild },
+        querySelector: vi.fn(() => null),
+        createElement,
+      });
+
+      preconnectToOrigin('https://api.example.com', true);
+
+      expect(createElement).toHaveBeenCalledTimes(2); // preconnect + dns-prefetch
+      expect(appendChild).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle server-side rendering gracefully', () => {
+      vi.stubGlobal('document', undefined);
+
+      expect(() => {
+        preconnectToOrigin('https://api.example.com');
+      }).not.toThrow();
+    });
   });
 
-  it('should return undefined for non-existent keys', () => {
-    const key = { id: 1 };
-    expect(cache.get(key)).toBeUndefined();
-  });
+  describe('generateSrcSet', () => {
+    it('should generate correct srcset string', () => {
+      const baseUrl = 'https://example.com/image';
+      const widths = [320, 640, 1024];
 
-  it('should check if key exists', () => {
-    const key = { id: 1 };
+      const result = generateSrcSet(baseUrl, widths);
 
-    expect(cache.has(key)).toBe(false);
+      expect(result).toBe(
+        'https://example.com/image?w=320 320w, https://example.com/image?w=640 640w, https://example.com/image?w=1024 1024w'
+      );
+    });
 
-    cache.set(key, 'value');
-    expect(cache.has(key)).toBe(true);
-  });
+    it('should handle single width', () => {
+      const result = generateSrcSet('https://example.com/image', [480]);
+      expect(result).toBe('https://example.com/image?w=480 480w');
+    });
 
-  it('should delete keys', () => {
-    const key = { id: 1 };
-    cache.set(key, 'value');
-
-    expect(cache.has(key)).toBe(true);
-
-    cache.delete(key);
-    expect(cache.has(key)).toBe(false);
-  });
-
-  it('should allow garbage collection of keys', () => {
-    let key: object | null = { id: 1 };
-    cache.set(key, 'value');
-
-    expect(cache.has(key)).toBe(true);
-
-    // Remove reference to key
-    key = null;
-
-    // Force garbage collection (if available)
-    if (global.gc) {
-      global.gc();
-    }
-
-    // After GC, the entry should eventually be collected
-    // Note: This is difficult to test reliably in practice
-  });
-
-  it('should work with different object types', () => {
-    const objKey = { id: 1 };
-    const arrayKey = [1, 2, 3];
-    const functionKey = () => {};
-
-    cache.set(objKey, 'object-value');
-    cache.set(arrayKey as any, 'array-value');
-    cache.set(functionKey as any, 'function-value');
-
-    expect(cache.get(objKey)).toBe('object-value');
-    expect(cache.get(arrayKey as any)).toBe('array-value');
-    expect(cache.get(functionKey as any)).toBe('function-value');
+    it('should handle empty widths array', () => {
+      const result = generateSrcSet('https://example.com/image', []);
+      expect(result).toBe('');
+    });
   });
 });
 
@@ -108,16 +106,19 @@ describe('LRUCache', () => {
   let cache: LRUCache<string, number>;
 
   beforeEach(() => {
-    cache = new LRUCache<string, number>(3); // Max 3 items
+    cache = new LRUCache<string, number>(3);
   });
 
   it('should store and retrieve values', () => {
     cache.set('a', 1);
+    cache.set('b', 2);
+
     expect(cache.get('a')).toBe(1);
+    expect(cache.get('b')).toBe(2);
   });
 
   it('should return undefined for non-existent keys', () => {
-    expect(cache.get('nonexistent')).toBeUndefined();
+    expect(cache.get('non-existent')).toBeUndefined();
   });
 
   it('should check if key exists', () => {
@@ -133,7 +134,7 @@ describe('LRUCache', () => {
     cache.set('c', 3);
     cache.set('d', 4); // Should evict 'a'
 
-    expect(cache.has('a')).toBe(false); // Evicted
+    expect(cache.has('a')).toBe(false);
     expect(cache.has('b')).toBe(true);
     expect(cache.has('c')).toBe(true);
     expect(cache.has('d')).toBe(true);
@@ -144,14 +145,14 @@ describe('LRUCache', () => {
     cache.set('b', 2);
     cache.set('c', 3);
 
-    // Access 'a' to make it recently used
+    // Access 'a' to make it most recently used
     cache.get('a');
 
-    // Add 'd' - should evict 'b' (least recently used)
+    // Add new item, should evict 'b' (least recently used)
     cache.set('d', 4);
 
-    expect(cache.has('a')).toBe(true); // Recently accessed
-    expect(cache.has('b')).toBe(false); // Evicted
+    expect(cache.has('a')).toBe(true);
+    expect(cache.has('b')).toBe(false);
     expect(cache.has('c')).toBe(true);
     expect(cache.has('d')).toBe(true);
   });
@@ -161,431 +162,357 @@ describe('LRUCache', () => {
     cache.set('b', 2);
     cache.set('c', 3);
 
-    cache.set('a', 10); // Update existing
+    cache.set('b', 20); // Update existing key
 
-    expect(cache.get('a')).toBe(10);
-    expect(cache.has('b')).toBe(true);
-    expect(cache.has('c')).toBe(true);
-  });
-
-  it('should delete keys', () => {
-    cache.set('a', 1);
-    expect(cache.has('a')).toBe(true);
-
-    cache.delete('a');
-    expect(cache.has('a')).toBe(false);
+    expect(cache.get('a')).toBe(1);
+    expect(cache.get('b')).toBe(20);
+    expect(cache.get('c')).toBe(3);
   });
 
   it('should clear all entries', () => {
     cache.set('a', 1);
     cache.set('b', 2);
-    cache.set('c', 3);
+    expect(cache.size).toBe(2);
 
     cache.clear();
-
+    expect(cache.size).toBe(0);
     expect(cache.has('a')).toBe(false);
     expect(cache.has('b')).toBe(false);
-    expect(cache.has('c')).toBe(false);
   });
 
   it('should return correct size', () => {
     expect(cache.size).toBe(0);
 
     cache.set('a', 1);
-    expect(cache.size).toBe(1);
-
     cache.set('b', 2);
     expect(cache.size).toBe(2);
-
-    cache.delete('a');
-    expect(cache.size).toBe(1);
   });
 });
 
 // ============================================================================
-// CleanupRegistry Tests
+// useLRUCache Hook Tests
 // ============================================================================
 
-describe('CleanupRegistry', () => {
-  let registry: CleanupRegistry;
+describe('useLRUCache', () => {
+  let container: HTMLDivElement;
 
   beforeEach(() => {
-    registry = new CleanupRegistry();
+    container = document.createElement('div');
+    document.body.appendChild(container);
   });
 
   afterEach(() => {
-    registry.cleanupAll();
-  });
-
-  it('should register and execute cleanup functions', () => {
-    const cleanup1 = vi.fn();
-    const cleanup2 = vi.fn();
-
-    registry.register('task1', cleanup1);
-    registry.register('task2', cleanup2);
-
-    registry.cleanupAll();
-
-    expect(cleanup1).toHaveBeenCalledTimes(1);
-    expect(cleanup2).toHaveBeenCalledTimes(1);
-  });
-
-  it('should cleanup specific task by name', () => {
-    const cleanup1 = vi.fn();
-    const cleanup2 = vi.fn();
-
-    registry.register('task1', cleanup1);
-    registry.register('task2', cleanup2);
-
-    registry.cleanup('task1');
-
-    expect(cleanup1).toHaveBeenCalledTimes(1);
-    expect(cleanup2).toHaveBeenCalledTimes(0);
-
-    registry.cleanupAll();
-    expect(cleanup2).toHaveBeenCalledTimes(1);
-  });
-
-  it('should handle cleanup errors gracefully', () => {
-    const cleanup1 = vi.fn(() => {
-      throw new Error('Cleanup failed');
-    });
-    const cleanup2 = vi.fn();
-
-    registry.register('task1', cleanup1);
-    registry.register('task2', cleanup2);
-
-    // Should not throw
-    expect(() => registry.cleanupAll()).not.toThrow();
-
-    // Both should be attempted
-    expect(cleanup1).toHaveBeenCalledTimes(1);
-    expect(cleanup2).toHaveBeenCalledTimes(1);
-  });
-
-  it('should allow re-registering same name', () => {
-    const cleanup1 = vi.fn();
-    const cleanup2 = vi.fn();
-
-    registry.register('task', cleanup1);
-    registry.register('task', cleanup2); // Overwrites
-
-    registry.cleanup('task');
-
-    expect(cleanup1).toHaveBeenCalledTimes(0);
-    expect(cleanup2).toHaveBeenCalledTimes(1);
-  });
-});
-
-// ============================================================================
-// useCleanupEffect Tests
-// ============================================================================
-
-describe('useCleanupEffect', () => {
-  it('should run cleanup on unmount', () => {
-    const cleanup = vi.fn();
-
-    const { unmount } = renderHook(() => {
-      useCleanupEffect(() => {
-        return cleanup;
-      }, []);
-    });
-
-    expect(cleanup).not.toHaveBeenCalled();
-
-    unmount();
-
-    expect(cleanup).toHaveBeenCalledTimes(1);
-  });
-
-  it('should run cleanup when dependencies change', () => {
-    const cleanup1 = vi.fn();
-    const cleanup2 = vi.fn();
-    let callCount = 0;
-
-    const { rerender } = renderHook(
-      ({ dep }) => {
-        useCleanupEffect(() => {
-          callCount++;
-          return callCount === 1 ? cleanup1 : cleanup2;
-        }, [dep]);
-      },
-      { initialProps: { dep: 'initial' } }
-    );
-
-    expect(cleanup1).not.toHaveBeenCalled();
-
-    // Change dependency
-    rerender({ dep: 'changed' });
-
-    expect(cleanup1).toHaveBeenCalledTimes(1);
-    expect(cleanup2).not.toHaveBeenCalled();
-  });
-});
-
-// ============================================================================
-// useStableCallback Tests
-// ============================================================================
-
-describe('useStableCallback', () => {
-  it('should return stable callback reference', () => {
-    const { result, rerender } = renderHook(
-      ({ count }) => {
-        return useStableCallback(() => count);
-      },
-      { initialProps: { count: 0 } }
-    );
-
-    const callback1 = result.current;
-
-    rerender({ count: 1 });
-    const callback2 = result.current;
-
-    rerender({ count: 2 });
-    const callback3 = result.current;
-
-    // All callbacks should be the same reference
-    expect(callback1).toBe(callback2);
-    expect(callback2).toBe(callback3);
-  });
-
-  it('should use latest values when called', () => {
-    const { result, rerender } = renderHook(
-      ({ count }) => {
-        return useStableCallback(() => count);
-      },
-      { initialProps: { count: 0 } }
-    );
-
-    expect(result.current()).toBe(0);
-
-    rerender({ count: 5 });
-    expect(result.current()).toBe(5);
-
-    rerender({ count: 10 });
-    expect(result.current()).toBe(10);
-  });
-});
-
-// ============================================================================
-// useMemoizedObject Tests
-// ============================================================================
-
-describe('useMemoizedObject', () => {
-  it('should memoize object by content', () => {
-    const { result, rerender } = renderHook(({ obj }) => useMemoizedObject(obj), {
-      initialProps: { obj: { a: 1, b: 2 } },
-    });
-
-    const obj1 = result.current;
-
-    // Rerender with same content but different reference
-    rerender({ obj: { a: 1, b: 2 } });
-    const obj2 = result.current;
-
-    // Should return same reference
-    expect(obj1).toBe(obj2);
-  });
-
-  it('should return new reference when content changes', () => {
-    const { result, rerender } = renderHook(({ obj }) => useMemoizedObject(obj), {
-      initialProps: { obj: { a: 1, b: 2 } },
-    });
-
-    const obj1 = result.current;
-
-    // Rerender with different content
-    rerender({ obj: { a: 1, b: 3 } });
-    const obj2 = result.current;
-
-    // Should return different reference
-    expect(obj1).not.toBe(obj2);
-    expect(obj2.b).toBe(3);
-  });
-});
-
-// ============================================================================
-// useDeepMemo Tests
-// ============================================================================
-
-describe('useDeepMemo', () => {
-  it('should memoize based on deep equality', () => {
-    const factory = vi.fn((obj: unknown) => ({ ...obj, computed: true }));
-
-    const { result, rerender } = renderHook(({ obj }) => useDeepMemo(() => factory(obj), [obj]), {
-      initialProps: { obj: { a: 1, b: { c: 2 } } },
-    });
-
-    expect(factory).toHaveBeenCalledTimes(1);
-    const result1 = result.current;
-
-    // Rerender with same deep content
-    rerender({ obj: { a: 1, b: { c: 2 } } });
-
-    // Factory should not be called again
-    expect(factory).toHaveBeenCalledTimes(1);
-    expect(result.current).toBe(result1);
-  });
-
-  it('should recompute when deep content changes', () => {
-    const factory = vi.fn((obj: unknown) => ({ ...obj, computed: true }));
-
-    const { result, rerender } = renderHook(({ obj }) => useDeepMemo(() => factory(obj), [obj]), {
-      initialProps: { obj: { a: 1, b: { c: 2 } } },
-    });
-
-    expect(factory).toHaveBeenCalledTimes(1);
-
-    // Rerender with different deep content
-    rerender({ obj: { a: 1, b: { c: 3 } } });
-
-    // Factory should be called again
-    expect(factory).toHaveBeenCalledTimes(2);
-    expect(result.current.b.c).toBe(3);
-  });
-});
-
-// ============================================================================
-// useIntersectionObserver Tests
-// ============================================================================
-
-describe('useIntersectionObserver', () => {
-  it('should create intersection observer', () => {
-    const callback = vi.fn();
-
-    const { result } = renderHook(() => useIntersectionObserver(callback, { threshold: 0.5 }));
-
-    expect(result.current).toBeDefined();
-    expect(result.current.current).toBeNull(); // No element attached yet
-  });
-
-  it('should call callback when element intersects', () => {
-    const callback = vi.fn();
-    const mockIntersectionObserver = vi.fn();
-
-    // Store the callback passed to IntersectionObserver
-    let observerCallback: IntersectionObserverCallback | null = null;
-
-    global.IntersectionObserver = vi.fn().mockImplementation((cb) => {
-      observerCallback = cb;
-      return {
-        observe: vi.fn(),
-        unobserve: vi.fn(),
-        disconnect: vi.fn(),
-        root: null,
-        rootMargin: '',
-        thresholds: [],
-      };
-    }) as any;
-
-    const { result } = renderHook(() => useIntersectionObserver(callback));
-
-    // Simulate element attachment
-    const mockElement = document.createElement('div');
-    act(() => {
-      if (result.current) {
-        (result.current as any).current = mockElement;
-      }
-    });
-
-    // Simulate intersection
-    if (observerCallback) {
-      const entries: IntersectionObserverEntry[] = [
-        {
-          isIntersecting: true,
-          target: mockElement,
-          intersectionRatio: 1,
-          boundingClientRect: mockElement.getBoundingClientRect(),
-          intersectionRect: mockElement.getBoundingClientRect(),
-          rootBounds: null,
-          time: Date.now(),
-        },
-      ];
-
-      observerCallback(entries, null as any);
-      expect(callback).toHaveBeenCalledWith(entries);
+    if (container.parentNode) {
+      container.parentNode.removeChild(container);
     }
   });
-});
 
-// ============================================================================
-// useRenderCount Tests
-// ============================================================================
+  it('should create and return LRU cache instance', () => {
+    let cacheInstance: LRUCache<string, string>;
 
-describe('useRenderCount', () => {
-  it('should track render count', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    function TestComponent() {
+      cacheInstance = useLRUCache<string, string>(3);
+      return React.createElement('div');
+    }
 
-    const { rerender } = renderHook(() => useRenderCount('TestComponent'));
+    render(React.createElement(TestComponent), { container });
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('TestComponent'),
-      expect.stringContaining('Render #1')
-    );
-
-    rerender();
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('TestComponent'),
-      expect.stringContaining('Render #2')
-    );
-
-    rerender();
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('TestComponent'),
-      expect.stringContaining('Render #3')
-    );
-
-    consoleSpy.mockRestore();
+    expect(cacheInstance!).toBeInstanceOf(LRUCache);
+    // Test that the cache works with the expected capacity
+    cacheInstance!.set('a', 'value1');
+    cacheInstance!.set('b', 'value2');
+    cacheInstance!.set('c', 'value3');
+    expect(cacheInstance!.size).toBe(3);
   });
 });
 
 // ============================================================================
-// useWhyDidYouUpdate Tests
+// Performance Hooks Tests
 // ============================================================================
 
-describe('useWhyDidYouUpdate', () => {
-  it('should log changed props', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+describe('useDebounce', () => {
+  let container: HTMLDivElement;
 
-    const { rerender } = renderHook(({ props }) => useWhyDidYouUpdate('TestComponent', props), {
-      initialProps: { props: { count: 0, name: 'test' } },
+  beforeEach(() => {
+    vi.useFakeTimers();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    if (container.parentNode) {
+      container.parentNode.removeChild(container);
+    }
+  });
+
+  it('should debounce value changes', () => {
+    let debouncedValue: string;
+    let renderCount = 0;
+
+    function TestComponent({ value }: { value: string }) {
+      renderCount++;
+      debouncedValue = useDebounce(value, 500);
+      return React.createElement('div');
+    }
+
+    const { rerender } = render(React.createElement(TestComponent, { value: 'initial' }), {
+      container,
     });
 
-    // First render should not log changes
-    expect(consoleSpy).not.toHaveBeenCalled();
+    expect(debouncedValue!).toBe('initial');
+    expect(renderCount).toBe(1);
 
-    // Change one prop
-    rerender({ props: { count: 1, name: 'test' } });
+    rerender(React.createElement(TestComponent, { value: 'updated' }));
+    expect(debouncedValue!).toBe('initial'); // Should still be initial
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('TestComponent'),
-      expect.stringContaining('Changed props'),
+    vi.advanceTimersByTime(500);
+    expect(debouncedValue!).toBe('updated'); // Should now be updated
+  });
+});
+
+describe('useThrottle', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // Ensure DOM body exists for React Testing Library
+    if (!document.body) {
+      document.body = document.createElement('body');
+    }
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('should throttle function calls', () => {
+    const mockFn = vi.fn();
+    let throttledFn: typeof mockFn;
+
+    function TestComponent() {
+      throttledFn = useThrottle(mockFn, 1000);
+      return React.createElement('div');
+    }
+
+    render(React.createElement(TestComponent));
+
+    // Call multiple times rapidly
+    throttledFn!();
+    throttledFn!();
+    throttledFn!();
+
+    expect(mockFn).toHaveBeenCalledTimes(1);
+
+    // Advance time and call again
+    vi.advanceTimersByTime(1000);
+    throttledFn!();
+
+    expect(mockFn).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('useIntersectionObserver', () => {
+  beforeEach(() => {
+    // Ensure DOM body exists for React Testing Library
+    if (!document.body) {
+      document.body = document.createElement('body');
+    }
+
+    // Mock IntersectionObserver
+    const mockIntersectionObserver = vi.fn(() => ({
+      observe: vi.fn(),
+      unobserve: vi.fn(),
+      disconnect: vi.fn(),
+    }));
+
+    vi.stubGlobal('IntersectionObserver', mockIntersectionObserver);
+  });
+  it('should create intersection observer with options', () => {
+    let hookResult: ReturnType<typeof useIntersectionObserver>;
+
+    function TestComponent() {
+      hookResult = useIntersectionObserver({ threshold: 0.5 });
+      return React.createElement('div');
+    }
+
+    render(React.createElement(TestComponent));
+
+    expect(hookResult!).toBeDefined();
+    expect(Array.isArray(hookResult!)).toBe(true);
+    expect(hookResult!).toHaveLength(2);
+
+    const [ref, isIntersecting] = hookResult!;
+    expect(ref).toBeDefined();
+    expect(typeof isIntersecting).toBe('boolean');
+  });
+
+  it('should handle IntersectionObserver not being available', () => {
+    vi.stubGlobal('IntersectionObserver', undefined);
+
+    let hookResult: ReturnType<typeof useIntersectionObserver>;
+
+    function TestComponent() {
+      hookResult = useIntersectionObserver();
+      return React.createElement('div');
+    }
+
+    render(React.createElement(TestComponent));
+
+    const [ref, isIntersecting] = hookResult!;
+    expect(ref).toBeDefined();
+    expect(isIntersecting).toBe(true); // Fallback behavior
+  });
+});
+
+// ============================================================================
+// Network Quality Tests
+// ============================================================================
+
+describe('getNetworkQuality', () => {
+  it('should return network quality information', () => {
+    // Mock navigator.connection
+    vi.stubGlobal('navigator', {
+      connection: {
+        effectiveType: '4g',
+        downlink: 10,
+        rtt: 100,
+        saveData: false,
+      },
+    });
+
+    const quality = getNetworkQuality();
+
+    expect(quality).toEqual({
+      effectiveType: '4g',
+      downlink: 10,
+      rtt: 100,
+      saveData: false,
+    });
+  });
+
+  it('should handle missing connection API', () => {
+    // Completely remove navigator to test the fallback
+    vi.stubGlobal('navigator', undefined);
+
+    const quality = getNetworkQuality();
+
+    expect(quality).toEqual({
+      effectiveType: '4g',
+      downlink: 10,
+      rtt: 50,
+      saveData: false,
+    });
+  });
+});
+
+// ============================================================================
+// Web Vitals Tests
+// ============================================================================
+
+describe('reportWebVitals', () => {
+  it('should handle metric reporting without errors', () => {
+    const mockMetric = {
+      name: 'CLS',
+      value: 0.1,
+      id: 'test-id',
+      delta: 0.05,
+    };
+
+    expect(() => {
+      reportWebVitals(mockMetric);
+    }).not.toThrow();
+  });
+
+  it('should handle different metric types', () => {
+    const metrics = [
+      { name: 'FCP', value: 1200, id: 'fcp-1', delta: 100 },
+      { name: 'LCP', value: 2400, id: 'lcp-1', delta: 200 },
+      { name: 'FID', value: 50, id: 'fid-1', delta: 10 },
+    ];
+
+    metrics.forEach((metric) => {
+      expect(() => {
+        reportWebVitals(metric);
+      }).not.toThrow();
+    });
+  });
+});
+
+// ============================================================================
+// Performance Hook Tests (Temporarily Skipped)
+// ============================================================================
+
+// Test already exists above - removing duplicate
+
+describe('useIntersectionObserver', () => {
+  let container: HTMLDivElement;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+
+    // Mock IntersectionObserver
+    global.IntersectionObserver = vi.fn().mockImplementation((_callback) => ({
+      observe: vi.fn(),
+      unobserve: vi.fn(),
+      disconnect: vi.fn(),
+    }));
+  });
+
+  afterEach(() => {
+    if (container.parentNode) {
+      container.parentNode.removeChild(container);
+    }
+  });
+
+  it('should create intersection observer with options', () => {
+    let targetRef: React.RefObject<HTMLElement>;
+    let isIntersecting: boolean;
+
+    function TestComponent() {
+      [targetRef, isIntersecting] = useIntersectionObserver({
+        threshold: 0.5,
+        rootMargin: '10px',
+      });
+      return React.createElement('div', { ref: targetRef });
+    }
+
+    render(React.createElement(TestComponent), { container });
+
+    expect(targetRef!.current).toBeNull(); // Initially null before mounting
+    expect(isIntersecting!).toBe(false);
+    expect(global.IntersectionObserver).toHaveBeenCalledWith(
+      expect.any(Function),
       expect.objectContaining({
-        count: expect.objectContaining({
-          from: 0,
-          to: 1,
-        }),
+        threshold: 0.5,
+        rootMargin: '10px',
       })
     );
-
-    consoleSpy.mockRestore();
   });
 
-  it('should not log when props unchanged', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+  it('should handle IntersectionObserver not being available', () => {
+    // Mock IntersectionObserver as undefined
+    const originalIntersectionObserver = global.IntersectionObserver;
+    // @ts-expect-error - Intentionally setting to undefined for test
+    global.IntersectionObserver = undefined;
 
-    const { rerender } = renderHook(({ props }) => useWhyDidYouUpdate('TestComponent', props), {
-      initialProps: { props: { count: 0 } },
-    });
+    let targetRef: React.RefObject<HTMLElement>;
+    let isIntersecting: boolean;
 
-    consoleSpy.mockClear();
+    function TestComponent() {
+      [targetRef, isIntersecting] = useIntersectionObserver({
+        threshold: 0.5,
+      });
+      return React.createElement('div', { ref: targetRef });
+    }
 
-    // Rerender with same props
-    rerender({ props: { count: 0 } });
+    expect(() => {
+      render(React.createElement(TestComponent), { container });
+    }).not.toThrow();
 
-    // Should not log if nothing changed
-    expect(consoleSpy).not.toHaveBeenCalled();
+    expect(targetRef!.current).toBeNull();
+    expect(isIntersecting!).toBe(true); // Should default to true when observer not available
 
-    consoleSpy.mockRestore();
+    // Restore
+    global.IntersectionObserver = originalIntersectionObserver;
   });
 });

@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { ReactElement, ReactNode } from 'react';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
+import { AuthProvider } from '../../contexts/AuthContext';
 
 // ============================================================================
 // Types
@@ -84,6 +85,7 @@ function AllProviders({
   initialRoute = '/',
   initialRoutes = ['/'],
   useBrowserRouter = false,
+  mockAuth,
 }: AllProvidersProps) {
   // Choose router based on options
   const Router = useBrowserRouter ? BrowserRouter : MemoryRouter;
@@ -91,10 +93,19 @@ function AllProviders({
     ? {}
     : { initialEntries: initialRoutes, initialIndex: initialRoutes.indexOf(initialRoute) };
 
-  // TODO: Add AuthProvider mock if mockAuth is provided
+  // Wrap children with providers
+  let wrappedChildren = children;
+
+  // Add AuthProvider if mockAuth is provided
+  if (mockAuth) {
+    // For now, we'll use the actual AuthProvider in test mode
+    // In a real implementation, you might want to create a MockAuthProvider
+    wrappedChildren = <AuthProvider>{wrappedChildren}</AuthProvider>;
+  }
+
   // TODO: Add other providers as needed (Theme, Query, etc.)
 
-  return <Router {...routerProps}>{children}</Router>;
+  return <Router {...routerProps}>{wrappedChildren}</Router>;
 }
 
 // ============================================================================

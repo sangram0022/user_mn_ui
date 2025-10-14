@@ -2,22 +2,25 @@
  * Shared utilities barrel export
  */
 
-// Type guards
-export * from './typeGuards';
+// Error handling utilities
+export * from './apiError';
+export * from './error';
 
-// Caching utilities
-export * from './cache';
+// Logging utilities
+export { logger } from './logger';
 
-// Advanced performance monitoring
-export * from './advancedPerformance';
+// Validation utilities
+export * from './formValidation';
+export * from './validation';
 
-// Re-export commonly used utilities
-export { TypeGuards } from './typeGuards';
-export { CacheUtils, MemoryCache, useCache } from './cache';
-export { advancedPerformanceMonitor, 
-  AdvancedPerformanceMonitor,
-  useAdvancedRenderPerformance,
-  useAdvancedApiPerformance } from './advancedPerformance';
+// User utilities
+export * from './user';
+
+// Performance utilities
+export * from './performance';
+
+// Class name utilities
+export { clsx, cn } from './classNames';
 
 // Re-export design system for convenience
 export * from '../design';

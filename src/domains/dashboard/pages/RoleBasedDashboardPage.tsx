@@ -19,7 +19,7 @@ import {
   Users,
   Workflow,
 } from 'lucide-react';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useAuth } from '../../auth';
 
 const RoleBasedDashboard: FC = () => {
   const { user } = useAuth();

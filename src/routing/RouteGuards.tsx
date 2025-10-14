@@ -29,3 +29,21 @@ export const PublicRoute: FC<RouteGuardProps> = ({ children }) => {
 
   return <>{children}</>;
 };
+
+export const AdminRoute: FC<RouteGuardProps> = ({ children }) => {
+  const { user, hasPermission } = useAuth();
+
+  // Check if user is authenticated first
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check if user has admin permissions
+  const canAccessAdmin = hasPermission('admin') || user.role === 'admin';
+
+  if (!canAccessAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};

@@ -14,6 +14,7 @@
  */
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { logger } from './logger';
 
 // ============================================================================
 // RESOURCE HINTS AND PRELOADING
@@ -261,7 +262,11 @@ export const useRenderTime = (componentName: string): void => {
   useEffect(() => {
     const renderTime = Date.now() - startTime.current;
     if (import.meta.env.DEV) {
-      console.log(`[Performance] ${componentName} render #${renderCount.current}: ${renderTime}ms`);
+      logger.debug('[Performance]', {
+        component: componentName,
+        renderNumber: renderCount.current,
+        renderTime: `${renderTime}ms`,
+      });
     }
     startTime.current = Date.now();
   });
@@ -431,9 +436,16 @@ export const reportWebVitals = (metric: {
   value: number;
   id: string;
   delta: number;
+  rating?: string;
 }): void => {
   if (import.meta.env.DEV) {
-    console.log(`[Web Vitals] ${metric.name}:`, metric.value);
+    logger.info('[Web Vitals]', {
+      metric: metric.name,
+      value: metric.value,
+      id: metric.id,
+      delta: metric.delta,
+      rating: metric.rating,
+    });
   }
 
   // Send to analytics in production

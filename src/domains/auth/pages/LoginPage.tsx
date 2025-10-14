@@ -1,53 +1,61 @@
-import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import React, { useState } from 'react';
+import { Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
-import { AuthButton } from '@shared/ui/AuthButton';
+import {
+  PasswordInput,
+  SubmitButton,
+  TextInput,
+  useFormState,
+  useLoadingState,
+  usePasswordVisibility,
+} from '@shared/index';
 import ErrorAlert from '@shared/ui/ErrorAlert';
-import { FormInput } from '@shared/ui/FormInput';
 import { validateEmail, validatePassword } from '@shared/utils/formValidation';
 import { useAuth } from '../context/AuthContext';
 
+interface LoginFormData {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}
+
 const LoginPage: React.FC = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false,
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { formData, updateField, errors, setFieldError, clearErrors } = useFormState<LoginFormData>(
+    {
+      email: '',
+      password: '',
+      rememberMe: false,
+    }
+  );
+
+  const { showPassword, togglePasswordVisibility } = usePasswordVisibility();
+  const { isLoading, withLoading } = useLoadingState();
   const { error, handleError, clearError } = useErrorHandler();
 
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = event.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-
-    if (error) {
-      clearError();
-    }
-  };
-
   const validateForm = () => {
+    clearErrors();
+    let isValid = true;
+
     const emailValidation = validateEmail(formData.email);
     if (!emailValidation.isValid) {
-      handleError(new Error(emailValidation.error));
-      return false;
+      setFieldError('email', emailValidation.error || 'Invalid email');
+      isValid = false;
     }
 
     const passwordValidation = validatePassword(formData.password, 8);
     if (!passwordValidation.isValid) {
-      handleError(new Error(passwordValidation.error));
-      return false;
+      setFieldError(
+        'password',
+        passwordValidation.error || 'Password must be at least 8 characters'
+      );
+      isValid = false;
     }
 
-    return true;
+    return isValid;
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -58,27 +66,22 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // Use AuthProvider's login method which updates user state
-      await authLogin({
-        email: formData.email,
-        password: formData.password,
+      await withLoading(async () => {
+        await authLogin({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        // Small delay to ensure state is fully updated
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Navigate to dashboard after successful login
+        navigate('/dashboard', { replace: true });
       });
-
-      // Only navigate after successful login and user state update
-      // Small delay to ensure state is fully updated
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Navigate to dashboard after successful login
-      navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
-      // Handle error on the login page, not showing full-screen error
       handleError(err);
-      setIsLoading(false); // Reset loading state on error
     }
-    // Note: Don't reset loading in finally - let navigation happen while showing spinner
   };
 
   return (
@@ -105,40 +108,28 @@ const LoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             {/* Email Field */}
-            <FormInput
-              id="email"
-              name="email"
-              type="email"
+            <TextInput
               label="Email Address"
+              type="email"
               value={formData.email}
-              onChange={handleChange}
+              onChange={(value) => updateField('email', value)}
+              error={errors.email}
               required
               placeholder="Enter your email"
               autoComplete="email"
-              Icon={Mail}
             />
 
             {/* Password Field */}
-            <FormInput
-              id="password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
+            <PasswordInput
               label="Password"
               value={formData.password}
-              onChange={handleChange}
+              onChange={(value) => updateField('password', value)}
+              showPassword={showPassword}
+              onToggleVisibility={togglePasswordVisibility}
+              error={errors.password}
               required
               placeholder="Enter your password"
               autoComplete="current-password"
-              Icon={Lock}
-              helperTextContent="Must be at least 8 characters long"
-              ToggleIcon={
-                showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
-                )
-              }
-              onToggle={() => setShowPassword(!showPassword)}
             />
 
             <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -151,7 +142,7 @@ const LoginPage: React.FC = () => {
                   name="rememberMe"
                   type="checkbox"
                   checked={formData.rememberMe}
-                  onChange={handleChange}
+                  onChange={(e) => updateField('rememberMe', e.target.checked)}
                   className="w-4 h-4 border border-gray-300 rounded accent-blue-500"
                 />
                 Remember me
@@ -166,9 +157,7 @@ const LoginPage: React.FC = () => {
             </div>
 
             {/* Submit Button */}
-            <AuthButton type="submit" variant="primary" isLoading={isLoading}>
-              Sign In
-            </AuthButton>
+            <SubmitButton isLoading={isLoading}>Sign In</SubmitButton>
           </form>
 
           {/* Divider */}

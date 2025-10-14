@@ -1,5 +1,6 @@
 import '@app/App.css';
 import { GlobalErrorBoundary } from '@app/GlobalErrorBoundary';
+import { LocalizationProvider } from '@contexts/LocalizationProvider';
 import { AuthProvider } from '@domains/auth/providers/AuthProvider';
 import { notFoundRoute, routes } from '@routing/config';
 import { ProtectedRoute, PublicRoute } from '@routing/RouteGuards';
@@ -55,22 +56,24 @@ function App() {
   return (
     <GlobalErrorBoundary>
       <ErrorBoundary>
-        <AuthProvider>
-          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <RoutePreloadTrigger>
-              <Routes>
-                {routes.map((route) => (
-                  <Route
-                    key={route.path}
-                    path={route.path}
-                    element={wrapWithGuard(route, <RouteRenderer route={route} />)}
-                  />
-                ))}
-                <Route path="*" element={<RouteRenderer route={notFoundRoute} />} />
-              </Routes>
-            </RoutePreloadTrigger>
-          </Router>
-        </AuthProvider>
+        <LocalizationProvider defaultLocale="en">
+          <AuthProvider>
+            <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <RoutePreloadTrigger>
+                <Routes>
+                  {routes.map((route) => (
+                    <Route
+                      key={route.path}
+                      path={route.path}
+                      element={wrapWithGuard(route, <RouteRenderer route={route} />)}
+                    />
+                  ))}
+                  <Route path="*" element={<RouteRenderer route={notFoundRoute} />} />
+                </Routes>
+              </RoutePreloadTrigger>
+            </Router>
+          </AuthProvider>
+        </LocalizationProvider>
       </ErrorBoundary>
       <PerformanceMonitor />
     </GlobalErrorBoundary>

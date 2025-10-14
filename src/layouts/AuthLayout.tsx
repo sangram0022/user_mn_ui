@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react';
 
-import Header from '../components/common/Header';
+import Header from '@shared/components/Header';
 import Footer from './Footer';
 
 export interface AuthLayoutProps {

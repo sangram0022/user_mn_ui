@@ -44,28 +44,17 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
 
   return (
     <div
-      className={`absolute inset-0 flex items-center justify-center z-50 ${className}`}
-      style={{
-        backgroundColor: transparent ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.9)',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-      }}
+      className={`absolute inset-0 z-50 flex items-center justify-center backdrop-blur ${
+        transparent ? 'bg-white/70' : 'bg-white/90'
+      } ${className}`}
       role="status"
       aria-live="polite"
       aria-busy="true"
     >
       <div className="text-center">
         {/* Small spinner - 10mm (~38px) */}
-        <div
-          className="inline-block rounded-full animate-spin"
-          style={{
-            width: '38px',
-            height: '38px',
-            border: '3px solid rgba(59, 130, 246, 0.3)',
-            borderTopColor: '#3b82f6',
-          }}
-        />
-        {message && <p className="mt-3 text-sm text-gray-700 font-medium">{message}</p>}
+        <div className="inline-block h-[38px] w-[38px] animate-spin rounded-full border-[3px] border-blue-500/30 border-t-blue-500" />
+        {message && <p className="mt-3 text-sm font-medium text-gray-700">{message}</p>}
       </div>
     </div>
   );

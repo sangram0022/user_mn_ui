@@ -1,5 +1,5 @@
 import { CheckCircle, LogIn } from 'lucide-react';
-import React from 'react';
+import type { FC } from 'react';
 import { AuthButton } from './AuthButton';
 
 interface SuccessMessageProps {
@@ -10,7 +10,7 @@ interface SuccessMessageProps {
   countdown?: number | null;
 }
 
-export const SuccessMessage: React.FC<SuccessMessageProps> = ({
+export const SuccessMessage: FC<SuccessMessageProps> = ({
   title,
   message,
   buttonText = 'Continue',
