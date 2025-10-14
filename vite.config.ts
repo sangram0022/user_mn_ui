@@ -19,12 +19,7 @@ export default defineConfig(({ mode }) => {
             [
               'babel-plugin-react-compiler',
               {
-                // Compiler options
-                runtimeModule: 'react-compiler-runtime',
-                // Enable change detection for debugging in development
-                environment: {
-                  enableChangeDetectionForDebugging: mode === 'development',
-                },
+                // Compiler options - simplified for production use
               },
             ],
           ],
