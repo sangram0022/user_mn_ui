@@ -24,11 +24,11 @@ expect.extend(matchers);
 
 /**
  * Ensure document.body exists before each test
- * Fixes: "Cannot read properties of null (reading 'appendChild')" errors
+ * React 19 + jsdom v27: Fixed DOM initialization
  */
 beforeEach(() => {
-  // Ensure document.body exists
-  if (!document.body) {
+  // jsdom v27: Ensure document and documentElement exist
+  if (typeof document !== 'undefined' && document.documentElement && !document.body) {
     const body = document.createElement('body');
     document.documentElement.appendChild(body);
   }

@@ -1,0 +1,277 @@
+/**
+ * TOAST COMPONENT STYLES
+ * 
+ * Toast notification styles with progress indicator.
+ * Replaces inline styles from ToastContainer.tsx
+ */
+
+@layer components {
+  /* ========================================================================
+     TOAST CONTAINER
+     ======================================================================== */
+
+  .toast-container {
+    position: fixed;
+    z-index: var(--z-notification);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    pointer-events: none;
+  }
+
+  /* Position variants */
+  .toast-container[data-position='top-right'] {
+    top: var(--space-4);
+    right: var(--space-4);
+  }
+
+  .toast-container[data-position='top-left'] {
+    top: var(--space-4);
+    left: var(--space-4);
+  }
+
+  .toast-container[data-position='top-center'] {
+    top: var(--space-4);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .toast-container[data-position='bottom-right'] {
+    bottom: var(--space-4);
+    right: var(--space-4);
+  }
+
+  .toast-container[data-position='bottom-left'] {
+    bottom: var(--space-4);
+    left: var(--space-4);
+  }
+
+  .toast-container[data-position='bottom-center'] {
+    bottom: var(--space-4);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* ========================================================================
+     TOAST ITEM
+     ======================================================================== */
+
+  .toast {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-width: 300px;
+    max-width: 500px;
+    padding: var(--toast-padding);
+    background: var(--toast-bg);
+    color: var(--toast-text);
+    border: 1px solid var(--toast-border);
+    border-radius: var(--toast-radius);
+    box-shadow: var(--toast-shadow);
+    pointer-events: auto;
+    overflow: hidden;
+
+    /* Animation */
+    animation: toast-slide-in var(--duration-base) var(--ease-spring);
+  }
+
+  @keyframes toast-slide-in {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .toast[data-position*='left'] {
+    animation: toast-slide-in-left var(--duration-base) var(--ease-spring);
+  }
+
+  @keyframes toast-slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Exit animation */
+  .toast[data-exiting='true'] {
+    animation: toast-slide-out var(--duration-base) var(--ease-in);
+  }
+
+  @keyframes toast-slide-out {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+  }
+
+  /* ========================================================================
+     TOAST VARIANTS
+     ======================================================================== */
+
+  .toast[data-variant='success'] {
+    background: var(--toast-success-bg);
+  }
+
+  .toast[data-variant='error'] {
+    background: var(--toast-error-bg);
+  }
+
+  .toast[data-variant='warning'] {
+    background: var(--toast-warning-bg);
+  }
+
+  .toast[data-variant='info'] {
+    background: var(--toast-info-bg);
+  }
+
+  /* ========================================================================
+     TOAST CONTENT
+     ======================================================================== */
+
+  .toast-icon {
+    flex-shrink: 0;
+    width: var(--size-icon-md);
+    height: var(--size-icon-md);
+  }
+
+  .toast-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .toast-title {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    margin: 0;
+  }
+
+  .toast-message {
+    font-size: var(--font-size-sm);
+    margin-top: var(--space-1);
+    opacity: 0.9;
+  }
+
+  .toast-close {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size-icon-md);
+    height: var(--size-icon-md);
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-base);
+    color: currentColor;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+
+  .toast-close:hover {
+    opacity: 1;
+    background: rgb(var(--color-white) / 0.1);
+  }
+
+  /* ========================================================================
+     TOAST PROGRESS BAR
+     ======================================================================== */
+
+  .toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--toast-progress-bg);
+    overflow: hidden;
+  }
+
+  .toast-progress-bar {
+    height: 100%;
+    background: var(--toast-progress-fill);
+    transform-origin: left;
+    animation: toast-progress-shrink var(--toast-duration, 5000ms) linear forwards;
+  }
+
+  @keyframes toast-progress-shrink {
+    from {
+      transform: scaleX(1);
+    }
+    to {
+      transform: scaleX(0);
+    }
+  }
+
+  /* Pause on hover */
+  .toast:hover .toast-progress-bar {
+    animation-play-state: paused;
+  }
+
+  /* ========================================================================
+     RESPONSIVE
+     ======================================================================== */
+
+  @media (max-width: 640px) {
+    .toast-container {
+      left: var(--space-2);
+      right: var(--space-2);
+      transform: none;
+    }
+
+    .toast {
+      min-width: 100%;
+    }
+  }
+
+  /* ========================================================================
+     REDUCED MOTION
+     ======================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast {
+      animation: toast-fade-in var(--duration-fast) ease-out;
+    }
+
+    @keyframes toast-fade-in {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .toast[data-exiting='true'] {
+      animation: toast-fade-out var(--duration-fast) ease-in;
+    }
+
+    @keyframes toast-fade-out {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    .toast-progress-bar {
+      animation: none;
+      display: none;
+    }
+  }
+}

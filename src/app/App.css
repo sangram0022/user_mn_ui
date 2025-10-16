@@ -1,6 +1,15 @@
-/* Minimal App.css - most styles now handled by Tailwind CSS */
+/**
+ * App.css - Minimal application-specific styles
+ * 
+ * Most styles are now handled by:
+ * - Tailwind CSS utility classes
+ * - Design system tokens (src/styles/design-system/)
+ * - Component-specific styles
+ * 
+ * Only keep truly unique, app-specific styles here.
+ */
 
-/* Keep only essential styles that don't conflict with Tailwind */
+/* ===== Logo Animation ===== */
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -29,29 +38,4 @@
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
-}
-
-.quick-action-card {
-  background: var(--background-secondary);
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  width: 100%;
-  background-color: var(--background-secondary);
-  color: inherit;
-}
-
-.quick-action-card:hover,
-.quick-action-card:focus-visible {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px var(--shadow-medium);
-  outline: none;
 }

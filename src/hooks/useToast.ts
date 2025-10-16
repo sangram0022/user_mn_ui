@@ -1,13 +1,5 @@
-import { useContext } from 'react';
-
-import { ToastContext, type ToastContextType } from '@contexts/ToastContext';
-
 /**
  * Hook to use toast notifications
+ * Re-exports from the Toast component for backward compatibility
  */
-export const useToast = (): ToastContextType => { const context = useContext(ToastContext);
-  if (context === undefined) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
-};
+export { useToast } from '@shared/components/ui/Toast';

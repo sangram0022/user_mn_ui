@@ -1,0 +1,538 @@
+/**
+ * Container Queries CSS
+ * 
+ * Modern CSS container queries for component-based responsive design.
+ * Components respond to their container's size, not viewport size.
+ * 
+ * Browser Support (as of 2025):
+ * - Chrome/Edge: 105+
+ * - Safari: 16+
+ * - Firefox: 110+
+ * 
+ * @see https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Container_Queries
+ */
+
+/* ============================================
+   CONTAINER CONTEXTS
+   ============================================ */
+
+/**
+ * Main container context
+ * Use this for primary layout containers
+ */
+.container-context {
+  container-type: inline-size;
+  container-name: main;
+}
+
+/**
+ * Card container context
+ * Cards can adapt based on their allocated space
+ */
+.container-card {
+  container-type: inline-size;
+  container-name: card;
+}
+
+/**
+ * Sidebar container context
+ * Sidebars and aside elements
+ */
+.container-sidebar {
+  container-type: inline-size;
+  container-name: sidebar;
+}
+
+/**
+ * Modal container context
+ * Modals can adapt based on available space
+ */
+.container-modal {
+  container-type: inline-size;
+  container-name: modal;
+}
+
+/**
+ * Table container context
+ * Tables adapt to container width
+ */
+.container-table {
+  container-type: inline-size;
+  container-name: table;
+}
+
+/**
+ * Form container context
+ * Forms adapt layout based on available space
+ */
+.container-form {
+  container-type: inline-size;
+  container-name: form;
+}
+
+/* ============================================
+   CARD CONTAINER QUERIES
+   ============================================ */
+
+/**
+ * Card - Compact layout (< 400px)
+ * Stack content vertically, reduce padding
+ */
+@container card (max-width: 400px) {
+  .card-responsive {
+    padding: 1rem;
+  }
+
+  .card-responsive .card-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .card-responsive .card-title {
+    font-size: 1rem;
+  }
+
+  .card-responsive .card-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .card-responsive .card-actions > button {
+    flex: 1;
+  }
+
+  .card-responsive .card-image {
+    aspect-ratio: 16/9;
+  }
+
+  .card-responsive .card-meta {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+/**
+ * Card - Medium layout (400px - 600px)
+ * Balanced spacing, horizontal layout for some elements
+ */
+@container card (min-width: 400px) and (max-width: 600px) {
+  .card-responsive {
+    padding: 1.5rem;
+  }
+
+  .card-responsive .card-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .card-responsive .card-title {
+    font-size: 1.125rem;
+  }
+
+  .card-responsive .card-actions {
+    justify-content: flex-end;
+  }
+}
+
+/**
+ * Card - Large layout (> 600px)
+ * Full spacing, horizontal layout
+ */
+@container card (min-width: 600px) {
+  .card-responsive {
+    padding: 2rem;
+  }
+
+  .card-responsive .card-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .card-responsive .card-title {
+    font-size: 1.25rem;
+  }
+
+  .card-responsive .card-body {
+    columns: 2;
+    column-gap: 2rem;
+  }
+
+  .card-responsive .card-image {
+    aspect-ratio: 21/9;
+  }
+}
+
+/* ============================================
+   MODAL CONTAINER QUERIES
+   ============================================ */
+
+/**
+ * Modal - Compact (< 500px)
+ * Full-width on small containers, reduced padding
+ */
+@container modal (max-width: 500px) {
+  .modal-responsive {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+
+  .modal-responsive .modal-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modal-responsive .modal-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modal-responsive .modal-footer > button {
+    width: 100%;
+  }
+
+  .modal-responsive .modal-body {
+    max-height: 50vh;
+  }
+}
+
+/**
+ * Modal - Medium (500px - 768px)
+ */
+@container modal (min-width: 500px) and (max-width: 768px) {
+  .modal-responsive {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  .modal-responsive .modal-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .modal-responsive .modal-body {
+    max-height: 60vh;
+  }
+}
+
+/**
+ * Modal - Large (> 768px)
+ */
+@container modal (min-width: 768px) {
+  .modal-responsive {
+    margin: 2rem;
+    padding: 2rem;
+  }
+
+  .modal-responsive .modal-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+
+  .modal-responsive .modal-body {
+    max-height: 70vh;
+  }
+}
+
+/* ============================================
+   TABLE CONTAINER QUERIES
+   ============================================ */
+
+/**
+ * Table - Card view (< 640px)
+ * Convert table to stacked cards for narrow containers
+ */
+@container table (max-width: 640px) {
+  .table-responsive {
+    display: block;
+  }
+
+  .table-responsive thead {
+    display: none;
+  }
+
+  .table-responsive tbody {
+    display: block;
+  }
+
+  .table-responsive tr {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: white;
+    border: 1px solid rgb(229 231 235);
+    border-radius: 0.5rem;
+  }
+
+  .table-responsive td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border: none;
+  }
+
+  .table-responsive td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: rgb(75 85 99);
+  }
+
+  .table-responsive td:not(:last-child) {
+    border-bottom: 1px solid rgb(243 244 246);
+  }
+}
+
+/**
+ * Table - Horizontal scroll (640px - 1024px)
+ * Enable horizontal scrolling for medium containers
+ */
+@container table (min-width: 640px) and (max-width: 1024px) {
+  .table-responsive {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .table-responsive th,
+  .table-responsive td {
+    padding: 0.75rem 1rem;
+  }
+
+  /* Reduce font size slightly for medium containers */
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+}
+
+/**
+ * Table - Full layout (> 1024px)
+ * Standard table layout with full spacing
+ */
+@container table (min-width: 1024px) {
+  .table-responsive {
+    display: table;
+    width: 100%;
+  }
+
+  .table-responsive th,
+  .table-responsive td {
+    padding: 1rem 1.5rem;
+  }
+}
+
+/* ============================================
+   FORM CONTAINER QUERIES
+   ============================================ */
+
+/**
+ * Form - Single column (< 640px)
+ * Stack all form fields vertically
+ */
+@container form (max-width: 640px) {
+  .form-responsive {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-responsive .form-group {
+    width: 100%;
+  }
+
+  .form-responsive .form-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-responsive .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-responsive .form-actions > button {
+    width: 100%;
+  }
+}
+
+/**
+ * Form - Two columns (640px - 1024px)
+ * Group related fields in 2 columns
+ */
+@container form (min-width: 640px) and (max-width: 1024px) {
+  .form-responsive {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .form-responsive .form-group-full {
+    grid-column: 1 / -1;
+  }
+
+  .form-responsive .form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+}
+
+/**
+ * Form - Three columns (> 1024px)
+ * Optimal spacing for large containers
+ */
+@container form (min-width: 1024px) {
+  .form-responsive {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .form-responsive .form-group-full {
+    grid-column: 1 / -1;
+  }
+
+  .form-responsive .form-group-half {
+    grid-column: span 2;
+  }
+
+  .form-responsive .form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+}
+
+/* ============================================
+   SIDEBAR CONTAINER QUERIES
+   ============================================ */
+
+/**
+ * Sidebar - Collapsed (< 240px)
+ * Icon-only navigation
+ */
+@container sidebar (max-width: 240px) {
+  .sidebar-responsive .sidebar-text {
+    display: none;
+  }
+
+  .sidebar-responsive .sidebar-icon {
+    margin: 0 auto;
+  }
+
+  .sidebar-responsive .sidebar-item {
+    justify-content: center;
+    padding: 0.75rem;
+  }
+}
+
+/**
+ * Sidebar - Expanded (> 240px)
+ * Full navigation with text labels
+ */
+@container sidebar (min-width: 240px) {
+  .sidebar-responsive .sidebar-text {
+    display: inline;
+  }
+
+  .sidebar-responsive .sidebar-item {
+    justify-content: flex-start;
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/**
+ * Container query units (cqw, cqh, cqi, cqb)
+ * Use for fluid typography and spacing
+ */
+.text-cq {
+  font-size: clamp(1rem, 2cqw + 0.5rem, 1.5rem);
+}
+
+.text-cq-lg {
+  font-size: clamp(1.25rem, 3cqw + 0.75rem, 2rem);
+}
+
+.text-cq-xl {
+  font-size: clamp(1.5rem, 4cqw + 1rem, 2.5rem);
+}
+
+/**
+ * Responsive padding based on container size
+ */
+.padding-cq-sm {
+  padding: clamp(0.5rem, 2cqw, 1rem);
+}
+
+.padding-cq-md {
+  padding: clamp(1rem, 3cqw, 2rem);
+}
+
+.padding-cq-lg {
+  padding: clamp(1.5rem, 4cqw, 3rem);
+}
+
+/**
+ * Responsive gap based on container size
+ */
+.gap-cq-sm {
+  gap: clamp(0.5rem, 2cqw, 1rem);
+}
+
+.gap-cq-md {
+  gap: clamp(1rem, 3cqw, 2rem);
+}
+
+.gap-cq-lg {
+  gap: clamp(1.5rem, 4cqw, 3rem);
+}
+
+/* ============================================
+   DEBUG UTILITIES
+   ============================================ */
+
+/**
+ * Visual indicator for container query support
+ * Remove in production
+ */
+@supports (container-type: inline-size) {
+  .container-debug::before {
+    content: 'CQ: Supported';
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.25rem 0.5rem;
+    background: #10b981;
+    color: white;
+    font-size: 0.75rem;
+    border-bottom-left-radius: 0.25rem;
+    z-index: 1000;
+  }
+}
+
+@supports not (container-type: inline-size) {
+  .container-debug::before {
+    content: 'CQ: Not Supported';
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.25rem 0.5rem;
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    border-bottom-left-radius: 0.25rem;
+    z-index: 1000;
+  }
+}

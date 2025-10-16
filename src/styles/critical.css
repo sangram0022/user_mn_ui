@@ -1,0 +1,489 @@
+/**
+ * Critical CSS - Above-the-Fold Styles
+ * 
+ * These styles should be inlined in <head> for immediate rendering.
+ * Extracted from design tokens and common components.
+ * 
+ * Priority: First Paint (FP) and First Contentful Paint (FCP)
+ */
+
+/* ==========================================================================
+   CRITICAL DESIGN TOKENS - Inline in <head>
+   ========================================================================== */
+
+:root {
+  /* Color Primitives (most used) */
+  --color-blue-500: 59 130 246;
+  --color-blue-600: 37 99 235;
+  --color-purple-500: 168 85 247;
+  --color-gray-50: 249 250 251;
+  --color-gray-100: 243 244 246;
+  --color-gray-200: 229 231 235;
+  --color-gray-900: 17 24 39;
+  --color-white: 255 255 255;
+
+  /* Semantic Tokens (critical) */
+  --bg-primary: var(--color-white);
+  --bg-secondary: var(--color-gray-50);
+  --text-primary: var(--color-gray-900);
+  --text-secondary: 107 114 128; /* gray-500 */
+
+  /* Spacing (most used) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+
+  /* Typography */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+/* Dark theme critical tokens */
+[data-theme='dark'] {
+  --bg-primary: 17 24 39; /* gray-900 */
+  --bg-secondary: 31 41 55; /* gray-800 */
+  --text-primary: 243 244 246; /* gray-100 */
+  --text-secondary: 156 163 175; /* gray-400 */
+}
+
+/* ==========================================================================
+   BASE CRITICAL STYLES
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  background: rgb(var(--bg-primary));
+  color: rgb(var(--text-primary));
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   CRITICAL LAYOUT - Stack (Most Used)
+   ========================================================================== */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.stack > * {
+  margin-block: 0;
+}
+
+.stack > * + * {
+  margin-block-start: var(--stack-space, 1rem);
+}
+
+/* ==========================================================================
+   CRITICAL BUTTON STYLES - Above the fold
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, rgb(var(--color-blue-500)), rgb(var(--color-purple-500)));
+  color: rgb(var(--color-white));
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   CRITICAL LOADING STATE - Skeleton
+   ========================================================================== */
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--color-gray-200)) 0%,
+    rgb(var(--color-gray-100)) 50%,
+    rgb(var(--color-gray-200)) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+[data-theme='dark'] .skeleton {
+  background: linear-gradient(90deg, rgb(31 41 55) 0%, rgb(55 65 81) 50%, rgb(31 41 55) 100%);
+}
+
+/* ==========================================================================
+   CRITICAL FOCUS STYLES - Accessibility
+   ========================================================================== */
+
+:focus-visible {
+  outline: 2px solid rgb(var(--color-blue-500));
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   SKIP LINK - Accessibility (Critical for keyboard users)
+   ========================================================================== */
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: rgb(var(--color-blue-600));
+  color: rgb(var(--color-white));
+  padding: var(--space-2) var(--space-4);
+  text-decoration: none;
+  border-radius: 0 0 var(--radius-md) 0;
+  z-index: 9999;
+  font-weight: var(--font-weight-medium);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ==========================================================================
+   LOADING INDICATOR - Above the fold
+   ========================================================================== */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ==========================================================================
+   CRITICAL NAVIGATION STYLES - Always visible
+   ========================================================================== */
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background: rgb(var(--bg-primary));
+  border-bottom: 1px solid rgb(var(--color-gray-200));
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-medium);
+  font-size: 0.875rem;
+  color: rgb(var(--text-primary));
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.nav-link:hover {
+  background: rgb(var(--color-gray-100));
+  color: rgb(var(--color-blue-600));
+}
+
+.nav-link[aria-current='page'] {
+  background: rgb(var(--color-blue-500) / 0.1);
+  color: rgb(var(--color-blue-600));
+}
+
+/* ==========================================================================
+   CRITICAL FORM ELEMENTS - Login/Auth pages
+   ========================================================================== */
+
+.input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgb(var(--text-primary));
+  background: rgb(var(--bg-primary));
+  border: 1px solid rgb(var(--color-gray-200));
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.input:focus {
+  outline: none;
+  border-color: rgb(var(--color-blue-500));
+  box-shadow: 0 0 0 3px rgb(var(--color-blue-500) / 0.1);
+}
+
+.input::placeholder {
+  color: rgb(var(--text-secondary));
+}
+
+.input:disabled {
+  background: rgb(var(--color-gray-50));
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: rgb(var(--text-primary));
+}
+
+/* ==========================================================================
+   CRITICAL CARD STYLES - Dashboard/Homepage
+   ========================================================================== */
+
+.card {
+  background: rgb(var(--bg-primary));
+  border: 1px solid rgb(var(--color-gray-200));
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid rgb(var(--color-gray-200));
+}
+
+.card-body {
+  padding: var(--space-6);
+}
+
+.card-footer {
+  padding: var(--space-4) var(--space-6);
+  background: rgb(var(--color-gray-50));
+  border-top: 1px solid rgb(var(--color-gray-200));
+}
+
+[data-theme='dark'] .card {
+  background: rgb(31 41 55); /* gray-800 */
+  border-color: rgb(55 65 81); /* gray-700 */
+}
+
+[data-theme='dark'] .card-header,
+[data-theme='dark'] .card-footer {
+  border-color: rgb(55 65 81);
+}
+
+[data-theme='dark'] .card-footer {
+  background: rgb(17 24 39); /* gray-900 */
+}
+
+/* ==========================================================================
+   CRITICAL TEXT UTILITIES - Typography
+   ========================================================================== */
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.font-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
+
+/* ==========================================================================
+   CRITICAL ALERT STYLES - Error messages above fold
+   ========================================================================== */
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+}
+
+.alert-error {
+  background: rgb(254 242 242);
+  border-color: rgb(254 226 226);
+  color: rgb(153 27 27);
+}
+
+.alert-success {
+  background: rgb(240 253 244);
+  border-color: rgb(220 252 231);
+  color: rgb(22 101 52);
+}
+
+.alert-warning {
+  background: rgb(254 252 232);
+  border-color: rgb(254 249 195);
+  color: rgb(133 77 14);
+}
+
+.alert-info {
+  background: rgb(239 246 255);
+  border-color: rgb(219 234 254);
+  color: rgb(30 64 175);
+}
+
+[data-theme='dark'] .alert-error {
+  background: rgb(127 29 29 / 0.2);
+  border-color: rgb(127 29 29 / 0.3);
+  color: rgb(254 202 202);
+}
+
+[data-theme='dark'] .alert-success {
+  background: rgb(22 101 52 / 0.2);
+  border-color: rgb(22 101 52 / 0.3);
+  color: rgb(187 247 208);
+}
+
+[data-theme='dark'] .alert-warning {
+  background: rgb(133 77 14 / 0.2);
+  border-color: rgb(133 77 14 / 0.3);
+  color: rgb(254 240 138);
+}
+
+[data-theme='dark'] .alert-info {
+  background: rgb(30 64 175 / 0.2);
+  border-color: rgb(30 64 175 / 0.3);
+  color: rgb(191 219 254);
+}
+
+/* ==========================================================================
+   CRITICAL UTILITY CLASSES - Layout helpers
+   ========================================================================== */
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: var(--space-2);
+}
+
+.gap-4 {
+  gap: var(--space-4);
+}
+
+.p-4 {
+  padding: var(--space-4);
+}
+
+.px-4 {
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+.py-2 {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.transition-all {
+  transition: all var(--transition-fast);
+}
+
+/* ==========================================================================
+   CRITICAL RESPONSIVE - Mobile-first breakpoints
+   ========================================================================== */
+
+@media (min-width: 768px) {
+  .md\:flex {
+    display: flex;
+  }
+
+  .md\:hidden {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .sm\:hidden {
+    display: none;
+  }
+}

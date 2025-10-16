@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, loadEnv } from 'vite';
 import { analyzer } from 'vite-bundle-analyzer';
+import { inlineCriticalCSS } from './vite-plugins/inline-critical-css';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -25,6 +26,8 @@ export default defineConfig(({ mode }) => {
           ],
         },
       }),
+      // Critical CSS inlining for faster FCP
+      mode === 'production' && inlineCriticalCSS(),
       // Bundle analyzer - only in analysis mode
       process.env.ANALYZE === 'true' &&
         analyzer({
@@ -45,6 +48,7 @@ export default defineConfig(({ mode }) => {
         '@widgets': fileURLToPath(new URL('./src/widgets', import.meta.url)),
         '@config': fileURLToPath(new URL('./src/config', import.meta.url)),
         '@contexts': fileURLToPath(new URL('./src/contexts', import.meta.url)),
+        '@components': fileURLToPath(new URL('./src/components', import.meta.url)),
         '@lib': fileURLToPath(new URL('./src/lib', import.meta.url)),
         '@hooks': fileURLToPath(new URL('./src/hooks', import.meta.url)),
         '@styles': fileURLToPath(new URL('./src/styles', import.meta.url)),
@@ -103,10 +107,33 @@ export default defineConfig(({ mode }) => {
       // Rollup options for enhanced code splitting
       rollupOptions: {
         output: {
-          // Optimized chunk naming for better caching
-          chunkFileNames: 'assets/js/[name]-[hash].js',
+          // Optimized chunk naming for better caching with CloudFront
+          chunkFileNames: (chunkInfo) => {
+            const facadeModuleId = chunkInfo.facadeModuleId
+              ? chunkInfo.facadeModuleId.split('/').pop()
+              : 'chunk';
+            return `assets/js/${facadeModuleId}-[hash].js`;
+          },
           entryFileNames: 'assets/js/[name]-[hash].js',
-          assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+
+          // Asset file naming for CloudFront caching
+          assetFileNames: (assetInfo) => {
+            if (!assetInfo.name) return 'assets/[name]-[hash][extname]';
+
+            // Images
+            if (/\.(png|jpe?g|svg|gif|webp|avif)$/i.test(assetInfo.name)) {
+              return 'assets/images/[name]-[hash][extname]';
+            }
+            // CSS
+            if (/\.css$/i.test(assetInfo.name)) {
+              return 'assets/css/[name]-[hash][extname]';
+            }
+            // Fonts
+            if (/\.(woff2?|eot|ttf|otf)$/i.test(assetInfo.name)) {
+              return 'assets/fonts/[name]-[hash][extname]';
+            }
+            return 'assets/[name]-[hash][extname]';
+          },
 
           manualChunks(id) {
             // Vendor chunks for better caching and lazy loading
@@ -152,6 +179,25 @@ export default defineConfig(({ mode }) => {
             // User management domain
             if (id.includes('/src/domains/user-management') || id.includes('/src/domains/users')) {
               return 'domain-user-management';
+            }
+
+            // Admin domain (split further for better caching)
+            if (id.includes('/src/domains/admin')) {
+              // Heavy admin pages get their own chunks
+              if (id.includes('AuditLogsPage') || id.includes('audit')) {
+                return 'admin-audit';
+              }
+              if (id.includes('BulkOperationsPage') || id.includes('bulk')) {
+                return 'admin-bulk';
+              }
+              if (id.includes('HealthMonitoringPage') || id.includes('health')) {
+                return 'admin-health';
+              }
+              if (id.includes('GDPRCompliancePage') || id.includes('gdpr')) {
+                return 'admin-gdpr';
+              }
+              // Other admin pages
+              return 'domain-admin';
             }
 
             // Workflow engine domain
@@ -204,6 +250,34 @@ export default defineConfig(({ mode }) => {
             }
 
             // === SHARED CODE SPLITTING ===
+
+            // Design system CSS (critical)
+            if (id.includes('/src/styles/tokens') || id.includes('primitives.css')) {
+              return 'design-tokens';
+            }
+
+            if (id.includes('/src/styles/compositions') || id.includes('layouts.css')) {
+              return 'layouts';
+            }
+
+            // Component CSS (lazy load per component)
+            if (id.includes('/src/styles/components/button.css')) {
+              return 'component-button';
+            }
+            if (id.includes('/src/styles/components/alert.css')) {
+              return 'component-alert';
+            }
+            if (id.includes('/src/styles/components/toast.css')) {
+              return 'component-toast';
+            }
+            if (id.includes('/src/styles/components')) {
+              return 'components-css';
+            }
+
+            // Self-hosted fonts
+            if (id.includes('@fontsource')) {
+              return 'fonts';
+            }
 
             // Shared UI components (heavy)
             if (id.includes('/src/shared/ui')) {

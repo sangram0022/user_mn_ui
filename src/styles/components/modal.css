@@ -1,0 +1,54 @@
+/**
+ * MODAL COMPONENT STYLES
+ */
+
+@layer components {
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal-backdrop);
+    background: var(--modal-backdrop);
+    animation: fade-in var(--transition-modal);
+  }
+
+  .modal-container {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    overflow-y: auto;
+  }
+
+  .modal {
+    position: relative;
+    width: 100%;
+    max-width: 32rem;
+    background: var(--modal-bg);
+    border-radius: var(--modal-radius);
+    box-shadow: var(--modal-shadow);
+    animation: modal-slide-up var(--transition-modal);
+  }
+
+  @keyframes modal-slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(2rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

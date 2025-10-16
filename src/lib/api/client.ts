@@ -123,10 +123,13 @@ interface LogoutResponse {
 export class ApiClient {
   private baseURL: string;
   private session: StoredSession | null;
+  // Request deduplication: prevent multiple simultaneous identical requests
+  private pendingRequests: Map<string, Promise<unknown>>;
 
   constructor(baseURL: string = DEFAULT_BASE_URL) {
     this.baseURL = baseURL;
     this.session = this.loadSession();
+    this.pendingRequests = new Map();
   }
 
   private loadSession(): StoredSession | null {
@@ -135,17 +138,18 @@ export class ApiClient {
     }
 
     try {
+      // Use sessionStorage for better security (tokens cleared on tab close)
       const accessToken =
-        window.localStorage.getItem('access_token') ??
-        window.localStorage.getItem('token') ??
+        window.sessionStorage.getItem('access_token') ??
+        window.sessionStorage.getItem('token') ??
         undefined;
       if (!accessToken) {
         return null;
       }
 
-      const refreshToken = window.localStorage.getItem('refresh_token') ?? undefined;
-      const issuedAt = window.localStorage.getItem('token_issued_at') ?? undefined;
-      const expiresInString = window.localStorage.getItem('token_expires_in') ?? undefined;
+      const refreshToken = window.sessionStorage.getItem('refresh_token') ?? undefined;
+      const issuedAt = window.sessionStorage.getItem('token_issued_at') ?? undefined;
+      const expiresInString = window.sessionStorage.getItem('token_expires_in') ?? undefined;
       const expiresIn = expiresInString ? Number(expiresInString) : undefined;
 
       return { accessToken, refreshToken, issuedAt, expiresIn };
@@ -162,29 +166,31 @@ export class ApiClient {
 
     try {
       if (!session) {
-        window.localStorage.removeItem('access_token');
-        window.localStorage.removeItem('refresh_token');
-        window.localStorage.removeItem('token_issued_at');
-        window.localStorage.removeItem('token_expires_in');
-        window.localStorage.removeItem('token');
+        // Clear all token data from sessionStorage
+        window.sessionStorage.removeItem('access_token');
+        window.sessionStorage.removeItem('refresh_token');
+        window.sessionStorage.removeItem('token_issued_at');
+        window.sessionStorage.removeItem('token_expires_in');
+        window.sessionStorage.removeItem('token');
         this.session = null;
         return;
       }
 
-      window.localStorage.setItem('access_token', session.accessToken);
-      window.localStorage.setItem('token', session.accessToken);
+      // Store tokens in sessionStorage (cleared on tab close for better security)
+      window.sessionStorage.setItem('access_token', session.accessToken);
+      window.sessionStorage.setItem('token', session.accessToken);
       if (session.refreshToken) {
-        window.localStorage.setItem('refresh_token', session.refreshToken);
+        window.sessionStorage.setItem('refresh_token', session.refreshToken);
       } else {
-        window.localStorage.removeItem('refresh_token');
+        window.sessionStorage.removeItem('refresh_token');
       }
 
       if (session.issuedAt) {
-        window.localStorage.setItem('token_issued_at', session.issuedAt);
+        window.sessionStorage.setItem('token_issued_at', session.issuedAt);
       }
 
       if (typeof session.expiresIn === 'number') {
-        window.localStorage.setItem('token_expires_in', String(session.expiresIn));
+        window.sessionStorage.setItem('token_expires_in', String(session.expiresIn));
       }
 
       this.session = session;
@@ -202,7 +208,29 @@ export class ApiClient {
       headers['Authorization'] = `Bearer ${this.session.accessToken}`;
     }
 
+    // Add CSRF token for state-changing requests
+    const csrfToken = this.getCsrfToken();
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+
     return headers;
+  }
+
+  /**
+   * Get CSRF token from meta tag or cookie
+   * For AWS deployment, the backend should set this via CloudFront
+   */
+  private getCsrfToken(): string | null {
+    // Try meta tag first (set by backend on page load)
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    if (metaTag) {
+      return metaTag.getAttribute('content');
+    }
+
+    // Fallback to cookie (if backend uses cookie-based CSRF)
+    const cookieMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+    return cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
   }
 
   private async parseJson<T>(response: Response): Promise<T | undefined> {
@@ -235,6 +263,31 @@ export class ApiClient {
       }
       return undefined;
     }
+  }
+
+  /**
+   * Request deduplication: if a request to the same URL with same method is already pending,
+   * return the existing promise instead of creating a new request
+   */
+  private async dedupedRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+    const method = options.method ?? 'GET';
+    const dedupeKey = `${method}:${path}`;
+
+    // Check if request is already pending
+    const pending = this.pendingRequests.get(dedupeKey);
+    if (pending) {
+      logger.debug(`[API] Deduplicating request: ${dedupeKey}`);
+      return pending as Promise<T>;
+    }
+
+    // Create new request and store promise
+    const requestPromise = this.request<T>(path, options).finally(() => {
+      // Clean up after request completes
+      this.pendingRequests.delete(dedupeKey);
+    });
+
+    this.pendingRequests.set(dedupeKey, requestPromise);
+    return requestPromise;
   }
 
   private async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -418,7 +471,7 @@ export class ApiClient {
   }
 
   async getUserProfile(): Promise<UserProfile> {
-    return await this.request<UserProfile>(ENDPOINTS.profile.me);
+    return await this.dedupedRequest<UserProfile>(ENDPOINTS.profile.me);
   }
 
   async updateUserProfile(payload: Partial<UserProfile>): Promise<UserProfile> {
@@ -458,12 +511,14 @@ export class ApiClient {
 
     const query = searchParams.toString();
     const path = query ? `${ENDPOINTS.admin.users}?${query}` : ENDPOINTS.admin.users;
-    const response = await this.request<UserListResponse[]>(path);
+    const response = await this.dedupedRequest<UserListResponse[]>(path);
     return response.map((user) => this.mapUserSummary(user));
   }
 
   async getUser(userId: string): Promise<UserSummary> {
-    const response = await this.request<UserDetailResponse>(ENDPOINTS.admin.userById(userId));
+    const response = await this.dedupedRequest<UserDetailResponse>(
+      ENDPOINTS.admin.userById(userId)
+    );
     return this.mapUserSummary(response);
   }
 
@@ -521,7 +576,7 @@ export class ApiClient {
     };
 
     try {
-      const analytics = await this.request<UserAnalytics>(ENDPOINTS.admin.analytics);
+      const analytics = await this.dedupedRequest<UserAnalytics>(ENDPOINTS.admin.analytics);
       return {
         ...fallback,
         ...analytics,
@@ -539,7 +594,7 @@ export class ApiClient {
   }
 
   async getLifecycleAnalytics<T = unknown>(): Promise<T> {
-    return await this.request<T>('/business-logic/lifecycle/analytics');
+    return await this.dedupedRequest<T>('/business-logic/lifecycle/analytics');
   }
 
   async getAuditLogs(params?: AuditLogsQuery): Promise<AuditLog[]> {
@@ -555,16 +610,16 @@ export class ApiClient {
 
     const query = searchParams.toString();
     const path = query ? `${ENDPOINTS.audit.logs}?${query}` : ENDPOINTS.audit.logs;
-    return await this.request<AuditLog[]>(path);
+    return await this.dedupedRequest<AuditLog[]>(path);
   }
 
   async getAuditSummary(): Promise<AuditSummary> {
-    return await this.request<AuditSummary>(ENDPOINTS.audit.summary);
+    return await this.dedupedRequest<AuditSummary>(ENDPOINTS.audit.summary);
   }
 
   async getPendingApprovals(): Promise<PendingWorkflow[]> {
     try {
-      return await this.request<PendingWorkflow[]>(ENDPOINTS.workflows.pending);
+      return await this.dedupedRequest<PendingWorkflow[]>(ENDPOINTS.workflows.pending);
     } catch (error) {
       if (import.meta.env.DEV) {
         logger.warn('Pending workflows endpoint unavailable', { error });

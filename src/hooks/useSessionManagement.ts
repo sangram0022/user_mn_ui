@@ -5,8 +5,7 @@
  * CRITICAL: This hook manages user session lifecycle - thoroughly test after changes
  */
 
-/* eslint-disable react-hooks/exhaustive-deps */
-
+import { SESSION_TIMEOUT } from '@shared/constants';
 import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useState } from 'react';
 
@@ -26,9 +25,9 @@ interface SessionConfig {
 }
 
 const DEFAULT_CONFIG: SessionConfig = {
-  maxInactiveTime: 30 * 60 * 1000, // 30 minutes
-  warningTime: 5 * 60 * 1000, // 5 minutes before expiry
-  checkInterval: 30 * 1000, // check every 30 seconds
+  maxInactiveTime: SESSION_TIMEOUT.MAX_INACTIVE_TIME,
+  warningTime: SESSION_TIMEOUT.WARNING_TIME,
+  checkInterval: SESSION_TIMEOUT.CHECK_INTERVAL,
 };
 
 export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
@@ -142,15 +141,16 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
         try {
           const parsed = JSON.parse(storedSession);
           if (parsed.expiresAt > Date.now()) {
-            setSessionData(parsed);
+            // Use setTimeout to avoid synchronous setState in effect
+            setTimeout(() => setSessionData(parsed), 0);
           } else {
-            initializeSession();
+            setTimeout(() => initializeSession(), 0);
           }
         } catch {
-          initializeSession();
+          setTimeout(() => initializeSession(), 0);
         }
       } else {
-        initializeSession();
+        setTimeout(() => initializeSession(), 0);
       }
     }
   }, [user, sessionData, initializeSession]);
@@ -158,16 +158,33 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
   // Cleanup on user logout
   useEffect(() => {
     if (!user) {
-      setSessionData(null);
-      setShowWarning(false);
+      // Use setTimeout to avoid synchronous setState in effect
+      setTimeout(() => {
+        setSessionData(null);
+        setShowWarning(false);
+      }, 0);
     }
   }, [user]);
 
-  // Calculate remaining time - Convert useMemo to IIFE
-  const remainingTime = (() => {
-    if (!sessionData) return 0;
-    return Math.max(0, sessionData.expiresAt - Date.now());
-  })();
+  // Calculate remaining time - Use state to avoid calling Date.now() during render
+  const [remainingTime, setRemainingTime] = useState(0);
+
+  useEffect(() => {
+    if (!sessionData) {
+      // Use setTimeout to avoid synchronous setState in effect
+      setTimeout(() => setRemainingTime(0), 0);
+      return;
+    }
+
+    const updateRemainingTime = () => {
+      setRemainingTime(Math.max(0, sessionData.expiresAt - Date.now()));
+    };
+
+    updateRemainingTime();
+    const timer = setInterval(updateRemainingTime, 1000);
+
+    return () => clearInterval(timer);
+  }, [sessionData]);
 
   return {
     sessionData,

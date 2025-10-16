@@ -689,8 +689,10 @@ export function useResizeObserver<T extends HTMLElement>(
   const observerRef = useRef<ResizeObserver | null>(null);
   const callbackRef = useRef(callback);
 
-  // Update callback ref when callback changes
-  callbackRef.current = callback;
+  // React 19 best practice: Update callback ref in useEffect
+  useEffect(() => {
+    callbackRef.current = callback;
+  });
 
   useEffect(() => {
     const element = elementRef.current;
@@ -723,7 +725,10 @@ export function useIntersectionObserver<T extends HTMLElement>(
   const observerRef = useRef<IntersectionObserver | null>(null);
   const callbackRef = useRef(callback);
 
-  callbackRef.current = callback;
+  // React 19 best practice: Update callback ref in useEffect
+  useEffect(() => {
+    callbackRef.current = callback;
+  });
 
   useEffect(() => {
     const element = elementRef.current;
@@ -767,7 +772,11 @@ export function useDebouncedValue<T>(value: T, delay: number): T {
 // Performance-aware callback hook
 export function useStableCallback<T extends (...args: unknown[]) => unknown>(callback: T): T {
   const callbackRef = useRef<T>(callback);
-  callbackRef.current = callback;
+
+  // React 19 best practice: Update callback ref in useEffect
+  useEffect(() => {
+    callbackRef.current = callback;
+  });
 
   return ((...args: Parameters<T>) => callbackRef.current(...args)) as T;
 }
@@ -796,9 +805,19 @@ export const useDebounce = <T>(value: T, delay: number): T => {
  */
 export const useThrottle = <T>(value: T, limit: number): T => {
   const [throttledValue, setThrottledValue] = useState<T>(value);
-  const lastRan = useRef<number>(Date.now());
+  // React 19 best practice: Initialize refs without impure functions
+  const lastRan = useRef<number>(0);
+  const isInitialized = useRef(false);
 
   useEffect(() => {
+    // Initialize on first run (no state update to avoid cascading)
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      lastRan.current = Date.now();
+      // Don't call setThrottledValue here to avoid cascading renders
+      return;
+    }
+
     const handler = setTimeout(
       () => {
         if (Date.now() - lastRan.current >= limit) {

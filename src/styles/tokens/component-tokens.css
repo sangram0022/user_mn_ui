@@ -1,0 +1,243 @@
+/**
+ * COMPONENT-SPECIFIC DESIGN TOKENS
+ * 
+ * Tokens specific to individual components.
+ * Built on top of semantic tokens for easy theming.
+ */
+
+:root {
+  /* ========================================================================
+     BUTTON TOKENS
+     ======================================================================== */
+
+  /* Primary button */
+  --button-primary-bg: linear-gradient(
+    135deg,
+    rgb(var(--color-blue-500)),
+    rgb(var(--color-purple-600))
+  );
+  --button-primary-bg-hover: linear-gradient(
+    135deg,
+    rgb(var(--color-blue-600)),
+    rgb(var(--color-purple-700))
+  );
+  --button-primary-text: rgb(var(--color-white));
+  --button-primary-border: transparent;
+  --button-primary-shadow: var(--shadow-button);
+  --button-primary-shadow-hover: 0 4px 12px rgb(var(--color-blue-500) / 0.3);
+
+  /* Secondary button */
+  --button-secondary-bg: rgb(var(--color-white));
+  --button-secondary-bg-hover: rgb(var(--color-gray-50));
+  --button-secondary-text: rgb(var(--color-gray-700));
+  --button-secondary-border: rgb(var(--color-gray-300));
+  --button-secondary-shadow: var(--shadow-button);
+
+  /* Outline button */
+  --button-outline-bg: transparent;
+  --button-outline-bg-hover: rgb(var(--color-blue-50));
+  --button-outline-text: rgb(var(--color-blue-600));
+  --button-outline-border: rgb(var(--color-blue-600));
+
+  /* Danger button */
+  --button-danger-bg: rgb(var(--color-red-600));
+  --button-danger-bg-hover: rgb(var(--color-red-700));
+  --button-danger-text: rgb(var(--color-white));
+  --button-danger-border: rgb(var(--color-red-600));
+
+  /* Success button */
+  --button-success-bg: rgb(var(--color-green-600));
+  --button-success-bg-hover: rgb(var(--color-green-700));
+  --button-success-text: rgb(var(--color-white));
+  --button-success-border: rgb(var(--color-green-600));
+
+  /* ========================================================================
+     CARD TOKENS
+     ======================================================================== */
+
+  --card-bg: rgb(var(--color-background-elevated));
+  --card-border: rgb(var(--color-border-secondary));
+  --card-shadow: var(--shadow-card);
+  --card-shadow-hover: var(--shadow-card-hover);
+  --card-radius: var(--border-radius-card);
+  --card-padding: var(--spacing-component-lg);
+
+  /* ========================================================================
+     MODAL TOKENS
+     ======================================================================== */
+
+  --modal-bg: rgb(var(--color-background-elevated));
+  --modal-backdrop: rgb(var(--color-background-overlay) / 0.75);
+  --modal-shadow: var(--shadow-modal);
+  --modal-radius: var(--border-radius-modal);
+  --modal-padding: var(--spacing-component-xl);
+  --modal-header-border: rgb(var(--color-border-secondary));
+  --modal-footer-border: rgb(var(--color-border-secondary));
+
+  /* ========================================================================
+     INPUT TOKENS
+     ======================================================================== */
+
+  --input-bg: rgb(var(--color-white));
+  --input-bg-disabled: rgb(var(--color-disabled-bg));
+  --input-border: rgb(var(--color-border-primary));
+  --input-border-hover: rgb(var(--color-border-focus));
+  --input-border-focus: rgb(var(--color-border-focus));
+  --input-border-error: rgb(var(--color-border-error));
+  --input-text: rgb(var(--color-text-primary));
+  --input-text-disabled: rgb(var(--color-text-disabled));
+  --input-placeholder: rgb(var(--color-text-tertiary));
+  --input-radius: var(--border-radius-input);
+  --input-shadow-focus: 0 0 0 3px rgb(var(--color-focus-ring) / 0.1);
+
+  /* ========================================================================
+     TOAST/NOTIFICATION TOKENS
+     ======================================================================== */
+
+  --toast-bg: rgb(var(--color-gray-900));
+  --toast-text: rgb(var(--color-white));
+  --toast-border: transparent;
+  --toast-shadow: var(--shadow-lg);
+  --toast-radius: var(--border-radius-component);
+  --toast-padding: var(--spacing-component-md);
+
+  /* Toast variants */
+  --toast-success-bg: rgb(var(--color-success-solid));
+  --toast-error-bg: rgb(var(--color-error-solid));
+  --toast-warning-bg: rgb(var(--color-warning-solid));
+  --toast-info-bg: rgb(var(--color-info-solid));
+
+  /* Progress indicator for auto-dismiss */
+  --toast-progress-bg: rgb(var(--color-white) / 0.3);
+  --toast-progress-fill: rgb(var(--color-white));
+
+  /* ========================================================================
+     TOOLTIP TOKENS
+     ======================================================================== */
+
+  --tooltip-bg: rgb(var(--color-gray-900));
+  --tooltip-text: rgb(var(--color-white));
+  --tooltip-shadow: var(--shadow-tooltip);
+  --tooltip-radius: var(--radius-lg);
+  --tooltip-padding: var(--space-2) var(--space-3);
+  --tooltip-arrow-size: 0.25rem;
+
+  /* ========================================================================
+     ALERT TOKENS
+     ======================================================================== */
+
+  --alert-radius: var(--border-radius-component);
+  --alert-padding: var(--spacing-component-md);
+  --alert-border-width: 1px;
+
+  /* Alert variants */
+  --alert-success-bg: rgb(var(--color-success-bg));
+  --alert-success-border: rgb(var(--color-success-border));
+  --alert-success-text: rgb(var(--color-success-text));
+  --alert-success-icon: rgb(var(--color-success-solid));
+
+  --alert-error-bg: rgb(var(--color-error-bg));
+  --alert-error-border: rgb(var(--color-error-border));
+  --alert-error-text: rgb(var(--color-error-text));
+  --alert-error-icon: rgb(var(--color-error-solid));
+
+  --alert-warning-bg: rgb(var(--color-warning-bg));
+  --alert-warning-border: rgb(var(--color-warning-border));
+  --alert-warning-text: rgb(var(--color-warning-text));
+  --alert-warning-icon: rgb(var(--color-warning-solid));
+
+  --alert-info-bg: rgb(var(--color-info-bg));
+  --alert-info-border: rgb(var(--color-info-border));
+  --alert-info-text: rgb(var(--color-info-text));
+  --alert-info-icon: rgb(var(--color-info-solid));
+
+  /* ========================================================================
+     TABLE TOKENS
+     ======================================================================== */
+
+  --table-bg: rgb(var(--color-background-elevated));
+  --table-header-bg: rgb(var(--color-background-subtle));
+  --table-border: rgb(var(--color-border-secondary));
+  --table-row-hover: rgb(var(--color-background-muted));
+  --table-cell-padding: var(--space-3) var(--space-4);
+
+  /* ========================================================================
+     BADGE TOKENS
+     ======================================================================== */
+
+  --badge-radius: var(--radius-full);
+  --badge-padding: var(--space-1) var(--space-2-5);
+  --badge-font-size: var(--font-size-xs);
+  --badge-font-weight: var(--font-weight-medium);
+
+  /* Badge variants */
+  --badge-primary-bg: rgb(var(--color-blue-100));
+  --badge-primary-text: rgb(var(--color-blue-800));
+  --badge-success-bg: rgb(var(--color-green-100));
+  --badge-success-text: rgb(var(--color-green-800));
+  --badge-error-bg: rgb(var(--color-red-100));
+  --badge-error-text: rgb(var(--color-red-800));
+  --badge-warning-bg: rgb(var(--color-yellow-100));
+  --badge-warning-text: rgb(var(--color-yellow-800));
+
+  /* ========================================================================
+     SKELETON LOADER TOKENS
+     ======================================================================== */
+
+  --skeleton-bg: rgb(var(--color-gray-200));
+  --skeleton-shimmer: rgb(var(--color-gray-300));
+  --skeleton-radius: var(--radius-md);
+
+  /* ========================================================================
+     PROGRESS BAR TOKENS
+     ======================================================================== */
+
+  --progress-bg: rgb(var(--color-gray-200));
+  --progress-fill: rgb(var(--color-brand-primary));
+  --progress-height: 0.5rem;
+  --progress-radius: var(--radius-full);
+
+  /* ========================================================================
+     DROPDOWN/SELECT TOKENS
+     ======================================================================== */
+
+  --dropdown-bg: rgb(var(--color-background-elevated));
+  --dropdown-border: rgb(var(--color-border-primary));
+  --dropdown-shadow: var(--shadow-dropdown);
+  --dropdown-radius: var(--border-radius-component);
+  --dropdown-item-hover: rgb(var(--color-background-muted));
+  --dropdown-item-active: rgb(var(--color-brand-primary));
+  --dropdown-item-active-text: rgb(var(--color-white));
+
+  /* ========================================================================
+     TABS TOKENS
+     ======================================================================== */
+
+  --tabs-border: rgb(var(--color-border-secondary));
+  --tabs-active-border: rgb(var(--color-brand-primary));
+  --tabs-active-text: rgb(var(--color-brand-primary));
+  --tabs-inactive-text: rgb(var(--color-text-secondary));
+  --tabs-hover-bg: rgb(var(--color-background-muted));
+
+  /* ========================================================================
+     SWITCH/TOGGLE TOKENS
+     ======================================================================== */
+
+  --switch-bg-off: rgb(var(--color-gray-300));
+  --switch-bg-on: rgb(var(--color-brand-primary));
+  --switch-thumb: rgb(var(--color-white));
+  --switch-shadow: var(--shadow-sm);
+
+  /* ========================================================================
+     CHECKBOX/RADIO TOKENS
+     ======================================================================== */
+
+  --checkbox-border: rgb(var(--color-border-primary));
+  --checkbox-bg-checked: rgb(var(--color-brand-primary));
+  --checkbox-checkmark: rgb(var(--color-white));
+  --checkbox-radius: var(--radius-base);
+
+  --radio-border: rgb(var(--color-border-primary));
+  --radio-bg-checked: rgb(var(--color-brand-primary));
+  --radio-dot: rgb(var(--color-white));
+}

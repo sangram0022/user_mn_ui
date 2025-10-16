@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
+import { useToast } from '@hooks/useToast';
 import { apiClient } from '@lib/api';
 
 const EmailVerificationPage: React.FC = () => {
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -19,7 +21,10 @@ const EmailVerificationPage: React.FC = () => {
     const verifyEmail = async () => {
       if (!token) {
         setStatus('error');
-        setMessage('No verification token provided. Please check your email for the correct link.');
+        const errorMsg =
+          'No verification token provided. Please check your email for the correct link.';
+        setMessage(errorMsg);
+        toast.error(errorMsg);
         return;
       }
 
@@ -27,21 +32,23 @@ const EmailVerificationPage: React.FC = () => {
         const response = await apiClient.verifyEmail(token);
 
         setStatus('success');
-        setMessage(
+        const successMsg =
           response.message ??
-            'Your email has been successfully verified! You can now sign in to your account.'
-        );
+          'Your email has been successfully verified! You can now sign in to your account.';
+        setMessage(successMsg);
+        toast.success('Email verified successfully!');
       } catch (error: unknown) {
         handleError(error);
         setStatus('error');
-        setMessage(
-          'Email verification failed. Please try again or request a new verification email.'
-        );
+        const errorMsg =
+          'Email verification failed. Please try again or request a new verification email.';
+        setMessage(errorMsg);
+        toast.error(errorMsg);
       }
     };
 
     void verifyEmail();
-  }, [token, handleError]);
+  }, [token, handleError, toast]);
 
   useEffect(() => {
     if (status !== 'success') {
@@ -68,11 +75,11 @@ const EmailVerificationPage: React.FC = () => {
   const getStatusIcon = () => {
     switch (status) {
       case 'loading':
-        return <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />;
+        return <Loader2 className="w-8 h-8 text-blue-600 animate-spin" aria-hidden="true" />;
       case 'success':
-        return <CheckCircle className="w-8 h-8 text-green-600" />;
+        return <CheckCircle className="w-8 h-8 text-green-600" aria-hidden="true" />;
       case 'error':
-        return <XCircle className="w-8 h-8 text-red-600" />;
+        return <XCircle className="w-8 h-8 text-red-600" aria-hidden="true" />;
     }
   };
 
@@ -90,7 +97,7 @@ const EmailVerificationPage: React.FC = () => {
   return (
     <div className="sm:mx-auto sm:w-full sm:max-w-md">
       <div className="bg-white shadow-xl sm:rounded-2xl border border-gray-100 p-8 sm:p-10">
-        <div className="text-center">
+        <div className="text-center" role="status" aria-live="polite">
           <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
             {getStatusIcon()}
           </div>
@@ -104,7 +111,11 @@ const EmailVerificationPage: React.FC = () => {
           <p className="text-gray-600 mb-6">{message}</p>
 
           {status === 'success' && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <div
+              className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6"
+              role="status"
+              aria-live="polite"
+            >
               <p className="text-sm text-green-800">
                 Redirecting to login in {countdown} second{countdown === 1 ? '' : 's'}...
               </p>
@@ -112,7 +123,11 @@ const EmailVerificationPage: React.FC = () => {
           )}
 
           {status === 'error' && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div
+              className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6"
+              role="alert"
+              aria-live="assertive"
+            >
               <div className="space-y-3">
                 <p className="text-sm text-red-800">
                   <strong>What you can do:</strong>
@@ -140,7 +155,7 @@ const EmailVerificationPage: React.FC = () => {
                   to="/email-confirmation"
                   className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
-                  <Mail className="h-4 w-4" />
+                  <Mail className="h-4 w-4" aria-hidden="true" />
                   Request New Verification Email
                 </Link>
                 <Link

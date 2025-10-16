@@ -12,9 +12,18 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import React, { ComponentType, useActionState, useCallback, useEffect, useState } from 'react';
+import React, {
+  ComponentType,
+  startTransition,
+  useActionState,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { useToast } from '@hooks/useToast';
 import { apiClient } from '@lib/api';
 import {
   validateEmail,
@@ -44,7 +53,7 @@ interface RegisterState {
 
 // Server action for registration
 async function registerAction(
-  prevState: RegisterState,
+  _prevState: RegisterState,
   formData: FormData
 ): Promise<RegisterState> {
   const firstName = formData.get('firstName') as string;
@@ -128,6 +137,7 @@ async function registerAction(
 }
 
 const RegisterPage: React.FC = () => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -146,7 +156,6 @@ const RegisterPage: React.FC = () => {
     feedback: null,
   });
 
-  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
   const [hasNavigated, setHasNavigated] = useState(false);
 
   const navigate = useNavigate();
@@ -154,7 +163,6 @@ const RegisterPage: React.FC = () => {
   const handleProceedToLogin = useCallback(() => {
     setHasNavigated((prev) => {
       if (!prev) {
-        setRedirectCountdown(null);
         navigate('/login', {
           state: { message: 'Registration successful! Please log in with your credentials.' },
         });
@@ -163,40 +171,49 @@ const RegisterPage: React.FC = () => {
     });
   }, [navigate]);
 
-  // Handle countdown and redirection
+  // React 19 best practice: Compute from props, don't sync
+  const feedbackCountdown = state.success && state.feedback ? state.feedback.redirectSeconds : null;
+
+  // Only maintain local countdown state for the timer
+  const [localCountdown, setLocalCountdown] = useState<number | null>(null);
+
+  // Sync only when feedback countdown changes (new success state)
+  const prevFeedbackRef = useRef<number | null>(null);
+  if (feedbackCountdown !== prevFeedbackRef.current) {
+    prevFeedbackRef.current = feedbackCountdown;
+    setLocalCountdown(feedbackCountdown);
+
+    // Show toast notification on registration success
+    if (feedbackCountdown !== null) {
+      toast.success('Registration successful! Redirecting to login...');
+    }
+  }
+
+  // Show toast on registration error
   useEffect(() => {
-    if (!state.success || !state.feedback) {
-      return;
+    if (state.error) {
+      toast.error(state.error);
     }
+  }, [state.error, toast]);
 
-    if (state.feedback.redirectSeconds === null) {
-      setRedirectCountdown(null);
-      return;
-    }
+  const redirectCountdown = localCountdown;
 
-    setRedirectCountdown(state.feedback.redirectSeconds);
-  }, [state.success, state.feedback]);
-
+  // Separate effect for timer
   useEffect(() => {
-    if (!state.success || hasNavigated) {
-      return;
-    }
-
-    if (redirectCountdown === null) {
-      return;
-    }
-
-    if (redirectCountdown <= 0) {
-      handleProceedToLogin();
+    if (redirectCountdown === null || redirectCountdown <= 0 || hasNavigated) {
       return;
     }
 
     const timer = window.setTimeout(() => {
-      setRedirectCountdown((prev) => (prev === null ? null : prev - 1));
+      if (redirectCountdown === 1) {
+        handleProceedToLogin();
+      } else {
+        setLocalCountdown(redirectCountdown - 1);
+      }
     }, 1000);
 
     return () => window.clearTimeout(timer);
-  }, [state.success, redirectCountdown, hasNavigated, handleProceedToLogin]);
+  }, [redirectCountdown, hasNavigated, handleProceedToLogin]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
@@ -206,7 +223,7 @@ const RegisterPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     // Create FormData from the form
@@ -216,17 +233,19 @@ const RegisterPage: React.FC = () => {
     // Add terms_accepted to FormData
     formDataObj.set('terms_accepted', formData.terms_accepted ? 'true' : 'false');
 
-    // Manually call the action
-    await submitAction(formDataObj);
+    // React 19: Call action within startTransition to avoid warnings
+    startTransition(() => {
+      submitAction(formDataObj);
+    });
   };
 
   if (state.success && state.feedback) {
     return (
       <div className="mx-auto w-full max-w-3xl">
         <div className="rounded-2xl border border-gray-200/50 bg-white/95 p-10 shadow-2xl backdrop-blur-sm">
-          <div className="text-center">
+          <div className="text-center" role="status" aria-live="polite">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/40">
-              <CheckCircle className="h-8 w-8 text-white" />
+              <CheckCircle className="h-8 w-8 text-white" aria-hidden="true" />
             </div>
             <h2 className="text-3xl font-bold tracking-tight text-gray-900">
               {state.feedback.title}
@@ -280,7 +299,7 @@ const RegisterPage: React.FC = () => {
                       className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
                     >
                       <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
-                        <IconComponent className="h-5 w-5 text-blue-500" />
+                        <IconComponent className="h-5 w-5 text-blue-500" aria-hidden="true" />
                       </div>
                       <div>
                         <h4 className="text-sm font-semibold text-slate-900">{step.title}</h4>
@@ -307,7 +326,7 @@ const RegisterPage: React.FC = () => {
             {redirectCountdown !== null && (
               <button
                 type="button"
-                onClick={() => setRedirectCountdown(null)}
+                onClick={() => setLocalCountdown(null)}
                 className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-transparent px-5 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
               >
                 Stay on this page
@@ -351,7 +370,7 @@ const RegisterPage: React.FC = () => {
         {/* Logo and Title */}
         <div className="text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg shadow-blue-500/40">
-            <User className="h-8 w-8 text-white" />
+            <User className="h-8 w-8 text-white" aria-hidden="true" />
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">Create Your Account</h2>
           <p className="mt-2 text-sm text-gray-500">
@@ -364,14 +383,18 @@ const RegisterPage: React.FC = () => {
         <div className="rounded-2xl border border-gray-200/50 bg-white/95 px-6 py-8 shadow-2xl backdrop-blur-sm">
           {/* Error Alert */}
           {state.error && (
-            <div className="mb-6">
+            <div className="mb-6" role="alert" aria-live="assertive">
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
                 {state.error}
               </div>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-6"
+            aria-label="Registration form"
+          >
             {/* First Name Field */}
             <div>
               <label htmlFor="firstName" className="mb-2 block text-sm font-medium text-gray-700">
@@ -448,7 +471,7 @@ const RegisterPage: React.FC = () => {
               </label>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
                 <input
                   id="password"
@@ -465,11 +488,12 @@ const RegisterPage: React.FC = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 flex cursor-pointer items-center border-none bg-transparent pr-3"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-5 w-5 text-gray-400" aria-hidden="true" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-5 w-5 text-gray-400" aria-hidden="true" />
                   )}
                 </button>
               </div>
@@ -486,7 +510,7 @@ const RegisterPage: React.FC = () => {
               </label>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
                 <input
                   id="confirmPassword"
@@ -503,11 +527,14 @@ const RegisterPage: React.FC = () => {
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 flex cursor-pointer items-center border-none bg-transparent pr-3"
+                  aria-label={
+                    showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'
+                  }
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-5 w-5 text-gray-400" aria-hidden="true" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-5 w-5 text-gray-400" aria-hidden="true" />
                   )}
                 </button>
               </div>

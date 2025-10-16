@@ -1,10 +1,19 @@
 /* Import Inter font for better typography */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* Tailwind CSS v4 imports */
+/* Tailwind CSS directives */
 @import 'tailwindcss';
 
-/* Import common utility classes */
+/* Design System - All tokens and theming */
+@import './design-system/index.css';
+
+/* Accessibility styles - WCAG 2.1 AA compliance */
+@import './accessibility.css';
+
+/* Container queries - Modern responsive design */
+@import './container-queries.css';
+
+/* Common utility classes */
 @import './common-classes.css';
 
 /* Base styles */

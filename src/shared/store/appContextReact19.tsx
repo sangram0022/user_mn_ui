@@ -106,25 +106,76 @@ export const AppProvider: React.FC<AppProviderProps> = ({
   children,
   initialState: providedInitialState,
 }) => {
-  // ✅ React 19: Simple useState for auth (no optimistic needed)
-  const [user, setUser] = useState<User | null>(providedInitialState?.user ?? initialState.user);
-  const [authToken, setAuthToken] = useState<string | null>(
-    providedInitialState?.authToken ?? initialState.authToken
-  );
+  // React 19 best practice: Load persisted state during initialization
+  const [user, setUser] = useState<User | null>(() => {
+    const initial = providedInitialState?.user ?? initialState.user;
+    if (initial) return initial;
+
+    try {
+      const persistedState = localStorage.getItem('app-state');
+      if (persistedState) {
+        const parsed = JSON.parse(persistedState);
+        if (parsed.user) return parsed.user;
+      }
+    } catch (error) {
+      logger.warn('Failed to load persisted user:', { error });
+    }
+    return null;
+  });
+
+  const [authToken, setAuthToken] = useState<string | null>(() => {
+    const initial = providedInitialState?.authToken ?? initialState.authToken;
+    if (initial) return initial;
+
+    try {
+      const persistedState = localStorage.getItem('app-state');
+      if (persistedState) {
+        const parsed = JSON.parse(persistedState);
+        if (parsed.authToken) return parsed.authToken;
+      }
+    } catch (error) {
+      logger.warn('Failed to load persisted token:', { error });
+    }
+    return null;
+  });
 
   // ✅ React 19: useState + useOptimistic for instant theme changes
-  const [theme, setThemeState] = useState<AppState['theme']>(
-    providedInitialState?.theme ?? initialState.theme
-  );
+  const [theme, setThemeState] = useState<AppState['theme']>(() => {
+    const initial = providedInitialState?.theme ?? initialState.theme;
+    if (initial) return initial;
+
+    try {
+      const persistedState = localStorage.getItem('app-state');
+      if (persistedState) {
+        const parsed = JSON.parse(persistedState);
+        if (parsed.theme) return parsed.theme;
+      }
+    } catch (error) {
+      logger.warn('Failed to load persisted theme:', { error });
+    }
+    return 'light';
+  });
   const [optimisticTheme, updateTheme] = useOptimistic(
     theme,
     (_current, newTheme: AppState['theme']) => newTheme
   );
 
   // ✅ React 19: useState + useOptimistic for instant sidebar changes
-  const [sidebar, setSidebarState] = useState(
-    providedInitialState?.sidebar ?? initialState.sidebar
-  );
+  const [sidebar, setSidebarState] = useState(() => {
+    const initial = providedInitialState?.sidebar ?? initialState.sidebar;
+    if (initial) return initial;
+
+    try {
+      const persistedState = localStorage.getItem('app-state');
+      if (persistedState) {
+        const parsed = JSON.parse(persistedState);
+        if (parsed.sidebar) return parsed.sidebar;
+      }
+    } catch (error) {
+      logger.warn('Failed to load persisted sidebar:', { error });
+    }
+    return { isOpen: true, isPinned: true };
+  });
   const [optimisticSidebar, updateSidebar] = useOptimistic(
     sidebar,
     (_current, update: Partial<AppState['sidebar']>) => ({ ...sidebar, ...update })
@@ -158,24 +209,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({
   );
   const [isOnline, setIsOnline] = useState(providedInitialState?.isOnline ?? initialState.isOnline);
   const [lastSyncTime] = useState(providedInitialState?.lastSyncTime ?? initialState.lastSyncTime);
-
-  // ✅ Load persisted state on mount
-  useEffect(() => {
-    try {
-      const persistedState = localStorage.getItem('app-state');
-      if (persistedState) {
-        const parsed = JSON.parse(persistedState);
-        if (parsed.user && parsed.authToken) {
-          setUser(parsed.user);
-          setAuthToken(parsed.authToken);
-        }
-        if (parsed.theme) setThemeState(parsed.theme);
-        if (parsed.sidebar) setSidebarState(parsed.sidebar);
-      }
-    } catch (error) {
-      logger.warn('Failed to load persisted state:', { error });
-    }
-  }, []);
 
   // ✅ Persist state changes
   useEffect(() => {

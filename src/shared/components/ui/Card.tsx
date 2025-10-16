@@ -6,6 +6,8 @@ interface CardProps {
   variant?: 'default' | 'elevated' | 'bordered' | 'glass';
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
+  /** Enable container query responsive behavior */
+  responsive?: boolean;
 }
 
 const cardVariants = {
@@ -26,14 +28,26 @@ const cardPadding = {
 /**
  * Common card component with consistent styling patterns
  * Consolidates repeated background, shadow, and border patterns
+ *
+ * @param responsive - When true, enables container query responsive behavior
  */
 export const Card: React.FC<CardProps> = ({
   children,
   variant = 'default',
   padding = 'md',
   className = '',
+  responsive = false,
 }) => {
   return (
-    <div className={cn(cardVariants[variant], cardPadding[padding], className)}>{children}</div>
+    <div
+      className={cn(
+        cardVariants[variant],
+        cardPadding[padding],
+        responsive && 'container-card card-responsive',
+        className
+      )}
+    >
+      {children}
+    </div>
   );
 };

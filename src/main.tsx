@@ -3,7 +3,14 @@ import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Metric } from 'web-vitals';
 import App from './app/App';
-import './styles/index.css';
+
+// Self-hosted fonts (no blocking network requests)
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+
+import './styles/index-new.css';
 
 // Performance monitoring - Web Vitals
 if (import.meta.env.PROD) {

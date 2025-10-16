@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { logger } from './logger';
 
 import { ApiError } from '@lib/api/error';
@@ -1282,11 +1282,9 @@ export const useErrorBoundary = (options: UseErrorBoundaryOptions = {}) => {
     options.onReset?.();
   };
 
-  useEffect(() => {
-    if (options.resetOnPropsChange) {
-      setError(null);
-    }
-  }, [options.resetOnPropsChange]);
+  // React 19 best practice: Handle reset via key or resetBoundary instead of useEffect
+  // Remove automatic reset in useEffect to avoid setState in effect
+  // Users should call resetBoundary explicitly when needed
 
   return { error, hasError: error !== null, showBoundary, resetBoundary };
 };

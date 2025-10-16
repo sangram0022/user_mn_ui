@@ -1,0 +1,158 @@
+/**
+ * Shadow Design Tokens
+ * 
+ * Elevation system using box-shadow for depth and hierarchy.
+ * Includes both light and dark theme variations.
+ */
+
+:root {
+  /* ========================================================================
+     SHADOW SCALE (Light Theme)
+     Progressive elevation from 0 (flat) to 5 (floating)
+     ======================================================================== */
+
+  /* Level 0 - No shadow (flat) */
+  --shadow-none: none;
+
+  /* Level 1 - Subtle shadow (cards, inputs) */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+  /* Level 2 - Normal shadow (dropdowns, popovers) */
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+
+  /* Level 3 - Elevated shadow (modals, drawers) */
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  /* Level 4 - High elevation (overlays, tooltips) */
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Level 5 - Maximum elevation */
+  --shadow-3xl: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
+
+  /* ========================================================================
+     INNER SHADOWS
+     ======================================================================== */
+
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  --shadow-inner-md: inset 0 4px 6px 0 rgba(0, 0, 0, 0.1);
+
+  /* ========================================================================
+     COLORED SHADOWS (for interactive elements)
+     ======================================================================== */
+
+  /* Primary (Blue) */
+  --shadow-primary-sm: 0 4px 12px rgba(59, 130, 246, 0.15);
+  --shadow-primary-md: 0 8px 16px rgba(59, 130, 246, 0.2);
+  --shadow-primary-lg: 0 12px 24px rgba(59, 130, 246, 0.25);
+
+  /* Success (Green) */
+  --shadow-success-sm: 0 4px 12px rgba(34, 197, 94, 0.15);
+  --shadow-success-md: 0 8px 16px rgba(34, 197, 94, 0.2);
+
+  /* Error (Red) */
+  --shadow-error-sm: 0 4px 12px rgba(239, 68, 68, 0.15);
+  --shadow-error-md: 0 8px 16px rgba(239, 68, 68, 0.2);
+
+  /* Warning (Orange) */
+  --shadow-warning-sm: 0 4px 12px rgba(249, 115, 22, 0.15);
+  --shadow-warning-md: 0 8px 16px rgba(249, 115, 22, 0.2);
+
+  /* ========================================================================
+     GLOW EFFECTS
+     ======================================================================== */
+
+  --shadow-glow-sm: 0 0 10px rgba(59, 130, 246, 0.3);
+  --shadow-glow-md: 0 0 20px rgba(59, 130, 246, 0.4);
+  --shadow-glow-lg: 0 0 30px rgba(59, 130, 246, 0.5);
+
+  /* ========================================================================
+     COMPONENT-SPECIFIC SHADOWS
+     ======================================================================== */
+
+  /* Cards */
+  --shadow-card: var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-md);
+  --shadow-card-elevated: var(--shadow-lg);
+
+  /* Buttons */
+  --shadow-button: var(--shadow-sm);
+  --shadow-button-hover: var(--shadow-md);
+  --shadow-button-primary-hover: var(--shadow-primary-sm);
+
+  /* Modals */
+  --shadow-modal: var(--shadow-2xl);
+  --shadow-modal-backdrop: none;
+
+  /* Dropdowns */
+  --shadow-dropdown: var(--shadow-lg);
+  --shadow-popover: var(--shadow-xl);
+
+  /* Tooltips */
+  --shadow-tooltip: var(--shadow-md);
+
+  /* Toast */
+  --shadow-toast: var(--shadow-lg);
+
+  /* Focus Ring */
+  --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  --shadow-focus-error: 0 0 0 3px rgba(239, 68, 68, 0.3);
+}
+
+/* ========================================================================
+   DARK THEME SHADOWS
+   Darker, more subtle shadows for dark backgrounds
+   ======================================================================== */
+
+[data-theme='dark'],
+.dark {
+  /* Base shadows - darker and more prominent */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 8px 10px -6px rgba(0, 0, 0, 0.7);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  --shadow-3xl: 0 35px 60px -15px rgba(0, 0, 0, 0.9);
+
+  /* Inner shadows */
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
+  --shadow-inner-md: inset 0 4px 6px 0 rgba(0, 0, 0, 0.4);
+
+  /* Colored shadows - adjusted for dark theme */
+  --shadow-primary-sm: 0 4px 12px rgba(96, 165, 250, 0.25);
+  --shadow-primary-md: 0 8px 16px rgba(96, 165, 250, 0.3);
+  --shadow-primary-lg: 0 12px 24px rgba(96, 165, 250, 0.35);
+
+  --shadow-success-sm: 0 4px 12px rgba(74, 222, 128, 0.25);
+  --shadow-success-md: 0 8px 16px rgba(74, 222, 128, 0.3);
+
+  --shadow-error-sm: 0 4px 12px rgba(248, 113, 113, 0.25);
+  --shadow-error-md: 0 8px 16px rgba(248, 113, 113, 0.3);
+
+  --shadow-warning-sm: 0 4px 12px rgba(251, 146, 60, 0.25);
+  --shadow-warning-md: 0 8px 16px rgba(251, 146, 60, 0.3);
+
+  /* Focus ring */
+  --shadow-focus: 0 0 0 3px rgba(96, 165, 250, 0.4);
+  --shadow-focus-error: 0 0 0 3px rgba(248, 113, 113, 0.4);
+}
+
+/* ========================================================================
+   LAYERING SYSTEM
+   Consistent z-index values for stacking context
+   ======================================================================== */
+
+:root {
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+  --z-max: 9999;
+}

@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       fontFamily: {
@@ -108,6 +109,7 @@ export default {
         'slide-down': 'slideDown 0.3s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
         'scale-out': 'scaleOut 0.2s ease-out',
+        shimmer: 'shimmer 2s infinite',
       },
       keyframes: {
         fadeIn: {
@@ -133,6 +135,10 @@ export default {
         scaleOut: {
           '0%': { transform: 'scale(1)', opacity: '1' },
           '100%': { transform: 'scale(0.9)', opacity: '0' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
         },
       },
     },

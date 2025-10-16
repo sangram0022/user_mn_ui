@@ -1,0 +1,235 @@
+/**
+ * SEMANTIC DESIGN TOKENS
+ * 
+ * Purpose-driven tokens that map to primitive values.
+ * These should be used in components instead of primitive tokens.
+ * 
+ * Benefits:
+ * - Consistent theming
+ * - Easy dark mode implementation
+ * - Better maintenance
+ * - Clear intent
+ */
+
+:root {
+  /* ========================================================================
+     COLOR SEMANTIC TOKENS - Light Theme (Default)
+     ======================================================================== */
+
+  /* Background Colors */
+  --color-background: var(--color-gray-50);
+  --color-background-elevated: var(--color-white);
+  --color-background-overlay: var(--color-gray-900);
+  --color-background-subtle: var(--color-gray-100);
+  --color-background-muted: var(--color-gray-200);
+
+  /* Text Colors */
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-600);
+  --color-text-tertiary: var(--color-gray-500);
+  --color-text-disabled: var(--color-gray-400);
+  --color-text-inverse: var(--color-white);
+  --color-text-link: var(--color-blue-600);
+  --color-text-link-hover: var(--color-blue-700);
+
+  /* Border Colors */
+  --color-border-primary: var(--color-gray-300);
+  --color-border-secondary: var(--color-gray-200);
+  --color-border-focus: var(--color-blue-500);
+  --color-border-error: var(--color-red-500);
+  --color-border-success: var(--color-green-500);
+  --color-border-warning: var(--color-yellow-500);
+
+  /* Brand Colors */
+  --color-brand-primary: var(--color-blue-600);
+  --color-brand-primary-hover: var(--color-blue-700);
+  --color-brand-primary-active: var(--color-blue-800);
+  --color-brand-secondary: var(--color-purple-600);
+  --color-brand-secondary-hover: var(--color-purple-700);
+
+  /* State Colors - Success */
+  --color-success-bg: var(--color-green-50);
+  --color-success-bg-hover: var(--color-green-100);
+  --color-success-border: var(--color-green-300);
+  --color-success-text: var(--color-green-800);
+  --color-success-solid: var(--color-green-600);
+  --color-success-solid-hover: var(--color-green-700);
+
+  /* State Colors - Error */
+  --color-error-bg: var(--color-red-50);
+  --color-error-bg-hover: var(--color-red-100);
+  --color-error-border: var(--color-red-300);
+  --color-error-text: var(--color-red-800);
+  --color-error-solid: var(--color-red-600);
+  --color-error-solid-hover: var(--color-red-700);
+
+  /* State Colors - Warning */
+  --color-warning-bg: var(--color-yellow-50);
+  --color-warning-bg-hover: var(--color-yellow-100);
+  --color-warning-border: var(--color-yellow-300);
+  --color-warning-text: var(--color-yellow-800);
+  --color-warning-solid: var(--color-yellow-600);
+  --color-warning-solid-hover: var(--color-yellow-700);
+
+  /* State Colors - Info */
+  --color-info-bg: var(--color-blue-50);
+  --color-info-bg-hover: var(--color-blue-100);
+  --color-info-border: var(--color-blue-300);
+  --color-info-text: var(--color-blue-800);
+  --color-info-solid: var(--color-blue-600);
+  --color-info-solid-hover: var(--color-blue-700);
+
+  /* Interactive States */
+  --color-hover-overlay: var(--color-gray-900);
+  --color-hover-overlay-opacity: 0.05;
+  --color-active-overlay: var(--color-gray-900);
+  --color-active-overlay-opacity: 0.1;
+  --color-focus-ring: var(--color-blue-500);
+  --color-disabled-bg: var(--color-gray-100);
+  --color-disabled-text: var(--color-gray-400);
+
+  /* ========================================================================
+     SPACING SEMANTIC TOKENS
+     ======================================================================== */
+
+  /* Component spacing */
+  --spacing-component-xs: var(--space-2);
+  --spacing-component-sm: var(--space-4);
+  --spacing-component-md: var(--space-6);
+  --spacing-component-lg: var(--space-8);
+  --spacing-component-xl: var(--space-12);
+
+  /* Layout spacing */
+  --spacing-layout-xs: var(--space-4);
+  --spacing-layout-sm: var(--space-6);
+  --spacing-layout-md: var(--space-8);
+  --spacing-layout-lg: var(--space-12);
+  --spacing-layout-xl: var(--space-16);
+  --spacing-layout-2xl: var(--space-24);
+
+  /* Section spacing */
+  --spacing-section-sm: var(--space-8);
+  --spacing-section-md: var(--space-12);
+  --spacing-section-lg: var(--space-16);
+  --spacing-section-xl: var(--space-24);
+
+  /* ========================================================================
+     TYPOGRAPHY SEMANTIC TOKENS
+     ======================================================================== */
+
+  /* Font families */
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+
+  /* Headings */
+  --text-heading-1: var(--font-size-5xl);
+  --text-heading-2: var(--font-size-4xl);
+  --text-heading-3: var(--font-size-3xl);
+  --text-heading-4: var(--font-size-2xl);
+  --text-heading-5: var(--font-size-xl);
+  --text-heading-6: var(--font-size-lg);
+
+  /* Body text */
+  --text-body-lg: var(--font-size-lg);
+  --text-body-base: var(--font-size-base);
+  --text-body-sm: var(--font-size-sm);
+  --text-body-xs: var(--font-size-xs);
+
+  /* ========================================================================
+     BORDER SEMANTIC TOKENS
+     ======================================================================== */
+
+  --border-width-thin: 1px;
+  --border-width-base: 2px;
+  --border-width-thick: 4px;
+
+  --border-radius-component: var(--radius-lg);
+  --border-radius-button: var(--radius-md);
+  --border-radius-input: var(--radius-md);
+  --border-radius-card: var(--radius-xl);
+  --border-radius-modal: var(--radius-2xl);
+
+  /* ========================================================================
+     SHADOW SEMANTIC TOKENS
+     ======================================================================== */
+
+  --shadow-button: var(--shadow-sm);
+  --shadow-button-hover: var(--shadow-md);
+  --shadow-card: var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-lg);
+  --shadow-modal: var(--shadow-2xl);
+  --shadow-dropdown: var(--shadow-lg);
+  --shadow-tooltip: var(--shadow-md);
+
+  /* ========================================================================
+     TRANSITION SEMANTIC TOKENS
+     ======================================================================== */
+
+  --transition-button: var(--duration-base) var(--ease-out);
+  --transition-modal: var(--duration-slow) var(--ease-in-out);
+  --transition-dropdown: var(--duration-fast) var(--ease-out);
+  --transition-toast: var(--duration-base) var(--ease-spring);
+  --transition-theme: var(--duration-slow) var(--ease-in-out);
+
+  /* ========================================================================
+     SIZE SEMANTIC TOKENS
+     ======================================================================== */
+
+  /* Button sizes */
+  --size-button-sm-height: 2rem;
+  --size-button-sm-padding: var(--space-2) var(--space-3);
+  --size-button-md-height: 2.5rem;
+  --size-button-md-padding: var(--space-2-5) var(--space-4);
+  --size-button-lg-height: 3rem;
+  --size-button-lg-padding: var(--space-3) var(--space-6);
+
+  /* Input sizes */
+  --size-input-sm-height: 2rem;
+  --size-input-md-height: 2.5rem;
+  --size-input-lg-height: 3rem;
+
+  /* Icon sizes */
+  --size-icon-xs: 1rem;
+  --size-icon-sm: 1.25rem;
+  --size-icon-md: 1.5rem;
+  --size-icon-lg: 2rem;
+  --size-icon-xl: 2.5rem;
+
+  /* ========================================================================
+     LAYOUT SEMANTIC TOKENS
+     ======================================================================== */
+
+  --layout-max-width-sm: 640px;
+  --layout-max-width-md: 768px;
+  --layout-max-width-lg: 1024px;
+  --layout-max-width-xl: 1280px;
+  --layout-max-width-2xl: 1536px;
+
+  --layout-container-padding: var(--space-4);
+  --layout-header-height: 4rem;
+  --layout-footer-height: 5rem;
+  --layout-sidebar-width: 16rem;
+
+  /* ========================================================================
+     ACCESSIBILITY TOKENS
+     ======================================================================== */
+
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring-color: rgb(var(--color-focus-ring) / 0.5);
+
+  --touch-target-min-size: 44px; /* WCAG 2.1 AA */
+}
+
+/* ========================================================================
+   RESPONSIVE BREAKPOINTS (for container queries)
+   ======================================================================== */
+
+:root {
+  --breakpoint-xs: 20rem; /* 320px */
+  --breakpoint-sm: 40rem; /* 640px */
+  --breakpoint-md: 48rem; /* 768px */
+  --breakpoint-lg: 64rem; /* 1024px */
+  --breakpoint-xl: 80rem; /* 1280px */
+  --breakpoint-2xl: 96rem; /* 1536px */
+}

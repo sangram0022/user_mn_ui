@@ -1,0 +1,267 @@
+/**
+ * BUTTON COMPONENT STYLES
+ * 
+ * Centralized button styles using design tokens.
+ * No inline styles - all variants defined here.
+ */
+
+@layer components {
+  /* ========================================================================
+     BASE BUTTON STYLES
+     ======================================================================== */
+
+  .btn {
+    /* Layout */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+
+    /* Typography */
+    font-family: var(--font-family-sans);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    white-space: nowrap;
+
+    /* Appearance */
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-button);
+    cursor: pointer;
+    user-select: none;
+
+    /* Transitions */
+    transition:
+      background-color var(--transition-button),
+      border-color var(--transition-button),
+      color var(--transition-button),
+      transform var(--transition-button),
+      box-shadow var(--transition-button);
+
+    /* Accessibility */
+    min-height: var(--touch-target-min-size);
+  }
+
+  .btn:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* Hover effect */
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  /* Disabled state */
+  .btn:disabled,
+  .btn[data-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* Loading state */
+  .btn[data-loading='true'] {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+  }
+
+  .btn[data-loading='true']::after {
+    content: '';
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    top: 50%;
+    left: 50%;
+    margin-left: -0.5rem;
+    margin-top: -0.5rem;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* ========================================================================
+     BUTTON SIZES
+     ======================================================================== */
+
+  .btn-sm {
+    padding: var(--size-button-sm-padding);
+    height: var(--size-button-sm-height);
+    font-size: var(--font-size-xs);
+  }
+
+  .btn-md {
+    padding: var(--size-button-md-padding);
+    height: var(--size-button-md-height);
+    font-size: var(--font-size-sm);
+  }
+
+  .btn-lg {
+    padding: var(--size-button-lg-padding);
+    height: var(--size-button-lg-height);
+    font-size: var(--font-size-base);
+  }
+
+  /* ========================================================================
+     BUTTON VARIANTS
+     ======================================================================== */
+
+  /* Primary */
+  .btn-primary {
+    background: var(--button-primary-bg);
+    color: var(--button-primary-text);
+    border-color: var(--button-primary-border);
+    box-shadow: var(--button-primary-shadow);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--button-primary-bg-hover);
+    box-shadow: var(--button-primary-shadow-hover);
+  }
+
+  /* Secondary */
+  .btn-secondary {
+    background: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
+    border-color: var(--button-secondary-border);
+    box-shadow: var(--button-secondary-shadow);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--button-secondary-bg-hover);
+  }
+
+  /* Outline */
+  .btn-outline {
+    background: var(--button-outline-bg);
+    color: var(--button-outline-text);
+    border-color: var(--button-outline-border);
+  }
+
+  .btn-outline:hover:not(:disabled) {
+    background: var(--button-outline-bg-hover);
+  }
+
+  /* Danger */
+  .btn-danger {
+    background: var(--button-danger-bg);
+    color: var(--button-danger-text);
+    border-color: var(--button-danger-border);
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    background: var(--button-danger-bg-hover);
+  }
+
+  /* Success */
+  .btn-success {
+    background: var(--button-success-bg);
+    color: var(--button-success-text);
+    border-color: var(--button-success-border);
+  }
+
+  .btn-success:hover:not(:disabled) {
+    background: var(--button-success-bg-hover);
+  }
+
+  /* Ghost */
+  .btn-ghost {
+    background: transparent;
+    color: rgb(var(--color-text-primary));
+    border-color: transparent;
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background: rgb(var(--color-hover-overlay) / var(--color-hover-overlay-opacity));
+  }
+
+  /* Link style button */
+  .btn-link {
+    background: transparent;
+    color: var(--color-text-link);
+    border-color: transparent;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 0.2em;
+  }
+
+  .btn-link:hover:not(:disabled) {
+    color: var(--color-text-link-hover);
+    background: transparent;
+    transform: none;
+  }
+
+  /* ========================================================================
+     BUTTON MODIFIERS
+     ======================================================================== */
+
+  /* Full width */
+  .btn-block {
+    display: flex;
+    width: 100%;
+  }
+
+  /* Icon only */
+  .btn-icon {
+    padding: var(--space-2);
+    aspect-ratio: 1;
+  }
+
+  /* Rounded */
+  .btn-rounded {
+    border-radius: var(--radius-full);
+  }
+
+  /* ========================================================================
+     BUTTON GROUP
+     ======================================================================== */
+
+  .btn-group {
+    display: inline-flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .btn-group-attached {
+    display: inline-flex;
+  }
+
+  .btn-group-attached > .btn:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -1px;
+  }
+
+  .btn-group-attached > .btn:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  /* ========================================================================
+     RESPONSIVE UTILITIES
+     ======================================================================== */
+
+  @media (max-width: 640px) {
+    .btn-sm\@sm {
+      padding: var(--size-button-sm-padding);
+      height: var(--size-button-sm-height);
+      font-size: var(--font-size-xs);
+    }
+
+    .btn-block\@sm {
+      display: flex;
+      width: 100%;
+    }
+  }
+}

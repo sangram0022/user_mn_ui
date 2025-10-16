@@ -1,0 +1,258 @@
+/**
+ * Dynamic Utility Classes
+ * 
+ * CSS utilities that use CSS custom properties for dynamic values.
+ * This allows us to avoid inline styles while still supporting dynamic content.
+ */
+
+/* ========================================================================
+   PROGRESS BAR
+   ======================================================================== */
+
+.progress-bar {
+  width: var(--progress, 0%);
+  height: 100%;
+  transition: width var(--duration-base) var(--ease-out);
+  background: currentColor;
+  border-radius: inherit;
+}
+
+.progress-bar-container {
+  position: relative;
+  width: 100%;
+  height: 0.25rem;
+  overflow: hidden;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+}
+
+/* Progress indicator with custom width */
+.progress-indicator {
+  width: var(--progress-width, 0%);
+  transition: width 300ms ease;
+}
+
+/* ========================================================================
+   VIRTUAL SCROLLING
+   ======================================================================== */
+
+.virtual-list {
+  height: var(--total-height, auto);
+  position: relative;
+  overflow: auto;
+}
+
+.virtual-list-item {
+  position: absolute;
+  top: var(--item-offset-top, 0);
+  left: 0;
+  right: 0;
+  height: var(--item-height, auto);
+}
+
+.virtual-container {
+  height: var(--container-height, 600px);
+  overflow: auto;
+  position: relative;
+}
+
+/* Virtual scrolling with transform for better performance */
+.virtual-row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--row-height, 60px);
+  transform: translateY(var(--row-offset, 0px));
+  will-change: transform;
+}
+
+/* Virtual spacer for maintaining scroll height */
+.virtual-spacer {
+  height: var(--total-height, 0px);
+  position: relative;
+}
+
+/* ========================================================================
+   DYNAMIC GRID
+   ======================================================================== */
+
+.grid-auto-columns {
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 1), 1fr);
+  gap: var(--gap, 1rem);
+}
+
+.grid-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--min-width, 250px), 1fr));
+  gap: var(--gap, 1rem);
+}
+
+.grid-auto-fill {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--min-width, 250px), 1fr));
+  gap: var(--gap, 1rem);
+}
+
+/* ========================================================================
+   DYNAMIC POSITIONING
+   ======================================================================== */
+
+.absolute-positioned {
+  position: absolute;
+  top: var(--pos-top, auto);
+  right: var(--pos-right, auto);
+  bottom: var(--pos-bottom, auto);
+  left: var(--pos-left, auto);
+}
+
+.relative-positioned {
+  position: relative;
+  top: var(--pos-top, auto);
+  right: var(--pos-right, auto);
+  bottom: var(--pos-bottom, auto);
+  left: var(--pos-left, auto);
+}
+
+/* ========================================================================
+   DYNAMIC SIZING
+   ======================================================================== */
+
+.dynamic-width {
+  width: var(--width, auto);
+}
+
+.dynamic-height {
+  height: var(--height, auto);
+}
+
+.dynamic-size {
+  width: var(--width, auto);
+  height: var(--height, auto);
+}
+
+/* ========================================================================
+   PERFORMANCE MONITORING
+   ======================================================================== */
+
+.performance-bar {
+  width: var(--performance-value, 0%);
+  height: 100%;
+  transition:
+    width 150ms ease-out,
+    background-color 150ms ease-out;
+  border-radius: var(--radius-sm);
+}
+
+.performance-bar-good {
+  background-color: var(--color-success);
+}
+
+.performance-bar-warning {
+  background-color: var(--color-warning);
+}
+
+.performance-bar-poor {
+  background-color: var(--color-error);
+}
+
+/* ========================================================================
+   SKELETON LOADING
+   ======================================================================== */
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--skeleton-columns, 1), 1fr);
+  gap: var(--skeleton-gap, 1rem);
+}
+
+.skeleton-item {
+  width: var(--skeleton-width, 100%);
+  height: var(--skeleton-height, 1rem);
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-200) 25%,
+    var(--color-gray-100) 50%,
+    var(--color-gray-200) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  border-radius: var(--skeleton-radius, var(--radius-md));
+}
+
+[data-theme='dark'] .skeleton-item,
+.dark .skeleton-item {
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-700) 25%,
+    var(--color-gray-800) 50%,
+    var(--color-gray-700) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* ========================================================================
+   CHART/VISUALIZATION BARS
+   ======================================================================== */
+
+.chart-bar {
+  width: var(--bar-width, 100%);
+  height: var(--bar-height, 2rem);
+  background-color: var(--bar-color, var(--color-brand-primary));
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.chart-bar:hover {
+  opacity: 0.8;
+  transform: scaleY(1.05);
+}
+
+/* ========================================================================
+   TOOLTIP POSITIONING
+   ======================================================================== */
+
+.tooltip-content {
+  --arrow-size: 6px;
+  position: absolute;
+  z-index: var(--z-tooltip);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-gray-900);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-tooltip);
+  box-shadow: var(--shadow-tooltip);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+[data-theme='dark'] .tooltip-content,
+.dark .tooltip-content {
+  background-color: var(--color-gray-700);
+}
+
+/* Tooltip positions */
+.tooltip-top {
+  bottom: calc(100% + var(--arrow-size) + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip-bottom {
+  top: calc(100% + var(--arrow-size) + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip-left {
+  right: calc(100% + var(--arrow-size) + 4px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tooltip-right {
+  left: calc(100% + var(--arrow-size) + 4px);
+  top: 50%;
+  transform: translateY(-50%);
+}

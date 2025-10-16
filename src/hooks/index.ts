@@ -33,3 +33,10 @@ export { useAuth } from 'src/domains/auth';
 
 // Session management (existing)
 export { useSessionManagement } from './useSessionManagement';
+
+// View Transitions (NEW - Phase 2 Task 8)
+export { supportsViewTransitions, useViewTransition } from './useViewTransition';
+export type { ViewTransition } from './useViewTransition';
+
+// Enhanced Navigation with View Transitions (NEW - Phase 2 Task 8)
+export { useNavigate, useNavigationState } from './useNavigate';

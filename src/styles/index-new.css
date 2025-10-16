@@ -1,0 +1,182 @@
+/**
+ * CSS ARCHITECTURE - LAYER STRUCTURE
+ * 
+ * Modern CSS architecture using @layer for explicit cascade control.
+ * Order matters: later layers have higher specificity
+ * 
+ * Structure:
+ * 1. base      - HTML element defaults
+ * 2. tokens    - Design tokens (CSS custom properties)
+ * 3. layouts   - Layout composition primitives
+ * 4. components - Component-specific styles
+ * 5. utilities - Utility classes (Tailwind)
+ * 6. overrides - State-based overrides
+ */
+
+/* 
+ * Fonts are now self-hosted via @fontsource/inter in main.tsx
+ * This eliminates render-blocking network requests to Google Fonts
+ */
+
+/* ============================================================================
+   TAILWIND CSS - Must be first
+   ============================================================================ */
+
+@import 'tailwindcss';
+
+/* ============================================================================
+   CUSTOM CSS IMPORTS - All imports must come before @layer definitions
+   ============================================================================ */
+
+@import './tokens/primitives.css';
+@import './tokens/semantic.css';
+@import './tokens/component-tokens.css';
+@import './tokens/dark-theme.css';
+@import './compositions/layouts.css';
+@import './components/button.css';
+@import './components/alert.css';
+@import './components/card.css';
+@import './components/modal.css';
+@import './components/toast.css';
+@import './components/form.css';
+@import './components/skeleton.css';
+@import './components/virtual-table.css';
+@import './design-system/index.css';
+@import './accessibility.css';
+@import './common-classes.css';
+@import './view-transitions.css';
+
+/* ============================================================================
+   BASE LAYER - Global element styles
+   ============================================================================ */
+
+@layer base {
+  html {
+    font-family:
+      'Inter',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      'Roboto',
+      'Oxygen',
+      'Ubuntu',
+      'Cantarell',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings:
+      'liga' 1,
+      'calt' 1;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-text-primary));
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  /* Improve focus visibility for accessibility */
+  *:focus-visible {
+    outline: 2px solid rgb(var(--color-focus-ring));
+    outline-offset: 2px;
+  }
+
+  /* Smooth scrolling with reduced motion support */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+/* ============================================================================
+   OVERRIDES LAYER - State-based overrides
+   ============================================================================ */
+
+@layer overrides {
+  /* High-priority state overrides */
+  [data-loading='true'] {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  [data-disabled='true'] {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Force dark mode */
+  [data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  /* Force light mode */
+  [data-theme='light'] {
+    color-scheme: light;
+  }
+}
+
+/* ============================================================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================================================ */
+
+/* Optimize font loading */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap; /* Prevent FOIT */
+  src: local('Inter'), local('Inter-Regular');
+}
+
+/* GPU acceleration for animations */
+@layer base {
+  .will-animate {
+    will-change: transform, opacity;
+  }
+
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+
+  @page {
+    margin: 1cm;
+  }
+
+  body {
+    font-size: 12pt;
+  }
+
+  a[href]::after {
+    content: ' (' attr(href) ')';
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

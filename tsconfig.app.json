@@ -32,12 +32,13 @@
       "@infrastructure/*": ["src/infrastructure/*"],
       "@shared/*": ["src/shared/*"],
       "@app/*": ["src/app/*"],
-      
+
       // Legacy paths (deprecated - migrate to DDD structure)
       "@features/*": ["src/features/*"],
       "@widgets/*": ["src/widgets/*"],
       "@config/*": ["src/config/*"],
       "@contexts/*": ["src/contexts/*"],
+      "@components/*": ["src/components/*"],
       "@lib/*": ["src/lib/*"],
       "@hooks/*": ["src/hooks/*"],
       "@styles/*": ["src/styles/*"],

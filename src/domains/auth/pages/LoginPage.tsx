@@ -1,7 +1,8 @@
 import { Lock } from 'lucide-react';
-import { useActionState, useEffect } from 'react';
+import { startTransition, useActionState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { useToast } from '@hooks/useToast';
 import {
   PasswordInput,
   SubmitButton,
@@ -24,7 +25,7 @@ interface LoginState {
 }
 
 // Server action for login - runs outside React component
-async function loginAction(prevState: LoginState, formData: FormData): Promise<LoginState> {
+async function loginAction(_prevState: LoginState, formData: FormData): Promise<LoginState> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
@@ -54,6 +55,7 @@ async function loginAction(prevState: LoginState, formData: FormData): Promise<L
 }
 
 const LoginPage: React.FC = () => {
+  const { toast } = useToast();
   const { formData, updateField } = useFormFields<LoginFormData>({
     email: '',
     password: '',
@@ -85,18 +87,22 @@ const LoginPage: React.FC = () => {
           // Small delay to ensure state is fully updated
           await new Promise((resolve) => setTimeout(resolve, 100));
 
+          toast.success('Login successful! Redirecting to dashboard...');
+
           // Navigate to dashboard after successful login
           navigate('/dashboard', { replace: true });
         } catch (error) {
           // Error will be handled by the auth context
+          toast.error('Login failed. Please check your credentials and try again.');
           console.error('Login failed:', error);
         }
       };
 
       performLogin();
     }
-  }, [state.success, state.error, authLogin, formData.email, formData.password, navigate]);
+  }, [state.success, state.error, authLogin, formData.email, formData.password, navigate, toast]);
 
+  // React 19: Wrap action call in startTransition to avoid warnings
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -104,8 +110,15 @@ const LoginPage: React.FC = () => {
     const form = event.currentTarget;
     const formDataObj = new FormData(form);
 
-    // Manually call the action
-    await submitAction(formDataObj);
+    // Add controlled input values to FormData since they're not in the form
+    formDataObj.set('email', formData.email);
+    formDataObj.set('password', formData.password);
+    formDataObj.set('rememberMe', formData.rememberMe.toString());
+
+    // Call action within startTransition
+    startTransition(() => {
+      submitAction(formDataObj);
+    });
   };
 
   return (
@@ -114,7 +127,7 @@ const LoginPage: React.FC = () => {
         {/* Logo and Title */}
         <div className="text-center">
           <div className="mx-auto mb-6 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/40">
-            <Lock className="w-8 h-8 text-white" />
+            <Lock className="w-8 h-8 text-white" aria-hidden="true" />
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">Welcome Back</h2>
           <p className="mt-2 text-sm text-gray-600">Sign in to your account to continue</p>
@@ -125,14 +138,14 @@ const LoginPage: React.FC = () => {
         <div className="bg-white/95 backdrop-blur-sm p-8 shadow-xl rounded-2xl border border-gray-200/50">
           {/* Error Alert */}
           {state.error && (
-            <div className="mb-6">
+            <div className="mb-6" role="alert" aria-live="assertive">
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
                 {state.error}
               </div>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6" aria-label="Login form">
             {/* Email Field */}
             <TextInput
               label="Email Address"

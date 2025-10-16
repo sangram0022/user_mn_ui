@@ -1,6 +1,7 @@
 import type { FC } from 'react';
-import { useActionState, useCallback, useEffect, useId, useState } from 'react';
+import { startTransition, useActionState, useEffect, useId, useState } from 'react';
 
+import { useToast } from '@hooks/useToast';
 import { apiClient } from '@lib/api';
 import type { UserProfile as BaseUserProfile } from '@shared/types';
 import Breadcrumb from '@shared/ui/Breadcrumb';
@@ -123,6 +124,7 @@ async function changePasswordAction(
 
 const ProfilePage: FC = () => {
   const { refreshProfile } = useAuth();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<ApiUserProfile | null>(null);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -184,8 +186,9 @@ const ProfilePage: FC = () => {
   });
 
   // Load profile data
+  // React 19 Compiler handles memoization
 
-  const loadProfile = useCallback(async () => {
+  const loadProfile = async () => {
     try {
       setIsLoading(true);
 
@@ -213,52 +216,64 @@ const ProfilePage: FC = () => {
         active_sessions: 2,
       });
     } catch {
-      // Silently fail - error handling can be added if needed
+      toast.error('Failed to load profile data');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     loadProfile();
-  }, [loadProfile]);
+  }, []);
 
   // Handle successful profile update
   useEffect(() => {
     if (profileState.success) {
       setSuccess('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
       setIsEditing(false);
       loadProfile();
       refreshProfile();
       setTimeout(() => setSuccess(''), 3000);
+    } else if (profileState.error) {
+      toast.error(profileState.error);
     }
-  }, [profileState.success, loadProfile, refreshProfile]);
+  }, [profileState.success, profileState.error, loadProfile, refreshProfile, toast]);
 
   // Handle successful password change
   useEffect(() => {
     if (passwordState.success) {
       setSuccess('Password changed successfully!');
+      toast.success('Password changed successfully!');
       setPasswordForm({
         current_password: '',
         new_password: '',
         confirm_password: '',
       });
       setTimeout(() => setSuccess(''), 3000);
+    } else if (passwordState.error) {
+      toast.error(passwordState.error);
     }
-  }, [passwordState.success]);
+  }, [passwordState.success, passwordState.error, toast]);
 
   // Save profile changes
-  const handleSaveProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveProfile = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formDataObj = new FormData(e.currentTarget);
-    await submitProfileAction(formDataObj);
+    // React 19: Wrap in startTransition to avoid warnings
+    startTransition(() => {
+      submitProfileAction(formDataObj);
+    });
   };
 
   // Change password
-  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChangePassword = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formDataObj = new FormData(e.currentTarget);
-    await submitPasswordAction(formDataObj);
+    // React 19: Wrap in startTransition to avoid warnings
+    startTransition(() => {
+      submitPasswordAction(formDataObj);
+    });
   };
 
   // Determine tab content
@@ -282,9 +297,12 @@ const ProfilePage: FC = () => {
         <div className="mb-8 flex items-center gap-6 border-b border-gray-200 pb-6">
           {/* Avatar */}
           <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-blue-500">
-            <UserIcon className="h-10 w-10 text-white" />
-            <button className="absolute bottom-0 right-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-green-500">
-              <Camera className="h-3 w-3 text-white" />
+            <UserIcon className="h-10 w-10 text-white" aria-hidden="true" />
+            <button
+              className="absolute bottom-0 right-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-green-500"
+              aria-label="Change profile picture"
+            >
+              <Camera className="h-3 w-3 text-white" aria-hidden="true" />
             </button>
           </div>
 
@@ -312,15 +330,16 @@ const ProfilePage: FC = () => {
                 ? 'border-red-600 bg-white text-red-600 hover:bg-red-50'
                 : 'border-blue-500 bg-white text-blue-500 hover:bg-blue-50'
             }`}
+            aria-label={isEditing ? 'Cancel editing profile' : 'Edit profile'}
           >
             {isEditing ? (
               <>
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4" aria-hidden="true" />
                 Cancel
               </>
             ) : (
               <>
-                <Edit3 className="h-4 w-4" />
+                <Edit3 className="h-4 w-4" aria-hidden="true" />
                 Edit Profile
               </>
             )}
@@ -532,11 +551,12 @@ const ProfilePage: FC = () => {
               type="submit"
               disabled={isProfilePending}
               className="flex cursor-pointer items-center gap-2 rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
+              aria-label="Save profile changes"
             >
               {isProfilePending ? (
-                <Loader className="h-4 w-4 animate-spin" />
+                <Loader className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
-                <Save className="h-4 w-4" />
+                <Save className="h-4 w-4" aria-hidden="true" />
               )}
               {isProfilePending ? 'Saving...' : 'Save Changes'}
             </button>
@@ -612,11 +632,14 @@ const ProfilePage: FC = () => {
                   type="button"
                   onClick={() => setShowPasswords((prev) => ({ ...prev, current: !prev.current }))}
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
+                  aria-label={
+                    showPasswords.current ? 'Hide current password' : 'Show current password'
+                  }
                 >
                   {showPasswords.current ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="h-4 w-4" aria-hidden="true" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-4 w-4" aria-hidden="true" />
                   )}
                 </button>
               </div>
@@ -648,8 +671,13 @@ const ProfilePage: FC = () => {
                   type="button"
                   onClick={() => setShowPasswords((prev) => ({ ...prev, new: !prev.new }))}
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
+                  aria-label={showPasswords.new ? 'Hide new password' : 'Show new password'}
                 >
-                  {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPasswords.new ? (
+                    <EyeOff className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="h-4 w-4" aria-hidden="true" />
+                  )}
                 </button>
               </div>
             </div>
@@ -679,11 +707,14 @@ const ProfilePage: FC = () => {
                   type="button"
                   onClick={() => setShowPasswords((prev) => ({ ...prev, confirm: !prev.confirm }))}
                   className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
+                  aria-label={
+                    showPasswords.confirm ? 'Hide confirm password' : 'Show confirm password'
+                  }
                 >
                   {showPasswords.confirm ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="h-4 w-4" aria-hidden="true" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-4 w-4" aria-hidden="true" />
                   )}
                 </button>
               </div>
@@ -708,9 +739,9 @@ const ProfilePage: FC = () => {
               }`}
             >
               {isPasswordPending ? (
-                <Loader className="h-4 w-4 animate-spin" />
+                <Loader className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
-                <Shield className="h-4 w-4" />
+                <Shield className="h-4 w-4" aria-hidden="true" />
               )}
               {isPasswordPending ? 'Changing...' : 'Change Password'}
             </button>
@@ -809,8 +840,8 @@ const ProfilePage: FC = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Loader className="mx-auto mb-4 h-8 w-8 animate-spin" />
+        <div className="text-center" role="status" aria-live="polite">
+          <Loader className="mx-auto mb-4 h-8 w-8 animate-spin" aria-hidden="true" />
           <p className="text-gray-600">Loading profile...</p>
         </div>
       </div>
@@ -831,15 +862,23 @@ const ProfilePage: FC = () => {
 
         {/* Alerts */}
         {success && (
-          <div className="mb-6 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4">
-            <CheckCircle className="h-5 w-5 text-green-500" />
+          <div
+            className="mb-6 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4"
+            role="status"
+            aria-live="polite"
+          >
+            <CheckCircle className="h-5 w-5 text-green-500" aria-hidden="true" />
             <p className="m-0 text-sm text-green-800">{success}</p>
           </div>
         )}
 
         {/* Tab Navigation */}
         <div className="overflow-hidden rounded-lg bg-white shadow-sm">
-          <nav className="flex border-b border-gray-200">
+          <div
+            className="flex border-b border-gray-200"
+            role="tablist"
+            aria-label="Profile settings sections"
+          >
             {[
               { id: 'profile', label: 'Profile', icon: UserIcon },
               { id: 'security', label: 'Security', icon: Shield },
@@ -853,15 +892,20 @@ const ProfilePage: FC = () => {
                     ? 'border-b-blue-500 bg-slate-50 text-blue-500'
                     : 'border-transparent bg-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
+                role="tab"
+                aria-selected={activeTab === id}
+                aria-controls={`${id}-panel`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4" aria-hidden="true" />
                 {label}
               </button>
             ))}
-          </nav>
+          </div>
 
           {/* Tab Content */}
-          {tabContent}
+          <div role="tabpanel" id={`${activeTab}-panel`} aria-labelledby={`${activeTab}-tab`}>
+            {tabContent}
+          </div>
         </div>
       </div>
     </div>

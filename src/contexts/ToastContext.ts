@@ -1,16 +1,50 @@
+import type { ReactNode } from 'react';
 import { createContext } from 'react';
 
-import type { ErrorInfo } from '@shared/utils/error';
+// Toast types
+export type ToastVariant = 'success' | 'error' | 'warning' | 'info';
 
-export interface ToastContextType { showError: (error: ErrorInfo | unknown) => void;
-	showSuccess: (message: string) => void;
-	showInfo: (message: string) => void;
-	clearToasts: () => void; }
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
 
-export interface ToastItem { id: string;
-	type: 'error' | 'success' | 'info';
-	message: string;
-	error?: ErrorInfo;
-	autoHideDelay?: number; }
+export interface ToastOptions {
+  duration?: number;
+  variant?: ToastVariant;
+  action?: ToastAction;
+  dismissible?: boolean;
+  icon?: ReactNode;
+  onDismiss?: () => void;
+}
+
+export interface Toast
+  extends Required<Pick<ToastOptions, 'duration' | 'variant' | 'dismissible'>> {
+  id: string;
+  message: string;
+  action?: ToastAction;
+  icon?: ReactNode;
+  onDismiss?: () => void;
+  createdAt: number;
+}
+
+export interface ToastContextType {
+  toasts: Toast[];
+  toast: {
+    success: (message: string, options?: ToastOptions) => string;
+    error: (message: string, options?: ToastOptions) => string;
+    warning: (message: string, options?: ToastOptions) => string;
+    info: (message: string, options?: ToastOptions) => string;
+    custom: (message: string, options?: ToastOptions) => string;
+  };
+  dismiss: (id: string) => void;
+  dismissAll: () => void;
+
+  // Legacy API (for backward compatibility)
+  showError: (message: string) => void;
+  showSuccess: (message: string) => void;
+  showInfo: (message: string) => void;
+  clearToasts: () => void;
+}
 
 export const ToastContext = createContext<ToastContextType | undefined>(undefined);

@@ -1,0 +1,425 @@
+import { Alert } from '@shared/ui/Alert';
+import type { Meta, StoryObj } from '@storybook/react';
+
+/**
+ * Alert Component Documentation
+ *
+ * A versatile alert component with multiple variants, sizes, and features:
+ * - 4 variants: info, success, warning, error
+ * - 3 sizes: sm, md, lg
+ * - Dismissible option
+ * - Custom icons support
+ * - Banner mode for full-width alerts
+ * - Animation support
+ * - Dark mode compatible
+ * - WCAG 2.1 AA compliant
+ */
+const meta = {
+  title: 'Components/Alert',
+  component: Alert,
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component:
+          'Alert component with multiple variants for different message types. Consolidates ErrorAlert, EnhancedErrorAlert, and original Alert components.',
+      },
+    },
+  },
+  tags: ['autodocs'],
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['info', 'success', 'warning', 'error'],
+      description: 'Visual style variant',
+      table: {
+        type: { summary: 'AlertVariant' },
+        defaultValue: { summary: 'info' },
+      },
+    },
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg'],
+      description: 'Size of the alert',
+      table: {
+        type: { summary: 'AlertSize' },
+        defaultValue: { summary: 'md' },
+      },
+    },
+    title: {
+      control: 'text',
+      description: 'Optional title for the alert',
+    },
+    children: {
+      control: 'text',
+      description: 'Alert message content',
+    },
+    showIcon: {
+      control: 'boolean',
+      description: 'Show default icon for variant',
+      table: {
+        defaultValue: { summary: 'true' },
+      },
+    },
+    dismissible: {
+      control: 'boolean',
+      description: 'Show dismiss button',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
+    banner: {
+      control: 'boolean',
+      description: 'Full-width banner mode',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
+    animate: {
+      control: 'boolean',
+      description: 'Animate on mount',
+      table: {
+        defaultValue: { summary: 'false' },
+      },
+    },
+  },
+} satisfies Meta<typeof Alert>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+// ============================================================================
+// Basic Variants
+// ============================================================================
+
+export const Info: Story = {
+  args: {
+    variant: 'info',
+    children: 'This is an informational message to help guide users.',
+    showIcon: true,
+  },
+};
+
+export const Success: Story = {
+  args: {
+    variant: 'success',
+    children: 'Your changes have been saved successfully!',
+    showIcon: true,
+  },
+};
+
+export const Warning: Story = {
+  args: {
+    variant: 'warning',
+    children: 'Please review your information before submitting.',
+    showIcon: true,
+  },
+};
+
+export const Error: Story = {
+  args: {
+    variant: 'error',
+    children: 'An error occurred while processing your request.',
+    showIcon: true,
+  },
+};
+
+// ============================================================================
+// With Titles
+// ============================================================================
+
+export const WithTitle: Story = {
+  args: {
+    variant: 'info',
+    title: 'Information',
+    children: 'This alert includes both a title and a description for more context.',
+    showIcon: true,
+  },
+};
+
+export const SuccessWithTitle: Story = {
+  args: {
+    variant: 'success',
+    title: 'Success',
+    children: 'Your profile has been updated with the latest changes.',
+    showIcon: true,
+  },
+};
+
+export const WarningWithTitle: Story = {
+  args: {
+    variant: 'warning',
+    title: 'Warning',
+    children: 'Your session will expire in 5 minutes. Please save your work.',
+    showIcon: true,
+  },
+};
+
+export const ErrorWithTitle: Story = {
+  args: {
+    variant: 'error',
+    title: 'Error',
+    children: 'Failed to connect to the server. Please check your internet connection.',
+    showIcon: true,
+  },
+};
+
+// ============================================================================
+// Sizes
+// ============================================================================
+
+export const SmallSize: Story = {
+  args: {
+    variant: 'info',
+    size: 'sm',
+    children: 'Small alert for compact layouts',
+    showIcon: true,
+  },
+};
+
+export const MediumSize: Story = {
+  args: {
+    variant: 'info',
+    size: 'md',
+    children: 'Medium alert - default size for most use cases',
+    showIcon: true,
+  },
+};
+
+export const LargeSize: Story = {
+  args: {
+    variant: 'info',
+    size: 'lg',
+    title: 'Large Alert',
+    children: 'Large alert with more prominent display for important messages',
+    showIcon: true,
+  },
+};
+
+// ============================================================================
+// Dismissible
+// ============================================================================
+
+export const Dismissible: Story = {
+  args: {
+    variant: 'info',
+    title: 'Dismissible Alert',
+    children: 'Click the X button to dismiss this alert.',
+    dismissible: true,
+    showIcon: true,
+    onDismiss: () => console.log('Alert dismissed'),
+  },
+};
+
+export const DismissibleError: Story = {
+  args: {
+    variant: 'error',
+    title: 'Dismissible Error',
+    children: 'This error message can be dismissed by the user.',
+    dismissible: true,
+    showIcon: true,
+    onDismiss: () => alert('Error alert dismissed'),
+  },
+};
+
+// ============================================================================
+// Banner Mode
+// ============================================================================
+
+export const BannerInfo: Story = {
+  args: {
+    variant: 'info',
+    title: 'System Maintenance',
+    children: 'Scheduled maintenance will occur on Sunday at 2:00 AM EST.',
+    banner: true,
+    showIcon: true,
+  },
+  parameters: {
+    layout: 'fullscreen',
+  },
+};
+
+export const BannerWarning: Story = {
+  args: {
+    variant: 'warning',
+    title: 'Update Required',
+    children: 'A new version is available. Please update to continue using all features.',
+    banner: true,
+    showIcon: true,
+    dismissible: true,
+  },
+  parameters: {
+    layout: 'fullscreen',
+  },
+};
+
+// ============================================================================
+// Without Icons
+// ============================================================================
+
+export const NoIcon: Story = {
+  args: {
+    variant: 'info',
+    title: 'Simple Alert',
+    children: 'Alert without an icon for minimal design',
+    showIcon: false,
+  },
+};
+
+// ============================================================================
+// Animated
+// ============================================================================
+
+export const Animated: Story = {
+  args: {
+    variant: 'success',
+    title: 'Animated Alert',
+    children: 'This alert includes entrance animation',
+    showIcon: true,
+    animate: true,
+  },
+};
+
+// ============================================================================
+// Complex Content
+// ============================================================================
+
+export const WithComplexContent: Story = {
+  args: {
+    variant: 'warning',
+    title: 'Action Required',
+    showIcon: true,
+    dismissible: true,
+  },
+  render: (args) => (
+    <Alert {...args}>
+      <div className="space-y-2">
+        <p>Your account requires attention. Please complete the following:</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>Verify your email address</li>
+          <li>Update your profile information</li>
+          <li>Enable two-factor authentication</li>
+        </ul>
+        <div className="flex gap-2 mt-3">
+          <button className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700">
+            Take Action
+          </button>
+          <button className="px-3 py-1 text-sm border border-orange-300 rounded hover:bg-orange-50">
+            Remind Me Later
+          </button>
+        </div>
+      </div>
+    </Alert>
+  ),
+};
+
+// ============================================================================
+// All Variants Showcase
+// ============================================================================
+
+export const AllVariants: Story = {
+  render: () => (
+    <div className="space-y-4">
+      <Alert variant="info" title="Info Alert" showIcon>
+        This is an informational message
+      </Alert>
+      <Alert variant="success" title="Success Alert" showIcon>
+        Operation completed successfully
+      </Alert>
+      <Alert variant="warning" title="Warning Alert" showIcon>
+        Please be careful with this action
+      </Alert>
+      <Alert variant="error" title="Error Alert" showIcon>
+        Something went wrong
+      </Alert>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'All alert variants displayed together for comparison',
+      },
+    },
+  },
+};
+
+// ============================================================================
+// All Sizes Showcase
+// ============================================================================
+
+export const AllSizes: Story = {
+  render: () => (
+    <div className="space-y-4">
+      <Alert variant="info" size="sm" title="Small" showIcon>
+        Small size alert
+      </Alert>
+      <Alert variant="info" size="md" title="Medium" showIcon>
+        Medium size alert (default)
+      </Alert>
+      <Alert variant="info" size="lg" title="Large" showIcon>
+        Large size alert for prominent messages
+      </Alert>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'All size variants displayed together for comparison',
+      },
+    },
+  },
+};
+
+// ============================================================================
+// Dark Mode
+// ============================================================================
+
+export const DarkMode: Story = {
+  args: {
+    variant: 'info',
+    title: 'Dark Mode Support',
+    children:
+      'All alert variants support dark mode automatically. Toggle the theme in the toolbar to see it in action.',
+    showIcon: true,
+    dismissible: true,
+  },
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+};
+
+// ============================================================================
+// Real-World Examples
+// ============================================================================
+
+export const FormValidationError: Story = {
+  render: () => (
+    <Alert variant="error" title="Form Validation Failed" showIcon dismissible>
+      <ul className="list-disc list-inside space-y-1 mt-2">
+        <li>Email address is required</li>
+        <li>Password must be at least 8 characters</li>
+        <li>Please accept the terms and conditions</li>
+      </ul>
+    </Alert>
+  ),
+};
+
+export const SuccessNotification: Story = {
+  render: () => (
+    <Alert variant="success" showIcon dismissible animate>
+      Your profile has been updated successfully. Changes will be visible across all devices.
+    </Alert>
+  ),
+};
+
+export const SystemMaintenanceBanner: Story = {
+  render: () => (
+    <Alert variant="warning" title="Scheduled Maintenance" banner showIcon dismissible>
+      Our system will undergo maintenance on Sunday, Oct 20 from 2:00 AM - 4:00 AM EST. Some
+      features may be temporarily unavailable.
+    </Alert>
+  ),
+  parameters: {
+    layout: 'fullscreen',
+  },
+};

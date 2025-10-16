@@ -1,0 +1,64 @@
+/**
+ * Border & Radius Design Tokens
+ * 
+ * Consistent border styling across the application.
+ */
+
+:root {
+  /* ========================================================================
+     BORDER WIDTHS
+     ======================================================================== */
+
+  --border-width-0: 0;
+  --border-width-default: 1px;
+  --border-width-2: 2px;
+  --border-width-4: 4px;
+  --border-width-8: 8px;
+
+  /* ========================================================================
+     BORDER RADIUS
+     ======================================================================== */
+
+  --radius-none: 0;
+  --radius-sm: 0.25rem; /* 4px */
+  --radius-md: 0.5rem; /* 8px */
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-xl: 1rem; /* 16px */
+  --radius-2xl: 1.5rem; /* 24px */
+  --radius-3xl: 2rem; /* 32px */
+  --radius-full: 9999px; /* Pill/Circle */
+
+  /* ========================================================================
+     COMPONENT-SPECIFIC RADIUS
+     ======================================================================== */
+
+  --radius-button-sm: var(--radius-md);
+  --radius-button-md: var(--radius-lg);
+  --radius-button-lg: var(--radius-lg);
+
+  --radius-input: var(--radius-md);
+  --radius-card: var(--radius-lg);
+  --radius-modal: var(--radius-xl);
+  --radius-badge: var(--radius-full);
+  --radius-avatar: var(--radius-full);
+  --radius-toast: var(--radius-lg);
+  --radius-tooltip: var(--radius-md);
+
+  /* ========================================================================
+     BORDER STYLES
+     ======================================================================== */
+
+  --border-style-solid: solid;
+  --border-style-dashed: dashed;
+  --border-style-dotted: dotted;
+
+  /* ========================================================================
+     OUTLINE WIDTHS (for focus states)
+     ======================================================================== */
+
+  --outline-width-thin: 1px;
+  --outline-width-default: 2px;
+  --outline-width-thick: 4px;
+
+  --outline-offset: 2px;
+}

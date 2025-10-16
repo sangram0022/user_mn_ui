@@ -7,12 +7,8 @@
  * @module useReact19Features
  */
 
-import {
-  useCallback,
-  useActionState as useReactActionState,
-  useOptimistic as useReactOptimistic,
-  useState,
-} from 'react';
+import { logger } from '@shared/utils/logger';
+import { useActionState, useOptimistic, useState } from 'react';
 
 // ==================== useOptimistic Wrappers ====================
 
@@ -35,7 +31,7 @@ export interface OptimisticAction<T extends OptimisticListItem> {
 export function useOptimisticList<T extends OptimisticListItem>(initialItems: T[]) {
   const [items, setItems] = useState<T[]>(initialItems);
 
-  const [optimisticItems, addOptimistic] = useReactOptimistic(
+  const [optimisticItems, addOptimistic] = useOptimistic(
     items,
     (state: T[], action: OptimisticAction<T>): T[] => {
       switch (action.type) {
@@ -79,7 +75,7 @@ export interface UseOptimisticUpdatesOptions<T> {
 export function useOptimisticUpdates<T>({ initialData, updateFn }: UseOptimisticUpdatesOptions<T>) {
   const [data, setData] = useState<T>(initialData);
 
-  const [optimisticData, applyOptimistic] = useReactOptimistic(
+  const [optimisticData, applyOptimistic] = useOptimistic(
     data,
     (state: T, update: Partial<T>): T => updateFn(state, update)
   );
@@ -120,7 +116,7 @@ export function useAdvancedFormState<TData = unknown>({
   onSuccess,
   onError,
 }: UseAdvancedFormStateOptions<TData>) {
-  const [state, submitAction, isPending] = useReactActionState(action, initialState);
+  const [state, submitAction, isPending] = useActionState(action, initialState);
 
   // Auto-trigger callbacks on state changes
   if (state.success && state.data && onSuccess) {
@@ -163,63 +159,55 @@ export function useOptimisticCRUD<T extends OptimisticListItem>(
 ): CRUDOperations<T> {
   const { items, setItems, addOptimistic } = useOptimisticList<T>(initialItems);
 
-  const create = useCallback(
-    async (item: T, serverFn: () => Promise<T>) => {
-      // Optimistic add
-      addOptimistic({ type: 'add', item });
+  // React 19 Compiler handles memoization
+  const create = async (item: T, serverFn: () => Promise<T>) => {
+    // Optimistic add
+    addOptimistic({ type: 'add', item });
 
-      try {
-        const createdItem = await serverFn();
-        // Confirm with real data
-        setItems((prev) => [...prev, createdItem]);
-      } catch (error) {
-        // Automatic rollback - optimistic state reverts
-        console.error('Create failed:', error);
-        throw error;
-      }
-    },
-    [addOptimistic, setItems]
-  );
+    try {
+      const createdItem = await serverFn();
+      // Confirm with real data
+      setItems((prev) => [...prev, createdItem]);
+    } catch (error) {
+      // Automatic rollback - optimistic state reverts
+      logger.error('Create failed', error as Error);
+      throw error;
+    }
+  };
 
-  const update = useCallback(
-    async (id: string, updates: Partial<T>, serverFn: () => Promise<T>) => {
-      // Optimistic update
-      addOptimistic({ type: 'update', id, updates });
+  const update = async (id: string, updates: Partial<T>, serverFn: () => Promise<T>) => {
+    // Optimistic update
+    addOptimistic({ type: 'update', id, updates });
 
-      try {
-        const updatedItem = await serverFn();
-        // Confirm with real data
-        setItems((prev) => prev.map((item) => (item.id === id ? updatedItem : item)));
-      } catch (error) {
-        // Automatic rollback
-        console.error('Update failed:', error);
-        throw error;
-      }
-    },
-    [addOptimistic, setItems]
-  );
+    try {
+      const updatedItem = await serverFn();
+      // Confirm with real data
+      setItems((prev) => prev.map((item) => (item.id === id ? updatedItem : item)));
+    } catch (error) {
+      // Automatic rollback
+      logger.error('Update failed', error as Error);
+      throw error;
+    }
+  };
 
-  const deleteItem = useCallback(
-    async (id: string, serverFn: () => Promise<void>) => {
-      // Optimistic delete
-      addOptimistic({ type: 'delete', id });
+  const deleteItem = async (id: string, serverFn: () => Promise<void>) => {
+    // Optimistic delete
+    addOptimistic({ type: 'delete', id });
 
-      try {
-        await serverFn();
-        // Confirm deletion
-        setItems((prev) => prev.filter((item) => item.id !== id));
-      } catch (error) {
-        // Automatic rollback
-        console.error('Delete failed:', error);
-        throw error;
-      }
-    },
-    [addOptimistic, setItems]
-  );
+    try {
+      await serverFn();
+      // Confirm deletion
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      // Automatic rollback
+      logger.error('Delete failed', error as Error);
+      throw error;
+    }
+  };
 
-  const isOptimistic = useCallback((item: T) => {
+  const isOptimistic = (item: T) => {
     return 'isOptimistic' in item && item.isOptimistic === true;
-  }, []);
+  };
 
   return {
     items,
@@ -293,12 +281,13 @@ export function useOptimisticToggle(
   serverFn: (newValue: boolean) => Promise<void>
 ) {
   const [value, setValue] = useState(initialValue);
-  const [optimisticValue, setOptimistic] = useReactOptimistic(
+  const [optimisticValue, setOptimistic] = useOptimistic(
     value,
     (_state: boolean, newValue: boolean) => newValue
   );
 
-  const toggle = useCallback(async () => {
+  // React 19 Compiler handles memoization
+  const toggle = async () => {
     const newValue = !optimisticValue;
 
     // Optimistic update
@@ -313,7 +302,7 @@ export function useOptimisticToggle(
       console.error('Toggle failed:', error);
       throw error;
     }
-  }, [optimisticValue, serverFn, setOptimistic]);
+  };
 
   return {
     value: optimisticValue,

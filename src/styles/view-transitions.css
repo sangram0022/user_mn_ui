@@ -1,0 +1,255 @@
+/**
+ * View Transitions API CSS Animations
+ * 
+ * Provides smooth animations for page transitions using the native
+ * View Transitions API. These animations are applied automatically
+ * when using document.startViewTransition().
+ * 
+ * Browser Support: Chrome 111+, Edge 111+, Safari 18+
+ * Fallback: React useTransition (no animation)
+ * 
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API
+ */
+
+/* ============================================
+   Root View Transition Animations
+   ============================================ */
+
+/* Default fade animation for all transitions */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: fade-in;
+}
+
+/* ============================================
+   Fade Animations
+   ============================================ */
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   Slide Animations
+   ============================================ */
+
+/* Slide from right (forward navigation) */
+@keyframes slide-from-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Slide to left (forward navigation exit) */
+@keyframes slide-to-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+/* Slide from left (back navigation) */
+@keyframes slide-from-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Slide to right (back navigation exit) */
+@keyframes slide-to-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   Zoom Animations
+   ============================================ */
+
+/* Zoom in (drill-down navigation) */
+@keyframes zoom-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Zoom out (drill-down exit) */
+@keyframes zoom-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   Custom Transition Types
+   ============================================ */
+
+/* 
+ * Apply custom transitions by adding data attributes to elements:
+ * <div data-transition="slide-forward"> ... </div>
+ */
+
+/* Slide forward navigation */
+::view-transition-old(slide-forward) {
+  animation-name: slide-to-left;
+}
+
+::view-transition-new(slide-forward) {
+  animation-name: slide-from-right;
+}
+
+/* Slide back navigation */
+::view-transition-old(slide-back) {
+  animation-name: slide-to-right;
+}
+
+::view-transition-new(slide-back) {
+  animation-name: slide-from-left;
+}
+
+/* Zoom drill-down */
+::view-transition-old(zoom) {
+  animation-name: zoom-out;
+}
+
+::view-transition-new(zoom) {
+  animation-name: zoom-in;
+}
+
+/* ============================================
+   Reduced Motion Support
+   ============================================ */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-old(slide-forward),
+  ::view-transition-new(slide-forward),
+  ::view-transition-old(slide-back),
+  ::view-transition-new(slide-back),
+  ::view-transition-old(zoom),
+  ::view-transition-new(zoom) {
+    animation-duration: 0ms !important;
+    animation: none !important;
+  }
+}
+
+/* ============================================
+   Dark Mode Support
+   ============================================ */
+
+/* Ensure smooth transitions in dark mode */
+.dark ::view-transition-old(root),
+.dark ::view-transition-new(root) {
+  /* Maintain same animation properties */
+  animation-duration: 300ms;
+}
+
+/* ============================================
+   Performance Optimization
+   ============================================ */
+
+/* Use GPU acceleration for better performance */
+::view-transition-old(root),
+::view-transition-new(root) {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ============================================
+   Loading States
+   ============================================ */
+
+/* Optional: Add loading indicator during transition */
+.view-transition-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-primary, #3b82f6) 50%, transparent);
+  animation: loading-bar 1s ease-in-out infinite;
+  z-index: 9999;
+}
+
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+/* Disable transitions for specific elements */
+.no-view-transition {
+  view-transition-name: none;
+}
+
+/* Keep element in place during transition */
+.view-transition-static {
+  view-transition-name: static;
+}
+
+::view-transition-old(static),
+::view-transition-new(static) {
+  animation: none;
+}

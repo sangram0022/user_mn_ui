@@ -2,6 +2,7 @@ import type { FC, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { logger } from './../../../shared/utils/logger';
 
+import { useToast } from '@hooks/useToast';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import { getUserRoleName } from '@shared/utils/user';
 import {
@@ -24,6 +25,7 @@ import { useAuth } from '../../auth';
 const RoleBasedDashboard: FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   if (!user) return null;
 
@@ -31,7 +33,12 @@ const RoleBasedDashboard: FC = () => {
     event.preventDefault();
     logger.info(`🧭 Dashboard navigation clicked: ${href}`);
     logger.info('🔧 Using navigate() to route to:', { href });
-    navigate(href);
+    try {
+      navigate(href);
+    } catch (error) {
+      logger.error('Navigation error:', error as Error);
+      toast.error('Failed to navigate to the requested page');
+    }
   };
 
   const roleName = getUserRoleName(user);
@@ -213,8 +220,10 @@ const RoleBasedDashboard: FC = () => {
                   ? 'bg-blue-100 text-blue-800'
                   : 'bg-green-100 text-green-800'
             }`}
+            role="status"
+            aria-label={`${roleInfo.title}: ${roleInfo.description}`}
           >
-            <RoleIcon className="h-6 w-6" />
+            <RoleIcon className="h-6 w-6" aria-hidden="true" />
             <div>
               <h1 className="text-2xl font-bold">{roleInfo.title}</h1>
               <p className="text-sm opacity-80">{roleInfo.description}</p>
@@ -223,11 +232,19 @@ const RoleBasedDashboard: FC = () => {
         </div>
 
         {isAdmin && (
-          <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div
+            className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+            role="region"
+            aria-label="System statistics"
+          >
+            <div
+              className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+              role="status"
+              aria-label="1,234 total users"
+            >
               <div className="flex items-center">
                 <div className="rounded-lg bg-blue-100 p-3">
-                  <Users className="h-6 w-6 text-blue-600" />
+                  <Users className="h-6 w-6 text-blue-600" aria-hidden="true" />
                 </div>
                 <div className="ml-4">
                   <div className="text-2xl font-bold text-gray-900">1,234</div>
@@ -235,10 +252,14 @@ const RoleBasedDashboard: FC = () => {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div
+              className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+              role="status"
+              aria-label="99.9% system uptime"
+            >
               <div className="flex items-center">
                 <div className="rounded-lg bg-green-100 p-3">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+                  <CheckCircle className="h-6 w-6 text-green-600" aria-hidden="true" />
                 </div>
                 <div className="ml-4">
                   <div className="text-2xl font-bold text-gray-900">99.9%</div>
@@ -246,10 +267,14 @@ const RoleBasedDashboard: FC = () => {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div
+              className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+              role="status"
+              aria-label="23 pending approvals"
+            >
               <div className="flex items-center">
                 <div className="rounded-lg bg-orange-100 p-3">
-                  <Clock className="h-6 w-6 text-orange-600" />
+                  <Clock className="h-6 w-6 text-orange-600" aria-hidden="true" />
                 </div>
                 <div className="ml-4">
                   <div className="text-2xl font-bold text-gray-900">23</div>
@@ -257,10 +282,14 @@ const RoleBasedDashboard: FC = () => {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div
+              className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+              role="status"
+              aria-label="5 security alerts"
+            >
               <div className="flex items-center">
                 <div className="rounded-lg bg-red-100 p-3">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                  <AlertTriangle className="h-6 w-6 text-red-600" aria-hidden="true" />
                 </div>
                 <div className="ml-4">
                   <div className="text-2xl font-bold text-gray-900">5</div>
@@ -273,7 +302,11 @@ const RoleBasedDashboard: FC = () => {
 
         <Breadcrumb />
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+          role="region"
+          aria-label="Available features and tools"
+        >
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
@@ -290,6 +323,7 @@ const RoleBasedDashboard: FC = () => {
                         ? 'purple-500'
                         : 'gray-400'
                 }`}
+                aria-label={`${feature.title}: ${feature.description}. ${feature.stats}`}
               >
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
@@ -303,6 +337,7 @@ const RoleBasedDashboard: FC = () => {
                               ? 'text-purple-500'
                               : 'text-gray-500'
                       }`}
+                      aria-hidden="true"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -310,7 +345,9 @@ const RoleBasedDashboard: FC = () => {
                     <p className="mb-3 text-sm opacity-80">{feature.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium opacity-60">{feature.stats}</span>
-                      <span className="text-xs font-medium">→</span>
+                      <span className="text-xs font-medium" aria-hidden="true">
+                        →
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -319,33 +356,39 @@ const RoleBasedDashboard: FC = () => {
           })}
         </div>
 
-        <div className="mt-8 rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+        <div
+          className="mt-8 rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6"
+          role="region"
+          aria-label={
+            isAdmin ? 'Admin tips' : isModerator ? 'Moderator tips' : 'Getting started tips'
+          }
+        >
           <h3 className="mb-4 text-lg font-semibold text-gray-900">
             {isAdmin ? 'Admin Tips' : isModerator ? 'Moderator Tips' : 'Getting Started'}
           </h3>
-          <div className="grid grid-cols-1 gap-4 text-sm text-gray-700 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 text-sm text-gray-700 md:grid-cols-2" role="list">
             {isAdmin && (
               <>
-                <div>• Use the Security Center to monitor system threats</div>
-                <div>• Review user analytics for platform insights</div>
-                <div>• Set up automated workflows for efficiency</div>
-                <div>• Regular backup and security audits are recommended</div>
+                <div role="listitem">• Use the Security Center to monitor system threats</div>
+                <div role="listitem">• Review user analytics for platform insights</div>
+                <div role="listitem">• Set up automated workflows for efficiency</div>
+                <div role="listitem">• Regular backup and security audits are recommended</div>
               </>
             )}
             {isModerator && (
               <>
-                <div>• Check pending approvals daily</div>
-                <div>• Monitor user activity for unusual patterns</div>
-                <div>• Review reported content promptly</div>
-                <div>• Use analytics to identify trends</div>
+                <div role="listitem">• Check pending approvals daily</div>
+                <div role="listitem">• Monitor user activity for unusual patterns</div>
+                <div role="listitem">• Review reported content promptly</div>
+                <div role="listitem">• Use analytics to identify trends</div>
               </>
             )}
             {isUser && (
               <>
-                <div>• Complete your profile for better experience</div>
-                <div>• Check your activity dashboard regularly</div>
-                <div>• Submit workflow requests when needed</div>
-                <div>• Keep your account settings up to date</div>
+                <div role="listitem">• Complete your profile for better experience</div>
+                <div role="listitem">• Check your activity dashboard regularly</div>
+                <div role="listitem">• Submit workflow requests when needed</div>
+                <div role="listitem">• Keep your account settings up to date</div>
               </>
             )}
           </div>

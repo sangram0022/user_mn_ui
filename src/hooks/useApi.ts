@@ -76,8 +76,7 @@ export function useApi<T>(apiCall: () => Promise<T>, options: UseApiOptions<T> =
     if (autoFetch) {
       execute();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoFetch, execute, ...deps]);
+  }, [autoFetch, execute, ...deps]); // deps spreading is intentional for custom dependencies
 
   const refetch = () => {
     return execute();

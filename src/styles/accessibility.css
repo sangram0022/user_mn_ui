@@ -1,0 +1,330 @@
+/**
+ * Global Accessibility Styles
+ * 
+ * WCAG 2.1 AA Compliance:
+ * - Focus indicators (minimum 2px, contrast ratio 3:1)
+ * - Skip links for keyboard navigation
+ * - Reduced motion support
+ * - High contrast mode support
+ */
+
+/* ========================================================================
+   FOCUS STYLES
+   ======================================================================== */
+
+/* Remove default outline */
+*:focus {
+  outline: none;
+}
+
+/* Add custom focus-visible ring */
+*:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Focus styles for interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role='button']:focus-visible,
+[role='link']:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Focus styles for dark mode */
+.dark *:focus-visible {
+  outline-color: var(--color-primary-400);
+}
+
+/* Focus within for containers */
+.focus-within-ring:focus-within {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ========================================================================
+   SKIP LINKS
+   ======================================================================== */
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-primary-600);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 0 0 var(--radius-md) 0;
+  z-index: 9999;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* ========================================================================
+   KEYBOARD NAVIGATION
+   ======================================================================== */
+
+/* Tab order indicator (only visible when tabbing) */
+body:not(.mouse-user) *:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Add mouse-user class when mouse is used */
+body.mouse-user *:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ========================================================================
+   TOUCH TARGETS
+   ======================================================================== */
+
+/* Minimum touch target size (44x44px for WCAG AA) */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure interactive elements meet minimum size */
+button,
+a,
+input[type='checkbox'],
+input[type='radio'],
+[role='button'],
+[role='link'] {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Exception for inline text links */
+a.inline-link {
+  min-width: auto;
+  min-height: auto;
+}
+
+/* ========================================================================
+   REDUCED MOTION
+   ======================================================================== */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ========================================================================
+   SCREEN READER ONLY
+   ======================================================================== */
+
+/* Visually hidden but accessible to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Make visible when focused (for skip links) */
+.sr-only:focus,
+.sr-only:active {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* ========================================================================
+   HIGH CONTRAST MODE
+   ======================================================================== */
+
+/* Support for Windows High Contrast Mode */
+@media (prefers-contrast: high) {
+  *:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    border: 2px solid currentColor;
+  }
+}
+
+/* ========================================================================
+   COLOR CONTRAST
+   ======================================================================== */
+
+/* Ensure minimum contrast ratios */
+.text-contrast-low {
+  color: var(--color-text-secondary);
+}
+
+.text-contrast-medium {
+  color: var(--color-text-primary);
+}
+
+.text-contrast-high {
+  color: var(--color-gray-900);
+}
+
+.dark .text-contrast-high {
+  color: var(--color-gray-50);
+}
+
+/* ========================================================================
+   FOCUS TRAP (for modals)
+   ======================================================================== */
+
+/* Disable focus for elements outside modal */
+.focus-trap-active {
+  pointer-events: none;
+}
+
+.focus-trap-active .modal-content,
+.focus-trap-active [role='dialog'] {
+  pointer-events: auto;
+}
+
+/* ========================================================================
+   ARIA LIVE REGIONS
+   ======================================================================== */
+
+/* Announcements for screen readers */
+.aria-live-polite {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+[aria-live='polite'],
+[aria-live='assertive'] {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ========================================================================
+   KEYBOARD-ONLY FOCUS
+   ======================================================================== */
+
+/* Enhanced focus for keyboard users */
+.keyboard-focus:focus-visible {
+  outline: 3px solid var(--color-primary-500);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.2);
+}
+
+/* ========================================================================
+   DISABLED STATES
+   ======================================================================== */
+
+/* Accessible disabled styling */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Maintain minimum contrast for disabled text */
+button:disabled,
+[aria-disabled='true'] {
+  color: var(--color-gray-600);
+}
+
+.dark button:disabled,
+.dark [aria-disabled='true'] {
+  color: var(--color-gray-400);
+}
+
+/* ========================================================================
+   INTERACTIVE STATES
+   ======================================================================== */
+
+/* Ensure clear interactive states */
+button:hover:not(:disabled),
+a:hover,
+[role='button']:hover:not([aria-disabled='true']) {
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
+button:active:not(:disabled),
+[role='button']:active:not([aria-disabled='true']) {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* ========================================================================
+   FOCUS MANAGEMENT
+   ======================================================================== */
+
+/* Trap focus within modal */
+.modal-open {
+  overflow: hidden;
+}
+
+.modal-open *:not(.modal-content):not(.modal-content *) {
+  visibility: hidden;
+}
+
+/* ========================================================================
+   ACCESSIBILITY UTILITIES
+   ======================================================================== */
+
+/* Focus indicator for custom components */
+.custom-focus-ring:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--color-primary-500),
+    0 0 0 6px rgba(59, 130, 246, 0.2);
+}
+
+/* Accessible text sizing */
+.text-accessible {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Accessible spacing for readability */
+.space-accessible > * + * {
+  margin-top: var(--space-4);
+}

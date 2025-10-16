@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
+import { useToast } from '@hooks/useToast';
 import { apiClient } from '@lib/api';
 import { Button } from '@shared/components/ui';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 
 const ForgotPasswordPage: React.FC = () => {
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -23,13 +25,17 @@ const ForgotPasswordPage: React.FC = () => {
       const response = await apiClient.forgotPassword(email);
 
       if (response.success === false) {
-        handleError(new Error(response.message || 'Failed to send reset email. Please try again.'));
+        const errorMsg = response.message || 'Failed to send reset email. Please try again.';
+        handleError(new Error(errorMsg));
+        toast.error(errorMsg);
         return;
       }
 
       setIsSuccess(true);
+      toast.success(`Password reset link sent to ${email}`);
     } catch (err: unknown) {
       handleError(err);
+      toast.error('Failed to send reset email. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -45,8 +51,12 @@ const ForgotPasswordPage: React.FC = () => {
   if (isSuccess) {
     return (
       <div className="mx-auto w-full max-w-md text-center">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500">
-          <CheckCircle className="h-8 w-8 text-white" />
+        <div
+          className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500"
+          role="status"
+          aria-live="polite"
+        >
+          <CheckCircle className="h-8 w-8 text-white" aria-hidden="true" />
         </div>
 
         <h1 className="mb-2 text-3xl font-bold text-gray-900">Check Your Email</h1>
@@ -89,14 +99,14 @@ const ForgotPasswordPage: React.FC = () => {
           to="/login"
           className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 no-underline transition-colors duration-200 hover:text-gray-700"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Back to Login
         </Link>
       </div>
 
       <header className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-500">
-          <Mail className="h-8 w-8 text-white" />
+          <Mail className="h-8 w-8 text-white" aria-hidden="true" />
         </div>
         <h1 className="mb-2 text-3xl font-bold text-gray-900">Reset Password</h1>
         <p className="text-sm text-gray-500">
@@ -106,12 +116,12 @@ const ForgotPasswordPage: React.FC = () => {
 
       <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-2xl">
         {error && (
-          <div className="mb-6">
+          <div className="mb-6" role="alert" aria-live="assertive">
             <ErrorAlert error={error} />
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} aria-label="Password reset form">
           <div className="mb-6">
             <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
               Email Address
@@ -128,7 +138,10 @@ const ForgotPasswordPage: React.FC = () => {
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pl-10 text-sm text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 placeholder="Enter your email address"
               />
-              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Mail
+                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                aria-hidden="true"
+              />
             </div>
           </div>
 
@@ -140,10 +153,11 @@ const ForgotPasswordPage: React.FC = () => {
                 ? 'cursor-not-allowed bg-gray-400'
                 : 'cursor-pointer bg-gradient-to-br from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
             }`}
+            aria-label={isLoading ? 'Sending password reset link' : 'Send password reset link'}
           >
             {isLoading ? (
               <>
-                <Loader className="h-4 w-4 animate-spin" />
+                <Loader className="h-4 w-4 animate-spin" aria-hidden="true" />
                 Sending Reset Link...
               </>
             ) : (

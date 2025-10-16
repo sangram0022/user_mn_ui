@@ -4,7 +4,7 @@
  * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { analyticsTracker } from '../AnalyticsTracker';
 import { errorTracker } from '../ErrorTracker';
 import { logger } from '../logger';
@@ -20,9 +20,18 @@ export interface UsePerformanceOptions {
 export const usePerformance = (componentName: string, options: UsePerformanceOptions = {}) => {
   const { trackRender = true, trackMount = true, trackUnmount = true } = options;
 
-  const mountTime = useRef<number>(Date.now());
+  // React 19 best practice: Initialize refs without impure functions
+  const mountTime = useRef<number>(0);
   const renderCount = useRef<number>(0);
-  const lastRenderTime = useRef<number>(Date.now());
+  const lastRenderTime = useRef<number>(0);
+
+  // Initialize mount time once in useEffect
+  useEffect(() => {
+    if (mountTime.current === 0) {
+      mountTime.current = Date.now();
+      lastRenderTime.current = Date.now();
+    }
+  }, []);
 
   useEffect(() => {
     const startTime = mountTime.current;
@@ -88,10 +97,17 @@ export const usePerformance = (componentName: string, options: UsePerformanceOpt
     return performanceMonitor.endTimer(timerName);
   };
 
+  // React 19: Store renderCount in state to avoid ref access during render
+  const [currentRenderCount, setCurrentRenderCount] = useState(0);
+
+  useEffect(() => {
+    setCurrentRenderCount(renderCount.current);
+  }, [renderCount]);
+
   return {
     startTimer,
     endTimer,
-    renderCount: renderCount.current,
+    renderCount: currentRenderCount,
   };
 };
 

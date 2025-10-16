@@ -6,6 +6,8 @@
  * - Performance hooks (useDebounce, useThrottle, useIntersectionObserver, etc.)
  * - Resource optimization functions
  * - Network quality detection
+ *
+ * Note: External variable reassignment is an acceptable pattern for testing hooks
  */
 
 import {
@@ -211,6 +213,7 @@ describe('useLRUCache', () => {
     let cacheInstance: LRUCache<string, string>;
 
     function TestComponent() {
+      // eslint-disable-next-line react-hooks/globals -- Test code: capturing hook return value
       cacheInstance = useLRUCache<string, string>(3);
       return React.createElement('div');
     }
@@ -289,6 +292,7 @@ describe('useThrottle', () => {
     let throttledFn: typeof mockFn;
 
     function TestComponent() {
+      // eslint-disable-next-line react-hooks/globals -- Test code: capturing hook return value
       throttledFn = useThrottle(mockFn, 1000);
       return React.createElement('div');
     }
@@ -330,6 +334,7 @@ describe('useIntersectionObserver', () => {
     let hookResult: ReturnType<typeof useIntersectionObserver>;
 
     function TestComponent() {
+      // eslint-disable-next-line react-hooks/globals -- Test code: capturing hook return value
       hookResult = useIntersectionObserver({ threshold: 0.5 });
       return React.createElement('div');
     }
@@ -351,6 +356,7 @@ describe('useIntersectionObserver', () => {
     let hookResult: ReturnType<typeof useIntersectionObserver>;
 
     function TestComponent() {
+      // eslint-disable-next-line react-hooks/globals -- Test code: capturing hook return value
       hookResult = useIntersectionObserver();
       return React.createElement('div');
     }
@@ -469,6 +475,7 @@ describe('useIntersectionObserver', () => {
     let isIntersecting: boolean;
 
     function TestComponent() {
+      // eslint-disable-next-line react-hooks/globals -- Test code: capturing hook return value
       [targetRef, isIntersecting] = useIntersectionObserver({
         threshold: 0.5,
         rootMargin: '10px',
@@ -499,6 +506,7 @@ describe('useIntersectionObserver', () => {
     let isIntersecting: boolean;
 
     function TestComponent() {
+      // eslint-disable-next-line react-hooks/globals -- Test code: capturing hook return value
       [targetRef, isIntersecting] = useIntersectionObserver({
         threshold: 0.5,
       });

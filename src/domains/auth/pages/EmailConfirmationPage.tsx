@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logger } from './../../../shared/utils/logger';
 
+import { useToast } from '@hooks/useToast';
 import { apiClient } from '@lib/api';
 
 const EmailConfirmationPage: React.FC = () => {
+  const { toast } = useToast();
   const location = useLocation();
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>('');
@@ -48,10 +50,14 @@ const EmailConfirmationPage: React.FC = () => {
 
     try {
       const response = await apiClient.resendVerification({ email });
-      setResendMessage(response.message ?? 'Verification email has been resent successfully!');
+      const successMsg = response.message ?? 'Verification email has been resent successfully!';
+      setResendMessage(successMsg);
+      toast.success(successMsg);
     } catch (error) {
       logger.error('Resend verification error:', undefined, { error });
-      setResendMessage('Failed to resend verification email. Please try again.');
+      const errorMsg = 'Failed to resend verification email. Please try again.';
+      setResendMessage(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsResending(false);
     }
@@ -62,7 +68,7 @@ const EmailConfirmationPage: React.FC = () => {
       <div className="bg-white shadow-xl sm:rounded-2xl border border-gray-100 p-8 sm:p-10">
         <div className="text-center">
           <div className="mx-auto w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-6">
-            <Mail className="w-8 h-8 text-white" />
+            <Mail className="w-8 h-8 text-white" aria-hidden="true" />
           </div>
 
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Check your email</h2>
@@ -72,9 +78,16 @@ const EmailConfirmationPage: React.FC = () => {
             <span className="font-medium text-gray-900">{email || 'your email address'}</span>
           </p>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div
+            className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6"
+            role="region"
+            aria-label="Next steps information"
+          >
             <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <CheckCircle
+                className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"
+                aria-hidden="true"
+              />
               <div className="text-left">
                 <h3 className="text-sm font-semibold text-blue-900 mb-1">What happens next?</h3>
                 <ul className="text-sm text-blue-800 space-y-1">
@@ -86,9 +99,13 @@ const EmailConfirmationPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+          <div
+            className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6"
+            role="region"
+            aria-label="Troubleshooting tips"
+          >
             <div className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <Clock className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div className="text-left">
                 <h3 className="text-sm font-semibold text-amber-900 mb-1">
                   Didn't receive the email?
@@ -105,6 +122,8 @@ const EmailConfirmationPage: React.FC = () => {
           <div className="space-y-4">
             {resendMessage && (
               <div
+                role="status"
+                aria-live="polite"
                 className={`p-3 rounded-lg text-sm ${
                   resendMessage.includes('successfully')
                     ? 'bg-green-50 border border-green-200 text-green-800'
@@ -120,8 +139,14 @@ const EmailConfirmationPage: React.FC = () => {
               onClick={handleResendEmail}
               disabled={isResending || !email}
               className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={
+                isResending ? 'Resending verification email' : 'Resend verification email'
+              }
             >
-              <RefreshCw className={`h-4 w-4 ${isResending ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isResending ? 'animate-spin' : ''}`}
+                aria-hidden="true"
+              />
               {isResending ? 'Resending...' : 'Resend verification email'}
             </button>
 
@@ -129,7 +154,7 @@ const EmailConfirmationPage: React.FC = () => {
               to="/login"
               className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               Back to login
             </Link>
           </div>

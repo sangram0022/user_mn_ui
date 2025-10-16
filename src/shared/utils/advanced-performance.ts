@@ -13,9 +13,10 @@
  *
  * @version 3.0.0
  * @author Senior UI Performance Engineer
+ * @see https://web.dev/fast/
  */
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { logger } from './logger';
 
 // ============================================================================
@@ -100,13 +101,19 @@ export const useLazyImage = (
   imageRef: React.RefObject<HTMLImageElement>;
   isLoaded: boolean;
 } => {
-  const [imageSrc, setImageSrc] = useState<string | undefined>();
+  const [imageSrc, setImageSrc] = useState<string | undefined>(() => {
+    // React 19 best practice: Handle initial state during render
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      return src;
+    }
+    return undefined;
+  });
   const [isLoaded, setIsLoaded] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    if (!imageRef.current || !('IntersectionObserver' in window)) {
-      setImageSrc(src);
+    // Early return if already loaded or no IntersectionObserver
+    if (!imageRef.current || imageSrc === src) {
       return;
     }
 
@@ -125,7 +132,7 @@ export const useLazyImage = (
     observer.observe(imageRef.current);
 
     return () => observer.disconnect();
-  }, [src, rootMargin]);
+  }, [src, rootMargin, imageSrc]);
 
   useEffect(() => {
     if (!imageSrc) return;
@@ -209,13 +216,24 @@ export const useThrottle = <T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): T => {
-  const lastRun = useRef(Date.now());
+  // React 19 best practice: Initialize refs without impure functions
+  const lastRun = useRef(0);
   const callbackRef = useRef(callback);
-  callbackRef.current = callback;
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
   // Convert useCallback to plain function
   return ((...args) => {
     const now = Date.now();
+    // Initialize lastRun on first call
+    if (lastRun.current === 0) {
+      lastRun.current = now;
+      callbackRef.current(...args);
+      return;
+    }
+
     if (now - lastRun.current >= delay) {
       callbackRef.current(...args);
       lastRun.current = now;
@@ -225,16 +243,19 @@ export const useThrottle = <T extends (...args: unknown[]) => unknown>(
 
 /**
  * Hook for intersection observer (viewport visibility detection)
+ * React 19: Use initial state instead of setState in useEffect
  */
 export const useIntersectionObserver = (
   options: IntersectionObserverInit = {}
 ): [React.RefObject<HTMLElement>, boolean] => {
-  const [isIntersecting, setIsIntersecting] = useState(false);
+  const [isIntersecting, setIsIntersecting] = useState(() => {
+    // If IntersectionObserver is not available, assume visible
+    return typeof window === 'undefined' || !('IntersectionObserver' in window);
+  });
   const targetRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!targetRef.current || !('IntersectionObserver' in window)) {
-      setIsIntersecting(true);
       return;
     }
 
@@ -255,7 +276,15 @@ export const useIntersectionObserver = (
  */
 export const useRenderTime = (componentName: string): void => {
   const renderCount = useRef(0);
-  const startTime = useRef(Date.now());
+  // React 19 best practice: Initialize refs without impure functions
+  const startTime = useRef(0);
+
+  // Initialize startTime once in useEffect
+  useEffect(() => {
+    if (startTime.current === 0) {
+      startTime.current = Date.now();
+    }
+  }, []);
 
   useLayoutEffect(() => {
     renderCount.current += 1;
@@ -333,14 +362,12 @@ export class LRUCache<K, V> {
 
 /**
  * Hook for LRU cached values
+ * React 19: Use useMemo for stable instance creation
  */
 export const useLRUCache = <K, V>(maxSize: number): LRUCache<K, V> => {
-  // Convert useMemo to useRef for instance caching
-  const cacheRef = useRef<LRUCache<K, V> | null>(null);
-  if (!cacheRef.current) {
-    cacheRef.current = new LRUCache<K, V>(maxSize);
-  }
-  return cacheRef.current;
+  // React 19: Use useMemo with empty deps to create stable instance
+  // This is better than lazy ref initialization for values returned during render
+  return useMemo(() => new LRUCache<K, V>(maxSize), [maxSize]);
 };
 
 // ============================================================================
