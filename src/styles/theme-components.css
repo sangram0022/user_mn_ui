@@ -6,6 +6,28 @@
  */
 
 /* ========================================================================
+   ENHANCED NEUTRAL TOKENS - Proper Color Separation
+   ======================================================================== */
+
+:root,
+[data-theme] {
+  /* Neutral Background Tokens - NOT using primary color */
+  --theme-neutral-bg: color-mix(in srgb, var(--theme-surface) 95%, var(--theme-background) 5%);
+  --theme-neutral-surface: var(--theme-surface);
+  --theme-card-bg: var(--theme-surface);
+
+  /* Input-specific tokens - Subtle, not primary colored */
+  --theme-input-bg: color-mix(in srgb, var(--theme-background) 98%, var(--theme-text) 2%);
+  --theme-input-border: color-mix(in srgb, var(--theme-border) 80%, var(--theme-text) 20%);
+  --theme-input-text: var(--theme-text);
+  --theme-input-placeholder: color-mix(in srgb, var(--theme-textSecondary) 60%, transparent 40%);
+
+  /* Focus states - Use primary only for interaction feedback */
+  --theme-focus-ring: color-mix(in srgb, var(--theme-primary) 20%, transparent 80%);
+  --theme-focus-border: var(--theme-primary);
+}
+
+/* ========================================================================
    GLOBAL THEME APPLICATION
    ======================================================================== */
 
@@ -19,6 +41,7 @@ body {
     'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
 #root {
@@ -68,14 +91,20 @@ input[type='button'] {
   background: var(--theme-primary);
   color: #ffffff;
   border: none;
-  border-radius: 0.75rem;
-  padding: 0.625rem 1.5rem;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
   font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease-in-out;
   box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  line-height: 1.5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 button:hover,
@@ -84,6 +113,18 @@ button:hover,
 input[type='submit']:hover,
 input[type='button']:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+button:active,
+.btn:active,
+[role='button']:active,
+input[type='submit']:active,
+input[type='button']:active {
+  transform: translateY(0);
 }
 
 button:disabled,
@@ -91,6 +132,7 @@ button:disabled,
 [role='button']:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* Secondary Button Variant */
@@ -106,6 +148,10 @@ button:disabled,
   border: 2px solid var(--theme-primary) !important;
 }
 
+.btn-outline:hover {
+  background: color-mix(in srgb, var(--theme-primary) 5%, transparent 95%) !important;
+}
+
 /* Ghost Button Variant */
 .btn-ghost {
   background: transparent !important;
@@ -115,6 +161,39 @@ button:disabled,
 
 .btn-ghost:hover {
   background: var(--theme-surface) !important;
+}
+
+/* Danger Button Variant */
+.btn-danger {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+/* Success Button Variant */
+.btn-success {
+  background: #22c55e !important;
+  color: #ffffff !important;
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.btn-md {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
+.btn-block {
+  width: 100%;
+  display: flex;
 }
 
 /* ========================================================================
@@ -132,14 +211,15 @@ input[type='date'],
 input[type='time'],
 textarea,
 select {
-  background: var(--theme-surface);
-  color: var(--theme-text);
-  border: 1px solid var(--theme-border);
+  background: var(--theme-input-bg);
+  color: var(--theme-input-text);
+  border: 1.5px solid var(--theme-input-border);
   border-radius: 0.5rem;
-  padding: 0.625rem 0.875rem;
+  padding: 0.75rem 1rem;
   font-size: 1rem;
-  transition: all 0.2s;
+  transition: all 0.2s ease-in-out;
   width: 100%;
+  line-height: 1.5;
 }
 
 input[type='text']:focus,
@@ -154,14 +234,15 @@ input[type='time']:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: var(--theme-primary);
-  box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb, 59, 130, 246), 0.1);
+  border-color: var(--theme-focus-border);
+  box-shadow: 0 0 0 3px var(--theme-focus-ring);
+  background: var(--theme-background);
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: var(--theme-textSecondary);
-  opacity: 0.6;
+  color: var(--theme-input-placeholder);
+  opacity: 1;
 }
 
 /* ========================================================================
@@ -222,18 +303,59 @@ input[type='radio']:focus {
 }
 
 /* ========================================================================
-   CARDS & SURFACES
+   CARDS & SURFACES - Neutral backgrounds
    ======================================================================== */
 
 .card,
 .surface {
-  background: var(--theme-surface);
+  background: var(--theme-card-bg);
   border: 1px solid var(--theme-border);
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow:
     0 1px 3px 0 rgba(0, 0, 0, 0.1),
-    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================================================
+   LAYOUT UTILITIES - Consistent Spacing
+   ======================================================================== */
+
+.layout-section {
+  padding-block: 4rem;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .layout-section {
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .layout-section {
+    padding-block: 5rem;
+    padding-inline: 2rem;
+  }
+}
+
+.layout-container {
+  max-width: 80rem;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.layout-narrow {
+  max-width: 42rem;
+  margin-inline: auto;
+  width: 100%;
 }
 
 /* ========================================================================
@@ -434,30 +556,10 @@ hr,
 }
 
 /* ========================================================================
-   REMOVE HARDCODED COLORS - Override any remaining
+   OVERRIDE HARDCODED COLORS
    ======================================================================== */
 
-/* Remove any blue hardcoded colors */
-[class*='blue-'],
-[class*='from-blue'],
-[class*='to-blue'],
-[class*='bg-blue'],
-[class*='text-blue'],
-[class*='border-blue'] {
-  /* These will be handled by theme variables */
-}
-
-/* Remove any purple hardcoded colors */
-[class*='purple-'],
-[class*='from-purple'],
-[class*='to-purple'],
-[class*='bg-purple'],
-[class*='text-purple'],
-[class*='border-purple'] {
-  /* These will be handled by theme variables */
-}
-
-/* Remove any gray hardcoded colors */
+/* Gray scale overrides */
 .text-gray-600,
 .text-gray-700,
 .text-gray-800,

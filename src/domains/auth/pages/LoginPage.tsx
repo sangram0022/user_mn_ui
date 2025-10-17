@@ -123,30 +123,27 @@ const LoginPage: React.FC = () => {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-md">
+      <div className="layout-narrow py-8">
         {/* Logo and Title */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <div
             className="mx-auto mb-6 w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
             style={{ background: 'var(--theme-primary)' }}
           >
             <User className="w-8 h-8 text-white" aria-hidden="true" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--theme-text)' }}>
+          <h2
+            className="text-3xl font-bold tracking-tight mb-2"
+            style={{ color: 'var(--theme-text)' }}
+          >
             Welcome Back
           </h2>
-          <p className="mt-2 text-sm" style={{ color: 'var(--theme-textSecondary)' }}>
+          <p className="text-base" style={{ color: 'var(--theme-textSecondary)' }}>
             Sign in to access your account
           </p>
         </div>
 
-        <div
-          className="p-8 shadow-xl rounded-2xl border"
-          style={{
-            background: 'var(--theme-surface)',
-            borderColor: 'var(--theme-border)',
-          }}
-        >
+        <div className="card">
           {/* Error Alert */}
           {state.error && (
             <div className="mb-6" role="alert" aria-live="assertive">

@@ -12,39 +12,49 @@ const HomePage: React.FC = () => {
 
       {/* Hero Section */}
       <section
-        className="py-20 px-4 sm:px-6 lg:px-8"
-        style={{ background: 'var(--theme-surface)' }}
+        className="layout-section"
+        style={{
+          background: 'var(--theme-surface)',
+          borderBottom: '1px solid var(--theme-border)',
+        }}
         aria-label="Hero section"
       >
-        <div className="max-w-7xl mx-auto text-center">
+        <div className="layout-container text-center">
           <h1
-            className="text-4xl md:text-6xl font-bold mb-6"
+            className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
             style={{ color: 'var(--theme-text)' }}
           >
             Secure User
             <span
-              className="bg-clip-text text-transparent"
-              style={{ background: 'var(--theme-gradient)' }}
+              className="bg-clip-text text-transparent ml-2"
+              style={{
+                backgroundImage: 'var(--theme-gradient)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
             >
-              {' '}
               Management
             </span>
           </h1>
           <p
-            className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed"
+            className="text-xl mb-10 max-w-3xl mx-auto leading-relaxed"
             style={{ color: 'var(--theme-textSecondary)' }}
           >
             Streamline user administration with our comprehensive platform. Manage roles,
             permissions, and access controls with enterprise-grade security and intuitive design.
           </p>
           <nav
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-xl mx-auto"
             aria-label="Primary call to action"
           >
             <Link
               to="/register"
-              className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl text-lg font-semibold shadow-lg transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
-              style={{ background: 'var(--theme-primary)', color: '#FFFFFF' }}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-lg text-base font-semibold shadow-md transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2"
+              style={{
+                background: 'var(--theme-primary)',
+                color: '#FFFFFF',
+                minWidth: '200px',
+              }}
               aria-label="Start free trial - Register new account"
             >
               Start Free Trial
@@ -52,8 +62,13 @@ const HomePage: React.FC = () => {
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl text-lg font-semibold shadow-lg transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
-              style={{ background: 'var(--theme-primary)', color: '#FFFFFF' }}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-lg text-base font-semibold border-2 transition-all duration-200 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2"
+              style={{
+                background: 'transparent',
+                borderColor: 'var(--theme-primary)',
+                color: 'var(--theme-primary)',
+                minWidth: '200px',
+              }}
               aria-label="Sign in to your account"
             >
               Sign In
@@ -64,11 +79,11 @@ const HomePage: React.FC = () => {
 
       {/* Features Section */}
       <section
-        className="py-20 px-4 sm:px-6 lg:px-8"
+        className="layout-section"
         style={{ background: 'var(--theme-background)' }}
         aria-label="Key features"
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="layout-container">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>
               Why Choose Our Platform?
@@ -79,10 +94,7 @@ const HomePage: React.FC = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <article
-              className="text-center p-8 rounded-xl border hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}
-            >
+            <article className="card text-center hover:-translate-y-1">
               <div
                 className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg"
                 style={{ background: 'var(--theme-primary)' }}
@@ -99,10 +111,7 @@ const HomePage: React.FC = () => {
               </p>
             </article>
 
-            <article
-              className="text-center p-8 rounded-xl border hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}
-            >
+            <article className="card text-center hover:-translate-y-1">
               <div
                 className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg"
                 style={{ background: 'var(--theme-primary)' }}
@@ -119,10 +128,7 @@ const HomePage: React.FC = () => {
               </p>
             </article>
 
-            <article
-              className="text-center p-8 rounded-xl border hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}
-            >
+            <article className="card text-center hover:-translate-y-1">
               <div
                 className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg"
                 style={{ background: 'var(--theme-primary)' }}
@@ -143,19 +149,21 @@ const HomePage: React.FC = () => {
 
       {/* CTA Section */}
       <section
-        className="py-20 px-4 sm:px-6 lg:px-8"
-        style={{ background: 'var(--theme-gradient)' }}
+        className="layout-section"
+        style={{
+          backgroundImage: 'var(--theme-gradient)',
+        }}
         aria-label="Call to action"
       >
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="layout-narrow text-center">
           <h2 className="text-4xl font-bold text-white mb-6">Ready to Get Started?</h2>
           <p className="text-xl text-white opacity-90 mb-10 leading-relaxed">
             Join thousands of organizations that trust our platform for secure user management.
           </p>
           <Link
             to="/register"
-            className="inline-flex items-center justify-center px-10 py-4 rounded-xl text-lg font-semibold shadow-lg transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
-            style={{ background: 'var(--theme-primary)', color: '#FFFFFF' }}
+            className="inline-flex items-center justify-center px-10 py-4 rounded-lg text-lg font-semibold shadow-lg transition-all duration-200 hover:opacity-90 hover:transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2"
+            style={{ background: 'white', color: 'var(--theme-primary)' }}
             aria-label="Create your account - Get started with registration"
           >
             Create Your Account
@@ -166,11 +174,11 @@ const HomePage: React.FC = () => {
 
       {/* Footer */}
       <footer
-        className="py-12 px-4 sm:px-6 lg:px-8"
+        className="layout-section"
         style={{ background: 'var(--theme-surface)', borderTop: `1px solid var(--theme-border)` }}
         role="contentinfo"
       >
-        <div className="max-w-7xl mx-auto text-center">
+        <div className="layout-container text-center">
           <div className="flex items-center justify-center space-x-3 mb-6">
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg"

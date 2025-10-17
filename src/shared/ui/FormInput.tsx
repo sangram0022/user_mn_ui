@@ -152,14 +152,18 @@ export const FormInput: React.FC<FormInputProps> = ({
   onToggle,
 }) => {
   return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
-        {label} {required && <span className="text-red-500">*</span>}
+    <div className="w-full">
+      <label
+        htmlFor={id}
+        className="block text-sm font-semibold mb-2"
+        style={{ color: 'var(--theme-text)' }}
+      >
+        {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
       </label>
       <div className="relative">
         {Icon && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Icon className="h-5 w-5 text-gray-400" />
+            <Icon className="h-5 w-5" style={{ color: 'var(--theme-textSecondary)' }} />
           </div>
         )}
         <input
@@ -171,27 +175,36 @@ export const FormInput: React.FC<FormInputProps> = ({
           value={value}
           onChange={onChange}
           className={`
-            block w-full rounded-lg border border-gray-300 
-            ${Icon ? 'pl-10' : 'pl-3'} 
-            ${ToggleIcon ? 'pr-12' : 'pr-3'} 
-            py-3 text-gray-900 text-sm
+            block w-full rounded-lg border-2
+            ${Icon ? 'pl-10' : 'pl-4'} 
+            ${ToggleIcon ? 'pr-12' : 'pr-4'} 
+            py-3 text-base font-normal
             shadow-sm transition-all duration-200
-            focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none
-            placeholder:text-gray-400
+            focus:outline-none
           `}
+          style={{
+            background: 'var(--theme-input-bg)',
+            borderColor: 'var(--theme-input-border)',
+            color: 'var(--theme-input-text)',
+          }}
           placeholder={placeholder}
         />
         {ToggleIcon && onToggle && (
           <button
             type="button"
             onClick={onToggle}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center bg-transparent border-none cursor-pointer"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+            style={{ color: 'var(--theme-textSecondary)' }}
           >
             {ToggleIcon}
           </button>
         )}
       </div>
-      {helperTextContent && <p className="mt-1 text-xs text-gray-600">{helperTextContent}</p>}
+      {helperTextContent && (
+        <p className="mt-2 text-sm" style={{ color: 'var(--theme-textSecondary)' }}>
+          {helperTextContent}
+        </p>
+      )}
     </div>
   );
 };

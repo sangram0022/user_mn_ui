@@ -366,25 +366,38 @@ const RegisterPage: React.FC = () => {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-md">
+      <div className="layout-narrow py-8">
         {/* Logo and Title */}
-        <div className="text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-lg">
+        <div className="text-center mb-8">
+          <div
+            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg"
+            style={{ background: 'var(--theme-primary)' }}
+          >
             <User className="h-8 w-8 text-white" aria-hidden="true" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">Create Your Account</h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <h2
+            className="text-3xl font-bold tracking-tight mb-2"
+            style={{ color: 'var(--theme-text)' }}
+          >
+            Create Your Account
+          </h2>
+          <p className="text-base" style={{ color: 'var(--theme-textSecondary)' }}>
             Get started with our user management platform
           </p>
         </div>
-      </div>
 
-      <div className="mx-auto mt-8 w-full max-w-md">
-        <div className="rounded-2xl border border-gray-200/50 bg-white/95 px-6 py-8 shadow-2xl backdrop-blur-sm">
+        <div className="card">
           {/* Error Alert */}
           {state.error && (
             <div className="mb-6" role="alert" aria-live="assertive">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+              <div
+                className="border-2 rounded-lg p-4"
+                style={{
+                  background: 'color-mix(in srgb, #ef4444 10%, var(--theme-background) 90%)',
+                  borderColor: '#ef4444',
+                  color: '#991b1b',
+                }}
+              >
                 {state.error}
               </div>
             </div>
