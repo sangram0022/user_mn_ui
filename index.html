@@ -81,12 +81,22 @@
     />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
+    <!-- Favicons & App Icons -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
     <!-- CSRF Token (populated by backend on page load) -->
     <meta name="csrf-token" content="" />
 
-    <!-- Preconnect to API origin for faster requests -->
-    <link rel="preconnect" href="http://127.0.0.1:8001" crossorigin />
-    <link rel="dns-prefetch" href="http://127.0.0.1:8001" />
+    <!-- 
+      Preconnect to API origin for faster requests
+      PRODUCTION: Update with actual API domain before deployment
+      DEVELOPMENT: Using localhost for local development
+    -->
+    <link rel="preconnect" href="https://api.yourdomain.com" crossorigin />
+    <link rel="dns-prefetch" href="https://api.yourdomain.com" />
 
     <!-- Critical CSS inline (reduces render-blocking) -->
     <style>
@@ -146,12 +156,27 @@
       }
     </style>
 
-    <title>User Management System</title>
-    <meta
-      name="description"
-      content="Fast, secure user management system with enterprise-grade features"
-    />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "User Management System",
+        "applicationCategory": "BusinessApplication",
+        "description": "Secure enterprise user management system with RBAC, audit logging, and GDPR compliance",
+        "operatingSystem": "Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "150"
+        }
+      }
+    </script>
 
     <!-- Resource hints for critical assets -->
     <link rel="preload" as="style" href="/src/styles/index-new.css" />

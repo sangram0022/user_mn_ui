@@ -1,3 +1,6 @@
+// Environment validation (must be first import)
+import './config/env.validation';
+
 import { logger } from '@shared/utils/logger';
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

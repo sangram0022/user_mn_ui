@@ -1,0 +1,97 @@
+# .dockerignore
+# Excludes files from Docker build context for faster builds and smaller images
+
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist
+dist-ssr
+*.local
+
+# Environment files (NEVER include in Docker images)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.staging
+.env.production
+
+# Testing
+coverage
+.nyc_output
+*.lcov
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~
+
+# Git
+.git
+.gitignore
+.gitattributes
+.github
+
+# CI/CD
+.gitlab-ci.yml
+.travis.yml
+circle.yml
+.circleci
+
+# Documentation
+*.md
+!README.md
+docs/
+CHANGELOG.md
+LICENSE
+
+# Storybook
+storybook-static
+*storybook.log
+.storybook
+
+# Logs
+logs
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# Lighthouse reports
+lighthouse*.html
+lighthouse*.json
+
+# Analysis reports
+stats.html
+bundle-analyzer-report.html
+
+# Playwright
+playwright-report
+test-results
+.cache
+
+# Other
+.cache
+.parcel-cache
+.eslintcache
+.stylelintcache

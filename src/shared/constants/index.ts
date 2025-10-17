@@ -1,17 +1,30 @@
 /**
  * Centralized constants barrel export
  *
- * Exports all application constants for easy access
+ * ALL CONSTANTS HAVE BEEN CONSOLIDATED into ../config/constants.ts
+ * This file maintains backward compatibility by re-exporting from the consolidated file.
+ *
+ * @deprecated Import directly from '../config/constants' instead
  * @module constants
  */
 
-// Re-export all domain-specific constants
-export * from './api.constants';
-export * from './app';
-export * from './session.constants';
-export * from './ui.constants';
-export * from './validation.constants';
+// Re-export everything from the consolidated constants file
+export * from '../config/constants';
 
-// Legacy exports for backward compatibility
+// Legacy re-exports for backward compatibility
+export {
+  ANIMATION,
+  API_TIMEOUT,
+  HTTP_STATUS as HTTP_STATUS_CODES,
+  LAYOUT,
+  RATE_LIMIT,
+  RETRY_CONFIG,
+  SESSION_STORAGE_KEYS,
+  SESSION_TIMEOUT,
+  TOAST,
+  VIRTUAL_SCROLL,
+} from '../config/constants';
+
+// Deprecated: these are now in ../config/constants
 export const APP_NAME = 'User Management System';
 export const DEFAULT_LANGUAGE = 'en';

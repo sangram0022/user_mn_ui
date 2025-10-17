@@ -152,8 +152,13 @@ async function checkPathAliases() {
     const tsconfigPath = path.join(rootDir, 'tsconfig.app.json');
     const content = await fs.readFile(tsconfigPath, 'utf-8');
 
-    // Parse JSONC (JSON with comments)
-    const jsonContent = content.replace(/\/\/.*$/gm, '').replace(/,(\s*[}\]])/g, '$1');
+    // Parse JSONC (JSON with comments) - more robust parsing
+    const jsonContent = content
+      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
+      .replace(/\/\/.*$/gm, '') // Remove line comments
+      .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+      .trim();
+
     const tsconfig = JSON.parse(jsonContent);
 
     const paths = tsconfig.compilerOptions?.paths || {};
