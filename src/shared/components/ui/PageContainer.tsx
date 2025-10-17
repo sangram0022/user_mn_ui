@@ -1,9 +1,28 @@
 import { cn } from '@shared/utils';
 import React from 'react';
 
+/**
+ * PageContainer component props
+ */
 interface PageContainerProps {
+  /**
+   * Page content
+   */
   children: React.ReactNode;
+
+  /**
+   * Visual variant for different page types
+   * - default: Standard gray background
+   * - auth: Gradient background for authentication pages
+   * - centered: Centered content with gray background
+   * - dashboard: Gray background with padding for dashboard layouts
+   * @default 'default'
+   */
   variant?: 'default' | 'auth' | 'centered' | 'dashboard';
+
+  /**
+   * Additional CSS classes
+   */
   className?: string;
 }
 
@@ -15,8 +34,40 @@ const containerVariants = {
 };
 
 /**
- * Common page container with consistent styling patterns
- * Consolidates repeated min-h-screen and background patterns
+ * PageContainer Component
+ *
+ * A page-level container component with consistent styling patterns.
+ * Consolidates repeated min-h-screen and background patterns across different page types.
+ *
+ * Features:
+ * - Multiple layout variants (default, auth, centered, dashboard)
+ * - Full viewport height (min-h-screen)
+ * - Consistent backgrounds and padding
+ * - Easy customization with className prop
+ *
+ * @example
+ * // Standard page
+ * <PageContainer>
+ *   <YourContent />
+ * </PageContainer>
+ *
+ * @example
+ * // Authentication page with gradient
+ * <PageContainer variant="auth">
+ *   <LoginForm />
+ * </PageContainer>
+ *
+ * @example
+ * // Centered content
+ * <PageContainer variant="centered">
+ *   <ErrorMessage />
+ * </PageContainer>
+ *
+ * @example
+ * // Dashboard layout with padding
+ * <PageContainer variant="dashboard">
+ *   <DashboardContent />
+ * </PageContainer>
  */
 export const PageContainer: React.FC<PageContainerProps> = ({
   children,

@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useState, type FC, type ReactNode } from 'react';
+import { logger } from '../shared/utils/logger';
 import type { LocaleCode, MessageBundle } from '../types/localization.types';
 import { LocalizationContext, type LocalizationContextState } from './LocalizationContext';
 
@@ -32,16 +33,6 @@ function isRTLLanguage(locale: LocaleCode): boolean {
 }
 
 // ============================================================================
-// Simple logger
-// ============================================================================
-
-const logger = {
-  debug: (message: string, data?: unknown) => console.debug(`[Localization] ${message}`, data),
-  info: (message: string, data?: unknown) => console.info(`[Localization] ${message}`, data),
-  error: (message: string, data?: unknown) => console.error(`[Localization] ${message}`, data),
-};
-
-// ============================================================================
 // Message Loading
 // ============================================================================
 
@@ -63,11 +54,17 @@ async function loadLocaleMessages(locale: LocaleCode): Promise<MessageBundle> {
       ...(errors.default || {}),
     };
 
-    logger.debug('Loaded messages for locale:', { locale, messageKeys: Object.keys(messages) });
+    logger.debug(`Loaded messages for locale: ${locale}`, {
+      component: 'LocalizationProvider',
+      metadata: { locale, messageKeys: Object.keys(messages) },
+    });
 
     return messages;
   } catch (error) {
-    logger.error('Failed to load locale messages:', { locale, error });
+    logger.error(`Failed to load locale messages for: ${locale}`, error as Error, {
+      component: 'LocalizationProvider',
+      metadata: { locale },
+    });
     throw error;
   }
 }
@@ -133,7 +130,10 @@ export const LocalizationProvider: FC<LocalizationProviderProps> = ({
         }
       } catch (err) {
         if (!isCancelled) {
-          logger.error('Failed to load messages:', { locale, error: err });
+          logger.error('Failed to load messages', err as Error, {
+            component: 'LocalizationProvider',
+            metadata: { locale },
+          });
 
           // Try fallback locale
           if (locale !== fallbackLocale) {
@@ -177,7 +177,10 @@ export const LocalizationProvider: FC<LocalizationProviderProps> = ({
 
   // Locale setter with persistence
   const setLocale = (newLocale: LocaleCode) => {
-    logger.info('Changing locale:', { from: locale, to: newLocale });
+    logger.info(`Changing locale from ${locale} to ${newLocale}`, {
+      component: 'LocalizationProvider',
+      metadata: { from: locale, to: newLocale },
+    });
     setCurrentLocale(newLocale);
     saveUserLocale(newLocale);
   };

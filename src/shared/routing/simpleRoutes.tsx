@@ -4,10 +4,13 @@
  * Expert-level React routing with security and performance
  */
 
-import React, { Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouteObject } from 'react-router-dom';
 import { PageErrorBoundary } from '../errors/ErrorBoundary';
 import { SkeletonLoader } from '../performance/lazyLoading';
+
+// Lazy load pages
+const ThemeTestPage = lazy(() => import('../../pages/ThemeTestPage'));
 
 // Simple placeholder component
 const SimplePlaceholder = () => (
@@ -46,6 +49,14 @@ const routes: RouteObject[] = [
     element: (
       <Layout>
         <SimplePlaceholder />
+      </Layout>
+    ),
+  },
+  {
+    path: '/theme-test',
+    element: (
+      <Layout>
+        <ThemeTestPage />
       </Layout>
     ),
   },

@@ -25,8 +25,12 @@
  * ```
  */
 
-import { logger } from '@shared/utils/logger';
+import { captureException } from '../../monitoring/sentry';
+import { logger } from './logger';
 
+/**
+ * Error handler options interface
+ */
 interface ErrorHandlerOptions {
   toast?: {
     error: (message: string) => void;
@@ -217,9 +221,12 @@ export function handleErrorBoundaryError(error: Error, errorInfo: React.ErrorInf
     info: JSON.stringify(errorInfo),
   });
 
-  // Send to error tracking service (Sentry, etc.) if configured
+  // Send to Sentry in production
   if (import.meta.env.PROD) {
-    // TODO: Send to error tracking service
+    captureException(error, {
+      errorBoundary: true,
+      errorInfo: errorInfo,
+    });
   }
 }
 

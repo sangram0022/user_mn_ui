@@ -12,8 +12,18 @@ import RouteRenderer from '@routing/RouteRenderer';
 import { initializePreloading, preloadPredictedRoutes } from '@routing/useNavigationPreload';
 import { ToastProvider } from '@shared/components/ui/Toast';
 import { PageErrorBoundary as ErrorBoundary } from '@shared/errors/ErrorBoundary';
+import '@styles/theme-components.css';
 import { useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { initPerformanceMonitoring } from '../monitoring/performance';
+import { initSentry } from '../monitoring/sentry';
+import '../shared/config/env'; // Validate environment on app startup
+
+// Initialize Sentry error tracking
+initSentry();
+
+// Initialize performance monitoring
+initPerformanceMonitoring();
 
 const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode) => {
   switch (route.guard) {
@@ -51,7 +61,7 @@ function App() {
   return (
     <GlobalErrorBoundary>
       <ErrorBoundary>
-        <ThemeProvider defaultTheme="system">
+        <ThemeProvider>
           <LocalizationProvider defaultLocale="en">
             <ToastProvider>
               <AuthProvider>

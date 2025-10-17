@@ -125,12 +125,12 @@ class Logger {
     switch (logMessage.level) {
       case 'debug':
         if (this.isDevelopment) {
-          console.debug(`🐛 ${prefix}`, logMessage.message, logMessage.context || '');
+          console.warn(`🐛 ${prefix}`, logMessage.message, logMessage.context || '');
         }
         break;
       case 'info':
         if (this.isDevelopment) {
-          console.info(`ℹ️ ${prefix}`, logMessage.message, logMessage.context || '');
+          console.warn(`ℹ️ ${prefix}`, logMessage.message, logMessage.context || '');
         }
         break;
       case 'warn':

@@ -8,8 +8,8 @@
  * @created October 12, 2025
  */
 
-import { ApiError } from '@lib/api/error';
 import { getErrorConfig } from '@shared/config/errorMessages';
+import { ApiError } from '@shared/errors/ApiError';
 import { AlertCircle, X } from 'lucide-react';
 import React from 'react';
 

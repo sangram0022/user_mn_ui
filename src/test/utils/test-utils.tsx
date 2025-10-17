@@ -238,13 +238,20 @@ export function createMockError(code: string, message: string, status = 400): an
  */
 export function mockConsole() {
   const originalConsole = { ...console };
+  const logMock = vi.fn();
+  const errorMock = vi.fn();
+  const warnMock = vi.fn();
 
   beforeEach(() => {
+    logMock.mockReset();
+    errorMock.mockReset();
+    warnMock.mockReset();
+
     global.console = {
       ...console,
-      log: vi.fn(),
-      error: vi.fn(),
-      warn: vi.fn(),
+      log: logMock,
+      error: errorMock,
+      warn: warnMock,
       info: vi.fn(),
       debug: vi.fn(),
     };
@@ -255,9 +262,9 @@ export function mockConsole() {
   });
 
   return {
-    getLogCalls: () => (console.log as any).mock.calls,
-    getErrorCalls: () => (console.error as any).mock.calls,
-    getWarnCalls: () => (console.warn as any).mock.calls,
+    getLogCalls: () => logMock.mock.calls,
+    getErrorCalls: () => errorMock.mock.calls,
+    getWarnCalls: () => warnMock.mock.calls,
   };
 }
 

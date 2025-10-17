@@ -6,21 +6,34 @@ import Header from '@shared/components/Header';
 
 const HomePage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Unified Header */}
+    <div className="min-h-screen" style={{ background: 'var(--theme-background)' }}>
+      {/* Unified Header - Clear separation with shadow */}
       <Header />
 
       {/* Hero Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8" aria-label="Hero section">
+      <section
+        className="py-20 px-4 sm:px-6 lg:px-8"
+        style={{ background: 'var(--theme-surface)' }}
+        aria-label="Hero section"
+      >
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1
+            className="text-4xl md:text-6xl font-bold mb-6"
+            style={{ color: 'var(--theme-text)' }}
+          >
             Secure User
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span
+              className="bg-clip-text text-transparent"
+              style={{ background: 'var(--theme-gradient)' }}
+            >
               {' '}
               Management
             </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          <p
+            className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed"
+            style={{ color: 'var(--theme-textSecondary)' }}
+          >
             Streamline user administration with our comprehensive platform. Manage roles,
             permissions, and access controls with enterprise-grade security and intuitive design.
           </p>
@@ -30,15 +43,17 @@ const HomePage: React.FC = () => {
           >
             <Link
               to="/register"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg text-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl text-lg font-semibold shadow-lg transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+              style={{ background: 'var(--theme-primary)', color: '#FFFFFF' }}
               aria-label="Start free trial - Register new account"
             >
               Start Free Trial
-              <ArrowRight className="w-5 h-5 inline ml-2" aria-hidden="true" />
+              <ArrowRight className="w-5 h-5 ml-2" aria-hidden="true" />
             </Link>
             <Link
               to="/login"
-              className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg text-lg font-medium hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+              className="inline-flex items-center justify-center px-8 py-3.5 rounded-xl text-lg font-semibold shadow-lg transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+              style={{ background: 'var(--theme-primary)', color: '#FFFFFF' }}
               aria-label="Sign in to your account"
             >
               Sign In
@@ -48,51 +63,77 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white/50" aria-label="Key features">
+      <section
+        className="py-20 px-4 sm:px-6 lg:px-8"
+        style={{ background: 'var(--theme-background)' }}
+        aria-label="Key features"
+      >
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Our Platform?</h2>
-            <p className="text-lg text-gray-600">Everything you need to manage users effectively</p>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>
+              Why Choose Our Platform?
+            </h2>
+            <p className="text-xl" style={{ color: 'var(--theme-textSecondary)' }}>
+              Everything you need to manage users effectively
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <article className="text-center p-6">
+            <article
+              className="text-center p-8 rounded-xl border hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}
+            >
               <div
-                className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4"
+                className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg"
+                style={{ background: 'var(--theme-primary)' }}
                 aria-hidden="true"
               >
-                <Users className="w-6 h-6 text-white" aria-hidden="true" />
+                <Users className="w-8 h-8 text-white" aria-hidden="true" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">User Management</h3>
-              <p className="text-gray-600">
+              <h3 className="text-2xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>
+                User Management
+              </h3>
+              <p className="leading-relaxed" style={{ color: 'var(--theme-textSecondary)' }}>
                 Comprehensive user administration with role-based access control and permission
                 management.
               </p>
             </article>
 
-            <article className="text-center p-6">
+            <article
+              className="text-center p-8 rounded-xl border hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}
+            >
               <div
-                className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4"
+                className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg"
+                style={{ background: 'var(--theme-primary)' }}
                 aria-hidden="true"
               >
-                <Shield className="w-6 h-6 text-white" aria-hidden="true" />
+                <Shield className="w-8 h-8 text-white" aria-hidden="true" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Security First</h3>
-              <p className="text-gray-600">
+              <h3 className="text-2xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>
+                Security First
+              </h3>
+              <p className="leading-relaxed" style={{ color: 'var(--theme-textSecondary)' }}>
                 Enterprise-grade security with multi-factor authentication and advanced threat
                 protection.
               </p>
             </article>
 
-            <article className="text-center p-6">
+            <article
+              className="text-center p-8 rounded-xl border hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              style={{ background: 'var(--theme-surface)', borderColor: 'var(--theme-border)' }}
+            >
               <div
-                className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4"
+                className="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg"
+                style={{ background: 'var(--theme-primary)' }}
                 aria-hidden="true"
               >
-                <BarChart3 className="w-6 h-6 text-white" aria-hidden="true" />
+                <BarChart3 className="w-8 h-8 text-white" aria-hidden="true" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Analytics & Insights</h3>
-              <p className="text-gray-600">
+              <h3 className="text-2xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>
+                Analytics & Insights
+              </h3>
+              <p className="leading-relaxed" style={{ color: 'var(--theme-textSecondary)' }}>
                 Real-time analytics and reporting to track user activity and system performance.
               </p>
             </article>
@@ -101,36 +142,50 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8" aria-label="Call to action">
+      <section
+        className="py-20 px-4 sm:px-6 lg:px-8"
+        style={{ background: 'var(--theme-gradient)' }}
+        aria-label="Call to action"
+      >
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Get Started?</h2>
-          <p className="text-lg text-gray-600 mb-8">
+          <h2 className="text-4xl font-bold text-white mb-6">Ready to Get Started?</h2>
+          <p className="text-xl text-white opacity-90 mb-10 leading-relaxed">
             Join thousands of organizations that trust our platform for secure user management.
           </p>
           <Link
             to="/register"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg text-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl inline-flex items-center"
+            className="inline-flex items-center justify-center px-10 py-4 rounded-xl text-lg font-semibold shadow-lg transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            style={{ background: 'var(--theme-primary)', color: '#FFFFFF' }}
             aria-label="Create your account - Get started with registration"
           >
             Create Your Account
-            <ArrowRight className="w-5 h-5 ml-2" aria-hidden="true" />
+            <ArrowRight className="w-6 h-6 ml-2" aria-hidden="true" />
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 px-4 sm:px-6 lg:px-8" role="contentinfo">
+      <footer
+        className="py-12 px-4 sm:px-6 lg:px-8"
+        style={{ background: 'var(--theme-surface)', borderTop: `1px solid var(--theme-border)` }}
+        role="contentinfo"
+      >
         <div className="max-w-7xl mx-auto text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
+          <div className="flex items-center justify-center space-x-3 mb-6">
             <div
-              className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center"
+              className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg"
+              style={{ background: 'var(--theme-primary)' }}
               aria-hidden="true"
             >
-              <Lock className="w-5 h-5 text-white" aria-hidden="true" />
+              <Lock className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
-            <span className="text-xl font-bold">User Management</span>
+            <span className="text-2xl font-bold" style={{ color: 'var(--theme-text)' }}>
+              User Management
+            </span>
           </div>
-          <p className="text-gray-400">© 2024 User Management Platform. All rights reserved.</p>
+          <p className="text-sm" style={{ color: 'var(--theme-textSecondary)' }}>
+            © 2024 User Management Platform. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>

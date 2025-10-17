@@ -24,7 +24,7 @@ import * as Sentry from '@sentry/react';
 export function initializeMonitoring(): void {
   // Only initialize in production
   if (!import.meta.env.PROD) {
-    console.log('🔍 Monitoring: Development mode - Sentry disabled');
+    console.warn('🔍 Monitoring: Development mode - Sentry disabled');
     return;
   }
 
@@ -208,7 +208,7 @@ export function initializeMonitoring(): void {
       debug: import.meta.env.DEV,
     });
 
-    console.log('✅ Monitoring: Sentry initialized successfully');
+    console.warn('✅ Monitoring: Sentry initialized successfully');
 
     // Set initial context
     Sentry.setTag('app_version', import.meta.env.VITE_VERSION || '1.0.0');

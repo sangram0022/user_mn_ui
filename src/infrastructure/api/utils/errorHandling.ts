@@ -1,6 +1,16 @@
 /**
  * API Error handling utilities
+ *
+ * Re-exports canonical ApiError and error handlers
  */
+
+import {
+  ApiError,
+  handleApiError as handleApiErrorUtil,
+  isApiError as isApiErrorCheck,
+} from '@shared/errors/ApiError';
+export type { ApiErrorInit } from '@shared/errors/ApiError';
+export { ApiError, handleApiErrorUtil as handleApiError, isApiErrorCheck as isApiError };
 
 export interface ApiErrorDetails {
   field?: string;
@@ -17,59 +27,8 @@ export interface ApiErrorResponse {
   status?: number;
 }
 
-export class ApiError extends Error {
-  constructor(
-    public errorCode: string,
-    message: string,
-    public status?: number,
-    public details?: ApiErrorDetails[]
-  ) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
-
-export const handleApiError = (error: unknown): ApiError => {
-  // If it's already an ApiError, return it
-  if (error instanceof ApiError) {
-    return error;
-  }
-
-  // Handle fetch/axios response errors
-  if (error.response) {
-    const { status, data } = error.response;
-
-    if (data && typeof data === 'object') {
-      return new ApiError(
-        data.error_code || 'API_ERROR',
-        data.message || 'An error occurred',
-        status,
-        data.details?.data
-      );
-    }
-
-    return new ApiError(
-      'HTTP_ERROR',
-      `HTTP ${status}: ${error.response.statusText || 'Unknown error'}`,
-      status
-    );
-  }
-
-  // Handle network errors
-  if (error.request) {
-    return new ApiError('NETWORK_ERROR', 'Network error: Unable to reach the server', 0);
-  }
-
-  // Handle other errors
-  return new ApiError('UNKNOWN_ERROR', error.message || 'An unknown error occurred');
-};
-
-export const isApiError = (error: unknown): error is ApiError => {
-  return error instanceof ApiError;
-};
-
 export const getErrorMessage = (error: unknown): string => {
-  if (isApiError(error)) {
+  if (isApiErrorCheck(error)) {
     return error.message;
   }
 
@@ -80,56 +39,55 @@ export const getErrorMessage = (error: unknown): string => {
   return 'An unknown error occurred';
 };
 
-export const getErrorDetails = (error: unknown): ApiErrorDetails[] => {
-  if (isApiError(error) && error.details) {
+export const getErrorDetails = (error: unknown): unknown => {
+  if (isApiErrorCheck(error)) {
     return error.details;
   }
 
-  return [];
+  return undefined;
 };
 
 export const isAuthError = (error: unknown): boolean => {
-  if (isApiError(error)) {
-    return error.status === 401 || error.errorCode === 'INVALID_CREDENTIALS';
+  if (isApiErrorCheck(error)) {
+    return error.isAuthError();
   }
 
   return false;
 };
 
 export const isValidationError = (error: unknown): boolean => {
-  if (isApiError(error)) {
-    return error.status === 400 || error.errorCode === 'VALIDATION_ERROR';
+  if (isApiErrorCheck(error)) {
+    return error.isValidationError();
   }
 
   return false;
 };
 
 export const isNotFoundError = (error: unknown): boolean => {
-  if (isApiError(error)) {
-    return error.status === 404;
+  if (isApiErrorCheck(error)) {
+    return error.isNotFoundError();
   }
 
   return false;
 };
 
 export const isServerError = (error: unknown): boolean => {
-  if (isApiError(error)) {
-    return (error.status || 0) >= 500;
+  if (!isApiErrorCheck(error)) {
+    return false;
   }
-
-  return false;
+  return error.isServerError();
 };
 
 export const formatValidationErrors = (error: unknown): Record<string, string> => {
   const result: Record<string, string> = {};
 
-  if (isApiError(error) && error.details) {
-    error.details.forEach((detail) => {
-      if (detail.field) {
-        result[detail.field] = detail.message;
-      }
-    });
+  if (!isApiErrorCheck(error) || !error.errors) {
+    return result;
   }
+
+  Object.entries(error.errors).forEach(([field, messages]) => {
+    result[field] = Array.isArray(messages) ? messages.join(', ') : String(messages);
+  });
 
   return result;
 };

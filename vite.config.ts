@@ -86,7 +86,7 @@ export default defineConfig(({ mode }) => {
       // Advanced esbuild options
       esbuildOptions: {
         // Drop console and debugger in production
-        drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+        drop: mode === 'production' ? ['console', 'debugger'] : [],
         // Aggressive minification
         legalComments: 'none',
         // Target modern browsers

@@ -11,12 +11,16 @@
 import '@testing-library/jest-dom';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { cleanup } from '@testing-library/react';
+import { toHaveNoViolations } from 'jest-axe';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from 'vitest';
 import { handlers } from './mocks/handlers';
 
 // Extend expect with jest-dom matchers
 expect.extend(matchers);
+
+// Extend expect with jest-axe matchers for accessibility testing
+expect.extend(toHaveNoViolations);
 
 // ============================================================================
 // DOM Setup

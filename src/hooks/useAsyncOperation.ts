@@ -108,13 +108,12 @@ export function useAsyncOperation<T = void>(): UseAsyncOperationResult<T> {
   } as const;
 
   // Create a shallow wrapper to attach a custom getter while preserving typing
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = { ...base };
-  let temp: unknown = data !== null ? data : error;
+  type ResultType = typeof base;
+  const result: ResultType = { ...base } as ResultType;
+  const temp: unknown = data !== null ? data : error;
   Object.defineProperty(result, 'error', {
     get() {
       const value = temp ?? null;
-      temp = null;
       return value;
     },
     configurable: true,

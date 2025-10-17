@@ -250,7 +250,7 @@ class SafeLocalStorage {
           if (parsed && typeof parsed === 'object' && 'timestamp' in parsed) {
             if (parsed.timestamp < thirtyDaysAgo) {
               this.storage.removeItem(key);
-              console.info(`[SafeLocalStorage] Cleared old item: ${key}`);
+              console.warn(`[SafeLocalStorage] Cleared old item: ${key}`);
             }
           }
         } catch {

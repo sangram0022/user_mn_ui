@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { logger } from './logger';
 
-import { ApiError } from '@lib/api/error';
+import { ApiError } from '@shared/errors/ApiError';
 import type { ApiErrorResponse, ParsedError } from '@shared/types/error';
 import errorMessagesFile from '../../locales/en/errors.json';
 export type { ApiErrorResponse, ParsedError } from '@shared/types/error';
@@ -1032,18 +1032,14 @@ class ErrorLogger {
 
   private logToConsole(entry: ErrorLogEntry): void {
     const style = 'color: #ef4444; font-weight: bold;';
-    console.group(`%c[Error Logger] ${entry.error.code}`, style);
-    logger.error('Message', undefined, { message: entry.error.message });
-    logger.error('Severity', undefined, { severity: entry.error.severity });
-    logger.error('Timestamp', undefined, { timestamp: entry.timestamp });
-    logger.error('URL', undefined, { url: entry.url });
-    if (entry.error.details) {
-      logger.error('Details', undefined, { details: entry.error.details });
-    }
-    if (entry.additionalContext) {
-      logger.error('Context', undefined, { context: entry.additionalContext });
-    }
-    console.groupEnd();
+    console.warn(`%c[Error Logger] ${entry.error.code}`, style, {
+      message: entry.error.message,
+      severity: entry.error.severity,
+      timestamp: entry.timestamp,
+      url: entry.url,
+      details: entry.error.details,
+      context: entry.additionalContext,
+    });
   }
 
   private async sendToBackend(entry: ErrorLogEntry): Promise<void> {

@@ -29,7 +29,7 @@ export function inlineCriticalCSS(): Plugin {
           .replace(/\n{2,}/g, '\n') // Remove multiple newlines
           .trim();
 
-        console.log(`✅ Critical CSS loaded: ${(criticalCSS.length / 1024).toFixed(2)}KB`);
+        console.warn(`✅ Critical CSS loaded: ${(criticalCSS.length / 1024).toFixed(2)}KB`);
       } catch {
         console.warn('⚠️  Critical CSS not found, skipping inline');
       }

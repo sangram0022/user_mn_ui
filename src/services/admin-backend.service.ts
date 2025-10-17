@@ -289,7 +289,7 @@ class AdminService {
   }
 
   /**
-   * Export audit logs
+   * Export audit logs to CSV or JSON format
    */
   async exportAuditLogs(filters: {
     action?: string;
@@ -298,21 +298,32 @@ class AdminService {
     start_date?: string;
     end_date?: string;
     severity?: string;
-    format?: 'csv' | 'json' | 'excel';
+    format?: 'csv' | 'json';
   }): Promise<Blob> {
-    logger.info('Exporting audit logs with filters:', filters);
-    // Simulate API call for export
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const csvContent =
-          'timestamp,action,resource,user_id,severity,details\n' +
-          '2024-01-15T10:30:00Z,user.login,authentication,user123,info,"{}"\n' +
-          '2024-01-15T10:25:00Z,user.logout,authentication,user456,info,"{}"';
+    try {
+      logger.info('Exporting audit logs', {
+        component: 'AdminService',
+        metadata: { filters },
+      });
 
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        resolve(blob);
-      }, 1000);
-    });
+      const blob = await backendApiClient.exportAuditLogs(filters);
+
+      logger.info('Audit logs exported successfully', {
+        component: 'AdminService',
+        metadata: {
+          format: filters.format || 'csv',
+          size: blob.size,
+        },
+      });
+
+      return blob;
+    } catch (error) {
+      logger.error('Failed to export audit logs', error as Error, {
+        component: 'AdminService',
+        metadata: { filters },
+      });
+      throw error;
+    }
   }
 
   // ========================================================================

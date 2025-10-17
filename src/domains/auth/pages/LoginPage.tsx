@@ -1,4 +1,4 @@
-import { Lock } from 'lucide-react';
+import { User } from 'lucide-react';
 import { startTransition, useActionState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -91,10 +91,10 @@ const LoginPage: React.FC = () => {
 
           // Navigate to dashboard after successful login
           navigate('/dashboard', { replace: true });
-        } catch (error) {
+        } catch {
           // Error will be handled by the auth context
           toast.error('Login failed. Please check your credentials and try again.');
-          console.error('Login failed:', error);
+          // Error is already logged by auth context and error handler
         }
       };
 
@@ -125,17 +125,28 @@ const LoginPage: React.FC = () => {
     <>
       <div className="mx-auto w-full max-w-md">
         {/* Logo and Title */}
-        <div className="text-center">
-          <div className="mx-auto mb-6 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/40">
-            <Lock className="w-8 h-8 text-white" aria-hidden="true" />
+        <div className="text-center mb-6">
+          <div
+            className="mx-auto mb-6 w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
+            style={{ background: 'var(--theme-primary)' }}
+          >
+            <User className="w-8 h-8 text-white" aria-hidden="true" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">Welcome Back</h2>
-          <p className="mt-2 text-sm text-gray-600">Sign in to your account to continue</p>
+          <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--theme-text)' }}>
+            Welcome Back
+          </h2>
+          <p className="mt-2 text-sm" style={{ color: 'var(--theme-textSecondary)' }}>
+            Sign in to access your account
+          </p>
         </div>
-      </div>
 
-      <div className="mx-auto w-full max-w-md mt-8">
-        <div className="bg-white/95 backdrop-blur-sm p-8 shadow-xl rounded-2xl border border-gray-200/50">
+        <div
+          className="p-8 shadow-xl rounded-2xl border"
+          style={{
+            background: 'var(--theme-surface)',
+            borderColor: 'var(--theme-border)',
+          }}
+        >
           {/* Error Alert */}
           {state.error && (
             <div className="mb-6" role="alert" aria-live="assertive">
@@ -172,7 +183,8 @@ const LoginPage: React.FC = () => {
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <label
                 htmlFor="remember-me-checkbox"
-                className="inline-flex items-center gap-2 text-sm text-gray-900 cursor-pointer"
+                className="inline-flex items-center gap-2 text-sm cursor-pointer"
+                style={{ color: 'var(--theme-text)' }}
               >
                 <input
                   id="remember-me-checkbox"
@@ -180,14 +192,15 @@ const LoginPage: React.FC = () => {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={(e) => updateField('rememberMe', e.target.checked)}
-                  className="w-4 h-4 border border-gray-300 rounded accent-blue-500"
+                  className="w-4 h-4"
                 />
                 Remember me
               </label>
 
               <Link
                 to="/forgot-password"
-                className="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors"
+                className="text-sm font-medium transition-colors hover:opacity-80"
+                style={{ color: 'var(--theme-primary)' }}
               >
                 Forgot your password?
               </Link>
@@ -201,10 +214,18 @@ const LoginPage: React.FC = () => {
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t" style={{ borderColor: 'var(--theme-border)' }} />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white/95 text-gray-600">Don't have an account?</span>
+                <span
+                  className="px-2"
+                  style={{
+                    background: 'var(--theme-surface)',
+                    color: 'var(--theme-textSecondary)',
+                  }}
+                >
+                  Don't have an account?
+                </span>
               </div>
             </div>
           </div>
@@ -213,7 +234,8 @@ const LoginPage: React.FC = () => {
           <div className="mt-6 text-center">
             <Link
               to="/register"
-              className="font-medium text-blue-500 hover:text-blue-600 transition-colors"
+              className="font-medium transition-colors hover:opacity-80"
+              style={{ color: 'var(--theme-primary)' }}
             >
               Create a new account
             </Link>

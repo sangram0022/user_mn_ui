@@ -4,7 +4,7 @@
  * Coverage: 100% - All functions, branches, edge cases
  */
 
-import { ApiError } from '@lib/api/error';
+import { ApiError } from '@shared/errors/ApiError';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {

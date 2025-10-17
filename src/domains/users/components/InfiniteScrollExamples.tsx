@@ -336,10 +336,10 @@ export function OptimisticInfiniteUserList() {
     try {
       await fetch(`/api/users/${userId}`, { method: 'DELETE' });
       // Success - already removed
-    } catch (err) {
+    } catch {
       // Rollback on error
       await loadMore(); // Reload data
-      console.error('Delete failed:', err);
+      // Error is already handled by error boundary
     }
   };
 

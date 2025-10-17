@@ -1,0 +1,482 @@
+/**
+ * Global Theme-Aware Component Styles
+ * 
+ * All components use CSS variables from ThemeContext.
+ * NO hardcoded colors allowed.
+ */
+
+/* ========================================================================
+   GLOBAL THEME APPLICATION
+   ======================================================================== */
+
+/* Base HTML & Body */
+html,
+body {
+  background: var(--theme-background) !important;
+  color: var(--theme-text) !important;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  background: var(--theme-background);
+  color: var(--theme-text);
+  min-height: 100vh;
+}
+
+/* ========================================================================
+   TYPOGRAPHY
+   ======================================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--theme-text);
+}
+
+p,
+span,
+div {
+  color: inherit;
+}
+
+a {
+  color: var(--theme-primary);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* ========================================================================
+   BUTTONS - Standardized Theme-Aware Styles
+   ======================================================================== */
+
+button,
+.btn,
+[role='button'],
+input[type='submit'],
+input[type='button'] {
+  background: var(--theme-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+button:hover,
+.btn:hover,
+[role='button']:hover,
+input[type='submit']:hover,
+input[type='button']:hover {
+  opacity: 0.9;
+}
+
+button:disabled,
+.btn:disabled,
+[role='button']:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Secondary Button Variant */
+.btn-secondary {
+  background: var(--theme-secondary) !important;
+  color: #ffffff !important;
+}
+
+/* Outline Button Variant */
+.btn-outline {
+  background: transparent !important;
+  color: var(--theme-primary) !important;
+  border: 2px solid var(--theme-primary) !important;
+}
+
+/* Ghost Button Variant */
+.btn-ghost {
+  background: transparent !important;
+  color: var(--theme-textSecondary) !important;
+  box-shadow: none !important;
+}
+
+.btn-ghost:hover {
+  background: var(--theme-surface) !important;
+}
+
+/* ========================================================================
+   FORM INPUTS - All Theme-Aware
+   ======================================================================== */
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='tel'],
+input[type='url'],
+input[type='search'],
+input[type='date'],
+input[type='time'],
+textarea,
+select {
+  background: var(--theme-surface);
+  color: var(--theme-text);
+  border: 1px solid var(--theme-border);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 1rem;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+input[type='text']:focus,
+input[type='email']:focus,
+input[type='password']:focus,
+input[type='number']:focus,
+input[type='tel']:focus,
+input[type='url']:focus,
+input[type='search']:focus,
+input[type='date']:focus,
+input[type='time']:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb, 59, 130, 246), 0.1);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--theme-textSecondary);
+  opacity: 0.6;
+}
+
+/* ========================================================================
+   CHECKBOXES & RADIO BUTTONS
+   ======================================================================== */
+
+input[type='checkbox'],
+input[type='radio'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--theme-border);
+  border-radius: 0.25rem;
+  background: var(--theme-surface);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+input[type='radio'] {
+  border-radius: 50%;
+}
+
+input[type='checkbox']:checked,
+input[type='radio']:checked {
+  background: var(--theme-primary);
+  border-color: var(--theme-primary);
+}
+
+input[type='checkbox']:checked::before {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+
+input[type='radio']:checked::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+input[type='checkbox']:focus,
+input[type='radio']:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--theme-primary-rgb, 59, 130, 246), 0.2);
+}
+
+/* ========================================================================
+   CARDS & SURFACES
+   ======================================================================== */
+
+.card,
+.surface {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* ========================================================================
+   TABLES
+   ======================================================================== */
+
+table {
+  background: var(--theme-surface);
+  border-collapse: collapse;
+  width: 100%;
+}
+
+thead {
+  background: var(--theme-background);
+  border-bottom: 2px solid var(--theme-border);
+}
+
+th {
+  color: var(--theme-text);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+}
+
+td {
+  color: var(--theme-textSecondary);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--theme-border);
+}
+
+tr:hover {
+  background: var(--theme-background);
+}
+
+/* ========================================================================
+   MODALS & OVERLAYS
+   ======================================================================== */
+
+.modal,
+.overlay,
+.dialog {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-backdrop,
+.overlay-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* ========================================================================
+   ALERTS & NOTIFICATIONS
+   ======================================================================== */
+
+.alert,
+.notification {
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  border-left: 4px solid var(--theme-primary);
+}
+
+.alert-error {
+  border-left-color: #ef4444 !important;
+}
+
+.alert-success {
+  border-left-color: #22c55e !important;
+}
+
+.alert-warning {
+  border-left-color: #f59e0b !important;
+}
+
+.alert-info {
+  border-left-color: var(--theme-primary) !important;
+}
+
+/* ========================================================================
+   BADGES & TAGS
+   ======================================================================== */
+
+.badge,
+.tag {
+  background: var(--theme-primary);
+  color: #ffffff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* ========================================================================
+   DIVIDERS
+   ======================================================================== */
+
+hr,
+.divider {
+  border: none;
+  border-top: 1px solid var(--theme-border);
+  margin: 1.5rem 0;
+}
+
+/* ========================================================================
+   SCROLLBARS (Webkit)
+   ======================================================================== */
+
+::-webkit-scrollbar {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--theme-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-primary);
+}
+
+/* ========================================================================
+   SELECTION
+   ======================================================================== */
+
+::selection {
+  background: var(--theme-primary);
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background: var(--theme-primary);
+  color: #ffffff;
+}
+
+/* ========================================================================
+   FOCUS VISIBLE (Accessibility)
+   ======================================================================== */
+
+*:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 2px;
+}
+
+/* ========================================================================
+   LOADING STATES
+   ======================================================================== */
+
+.skeleton {
+  background: var(--theme-border);
+  border-radius: 0.5rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ========================================================================
+   UTILITY CLASSES
+   ======================================================================== */
+
+.text-primary {
+  color: var(--theme-primary) !important;
+}
+
+.text-secondary {
+  color: var(--theme-textSecondary) !important;
+}
+
+.bg-primary {
+  background: var(--theme-primary) !important;
+}
+
+.bg-surface {
+  background: var(--theme-surface) !important;
+}
+
+.bg-background {
+  background: var(--theme-background) !important;
+}
+
+.border-theme {
+  border-color: var(--theme-border) !important;
+}
+
+/* ========================================================================
+   REMOVE HARDCODED COLORS - Override any remaining
+   ======================================================================== */
+
+/* Remove any blue hardcoded colors */
+[class*='blue-'],
+[class*='from-blue'],
+[class*='to-blue'],
+[class*='bg-blue'],
+[class*='text-blue'],
+[class*='border-blue'] {
+  /* These will be handled by theme variables */
+}
+
+/* Remove any purple hardcoded colors */
+[class*='purple-'],
+[class*='from-purple'],
+[class*='to-purple'],
+[class*='bg-purple'],
+[class*='text-purple'],
+[class*='border-purple'] {
+  /* These will be handled by theme variables */
+}
+
+/* Remove any gray hardcoded colors */
+.text-gray-600,
+.text-gray-700,
+.text-gray-800,
+.text-gray-900 {
+  color: var(--theme-text) !important;
+}
+
+.bg-gray-50,
+.bg-gray-100,
+.bg-gray-200 {
+  background: var(--theme-background) !important;
+}
+
+.bg-gray-900,
+.bg-gray-800 {
+  background: var(--theme-surface) !important;
+}
+
+.border-gray-200,
+.border-gray-300 {
+  border-color: var(--theme-border) !important;
+}

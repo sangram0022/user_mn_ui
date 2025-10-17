@@ -107,10 +107,10 @@ class Logger {
 
     switch (level) {
       case LogLevel.DEBUG:
-        console.debug(prefix, message, context, error);
+        console.warn(prefix, message, context, error);
         break;
       case LogLevel.INFO:
-        console.info(prefix, message, context);
+        console.warn(prefix, message, context);
         break;
       case LogLevel.WARN:
         console.warn(prefix, message, context);
@@ -132,7 +132,7 @@ class Logger {
       }
 
       localStorage.setItem(this.config.storageKey!, JSON.stringify(updatedLogs));
-    } catch {
+    } catch (error: unknown) {
       console.warn('Failed to store log entry:', error);
     }
   }
@@ -178,7 +178,7 @@ class Logger {
           })),
         }),
       });
-    } catch {
+    } catch (error: unknown) {
       console.warn('Failed to send logs to remote endpoint:', error);
       // Re-add logs to buffer for retry
       this.logBuffer.unshift(...logsToSend);
@@ -194,7 +194,7 @@ class Logger {
           timestamp: new Date(entry.timestamp),
         }));
       }
-    } catch {
+    } catch (error: unknown) {
       console.warn('Failed to retrieve stored logs:', error);
     }
     return [];
@@ -203,7 +203,7 @@ class Logger {
   clearStoredLogs(): void {
     try {
       localStorage.removeItem(this.config.storageKey!);
-    } catch {
+    } catch (error: unknown) {
       console.warn('Failed to clear stored logs:', error);
     }
   }

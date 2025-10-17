@@ -1,2 +1,2 @@
-export { ApiError } from '@lib/api/error';
-export type { ApiErrorInit } from '@lib/api/error';
+export { ApiError, handleApiError, isApiError } from '@shared/errors/ApiError';
+export type { ApiErrorInit } from '@shared/errors/ApiError';

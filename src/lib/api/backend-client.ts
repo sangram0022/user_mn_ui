@@ -5,6 +5,7 @@
  * handling authentication, error responses, and data transformation correctly.
  */
 
+import { ApiError } from '@shared/errors/ApiError';
 import { logger } from '../../shared/utils/logger';
 import type {
   CreateUserRequest,
@@ -83,6 +84,7 @@ const ENDPOINTS = {
   AUDIT: {
     LOGS: '/audit/logs',
     SUMMARY: '/audit/summary',
+    EXPORT: '/audit/logs/export',
   },
 
   // GDPR
@@ -231,7 +233,12 @@ class BackendApiClient {
       if (!response.ok) {
         const errorMessage = this.extractErrorMessage(responseData, response.statusText);
         const errorCode = this.extractErrorCode(responseData);
-        throw new ApiError(errorMessage, response.status, errorCode, responseData);
+        throw new ApiError({
+          message: errorMessage,
+          status: response.status,
+          code: errorCode,
+          details: responseData,
+        });
       }
 
       logger.debug(`[API] Response ${response.status}`, { responseData });
@@ -245,18 +252,22 @@ class BackendApiClient {
       clearTimeout(timeoutId);
 
       if (error instanceof Error && error.name === 'AbortError') {
-        throw new ApiError('Request timeout', 0, 'TIMEOUT');
+        throw new ApiError({
+          message: 'Request timeout',
+          status: 0,
+          code: 'TIMEOUT',
+        });
       }
 
       if (error instanceof ApiError) {
         throw error;
       }
 
-      throw new ApiError(
-        error instanceof Error ? error.message : 'Network error',
-        0,
-        'NETWORK_ERROR'
-      );
+      throw new ApiError({
+        message: error instanceof Error ? error.message : 'Network error',
+        status: 0,
+        code: 'NETWORK_ERROR',
+      });
     }
   }
 
@@ -832,6 +843,47 @@ class BackendApiClient {
     return response.data;
   }
 
+  /**
+   * Export audit logs to CSV or JSON format
+   */
+  async exportAuditLogs(
+    filters: {
+      action?: string;
+      resource?: string;
+      user_id?: string;
+      start_date?: string;
+      end_date?: string;
+      severity?: string;
+      format?: 'csv' | 'json';
+    } = {}
+  ): Promise<Blob> {
+    const { format = 'csv', ...params } = filters;
+
+    const queryString = new URLSearchParams(
+      Object.entries({ ...params, format })
+        .filter(([, value]) => value !== undefined)
+        .map(([key, value]) => [key, String(value)])
+    ).toString();
+
+    const endpoint = queryString
+      ? `${ENDPOINTS.AUDIT.EXPORT}?${queryString}`
+      : ENDPOINTS.AUDIT.EXPORT;
+
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${TokenStorage.getAccessToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Failed to export audit logs' }));
+      throw new Error(error.detail || 'Failed to export audit logs');
+    }
+
+    return await response.blob();
+  }
+
   // ========================================================================
   // GDPR Methods
   // ========================================================================
@@ -1060,20 +1112,9 @@ class BackendApiClient {
 // Create and export client instance
 // ============================================================================
 
-class ApiError extends Error {
-  public readonly status: number;
-  public readonly code?: string;
-  public readonly details?: unknown;
-
-  constructor(message: string, status: number, code?: string, details?: unknown) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
-    this.code = code;
-    this.details = details;
-  }
-}
+// Re-export canonical ApiError from shared location
+export { ApiError, handleApiError, isApiError } from '@shared/errors/ApiError';
+export { TokenStorage };
+export type { ApiResponse, RequestConfig };
 
 export const backendApiClient = new BackendApiClient();
-export { ApiError, TokenStorage };
-export type { ApiResponse, RequestConfig };

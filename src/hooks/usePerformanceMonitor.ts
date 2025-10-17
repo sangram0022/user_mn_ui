@@ -154,7 +154,7 @@ export function usePerformanceMonitor(
 
     // Console logging
     if (config.enableLogging) {
-      console.log(`[Performance] ${componentName}.${name}:`, value, 'ms', metadata);
+      console.warn(`[Performance] ${componentName}.${name}:`, value, 'ms', metadata);
     }
   };
 

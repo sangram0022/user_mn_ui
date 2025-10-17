@@ -244,7 +244,7 @@ const RegisterPage: React.FC = () => {
       <div className="mx-auto w-full max-w-3xl">
         <div className="rounded-2xl border border-gray-200/50 bg-white/95 p-10 shadow-2xl backdrop-blur-sm">
           <div className="text-center" role="status" aria-live="polite">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/40">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary shadow-lg">
               <CheckCircle className="h-8 w-8 text-white" aria-hidden="true" />
             </div>
             <h2 className="text-3xl font-bold tracking-tight text-gray-900">
@@ -318,7 +318,7 @@ const RegisterPage: React.FC = () => {
             <button
               type="button"
               onClick={handleProceedToLogin}
-              className="inline-flex items-center justify-center gap-2 rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-3 text-sm font-semibold text-white shadow-sm outline-none transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.5)]"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border-none bg-gradient-primary px-5 py-3 text-sm font-semibold text-white shadow-sm outline-none transition-all hover:-translate-y-0.5 hover:shadow-lg focus:shadow-[0_0_0_3px_rgba(59,130,246,0.5)]"
             >
               <LogIn className="h-4 w-4" />
               {redirectCountdown !== null ? `Go to login (${redirectCountdown}s)` : 'Go to login'}
@@ -340,9 +340,9 @@ const RegisterPage: React.FC = () => {
 
   if (state.success && !state.feedback) {
     return (
-      <div className="flex min-h-screen flex-col justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-12">
+      <div className="flex min-h-screen flex-col justify-center bg-gradient-page px-4 py-12">
         <div className="mx-auto w-full max-w-md text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/40">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary shadow-lg">
             <CheckCircle className="h-8 w-8 text-white" />
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">
@@ -354,7 +354,7 @@ const RegisterPage: React.FC = () => {
           <button
             type="button"
             onClick={handleProceedToLogin}
-            className="mt-6 inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40"
+            className="mt-6 inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border-none bg-gradient-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
           >
             <LogIn className="h-4 w-4" />
             Go to login
@@ -369,7 +369,7 @@ const RegisterPage: React.FC = () => {
       <div className="mx-auto w-full max-w-md">
         {/* Logo and Title */}
         <div className="text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg shadow-blue-500/40">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-lg">
             <User className="h-8 w-8 text-white" aria-hidden="true" />
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">Create Your Account</h2>
@@ -568,7 +568,7 @@ const RegisterPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isPending}
-                className="flex w-full cursor-pointer justify-center rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-3 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
+                className="flex w-full cursor-pointer justify-center rounded-lg border-none bg-gradient-primary px-4 py-3 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
               >
                 {isPending ? (
                   <div className="flex items-center">

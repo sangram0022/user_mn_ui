@@ -446,8 +446,45 @@ const AuditLogsPage: FC = () => {
   const handleExport = async () => {
     return await measure('export-audit-logs', async () => {
       try {
-        // TODO: Implement export functionality
-        // await adminService.exportAuditLogs(filters);
+        // Show loading toast
+        toast.info('Preparing audit logs export...');
+
+        // Export audit logs with current filters
+        const blob = await adminService.exportAuditLogs({
+          action: filters.action,
+          resource: filters.resource,
+          user_id: filters.user_id,
+          start_date: filters.start_date,
+          end_date: filters.end_date,
+          severity: filters.severity,
+          format: 'csv', // Default to CSV format
+        });
+
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+
+        // Generate filename with current date and filters
+        const dateStr = new Date().toISOString().split('T')[0];
+        const filterStr = [
+          filters.severity && `severity-${filters.severity}`,
+          filters.action && `action-${filters.action}`,
+          filters.resource && `resource-${filters.resource}`,
+        ]
+          .filter(Boolean)
+          .join('_');
+
+        link.download = `audit-logs_${dateStr}${filterStr ? '_' + filterStr : ''}.csv`;
+
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+
+        // Cleanup
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
         toast.success('Audit logs exported successfully');
         recordMetric('logs-exported', 1);
       } catch (error) {

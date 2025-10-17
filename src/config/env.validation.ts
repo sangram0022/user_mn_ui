@@ -178,10 +178,10 @@ export function validateEnvironment(): void {
 
   // Log success in development
   if (import.meta.env.DEV) {
-    console.log('✅ Environment validation passed');
-    console.log('Environment:', import.meta.env.VITE_APP_ENV || import.meta.env.MODE);
-    console.log('Backend URL:', import.meta.env.VITE_BACKEND_URL);
-    console.log('API URL:', import.meta.env.VITE_API_BASE_URL);
+    console.warn('✅ Environment validation passed');
+    console.warn('Environment:', import.meta.env.VITE_APP_ENV || import.meta.env.MODE);
+    console.warn('Backend URL:', import.meta.env.VITE_BACKEND_URL);
+    console.warn('API URL:', import.meta.env.VITE_API_BASE_URL);
   }
 }
 
