@@ -172,7 +172,8 @@ const Header: FC = () => {
                         <hr className="my-1" style={{ borderColor: 'var(--theme-border)' }} />
                         <button
                           onClick={handleLogout}
-                          className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                          className="flex items-center w-full text-left px-4 py-2 text-sm transition-colors rounded-md hover:opacity-80"
+                          style={{ color: 'var(--theme-error)' }}
                         >
                           <LogOut className="w-4 h-4 mr-3" />
                           Sign Out
@@ -187,15 +188,15 @@ const Header: FC = () => {
               <>
                 <Link
                   to="/login"
-                  className="px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                  style={{ color: 'var(--theme-textSecondary)' }}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold shadow-lg transition-all duration-200 hover:opacity-90"
+                  style={{ background: 'var(--theme-secondary)', color: 'var(--theme-onPrimary)' }}
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
                   className="px-4 py-2 rounded-xl text-sm font-semibold shadow-lg transition-all duration-200 hover:opacity-90"
-                  style={{ background: 'var(--theme-primary)', color: '#FFFFFF' }}
+                  style={{ background: 'var(--theme-primary)', color: 'var(--theme-onPrimary)' }}
                 >
                   Get Started
                 </Link>
@@ -244,7 +245,7 @@ const Header: FC = () => {
                 <button
                   onClick={handleLogoutAndCloseMobile}
                   className="block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors"
-                  style={{ color: '#ef4444' }}
+                  style={{ color: 'var(--theme-error)' }}
                 >
                   Sign Out
                 </button>
@@ -253,8 +254,8 @@ const Header: FC = () => {
               <>
                 <Link
                   to="/login"
-                  className="block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                  style={{ color: 'var(--theme-textSecondary)' }}
+                  className="block px-3 py-2 rounded-xl text-base font-semibold shadow-lg transition-all duration-200 hover:opacity-90"
+                  style={{ background: 'var(--theme-secondary)', color: 'var(--theme-onPrimary)' }}
                   onClick={closeMobileMenu}
                 >
                   Sign In
@@ -262,7 +263,7 @@ const Header: FC = () => {
                 <Link
                   to="/register"
                   className="block px-3 py-2 rounded-xl text-base font-semibold shadow-lg transition-all duration-200 hover:opacity-90 mt-2"
-                  style={{ background: 'var(--theme-primary)', color: '#FFFFFF' }}
+                  style={{ background: 'var(--theme-primary)', color: 'var(--theme-onPrimary)' }}
                   onClick={closeMobileMenu}
                 >
                   Get Started

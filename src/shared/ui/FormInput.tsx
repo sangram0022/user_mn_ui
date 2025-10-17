@@ -158,7 +158,7 @@ export const FormInput: React.FC<FormInputProps> = ({
         className="block text-sm font-semibold mb-2"
         style={{ color: 'var(--theme-text)' }}
       >
-        {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
+        {label} {required && <span style={{ color: 'var(--theme-error)' }}>*</span>}
       </label>
       <div className="relative">
         {Icon && (

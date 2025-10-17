@@ -77,7 +77,8 @@ const routes: RouteObject[] = [
           <p className="text-gray-600 mb-8">The page you're looking for doesn't exist.</p>
           <a
             href="/"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+            className="font-medium py-2 px-4 rounded-md transition-colors inline-block"
+            style={{ background: 'var(--theme-primary)', color: 'var(--theme-onPrimary)' }}
           >
             Go Home
           </a>

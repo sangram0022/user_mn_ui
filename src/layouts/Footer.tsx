@@ -10,7 +10,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto border-t-4 border-blue-500 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+    <footer className="mt-auto border-t-4 border-blue-500 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Main Footer Content */}
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -33,7 +33,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-gray-800 transition-all duration-200 hover:scale-110 hover:bg-blue-600"
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-gray-800 transition-all duration-200 hover:scale-110 hover:bg-slate-600 dark:hover:bg-slate-400"
                 aria-label="GitHub"
               >
                 <Github className="h-5 w-5" />
@@ -42,7 +42,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-gray-800 transition-all duration-200 hover:scale-110 hover:bg-blue-400"
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-gray-800 transition-all duration-200 hover:scale-110 hover:bg-slate-500"
                 aria-label="Twitter"
               >
                 <Twitter className="h-5 w-5" />
@@ -51,7 +51,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-gray-800 transition-all duration-200 hover:scale-110 hover:bg-blue-800"
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-gray-800 transition-all duration-200 hover:scale-110 hover:bg-slate-700"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="h-5 w-5" />
@@ -93,7 +93,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <Link
                   to="/dashboard"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Dashboard
@@ -102,7 +103,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <Link
                   to="/users"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   User Management
@@ -111,7 +113,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <Link
                   to="/analytics"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Analytics
@@ -120,7 +123,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <Link
                   to="/workflows"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Workflows
@@ -129,7 +133,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <Link
                   to="/security"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Security Center
@@ -138,7 +143,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#pricing"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Pricing
@@ -157,7 +163,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#about"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   About Us
@@ -166,7 +173,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#careers"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Careers
@@ -175,7 +183,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#blog"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Blog
@@ -184,7 +193,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#press"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Press Kit
@@ -193,7 +203,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#contact"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Contact Us
@@ -202,7 +213,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#partners"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Partners
@@ -221,7 +233,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#privacy"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Privacy Policy
@@ -230,7 +243,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#terms"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Terms of Service
@@ -239,7 +253,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#cookies"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Cookie Policy
@@ -248,7 +263,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#gdpr"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   GDPR Compliance
@@ -257,7 +273,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <Link
                   to="/help"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   Help Center
@@ -266,7 +283,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <li>
                 <a
                   href="#api-docs"
-                  className="flex items-center text-sm text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                  className="flex items-center text-sm no-underline transition-colors duration-200"
+                  style={{ color: 'var(--theme-textSecondary)' }}
                 >
                   <span className="mr-2">→</span>
                   API Documentation
@@ -315,19 +333,22 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               <a
                 href="#sitemap"
-                className="text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                className="no-underline transition-colors duration-200"
+                style={{ color: 'var(--theme-textSecondary)' }}
               >
                 Sitemap
               </a>
               <a
                 href="#status"
-                className="text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                className="no-underline transition-colors duration-200"
+                style={{ color: 'var(--theme-textSecondary)' }}
               >
                 System Status
               </a>
               <a
                 href="#changelog"
-                className="text-gray-400 no-underline transition-colors duration-200 hover:text-white"
+                className="no-underline transition-colors duration-200"
+                style={{ color: 'var(--theme-textSecondary)' }}
               >
                 Changelog
               </a>

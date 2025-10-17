@@ -73,7 +73,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                       className="px-5 py-3 rounded-xl font-semibold transition-all duration-200 capitalize transform hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
                       style={{
                         background: isActive ? 'var(--theme-primary)' : 'transparent',
-                        color: isActive ? '#FFFFFF' : 'var(--theme-text)',
+                        color: isActive ? 'var(--theme-onPrimary)' : 'var(--theme-text)',
                         border: `2px solid ${isActive ? 'var(--theme-primary)' : 'var(--theme-border)'}`,
                         boxShadow: isActive ? '0 4px 14px rgba(0,0,0,0.15)' : 'none',
                       }}
@@ -106,7 +106,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                       className="px-8 py-3 font-semibold transition-all duration-200 capitalize focus:outline-none relative"
                       style={{
                         background: isActive ? 'var(--theme-primary)' : 'var(--theme-surface)',
-                        color: isActive ? '#FFFFFF' : 'var(--theme-text)',
+                        color: isActive ? 'var(--theme-onPrimary)' : 'var(--theme-text)',
                         borderRight: index < 2 ? `1px solid var(--theme-border)` : 'none',
                         zIndex: isActive ? 10 : 1,
                       }}
@@ -153,7 +153,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2"
                   style={{
                     background: 'var(--theme-primary)',
-                    color: '#FFFFFF',
+                    color: 'var(--theme-onPrimary)',
                   }}
                 >
                   Primary Action
@@ -162,7 +162,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2"
                   style={{
                     background: 'var(--theme-gradient)',
-                    color: '#FFFFFF',
+                    color: 'var(--theme-onPrimary)',
                   }}
                 >
                   Gradient Primary
@@ -171,7 +171,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-md opacity-60 cursor-not-allowed"
                   style={{
                     background: 'var(--theme-primary)',
-                    color: '#FFFFFF',
+                    color: 'var(--theme-onPrimary)',
                   }}
                   disabled
                 >
@@ -197,7 +197,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2"
                   style={{
                     background: 'var(--theme-secondary)',
-                    color: '#FFFFFF',
+                    color: 'var(--theme-onPrimary)',
                   }}
                 >
                   Secondary Action
@@ -206,7 +206,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2"
                   style={{
                     background: 'var(--theme-accent)',
-                    color: '#FFFFFF',
+                    color: 'var(--theme-onPrimary)',
                   }}
                 >
                   Accent Action
@@ -306,7 +306,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none"
                   style={{
                     background: 'var(--theme-primary)',
-                    color: '#FFFFFF',
+                    color: 'var(--theme-onPrimary)',
                   }}
                 >
                   Small
@@ -315,7 +315,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none"
                   style={{
                     background: 'var(--theme-primary)',
-                    color: '#FFFFFF',
+                    color: 'var(--theme-onPrimary)',
                   }}
                 >
                   Medium
@@ -324,7 +324,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 focus:outline-none"
                   style={{
                     background: 'var(--theme-primary)',
-                    color: '#FFFFFF',
+                    color: 'var(--theme-onPrimary)',
                   }}
                 >
                   Large
@@ -333,7 +333,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="px-12 py-5 rounded-xl text-lg font-bold transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 focus:outline-none"
                   style={{
                     background: 'var(--theme-primary)',
-                    color: '#FFFFFF',
+                    color: 'var(--theme-onPrimary)',
                   }}
                 >
                   Extra Large
@@ -402,7 +402,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="w-full px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
                   style={{
                     background: `var(--theme-${card.color})`,
-                    color: '#FFFFFF',
+                    color: 'var(--theme-onPrimary)',
                   }}
                 >
                   Learn More
@@ -426,9 +426,9 @@ export default function ThemeTestPage(): React.JSX.Element {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { name: 'Primary', var: '--theme-primary', textColor: '#FFFFFF' },
-              { name: 'Secondary', var: '--theme-secondary', textColor: '#FFFFFF' },
-              { name: 'Accent', var: '--theme-accent', textColor: '#FFFFFF' },
+              { name: 'Primary', var: '--theme-primary', textColor: 'var(--theme-onPrimary)' },
+              { name: 'Secondary', var: '--theme-secondary', textColor: 'var(--theme-onPrimary)' },
+              { name: 'Accent', var: '--theme-accent', textColor: 'var(--theme-onPrimary)' },
               { name: 'Background', var: '--theme-background', textColor: 'var(--theme-text)' },
               { name: 'Surface', var: '--theme-surface', textColor: 'var(--theme-text)' },
               { name: 'Text', var: '--theme-text', textColor: 'var(--theme-background)' },
@@ -489,7 +489,7 @@ export default function ThemeTestPage(): React.JSX.Element {
               <div className="flex items-start gap-3">
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{ background: 'var(--theme-primary)', color: '#FFFFFF' }}
+                  style={{ background: 'var(--theme-primary)', color: 'var(--theme-onPrimary)' }}
                 >
                   ℹ
                 </div>
@@ -522,7 +522,7 @@ export default function ThemeTestPage(): React.JSX.Element {
               <div className="flex items-start gap-3">
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{ background: 'var(--theme-accent)', color: '#FFFFFF' }}
+                  style={{ background: 'var(--theme-accent)', color: 'var(--theme-onPrimary)' }}
                 >
                   ✓
                 </div>
@@ -555,7 +555,7 @@ export default function ThemeTestPage(): React.JSX.Element {
               <div className="flex items-start gap-3">
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{ background: 'var(--theme-secondary)', color: '#FFFFFF' }}
+                  style={{ background: 'var(--theme-secondary)', color: 'var(--theme-onPrimary)' }}
                 >
                   ⚠
                 </div>
@@ -577,7 +577,7 @@ export default function ThemeTestPage(): React.JSX.Element {
           className="p-12 rounded-2xl text-center shadow-2xl"
           style={{
             background: 'var(--theme-gradient)',
-            color: '#FFFFFF',
+            color: 'var(--theme-onPrimary)',
           }}
         >
           <h2 className="text-4xl font-bold mb-3">Theme Gradient Hero</h2>
@@ -588,7 +588,7 @@ export default function ThemeTestPage(): React.JSX.Element {
             <button
               className="px-8 py-4 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               style={{
-                background: '#FFFFFF',
+                background: 'var(--theme-onPrimary)',
                 color: 'var(--theme-primary)',
               }}
             >
@@ -598,8 +598,8 @@ export default function ThemeTestPage(): React.JSX.Element {
               className="px-8 py-4 rounded-xl font-bold transition-all duration-200 hover:bg-white hover:bg-opacity-20"
               style={{
                 background: 'transparent',
-                color: '#FFFFFF',
-                border: '2px solid #FFFFFF',
+                color: 'var(--theme-onPrimary)',
+                border: '2px solid var(--theme-onPrimary)',
               }}
             >
               Learn More

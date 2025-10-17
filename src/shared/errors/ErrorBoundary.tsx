@@ -96,7 +96,8 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error, resetError, retryCoun
         {canRetry && (
           <button
             onClick={resetError}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="flex-1 font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+            style={{ background: 'var(--theme-primary)', color: 'var(--theme-onPrimary)' }}
             type="button"
           >
             Try Again {retryCount > 0 && `(${retryCount + 1})`}
@@ -105,7 +106,12 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error, resetError, retryCoun
 
         <button
           onClick={() => window.location.reload()}
-          className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          className="flex-1 font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+          style={{
+            background: 'var(--theme-surface)',
+            color: 'var(--theme-text)',
+            border: '1px solid var(--theme-border)',
+          }}
           type="button"
         >
           Reload Page
@@ -113,7 +119,7 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error, resetError, retryCoun
       </div>
 
       <div className="mt-4 text-center">
-        <a href="/" className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400">
+        <a href="/" className="text-sm transition-colors" style={{ color: 'var(--theme-primary)' }}>
           Return to Home
         </a>
       </div>
