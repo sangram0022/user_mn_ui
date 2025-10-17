@@ -3,16 +3,35 @@
  * @module shared/ui
  *
  * Reusable UI components used across all domains
+ * Note: Main components are in @shared/components/ui, these are re-exports for backward compatibility
  */
 
-// Modal Component - Production-grade modal with accessibility
-export { Modal, ModalFooter, type ModalProps, type ModalSize } from './Modal';
+// Re-export from consolidated location
+export { Modal, ModalFooter } from '@shared/components/ui/Modal';
+export type { ModalProps, ModalSize, ModalFooterProps } from '@shared/components/ui/Modal';
 
-// Badge Component - Standardized badges for severity levels
-export { Badge, type BadgeProps, type BadgeSize, type BadgeVariant } from './Badge';
+export { Badge } from '@shared/components/ui/Badge';
+export type { BadgeProps, BadgeSize, BadgeVariant } from '@shared/components/ui/Badge';
 
-// Badge Utilities - Helper functions for badges
-export { getSeverityBadgeVariant, getStatusBadgeVariant } from './badgeUtils';
+export { getSeverityBadgeVariant, getStatusBadgeVariant } from '@shared/components/ui/Badge';
+
+export {
+  Skeleton,
+  SkeletonText,
+  SkeletonCard,
+  SkeletonList,
+  SkeletonTable,
+  SkeletonForm,
+  PageSkeleton,
+  DashboardSkeleton,
+  TableSkeleton,
+} from '@shared/components/ui/Skeleton';
+export type {
+  SkeletonProps,
+  PageSkeletonProps,
+  DashboardSkeletonProps,
+  TableSkeletonProps,
+} from '@shared/components/ui/Skeleton';
 
 // To be implemented - move truly reusable components here
 // export { Button } from './Button';

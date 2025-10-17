@@ -425,5 +425,161 @@ export function SkeletonForm({
   );
 }
 
+/**
+ * PageSkeleton - Full page loading skeleton with header and content
+ */
+export interface PageSkeletonProps {
+  heading?: string;
+  actionCount?: number;
+  descriptionLines?: number;
+}
+
+export function PageSkeleton({
+  heading = 'Loading',
+  actionCount = 0,
+  descriptionLines = 0,
+}: PageSkeletonProps) {
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="status" aria-label={heading}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-3 flex-1">
+            <Skeleton width="256px" height="32px" />
+            {descriptionLines > 0 && (
+              <div className="space-y-2">
+                {Array.from({ length: descriptionLines }).map((_, i) => (
+                  <Skeleton key={i} width="384px" height="16px" />
+                ))}
+              </div>
+            )}
+          </div>
+          {actionCount > 0 && (
+            <div className="flex space-x-3">
+              {Array.from({ length: actionCount }).map((_, i) => (
+                <Skeleton key={i} width="96px" height="40px" />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+          <div className="space-y-4">
+            <Skeleton height="16px" />
+            <Skeleton width="83%" height="16px" />
+            <Skeleton width="66%" height="16px" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * DashboardSkeleton - Dashboard loading skeleton with metrics and charts
+ */
+export interface DashboardSkeletonProps {
+  heading?: string;
+  actionCount?: number;
+  descriptionLines?: number;
+}
+
+export function DashboardSkeleton({
+  heading = 'Loading dashboard',
+  actionCount = 3,
+  descriptionLines = 2,
+}: DashboardSkeletonProps) {
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="status" aria-label={heading}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-3">
+            <Skeleton width="256px" height="32px" />
+            {descriptionLines > 0 && (
+              <div className="space-y-2">
+                {Array.from({ length: descriptionLines }).map((_, i) => (
+                  <Skeleton key={i} width="384px" height="16px" />
+                ))}
+              </div>
+            )}
+          </div>
+          {actionCount > 0 && (
+            <div className="flex space-x-3">
+              {Array.from({ length: actionCount }).map((_, i) => (
+                <Skeleton key={i} width="96px" height="40px" />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Metric Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <Skeleton width="96px" height="16px" className="mb-4" />
+              <Skeleton width="128px" height="32px" className="mb-2" />
+              <Skeleton width="80px" height="12px" />
+            </div>
+          ))}
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <Skeleton width="192px" height="24px" className="mb-4" />
+              <Skeleton height="256px" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * TableSkeleton - Table loading skeleton
+ */
+export interface TableSkeletonProps {
+  rows?: number;
+  columns?: number;
+}
+
+export function TableSkeleton({ rows = 5, columns = 4 }: TableSkeletonProps) {
+  return (
+    <div
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+      role="status"
+      aria-label="Loading table"
+    >
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+        {/* Table Header */}
+        <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-6 py-4">
+          <div className="flex space-x-4">
+            {Array.from({ length: columns }).map((_, i) => (
+              <Skeleton key={i} height="20px" className="flex-1" />
+            ))}
+          </div>
+        </div>
+
+        {/* Table Rows */}
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          {Array.from({ length: rows }).map((_, rowIndex) => (
+            <div key={rowIndex} className="px-6 py-4">
+              <div className="flex space-x-4">
+                {Array.from({ length: columns }).map((_, colIndex) => (
+                  <Skeleton key={colIndex} height="16px" className="flex-1" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Export all skeleton components
 export default Skeleton;

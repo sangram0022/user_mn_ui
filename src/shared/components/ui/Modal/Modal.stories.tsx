@@ -1,4 +1,4 @@
-import { Modal } from '@shared/ui/Modal';
+import { Modal } from '@shared/components/ui/Modal';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React, { useState } from 'react';
 

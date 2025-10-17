@@ -31,8 +31,8 @@ import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
-import { Modal, ModalFooter } from '@shared/ui/Modal';
-import { Skeleton } from '@shared/ui/Skeleton';
+import { Modal, ModalFooter } from '@shared/components/ui/Modal';
+import { Skeleton } from '@shared/components/ui/Skeleton';
 import { formatDate } from '@shared/utils';
 import { adminService } from '../../../services/admin-backend.service';
 

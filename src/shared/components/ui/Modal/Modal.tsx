@@ -203,3 +203,36 @@ export function Modal({
 
   return createPortal(modalContent, document.body);
 }
+
+/**
+ * ModalFooter Component
+ *
+ * Convenience component for modal footer with standard button layout
+ */
+export interface ModalFooterProps {
+  /** Primary action button (e.g., "Save", "Confirm") */
+  primaryAction?: React.ReactNode;
+  /** Secondary action button (e.g., "Cancel") */
+  secondaryAction?: React.ReactNode;
+  /** Additional actions (rendered on the left side) */
+  additionalActions?: React.ReactNode;
+}
+
+export function ModalFooter({
+  primaryAction,
+  secondaryAction,
+  additionalActions,
+}: ModalFooterProps) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      {/* Left side - additional actions */}
+      <div className="flex items-center gap-2">{additionalActions}</div>
+
+      {/* Right side - primary and secondary actions */}
+      <div className="flex items-center gap-2 ml-auto">
+        {secondaryAction}
+        {primaryAction}
+      </div>
+    </div>
+  );
+}

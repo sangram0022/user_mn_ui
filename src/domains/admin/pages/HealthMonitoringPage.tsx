@@ -34,10 +34,10 @@ import { useEffect, useState, type FC } from 'react';
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
-import { Badge } from '@shared/ui/Badge';
+import { Badge } from '@shared/components/ui/Badge';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
-import { Skeleton } from '@shared/ui/Skeleton';
+import { Skeleton } from '@shared/components/ui/Skeleton';
 import { formatDateTime, formatTime } from '@shared/utils';
 import { adminService } from '../../../services/admin-backend.service';
 

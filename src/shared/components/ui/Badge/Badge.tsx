@@ -13,7 +13,14 @@ import { cn } from '@shared/utils';
 import { X } from 'lucide-react';
 import React from 'react';
 
-export type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info';
+export type BadgeVariant =
+  | 'default'
+  | 'primary'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info'
+  | 'critical';
 export type BadgeSize = 'sm' | 'md' | 'lg';
 
 export interface BadgeProps {
@@ -25,6 +32,9 @@ export interface BadgeProps {
 
   /** Size */
   size?: BadgeSize;
+
+  /** Optional icon to display before text */
+  icon?: React.ReactNode;
 
   /** Show dot indicator */
   dot?: boolean;
@@ -51,6 +61,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   error:
     'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800',
   info: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800',
+  critical: 'bg-red-600 dark:bg-red-700 text-white border border-red-700 dark:border-red-600',
 };
 
 const dotColors: Record<BadgeVariant, string> = {
@@ -60,6 +71,7 @@ const dotColors: Record<BadgeVariant, string> = {
   warning: 'bg-yellow-500',
   error: 'bg-red-500',
   info: 'bg-blue-400',
+  critical: 'bg-white',
 };
 
 const sizeStyles: Record<BadgeSize, { container: string; dot: string; icon: string }> = {
@@ -84,6 +96,7 @@ export function Badge({
   children,
   variant = 'default',
   size = 'md',
+  icon,
   dot = false,
   removable = false,
   onRemove,
@@ -102,6 +115,9 @@ export function Badge({
     >
       {/* Dot Indicator */}
       {dot && <span className={cn('rounded-full', dotColors[variant], sizeStyles[size].dot)} />}
+
+      {/* Icon */}
+      {icon && <span className={cn('inline-flex', sizeStyles[size].icon)}>{icon}</span>}
 
       {/* Content */}
       <span>{children}</span>

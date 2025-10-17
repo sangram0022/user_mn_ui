@@ -36,10 +36,10 @@ import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { usePerformanceMonitor } from '@hooks/usePerformanceMonitor';
 import { useToast } from '@hooks/useToast';
-import { Badge } from '@shared/ui/Badge';
+import { Badge, getSeverityBadgeVariant } from '@shared/components/ui/Badge';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
-import { Skeleton } from '@shared/ui/Skeleton';
+import { Skeleton } from '@shared/components/ui/Skeleton';
 import { formatDateTime, formatTimestamp } from '@shared/utils';
 import { adminService } from '../../../services/admin-backend.service';
 
@@ -87,26 +87,9 @@ interface AuditSummary {
 // Badge Component Mapping
 // ============================================================================
 
-/**
- * Map severity level to Badge variant
- */
-const getSeverityVariant = (
-  severity: string
-): 'critical' | 'warning' | 'info' | 'success' | 'default' => {
-  switch (severity.toLowerCase()) {
-    case 'critical':
-    case 'error':
-      return 'critical';
-    case 'warning':
-      return 'warning';
-    case 'info':
-      return 'info';
-    case 'success':
-      return 'success';
-    default:
-      return 'default';
-  }
-};
+// ============================================================================
+// Constants
+// ============================================================================
 
 /**
  * Get icon for severity level
@@ -141,7 +124,7 @@ const AuditLogRow: FC<{ log: AuditLogEntry; onViewDetails: (log: AuditLogEntry) 
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <Badge
-          variant={getSeverityVariant(log.severity)}
+          variant={getSeverityBadgeVariant(log.severity)}
           icon={getSeverityIcon(log.severity)}
           size="sm"
           aria-label={`${log.severity} severity`}
@@ -206,7 +189,7 @@ const DetailsModal: FC<{
               <div>
                 <h4 className="text-sm font-medium text-gray-700 mb-1">Severity</h4>
                 <Badge
-                  variant={getSeverityVariant(log.severity)}
+                  variant={getSeverityBadgeVariant(log.severity)}
                   icon={getSeverityIcon(log.severity)}
                   size="sm"
                 >

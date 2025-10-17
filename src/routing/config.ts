@@ -1,4 +1,4 @@
-import { DashboardSkeleton, PageSkeleton, TableSkeleton } from '@shared/ui/Skeleton';
+import { DashboardSkeleton, PageSkeleton, TableSkeleton } from '@shared/components/ui/Skeleton';
 import {
   createElement,
   lazy,
