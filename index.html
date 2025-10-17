@@ -5,9 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Security Headers -->
+    <!--
+      PRODUCTION CSP (via CloudFront/Server headers):
+      Content-Security-Policy: 
+        default-src 'self';
+        script-src 'self' 'nonce-{NONCE}';
+        style-src 'self' 'nonce-{NONCE}' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: https: blob:;
+        connect-src 'self' https://*.execute-api.{region}.amazonaws.com;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+        upgrade-insecure-requests;
+        
+      DEVELOPMENT: Relaxed for HMR (below) - Replace in production deployment
+    -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://127.0.0.1:8001 http://localhost:8001;"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' http://127.0.0.1:8001 http://localhost:8001 ws://localhost:* ws://127.0.0.1:*; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
     />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 

@@ -170,14 +170,16 @@ export function SkeletonText({
 
   return (
     <div className={`${spacingClasses[spacing]} ${className}`} data-testid="skeleton-text">
-      {Array.from({ length: lines }).map((_, index) => (
-        <Skeleton
-          key={index}
-          variant="text"
-          width={index === lines - 1 ? lastLineWidth : '100%'}
-          animation={animation}
-        />
-      ))}
+      {Array.from({ length: lines }, (_, index) => ({ id: `skeleton-text-${index}` })).map(
+        ({ id }, index) => (
+          <Skeleton
+            key={id}
+            variant="text"
+            width={index === lines - 1 ? lastLineWidth : '100%'}
+            animation={animation}
+          />
+        )
+      )}
     </div>
   );
 }
@@ -297,24 +299,30 @@ export function SkeletonTable({
           data-columns={columns}
           style={{ '--columns': columns } as React.CSSProperties}
         >
-          {Array.from({ length: columns }).map((_, index) => (
-            <Skeleton key={`header-${index}`} variant="text" height="20px" animation={animation} />
-          ))}
+          {Array.from({ length: columns }, (_, index) => ({ id: `header-col-${index}` })).map(
+            ({ id }) => (
+              <Skeleton key={id} variant="text" height="20px" animation={animation} />
+            )
+          )}
         </div>
       )}
 
-      {Array.from({ length: rows }).map((_, rowIndex) => (
-        <div
-          key={`row-${rowIndex}`}
-          className="skeleton-grid"
-          data-columns={columns}
-          style={{ '--columns': columns } as React.CSSProperties}
-        >
-          {Array.from({ length: columns }).map((_, colIndex) => (
-            <Skeleton key={`cell-${rowIndex}-${colIndex}`} variant="text" animation={animation} />
-          ))}
-        </div>
-      ))}
+      {Array.from({ length: rows }, (_, rowIndex) => ({ id: `row-${rowIndex}`, rowIndex })).map(
+        ({ id, rowIndex }) => (
+          <div
+            key={id}
+            className="skeleton-grid"
+            data-columns={columns}
+            style={{ '--columns': columns } as React.CSSProperties}
+          >
+            {Array.from({ length: columns }, (_, colIndex) => ({
+              id: `cell-${rowIndex}-${colIndex}`,
+            })).map(({ id }) => (
+              <Skeleton key={id} variant="text" animation={animation} />
+            ))}
+          </div>
+        )
+      )}
     </div>
   );
 }
@@ -358,8 +366,8 @@ export function SkeletonList({
 }: SkeletonListProps) {
   return (
     <div className={`space-y-4 ${className}`} data-testid="skeleton-list">
-      {Array.from({ length: items }).map((_, index) => (
-        <div key={index} className="flex items-start space-x-4">
+      {Array.from({ length: items }, (_, index) => ({ id: `list-item-${index}` })).map(({ id }) => (
+        <div key={id} className="flex items-start space-x-4">
           {showAvatar && (
             <Skeleton variant="circular" width="40px" height="40px" animation={animation} />
           )}
@@ -405,12 +413,14 @@ export function SkeletonForm({
 }: SkeletonFormProps) {
   return (
     <div className={`space-y-4 ${className}`} data-testid="skeleton-form">
-      {Array.from({ length: fields }).map((_, index) => (
-        <div key={index} className="space-y-2">
-          <Skeleton variant="text" width="100px" height="16px" animation={animation} />
-          <Skeleton variant="rounded" height="40px" animation={animation} />
-        </div>
-      ))}
+      {Array.from({ length: fields }, (_, index) => ({ id: `form-field-${index}` })).map(
+        ({ id }) => (
+          <div key={id} className="space-y-2">
+            <Skeleton variant="text" width="100px" height="16px" animation={animation} />
+            <Skeleton variant="rounded" height="40px" animation={animation} />
+          </div>
+        )
+      )}
 
       {showButton && (
         <Skeleton
@@ -448,16 +458,20 @@ export function PageSkeleton({
             <Skeleton width="256px" height="32px" />
             {descriptionLines > 0 && (
               <div className="space-y-2">
-                {Array.from({ length: descriptionLines }).map((_, i) => (
-                  <Skeleton key={i} width="384px" height="16px" />
+                {Array.from({ length: descriptionLines }, (_, i) => ({
+                  id: `page-desc-${i}`,
+                })).map(({ id }) => (
+                  <Skeleton key={id} width="384px" height="16px" />
                 ))}
               </div>
             )}
           </div>
           {actionCount > 0 && (
             <div className="flex space-x-3">
-              {Array.from({ length: actionCount }).map((_, i) => (
-                <Skeleton key={i} width="96px" height="40px" />
+              {Array.from({ length: actionCount }, (_, i) => ({
+                id: `page-action-${i}`,
+              })).map(({ id }) => (
+                <Skeleton key={id} width="96px" height="40px" />
               ))}
             </div>
           )}
@@ -499,16 +513,20 @@ export function DashboardSkeleton({
             <Skeleton width="256px" height="32px" />
             {descriptionLines > 0 && (
               <div className="space-y-2">
-                {Array.from({ length: descriptionLines }).map((_, i) => (
-                  <Skeleton key={i} width="384px" height="16px" />
+                {Array.from({ length: descriptionLines }, (_, i) => ({
+                  id: `dash-desc-${i}`,
+                })).map(({ id }) => (
+                  <Skeleton key={id} width="384px" height="16px" />
                 ))}
               </div>
             )}
           </div>
           {actionCount > 0 && (
             <div className="flex space-x-3">
-              {Array.from({ length: actionCount }).map((_, i) => (
-                <Skeleton key={i} width="96px" height="40px" />
+              {Array.from({ length: actionCount }, (_, i) => ({
+                id: `dash-action-${i}`,
+              })).map(({ id }) => (
+                <Skeleton key={id} width="96px" height="40px" />
               ))}
             </div>
           )}
@@ -516,8 +534,8 @@ export function DashboardSkeleton({
 
         {/* Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+          {Array.from({ length: 4 }, (_, i) => ({ id: `metric-card-${i}` })).map(({ id }) => (
+            <div key={id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
               <Skeleton width="96px" height="16px" className="mb-4" />
               <Skeleton width="128px" height="32px" className="mb-2" />
               <Skeleton width="80px" height="12px" />
@@ -527,8 +545,8 @@ export function DashboardSkeleton({
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+          {Array.from({ length: 2 }, (_, i) => ({ id: `chart-${i}` })).map(({ id }) => (
+            <div key={id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
               <Skeleton width="192px" height="24px" className="mb-4" />
               <Skeleton height="256px" />
             </div>
@@ -558,19 +576,26 @@ export function TableSkeleton({ rows = 5, columns = 4 }: TableSkeletonProps) {
         {/* Table Header */}
         <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-6 py-4">
           <div className="flex space-x-4">
-            {Array.from({ length: columns }).map((_, i) => (
-              <Skeleton key={i} height="20px" className="flex-1" />
-            ))}
+            {Array.from({ length: columns }, (_, i) => ({ id: `table-header-${i}` })).map(
+              ({ id }) => (
+                <Skeleton key={id} height="20px" className="flex-1" />
+              )
+            )}
           </div>
         </div>
 
         {/* Table Rows */}
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {Array.from({ length: rows }).map((_, rowIndex) => (
-            <div key={rowIndex} className="px-6 py-4">
+          {Array.from({ length: rows }, (_, rowIndex) => ({
+            id: `table-row-${rowIndex}`,
+            rowIndex,
+          })).map(({ id, rowIndex }) => (
+            <div key={id} className="px-6 py-4">
               <div className="flex space-x-4">
-                {Array.from({ length: columns }).map((_, colIndex) => (
-                  <Skeleton key={colIndex} height="16px" className="flex-1" />
+                {Array.from({ length: columns }, (_, colIndex) => ({
+                  id: `table-cell-${rowIndex}-${colIndex}`,
+                })).map(({ id }) => (
+                  <Skeleton key={id} height="16px" className="flex-1" />
                 ))}
               </div>
             </div>

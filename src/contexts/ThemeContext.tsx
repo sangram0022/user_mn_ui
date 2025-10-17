@@ -10,6 +10,7 @@
 
 /* eslint-disable react-refresh/only-export-components */
 
+import { safeLocalStorage } from '@shared/utils/safeLocalStorage';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -52,13 +53,8 @@ export function ThemeProvider({
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     if (typeof window === 'undefined') return defaultTheme;
 
-    try {
-      const stored = localStorage.getItem(storageKey) as ThemeMode | null;
-      return stored && ['light', 'dark', 'system'].includes(stored) ? stored : defaultTheme;
-    } catch (error) {
-      console.warn('Failed to read theme from localStorage:', error);
-      return defaultTheme;
-    }
+    const stored = safeLocalStorage.getItem(storageKey) as ThemeMode | null;
+    return stored && ['light', 'dark', 'system'].includes(stored) ? stored : defaultTheme;
   });
 
   const [effectiveTheme, setEffectiveTheme] = useState<EffectiveTheme>('light');
@@ -134,12 +130,7 @@ export function ThemeProvider({
   const setTheme = useCallback(
     (newTheme: ThemeMode) => {
       setThemeState(newTheme);
-
-      try {
-        localStorage.setItem(storageKey, newTheme);
-      } catch (error) {
-        console.warn('Failed to save theme to localStorage:', error);
-      }
+      safeLocalStorage.setItem(storageKey, newTheme);
     },
     [storageKey]
   );

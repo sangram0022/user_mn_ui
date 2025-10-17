@@ -123,8 +123,8 @@ export const ContentCard: Story = {
 export const SkeletonGrid: Story = {
   render: () => (
     <Skeleton.Grid columns={3} className="gap-4">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="border border-gray-200 rounded-lg overflow-hidden">
+      {Array.from({ length: 6 }, (_, i) => ({ id: `grid-item-${i}` })).map(({ id }) => (
+        <div key={id} className="border border-gray-200 rounded-lg overflow-hidden">
           <Skeleton variant="rectangular" width="100%" height="150px" />
           <div className="p-3 space-y-2">
             <Skeleton variant="text" width="70%" />
@@ -142,8 +142,8 @@ export const SkeletonGrid: Story = {
 export const TableRows: Story = {
   render: () => (
     <div className="space-y-4 max-w-2xl">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
+      {Array.from({ length: 5 }, (_, i) => ({ id: `table-row-${i}` })).map(({ id }) => (
+        <div key={id} className="flex items-center gap-4">
           <Skeleton variant="circular" width="32px" height="32px" />
           <Skeleton variant="text" width="30%" />
           <Skeleton variant="text" width="25%" />
@@ -165,8 +165,8 @@ export const Dashboard: Story = {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="p-4 border border-gray-200 rounded-lg space-y-2">
+        {Array.from({ length: 3 }, (_, i) => ({ id: `stat-card-${i}` })).map(({ id }) => (
+          <div key={id} className="p-4 border border-gray-200 rounded-lg space-y-2">
             <Skeleton variant="text" width="60%" />
             <Skeleton variant="text" width="40%" height="24px" />
           </div>

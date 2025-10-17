@@ -260,7 +260,7 @@ export const ExtraLargeSize: Story = {
               <p>This is an extra large modal for very complex layouts.</p>
               <div className="grid grid-cols-3 gap-4">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="p-4 border rounded">
+                  <div key={`xl-modal-item-${i}`} className="p-4 border rounded">
                     <h3 className="font-semibold mb-2">Item {i}</h3>
                     <p className="text-sm">Description for item {i}</p>
                   </div>
@@ -291,9 +291,12 @@ export const FullSize: Story = {
               <p>Perfect for immersive experiences or complex data tables.</p>
               <div className="h-96 border rounded p-4 overflow-auto">
                 <h3 className="font-semibold mb-4">Large Content Area</h3>
-                {Array.from({ length: 20 }).map((_, i) => (
-                  <p key={i} className="mb-2">
-                    Line {i + 1}: This is scrollable content within the modal.
+                {Array.from({ length: 20 }, (_, i) => ({
+                  id: `full-modal-line-${i}`,
+                  line: i,
+                })).map(({ id, line }) => (
+                  <p key={id} className="mb-2">
+                    Line {line + 1}: This is scrollable content within the modal.
                   </p>
                 ))}
               </div>
@@ -564,15 +567,17 @@ export const ScrollableContent: Story = {
               </p>
 
               {/* Repeat sections for scrollable content */}
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i}>
-                  <h3 className="font-semibold">{i + 4}. Additional Section</h3>
-                  <p className="text-sm text-gray-700">
-                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
-                    deserunt mollit anim id est laborum.
-                  </p>
-                </div>
-              ))}
+              {Array.from({ length: 5 }, (_, i) => ({ id: `scroll-section-${i}`, index: i })).map(
+                ({ id, index }) => (
+                  <div key={id}>
+                    <h3 className="font-semibold">{index + 4}. Additional Section</h3>
+                    <p className="text-sm text-gray-700">
+                      Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                      deserunt mollit anim id est laborum.
+                    </p>
+                  </div>
+                )
+              )}
             </div>
           </Modal>
         </>

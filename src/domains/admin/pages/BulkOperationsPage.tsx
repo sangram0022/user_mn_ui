@@ -404,7 +404,7 @@ const ValidationResults: FC<{
           </h4>
           <div className="space-y-2 max-h-48 overflow-y-auto" role="list">
             {validation.errors.map((error, index) => (
-              <div key={index} className="text-sm" role="listitem">
+              <div key={`error-${error.row}-${index}`} className="text-sm" role="listitem">
                 <span className="font-medium text-red-700">Row {error.row}:</span>
                 {error.field && <span className="text-red-600"> [{error.field}]</span>}
                 <span className="text-red-800"> {error.message}</span>
@@ -426,7 +426,7 @@ const ValidationResults: FC<{
           </h4>
           <div className="space-y-2 max-h-48 overflow-y-auto" role="list">
             {validation.warnings.map((warning, index) => (
-              <div key={index} className="text-sm" role="listitem">
+              <div key={`warning-${warning.row}-${index}`} className="text-sm" role="listitem">
                 <span className="font-medium text-yellow-700">Row {warning.row}:</span>
                 {warning.field && <span className="text-yellow-600"> [{warning.field}]</span>}
                 <span className="text-yellow-800"> {warning.message}</span>
