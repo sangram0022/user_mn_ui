@@ -29,10 +29,10 @@ import { useEffect, useState, type FC } from 'react';
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
-import Breadcrumb from '@shared/ui/Breadcrumb';
-import ErrorAlert from '@shared/ui/ErrorAlert';
 import { Modal, ModalFooter } from '@shared/components/ui/Modal';
 import { Skeleton } from '@shared/components/ui/Skeleton';
+import Breadcrumb from '@shared/ui/Breadcrumb';
+import ErrorAlert from '@shared/ui/ErrorAlert';
 import { adminService } from '../../../services/admin-backend.service';
 
 // ============================================================================

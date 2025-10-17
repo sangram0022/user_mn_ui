@@ -30,9 +30,9 @@ import { useEffect, useRef, useState, type FC } from 'react';
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
+import { Skeleton } from '@shared/components/ui/Skeleton';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
-import { Skeleton } from '@shared/components/ui/Skeleton';
 import { formatDateTime } from '@shared/utils';
 import { adminService } from '../../../services/admin-backend.service';
 

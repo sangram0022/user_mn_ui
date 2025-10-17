@@ -37,9 +37,9 @@ import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { usePerformanceMonitor } from '@hooks/usePerformanceMonitor';
 import { useToast } from '@hooks/useToast';
 import { Badge, getSeverityBadgeVariant } from '@shared/components/ui/Badge';
+import { Skeleton } from '@shared/components/ui/Skeleton';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
-import { Skeleton } from '@shared/components/ui/Skeleton';
 import { formatDateTime, formatTimestamp } from '@shared/utils';
 import { adminService } from '../../../services/admin-backend.service';
 

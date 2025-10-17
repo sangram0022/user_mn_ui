@@ -8,7 +8,7 @@
 
 // Re-export from consolidated location
 export { Modal, ModalFooter } from '@shared/components/ui/Modal';
-export type { ModalProps, ModalSize, ModalFooterProps } from '@shared/components/ui/Modal';
+export type { ModalFooterProps, ModalProps, ModalSize } from '@shared/components/ui/Modal';
 
 export { Badge } from '@shared/components/ui/Badge';
 export type { BadgeProps, BadgeSize, BadgeVariant } from '@shared/components/ui/Badge';
@@ -16,20 +16,20 @@ export type { BadgeProps, BadgeSize, BadgeVariant } from '@shared/components/ui/
 export { getSeverityBadgeVariant, getStatusBadgeVariant } from '@shared/components/ui/Badge';
 
 export {
+  DashboardSkeleton,
+  PageSkeleton,
   Skeleton,
-  SkeletonText,
   SkeletonCard,
+  SkeletonForm,
   SkeletonList,
   SkeletonTable,
-  SkeletonForm,
-  PageSkeleton,
-  DashboardSkeleton,
+  SkeletonText,
   TableSkeleton,
 } from '@shared/components/ui/Skeleton';
 export type {
-  SkeletonProps,
-  PageSkeletonProps,
   DashboardSkeletonProps,
+  PageSkeletonProps,
+  SkeletonProps,
   TableSkeletonProps,
 } from '@shared/components/ui/Skeleton';
 

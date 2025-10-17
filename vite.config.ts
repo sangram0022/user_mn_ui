@@ -14,17 +14,6 @@ export default defineConfig(({ mode }) => {
       react({
         // Use automatic JSX runtime
         jsxRuntime: 'automatic',
-        // ✅ React 19: Enable React Compiler for automatic memoization
-        babel: {
-          plugins: [
-            [
-              'babel-plugin-react-compiler',
-              {
-                // Compiler options - simplified for production use
-              },
-            ],
-          ],
-        },
       }),
       // Critical CSS inlining for faster FCP
       mode === 'production' && inlineCriticalCSS(),
