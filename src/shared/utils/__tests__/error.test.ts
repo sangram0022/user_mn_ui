@@ -5,7 +5,6 @@
  */
 
 import { ApiError } from '@shared/errors/ApiError';
-import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   APPLICATION_ERRORS,
@@ -23,7 +22,6 @@ import {
   parseApiError,
   parseError,
   requiresUserAction,
-  useErrorBoundary,
 } from '../error';
 
 describe('Error Utility - Complete Coverage', () => {
@@ -587,7 +585,7 @@ describe('Error Utility - Complete Coverage', () => {
 
     it('should log error without throwing', () => {
       const error = new Error('Test error');
-      expect(() => errorLogger.log(error, 'test-context')).not.toThrow();
+      expect(() => errorLogger.log(error, { component: 'test-context' })).not.toThrow();
     });
 
     it('should have getRecentErrors method', () => {
@@ -607,100 +605,6 @@ describe('Error Utility - Complete Coverage', () => {
 
     it('should clear errors without throwing', () => {
       expect(() => errorLogger.clear()).not.toThrow();
-    });
-  });
-
-  describe('useErrorBoundary hook', () => {
-    it('should initialize with no error', () => {
-      const { result } = renderHook(() => useErrorBoundary());
-      expect(result.current.error).toBeNull();
-      expect(result.current.hasError).toBe(false);
-    });
-
-    it('should set error when showBoundary is called', () => {
-      const { result } = renderHook(() => useErrorBoundary());
-      const testError = new Error('Test error');
-
-      act(() => {
-        result.current.showBoundary(testError);
-      });
-
-      expect(result.current.error).toBe(testError);
-      expect(result.current.hasError).toBe(true);
-    });
-
-    it('should reset error when resetBoundary is called', () => {
-      const { result } = renderHook(() => useErrorBoundary());
-      const testError = new Error('Test error');
-
-      act(() => {
-        result.current.showBoundary(testError);
-      });
-
-      expect(result.current.hasError).toBe(true);
-
-      act(() => {
-        result.current.resetBoundary();
-      });
-
-      expect(result.current.error).toBeNull();
-      expect(result.current.hasError).toBe(false);
-    });
-
-    it('should call onError callback when error is set', () => {
-      const onError = vi.fn();
-      const { result } = renderHook(() => useErrorBoundary({ onError }));
-      const testError = new Error('Test error');
-
-      act(() => {
-        result.current.showBoundary(testError);
-      });
-
-      expect(onError).toHaveBeenCalledWith(testError);
-    });
-
-    it('should call onReset callback when error is reset', () => {
-      const onReset = vi.fn();
-      const { result } = renderHook(() => useErrorBoundary({ onReset }));
-      const testError = new Error('Test error');
-
-      act(() => {
-        result.current.showBoundary(testError);
-        result.current.resetBoundary();
-      });
-
-      expect(onReset).toHaveBeenCalled();
-    });
-
-    it('should handle multiple error/reset cycles', () => {
-      const { result } = renderHook(() => useErrorBoundary());
-      const error1 = new Error('Error 1');
-      const error2 = new Error('Error 2');
-
-      act(() => {
-        result.current.showBoundary(error1);
-      });
-      expect(result.current.error).toBe(error1);
-
-      act(() => {
-        result.current.resetBoundary();
-      });
-      expect(result.current.error).toBeNull();
-
-      act(() => {
-        result.current.showBoundary(error2);
-      });
-      expect(result.current.error).toBe(error2);
-    });
-
-    it('should handle null error passed to showBoundary', () => {
-      const { result } = renderHook(() => useErrorBoundary());
-
-      act(() => {
-        result.current.showBoundary(null);
-      });
-
-      expect(result.current.hasError).toBe(true);
     });
   });
 

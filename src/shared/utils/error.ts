@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { logger } from './logger';
 
 import { ApiError } from '@shared/errors/ApiError';
@@ -1409,69 +1408,3 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
   (window as unknown as { errorLogger: ErrorLogger }).errorLogger = errorLogger;
   logger.info('[Error Logger] Debug interface available at window.errorLogger');
 }
-
-interface UseErrorBoundaryOptions {
-  onError?: (error: Error | null) => void;
-  onReset?: () => void;
-  resetOnPropsChange?: boolean;
-}
-
-export const useErrorBoundary = (options: UseErrorBoundaryOptions = {}) => {
-  const [error, setError] = useState<Error | null>(null);
-
-  const showBoundary = (err: Error | null) => {
-    // allow null to represent generic boundary trigger
-    const normalized = err ?? new Error('Unknown error');
-    setError(normalized);
-    options.onError?.(err ?? null);
-  };
-
-  const resetBoundary = () => {
-    setError(null);
-    options.onReset?.();
-  };
-
-  // React 19 best practice: Handle reset via key or resetBoundary instead of useEffect
-  // Remove automatic reset in useEffect to avoid setState in effect
-  // Users should call resetBoundary explicitly when needed
-
-  return { error, hasError: error !== null, showBoundary, resetBoundary };
-};
-
-export const useErrorHandler = () => {
-  const [error, setError] = useState<ErrorInfo | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  const showError = (errorInput: unknown) => {
-    const parsedError = parseError(errorInput);
-    setError(parsedError);
-    setIsVisible(true);
-  };
-
-  const hideError = () => {
-    setIsVisible(false);
-  };
-
-  const clearError = () => {
-    setError(null);
-    setIsVisible(false);
-  };
-
-  const retry = () => {
-    if (error?.retryable) {
-      hideError();
-      return true;
-    }
-    return false;
-  };
-
-  return {
-    error,
-    isVisible,
-    showError,
-    hideError,
-    clearError,
-    retry,
-    canRetry: error?.retryable ?? false,
-  };
-};
