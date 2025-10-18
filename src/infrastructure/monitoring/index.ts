@@ -5,10 +5,6 @@
  * @module infrastructure/monitoring
  */
 
-// Logger - Structured logging delegates to shared utilities
-export { logger } from '@shared/utils/logger';
-export type { LogContext, LogLevel, LogMessage } from '@shared/utils/logger';
-
 // Performance Monitoring
 export { performanceMonitor } from './PerformanceMonitor';
 export { webVitalsTracker } from './WebVitalsTracker';

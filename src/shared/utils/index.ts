@@ -3,7 +3,6 @@
  */
 
 // Error handling utilities
-export * from './apiError';
 export * from './error';
 
 // Logging utilities
