@@ -25,12 +25,14 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { useToast } from '@hooks/useToast';
 import { apiClient } from '@lib/api';
+import { PageMetadata } from '@shared/components/PageMetadata';
 import {
   validateEmail,
   validatePassword,
   validatePasswordMatch,
   validateRequired,
 } from '@shared/utils/formValidation';
+import { prefetchRoute } from '@shared/utils/resource-loading';
 import type { FeedbackIcon, RegistrationFeedback } from '../utils/registrationFeedback';
 import { buildRegistrationFeedback } from '../utils/registrationFeedback';
 
@@ -159,6 +161,11 @@ const RegisterPage: React.FC = () => {
   const [hasNavigated, setHasNavigated] = useState(false);
 
   const navigate = useNavigate();
+
+  // Prefetch likely next routes for improved navigation performance
+  useEffect(() => {
+    prefetchRoute('/login');
+  }, []);
 
   const handleProceedToLogin = useCallback(() => {
     setHasNavigated((prev) => {
@@ -366,6 +373,13 @@ const RegisterPage: React.FC = () => {
 
   return (
     <>
+      <PageMetadata
+        title="Register - Create Account"
+        description="Create a new account to access the user management system with secure authentication."
+        keywords="register, sign up, create account, new user, registration"
+        ogTitle="Register - User Management System"
+        ogDescription="Sign up for a new account with secure registration."
+      />
       <div className="layout-narrow py-8">
         {/* Logo and Title */}
         <div className="text-center mb-8">

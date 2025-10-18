@@ -30,6 +30,7 @@ import { useEffect, useRef, useState, type FC } from 'react';
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
+import { PageMetadata } from '@shared/components/PageMetadata';
 import { Skeleton } from '@shared/components/ui/Skeleton';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
@@ -909,114 +910,121 @@ const BulkOperationsPage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Breadcrumb />
-          <div className="mt-4 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Bulk Operations</h1>
-              <p className="text-gray-600 mt-1">Import and manage users in bulk with CSV files</p>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={loadOperations}
-                disabled={isLoading}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                <Download className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Sample CSV
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6">
-            <ErrorAlert error={error} onDismiss={clearError} />
-          </div>
-        )}
-
-        {/* File Upload Section */}
-        {!validation && (
-          <div className="bg-white rounded-lg shadow-sm border mb-8 p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Upload User Data</h2>
-            {isValidating ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
-                <p className="text-gray-600">Validating file...</p>
+    <>
+      <PageMetadata
+        title="Bulk Operations - Admin"
+        description="Upload, validate, and manage large-scale user imports with realtime progress tracking."
+        keywords="admin bulk operations, user import csv, bulk user management, admin automation tools"
+      />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <Breadcrumb />
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Bulk Operations</h1>
+                <p className="text-gray-600 mt-1">Import and manage users in bulk with CSV files</p>
               </div>
-            ) : (
-              <FileUploadArea
-                onFileSelect={handleFileSelect}
-                isUploading={isUploading}
-                progress={uploadProgress}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Validation Results */}
-        {validation && (
-          <div className="bg-white rounded-lg shadow-sm border mb-8 p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-6">Validation Results</h2>
-            <ValidationResults
-              validation={validation}
-              onProceed={handleProceedWithImport}
-              onCancel={() => setValidation(null)}
-              isProcessing={isProcessing}
-            />
-          </div>
-        )}
-
-        {/* Operations List */}
-        <div
-          className="bg-white rounded-lg shadow-sm border"
-          role="region"
-          aria-labelledby="operations-list-title"
-        >
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 id="operations-list-title" className="text-lg font-medium text-gray-900">
-              Recent Operations
-            </h2>
-          </div>
-          <div className="p-6">
-            {isLoading ? (
-              <div className="space-y-4" role="status" aria-label="Loading operations">
-                <span className="sr-only">Loading bulk operations list</span>
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="border border-gray-200 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <Skeleton className="h-6 w-32" />
-                      <Skeleton className="h-6 w-20" />
-                    </div>
-                    <div className="grid grid-cols-4 gap-4 mb-4">
-                      {Array.from({ length: 4 }).map((_, j) => (
-                        <div key={j}>
-                          <Skeleton className="h-4 w-16 mb-2" />
-                          <Skeleton className="h-6 w-12" />
-                        </div>
-                      ))}
-                    </div>
-                    <Skeleton className="h-2 w-full" />
-                  </div>
-                ))}
+              <div className="flex space-x-3">
+                <button
+                  onClick={loadOperations}
+                  disabled={isLoading}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                >
+                  <Download className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                  Sample CSV
+                </button>
               </div>
-            ) : (
-              <OperationsList
-                operations={operations}
-                onViewDetails={() => {}} // Placeholder for future implementation
-                onPauseResume={handlePauseResume}
-                onCancel={handleCancel}
-                onRollback={handleRollback}
+            </div>
+          </div>
+
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6">
+              <ErrorAlert error={error} onDismiss={clearError} />
+            </div>
+          )}
+
+          {/* File Upload Section */}
+          {!validation && (
+            <div className="bg-white rounded-lg shadow-sm border mb-8 p-6">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">Upload User Data</h2>
+              {isValidating ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
+                  <p className="text-gray-600">Validating file...</p>
+                </div>
+              ) : (
+                <FileUploadArea
+                  onFileSelect={handleFileSelect}
+                  isUploading={isUploading}
+                  progress={uploadProgress}
+                />
+              )}
+            </div>
+          )}
+
+          {/* Validation Results */}
+          {validation && (
+            <div className="bg-white rounded-lg shadow-sm border mb-8 p-6">
+              <h2 className="text-lg font-medium text-gray-900 mb-6">Validation Results</h2>
+              <ValidationResults
+                validation={validation}
+                onProceed={handleProceedWithImport}
+                onCancel={() => setValidation(null)}
+                isProcessing={isProcessing}
               />
-            )}
+            </div>
+          )}
+
+          {/* Operations List */}
+          <div
+            className="bg-white rounded-lg shadow-sm border"
+            role="region"
+            aria-labelledby="operations-list-title"
+          >
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 id="operations-list-title" className="text-lg font-medium text-gray-900">
+                Recent Operations
+              </h2>
+            </div>
+            <div className="p-6">
+              {isLoading ? (
+                <div className="space-y-4" role="status" aria-label="Loading operations">
+                  <span className="sr-only">Loading bulk operations list</span>
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="border border-gray-200 rounded-lg p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-6 w-20" />
+                      </div>
+                      <div className="grid grid-cols-4 gap-4 mb-4">
+                        {Array.from({ length: 4 }).map((_, j) => (
+                          <div key={j}>
+                            <Skeleton className="h-4 w-16 mb-2" />
+                            <Skeleton className="h-6 w-12" />
+                          </div>
+                        ))}
+                      </div>
+                      <Skeleton className="h-2 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <OperationsList
+                  operations={operations}
+                  onViewDetails={() => {}} // Placeholder for future implementation
+                  onPauseResume={handlePauseResume}
+                  onCancel={handleCancel}
+                  onRollback={handleRollback}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

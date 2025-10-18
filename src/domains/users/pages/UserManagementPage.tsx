@@ -15,7 +15,9 @@ import { useVirtualScroll } from '@hooks/useVirtualScroll';
 import { apiClient } from '@lib/api';
 import { SkeletonTable } from '@shared/components/ui/Skeleton';
 import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@shared/types';
+import { PageMetadata } from '@shared/ui';
 import { formatDate } from '@shared/utils';
+import { prefetchRoute } from '@shared/utils/resource-loading';
 import { getUserPermissions, getUserRoleName } from '@shared/utils/user';
 import { useAuth } from '../../auth';
 import {
@@ -361,6 +363,13 @@ const UserManagementEnhanced: FC = () => {
     }
   };
 
+  // Prefetch likely next routes for improved navigation performance
+  useEffect(() => {
+    prefetchRoute('/users/roles');
+    prefetchRoute('/profile');
+    prefetchRoute('/dashboard');
+  }, []);
+
   useEffect(() => {
     debugLog('UserManagementEnhanced mounted', {
       userEmail: user?.email,
@@ -547,443 +556,460 @@ const UserManagementEnhanced: FC = () => {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-8">
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="mb-2 flex items-center gap-2 text-gray-900">
-            <Users className="h-6 w-6" aria-hidden="true" />
-            User Management
-          </h1>
-          <p className="m-0 text-gray-600" role="status">
-            Manage user accounts, roles, and permissions ({users.length} total users)
-          </p>
-        </div>
+    <>
+      {/* React 19: Declarative metadata */}
+      <PageMetadata
+        title="Users"
+        description="Manage your users efficiently with advanced filtering and search capabilities"
+        keywords="users, user management, user list, user administration, RBAC"
+      />
 
-        <div className="flex items-center gap-4">
-          {/* ✅ React 19: Enhanced bulk actions with ARIA live regions */}
-          {uiState.selectedUsers.size > 0 && (
-            <div
-              className="flex items-center gap-2 rounded-lg bg-sky-100 px-4 py-2 text-sky-700"
-              role="status"
-              aria-live="polite"
-            >
-              <span aria-label={`${uiState.selectedUsers.size} users selected`}>
-                {uiState.selectedUsers.size} selected
-              </span>
-              <button
-                onClick={handleBulkDelete}
-                disabled={actionLoading === 'bulk-delete'}
-                className="flex cursor-pointer items-center gap-1 rounded border-none bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all"
-                aria-label={`Delete ${uiState.selectedUsers.size} selected users`}
-                aria-busy={actionLoading === 'bulk-delete'}
-              >
-                <Trash2 className="h-3 w-3" aria-hidden="true" />
-                {actionLoading === 'bulk-delete' ? 'Deleting...' : 'Delete'}
-              </button>
-              <button
-                onClick={() =>
-                  setUIState((prev) => ({ ...prev, selectedUsers: new Set<string>() }))
-                }
-                className="cursor-pointer rounded border-none bg-gray-600 px-2 py-1 text-xs text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all"
-                aria-label="Clear selection"
-              >
-                Clear
-              </button>
-            </div>
-          )}
-
-          {hasPermission('user:write') && (
-            <button
-              onClick={() => setUIState((prev) => ({ ...prev, showCreateModal: true }))}
-              className="flex items-center gap-2 rounded-lg border-none bg-blue-500 px-6 py-3 font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
-              aria-label="Create new user"
-            >
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Create New User
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ✅ React 19: Accessible filters with semantic HTML */}
-      <div className="mb-8 rounded-xl border border-gray-200 bg-gray-50 p-6" role="search">
-        <h2 className="sr-only">Filter users</h2>
-        <div className="grid items-end gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto max-w-7xl p-8">
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
           <div>
-            <label htmlFor="search-users" className="flex flex-col gap-2 font-medium text-gray-700">
-              <span>
-                <Search className="mr-2 inline h-4 w-4" aria-hidden="true" />
-                Search Users
-                {/* ✅ Show pending indicator when search is deferred */}
-                {filters.searchTerm !== deferredSearchTerm && (
-                  <span className="ml-2 text-xs text-blue-600" role="status" aria-live="polite">
-                    Searching...
-                  </span>
-                )}
-              </span>
-              <input
-                id="search-users"
-                type="text"
-                placeholder="Search by email, username..."
-                value={filters.searchTerm}
-                onChange={(e) => setFilters((prev) => ({ ...prev, searchTerm: e.target.value }))}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
-                aria-label="Search users by email or username"
-                aria-describedby={
-                  filters.searchTerm !== deferredSearchTerm ? 'search-status' : undefined
-                }
-              />
-            </label>
-          </div>
-
-          <div>
-            <label htmlFor="filter-role" className="flex flex-col gap-2 font-medium text-gray-700">
-              <span>
-                <Filter className="mr-2 inline h-4 w-4" aria-hidden="true" />
-                Filter by Role
-                {/* ✅ Show transition pending indicator */}
-                {isPending && (
-                  <span className="ml-2 text-xs text-blue-600" role="status" aria-live="polite">
-                    Updating...
-                  </span>
-                )}
-              </span>
-              <select
-                id="filter-role"
-                value={filters.role}
-                onChange={(e) => {
-                  // ✅ React 19: Mark filter change as non-urgent
-                  startTransition(() => {
-                    setFilters((prev) => ({ ...prev, role: e.target.value }));
-                  });
-                }}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
-                aria-label="Filter users by role"
-              >
-                <option value="">All Roles</option>
-                {roles.map((role) => (
-                  <option key={role.id} value={role.name}>
-                    {role.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div>
-            <label
-              htmlFor="filter-status"
-              className="flex flex-col gap-2 font-medium text-gray-700"
-            >
-              <span>Status</span>
-              <select
-                id="filter-status"
-                value={filters.isActive === undefined ? '' : filters.isActive.toString()}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFilters((prev) => ({
-                    ...prev,
-                    isActive: value === '' ? undefined : value === 'true',
-                  }));
-                }}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
-                aria-label="Filter users by status"
-              >
-                <option value="">All Status</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
-            </label>
-          </div>
-
-          <button
-            onClick={() => {
-              setFilters({ searchTerm: '', role: '', isActive: undefined });
-            }}
-            className="cursor-pointer rounded-md border-none bg-gray-600 px-4 py-3 font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all"
-            aria-label="Clear all filters"
-          >
-            Clear Filters
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
-          {error}
-        </div>
-      )}
-
-      {/* Users Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-        {isLoading ? (
-          <div className="p-4">
-            <SkeletonTable rows={8} columns={5} showHeader />
-          </div>
-        ) : users.length === 0 ? (
-          <div className="p-12 text-center">
-            <Users className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-            <h3 className="mb-2 text-gray-900">No users found</h3>
-            <p className="text-gray-600">
-              {filters.searchTerm || filters.role || filters.isActive !== undefined
-                ? 'Try adjusting your filters'
-                : 'Get started by creating your first user'}
+            <h1 className="mb-2 flex items-center gap-2 text-gray-900">
+              <Users className="h-6 w-6" aria-hidden="true" />
+              User Management
+            </h1>
+            <p className="m-0 text-gray-600" role="status">
+              Manage user accounts, roles, and permissions ({users.length} total users)
             </p>
           </div>
-        ) : (
-          <>
-            {/* ✅ Virtual Scrolling: Fixed Header */}
-            <div className="border-b-2 border-gray-200 bg-gray-50" role="rowgroup">
-              <table className="w-full border-collapse" role="presentation">
-                <thead>
-                  <tr role="row">
-                    <th className="p-4 text-left font-semibold text-gray-700" scope="col">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={uiState.selectedUsers.size === users.length && users.length > 0}
-                          onChange={(e) => handleSelectAll(e.target.checked)}
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                          aria-label="Select all users"
-                        />
-                        <span>User</span>
-                      </label>
-                    </th>
-                    <th className="p-4 text-left font-semibold text-gray-700" scope="col">
-                      Role
-                    </th>
-                    <th className="p-4 text-left font-semibold text-gray-700" scope="col">
-                      Status
-                    </th>
-                    <th className="p-4 text-left font-semibold text-gray-700" scope="col">
-                      Created
-                    </th>
-                    <th className="p-4 text-left font-semibold text-gray-700" scope="col">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-              </table>
+
+          <div className="flex items-center gap-4">
+            {/* ✅ React 19: Enhanced bulk actions with ARIA live regions */}
+            {uiState.selectedUsers.size > 0 && (
+              <div
+                className="flex items-center gap-2 rounded-lg bg-sky-100 px-4 py-2 text-sky-700"
+                role="status"
+                aria-live="polite"
+              >
+                <span aria-label={`${uiState.selectedUsers.size} users selected`}>
+                  {uiState.selectedUsers.size} selected
+                </span>
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={actionLoading === 'bulk-delete'}
+                  className="flex cursor-pointer items-center gap-1 rounded border-none bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all"
+                  aria-label={`Delete ${uiState.selectedUsers.size} selected users`}
+                  aria-busy={actionLoading === 'bulk-delete'}
+                >
+                  <Trash2 className="h-3 w-3" aria-hidden="true" />
+                  {actionLoading === 'bulk-delete' ? 'Deleting...' : 'Delete'}
+                </button>
+                <button
+                  onClick={() =>
+                    setUIState((prev) => ({ ...prev, selectedUsers: new Set<string>() }))
+                  }
+                  className="cursor-pointer rounded border-none bg-gray-600 px-2 py-1 text-xs text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all"
+                  aria-label="Clear selection"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+
+            {hasPermission('user:write') && (
+              <button
+                onClick={() => setUIState((prev) => ({ ...prev, showCreateModal: true }))}
+                className="flex items-center gap-2 rounded-lg border-none bg-blue-500 px-6 py-3 font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                aria-label="Create new user"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Create New User
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ✅ React 19: Accessible filters with semantic HTML */}
+        <div className="mb-8 rounded-xl border border-gray-200 bg-gray-50 p-6" role="search">
+          <h2 className="sr-only">Filter users</h2>
+          <div className="grid items-end gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <label
+                htmlFor="search-users"
+                className="flex flex-col gap-2 font-medium text-gray-700"
+              >
+                <span>
+                  <Search className="mr-2 inline h-4 w-4" aria-hidden="true" />
+                  Search Users
+                  {/* ✅ Show pending indicator when search is deferred */}
+                  {filters.searchTerm !== deferredSearchTerm && (
+                    <span className="ml-2 text-xs text-blue-600" role="status" aria-live="polite">
+                      Searching...
+                    </span>
+                  )}
+                </span>
+                <input
+                  id="search-users"
+                  type="text"
+                  placeholder="Search by email, username..."
+                  value={filters.searchTerm}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, searchTerm: e.target.value }))}
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
+                  aria-label="Search users by email or username"
+                  aria-describedby={
+                    filters.searchTerm !== deferredSearchTerm ? 'search-status' : undefined
+                  }
+                />
+              </label>
             </div>
 
-            {/* ✅ Virtual Scrolling: Scrollable Body */}
-            <div
-              ref={containerRef}
-              className="virtual-container overflow-x-auto"
-              style={
-                {
-                  '--container-height': `${CONTAINER_HEIGHT}px`,
-                } as React.CSSProperties
-              }
-              role="region"
-              aria-label="User list"
-            >
-              <div
-                className="virtual-spacer"
-                style={{ '--total-height': `${totalHeight}px` } as React.CSSProperties}
+            <div>
+              <label
+                htmlFor="filter-role"
+                className="flex flex-col gap-2 font-medium text-gray-700"
               >
-                {virtualItems.map(({ index, data: user, offsetTop }) => (
-                  <div
-                    key={user.id}
-                    className="virtual-row"
-                    style={
-                      {
-                        '--row-height': `${ITEM_HEIGHT}px`,
-                        '--row-offset': `${offsetTop}px`,
-                      } as React.CSSProperties
-                    }
-                  >
-                    <table className="w-full border-collapse" role="presentation">
-                      <tbody>
-                        <tr
-                          className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${
-                            isOptimistic(user) ? 'opacity-60 transition-opacity' : ''
-                          }`}
-                          role="row"
-                        >
-                          <td className="p-4">
-                            <div className="flex items-center gap-3">
-                              <label className="flex items-center cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={uiState.selectedUsers.has(user.id)}
-                                  onChange={(e) => handleSelectUser(user.id, e.target.checked)}
-                                  disabled={isOptimistic(user)}
-                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                  aria-label={`Select ${user.full_name || user.email}`}
-                                />
-                              </label>
-                              <div>
-                                <div className="font-medium text-gray-900 flex items-center gap-2">
-                                  {user.full_name || user.username || user.email}
-                                  {/* ✅ React 19: Visual indicator for optimistic updates */}
-                                  {isOptimistic(user) && (
-                                    <span className="text-xs text-amber-600 font-normal animate-pulse">
-                                      Saving...
-                                    </span>
-                                  )}
+                <span>
+                  <Filter className="mr-2 inline h-4 w-4" aria-hidden="true" />
+                  Filter by Role
+                  {/* ✅ Show transition pending indicator */}
+                  {isPending && (
+                    <span className="ml-2 text-xs text-blue-600" role="status" aria-live="polite">
+                      Updating...
+                    </span>
+                  )}
+                </span>
+                <select
+                  id="filter-role"
+                  value={filters.role}
+                  onChange={(e) => {
+                    // ✅ React 19: Mark filter change as non-urgent
+                    startTransition(() => {
+                      setFilters((prev) => ({ ...prev, role: e.target.value }));
+                    });
+                  }}
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
+                  aria-label="Filter users by role"
+                >
+                  <option value="">All Roles</option>
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.name}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div>
+              <label
+                htmlFor="filter-status"
+                className="flex flex-col gap-2 font-medium text-gray-700"
+              >
+                <span>Status</span>
+                <select
+                  id="filter-status"
+                  value={filters.isActive === undefined ? '' : filters.isActive.toString()}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFilters((prev) => ({
+                      ...prev,
+                      isActive: value === '' ? undefined : value === 'true',
+                    }));
+                  }}
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
+                  aria-label="Filter users by status"
+                >
+                  <option value="">All Status</option>
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </label>
+            </div>
+
+            <button
+              onClick={() => {
+                setFilters({ searchTerm: '', role: '', isActive: undefined });
+              }}
+              className="cursor-pointer rounded-md border-none bg-gray-600 px-4 py-3 font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all"
+              aria-label="Clear all filters"
+            >
+              Clear Filters
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
+            {error}
+          </div>
+        )}
+
+        {/* Users Table */}
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+          {isLoading ? (
+            <div className="p-4">
+              <SkeletonTable rows={8} columns={5} showHeader />
+            </div>
+          ) : users.length === 0 ? (
+            <div className="p-12 text-center">
+              <Users className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+              <h3 className="mb-2 text-gray-900">No users found</h3>
+              <p className="text-gray-600">
+                {filters.searchTerm || filters.role || filters.isActive !== undefined
+                  ? 'Try adjusting your filters'
+                  : 'Get started by creating your first user'}
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* ✅ Virtual Scrolling: Fixed Header */}
+              <div className="border-b-2 border-gray-200 bg-gray-50" role="rowgroup">
+                <table className="w-full border-collapse" role="presentation">
+                  <thead>
+                    <tr role="row">
+                      <th className="p-4 text-left font-semibold text-gray-700" scope="col">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={
+                              uiState.selectedUsers.size === users.length && users.length > 0
+                            }
+                            onChange={(e) => handleSelectAll(e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            aria-label="Select all users"
+                          />
+                          <span>User</span>
+                        </label>
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700" scope="col">
+                        Role
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700" scope="col">
+                        Status
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700" scope="col">
+                        Created
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700" scope="col">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+
+              {/* ✅ Virtual Scrolling: Scrollable Body */}
+              <div
+                ref={containerRef}
+                className="virtual-container overflow-x-auto"
+                style={
+                  {
+                    '--container-height': `${CONTAINER_HEIGHT}px`,
+                  } as React.CSSProperties
+                }
+                role="region"
+                aria-label="User list"
+              >
+                <div
+                  className="virtual-spacer"
+                  style={{ '--total-height': `${totalHeight}px` } as React.CSSProperties}
+                >
+                  {virtualItems.map(({ index, data: user, offsetTop }) => (
+                    <div
+                      key={user.id}
+                      className="virtual-row"
+                      style={
+                        {
+                          '--row-height': `${ITEM_HEIGHT}px`,
+                          '--row-offset': `${offsetTop}px`,
+                        } as React.CSSProperties
+                      }
+                    >
+                      <table className="w-full border-collapse" role="presentation">
+                        <tbody>
+                          <tr
+                            className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${
+                              isOptimistic(user) ? 'opacity-60 transition-opacity' : ''
+                            }`}
+                            role="row"
+                          >
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <label className="flex items-center cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={uiState.selectedUsers.has(user.id)}
+                                    onChange={(e) => handleSelectUser(user.id, e.target.checked)}
+                                    disabled={isOptimistic(user)}
+                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    aria-label={`Select ${user.full_name || user.email}`}
+                                  />
+                                </label>
+                                <div>
+                                  <div className="font-medium text-gray-900 flex items-center gap-2">
+                                    {user.full_name || user.username || user.email}
+                                    {/* ✅ React 19: Visual indicator for optimistic updates */}
+                                    {isOptimistic(user) && (
+                                      <span className="text-xs text-amber-600 font-normal animate-pulse">
+                                        Saving...
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-sm text-gray-600">{user.email}</div>
                                 </div>
-                                <div className="text-sm text-gray-600">{user.email}</div>
                               </div>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <span
-                              className={`rounded-2xl px-3 py-1 text-sm font-medium ${
-                                user.role.name === 'admin'
-                                  ? 'bg-sky-100 text-sky-700'
-                                  : 'bg-blue-50 text-sky-600'
-                              }`}
-                            >
-                              {user.role.name}
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              {user.is_active ? (
-                                <UserCheck className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <UserX className="h-4 w-4 text-red-600" />
-                              )}
+                            </td>
+                            <td className="p-4">
                               <span
-                                className={`font-medium ${
-                                  user.is_active ? 'text-green-600' : 'text-red-600'
+                                className={`rounded-2xl px-3 py-1 text-sm font-medium ${
+                                  user.role.name === 'admin'
+                                    ? 'bg-sky-100 text-sky-700'
+                                    : 'bg-blue-50 text-sky-600'
                                 }`}
                               >
-                                {user.is_active ? 'Active' : 'Inactive'}
+                                {user.role.name}
                               </span>
-                            </div>
-                          </td>
-                          <td className="p-4 text-gray-600">{formatDate(user.created_at)}</td>
-                          <td className="p-4">
-                            <div className="flex gap-2" role="group" aria-label="User actions">
-                              {/* ✅ React 19: Enhanced accessibility with ARIA labels */}
-                              <button
-                                onClick={() => {
-                                  setUIState((prev) => ({
-                                    ...prev,
-                                    selectedUser: user,
-                                    showUserModal: true,
-                                  }));
-                                }}
-                                className="flex cursor-pointer items-center gap-1 rounded border-none bg-blue-500 p-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
-                                title="View/Edit User"
-                                aria-label={`View or edit ${user.full_name || user.email}`}
-                              >
-                                <Eye className="h-3 w-3" aria-hidden="true" />
-                                <span className="sr-only">View/Edit</span>
-                              </button>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-2">
+                                {user.is_active ? (
+                                  <UserCheck className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <UserX className="h-4 w-4 text-red-600" />
+                                )}
+                                <span
+                                  className={`font-medium ${
+                                    user.is_active ? 'text-green-600' : 'text-red-600'
+                                  }`}
+                                >
+                                  {user.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="p-4 text-gray-600">{formatDate(user.created_at)}</td>
+                            <td className="p-4">
+                              <div className="flex gap-2" role="group" aria-label="User actions">
+                                {/* ✅ React 19: Enhanced accessibility with ARIA labels */}
+                                <button
+                                  onClick={() => {
+                                    setUIState((prev) => ({
+                                      ...prev,
+                                      selectedUser: user,
+                                      showUserModal: true,
+                                    }));
+                                  }}
+                                  className="flex cursor-pointer items-center gap-1 rounded border-none bg-blue-500 p-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                                  title="View/Edit User"
+                                  aria-label={`View or edit ${user.full_name || user.email}`}
+                                >
+                                  <Eye className="h-3 w-3" aria-hidden="true" />
+                                  <span className="sr-only">View/Edit</span>
+                                </button>
 
-                              {hasPermission('user:write') && (
-                                <>
-                                  <button
-                                    onClick={() =>
-                                      handleUserAction(
-                                        user.is_active ? 'deactivate' : 'activate',
-                                        user.id
-                                      )
-                                    }
-                                    disabled={actionLoading?.includes(user.id)}
-                                    className={`flex cursor-pointer items-center gap-1 rounded border-none p-2 text-white disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
-                                      user.is_active
-                                        ? 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500'
-                                        : 'bg-green-500 hover:bg-green-600 focus:ring-green-500'
-                                    }`}
-                                    title={user.is_active ? 'Deactivate User' : 'Activate User'}
-                                    aria-label={`${user.is_active ? 'Deactivate' : 'Activate'} ${user.full_name || user.email}`}
-                                    aria-busy={actionLoading?.includes(user.id)}
-                                  >
-                                    {user.is_active ? (
-                                      <UserX className="h-3 w-3" aria-hidden="true" />
-                                    ) : (
-                                      <UserCheck className="h-3 w-3" aria-hidden="true" />
-                                    )}
-                                    <span className="sr-only">
-                                      {user.is_active ? 'Deactivate' : 'Activate'}
-                                    </span>
-                                  </button>
+                                {hasPermission('user:write') && (
+                                  <>
+                                    <button
+                                      onClick={() =>
+                                        handleUserAction(
+                                          user.is_active ? 'deactivate' : 'activate',
+                                          user.id
+                                        )
+                                      }
+                                      disabled={actionLoading?.includes(user.id)}
+                                      className={`flex cursor-pointer items-center gap-1 rounded border-none p-2 text-white disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
+                                        user.is_active
+                                          ? 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500'
+                                          : 'bg-green-500 hover:bg-green-600 focus:ring-green-500'
+                                      }`}
+                                      title={user.is_active ? 'Deactivate User' : 'Activate User'}
+                                      aria-label={`${user.is_active ? 'Deactivate' : 'Activate'} ${user.full_name || user.email}`}
+                                      aria-busy={actionLoading?.includes(user.id)}
+                                    >
+                                      {user.is_active ? (
+                                        <UserX className="h-3 w-3" aria-hidden="true" />
+                                      ) : (
+                                        <UserCheck className="h-3 w-3" aria-hidden="true" />
+                                      )}
+                                      <span className="sr-only">
+                                        {user.is_active ? 'Deactivate' : 'Activate'}
+                                      </span>
+                                    </button>
 
-                                  <button
-                                    onClick={() => handleUserAction('delete', user.id)}
-                                    disabled={actionLoading?.includes(user.id)}
-                                    className="flex cursor-pointer items-center gap-1 rounded border-none bg-red-500 p-2 text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all"
-                                    title="Delete User"
-                                    aria-label={`Delete ${user.full_name || user.email}`}
-                                    aria-busy={actionLoading?.includes(user.id)}
-                                  >
-                                    <Trash2 className="h-3 w-3" aria-hidden="true" />
-                                    <span className="sr-only">Delete</span>
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
+                                    <button
+                                      onClick={() => handleUserAction('delete', user.id)}
+                                      disabled={actionLoading?.includes(user.id)}
+                                      className="flex cursor-pointer items-center gap-1 rounded border-none bg-red-500 p-2 text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all"
+                                      title="Delete User"
+                                      aria-label={`Delete ${user.full_name || user.email}`}
+                                      aria-busy={actionLoading?.includes(user.id)}
+                                    >
+                                      <Trash2 className="h-3 w-3" aria-hidden="true" />
+                                      <span className="sr-only">Delete</span>
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* ✅ Virtual Scrolling: Footer with Scroll to Top */}
-            <div
-              className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-8 py-4"
-              role="navigation"
-              aria-label="Table navigation"
-            >
-              <div className="text-gray-600" role="status" aria-live="polite" aria-atomic="true">
-                Showing {virtualItems.length} of {users.length} users
-                {users.length > virtualItems.length && ' (virtual scrolling active)'}
+              {/* ✅ Virtual Scrolling: Footer with Scroll to Top */}
+              <div
+                className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-8 py-4"
+                role="navigation"
+                aria-label="Table navigation"
+              >
+                <div className="text-gray-600" role="status" aria-live="polite" aria-atomic="true">
+                  Showing {virtualItems.length} of {users.length} users
+                  {users.length > virtualItems.length && ' (virtual scrolling active)'}
+                </div>
+                <div className="flex gap-2" role="group" aria-label="Scroll controls">
+                  <button
+                    onClick={() => scrollToIndex(0)}
+                    className="cursor-pointer rounded-md border-none bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                    title="Scroll to top"
+                    aria-label="Scroll to top of user list"
+                  >
+                    ↑ Top
+                  </button>
+                  <button
+                    onClick={() => scrollToIndex(users.length - 1)}
+                    className="cursor-pointer rounded-md border-none bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+                    title="Scroll to bottom"
+                    aria-label="Scroll to bottom of user list"
+                  >
+                    ↓ Bottom
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-2" role="group" aria-label="Scroll controls">
-                <button
-                  onClick={() => scrollToIndex(0)}
-                  className="cursor-pointer rounded-md border-none bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
-                  title="Scroll to top"
-                  aria-label="Scroll to top of user list"
-                >
-                  ↑ Top
-                </button>
-                <button
-                  onClick={() => scrollToIndex(users.length - 1)}
-                  className="cursor-pointer rounded-md border-none bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
-                  title="Scroll to bottom"
-                  aria-label="Scroll to bottom of user list"
-                >
-                  ↓ Bottom
-                </button>
-              </div>
-            </div>
-          </>
+            </>
+          )}
+        </div>
+
+        {/* Create User Modal */}
+        {uiState.showCreateModal && (
+          <CreateUserModal
+            roles={roles}
+            onSave={handleCreateUser}
+            onClose={() => setUIState((prev) => ({ ...prev, showCreateModal: false }))}
+            isLoading={actionLoading === 'create-user'}
+          />
+        )}
+
+        {/* Edit User Modal */}
+        {uiState.showUserModal && uiState.selectedUser && (
+          <EditUserModal
+            user={uiState.selectedUser}
+            roles={roles}
+            onSave={(data) => {
+              handleUserAction('update', uiState.selectedUser!.id, data);
+              setUIState((prev) => ({ ...prev, showUserModal: false }));
+            }}
+            onClose={() => setUIState((prev) => ({ ...prev, showUserModal: false }))}
+            isLoading={actionLoading?.includes(uiState.selectedUser.id) || false}
+          />
         )}
       </div>
-
-      {/* Create User Modal */}
-      {uiState.showCreateModal && (
-        <CreateUserModal
-          roles={roles}
-          onSave={handleCreateUser}
-          onClose={() => setUIState((prev) => ({ ...prev, showCreateModal: false }))}
-          isLoading={actionLoading === 'create-user'}
-        />
-      )}
-
-      {/* Edit User Modal */}
-      {uiState.showUserModal && uiState.selectedUser && (
-        <EditUserModal
-          user={uiState.selectedUser}
-          roles={roles}
-          onSave={(data) => {
-            handleUserAction('update', uiState.selectedUser!.id, data);
-            setUIState((prev) => ({ ...prev, showUserModal: false }));
-          }}
-          onClose={() => setUIState((prev) => ({ ...prev, showUserModal: false }))}
-          isLoading={actionLoading?.includes(uiState.selectedUser.id) || false}
-        />
-      )}
-    </div>
+    </>
   );
 };
 

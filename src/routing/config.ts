@@ -37,6 +37,9 @@ const LazyNotFoundPage = lazy(() => import('@shared/pages/NotFoundPage'));
 
 // Admin Pages - Lazy loaded for better performance
 const LazyAdminDashboardPage = lazy(() => import('../domains/admin/pages/AdminDashboardPage'));
+const LazyAdminAnalyticsDashboardPage = lazy(
+  () => import('../domains/admin/pages/AdminAnalyticsDashboardPage')
+);
 const LazyAuditLogsPage = lazy(() => import('../domains/admin/pages/AuditLogsPage'));
 const LazyBulkOperationsPage = lazy(() => import('../domains/admin/pages/BulkOperationsPage'));
 const LazyRoleManagementPage = lazy(() => import('../domains/admin/pages/RoleManagementPage'));
@@ -198,6 +201,16 @@ export const routes: RouteConfig[] = [
     guard: 'protected',
     title: 'Admin Dashboard',
     description: 'Administrative dashboard with system overview and quick actions.',
+    suspenseFallback: createElement(DashboardSkeleton),
+  },
+  {
+    path: '/admin/analytics',
+    component: LazyAdminAnalyticsDashboardPage,
+    layout: 'admin',
+    guard: 'protected',
+    title: 'Admin Analytics',
+    description:
+      'Comprehensive analytics dashboard with user growth, engagement, and lifecycle metrics.',
     suspenseFallback: createElement(DashboardSkeleton),
   },
   {

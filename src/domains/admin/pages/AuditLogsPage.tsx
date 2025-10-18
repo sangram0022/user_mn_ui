@@ -36,11 +36,13 @@ import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { usePerformanceMonitor } from '@hooks/usePerformanceMonitor';
 import { useToast } from '@hooks/useToast';
+import { PageMetadata } from '@shared/components/PageMetadata';
 import { Badge, getSeverityBadgeVariant } from '@shared/components/ui/Badge';
 import { Skeleton } from '@shared/components/ui/Skeleton';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { formatDateTime, formatTimestamp } from '@shared/utils';
+import { prefetchRoute } from '@shared/utils/resource-loading';
 import { adminService } from '../../../services/admin-backend.service';
 
 // ============================================================================
@@ -498,6 +500,12 @@ const AuditLogsPage: FC = () => {
   // Effects
   // ============================================================================
 
+  // Prefetch likely next routes for improved navigation performance
+  useEffect(() => {
+    prefetchRoute('/dashboard');
+    prefetchRoute('/users/roles');
+  }, []);
+
   useEffect(() => {
     loadAuditLogs();
   }, [filters, loadAuditLogs]);
@@ -525,333 +533,360 @@ const AuditLogsPage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Breadcrumb />
-          <div className="mt-4 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
-              <p className="text-gray-600 mt-1">System activity and security events</p>
-            </div>
-            <div className="flex space-x-3" role="group" aria-label="Audit log actions">
-              <button
-                onClick={clearFilters}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                aria-label="Clear all filters"
-              >
-                Clear Filters
-              </button>
-              <button
-                onClick={handleExport}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                aria-label="Export audit logs"
-              >
-                <Download className="w-4 h-4 mr-2" aria-hidden="true" />
-                Export
-              </button>
-              <button
-                onClick={loadAuditLogs}
-                disabled={isLoading}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                aria-label={isLoading ? 'Refreshing audit logs' : 'Refresh audit logs'}
-              >
-                <RefreshCw
-                  className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
-                  aria-hidden="true"
-                />
-                Refresh
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6">
-            <ErrorAlert error={error} onDismiss={clearError} />
-          </div>
-        )}
-
-        {/* Summary Cards */}
-        {summary && (
-          <div
-            className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
-            role="region"
-            aria-label="Audit log summary statistics"
-          >
-            <div
-              className="bg-white rounded-lg shadow-sm border p-6"
-              role="group"
-              aria-labelledby="total-events-label"
-            >
-              <div className="flex items-center">
-                <Activity className="w-8 h-8 text-blue-600" aria-hidden="true" />
-                <div className="ml-4">
-                  <p id="total-events-label" className="text-sm font-medium text-gray-600">
-                    Total Events
-                  </p>
-                  <p
-                    className="text-2xl font-semibold text-gray-900"
-                    aria-label={`${summary.total_events} total events`}
-                  >
-                    {summary.total_events}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="section-container" role="group" aria-labelledby="critical-events-label">
-              <div className="flex items-center">
-                <AlertCircle className="w-8 h-8 text-red-600" aria-hidden="true" />
-                <div className="ml-4">
-                  <p id="critical-events-label" className="text-sm font-medium text-gray-600">
-                    Critical
-                  </p>
-                  <p
-                    className="text-2xl font-semibold text-gray-900"
-                    aria-label={`${summary.events_by_severity.critical || 0} critical events`}
-                  >
-                    {summary.events_by_severity.critical || 0}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="section-container" role="group" aria-labelledby="warning-events-label">
-              <div className="flex items-center">
-                <AlertTriangle className="w-8 h-8 text-yellow-600" aria-hidden="true" />
-                <div className="ml-4">
-                  <p id="warning-events-label" className="text-sm font-medium text-gray-600">
-                    Warnings
-                  </p>
-                  <p
-                    className="text-2xl font-semibold text-gray-900"
-                    aria-label={`${summary.events_by_severity.warning || 0} warning events`}
-                  >
-                    {summary.events_by_severity.warning || 0}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="section-container" role="group" aria-labelledby="success-events-label">
-              <div className="flex items-center">
-                <CheckCircle className="w-8 h-8 text-green-600" aria-hidden="true" />
-                <div className="ml-4">
-                  <p id="success-events-label" className="text-sm font-medium text-gray-600">
-                    Success
-                  </p>
-                  <p
-                    className="text-2xl font-semibold text-gray-900"
-                    aria-label={`${summary.events_by_severity.success || 0} successful events`}
-                  >
-                    {summary.events_by_severity.success || 0}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Filters */}
-        <div className="section-container-mb">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 flex items-center">
-              <Filter className="w-5 h-5 mr-2" aria-hidden="true" />
-              Filters
-            </h3>
-          </div>
-          <div className="px-6 py-4" role="search" aria-label="Filter audit logs">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <>
+      <PageMetadata
+        title="Audit Logs - Security & Activity Monitoring"
+        description="View comprehensive audit trail of system activity, user actions, and security events with filtering and export capabilities."
+        keywords="audit logs, security monitoring, activity tracking, compliance, system events"
+        ogTitle="Audit Logs - User Management System"
+        ogDescription="Monitor and review system activity with comprehensive audit trail."
+      />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <Breadcrumb />
+            <div className="mt-4 flex items-center justify-between">
               <div>
-                <label htmlFor="action" className="block text-sm font-medium text-gray-700 mb-1">
-                  Action
-                </label>
-                <input
-                  id="action"
-                  type="text"
-                  value={filters.action || ''}
-                  onChange={(e) => handleFilterChange('action', e.target.value)}
-                  placeholder="Filter by action"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+                <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
+                <p className="text-gray-600 mt-1">System activity and security events</p>
               </div>
-              <div>
-                <label htmlFor="resource" className="block text-sm font-medium text-gray-700 mb-1">
-                  Resource
-                </label>
-                <input
-                  id="resource"
-                  type="text"
-                  value={filters.resource || ''}
-                  onChange={(e) => handleFilterChange('resource', e.target.value)}
-                  placeholder="Filter by resource"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label htmlFor="severity" className="block text-sm font-medium text-gray-700 mb-1">
-                  Severity
-                </label>
-                <select
-                  id="severity"
-                  value={filters.severity || ''}
-                  onChange={(e) => handleFilterChange('severity', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  aria-label="Filter by severity level"
+              <div className="flex space-x-3" role="group" aria-label="Audit log actions">
+                <button
+                  onClick={clearFilters}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  aria-label="Clear all filters"
                 >
-                  <option value="">All Severities</option>
-                  <option value="critical">Critical</option>
-                  <option value="warning">Warning</option>
-                  <option value="info">Info</option>
-                  <option value="success">Success</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
-                  User ID
-                </label>
-                <input
-                  id="userId"
-                  type="text"
-                  value={filters.user_id || ''}
-                  onChange={(e) => handleFilterChange('user_id', e.target.value)}
-                  placeholder="Filter by user ID"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  aria-label="Filter by user ID"
-                  aria-describedby="userId-help"
-                />
-                <span id="userId-help" className="sr-only">
-                  Enter user ID to filter audit logs
-                </span>
+                  Clear Filters
+                </button>
+                <button
+                  onClick={handleExport}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  aria-label="Export audit logs"
+                >
+                  <Download className="w-4 h-4 mr-2" aria-hidden="true" />
+                  Export
+                </button>
+                <button
+                  onClick={loadAuditLogs}
+                  disabled={isLoading}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  aria-label={isLoading ? 'Refreshing audit logs' : 'Refresh audit logs'}
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
+                    aria-hidden="true"
+                  />
+                  Refresh
+                </button>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Logs Table */}
-        <div className="bg-white shadow-sm rounded-lg border overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">
-              Audit Events ({logs.length} of {totalPages * filters.limit})
-            </h3>
-          </div>
-          <div
-            className="overflow-x-auto"
-            role="region"
-            aria-label="Audit logs table"
-            aria-live="polite"
-          >
-            <table className="min-w-full divide-y divide-gray-200" aria-label="Audit log entries">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Timestamp
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Severity
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6">
+              <ErrorAlert error={error} onDismiss={clearError} />
+            </div>
+          )}
+
+          {/* Summary Cards */}
+          {summary && (
+            <div
+              className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+              role="region"
+              aria-label="Audit log summary statistics"
+            >
+              <div
+                className="bg-white rounded-lg shadow-sm border p-6"
+                role="group"
+                aria-labelledby="total-events-label"
+              >
+                <div className="flex items-center">
+                  <Activity className="w-8 h-8 text-blue-600" aria-hidden="true" />
+                  <div className="ml-4">
+                    <p id="total-events-label" className="text-sm font-medium text-gray-600">
+                      Total Events
+                    </p>
+                    <p
+                      className="text-2xl font-semibold text-gray-900"
+                      aria-label={`${summary.total_events} total events`}
+                    >
+                      {summary.total_events}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="section-container"
+                role="group"
+                aria-labelledby="critical-events-label"
+              >
+                <div className="flex items-center">
+                  <AlertCircle className="w-8 h-8 text-red-600" aria-hidden="true" />
+                  <div className="ml-4">
+                    <p id="critical-events-label" className="text-sm font-medium text-gray-600">
+                      Critical
+                    </p>
+                    <p
+                      className="text-2xl font-semibold text-gray-900"
+                      aria-label={`${summary.events_by_severity.critical || 0} critical events`}
+                    >
+                      {summary.events_by_severity.critical || 0}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="section-container"
+                role="group"
+                aria-labelledby="warning-events-label"
+              >
+                <div className="flex items-center">
+                  <AlertTriangle className="w-8 h-8 text-yellow-600" aria-hidden="true" />
+                  <div className="ml-4">
+                    <p id="warning-events-label" className="text-sm font-medium text-gray-600">
+                      Warnings
+                    </p>
+                    <p
+                      className="text-2xl font-semibold text-gray-900"
+                      aria-label={`${summary.events_by_severity.warning || 0} warning events`}
+                    >
+                      {summary.events_by_severity.warning || 0}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="section-container"
+                role="group"
+                aria-labelledby="success-events-label"
+              >
+                <div className="flex items-center">
+                  <CheckCircle className="w-8 h-8 text-green-600" aria-hidden="true" />
+                  <div className="ml-4">
+                    <p id="success-events-label" className="text-sm font-medium text-gray-600">
+                      Success
+                    </p>
+                    <p
+                      className="text-2xl font-semibold text-gray-900"
+                      aria-label={`${summary.events_by_severity.success || 0} successful events`}
+                    >
+                      {summary.events_by_severity.success || 0}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Filters */}
+          <div className="section-container-mb">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                <Filter className="w-5 h-5 mr-2" aria-hidden="true" />
+                Filters
+              </h3>
+            </div>
+            <div className="px-6 py-4" role="search" aria-label="Filter audit logs">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="action" className="block text-sm font-medium text-gray-700 mb-1">
                     Action
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  </label>
+                  <input
+                    id="action"
+                    type="text"
+                    value={filters.action || ''}
+                    onChange={(e) => handleFilterChange('action', e.target.value)}
+                    placeholder="Filter by action"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="resource"
+                    className="block text-sm font-medium text-gray-700 mb-1"
                   >
                     Resource
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  </label>
+                  <input
+                    id="resource"
+                    type="text"
+                    value={filters.resource || ''}
+                    onChange={(e) => handleFilterChange('resource', e.target.value)}
+                    placeholder="Filter by resource"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="severity"
+                    className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    User
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    Severity
+                  </label>
+                  <select
+                    id="severity"
+                    value={filters.severity || ''}
+                    onChange={(e) => handleFilterChange('severity', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    aria-label="Filter by severity level"
                   >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {isLoading ? (
-                  Array.from({ length: 10 }).map((_, i) => (
-                    <tr key={i} aria-label="Loading audit log entry">
-                      <td className="px-6 py-4">
-                        <Skeleton className="h-4 w-24" />
-                      </td>
-                      <td className="px-6 py-4">
-                        <Skeleton className="h-6 w-16" />
-                      </td>
-                      <td className="px-6 py-4">
-                        <Skeleton className="h-4 w-32" />
-                      </td>
-                      <td className="px-6 py-4">
-                        <Skeleton className="h-4 w-24" />
-                      </td>
-                      <td className="px-6 py-4">
-                        <Skeleton className="h-4 w-20" />
-                      </td>
-                      <td className="px-6 py-4">
-                        <Skeleton className="h-4 w-8" />
-                      </td>
-                    </tr>
-                  ))
-                ) : logs.length > 0 ? (
-                  logs.map((log) => (
-                    <AuditLogRow key={log.log_id} log={log} onViewDetails={handleViewDetails} />
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center">
-                      <div role="status" aria-live="polite">
-                        <Activity
-                          className="w-12 h-12 text-gray-400 mx-auto mb-4"
-                          aria-hidden="true"
-                        />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                          No audit logs found
-                        </h3>
-                        <p className="text-gray-600">
-                          No events match your current filter criteria.
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                    <option value="">All Severities</option>
+                    <option value="critical">Critical</option>
+                    <option value="warning">Warning</option>
+                    <option value="info">Info</option>
+                    <option value="success">Success</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
+                    User ID
+                  </label>
+                  <input
+                    id="userId"
+                    type="text"
+                    value={filters.user_id || ''}
+                    onChange={(e) => handleFilterChange('user_id', e.target.value)}
+                    placeholder="Filter by user ID"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    aria-label="Filter by user ID"
+                    aria-describedby="userId-help"
+                  />
+                  <span id="userId-help" className="sr-only">
+                    Enter user ID to filter audit logs
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Pagination */}
-          <Pagination
-            currentPage={filters.page}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            isLoading={isLoading}
-          />
-        </div>
-      </div>
+          {/* Logs Table */}
+          <div className="bg-white shadow-sm rounded-lg border overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">
+                Audit Events ({logs.length} of {totalPages * filters.limit})
+              </h3>
+            </div>
+            <div
+              className="overflow-x-auto"
+              role="region"
+              aria-label="Audit logs table"
+              aria-live="polite"
+            >
+              <table className="min-w-full divide-y divide-gray-200" aria-label="Audit log entries">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Timestamp
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Severity
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Action
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Resource
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      User
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {isLoading ? (
+                    Array.from({ length: 10 }).map((_, i) => (
+                      <tr key={i} aria-label="Loading audit log entry">
+                        <td className="px-6 py-4">
+                          <Skeleton className="h-4 w-24" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <Skeleton className="h-6 w-16" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <Skeleton className="h-4 w-32" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <Skeleton className="h-4 w-24" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <Skeleton className="h-4 w-20" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <Skeleton className="h-4 w-8" />
+                        </td>
+                      </tr>
+                    ))
+                  ) : logs.length > 0 ? (
+                    logs.map((log) => (
+                      <AuditLogRow key={log.log_id} log={log} onViewDetails={handleViewDetails} />
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center">
+                        <div role="status" aria-live="polite">
+                          <Activity
+                            className="w-12 h-12 text-gray-400 mx-auto mb-4"
+                            aria-hidden="true"
+                          />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            No audit logs found
+                          </h3>
+                          <p className="text-gray-600">
+                            No events match your current filter criteria.
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-      {/* Details Modal */}
-      <DetailsModal
-        log={selectedLog}
-        isOpen={isDetailsModalOpen}
-        onClose={() => {
-          setIsDetailsModalOpen(false);
-          setSelectedLog(null);
-        }}
-      />
-    </div>
+            {/* Pagination */}
+            <Pagination
+              currentPage={filters.page}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              isLoading={isLoading}
+            />
+          </div>
+        </div>
+
+        {/* Details Modal */}
+        <DetailsModal
+          log={selectedLog}
+          isOpen={isDetailsModalOpen}
+          onClose={() => {
+            setIsDetailsModalOpen(false);
+            setSelectedLog(null);
+          }}
+        />
+      </div>
+    </>
   );
 };
 

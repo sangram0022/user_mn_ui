@@ -4,10 +4,8 @@
  * React 19: No memoization needed - React Compiler handles optimization
  */
 
+import { logger } from '@shared/utils/logger';
 import { useEffect, useRef, useState } from 'react';
-import { analyticsTracker } from '../AnalyticsTracker';
-import { errorTracker } from '../ErrorTracker';
-import { logger } from '../logger';
 import { performanceMonitor } from '../PerformanceMonitor';
 
 export interface UsePerformanceOptions {
@@ -120,9 +118,14 @@ export const useAnalytics = (pageName?: string, options: UseAnalyticsOptions = {
   const { trackPageView = true } = options;
 
   useEffect(() => {
-    if (trackPageView && pageName) {
-      analyticsTracker.trackPageView(window.location.pathname, pageName);
+    if (!trackPageView || !pageName) {
+      return;
     }
+
+    logger.info('[analytics] page view recorded', {
+      pageName,
+      path: typeof window !== 'undefined' ? window.location.pathname : undefined,
+    });
   }, [pageName, trackPageView]);
 
   const trackEvent = (
@@ -133,15 +136,25 @@ export const useAnalytics = (pageName?: string, options: UseAnalyticsOptions = {
     value?: number,
     properties?: Record<string, unknown>
   ) => {
-    analyticsTracker.track(name, category, action, label, value, properties);
+    logger.info('[analytics] event tracked', {
+      name,
+      category,
+      action,
+      label,
+      value,
+      properties,
+    });
   };
 
   const trackUserAction = (action: string, properties?: Record<string, unknown>) => {
-    analyticsTracker.trackUserAction(action, 'user_interaction', properties);
+    logger.info('[analytics] user action', {
+      action,
+      properties,
+    });
   };
 
   const trackError = (error: Error, context?: Record<string, unknown>) => {
-    analyticsTracker.trackError(error, context);
+    logger.error('[analytics] error event', error, context);
   };
 
   return {
@@ -161,19 +174,6 @@ export const useErrorBoundary = (options: UseErrorBoundaryOptions = {}) => {
   const { componentName = 'UnknownComponent', onError } = options;
 
   const captureError = (error: Error, errorInfo?: unknown) => {
-    // Track the error
-    errorTracker.trackError(
-      error,
-      {
-        component: componentName,
-        action: 'component_error',
-        additionalData: errorInfo as Record<string, unknown>,
-      },
-      'high',
-      true
-    );
-
-    // Call custom error handler
     if (onError) {
       onError(error, errorInfo);
     }
@@ -263,7 +263,10 @@ export const useNetworkMonitoring = (options: UseNetworkMonitoringOptions = {}) 
 
   const trackNetworkError = (url: string, method: string, error: Error) => {
     if (trackErrors) {
-      errorTracker.trackApiError(error, url, method);
+      logger.error('[network] request failed', error, {
+        url,
+        method,
+      });
     }
   };
 
@@ -286,30 +289,90 @@ export const useUserSession = (options: UseUserSessionOptions = {}) => {
     sessionTimeout = 30 * 60 * 1000, // 30 minutes
   } = options;
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+  const storageKey = 'app_monitoring_session';
 
-    const resetTimeout = () => {
+  const readSession = () => {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+
+    try {
+      const raw = sessionStorage.getItem(storageKey);
+      return raw ? (JSON.parse(raw) as { id: string; lastActive: number }) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const writeSession = (session: { id: string; lastActive: number }) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    try {
+      sessionStorage.setItem(storageKey, JSON.stringify(session));
+    } catch {
+      // Silent fail – storage might be unavailable
+    }
+  };
+
+  const ensureSession = () => {
+    const session = readSession();
+    if (session) {
+      return session;
+    }
+
+    const newSession = {
+      id: `session_${Math.random().toString(36).slice(2)}_${Date.now()}`,
+      lastActive: Date.now(),
+    };
+    writeSession(newSession);
+    logger.info('[session] started new monitoring session', { sessionId: newSession.id });
+    return newSession;
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const markActivity = () => {
+      const session = ensureSession();
+      const updated = { ...session, lastActive: Date.now() };
+      writeSession(updated);
+      logger.debug('[session] activity recorded', { sessionId: updated.id });
+    };
+
+    const scheduleTimeout = () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
 
       timeoutId = setTimeout(() => {
-        analyticsTracker.endSession();
+        const session = readSession();
+        if (session) {
+          logger.info('[session] inactive timeout reached', { sessionId: session.id });
+        }
+        sessionStorage.removeItem(storageKey);
       }, sessionTimeout);
     };
 
     const handleUserActivity = () => {
-      resetTimeout();
+      markActivity();
+      scheduleTimeout();
     };
+
+    ensureSession();
+    markActivity();
+    scheduleTimeout();
 
     if (trackActions) {
       document.addEventListener('click', handleUserActivity);
       document.addEventListener('keydown', handleUserActivity);
       document.addEventListener('scroll', handleUserActivity);
     }
-
-    resetTimeout();
 
     return () => {
       if (timeoutId) {
@@ -324,12 +387,16 @@ export const useUserSession = (options: UseUserSessionOptions = {}) => {
     };
   }, [trackActions, sessionTimeout]);
 
-  const getCurrentSession = () => {
-    return analyticsTracker.getCurrentSession();
-  };
+  const getCurrentSession = () => readSession();
 
   const endSession = () => {
-    analyticsTracker.endSession();
+    const session = readSession();
+    if (session) {
+      logger.info('[session] ended via hook', { sessionId: session.id });
+    }
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(storageKey);
+    }
   };
 
   return {

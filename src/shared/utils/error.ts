@@ -247,6 +247,7 @@ const formatErrorDetails = (errors?: Record<string, unknown>): string[] => {
 };
 
 export const APPLICATION_ERRORS = {
+  // Registration Errors
   REGISTRATION_EMAIL_EXISTS: {
     code: 'REGISTRATION_EMAIL_EXISTS',
     title: 'Email Already Registered',
@@ -257,6 +258,16 @@ export const APPLICATION_ERRORS = {
     retryable: false,
     action: 'Use different email',
   },
+  DUPLICATE_EMAIL: {
+    code: 'DUPLICATE_EMAIL',
+    title: 'Email Already Exists',
+    message: 'This email address is already in use.',
+    userMessage:
+      'An account with this email already exists. Please try logging in or use a different email address.',
+    category: 'validation' as const,
+    retryable: false,
+    action: 'Login or use different email',
+  },
   REGISTRATION_INVALID_DATA: {
     code: 'REGISTRATION_INVALID_DATA',
     title: 'Invalid Registration Data',
@@ -266,6 +277,8 @@ export const APPLICATION_ERRORS = {
     retryable: false,
     action: 'Check your data',
   },
+
+  // Authentication Errors
   LOGIN_INVALID_CREDENTIALS: {
     code: 'LOGIN_INVALID_CREDENTIALS',
     title: 'Invalid Credentials',
@@ -274,6 +287,39 @@ export const APPLICATION_ERRORS = {
     category: 'auth' as const,
     retryable: false,
     action: 'Check credentials',
+  },
+  INVALID_CREDENTIALS: {
+    code: 'INVALID_CREDENTIALS',
+    title: 'Invalid Credentials',
+    message: 'The credentials provided are invalid.',
+    userMessage: 'Invalid email or password. Please check your credentials and try again.',
+    category: 'auth' as const,
+    retryable: false,
+    action: 'Verify credentials',
+  },
+  EMAIL_NOT_VERIFIED: {
+    code: 'EMAIL_NOT_VERIFIED',
+    title: 'Email Verification Required',
+    message: 'Please verify your email address to continue.',
+    userMessage:
+      'Your email address has not been verified. Please check your inbox for a verification link.',
+    category: 'auth' as const,
+    retryable: false,
+    action: 'Verify email',
+    details: [
+      'Check your spam/junk folder if you cannot find the verification email.',
+      'Click "Resend Verification Email" if the link has expired.',
+    ],
+  },
+  ACCOUNT_INACTIVE: {
+    code: 'ACCOUNT_INACTIVE',
+    title: 'Account Inactive',
+    message: 'Your account has been deactivated.',
+    userMessage: 'Your account is currently inactive. Please contact support for assistance.',
+    category: 'auth' as const,
+    retryable: false,
+    action: 'Contact support',
+    supportUrl: 'mailto:support@usermgmt.example.com?subject=Account%20Reactivation',
   },
   LOGIN_ACCOUNT_LOCKED: {
     code: 'LOGIN_ACCOUNT_LOCKED',
@@ -284,7 +330,52 @@ export const APPLICATION_ERRORS = {
     category: 'auth' as const,
     retryable: true,
     action: 'Wait and retry',
+    retryAfterSeconds: 300,
   },
+
+  // Token Errors
+  TOKEN_EXPIRED: {
+    code: 'TOKEN_EXPIRED',
+    title: 'Session Expired',
+    message: 'Your session has expired.',
+    userMessage: 'Your session has expired. Please log in again to continue.',
+    category: 'auth' as const,
+    retryable: false,
+    action: 'Log in again',
+  },
+  INVALID_TOKEN: {
+    code: 'INVALID_TOKEN',
+    title: 'Invalid Token',
+    message: 'The provided token is invalid or has expired.',
+    userMessage: 'The verification link is invalid or has expired. Please request a new one.',
+    category: 'auth' as const,
+    retryable: false,
+    action: 'Request new link',
+  },
+
+  // Validation Errors
+  VALIDATION_ERROR: {
+    code: 'VALIDATION_ERROR',
+    title: 'Validation Error',
+    message: 'The submitted data failed validation.',
+    userMessage: 'Please check your input and correct any errors before submitting.',
+    category: 'validation' as const,
+    retryable: false,
+    action: 'Review and correct',
+  },
+
+  // Permission Errors
+  USER_NOT_FOUND: {
+    code: 'USER_NOT_FOUND',
+    title: 'User Not Found',
+    message: 'The requested user could not be found.',
+    userMessage: 'The user you are looking for does not exist or has been deleted.',
+    category: 'server' as const,
+    retryable: false,
+    action: 'Check user ID',
+  },
+
+  // Network Errors
   NETWORK_OFFLINE: {
     code: 'NETWORK_OFFLINE',
     title: 'Offline',
@@ -374,8 +465,21 @@ export function parseError(error: unknown): ErrorInfo {
     const baseInfo = getErrorFromStatusCode(error.status);
     const detailSet = new Set<string>(baseInfo.details ?? []);
 
-    if (error.detail && error.detail !== baseInfo.message) {
-      detailSet.add(error.detail);
+    // Handle details field (string, array, or object)
+    if (error.details) {
+      if (typeof error.details === 'string') {
+        detailSet.add(error.details);
+      } else if (Array.isArray(error.details)) {
+        error.details.forEach((detail) => {
+          if (typeof detail === 'string') {
+            detailSet.add(detail);
+          }
+        });
+      } else if (typeof error.details === 'object') {
+        formatErrorDetails(error.details as Record<string, unknown>).forEach((detail) =>
+          detailSet.add(detail)
+        );
+      }
     }
 
     if (error.errors) {
@@ -389,6 +493,23 @@ export function parseError(error: unknown): ErrorInfo {
         detailSet.add(payload.detail);
       }
 
+      // Handle backend's details field from payload
+      if (payload.details) {
+        if (typeof payload.details === 'string') {
+          detailSet.add(payload.details);
+        } else if (Array.isArray(payload.details)) {
+          payload.details.forEach((detail) => {
+            if (typeof detail === 'string') {
+              detailSet.add(detail);
+            }
+          });
+        } else if (typeof payload.details === 'object') {
+          formatErrorDetails(payload.details as Record<string, unknown>).forEach((detail) =>
+            detailSet.add(detail)
+          );
+        }
+      }
+
       if (payload.errors && typeof payload.errors === 'object') {
         formatErrorDetails(payload.errors as Record<string, unknown>).forEach((detail) =>
           detailSet.add(detail)
@@ -399,7 +520,7 @@ export function parseError(error: unknown): ErrorInfo {
     const normalized: ErrorInfo = {
       ...baseInfo,
       code: error.code || baseInfo.code,
-      message: error.detail || error.message || baseInfo.message,
+      message: error.message || baseInfo.message,
       userMessage: baseInfo.userMessage,
       retryable: error.status >= 500 ? true : baseInfo.retryable,
       details: detailSet.size ? Array.from(detailSet) : baseInfo.details,
@@ -854,9 +975,26 @@ export interface NormalizedApiError {
   message: string;
   code?: string;
   detail?: string;
+  details?: string | string[] | Record<string, unknown>;
   errors?: Record<string, unknown>;
   timestamp?: string;
 }
+
+/**
+ * Normalizes backend API error responses to a consistent format
+ * Handles both the new format and legacy formats
+ *
+ * Backend error response format (from latest_api_doc.md):
+ * {
+ *   "success": false,
+ *   "error": {
+ *     "code": "VALIDATION_ERROR",
+ *     "message": "Field validation failed",
+ *     "details": { "email": ["Invalid email format"], "password": ["Too weak"] }
+ *   },
+ *   "timestamp": "2025-10-18T10:30:00Z"
+ * }
+ */
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null;
@@ -867,7 +1005,7 @@ const normalizeNewErrorFormat = (
   fallbackMessage: string,
   status: number
 ): NormalizedApiError => {
-  // Handle nested error structure from backend
+  // Handle nested error structure from backend: { "success": false, "error": {...} }
   let actualPayload = payload;
   let originalPayload: Record<string, unknown> | undefined;
 
@@ -882,21 +1020,30 @@ const normalizeNewErrorFormat = (
   let normalizedMessage = fallbackMessage;
   let code: string | undefined = actualPayload.code;
   const errors: Record<string, unknown> | undefined = actualPayload.errors;
+  let extractedDetails: string | string[] | Record<string, unknown> | undefined;
 
   // Try to extract message from various locations
   if (typeof message === 'string') {
     normalizedMessage = message.trim() || fallbackMessage;
   } else if (typeof detail === 'string') {
     normalizedMessage = detail.trim() || fallbackMessage;
-  } else if (actualPayload.detail && typeof actualPayload.detail === 'object') {
+  } else if (detail && typeof detail === 'object') {
     // Handle nested detail object with message
-    const detailObj = actualPayload.detail as Record<string, unknown>;
+    const detailObj = detail as Record<string, unknown>;
     if (typeof detailObj.message === 'string') {
       normalizedMessage = detailObj.message.trim() || fallbackMessage;
     }
-    if (typeof detailObj.error_code === 'string') {
-      code = detailObj.error_code;
+    if (typeof detailObj.error_code === 'string' || typeof detailObj.code === 'string') {
+      code = (detailObj.error_code || detailObj.code) as string;
     }
+  }
+
+  // Extract details field for additional context
+  const detailsField = (actualPayload as Record<string, unknown>).details;
+  if (detailsField) {
+    extractedDetails = detailsField as string | string[] | Record<string, unknown>;
+  } else if (typeof detail === 'object' && detail !== null) {
+    extractedDetails = detail;
   }
 
   // Also check original payload's detail for error_code (in case of nested structure)
@@ -904,17 +1051,23 @@ const normalizeNewErrorFormat = (
     const originalDetail = originalPayload.detail;
     if (originalDetail && typeof originalDetail === 'object') {
       const detailObj = originalDetail as Record<string, unknown>;
-      if (typeof detailObj.error_code === 'string') {
-        code = detailObj.error_code;
+      if (typeof detailObj.error_code === 'string' || typeof detailObj.code === 'string') {
+        code = (detailObj.error_code || detailObj.code) as string;
       }
     }
+  }
+
+  // If code not found yet, try to map from HTTP status
+  if (!code) {
+    code = HTTP_ERROR_MAPPING[status]?.code;
   }
 
   return {
     status: typeof apiStatus === 'number' ? apiStatus : status,
     message: normalizedMessage,
     code,
-    detail: actualPayload.detail,
+    detail: typeof detail === 'string' ? detail : undefined,
+    details: extractedDetails,
     errors,
     timestamp: new Date().toISOString(),
   };
@@ -948,7 +1101,7 @@ export function normalizeApiError(a: unknown, b?: unknown, c?: unknown): Normali
       status: error.status ?? 500,
       message: error.message,
       code: error.code,
-      detail: error.detail,
+      details: error.details as string | string[] | Record<string, unknown> | undefined,
       errors: error.errors,
       timestamp: new Date().toISOString(),
     };

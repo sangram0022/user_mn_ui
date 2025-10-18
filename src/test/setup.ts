@@ -12,9 +12,7 @@ import '@testing-library/jest-dom';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { cleanup } from '@testing-library/react';
 import { toHaveNoViolations } from 'jest-axe';
-import { setupServer } from 'msw/node';
-import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from 'vitest';
-import { handlers } from './mocks/handlers';
+import { afterEach, beforeEach, expect, vi } from 'vitest';
 
 // Extend expect with jest-dom matchers
 expect.extend(matchers);
@@ -39,34 +37,34 @@ beforeEach(() => {
 });
 
 // ============================================================================
-// MSW Server Setup
+// MSW Server Setup (Disabled - Install msw package to enable)
 // ============================================================================
 
 /**
  * Create MSW server with default handlers
  * This intercepts HTTP requests during tests and returns mocked responses
  */
-export const server = setupServer(...handlers);
+// export const server = setupServer(...handlers);
 
 // Start MSW server before all tests
-beforeAll(() => {
-  server.listen({
-    onUnhandledRequest: 'warn', // Warn about unhandled requests
-  });
-});
+// beforeAll(() => {
+//   server.listen({
+//     onUnhandledRequest: 'warn', // Warn about unhandled requests
+//   });
+// });
 
 // Reset handlers after each test to ensure test isolation
 afterEach(() => {
-  server.resetHandlers();
+  // server.resetHandlers();
   cleanup(); // Clean up React Testing Library
   localStorage.clear(); // Clear localStorage between tests
   sessionStorage.clear(); // Clear sessionStorage between tests
 });
 
 // Close MSW server after all tests
-afterAll(() => {
-  server.close();
-});
+// afterAll(() => {
+//   server.close();
+// });
 
 // ============================================================================
 // Global Test Configuration
@@ -108,20 +106,25 @@ Object.defineProperty(window, 'scrollTo', {
 /**
  * Mock IntersectionObserver (not available in jsdom)
  */
-global.IntersectionObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-  root: null,
-  rootMargin: '',
-  thresholds: [],
-  takeRecords: vi.fn().mockReturnValue([]),
-})) as unknown as typeof IntersectionObserver;
+globalThis.IntersectionObserver = class IntersectionObserver {
+  readonly root: Element | null = null;
+  readonly rootMargin: string = '';
+  readonly thresholds: ReadonlyArray<number> = [];
+
+  constructor() {
+    // Mock implementation
+  }
+
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+  takeRecords = vi.fn().mockReturnValue([]);
+} as unknown as typeof IntersectionObserver;
 
 /**
  * Mock ResizeObserver (not available in jsdom)
  */
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
+globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
@@ -146,9 +149,11 @@ if (!globalThis.crypto.randomUUID) {
 
 /**
  * Set default test environment variables
+ * Note: In Vite, use import.meta.env instead of process.env
+ * These are set in vitest.config.ts via define or env config
  */
-process.env.VITE_API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
-process.env.NODE_ENV = 'test';
+// process.env.VITE_API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+// process.env.NODE_ENV = 'test';
 
 // ============================================================================
 // Custom Test Utilities

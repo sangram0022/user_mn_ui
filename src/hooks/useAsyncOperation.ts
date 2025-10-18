@@ -94,33 +94,15 @@ export function useAsyncOperation<T = void>(): UseAsyncOperationResult<T> {
     }
   };
 
-  // Build return object with a dynamic getter for `error` that supports
-  // test expectations: first access returns data (on success) or error (on failure),
-  // subsequent access returns null.
-  const base = {
+  // Return the hook result
+  return {
     execute,
     isLoading,
-    // placeholder, will be overridden by getter below
-    error: null as Error | null,
+    error,
     data,
     clearError,
     reset,
-  } as const;
-
-  // Create a shallow wrapper to attach a custom getter while preserving typing
-  type ResultType = typeof base;
-  const result: ResultType = { ...base } as ResultType;
-  const temp: unknown = data !== null ? data : error;
-  Object.defineProperty(result, 'error', {
-    get() {
-      const value = temp ?? null;
-      return value;
-    },
-    configurable: true,
-    enumerable: true,
-  });
-
-  return result as unknown as UseAsyncOperationResult<T> & { data: T | null };
+  };
 }
 
 export default useAsyncOperation;

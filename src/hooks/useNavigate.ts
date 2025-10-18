@@ -46,24 +46,3 @@ export function useNavigate(): NavigateFunction {
 
   return navigate;
 }
-
-/**
- * Hook to get current navigation state with transition info
- *
- * @returns Object with navigation state and helpers
- */
-export function useNavigationState() {
-  const { isPending } = useViewTransition();
-
-  return {
-    /**
-     * True if a navigation transition is in progress
-     */
-    isNavigating: isPending,
-
-    /**
-     * CSS class for loading state
-     */
-    loadingClass: isPending ? 'opacity-70 pointer-events-none' : '',
-  };
-}

@@ -29,6 +29,7 @@ import { useEffect, useState, type FC } from 'react';
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
+import { PageMetadata } from '@shared/components/PageMetadata';
 import { Modal, ModalFooter } from '@shared/components/ui/Modal';
 import { Skeleton } from '@shared/components/ui/Skeleton';
 import Breadcrumb from '@shared/ui/Breadcrumb';
@@ -804,332 +805,341 @@ const GDPRCompliancePage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Breadcrumb />
-          <div className="mt-4 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">GDPR Compliance</h1>
-              <p className="text-gray-600 mt-1">
-                Data protection and privacy compliance management
-              </p>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={loadGDPRData}
-                disabled={isLoading}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6">
-            <ErrorAlert error={error} onDismiss={clearError} />
-          </div>
-        )}
-
-        {/* Stats Cards */}
-        {stats && (
-          <div
-            className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8"
-            role="region"
-            aria-label="GDPR statistics summary"
-          >
-            <div
-              className="bg-white rounded-lg shadow-sm border p-4"
-              role="status"
-              aria-label={`${stats.total_export_requests} export requests`}
-            >
-              <div className="flex items-center">
-                <Download className="w-6 h-6 text-blue-600 mr-3" aria-hidden="true" />
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Export Requests</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {stats.total_export_requests}
-                  </p>
-                </div>
+    <>
+      <PageMetadata
+        title="GDPR Compliance Center"
+        description="Manage data export, deletion, and consent workflows to keep your organization compliant with GDPR mandates."
+        keywords="gdpr compliance, data export requests, account deletion, consent management"
+      />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <Breadcrumb />
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">GDPR Compliance</h1>
+                <p className="text-gray-600 mt-1">
+                  Data protection and privacy compliance management
+                </p>
               </div>
-            </div>
-            <div
-              className="bg-white rounded-lg shadow-sm border p-4"
-              role="status"
-              aria-label={`${stats.pending_exports} pending export requests`}
-            >
-              <div className="flex items-center">
-                <Clock className="w-6 h-6 text-yellow-600 mr-3" aria-hidden="true" />
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Pending Exports</p>
-                  <p className="text-lg font-semibold text-gray-900">{stats.pending_exports}</p>
-                </div>
-              </div>
-            </div>
-            <div
-              className="bg-white rounded-lg shadow-sm border p-4"
-              role="status"
-              aria-label={`${stats.total_deletion_requests} deletion requests`}
-            >
-              <div className="flex items-center">
-                <Trash2 className="w-6 h-6 text-red-600 mr-3" aria-hidden="true" />
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Deletion Requests</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {stats.total_deletion_requests}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div
-              className="bg-white rounded-lg shadow-sm border p-4"
-              role="status"
-              aria-label={`${stats.pending_deletions} pending deletion requests`}
-            >
-              <div className="flex items-center">
-                <AlertTriangle className="w-6 h-6 text-orange-600 mr-3" aria-hidden="true" />
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Pending Deletions</p>
-                  <p className="text-lg font-semibold text-gray-900">{stats.pending_deletions}</p>
-                </div>
-              </div>
-            </div>
-            <div
-              className="bg-white rounded-lg shadow-sm border p-4"
-              role="status"
-              aria-label={`${stats.active_consents} active consents`}
-            >
-              <div className="flex items-center">
-                <CheckCircle className="w-6 h-6 text-green-600 mr-3" aria-hidden="true" />
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Active Consents</p>
-                  <p className="text-lg font-semibold text-gray-900">{stats.active_consents}</p>
-                </div>
-              </div>
-            </div>
-            <div
-              className="bg-white rounded-lg shadow-sm border p-4"
-              role="status"
-              aria-label={`${stats.withdrawn_consents} withdrawn consents`}
-            >
-              <div className="flex items-center">
-                <XCircle className="w-6 h-6 text-gray-600 mr-3" aria-hidden="true" />
-                <div>
-                  <p className="text-xs font-medium text-gray-600">Withdrawn</p>
-                  <p className="text-lg font-semibold text-gray-900">{stats.withdrawn_consents}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tabs and Filters */}
-        <div className="bg-white rounded-lg shadow-sm border mb-6">
-          <div className="border-b border-gray-200">
-            <div className="flex items-center justify-between px-6 py-4">
-              <div role="tablist" aria-label="GDPR data categories">
-                <nav className="-mb-px flex space-x-8">
-                  <button
-                    onClick={() => setActiveTab('exports')}
-                    role="tab"
-                    aria-selected={activeTab === 'exports'}
-                    aria-controls="exports-panel"
-                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === 'exports'
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    Data Export Requests
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('deletions')}
-                    role="tab"
-                    aria-selected={activeTab === 'deletions'}
-                    aria-controls="deletions-panel"
-                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === 'deletions'
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    Deletion Requests
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('consents')}
-                    role="tab"
-                    aria-selected={activeTab === 'consents'}
-                    aria-controls="consents-panel"
-                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === 'consents'
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    Consent Records
-                  </button>
-                </nav>
-              </div>
-
-              <div className="flex space-x-4">
-                <div className="relative" role="search">
-                  <Search
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"
-                    aria-hidden="true"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    aria-label="Search GDPR records"
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                {activeTab !== 'consents' && (
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    aria-label="Filter by status"
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
-                    <option value="ready">Ready</option>
-                    <option value="completed">Completed</option>
-                    <option value="failed">Failed</option>
-                  </select>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-6">
-            {activeTab === 'exports' && (
-              <div role="tabpanel" id="exports-panel" aria-labelledby="exports-tab">
-                <ExportRequestsTable
-                  requests={filteredExportRequests}
-                  onDownload={handleDownloadExport}
-                  onViewDetails={() => {}}
-                  isLoading={isLoading}
-                />
-              </div>
-            )}
-
-            {activeTab === 'deletions' && (
-              <div role="tabpanel" id="deletions-panel" aria-labelledby="deletions-tab">
-                <DeletionRequestsTable
-                  requests={filteredDeletionRequests}
-                  onApprove={handleApproveDeletion}
-                  onReject={handleRejectDeletion}
-                  onViewDetails={() => {}}
-                  isLoading={isLoading}
-                />
-              </div>
-            )}
-
-            {activeTab === 'consents' && (
-              <div role="tabpanel" id="consents-panel" aria-labelledby="consents-tab">
-                <div
-                  className="overflow-x-auto"
-                  role="region"
-                  aria-label="Consent management records"
+              <div className="flex space-x-3">
+                <button
+                  onClick={loadGDPRData}
+                  disabled={isLoading}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
                 >
-                  {isLoading ? (
-                    <div className="space-y-4">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                          role="status"
-                          aria-label="Loading consent record"
-                        >
-                          <div className="flex items-center space-x-4">
-                            <Skeleton className="h-10 w-10 rounded-full" />
-                            <div>
-                              <Skeleton className="h-4 w-32 mb-2" />
-                              <Skeleton className="h-3 w-24" />
-                            </div>
-                          </div>
-                          <Skeleton className="h-6 w-20" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {filteredConsentRecords.length > 0 ? (
-                        filteredConsentRecords.map((record) => (
-                          <div
-                            key={record.consent_id}
-                            className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
-                          >
-                            <div className="flex items-center space-x-4">
-                              <User className="w-10 h-10 text-gray-400" aria-hidden="true" />
-                              <div>
-                                <div className="font-medium text-gray-900">{record.email}</div>
-                                <div className="text-sm text-gray-500">
-                                  {record.consent_type} • {record.legal_basis}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              {record.granted ? (
-                                <span
-                                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                                  role="status"
-                                  aria-label={`Consent granted on ${formatDate(record.granted_at!)}`}
-                                >
-                                  <CheckCircle className="w-3 h-3 mr-1" aria-hidden="true" />
-                                  Granted
-                                </span>
-                              ) : (
-                                <span
-                                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
-                                  role="status"
-                                  aria-label={`Consent withdrawn on ${formatDate(record.withdrawn_at!)}`}
-                                >
-                                  <XCircle className="w-3 h-3 mr-1" aria-hidden="true" />
-                                  Withdrawn
-                                </span>
-                              )}
-                              <div className="text-sm text-gray-500">
-                                {record.granted
-                                  ? formatDate(record.granted_at!)
-                                  : formatDate(record.withdrawn_at!)}
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-12">
-                          <Shield
-                            className="w-12 h-12 text-gray-400 mx-auto mb-4"
-                            aria-hidden="true"
-                          />
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            No consent records
-                          </h3>
-                          <p className="text-gray-600">
-                            No consent records match your search criteria.
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6">
+              <ErrorAlert error={error} onDismiss={clearError} />
+            </div>
+          )}
+
+          {/* Stats Cards */}
+          {stats && (
+            <div
+              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8"
+              role="region"
+              aria-label="GDPR statistics summary"
+            >
+              <div
+                className="bg-white rounded-lg shadow-sm border p-4"
+                role="status"
+                aria-label={`${stats.total_export_requests} export requests`}
+              >
+                <div className="flex items-center">
+                  <Download className="w-6 h-6 text-blue-600 mr-3" aria-hidden="true" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-600">Export Requests</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {stats.total_export_requests}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="bg-white rounded-lg shadow-sm border p-4"
+                role="status"
+                aria-label={`${stats.pending_exports} pending export requests`}
+              >
+                <div className="flex items-center">
+                  <Clock className="w-6 h-6 text-yellow-600 mr-3" aria-hidden="true" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-600">Pending Exports</p>
+                    <p className="text-lg font-semibold text-gray-900">{stats.pending_exports}</p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="bg-white rounded-lg shadow-sm border p-4"
+                role="status"
+                aria-label={`${stats.total_deletion_requests} deletion requests`}
+              >
+                <div className="flex items-center">
+                  <Trash2 className="w-6 h-6 text-red-600 mr-3" aria-hidden="true" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-600">Deletion Requests</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {stats.total_deletion_requests}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="bg-white rounded-lg shadow-sm border p-4"
+                role="status"
+                aria-label={`${stats.pending_deletions} pending deletion requests`}
+              >
+                <div className="flex items-center">
+                  <AlertTriangle className="w-6 h-6 text-orange-600 mr-3" aria-hidden="true" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-600">Pending Deletions</p>
+                    <p className="text-lg font-semibold text-gray-900">{stats.pending_deletions}</p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="bg-white rounded-lg shadow-sm border p-4"
+                role="status"
+                aria-label={`${stats.active_consents} active consents`}
+              >
+                <div className="flex items-center">
+                  <CheckCircle className="w-6 h-6 text-green-600 mr-3" aria-hidden="true" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-600">Active Consents</p>
+                    <p className="text-lg font-semibold text-gray-900">{stats.active_consents}</p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="bg-white rounded-lg shadow-sm border p-4"
+                role="status"
+                aria-label={`${stats.withdrawn_consents} withdrawn consents`}
+              >
+                <div className="flex items-center">
+                  <XCircle className="w-6 h-6 text-gray-600 mr-3" aria-hidden="true" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-600">Withdrawn</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {stats.withdrawn_consents}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tabs and Filters */}
+          <div className="bg-white rounded-lg shadow-sm border mb-6">
+            <div className="border-b border-gray-200">
+              <div className="flex items-center justify-between px-6 py-4">
+                <div role="tablist" aria-label="GDPR data categories">
+                  <nav className="-mb-px flex space-x-8">
+                    <button
+                      onClick={() => setActiveTab('exports')}
+                      role="tab"
+                      aria-selected={activeTab === 'exports'}
+                      aria-controls="exports-panel"
+                      className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                        activeTab === 'exports'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Data Export Requests
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('deletions')}
+                      role="tab"
+                      aria-selected={activeTab === 'deletions'}
+                      aria-controls="deletions-panel"
+                      className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                        activeTab === 'deletions'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Deletion Requests
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('consents')}
+                      role="tab"
+                      aria-selected={activeTab === 'consents'}
+                      aria-controls="consents-panel"
+                      className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                        activeTab === 'consents'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Consent Records
+                    </button>
+                  </nav>
+                </div>
+
+                <div className="flex space-x-4">
+                  <div className="relative" role="search">
+                    <Search
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"
+                      aria-hidden="true"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      aria-label="Search GDPR records"
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  {activeTab !== 'consents' && (
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      aria-label="Filter by status"
+                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="all">All Statuses</option>
+                      <option value="pending">Pending</option>
+                      <option value="processing">Processing</option>
+                      <option value="ready">Ready</option>
+                      <option value="completed">Completed</option>
+                      <option value="failed">Failed</option>
+                    </select>
                   )}
                 </div>
               </div>
-            )}
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6">
+              {activeTab === 'exports' && (
+                <div role="tabpanel" id="exports-panel" aria-labelledby="exports-tab">
+                  <ExportRequestsTable
+                    requests={filteredExportRequests}
+                    onDownload={handleDownloadExport}
+                    onViewDetails={() => {}}
+                    isLoading={isLoading}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'deletions' && (
+                <div role="tabpanel" id="deletions-panel" aria-labelledby="deletions-tab">
+                  <DeletionRequestsTable
+                    requests={filteredDeletionRequests}
+                    onApprove={handleApproveDeletion}
+                    onReject={handleRejectDeletion}
+                    onViewDetails={() => {}}
+                    isLoading={isLoading}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'consents' && (
+                <div role="tabpanel" id="consents-panel" aria-labelledby="consents-tab">
+                  <div
+                    className="overflow-x-auto"
+                    role="region"
+                    aria-label="Consent management records"
+                  >
+                    {isLoading ? (
+                      <div className="space-y-4">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                            role="status"
+                            aria-label="Loading consent record"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <Skeleton className="h-10 w-10 rounded-full" />
+                              <div>
+                                <Skeleton className="h-4 w-32 mb-2" />
+                                <Skeleton className="h-3 w-24" />
+                              </div>
+                            </div>
+                            <Skeleton className="h-6 w-20" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {filteredConsentRecords.length > 0 ? (
+                          filteredConsentRecords.map((record) => (
+                            <div
+                              key={record.consent_id}
+                              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                            >
+                              <div className="flex items-center space-x-4">
+                                <User className="w-10 h-10 text-gray-400" aria-hidden="true" />
+                                <div>
+                                  <div className="font-medium text-gray-900">{record.email}</div>
+                                  <div className="text-sm text-gray-500">
+                                    {record.consent_type} • {record.legal_basis}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-3">
+                                {record.granted ? (
+                                  <span
+                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                                    role="status"
+                                    aria-label={`Consent granted on ${formatDate(record.granted_at!)}`}
+                                  >
+                                    <CheckCircle className="w-3 h-3 mr-1" aria-hidden="true" />
+                                    Granted
+                                  </span>
+                                ) : (
+                                  <span
+                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                                    role="status"
+                                    aria-label={`Consent withdrawn on ${formatDate(record.withdrawn_at!)}`}
+                                  >
+                                    <XCircle className="w-3 h-3 mr-1" aria-hidden="true" />
+                                    Withdrawn
+                                  </span>
+                                )}
+                                <div className="text-sm text-gray-500">
+                                  {record.granted
+                                    ? formatDate(record.granted_at!)
+                                    : formatDate(record.withdrawn_at!)}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-12">
+                            <Shield
+                              className="w-12 h-12 text-gray-400 mx-auto mb-4"
+                              aria-hidden="true"
+                            />
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                              No consent records
+                            </h3>
+                            <p className="text-gray-600">
+                              No consent records match your search criteria.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

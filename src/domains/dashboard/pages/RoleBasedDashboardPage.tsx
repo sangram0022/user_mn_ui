@@ -20,12 +20,32 @@ import {
   Users,
   Workflow,
 } from 'lucide-react';
+import { useEffect } from 'react';
+import { PageMetadata } from '../../../shared/components/PageMetadata';
+import { prefetchRoute } from '../../../shared/utils/resource-loading';
 import { useAuth } from '../../auth';
 
 const RoleBasedDashboard: FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Prefetch likely routes based on user role - must be before early return
+  useEffect(() => {
+    if (!user) return;
+
+    // Prefetch common routes for all users
+    prefetchRoute('/profile');
+    prefetchRoute('/settings');
+
+    // Admin-specific prefetching - user.role can be string or UserRoleInfo
+    const roleValue = typeof user.role === 'string' ? user.role : user.role?.name;
+    if (user.is_superuser || roleValue === 'admin') {
+      prefetchRoute('/users');
+      prefetchRoute('/analytics');
+      prefetchRoute('/workflows');
+    }
+  }, [user]);
 
   if (!user) return null;
 
@@ -209,192 +229,204 @@ const RoleBasedDashboard: FC = () => {
   const RoleIcon = roleInfo.icon;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="mb-8">
-          <div
-            className={`inline-flex items-center gap-3 rounded-lg p-4 ${
-              roleInfo.color.includes('yellow')
-                ? 'bg-amber-100 text-amber-800'
-                : roleInfo.color.includes('blue')
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-green-100 text-green-800'
-            }`}
-            role="status"
-            aria-label={`${roleInfo.title}: ${roleInfo.description}`}
-          >
-            <RoleIcon className="h-6 w-6" aria-hidden="true" />
-            <div>
-              <h1 className="text-2xl font-bold">{roleInfo.title}</h1>
-              <p className="text-sm opacity-80">{roleInfo.description}</p>
-            </div>
-          </div>
-        </div>
-
-        {isAdmin && (
-          <div
-            className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
-            role="region"
-            aria-label="System statistics"
-          >
+    <>
+      <PageMetadata
+        title={roleInfo.title}
+        description={roleInfo.description}
+        keywords="dashboard, user management, analytics, settings"
+        ogTitle={`${roleInfo.title} - User Management System`}
+        ogDescription={roleInfo.description}
+      />
+      <div className="min-h-screen bg-gray-50">
+        <div className="mx-auto max-w-7xl px-4 py-8">
+          <div className="mb-8">
             <div
-              className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+              className={`inline-flex items-center gap-3 rounded-lg p-4 ${
+                roleInfo.color.includes('yellow')
+                  ? 'bg-amber-100 text-amber-800'
+                  : roleInfo.color.includes('blue')
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-green-100 text-green-800'
+              }`}
               role="status"
-              aria-label="1,234 total users"
+              aria-label={`${roleInfo.title}: ${roleInfo.description}`}
             >
-              <div className="flex items-center">
-                <div className="rounded-lg bg-blue-100 p-3">
-                  <Users className="h-6 w-6 text-blue-600" aria-hidden="true" />
-                </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">1,234</div>
-                  <div className="text-sm text-gray-500">Total Users</div>
-                </div>
-              </div>
-            </div>
-            <div
-              className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-              role="status"
-              aria-label="99.9% system uptime"
-            >
-              <div className="flex items-center">
-                <div className="rounded-lg bg-green-100 p-3">
-                  <CheckCircle className="h-6 w-6 text-green-600" aria-hidden="true" />
-                </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">99.9%</div>
-                  <div className="text-sm text-gray-500">System Uptime</div>
-                </div>
-              </div>
-            </div>
-            <div
-              className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-              role="status"
-              aria-label="23 pending approvals"
-            >
-              <div className="flex items-center">
-                <div className="rounded-lg bg-orange-100 p-3">
-                  <Clock className="h-6 w-6 text-orange-600" aria-hidden="true" />
-                </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">23</div>
-                  <div className="text-sm text-gray-500">Pending Approvals</div>
-                </div>
-              </div>
-            </div>
-            <div
-              className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-              role="status"
-              aria-label="5 security alerts"
-            >
-              <div className="flex items-center">
-                <div className="rounded-lg bg-red-100 p-3">
-                  <AlertTriangle className="h-6 w-6 text-red-600" aria-hidden="true" />
-                </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">5</div>
-                  <div className="text-sm text-gray-500">Security Alerts</div>
-                </div>
+              <RoleIcon className="h-6 w-6" aria-hidden="true" />
+              <div>
+                <h1 className="text-2xl font-bold">{roleInfo.title}</h1>
+                <p className="text-sm opacity-80">{roleInfo.description}</p>
               </div>
             </div>
           </div>
-        )}
 
-        <Breadcrumb />
-
-        <div
-          className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-          role="region"
-          aria-label="Available features and tools"
-        >
-          {features.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <Link
-                key={feature.href}
-                to={feature.href}
-                onClick={(event) => handleFeatureClick(feature.href, event)}
-                className={`group block rounded-lg border-2 border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg no-underline text-inherit hover:border-${
-                  feature.color === 'blue'
-                    ? 'blue-500'
-                    : feature.color === 'green'
-                      ? 'green-500'
-                      : feature.color === 'purple'
-                        ? 'purple-500'
-                        : 'gray-400'
-                }`}
-                aria-label={`${feature.title}: ${feature.description}. ${feature.stats}`}
+          {isAdmin && (
+            <div
+              className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+              role="region"
+              aria-label="System statistics"
+            >
+              <div
+                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                role="status"
+                aria-label="1,234 total users"
               >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0">
-                    <Icon
-                      className={`h-8 w-8 ${
-                        feature.color === 'blue'
-                          ? 'text-blue-500'
-                          : feature.color === 'green'
-                            ? 'text-green-500'
-                            : feature.color === 'purple'
-                              ? 'text-purple-500'
-                              : 'text-gray-500'
-                      }`}
-                      aria-hidden="true"
-                    />
+                <div className="flex items-center">
+                  <div className="rounded-lg bg-blue-100 p-3">
+                    <Users className="h-6 w-6 text-blue-600" aria-hidden="true" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
-                    <p className="mb-3 text-sm opacity-80">{feature.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium opacity-60">{feature.stats}</span>
-                      <span className="text-xs font-medium" aria-hidden="true">
-                        →
-                      </span>
+                  <div className="ml-4">
+                    <div className="text-2xl font-bold text-gray-900">1,234</div>
+                    <div className="text-sm text-gray-500">Total Users</div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                role="status"
+                aria-label="99.9% system uptime"
+              >
+                <div className="flex items-center">
+                  <div className="rounded-lg bg-green-100 p-3">
+                    <CheckCircle className="h-6 w-6 text-green-600" aria-hidden="true" />
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-2xl font-bold text-gray-900">99.9%</div>
+                    <div className="text-sm text-gray-500">System Uptime</div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                role="status"
+                aria-label="23 pending approvals"
+              >
+                <div className="flex items-center">
+                  <div className="rounded-lg bg-orange-100 p-3">
+                    <Clock className="h-6 w-6 text-orange-600" aria-hidden="true" />
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-2xl font-bold text-gray-900">23</div>
+                    <div className="text-sm text-gray-500">Pending Approvals</div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                role="status"
+                aria-label="5 security alerts"
+              >
+                <div className="flex items-center">
+                  <div className="rounded-lg bg-red-100 p-3">
+                    <AlertTriangle className="h-6 w-6 text-red-600" aria-hidden="true" />
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-2xl font-bold text-gray-900">5</div>
+                    <div className="text-sm text-gray-500">Security Alerts</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <Breadcrumb />
+
+          <div
+            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+            role="region"
+            aria-label="Available features and tools"
+          >
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <Link
+                  key={feature.href}
+                  to={feature.href}
+                  onClick={(event) => handleFeatureClick(feature.href, event)}
+                  className={`group block rounded-lg border-2 border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg no-underline text-inherit hover:border-${
+                    feature.color === 'blue'
+                      ? 'blue-500'
+                      : feature.color === 'green'
+                        ? 'green-500'
+                        : feature.color === 'purple'
+                          ? 'purple-500'
+                          : 'gray-400'
+                  }`}
+                  aria-label={`${feature.title}: ${feature.description}. ${feature.stats}`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                      <Icon
+                        className={`h-8 w-8 ${
+                          feature.color === 'blue'
+                            ? 'text-blue-500'
+                            : feature.color === 'green'
+                              ? 'text-green-500'
+                              : feature.color === 'purple'
+                                ? 'text-purple-500'
+                                : 'text-gray-500'
+                        }`}
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="mb-2 text-lg font-semibold">{feature.title}</h3>
+                      <p className="mb-3 text-sm opacity-80">{feature.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium opacity-60">{feature.stats}</span>
+                        <span className="text-xs font-medium" aria-hidden="true">
+                          →
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+                </Link>
+              );
+            })}
+          </div>
 
-        <div
-          className="mt-8 rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6"
-          role="region"
-          aria-label={
-            isAdmin ? 'Admin tips' : isModerator ? 'Moderator tips' : 'Getting started tips'
-          }
-        >
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">
-            {isAdmin ? 'Admin Tips' : isModerator ? 'Moderator Tips' : 'Getting Started'}
-          </h3>
-          <div className="grid grid-cols-1 gap-4 text-sm text-gray-700 md:grid-cols-2" role="list">
-            {isAdmin && (
-              <>
-                <div role="listitem">• Use the Security Center to monitor system threats</div>
-                <div role="listitem">• Review user analytics for platform insights</div>
-                <div role="listitem">• Set up automated workflows for efficiency</div>
-                <div role="listitem">• Regular backup and security audits are recommended</div>
-              </>
-            )}
-            {isModerator && (
-              <>
-                <div role="listitem">• Check pending approvals daily</div>
-                <div role="listitem">• Monitor user activity for unusual patterns</div>
-                <div role="listitem">• Review reported content promptly</div>
-                <div role="listitem">• Use analytics to identify trends</div>
-              </>
-            )}
-            {isUser && (
-              <>
-                <div role="listitem">• Complete your profile for better experience</div>
-                <div role="listitem">• Check your activity dashboard regularly</div>
-                <div role="listitem">• Submit workflow requests when needed</div>
-                <div role="listitem">• Keep your account settings up to date</div>
-              </>
-            )}
+          <div
+            className="mt-8 rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6"
+            role="region"
+            aria-label={
+              isAdmin ? 'Admin tips' : isModerator ? 'Moderator tips' : 'Getting started tips'
+            }
+          >
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+              {isAdmin ? 'Admin Tips' : isModerator ? 'Moderator Tips' : 'Getting Started'}
+            </h3>
+            <div
+              className="grid grid-cols-1 gap-4 text-sm text-gray-700 md:grid-cols-2"
+              role="list"
+            >
+              {isAdmin && (
+                <>
+                  <div role="listitem">• Use the Security Center to monitor system threats</div>
+                  <div role="listitem">• Review user analytics for platform insights</div>
+                  <div role="listitem">• Set up automated workflows for efficiency</div>
+                  <div role="listitem">• Regular backup and security audits are recommended</div>
+                </>
+              )}
+              {isModerator && (
+                <>
+                  <div role="listitem">• Check pending approvals daily</div>
+                  <div role="listitem">• Monitor user activity for unusual patterns</div>
+                  <div role="listitem">• Review reported content promptly</div>
+                  <div role="listitem">• Use analytics to identify trends</div>
+                </>
+              )}
+              {isUser && (
+                <>
+                  <div role="listitem">• Complete your profile for better experience</div>
+                  <div role="listitem">• Check your activity dashboard regularly</div>
+                  <div role="listitem">• Submit workflow requests when needed</div>
+                  <div role="listitem">• Keep your account settings up to date</div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

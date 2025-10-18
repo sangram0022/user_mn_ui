@@ -25,6 +25,16 @@
 @import 'tailwindcss';
 
 /* ============================================================================
+   UNIFIED DESIGN SYSTEM - Professional light theme (CORE SYSTEM)
+   ============================================================================ */
+
+@import './unified-theme.css';
+@import './components/unified-form.css';
+@import './components/unified-button.css';
+@import './components/unified-typography.css';
+@import './components/unified-container.css';
+
+/* ============================================================================
    CUSTOM CSS IMPORTS - All imports must come before @layer definitions
    ============================================================================ */
 

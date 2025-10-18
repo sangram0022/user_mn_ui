@@ -24,12 +24,13 @@ export interface LogMessage {
 
 class Logger {
   private isDevelopment = import.meta.env.DEV;
+  private isTest = import.meta.env.MODE === 'test' || import.meta.env.VITEST;
   private logBuffer: LogMessage[] = [];
   private maxBufferSize = 100;
 
   constructor() {
     // Send buffered logs periodically in production
-    if (!this.isDevelopment) {
+    if (!this.isDevelopment && !this.isTest) {
       setInterval(() => this.flushLogs(), 30000); // Every 30 seconds
     }
   }
@@ -85,7 +86,8 @@ class Logger {
   }
 
   private async flushLogs(): Promise<void> {
-    if (this.logBuffer.length === 0 || this.isDevelopment) return;
+    // Don't send logs in development or test environments
+    if (this.logBuffer.length === 0 || this.isDevelopment || this.isTest) return;
 
     const logsToSend = [...this.logBuffer];
     this.logBuffer = [];
@@ -102,14 +104,19 @@ class Logger {
     } catch (error) {
       // Failed to send logs, put them back in buffer
       this.logBuffer.unshift(...logsToSend);
-      if (this.isDevelopment) {
+      if (this.isDevelopment || this.isTest) {
         console.warn('[Logger] Failed to send logs to server:', error);
       }
     }
   }
 
   private shouldLog(level: LogLevel): boolean {
-    if (!this.isDevelopment && level === 'debug') {
+    // Always log in test and development environments
+    if (this.isTest || this.isDevelopment) {
+      return true;
+    }
+    // In production, skip debug logs
+    if (level === 'debug') {
       return false;
     }
     return true;
@@ -121,32 +128,29 @@ class Logger {
     }
 
     const prefix = `[${logMessage.timestamp}] ${logMessage.level.toUpperCase()}:`;
+    const shouldOutputToConsole = this.isDevelopment || this.isTest;
 
-    switch (logMessage.level) {
-      case 'debug':
-        if (this.isDevelopment) {
-          console.warn(`🐛 ${prefix}`, logMessage.message, logMessage.context || '');
-        }
-        break;
-      case 'info':
-        if (this.isDevelopment) {
-          console.warn(`ℹ️ ${prefix}`, logMessage.message, logMessage.context || '');
-        }
-        break;
-      case 'warn':
-        if (this.isDevelopment) {
+    if (shouldOutputToConsole) {
+      switch (logMessage.level) {
+        case 'debug':
+          // eslint-disable-next-line no-console
+          console.debug(`🐛 ${prefix}`, logMessage.message, logMessage.context || '');
+          break;
+        case 'info':
+          // eslint-disable-next-line no-console
+          console.info(`ℹ️ ${prefix}`, logMessage.message, logMessage.context || '');
+          break;
+        case 'warn':
           console.warn(`⚠️ ${prefix}`, logMessage.message, logMessage.context || '');
-        }
-        break;
-      case 'error':
-        if (this.isDevelopment) {
+          break;
+        case 'error':
           console.error(
             `❌ ${prefix}`,
             logMessage.message,
             logMessage.error || logMessage.context || ''
           );
-        }
-        break;
+          break;
+      }
     }
 
     // Add to production buffer
@@ -169,8 +173,8 @@ class Logger {
     const logMessage = this.formatMessage('error', message, context, error);
     this.outputLog(logMessage);
 
-    // Report critical errors immediately in production
-    if (!this.isDevelopment) {
+    // Report critical errors immediately in production (not in dev/test)
+    if (!this.isDevelopment && !this.isTest) {
       this.reportCriticalError(logMessage);
     }
   }
@@ -199,7 +203,8 @@ class Logger {
 
   // Critical error reporting for production
   private async reportCriticalError(logMessage: LogMessage): Promise<void> {
-    if (this.isDevelopment) return;
+    // Don't send error reports in dev/test environments
+    if (this.isDevelopment || this.isTest) return;
 
     try {
       await fetch('/api/errors/critical', {
@@ -227,10 +232,11 @@ export const log = {
 };
 
 // Development helper
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV || import.meta.env.MODE === 'test') {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (globalThis as any).logger = logger;
-  logger.info('Enhanced Logger initialized', { environment: 'development' });
+  const environment = import.meta.env.MODE === 'test' ? 'test' : 'development';
+  logger.info('Enhanced Logger initialized', { environment });
 }
 
 export default logger;

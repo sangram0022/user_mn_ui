@@ -33,6 +33,10 @@ export type {
   TableSkeletonProps,
 } from '@shared/components/ui/Skeleton';
 
+// React 19 Metadata Component
+export { MetadataPresets, PageMetadata, usePageMetadata } from '@shared/components/PageMetadata';
+export type { PageMetadataProps } from '@shared/components/PageMetadata';
+
 // To be implemented - move truly reusable components here
 // export { Button } from './Button';
 // export { Input } from './Input';

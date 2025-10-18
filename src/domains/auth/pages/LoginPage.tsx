@@ -3,6 +3,7 @@ import { startTransition, useActionState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useToast } from '@hooks/useToast';
+import { PageMetadata } from '@shared/components/PageMetadata';
 import {
   PasswordInput,
   SubmitButton,
@@ -11,6 +12,7 @@ import {
   usePasswordVisibility,
 } from '@shared/index';
 import { validateEmail, validatePassword } from '@shared/utils/formValidation';
+import { prefetchRoute } from '@shared/utils/resource-loading';
 import { useAuth } from '../context/AuthContext';
 
 interface LoginFormData extends Record<string, unknown> {
@@ -73,6 +75,12 @@ const LoginPage: React.FC = () => {
     error: null,
   });
 
+  // Prefetch likely next routes for improved navigation performance
+  useEffect(() => {
+    prefetchRoute('/dashboard');
+    prefetchRoute('/register');
+  }, []);
+
   // Navigate on successful login
   useEffect(() => {
     if (state.success && !state.error) {
@@ -123,6 +131,13 @@ const LoginPage: React.FC = () => {
 
   return (
     <>
+      <PageMetadata
+        title="Login - User Management System"
+        description="Sign in to your account to access the user management dashboard and features."
+        keywords="login, sign in, authentication, user account"
+        ogTitle="Login - User Management System"
+        ogDescription="Secure login to access your account."
+      />
       <div className="layout-narrow py-8">
         {/* Logo and Title */}
         <div className="text-center mb-8">

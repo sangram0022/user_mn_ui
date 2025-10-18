@@ -34,6 +34,7 @@ import { useEffect, useState, type FC } from 'react';
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
+import { PageMetadata } from '@shared/components/PageMetadata';
 import { Badge } from '@shared/components/ui/Badge';
 import { Skeleton } from '@shared/components/ui/Skeleton';
 import Breadcrumb from '@shared/ui/Breadcrumb';
@@ -555,287 +556,298 @@ const HealthMonitoringPage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Breadcrumb />
-          <div className="mt-4 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Health Monitoring</h1>
-              <p className="text-gray-600 mt-1">
-                Real-time system health and performance monitoring
-              </p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={autoRefresh}
-                  onChange={(e) => setAutoRefresh(e.target.checked)}
-                  className="mr-2 rounded border-gray-300"
-                  aria-label="Enable auto-refresh every 30 seconds"
-                />
-                <span className="text-sm text-gray-700">Auto-refresh</span>
-              </label>
-              <button
-                onClick={handleExportReport}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                aria-label="Export health report"
-              >
-                <Download className="w-4 h-4 mr-2" aria-hidden="true" />
-                Export Report
-              </button>
-              <button
-                onClick={loadHealthData}
-                disabled={isLoading}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                aria-label="Refresh health data"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
-                  aria-hidden="true"
-                />
-                Refresh
-              </button>
+    <>
+      <PageMetadata
+        title="System Health Monitoring"
+        description="Track real-time service uptime, performance metrics, and alert thresholds across the user management platform."
+        keywords="system health monitoring, performance metrics, uptime dashboard, admin observability"
+      />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <Breadcrumb />
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Health Monitoring</h1>
+                <p className="text-gray-600 mt-1">
+                  Real-time operational insights across platform services.
+                </p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={autoRefresh}
+                    onChange={(e) => setAutoRefresh(e.target.checked)}
+                    className="mr-2 rounded border-gray-300"
+                    aria-label="Enable auto-refresh every 30 seconds"
+                  />
+                  <span className="text-sm text-gray-700">Auto-refresh</span>
+                </label>
+                <button
+                  onClick={handleExportReport}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                  aria-label="Export health report"
+                >
+                  <Download className="w-4 h-4 mr-2" aria-hidden="true" />
+                  Export Report
+                </button>
+                <button
+                  onClick={loadHealthData}
+                  disabled={isLoading}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                  aria-label="Refresh health data"
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
+                    aria-hidden="true"
+                  />
+                  Refresh
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6">
-            <ErrorAlert error={error} onDismiss={clearError} />
-          </div>
-        )}
-
-        {/* System Metrics */}
-        <div className="mb-8" role="region" aria-label="System resource metrics">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">System Metrics</h2>
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="p-6 bg-white rounded-lg border border-gray-200">
-                  <div className="flex items-center">
-                    <Skeleton className="w-8 h-8 mr-3" />
-                    <div>
-                      <Skeleton className="h-4 w-20 mb-2" />
-                      <Skeleton className="h-8 w-16" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : metrics ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <MetricCard
-                title="CPU Usage"
-                value={metrics.cpu_usage}
-                unit="%"
-                icon={Cpu}
-                status={getMetricStatus(metrics.cpu_usage, { warning: 70, critical: 90 })}
-                trend={metrics.cpu_usage > 50 ? 'up' : 'down'}
-                trendValue={5.2}
-              />
-              <MetricCard
-                title="Memory Usage"
-                value={metrics.memory_usage}
-                unit="%"
-                icon={MemoryStick}
-                status={getMetricStatus(metrics.memory_usage, { warning: 80, critical: 95 })}
-                trend={metrics.memory_usage > 60 ? 'up' : 'stable'}
-                trendValue={2.1}
-              />
-              <MetricCard
-                title="Disk Usage"
-                value={metrics.disk_usage}
-                unit="%"
-                icon={HardDrive}
-                status={getMetricStatus(metrics.disk_usage, { warning: 85, critical: 95 })}
-                trend="stable"
-              />
-              <MetricCard
-                title="Response Time"
-                value={metrics.response_time_avg}
-                unit="ms"
-                icon={Zap}
-                status={getMetricStatus(metrics.response_time_avg, {
-                  warning: 500,
-                  critical: 1000,
-                })}
-                trend={metrics.response_time_avg < 300 ? 'down' : 'up'}
-                trendValue={12.5}
-              />
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500">No metrics data available</p>
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6">
+              <ErrorAlert error={error} onDismiss={clearError} />
             </div>
           )}
-        </div>
 
-        {/* Performance Metrics */}
-        {performance && (
-          <div className="mb-8" role="region" aria-label="Application performance metrics">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Performance Metrics</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              <div
-                className="bg-white p-4 rounded-lg border"
-                role="status"
-                aria-label={`${performance.requests_per_minute} requests per minute`}
-              >
-                <p className="text-sm text-gray-500">Requests/min</p>
-                <p className="text-xl font-bold text-gray-900">{performance.requests_per_minute}</p>
-              </div>
-              <div
-                className="bg-white p-4 rounded-lg border"
-                role="status"
-                aria-label={`Average response time: ${performance.average_response_time} milliseconds`}
-              >
-                <p className="text-sm text-gray-500">Avg Response</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {performance.average_response_time}ms
-                </p>
-              </div>
-              <div
-                className="bg-white p-4 rounded-lg border"
-                role="status"
-                aria-label={`Error rate: ${performance.error_rate_percentage}%`}
-              >
-                <p className="text-sm text-gray-500">Error Rate</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {performance.error_rate_percentage}%
-                </p>
-              </div>
-              <div
-                className="bg-white p-4 rounded-lg border"
-                role="status"
-                aria-label={`${performance.active_users} active users`}
-              >
-                <p className="text-sm text-gray-500">Active Users</p>
-                <p className="text-xl font-bold text-gray-900">{performance.active_users}</p>
-              </div>
-              <div
-                className="bg-white p-4 rounded-lg border"
-                role="status"
-                aria-label={`${performance.database_queries_per_second} database queries per second`}
-              >
-                <p className="text-sm text-gray-500">DB Queries/sec</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {performance.database_queries_per_second}
-                </p>
-              </div>
-              <div
-                className="bg-white p-4 rounded-lg border"
-                role="status"
-                aria-label={`Cache hit ratio: ${performance.cache_hit_ratio}%`}
-              >
-                <p className="text-sm text-gray-500">Cache Hit Ratio</p>
-                <p className="text-xl font-bold text-gray-900">{performance.cache_hit_ratio}%</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Services Health */}
-          <div role="region" aria-label="Services health status">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Services Health</h2>
+          {/* System Metrics */}
+          <div className="mb-8" role="region" aria-label="System resource metrics">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">System Metrics</h2>
             {isLoading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="bg-white rounded-lg border p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <Skeleton className="w-3 h-3 rounded-full" />
-                        <Skeleton className="h-6 w-32" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      {Array.from({ length: 4 }).map((_, j) => (
-                        <div key={j}>
-                          <Skeleton className="h-4 w-20 mb-1" />
-                          <Skeleton className="h-5 w-16" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {services.map((service) => (
-                  <ServiceCard
-                    key={service.service_name}
-                    service={service}
-                    onViewDetails={setSelectedService}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* System Alerts */}
-          <div role="region" aria-label="System alerts and notifications">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">System Alerts</h2>
-              {alerts.filter((a) => !a.resolved).length > 0 && (
-                <span
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
-                  role="status"
-                  aria-label={`${alerts.filter((a) => !a.resolved).length} active alerts`}
-                >
-                  <Bell className="w-3 h-3 mr-1" aria-hidden="true" />
-                  {alerts.filter((a) => !a.resolved).length} Active
-                </span>
-              )}
-            </div>
-            {isLoading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="p-4 bg-white rounded-lg border">
-                    <div className="flex items-start space-x-3">
-                      <Skeleton className="w-5 h-5 mt-0.5" />
-                      <div className="flex-1">
-                        <Skeleton className="h-4 w-24 mb-2" />
-                        <Skeleton className="h-5 w-48 mb-2" />
-                        <Skeleton className="h-3 w-32" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="p-6 bg-white rounded-lg border border-gray-200">
+                    <div className="flex items-center">
+                      <Skeleton className="w-8 h-8 mr-3" />
+                      <div>
+                        <Skeleton className="h-4 w-20 mb-2" />
+                        <Skeleton className="h-8 w-16" />
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-            ) : alerts.length > 0 ? (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {alerts
-                  .filter((alert) => !alert.resolved)
-                  .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                  .map((alert) => (
-                    <AlertCard
-                      key={alert.alert_id}
-                      alert={alert}
-                      onAcknowledge={handleAcknowledgeAlert}
-                      onResolve={handleResolveAlert}
-                    />
-                  ))}
-                {alerts.filter((a) => !a.resolved).length === 0 && (
-                  <div className="text-center py-8">
-                    <CheckCircle
-                      className="w-12 h-12 text-green-500 mx-auto mb-4"
-                      aria-hidden="true"
-                    />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">All Clear!</h3>
-                    <p className="text-gray-600">No active alerts at this time.</p>
-                  </div>
-                )}
+            ) : metrics ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <MetricCard
+                  title="CPU Usage"
+                  value={metrics.cpu_usage}
+                  unit="%"
+                  icon={Cpu}
+                  status={getMetricStatus(metrics.cpu_usage, { warning: 70, critical: 90 })}
+                  trend={metrics.cpu_usage > 50 ? 'up' : 'down'}
+                  trendValue={5.2}
+                />
+                <MetricCard
+                  title="Memory Usage"
+                  value={metrics.memory_usage}
+                  unit="%"
+                  icon={MemoryStick}
+                  status={getMetricStatus(metrics.memory_usage, { warning: 80, critical: 95 })}
+                  trend={metrics.memory_usage > 60 ? 'up' : 'stable'}
+                  trendValue={2.1}
+                />
+                <MetricCard
+                  title="Disk Usage"
+                  value={metrics.disk_usage}
+                  unit="%"
+                  icon={HardDrive}
+                  status={getMetricStatus(metrics.disk_usage, { warning: 85, critical: 95 })}
+                  trend="stable"
+                />
+                <MetricCard
+                  title="Response Time"
+                  value={metrics.response_time_avg}
+                  unit="ms"
+                  icon={Zap}
+                  status={getMetricStatus(metrics.response_time_avg, {
+                    warning: 500,
+                    critical: 1000,
+                  })}
+                  trend={metrics.response_time_avg < 300 ? 'down' : 'up'}
+                  trendValue={12.5}
+                />
               </div>
             ) : (
               <div className="text-center py-8">
-                <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Alerts</h3>
-                <p className="text-gray-600">System is running smoothly.</p>
+                <p className="text-gray-500">No metrics data available</p>
               </div>
             )}
+          </div>
+
+          {/* Performance Metrics */}
+          {performance && (
+            <div className="mb-8" role="region" aria-label="Application performance metrics">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">Performance Metrics</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div
+                  className="bg-white p-4 rounded-lg border"
+                  role="status"
+                  aria-label={`${performance.requests_per_minute} requests per minute`}
+                >
+                  <p className="text-sm text-gray-500">Requests/min</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {performance.requests_per_minute}
+                  </p>
+                </div>
+                <div
+                  className="bg-white p-4 rounded-lg border"
+                  role="status"
+                  aria-label={`Average response time: ${performance.average_response_time} milliseconds`}
+                >
+                  <p className="text-sm text-gray-500">Avg Response</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {performance.average_response_time}ms
+                  </p>
+                </div>
+                <div
+                  className="bg-white p-4 rounded-lg border"
+                  role="status"
+                  aria-label={`Error rate: ${performance.error_rate_percentage}%`}
+                >
+                  <p className="text-sm text-gray-500">Error Rate</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {performance.error_rate_percentage}%
+                  </p>
+                </div>
+                <div
+                  className="bg-white p-4 rounded-lg border"
+                  role="status"
+                  aria-label={`${performance.active_users} active users`}
+                >
+                  <p className="text-sm text-gray-500">Active Users</p>
+                  <p className="text-xl font-bold text-gray-900">{performance.active_users}</p>
+                </div>
+                <div
+                  className="bg-white p-4 rounded-lg border"
+                  role="status"
+                  aria-label={`${performance.database_queries_per_second} database queries per second`}
+                >
+                  <p className="text-sm text-gray-500">DB Queries/sec</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {performance.database_queries_per_second}
+                  </p>
+                </div>
+                <div
+                  className="bg-white p-4 rounded-lg border"
+                  role="status"
+                  aria-label={`Cache hit ratio: ${performance.cache_hit_ratio}%`}
+                >
+                  <p className="text-sm text-gray-500">Cache Hit Ratio</p>
+                  <p className="text-xl font-bold text-gray-900">{performance.cache_hit_ratio}%</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Services Health */}
+            <div role="region" aria-label="Services health status">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">Services Health</h2>
+              {isLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="bg-white rounded-lg border p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <Skeleton className="w-3 h-3 rounded-full" />
+                          <Skeleton className="h-6 w-32" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        {Array.from({ length: 4 }).map((_, j) => (
+                          <div key={j}>
+                            <Skeleton className="h-4 w-20 mb-1" />
+                            <Skeleton className="h-5 w-16" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {services.map((service) => (
+                    <ServiceCard
+                      key={service.service_name}
+                      service={service}
+                      onViewDetails={setSelectedService}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* System Alerts */}
+            <div role="region" aria-label="System alerts and notifications">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-medium text-gray-900">System Alerts</h2>
+                {alerts.filter((a) => !a.resolved).length > 0 && (
+                  <span
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                    role="status"
+                    aria-label={`${alerts.filter((a) => !a.resolved).length} active alerts`}
+                  >
+                    <Bell className="w-3 h-3 mr-1" aria-hidden="true" />
+                    {alerts.filter((a) => !a.resolved).length} Active
+                  </span>
+                )}
+              </div>
+              {isLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="p-4 bg-white rounded-lg border">
+                      <div className="flex items-start space-x-3">
+                        <Skeleton className="w-5 h-5 mt-0.5" />
+                        <div className="flex-1">
+                          <Skeleton className="h-4 w-24 mb-2" />
+                          <Skeleton className="h-5 w-48 mb-2" />
+                          <Skeleton className="h-3 w-32" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : alerts.length > 0 ? (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {alerts
+                    .filter((alert) => !alert.resolved)
+                    .sort(
+                      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                    )
+                    .map((alert) => (
+                      <AlertCard
+                        key={alert.alert_id}
+                        alert={alert}
+                        onAcknowledge={handleAcknowledgeAlert}
+                        onResolve={handleResolveAlert}
+                      />
+                    ))}
+                  {alerts.filter((a) => !a.resolved).length === 0 && (
+                    <div className="text-center py-8">
+                      <CheckCircle
+                        className="w-12 h-12 text-green-500 mx-auto mb-4"
+                        aria-hidden="true"
+                      />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">All Clear!</h3>
+                      <p className="text-gray-600">No active alerts at this time.</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Alerts</h3>
+                  <p className="text-gray-600">System is running smoothly.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -942,7 +954,7 @@ const HealthMonitoringPage: FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

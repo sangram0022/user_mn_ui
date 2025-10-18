@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { apiClient } from '@lib/api';
 import { tokenService } from '@shared/services/auth/tokenService';
@@ -15,17 +15,51 @@ interface AuthProviderProps {
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+  const hasMountedRef = useRef(false);
 
   const isAuthenticated = !!user;
 
   // Check if user is authenticated on app load
+  // Use ref to prevent duplicate checks in React StrictMode
   useEffect(() => {
-    checkAuthStatus();
+    const abortController = new AbortController();
+
+    // In development, React StrictMode causes components to mount twice
+    // Use ref to ensure auth check only runs once per actual mount
+    if (hasMountedRef.current) {
+      logger.debug('Auth check skipped - already mounted in StrictMode');
+      return;
+    }
+
+    hasMountedRef.current = true;
+
+    // Prevent duplicate auth checks
+    if (!isCheckingAuth) {
+      checkAuthStatus(abortController.signal);
+    }
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = async (signal?: AbortSignal) => {
+    // Prevent concurrent auth checks
+    if (isCheckingAuth) {
+      logger.debug('Auth check already in progress, skipping');
+      return;
+    }
+
     try {
+      setIsCheckingAuth(true);
       setError(null);
+
+      // Check if request was aborted
+      if (signal?.aborted) {
+        logger.debug('Auth check aborted');
+        return;
+      }
 
       // Use enterprise token service to check authentication
       if (!tokenService.isAuthenticated()) {
@@ -39,16 +73,37 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
+      // Check again before making API call
+      if (signal?.aborted) {
+        logger.debug('Auth check aborted before API call');
+        return;
+      }
+
       // Verify token is still valid by fetching user profile
       const userProfile = await apiClient.getUserProfile();
+
+      // Final abort check before updating state
+      if (signal?.aborted) {
+        logger.debug('Auth check aborted after API call');
+        return;
+      }
+
       setUser(userProfile);
       logger.debug('Auth check succeeded for user', { email: userProfile?.email });
     } catch (err) {
+      // Don't log errors for aborted requests
+      if (signal?.aborted) {
+        logger.debug('Auth check cancelled');
+        return;
+      }
+
       logger.error('Auth check failed', err instanceof Error ? err : new Error(String(err)));
       // Clear invalid tokens
       tokenService.clearTokens();
       setUser(null);
       setError(err instanceof Error ? err.message : 'Authentication failed');
+    } finally {
+      setIsCheckingAuth(false);
     }
   };
 
@@ -56,10 +111,11 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     try {
       setError(null);
 
-      // Call login API - tokens are automatically stored by apiClient
-      const response = await apiClient.login(credentials.email, credentials.password);
+      // Use secure login endpoint with httpOnly cookies and CSRF protection
+      // The apiClient will automatically handle token storage and CSRF token fetching
+      const response = await apiClient.loginSecure(credentials.email, credentials.password);
 
-      logger.info('Login successful', {
+      logger.info('Secure login successful', {
         email: response.email,
         userId: response.user_id,
         role: response.role,

@@ -34,10 +34,12 @@ import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useLocalization } from '@hooks/localization/useLocalization';
 import { useToast } from '@hooks/useToast';
+import { PageMetadata } from '@shared/components/PageMetadata';
 import { Skeleton } from '@shared/components/ui/Skeleton';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { formatTime } from '@shared/utils';
+import { prefetchRoute } from '@shared/utils/resource-loading';
 import { adminService } from '../../../services/admin-backend.service';
 
 // ============================================================================
@@ -276,6 +278,14 @@ const AdminDashboardPage: FC = () => {
   // Effects
   // ============================================================================
 
+  // Prefetch likely next routes for improved navigation performance
+  useEffect(() => {
+    prefetchRoute('/users');
+    prefetchRoute('/users/roles');
+    prefetchRoute('/admin/audit');
+    prefetchRoute('/settings');
+  }, []);
+
   useEffect(() => {
     loadAllData();
   }, [loadAllData]);
@@ -312,257 +322,271 @@ const AdminDashboardPage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Breadcrumb />
-          <div className="mt-4 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
-              <p className="text-gray-600 mt-1">{t('dashboard.description')}</p>
-            </div>
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-              aria-label={isRefreshing ? 'Refreshing dashboard data' : 'Refresh dashboard data'}
-            >
-              <RefreshCw
-                className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
-                aria-hidden="true"
-              />
-              {t('dashboard.refresh')}
-            </button>
-          </div>
-        </div>
-
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6">
-            <ErrorAlert error={error} onDismiss={clearError} />
-          </div>
-        )}
-
-        {/* Stats Grid */}
-        {adminStats && (
-          <div
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-            role="region"
-            aria-label="Admin statistics overview"
-          >
-            <StatCard
-              title={t('dashboard.totalUsers')}
-              value={adminStats.total_users}
-              icon={<Users className="w-6 h-6" />}
-              color="blue"
-              loading={isLoading}
-            />
-            <StatCard
-              title={t('dashboard.activeUsers')}
-              value={adminStats.active_users}
-              icon={<UserCheck className="w-6 h-6" />}
-              color="green"
-              loading={isLoading}
-            />
-            <StatCard
-              title={t('dashboard.pendingApprovals')}
-              value={adminStats.pending_approvals}
-              icon={<Clock className="w-6 h-6" />}
-              color="yellow"
-              loading={isLoading}
-            />
-          </div>
-        )}
-
-        {/* System Health Section */}
-        <div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8"
-          role="region"
-          aria-label="System health monitoring"
-        >
-          {/* Database Health */}
-          <div className="card-white">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center">
-                <Database className="w-5 h-5 text-blue-600 mr-2" aria-hidden="true" />
-                <h3 className="text-lg font-medium text-gray-900">
-                  {t('dashboard.databaseHealth')}
-                </h3>
-                {dbHealth && <HealthStatusBadge status={dbHealth.status} className="ml-auto" />}
+    <>
+      <PageMetadata
+        title="Admin Dashboard - System Overview"
+        description="Comprehensive administrative dashboard with system health, user statistics, and audit logs."
+        keywords="admin, dashboard, system health, user management, audit logs"
+        ogTitle="Admin Dashboard - User Management System"
+        ogDescription="Monitor system health, user activity, and manage administrative tasks."
+      />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <Breadcrumb />
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+                <p className="text-gray-600 mt-1">{t('dashboard.description')}</p>
               </div>
-            </div>
-            <div className="p-6" role="group" aria-labelledby="db-health-title">
-              <span id="db-health-title" className="sr-only">
-                Database health metrics
-              </span>
-              {isLoading ? (
-                <div className="space-y-3" role="status" aria-label="Loading database health">
-                  <span className="sr-only">Loading database health information</span>
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ) : dbHealth ? (
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">
-                      {t('dashboard.activeConnections')}
-                    </span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`${dbHealth.connection_count} active connections`}
-                    >
-                      {dbHealth.connection_count}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t('dashboard.responseTime')}</span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`Response time ${dbHealth.response_time} milliseconds`}
-                    >
-                      {dbHealth.response_time}ms
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t('dashboard.lastCheck')}</span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`Last checked at ${formatTime(dbHealth.timestamp)}`}
-                    >
-                      {formatTime(dbHealth.timestamp)}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500" role="alert">
-                  {t('dashboard.unableToLoadDatabaseHealth')}
-                </p>
-              )}
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                aria-label={isRefreshing ? 'Refreshing dashboard data' : 'Refresh dashboard data'}
+              >
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
+                  aria-hidden="true"
+                />
+                {t('dashboard.refresh')}
+              </button>
             </div>
           </div>
 
-          {/* System Metrics */}
-          <div className="card-white">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center">
-                <Monitor className="w-5 h-5 text-green-600 mr-2" aria-hidden="true" />
-                <h3 className="text-lg font-medium text-gray-900">
-                  {t('dashboard.systemMetrics')}
-                </h3>
-                {systemMetrics && (
-                  <HealthStatusBadge status={systemMetrics.status} className="ml-auto" />
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6">
+              <ErrorAlert error={error} onDismiss={clearError} />
+            </div>
+          )}
+
+          {/* Stats Grid */}
+          {adminStats && (
+            <div
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+              role="region"
+              aria-label="Admin statistics overview"
+            >
+              <StatCard
+                title={t('dashboard.totalUsers')}
+                value={adminStats.total_users}
+                icon={<Users className="w-6 h-6" />}
+                color="blue"
+                loading={isLoading}
+              />
+              <StatCard
+                title={t('dashboard.activeUsers')}
+                value={adminStats.active_users}
+                icon={<UserCheck className="w-6 h-6" />}
+                color="green"
+                loading={isLoading}
+              />
+              <StatCard
+                title={t('dashboard.pendingApprovals')}
+                value={adminStats.pending_approvals}
+                icon={<Clock className="w-6 h-6" />}
+                color="yellow"
+                loading={isLoading}
+              />
+            </div>
+          )}
+
+          {/* System Health Section */}
+          <div
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8"
+            role="region"
+            aria-label="System health monitoring"
+          >
+            {/* Database Health */}
+            <div className="card-white">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <Database className="w-5 h-5 text-blue-600 mr-2" aria-hidden="true" />
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {t('dashboard.databaseHealth')}
+                  </h3>
+                  {dbHealth && <HealthStatusBadge status={dbHealth.status} className="ml-auto" />}
+                </div>
+              </div>
+              <div className="p-6" role="group" aria-labelledby="db-health-title">
+                <span id="db-health-title" className="sr-only">
+                  Database health metrics
+                </span>
+                {isLoading ? (
+                  <div className="space-y-3" role="status" aria-label="Loading database health">
+                    <span className="sr-only">Loading database health information</span>
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                ) : dbHealth ? (
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">
+                        {t('dashboard.activeConnections')}
+                      </span>
+                      <span
+                        className="text-sm font-medium"
+                        aria-label={`${dbHealth.connection_count} active connections`}
+                      >
+                        {dbHealth.connection_count}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">{t('dashboard.responseTime')}</span>
+                      <span
+                        className="text-sm font-medium"
+                        aria-label={`Response time ${dbHealth.response_time} milliseconds`}
+                      >
+                        {dbHealth.response_time}ms
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">{t('dashboard.lastCheck')}</span>
+                      <span
+                        className="text-sm font-medium"
+                        aria-label={`Last checked at ${formatTime(dbHealth.timestamp)}`}
+                      >
+                        {formatTime(dbHealth.timestamp)}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500" role="alert">
+                    {t('dashboard.unableToLoadDatabaseHealth')}
+                  </p>
                 )}
               </div>
             </div>
-            <div className="p-6" role="group" aria-labelledby="system-metrics-title">
-              <span id="system-metrics-title" className="sr-only">
-                System performance metrics
-              </span>
-              {isLoading ? (
-                <div className="space-y-3" role="status" aria-label="Loading system metrics">
-                  <span className="sr-only">Loading system performance information</span>
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ) : systemMetrics ? (
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t('dashboard.cpuUsage')}</span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`CPU usage ${systemMetrics.cpu_usage.toFixed(1)} percent`}
-                    >
-                      {systemMetrics.cpu_usage.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t('dashboard.memoryUsage')}</span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`Memory usage ${systemMetrics.memory_usage.toFixed(1)} percent`}
-                    >
-                      {systemMetrics.memory_usage.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t('dashboard.diskUsage')}</span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`Disk usage ${systemMetrics.disk_usage.toFixed(1)} percent`}
-                    >
-                      {systemMetrics.disk_usage.toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500" role="alert">
-                  {t('dashboard.unableToLoadSystemMetrics')}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
 
-        {/* Recent Activity */}
-        {canViewAuditLogs && auditSummary && (
-          <div className="card-white" role="region" aria-labelledby="recent-activity-title">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center">
-                <Activity className="w-5 h-5 text-purple-600 mr-2" aria-hidden="true" />
-                <h3 id="recent-activity-title" className="text-lg font-medium text-gray-900">
-                  {t('dashboard.recentActivity')}
-                </h3>
-                <span
-                  className="ml-auto text-sm text-gray-500"
-                  aria-label={`${auditSummary.total_events} total events`}
-                >
-                  {auditSummary.total_events} {t('dashboard.totalEvents')}
-                </span>
-              </div>
-            </div>
-            <div className="p-6">
-              {isLoading ? (
-                <div className="space-y-3" role="status" aria-label="Loading recent activity">
-                  <span className="sr-only">Loading recent audit activity</span>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-4 w-full" />
-                  ))}
+            {/* System Metrics */}
+            <div className="card-white">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <Monitor className="w-5 h-5 text-green-600 mr-2" aria-hidden="true" />
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {t('dashboard.systemMetrics')}
+                  </h3>
+                  {systemMetrics && (
+                    <HealthStatusBadge status={systemMetrics.status} className="ml-auto" />
+                  )}
                 </div>
-              ) : auditSummary.recent_activity.length > 0 ? (
-                <div className="space-y-3" role="list" aria-label="Recent audit activities">
-                  {auditSummary.recent_activity.slice(0, 5).map((activity, index) => (
-                    <div
-                      key={index}
-                      role="listitem"
-                      className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
-                      aria-label={`${activity.action}${activity.user_id ? ` by ${activity.user_id}` : ''} at ${formatTime(activity.timestamp)}`}
-                    >
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full mr-3" aria-hidden="true" />
-                        <span className="text-sm text-gray-900">{activity.action}</span>
-                        {activity.user_id && (
-                          <span className="text-xs text-gray-500 ml-2">by {activity.user_id}</span>
-                        )}
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        {formatTime(activity.timestamp)}
+              </div>
+              <div className="p-6" role="group" aria-labelledby="system-metrics-title">
+                <span id="system-metrics-title" className="sr-only">
+                  System performance metrics
+                </span>
+                {isLoading ? (
+                  <div className="space-y-3" role="status" aria-label="Loading system metrics">
+                    <span className="sr-only">Loading system performance information</span>
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                ) : systemMetrics ? (
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">{t('dashboard.cpuUsage')}</span>
+                      <span
+                        className="text-sm font-medium"
+                        aria-label={`CPU usage ${systemMetrics.cpu_usage.toFixed(1)} percent`}
+                      >
+                        {systemMetrics.cpu_usage.toFixed(1)}%
                       </span>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500" role="status">
-                  {t('dashboard.noRecentActivity')}
-                </p>
-              )}
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">{t('dashboard.memoryUsage')}</span>
+                      <span
+                        className="text-sm font-medium"
+                        aria-label={`Memory usage ${systemMetrics.memory_usage.toFixed(1)} percent`}
+                      >
+                        {systemMetrics.memory_usage.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">{t('dashboard.diskUsage')}</span>
+                      <span
+                        className="text-sm font-medium"
+                        aria-label={`Disk usage ${systemMetrics.disk_usage.toFixed(1)} percent`}
+                      >
+                        {systemMetrics.disk_usage.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500" role="alert">
+                    {t('dashboard.unableToLoadSystemMetrics')}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        )}
+
+          {/* Recent Activity */}
+          {canViewAuditLogs && auditSummary && (
+            <div className="card-white" role="region" aria-labelledby="recent-activity-title">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <Activity className="w-5 h-5 text-purple-600 mr-2" aria-hidden="true" />
+                  <h3 id="recent-activity-title" className="text-lg font-medium text-gray-900">
+                    {t('dashboard.recentActivity')}
+                  </h3>
+                  <span
+                    className="ml-auto text-sm text-gray-500"
+                    aria-label={`${auditSummary.total_events} total events`}
+                  >
+                    {auditSummary.total_events} {t('dashboard.totalEvents')}
+                  </span>
+                </div>
+              </div>
+              <div className="p-6">
+                {isLoading ? (
+                  <div className="space-y-3" role="status" aria-label="Loading recent activity">
+                    <span className="sr-only">Loading recent audit activity</span>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Skeleton key={i} className="h-4 w-full" />
+                    ))}
+                  </div>
+                ) : auditSummary.recent_activity.length > 0 ? (
+                  <div className="space-y-3" role="list" aria-label="Recent audit activities">
+                    {auditSummary.recent_activity.slice(0, 5).map((activity, index) => (
+                      <div
+                        key={index}
+                        role="listitem"
+                        className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
+                        aria-label={`${activity.action}${activity.user_id ? ` by ${activity.user_id}` : ''} at ${formatTime(activity.timestamp)}`}
+                      >
+                        <div className="flex items-center">
+                          <div
+                            className="w-2 h-2 bg-blue-400 rounded-full mr-3"
+                            aria-hidden="true"
+                          />
+                          <span className="text-sm text-gray-900">{activity.action}</span>
+                          {activity.user_id && (
+                            <span className="text-xs text-gray-500 ml-2">
+                              by {activity.user_id}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {formatTime(activity.timestamp)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500" role="status">
+                    {t('dashboard.noRecentActivity')}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

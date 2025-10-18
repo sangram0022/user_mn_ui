@@ -45,13 +45,13 @@ const sizeStyles: Record<CheckboxSize, { box: string; icon: string; text: string
     text: 'text-sm',
   },
   md: {
-    box: 'w-5 h-5',
-    icon: 'w-4 h-4',
+    box: 'w-4 h-4',
+    icon: 'w-3 h-3',
     text: 'text-base',
   },
   lg: {
-    box: 'w-6 h-6',
-    icon: 'w-5 h-5',
+    box: 'w-5 h-5',
+    icon: 'w-4 h-4',
     text: 'text-lg',
   },
 };

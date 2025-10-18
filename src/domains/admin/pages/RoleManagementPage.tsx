@@ -21,11 +21,13 @@ import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useLocalization } from '@hooks/localization/useLocalization';
 import { usePerformanceMonitor } from '@hooks/usePerformanceMonitor';
 import { useToast } from '@hooks/useToast';
+import { PageMetadata } from '@shared/components/PageMetadata';
 import { TextInput } from '@shared/components/forms/FormComponents';
 import { Modal, ModalFooter } from '@shared/components/ui/Modal';
 import { Skeleton } from '@shared/components/ui/Skeleton';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
+import { prefetchRoute } from '@shared/utils/resource-loading';
 import { adminService } from '../../../services/admin-backend.service';
 
 // ============================================================================
@@ -501,6 +503,13 @@ const RoleManagementPage: FC = () => {
   // Effects
   // ============================================================================
 
+  // Prefetch likely next routes for improved navigation performance
+  useEffect(() => {
+    prefetchRoute('/users');
+    prefetchRoute('/admin/audit');
+    prefetchRoute('/dashboard');
+  }, []);
+
   useEffect(() => {
     loadAllData();
   }, [loadAllData]);
@@ -524,258 +533,267 @@ const RoleManagementPage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Breadcrumb />
-          <div className="mt-4 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Role Management</h1>
-              <p className="text-gray-600 mt-1">Manage user roles and permissions</p>
-            </div>
-            {canManageRoles && (
-              <div className="flex space-x-3" role="group" aria-label="Role management actions">
-                <button
-                  onClick={() => setIsAssignModalOpen(true)}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  aria-label="Assign role to user"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" aria-hidden="true" />
-                  {t('roles.assignRole')}
-                </button>
-                <button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  aria-label="Create new role"
-                >
-                  <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
-                  {t('roles.createRole')}
-                </button>
+    <>
+      <PageMetadata
+        title="Role Management - RBAC Administration"
+        description="Manage user roles, permissions, and access control. Create, edit, and assign roles with granular permissions."
+        keywords="role management, RBAC, permissions, access control, user roles, authorization"
+        ogTitle="Role Management - User Management System"
+        ogDescription="Comprehensive role-based access control management interface."
+      />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <Breadcrumb />
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Role Management</h1>
+                <p className="text-gray-600 mt-1">Manage user roles and permissions</p>
               </div>
-            )}
+              {canManageRoles && (
+                <div className="flex space-x-3" role="group" aria-label="Role management actions">
+                  <button
+                    onClick={() => setIsAssignModalOpen(true)}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    aria-label="Assign role to user"
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" aria-hidden="true" />
+                    {t('roles.assignRole')}
+                  </button>
+                  <button
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    aria-label="Create new role"
+                  >
+                    <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
+                    {t('roles.createRole')}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6">
-            <ErrorAlert error={error} onDismiss={clearError} />
-          </div>
-        )}
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6">
+              <ErrorAlert error={error} onDismiss={clearError} />
+            </div>
+          )}
 
-        {/* Search and Filters */}
-        <div
-          className="bg-white rounded-lg shadow-sm border mb-6"
-          role="search"
-          aria-label="Role search"
-        >
-          <div className="px-6 py-4">
-            <div className="flex items-center space-x-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
-                    aria-hidden="true"
-                  />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search roles..."
-                    aria-label="Search roles by name or description"
-                    aria-describedby="search-help"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span id="search-help" className="sr-only">
-                    Filter roles by searching in role name or description
-                  </span>
+          {/* Search and Filters */}
+          <div
+            className="bg-white rounded-lg shadow-sm border mb-6"
+            role="search"
+            aria-label="Role search"
+          >
+            <div className="px-6 py-4">
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+                      aria-hidden="true"
+                    />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search roles..."
+                      aria-label="Search roles by name or description"
+                      aria-describedby="search-help"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <span id="search-help" className="sr-only">
+                      Filter roles by searching in role name or description
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Roles List */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">
-              {t('roles.roles', { count: filteredRoles.length })}
-            </h3>
-          </div>
-          <div
-            className="p-6"
-            role="region"
-            aria-label="Roles list"
-            aria-live="polite"
-            aria-atomic="false"
-          >
-            {isLoading ? (
-              <div className="space-y-4" role="status" aria-label="Loading roles">
-                <span className="sr-only">Loading roles, please wait...</span>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="p-4 border border-gray-200 rounded-lg">
-                    <Skeleton className="h-4 w-1/4 mb-2" />
-                    <Skeleton className="h-3 w-3/4 mb-2" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                ))}
-              </div>
-            ) : filteredRoles.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" role="list">
-                {filteredRoles.map((role) => (
-                  <div
-                    key={role.role_id}
-                    className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
-                    role="listitem"
-                    aria-labelledby={`role-name-${role.role_id}`}
-                    aria-describedby={`role-desc-${role.role_id}`}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center">
-                        <Shield className="w-5 h-5 text-blue-600 mr-2" aria-hidden="true" />
-                        <h4
-                          id={`role-name-${role.role_id}`}
-                          className="text-lg font-medium text-gray-900"
-                        >
-                          {role.role_name}
-                        </h4>
-                      </div>
-                      {canManageRoles && (
-                        <div className="flex space-x-1">
-                          <button
-                            onClick={() => handleDeleteRole(role.role_id)}
-                            className="text-red-600 hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded p-1"
-                            aria-label={`Delete role ${role.role_name}`}
-                            title={`Delete ${role.role_name}`}
-                          >
-                            <Trash2 className="w-4 h-4" aria-hidden="true" />
-                          </button>
-                        </div>
-                      )}
+          {/* Roles List */}
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">
+                {t('roles.roles', { count: filteredRoles.length })}
+              </h3>
+            </div>
+            <div
+              className="p-6"
+              role="region"
+              aria-label="Roles list"
+              aria-live="polite"
+              aria-atomic="false"
+            >
+              {isLoading ? (
+                <div className="space-y-4" role="status" aria-label="Loading roles">
+                  <span className="sr-only">Loading roles, please wait...</span>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="p-4 border border-gray-200 rounded-lg">
+                      <Skeleton className="h-4 w-1/4 mb-2" />
+                      <Skeleton className="h-3 w-3/4 mb-2" />
+                      <Skeleton className="h-3 w-1/2" />
                     </div>
-                    <p id={`role-desc-${role.role_id}`} className="text-gray-600 text-sm mb-3">
-                      {role.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">
-                        {t('roles.permissionsCount', { count: role.permissions.length })}
-                      </span>
-                      <div className="flex flex-wrap gap-1">
-                        {role.permissions.slice(0, 3).map((permission) => (
-                          <span
-                            key={permission}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  ))}
+                </div>
+              ) : filteredRoles.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" role="list">
+                  {filteredRoles.map((role) => (
+                    <div
+                      key={role.role_id}
+                      className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+                      role="listitem"
+                      aria-labelledby={`role-name-${role.role_id}`}
+                      aria-describedby={`role-desc-${role.role_id}`}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center">
+                          <Shield className="w-5 h-5 text-blue-600 mr-2" aria-hidden="true" />
+                          <h4
+                            id={`role-name-${role.role_id}`}
+                            className="text-lg font-medium text-gray-900"
                           >
-                            {permission}
-                          </span>
-                        ))}
-                        {role.permissions.length > 3 && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            {t('roles.more', { count: role.permissions.length - 3 })}
-                          </span>
+                            {role.role_name}
+                          </h4>
+                        </div>
+                        {canManageRoles && (
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => handleDeleteRole(role.role_id)}
+                              className="text-red-600 hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded p-1"
+                              aria-label={`Delete role ${role.role_name}`}
+                              title={`Delete ${role.role_name}`}
+                            >
+                              <Trash2 className="w-4 h-4" aria-hidden="true" />
+                            </button>
+                          </div>
                         )}
                       </div>
+                      <p id={`role-desc-${role.role_id}`} className="text-gray-600 text-sm mb-3">
+                        {role.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">
+                          {t('roles.permissionsCount', { count: role.permissions.length })}
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {role.permissions.slice(0, 3).map((permission) => (
+                            <span
+                              key={permission}
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                              {permission}
+                            </span>
+                          ))}
+                          {role.permissions.length > 3 && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              {t('roles.more', { count: role.permissions.length - 3 })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12" role="status">
-                <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {t('roles.noRolesFound')}
-                </h3>
-                <p className="text-gray-600">
-                  {searchTerm ? t('roles.noRolesMatchSearch') : t('roles.noRolesCreatedYet')}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Available Permissions */}
-        <div className="mt-8 bg-white rounded-lg shadow-sm border">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900">
-                {t('roles.availablePermissions')}
-              </h3>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                aria-label="Filter permissions by category"
-              >
-                <option value="">{t('roles.allCategories')}</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12" role="status">
+                  <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {t('roles.noRolesFound')}
+                  </h3>
+                  <p className="text-gray-600">
+                    {searchTerm ? t('roles.noRolesMatchSearch') : t('roles.noRolesCreatedYet')}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
-          <div
-            className="p-6"
-            role="region"
-            aria-label="Available permissions list"
-            aria-live="polite"
-          >
-            {isLoading ? (
-              <div className="space-y-2" role="status" aria-label="Loading permissions">
-                <span className="sr-only">Loading permissions, please wait...</span>
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <Skeleton key={i} className="h-8 w-full" />
-                ))}
+
+          {/* Available Permissions */}
+          <div className="mt-8 bg-white rounded-lg shadow-sm border">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-gray-900">
+                  {t('roles.availablePermissions')}
+                </h3>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  aria-label="Filter permissions by category"
+                >
+                  <option value="">{t('roles.allCategories')}</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
-                {filteredPermissions.map((permission) => (
-                  <div
-                    key={permission.permission_id}
-                    className="p-3 border border-gray-200 rounded-lg focus-within:ring-2 focus-within:ring-blue-500"
-                    role="listitem"
-                    aria-labelledby={`permission-${permission.permission_id}`}
-                  >
-                    <div className="flex items-center mb-2">
-                      <Lock className="w-4 h-4 text-gray-600 mr-2" aria-hidden="true" />
-                      <span
-                        id={`permission-${permission.permission_id}`}
-                        className="font-medium text-gray-900"
-                      >
-                        {permission.action} - {permission.resource}
-                      </span>
+            </div>
+            <div
+              className="p-6"
+              role="region"
+              aria-label="Available permissions list"
+              aria-live="polite"
+            >
+              {isLoading ? (
+                <div className="space-y-2" role="status" aria-label="Loading permissions">
+                  <span className="sr-only">Loading permissions, please wait...</span>
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} className="h-8 w-full" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
+                  {filteredPermissions.map((permission) => (
+                    <div
+                      key={permission.permission_id}
+                      className="p-3 border border-gray-200 rounded-lg focus-within:ring-2 focus-within:ring-blue-500"
+                      role="listitem"
+                      aria-labelledby={`permission-${permission.permission_id}`}
+                    >
+                      <div className="flex items-center mb-2">
+                        <Lock className="w-4 h-4 text-gray-600 mr-2" aria-hidden="true" />
+                        <span
+                          id={`permission-${permission.permission_id}`}
+                          className="font-medium text-gray-900"
+                        >
+                          {permission.action} - {permission.resource}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Category: <span className="font-medium">{permission.category}</span>
+                      </div>
+                      {permission.description && (
+                        <div className="text-xs text-gray-500 mt-1">{permission.description}</div>
+                      )}
                     </div>
-                    <div className="text-sm text-gray-600">
-                      Category: <span className="font-medium">{permission.category}</span>
-                    </div>
-                    {permission.description && (
-                      <div className="text-xs text-gray-500 mt-1">{permission.description}</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Modals */}
+        <CreateRoleModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          permissions={permissions}
+          onSuccess={loadRoles}
+        />
+
+        <AssignRoleModal
+          isOpen={isAssignModalOpen}
+          onClose={() => setIsAssignModalOpen(false)}
+          roles={roles}
+          onAssign={handleAssignRole}
+        />
       </div>
-
-      {/* Modals */}
-      <CreateRoleModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        permissions={permissions}
-        onSuccess={loadRoles}
-      />
-
-      <AssignRoleModal
-        isOpen={isAssignModalOpen}
-        onClose={() => setIsAssignModalOpen(false)}
-        roles={roles}
-        onAssign={handleAssignRole}
-      />
-    </div>
+    </>
   );
 };
 

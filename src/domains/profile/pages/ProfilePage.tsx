@@ -3,9 +3,11 @@ import { startTransition, useActionState, useEffect, useId, useState } from 'rea
 
 import { useToast } from '@hooks/useToast';
 import { apiClient } from '@lib/api';
+import { PageMetadata } from '@shared/components/PageMetadata';
 import type { UserProfile as BaseUserProfile } from '@shared/types';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import { formatDate } from '@shared/utils';
+import { prefetchRoute } from '@shared/utils/resource-loading';
 import {
   Bell,
   Camera,
@@ -221,6 +223,12 @@ const ProfilePage: FC = () => {
       setIsLoading(false);
     }
   };
+
+  // Prefetch likely next routes for improved navigation performance
+  useEffect(() => {
+    prefetchRoute('/settings');
+    prefetchRoute('/dashboard');
+  }, []);
 
   useEffect(() => {
     loadProfile();
@@ -849,66 +857,77 @@ const ProfilePage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="mx-auto max-w-4xl">
-        {/* Breadcrumb Navigation */}
-        <Breadcrumb />
+    <>
+      <PageMetadata
+        title={`${profile?.full_name || 'User'} Profile - Settings`}
+        description="Manage your profile information, security settings, and preferences."
+        keywords="profile, user settings, security, preferences, account management"
+        ogTitle="Profile Settings - User Management System"
+        ogDescription="Update your profile, manage security settings, and customize your experience."
+      />
+      <div className="min-h-screen bg-gray-50 px-4 py-8">
+        <div className="mx-auto max-w-4xl">
+          {/* Breadcrumb Navigation */}
+          <Breadcrumb />
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">Profile Settings</h1>
-          <p className="m-0 text-sm text-gray-600">Manage your account settings and preferences</p>
-        </div>
-
-        {/* Alerts */}
-        {success && (
-          <div
-            className="mb-6 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4"
-            role="status"
-            aria-live="polite"
-          >
-            <CheckCircle className="h-5 w-5 text-green-500" aria-hidden="true" />
-            <p className="m-0 text-sm text-green-800">{success}</p>
-          </div>
-        )}
-
-        {/* Tab Navigation */}
-        <div className="overflow-hidden rounded-lg bg-white shadow-sm">
-          <div
-            className="flex border-b border-gray-200"
-            role="tablist"
-            aria-label="Profile settings sections"
-          >
-            {[
-              { id: 'profile', label: 'Profile', icon: UserIcon },
-              { id: 'security', label: 'Security', icon: Shield },
-              { id: 'preferences', label: 'Preferences', icon: Settings },
-            ].map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id as 'profile' | 'security' | 'preferences')}
-                className={`flex flex-1 items-center justify-center gap-2 border-b-2 border-none p-4 text-sm font-medium transition-all duration-200 ${
-                  activeTab === id
-                    ? 'border-b-blue-500 bg-slate-50 text-blue-500'
-                    : 'border-transparent bg-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-                role="tab"
-                aria-selected={activeTab === id}
-                aria-controls={`${id}-panel`}
-              >
-                <Icon className="h-4 w-4" aria-hidden="true" />
-                {label}
-              </button>
-            ))}
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="mb-2 text-3xl font-bold text-gray-900">Profile Settings</h1>
+            <p className="m-0 text-sm text-gray-600">
+              Manage your account settings and preferences
+            </p>
           </div>
 
-          {/* Tab Content */}
-          <div role="tabpanel" id={`${activeTab}-panel`} aria-labelledby={`${activeTab}-tab`}>
-            {tabContent}
+          {/* Alerts */}
+          {success && (
+            <div
+              className="mb-6 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4"
+              role="status"
+              aria-live="polite"
+            >
+              <CheckCircle className="h-5 w-5 text-green-500" aria-hidden="true" />
+              <p className="m-0 text-sm text-green-800">{success}</p>
+            </div>
+          )}
+
+          {/* Tab Navigation */}
+          <div className="overflow-hidden rounded-lg bg-white shadow-sm">
+            <div
+              className="flex border-b border-gray-200"
+              role="tablist"
+              aria-label="Profile settings sections"
+            >
+              {[
+                { id: 'profile', label: 'Profile', icon: UserIcon },
+                { id: 'security', label: 'Security', icon: Shield },
+                { id: 'preferences', label: 'Preferences', icon: Settings },
+              ].map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveTab(id as 'profile' | 'security' | 'preferences')}
+                  className={`flex flex-1 items-center justify-center gap-2 border-b-2 border-none p-4 text-sm font-medium transition-all duration-200 ${
+                    activeTab === id
+                      ? 'border-b-blue-500 bg-slate-50 text-blue-500'
+                      : 'border-transparent bg-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                  role="tab"
+                  aria-selected={activeTab === id}
+                  aria-controls={`${id}-panel`}
+                >
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab Content */}
+            <div role="tabpanel" id={`${activeTab}-panel`} aria-labelledby={`${activeTab}-tab`}>
+              {tabContent}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -19,6 +19,9 @@ export * from './user';
 // Performance utilities
 export * from './performance';
 
+// React 19 resource loading utilities
+export * from './resource-loading';
+
 // Date utilities
 export * from './dateUtils';
 

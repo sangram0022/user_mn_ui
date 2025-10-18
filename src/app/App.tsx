@@ -1,4 +1,3 @@
-import '@app/App.css';
 import { GlobalErrorBoundary } from '@app/GlobalErrorBoundary';
 import { SkipLink } from '@components/common/SkipLink';
 import { LocalizationProvider } from '@contexts/LocalizationProvider';
@@ -13,6 +12,7 @@ import { initializePreloading, preloadPredictedRoutes } from '@routing/useNaviga
 import { ToastProvider } from '@shared/components/ui/Toast';
 import { PageErrorBoundary as ErrorBoundary } from '@shared/errors/ErrorBoundary';
 import '@styles/theme-components.css';
+import type { ComponentProps, FC } from 'react';
 import { useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { initPerformanceMonitoring } from '../monitoring/performance';
@@ -24,6 +24,15 @@ initSentry();
 
 // Initialize performance monitoring
 initPerformanceMonitoring();
+
+type RouterWithFutureProps = ComponentProps<typeof Router> & {
+  future?: {
+    v7_startTransition?: boolean;
+    v7_relativeSplatPath?: boolean;
+  };
+};
+
+const RouterWithFuture = Router as unknown as FC<RouterWithFutureProps>;
 
 const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode) => {
   switch (route.guard) {
@@ -65,7 +74,7 @@ function App() {
           <LocalizationProvider defaultLocale="en">
             <ToastProvider>
               <AuthProvider>
-                <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                <RouterWithFuture future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                   {/* Skip link for keyboard navigation */}
                   <SkipLink />
                   <RoutePreloadTrigger>
@@ -82,7 +91,7 @@ function App() {
                       </Routes>
                     </main>
                   </RoutePreloadTrigger>
-                </Router>
+                </RouterWithFuture>
               </AuthProvider>
             </ToastProvider>
           </LocalizationProvider>

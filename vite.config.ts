@@ -89,8 +89,8 @@ export default defineConfig(({ mode }) => {
         drop: mode === 'production' ? ['console', 'debugger'] : [],
         // Aggressive minification
         legalComments: 'none',
-        // Target modern browsers
-        target: 'es2020',
+        // Target modern browsers (ES2022 for top-level await support)
+        target: 'es2022',
       },
 
       // Rollup options for enhanced code splitting
@@ -289,8 +289,8 @@ export default defineConfig(({ mode }) => {
       // Performance optimizations
       chunkSizeWarningLimit: 500, // Reduced from 600KB for better performance
 
-      // Target modern browsers for better optimization
-      target: ['es2020', 'chrome80', 'firefox78', 'safari14'],
+      // Target modern browsers for better optimization (ES2022 for top-level await support)
+      target: ['es2022', 'chrome89', 'firefox89', 'safari15'],
 
       // Additional optimizations
       reportCompressedSize: true,

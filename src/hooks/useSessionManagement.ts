@@ -3,11 +3,13 @@
  *
  * React 19 Migration: All memoization removed - React Compiler handles optimization
  * CRITICAL: This hook manages user session lifecycle - thoroughly test after changes
+ *
+ * StrictMode Compatible: Uses refs to prevent duplicate listeners and timers
  */
 
-import { SESSION_TIMEOUT } from '@shared/constants';
+import { SESSION } from '@shared/config/constants';
 import type { Dispatch, SetStateAction } from 'react';
-import { useEffect, useState } from 'react';
+import { startTransition, useEffect, useRef, useState } from 'react';
 
 import { useAuth } from 'src/domains/auth';
 
@@ -25,9 +27,9 @@ interface SessionConfig {
 }
 
 const DEFAULT_CONFIG: SessionConfig = {
-  maxInactiveTime: SESSION_TIMEOUT.MAX_INACTIVE_TIME,
-  warningTime: SESSION_TIMEOUT.WARNING_TIME,
-  checkInterval: SESSION_TIMEOUT.CHECK_INTERVAL,
+  maxInactiveTime: SESSION.MAX_INACTIVE_TIME,
+  warningTime: SESSION.WARNING_TIME,
+  checkInterval: SESSION.CHECK_INTERVAL,
 };
 
 export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
@@ -35,13 +37,32 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [showWarning, setShowWarning]: [boolean, Dispatch<SetStateAction<boolean>>] =
     useState(false);
+  const [remainingTime, setRemainingTime] = useState(0);
+
+  // Refs to prevent duplicate setup in StrictMode
+  const activityListenersSetupRef = useRef(false);
+  const sessionTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const remainingTimeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const hasInitializedRef = useRef(false);
 
   // Convert useMemo to IIFE
   const sessionConfig = (() => ({ ...DEFAULT_CONFIG, ...config }))();
 
-  // Convert all useCallback to plain functions
+  // Stable refs for callbacks to avoid dependency issues
+  const sessionDataRef = useRef(sessionData);
+  const userRef = useRef(user);
+  const showWarningRef = useRef(showWarning);
+
+  // Keep refs synchronized
+  useEffect(() => {
+    sessionDataRef.current = sessionData;
+    userRef.current = user;
+    showWarningRef.current = showWarning;
+  });
+
+  // Convert all useCallback to plain functions with stable references
   const initializeSession = () => {
-    if (user) {
+    if (userRef.current) {
       const now = Date.now();
       const session: SessionData = {
         sessionId: `session_${now}_${Math.random().toString(36).substr(2, 9)}`,
@@ -57,10 +78,13 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
   };
 
   const updateActivity = () => {
-    if (sessionData && user) {
+    const currentSessionData = sessionDataRef.current;
+    const currentUser = userRef.current;
+
+    if (currentSessionData && currentUser) {
       const now = Date.now();
       const updatedSession: SessionData = {
-        ...sessionData,
+        ...currentSessionData,
         lastActivity: now,
         expiresAt: now + sessionConfig.maxInactiveTime,
       };
@@ -72,10 +96,14 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
   };
 
   const checkSession = () => {
-    if (!sessionData || !user) return;
+    const currentSessionData = sessionDataRef.current;
+    const currentUser = userRef.current;
+    const currentShowWarning = showWarningRef.current;
+
+    if (!currentSessionData || !currentUser) return;
 
     const now = Date.now();
-    const timeUntilExpiry = sessionData.expiresAt - now;
+    const timeUntilExpiry = currentSessionData.expiresAt - now;
 
     if (timeUntilExpiry <= 0) {
       // Session expired
@@ -84,7 +112,7 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
       localStorage.removeItem('session_id');
       setSessionData(null);
       setShowWarning(false);
-    } else if (timeUntilExpiry <= sessionConfig.warningTime && !showWarning) {
+    } else if (timeUntilExpiry <= sessionConfig.warningTime && !currentShowWarning) {
       // Show warning
       setShowWarning(true);
     }
@@ -102,88 +130,126 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
     setShowWarning(false);
   };
 
-  // Activity listeners
+  // ✅ FIX 1: Activity listeners - prevent duplicates with ref guard
   useEffect(() => {
+    // Prevent duplicate setup in StrictMode
+    if (activityListenersSetupRef.current) return;
+    activityListenersSetupRef.current = true;
+
     const activities = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
 
     const handleActivity = () => {
       updateActivity();
     };
 
+    // Use passive listeners for better performance
     activities.forEach((activity) => {
-      document.addEventListener(activity, handleActivity, true);
+      document.addEventListener(activity, handleActivity, { passive: true, capture: true });
     });
 
     return () => {
+      // βœ… StrictMode Fix: Don't reset ref - keep it true to prevent re-setup
+      // The ref staying true ensures listeners are only added once, even with StrictMode double-mount
       activities.forEach((activity) => {
-        document.removeEventListener(activity, handleActivity, true);
+        document.removeEventListener(activity, handleActivity, { capture: true });
       });
     };
-  }, [updateActivity]);
+  }, []); // Empty deps - only setup once
 
-  // Session check interval
+  // ✅ FIX 2: Session check interval - prevent duplicate timers
   useEffect(() => {
-    if (user && sessionData) {
-      const interval = setInterval(checkSession, sessionConfig.checkInterval);
-      return () => clearInterval(interval);
+    // Clear any existing timer
+    if (sessionTimerRef.current) {
+      clearInterval(sessionTimerRef.current);
+      sessionTimerRef.current = null;
     }
 
-    // Return undefined when conditions are not met
-    return undefined;
-  }, [user, sessionData, checkSession, sessionConfig.checkInterval]);
+    // Only start timer if we have both user and session data
+    if (!user || !sessionData) {
+      return;
+    }
 
-  // Initialize session on user login
-  useEffect(() => {
-    if (user && !sessionData) {
-      // Try to restore from sessionStorage first
-      const storedSession = sessionStorage.getItem('user_session');
-      if (storedSession) {
-        try {
-          const parsed = JSON.parse(storedSession);
-          if (parsed.expiresAt > Date.now()) {
-            // Use setTimeout to avoid synchronous setState in effect
-            setTimeout(() => setSessionData(parsed), 0);
-          } else {
-            setTimeout(() => initializeSession(), 0);
-          }
-        } catch {
-          setTimeout(() => initializeSession(), 0);
-        }
-      } else {
-        setTimeout(() => initializeSession(), 0);
+    // Prevent duplicate timers
+    if (sessionTimerRef.current) return;
+
+    sessionTimerRef.current = setInterval(checkSession, sessionConfig.checkInterval);
+
+    return () => {
+      if (sessionTimerRef.current) {
+        clearInterval(sessionTimerRef.current);
+        sessionTimerRef.current = null;
       }
-    }
-  }, [user, sessionData, initializeSession]);
+    };
+  }, [user, sessionData]); // Minimal deps
 
-  // Cleanup on user logout
+  // ✅ FIX 3: Initialize session - use startTransition instead of setTimeout(0)
   useEffect(() => {
-    if (!user) {
-      // Use setTimeout to avoid synchronous setState in effect
-      setTimeout(() => {
+    // Prevent duplicate initialization in StrictMode
+    if (hasInitializedRef.current || !user || sessionData) return;
+    hasInitializedRef.current = true;
+
+    // Try to restore from sessionStorage first
+    const storedSession = sessionStorage.getItem('user_session');
+    if (storedSession) {
+      try {
+        const parsed = JSON.parse(storedSession);
+        if (parsed.expiresAt > Date.now()) {
+          // Use startTransition for non-urgent updates (React 19 way)
+          startTransition(() => setSessionData(parsed));
+        } else {
+          startTransition(() => initializeSession());
+        }
+      } catch {
+        startTransition(() => initializeSession());
+      }
+    } else {
+      startTransition(() => initializeSession());
+    }
+
+    return () => {
+      // βœ… StrictMode Fix: Don't reset ref - keep it true to prevent re-initialization
+      // hasInitializedRef.current = false; // Removed
+    };
+  }, [user, sessionData]);
+
+  // ✅ FIX 4: Cleanup on user logout - use startTransition
+  useEffect(() => {
+    if (!user && sessionData) {
+      // Use startTransition for non-urgent updates
+      startTransition(() => {
         setSessionData(null);
         setShowWarning(false);
-      }, 0);
+      });
     }
-  }, [user]);
+  }, [user, sessionData]);
 
-  // Calculate remaining time - Use state to avoid calling Date.now() during render
-  const [remainingTime, setRemainingTime] = useState(0);
-
+  // ✅ FIX 5: Remaining time calculation - prevent duplicate timers
   useEffect(() => {
+    // Clear any existing timer
+    if (remainingTimeTimerRef.current) {
+      clearInterval(remainingTimeTimerRef.current);
+      remainingTimeTimerRef.current = null;
+    }
+
     if (!sessionData) {
-      // Use setTimeout to avoid synchronous setState in effect
-      setTimeout(() => setRemainingTime(0), 0);
+      startTransition(() => setRemainingTime(0));
       return;
     }
 
     const updateRemainingTime = () => {
-      setRemainingTime(Math.max(0, sessionData.expiresAt - Date.now()));
+      const remaining = Math.max(0, sessionData.expiresAt - Date.now());
+      setRemainingTime(remaining);
     };
 
     updateRemainingTime();
-    const timer = setInterval(updateRemainingTime, 1000);
+    remainingTimeTimerRef.current = setInterval(updateRemainingTime, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      if (remainingTimeTimerRef.current) {
+        clearInterval(remainingTimeTimerRef.current);
+        remainingTimeTimerRef.current = null;
+      }
+    };
   }, [sessionData]);
 
   return {

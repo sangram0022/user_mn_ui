@@ -5,18 +5,13 @@
  * @module infrastructure/monitoring
  */
 
-// Logger - Structured logging
-export { LogLevel, logger } from './logger';
-
-// Error Tracking
-export { errorTracker } from './ErrorTracker';
+// Logger - Structured logging delegates to shared utilities
+export { logger } from '@shared/utils/logger';
+export type { LogContext, LogLevel, LogMessage } from '@shared/utils/logger';
 
 // Performance Monitoring
 export { performanceMonitor } from './PerformanceMonitor';
 export { webVitalsTracker } from './WebVitalsTracker';
-
-// Analytics
-export { analyticsTracker } from './AnalyticsTracker';
 
 // Monitoring Hooks
 export {

@@ -41,13 +41,13 @@ const sizeStyles: Record<RadioSize, { box: string; dot: string; text: string }> 
     text: 'text-sm',
   },
   md: {
-    box: 'w-5 h-5',
-    dot: 'w-2.5 h-2.5',
+    box: 'w-4 h-4',
+    dot: 'w-2 h-2',
     text: 'text-base',
   },
   lg: {
-    box: 'w-6 h-6',
-    dot: 'w-3 h-3',
+    box: 'w-5 h-5',
+    dot: 'w-2.5 h-2.5',
     text: 'text-lg',
   },
 };

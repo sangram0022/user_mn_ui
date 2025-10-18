@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { ReactElement, ReactNode } from 'react';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
-import { AuthProvider } from '../../contexts/AuthContext';
+import { AuthProvider } from '../../domains/auth/providers/AuthProvider';
 
 // ============================================================================
 // Types

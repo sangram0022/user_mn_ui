@@ -1,12 +1,21 @@
 import { BACKEND_CONFIG } from '@shared/config/api';
+import { createCSRFTokenService } from '@shared/services/auth/csrfTokenService';
 import { tokenService } from '@shared/services/auth/tokenService';
 import type {
+  AdminActivateUserResponse,
+  AdminDeactivateUserResponse,
   AdminUsersQuery,
   AuditLog,
   AuditLogsQuery,
   AuditSummary,
   ChangePasswordRequest,
   CreateUserRequest,
+  CSRFTokenResponse,
+  ForgotPasswordResponse,
+  GDPRDeleteRequest,
+  GDPRDeleteResponse,
+  GDPRExportResponse,
+  GDPRExportStatus,
   LoginResponse,
   PendingWorkflow,
   RegisterRequest,
@@ -29,6 +38,13 @@ const DEFAULT_BASE_URL = BACKEND_CONFIG.API_BASE_URL;
 
 const ENDPOINTS = {
   auth: {
+    // Secure endpoints (httpOnly cookies)
+    loginSecure: '/auth/login-secure',
+    logoutSecure: '/auth/logout-secure',
+    refreshSecure: '/auth/refresh-secure',
+    csrfToken: '/auth/csrf-token',
+    validateCsrf: '/auth/validate-csrf',
+    // Legacy endpoints (backward compatibility)
     login: '/auth/login',
     register: '/auth/register',
     logout: '/auth/logout',
@@ -44,12 +60,20 @@ const ENDPOINTS = {
   admin: {
     users: '/admin/users',
     userById: (userId: string) => `/admin/users/${userId}`,
+    activateUser: (userId: string) => `/admin/users/${userId}/activate`,
+    deactivateUser: (userId: string) => `/admin/users/${userId}/deactivate`,
     approveUser: (userId: string) => `/admin/users/${userId}/approve`,
     rejectUser: (userId: string) => `/admin/users/${userId}/reject`,
     analytics: '/admin/analytics',
   },
+  gdpr: {
+    exportMyData: '/gdpr/export/my-data',
+    exportStatus: (exportId: string) => `/gdpr/export/status/${exportId}`,
+    deleteMyAccount: '/gdpr/delete/my-account',
+  },
   audit: { logs: '/audit/logs', summary: '/audit/summary' },
   workflows: { pending: '/workflows/pending' },
+  health: { check: '/health', ping: '/ping' },
 } as const;
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -110,11 +134,6 @@ interface ChangePasswordResponse {
   changed_at?: string;
 }
 
-interface ForgotPasswordResponse {
-  message: string;
-  success?: boolean;
-}
-
 interface LogoutResponse {
   message: string;
   success?: boolean;
@@ -125,11 +144,28 @@ export class ApiClient {
   private session: StoredSession | null;
   // Request deduplication: prevent multiple simultaneous identical requests
   private pendingRequests: Map<string, Promise<unknown>>;
+  // CSRF Token Service for httpOnly cookie-based authentication
+  private csrfTokenService: ReturnType<typeof createCSRFTokenService>;
+  // Configuration flag for using new secure endpoints
+  private useSecureEndpoints: boolean;
+  // Rate limit tracking with exponential backoff
+  private rateLimitState: Map<string, { retryAfter: number; backoffMs: number }>;
+  // Retry configuration for transient errors
+  private retryConfig = {
+    maxRetries: 3,
+    baseDelay: 1000, // 1 second
+    maxDelay: 30000, // 30 seconds
+    retryableStatusCodes: [500, 502, 503, 504], // Server errors
+    retryableErrors: ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'ENETUNREACH'], // Network errors
+  };
 
-  constructor(baseURL: string = DEFAULT_BASE_URL) {
+  constructor(baseURL: string = DEFAULT_BASE_URL, useSecureEndpoints = true) {
     this.baseURL = baseURL;
     this.session = this.loadSession();
     this.pendingRequests = new Map();
+    this.csrfTokenService = createCSRFTokenService(baseURL);
+    this.useSecureEndpoints = useSecureEndpoints;
+    this.rateLimitState = new Map();
   }
 
   private loadSession(): StoredSession | null {
@@ -208,31 +244,16 @@ export class ApiClient {
       headers['Authorization'] = `Bearer ${this.session.accessToken}`;
     }
 
-    // Add CSRF token for state-changing requests
-    const csrfToken = this.getCsrfToken();
-    if (csrfToken) {
-      headers['X-CSRF-Token'] = csrfToken;
+    // Add CSRF token for state-changing requests (when using new secure endpoints)
+    if (this.useSecureEndpoints) {
+      const csrfHeader = this.csrfTokenService.getTokenHeader();
+      if (csrfHeader) {
+        Object.assign(headers, csrfHeader);
+      }
     }
 
     return headers;
   }
-
-  /**
-   * Get CSRF token from meta tag or cookie
-   * For AWS deployment, the backend should set this via CloudFront
-   */
-  private getCsrfToken(): string | null {
-    // Try meta tag first (set by backend on page load)
-    const metaTag = document.querySelector('meta[name="csrf-token"]');
-    if (metaTag) {
-      return metaTag.getAttribute('content');
-    }
-
-    // Fallback to cookie (if backend uses cookie-based CSRF)
-    const cookieMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
-    return cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
-  }
-
   private async parseJson<T>(response: Response): Promise<T | undefined> {
     const contentType = response.headers.get('content-type');
     if (contentType?.includes('application/json')) {
@@ -267,11 +288,23 @@ export class ApiClient {
 
   /**
    * Request deduplication: if a request to the same URL with same method is already pending,
-   * return the existing promise instead of creating a new request
+   * return the existing promise instead of creating a new request.
+   * For POST/PUT/DELETE with body, include body hash in deduplication key.
    */
   private async dedupedRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const method = options.method ?? 'GET';
-    const dedupeKey = `${method}:${path}`;
+
+    // For mutation requests with body, include body in deduplication key
+    let dedupeKey = `${method}:${path}`;
+    if (options.body && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+      // Simple hash of body for deduplication
+      const bodyStr =
+        typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+      const bodyHash = bodyStr.split('').reduce((hash, char) => {
+        return (hash << 5) - hash + char.charCodeAt(0);
+      }, 0);
+      dedupeKey = `${method}:${path}:${bodyHash}`;
+    }
 
     // Check if request is already pending
     const pending = this.pendingRequests.get(dedupeKey);
@@ -290,10 +323,132 @@ export class ApiClient {
     return requestPromise;
   }
 
+  /**
+   * Calculate exponential backoff delay
+   * Formula: min(baseDelay * 2^attempt, maxDelay)
+   */
+  private calculateRetryDelay(attempt: number): number {
+    const delay = this.retryConfig.baseDelay * Math.pow(2, attempt);
+    return Math.min(delay, this.retryConfig.maxDelay);
+  }
+
+  /**
+   * Check if error is retryable (transient failure)
+   */
+  private isRetryableError(error: unknown): boolean {
+    // Retryable HTTP status codes (5xx server errors)
+    if (error instanceof ApiError) {
+      // Retry server errors (5xx)
+      if (this.retryConfig.retryableStatusCodes.includes(error.status)) {
+        return true;
+      }
+      // Retry network errors (status 0 = network failure)
+      if (error.status === 0 && error.code === 'NETWORK_ERROR') {
+        return true;
+      }
+      return false;
+    }
+
+    // Network errors (fetch failures)
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return true;
+    }
+
+    // Node.js network errors (for SSR/testing environments)
+    if (error && typeof error === 'object' && 'code' in error) {
+      return this.retryConfig.retryableErrors.includes(String(error.code));
+    }
+
+    return false;
+  }
+
+  /**
+   * Sleep for specified duration
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Retry wrapper with exponential backoff for transient errors
+   */
+  private async retryWithBackoff<T>(
+    operation: () => Promise<T>,
+    context: string,
+    attempt = 0
+  ): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      const isRetryable = this.isRetryableError(error);
+      const hasRetriesLeft = attempt < this.retryConfig.maxRetries;
+
+      if (!isRetryable || !hasRetriesLeft) {
+        // Don't retry: either non-retryable error or max retries reached
+        if (hasRetriesLeft && !isRetryable) {
+          logger.debug(`[API] Non-retryable error for ${context}`, { error });
+        } else if (!hasRetriesLeft) {
+          logger.warn(`[API] Max retries (${this.retryConfig.maxRetries}) reached for ${context}`, {
+            error,
+          });
+        }
+        throw error;
+      }
+
+      // Calculate delay and retry
+      const delay = this.calculateRetryDelay(attempt);
+      const retryNumber = attempt + 1;
+
+      logger.warn(
+        `[API] Retry ${retryNumber}/${this.retryConfig.maxRetries} for ${context} after ${delay}ms`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          statusCode: error instanceof ApiError ? error.status : undefined,
+          attempt: retryNumber,
+          delay,
+        }
+      );
+
+      await this.sleep(delay);
+      return this.retryWithBackoff(operation, context, attempt + 1);
+    }
+  }
+
   private async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+    const method = options.method ?? 'GET';
+    const context = `${method} ${path}`;
+
+    // Wrap request execution with retry logic
+    return this.retryWithBackoff(() => this._executeRequest<T>(path, options), context);
+  }
+
+  /**
+   * Execute HTTP request (internal implementation)
+   * Called by request() with retry wrapper
+   */
+  private async _executeRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const url = `${this.baseURL}${path.startsWith('/') ? path : `/${path}`}`;
+    const method = options.method ?? 'GET';
+
+    // Check for active rate limit on this endpoint
+    const rateLimitKey = `${method}:${path}`;
+    const rateLimitInfo = this.rateLimitState.get(rateLimitKey);
+
+    if (rateLimitInfo && Date.now() < rateLimitInfo.retryAfter) {
+      const waitMs = rateLimitInfo.retryAfter - Date.now();
+      logger.warn(`[API] Rate limited, waiting ${waitMs}ms before retry`, {
+        endpoint: rateLimitKey,
+        backoffMs: rateLimitInfo.backoffMs,
+      });
+
+      // Wait for backoff period
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
+
     const config: RequestInit = {
-      method: options.method ?? 'GET',
+      method,
+      // Enable httpOnly cookie transmission (required for secure endpoints)
+      credentials: this.useSecureEndpoints ? 'include' : 'same-origin',
       ...options,
       headers: {
         ...this.getHeaders(),
@@ -336,6 +491,28 @@ export class ApiClient {
         this.persistSession(null);
       }
 
+      // Handle rate limiting with exponential backoff
+      if (response.status === 429) {
+        const retryAfterHeader = response.headers.get('Retry-After');
+        const currentBackoff = rateLimitInfo?.backoffMs ?? 1000;
+        const nextBackoff = Math.min(currentBackoff * 2, 60000); // Max 60 seconds
+
+        const retryAfterMs = retryAfterHeader
+          ? parseInt(retryAfterHeader, 10) * 1000
+          : currentBackoff;
+
+        this.rateLimitState.set(rateLimitKey, {
+          retryAfter: Date.now() + retryAfterMs,
+          backoffMs: nextBackoff,
+        });
+
+        logger.warn(`[API] Rate limit hit (429), will retry after ${retryAfterMs}ms`, {
+          endpoint: rateLimitKey,
+          backoffMs: nextBackoff,
+          retryAfterHeader,
+        });
+      }
+
       const errorPayload = await this.parseJson(response);
       const normalized = normalizeApiError(response.status, response.statusText, errorPayload);
 
@@ -352,11 +529,16 @@ export class ApiClient {
         status: normalized.status,
         message: normalized.message,
         code: normalized.code,
-        detail: normalized.detail,
+        details: normalized.detail,
         errors: normalized.errors,
         headers: response.headers,
         payload: errorPayload,
       });
+    }
+
+    // Clear rate limit state on successful request
+    if (rateLimitInfo) {
+      this.rateLimitState.delete(rateLimitKey);
     }
 
     const body = await this.parseJson<T>(response);
@@ -399,12 +581,59 @@ export class ApiClient {
         ? { email: emailOrCredentials, password: password ?? '' }
         : emailOrCredentials;
 
-    const response = await this.request<LoginResponse>(ENDPOINTS.auth.login, {
+    // Use secure endpoint if enabled, otherwise fallback to legacy endpoint
+    const endpoint = this.useSecureEndpoints ? ENDPOINTS.auth.loginSecure : ENDPOINTS.auth.login;
+
+    const response = await this.request<LoginResponse>(endpoint, {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
 
     this.setSessionTokens(response);
+
+    // For secure endpoints, fetch CSRF token after login
+    if (this.useSecureEndpoints) {
+      try {
+        await this.csrfTokenService.fetchToken();
+        logger.debug('CSRF token fetched after login');
+      } catch (err) {
+        logger.warn('Failed to fetch CSRF token after login', { error: err });
+        // Continue anyway, CSRF token will be fetched on first request
+      }
+    }
+
+    return response;
+  }
+
+  /**
+   * Secure login using httpOnly cookies (recommended)
+   * Automatically fetches CSRF token for subsequent requests
+   */
+  async loginSecure(
+    emailOrCredentials: string | { email: string; password: string },
+    password?: string
+  ): Promise<LoginResponse> {
+    const credentials =
+      typeof emailOrCredentials === 'string'
+        ? { email: emailOrCredentials, password: password ?? '' }
+        : emailOrCredentials;
+
+    const response = await this.request<LoginResponse>(ENDPOINTS.auth.loginSecure, {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+
+    this.setSessionTokens(response);
+
+    // Fetch CSRF token after successful login
+    try {
+      await this.csrfTokenService.fetchToken();
+      logger.debug('CSRF token fetched after secure login');
+    } catch (err) {
+      logger.warn('Failed to fetch CSRF token after secure login', { error: err });
+      // Continue anyway, CSRF token will be fetched on first request
+    }
+
     return response;
   }
 
@@ -417,12 +646,18 @@ export class ApiClient {
 
   async logout(): Promise<LogoutResponse> {
     try {
-      const response = await this.request<LogoutResponse>(ENDPOINTS.auth.logout, {
+      // Use secure endpoint if enabled
+      const endpoint = this.useSecureEndpoints
+        ? ENDPOINTS.auth.logoutSecure
+        : ENDPOINTS.auth.logout;
+      const response = await this.request<LogoutResponse>(endpoint, {
         method: 'POST',
       });
       return response;
     } finally {
+      // Clear session and CSRF tokens
       this.clearSession();
+      this.csrfTokenService.clearAll();
     }
   }
 
@@ -560,6 +795,19 @@ export class ApiClient {
     return await this.getUser(userId);
   }
 
+  async activateUser(userId: string): Promise<AdminActivateUserResponse> {
+    return await this.request<AdminActivateUserResponse>(ENDPOINTS.admin.activateUser(userId), {
+      method: 'POST',
+    });
+  }
+
+  async deactivateUser(userId: string, reason: string): Promise<AdminDeactivateUserResponse> {
+    return await this.request<AdminDeactivateUserResponse>(ENDPOINTS.admin.deactivateUser(userId), {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    });
+  }
+
   async getUserAnalytics(): Promise<UserAnalytics> {
     const fallback: UserAnalytics = {
       total_users: 0,
@@ -628,6 +876,54 @@ export class ApiClient {
     }
   }
 
+  async getCSRFToken(): Promise<CSRFTokenResponse> {
+    return await this.request<CSRFTokenResponse>(ENDPOINTS.auth.csrfToken, {
+      method: 'GET',
+    });
+  }
+
+  async requestGDPRExport(): Promise<GDPRExportResponse> {
+    return await this.request<GDPRExportResponse>(ENDPOINTS.gdpr.exportMyData, {
+      method: 'POST',
+    });
+  }
+
+  async getGDPRExportStatus(exportId: string): Promise<GDPRExportStatus> {
+    return await this.request<GDPRExportStatus>(ENDPOINTS.gdpr.exportStatus(exportId), {
+      method: 'GET',
+    });
+  }
+
+  async requestGDPRDelete(payload: GDPRDeleteRequest): Promise<GDPRDeleteResponse> {
+    return await this.request<GDPRDeleteResponse>(ENDPOINTS.gdpr.deleteMyAccount, {
+      method: 'DELETE',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteMyAccount(
+    password: string,
+    confirmation: string,
+    reason?: string
+  ): Promise<GDPRDeleteResponse> {
+    return await this.requestGDPRDelete({ password, confirmation, reason });
+  }
+
+  async healthCheck(): Promise<{ status: string; version: string; timestamp: string }> {
+    return await this.request<{ status: string; version: string; timestamp: string }>(
+      ENDPOINTS.health.check,
+      {
+        method: 'GET',
+      }
+    );
+  }
+
+  async ping(): Promise<{ message: string; timestamp: string }> {
+    return await this.request<{ message: string; timestamp: string }>(ENDPOINTS.health.ping, {
+      method: 'GET',
+    });
+  }
+
   async getRoles(): Promise<UserRole[]> {
     try {
       return await this.request<UserRole[]>('/admin/roles');
@@ -660,7 +956,9 @@ export const useApi = () => ({
   setSessionTokens: apiClient.setSessionTokens.bind(apiClient),
   clearSession: apiClient.clearSession.bind(apiClient),
 
+  // Authentication
   login: apiClient.login.bind(apiClient),
+  loginSecure: apiClient.loginSecure.bind(apiClient),
   register: apiClient.register.bind(apiClient),
   logout: apiClient.logout.bind(apiClient),
   requestPasswordReset: apiClient.requestPasswordReset.bind(apiClient),
@@ -670,9 +968,11 @@ export const useApi = () => ({
   verifyEmail: apiClient.verifyEmail.bind(apiClient),
   resendVerification: apiClient.resendVerification.bind(apiClient),
 
+  // Profile
   getUserProfile: apiClient.getUserProfile.bind(apiClient),
   updateUserProfile: apiClient.updateUserProfile.bind(apiClient),
 
+  // Admin - User Management
   getUsers: apiClient.getUsers.bind(apiClient),
   getUser: apiClient.getUser.bind(apiClient),
   createUser: apiClient.createUser.bind(apiClient),
@@ -680,13 +980,34 @@ export const useApi = () => ({
   deleteUser: apiClient.deleteUser.bind(apiClient),
   approveUser: apiClient.approveUser.bind(apiClient),
   rejectUser: apiClient.rejectUser.bind(apiClient),
+  activateUser: apiClient.activateUser.bind(apiClient),
+  deactivateUser: apiClient.deactivateUser.bind(apiClient),
+
+  // Admin - Analytics & Roles
   getUserAnalytics: apiClient.getUserAnalytics.bind(apiClient),
   getRoles: apiClient.getRoles.bind(apiClient),
 
+  // Audit
   getAuditLogs: apiClient.getAuditLogs.bind(apiClient),
   getAuditSummary: apiClient.getAuditSummary.bind(apiClient),
+
+  // Workflows
   getPendingApprovals: apiClient.getPendingApprovals.bind(apiClient),
 
+  // GDPR
+  requestGDPRExport: apiClient.requestGDPRExport.bind(apiClient),
+  getGDPRExportStatus: apiClient.getGDPRExportStatus.bind(apiClient),
+  requestGDPRDelete: apiClient.requestGDPRDelete.bind(apiClient),
+  deleteMyAccount: apiClient.deleteMyAccount.bind(apiClient),
+
+  // Security
+  getCSRFToken: apiClient.getCSRFToken.bind(apiClient),
+
+  // Health
+  healthCheck: apiClient.healthCheck.bind(apiClient),
+  ping: apiClient.ping.bind(apiClient),
+
+  // Generic
   execute: apiClient.execute.bind(apiClient),
 });
 

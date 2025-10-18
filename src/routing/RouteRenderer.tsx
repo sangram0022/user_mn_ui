@@ -22,10 +22,8 @@ const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => {
   const {
     component: Component,
     layout,
-    title,
-    description,
     suspenseFallback,
-    documentTitleFormatter,
+    // title, description, documentTitleFormatter - deprecated, use PageMetadata in components
   } = route;
 
   const location = useLocation();
@@ -44,21 +42,9 @@ const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => {
     });
   }, []);
 
-  useEffect(() => {
-    if (title) {
-      const formattedTitle = documentTitleFormatter
-        ? documentTitleFormatter(title)
-        : `${title} | User Management UI`;
-      document.title = formattedTitle;
-    }
-
-    if (description) {
-      const metaDescription = document.querySelector('meta[name="description"]');
-      if (metaDescription) {
-        metaDescription.setAttribute('content', description);
-      }
-    }
-  }, [title, description, documentTitleFormatter]);
+  // ✅ React 19: No longer need manual document.title manipulation
+  // Components now use <PageMetadata> for declarative metadata
+  // Keeping route config for backward compatibility, but metadata is now handled by components
 
   const LayoutComponent = layoutComponents[layout] ?? PlainLayout;
 

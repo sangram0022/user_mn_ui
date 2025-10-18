@@ -73,7 +73,11 @@ export function sanitizeInput(input: string, maxLength: number = 1000): string {
   return (
     input
       .trim()
-      // Remove any HTML tags
+      // Remove script tags AND their content (security-critical)
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      // Remove style tags AND their content
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+      // Remove any remaining HTML tags (but keep their content)
       .replace(/<[^>]*>/g, '')
       // Remove null bytes
       .replace(/\0/g, '')

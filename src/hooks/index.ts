@@ -39,4 +39,4 @@ export { supportsViewTransitions, useViewTransition } from './useViewTransition'
 export type { ViewTransition } from './useViewTransition';
 
 // Enhanced Navigation with View Transitions (NEW - Phase 2 Task 8)
-export { useNavigate, useNavigationState } from './useNavigate';
+export { useNavigate } from './useNavigate';

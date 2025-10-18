@@ -18,24 +18,36 @@ describe('useAsyncOperation', () => {
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
-    expect(result.current.error /* data not in interface */).toBeNull();
+    expect(result.current.data).toBeNull();
   });
 
   it('should handle successful async operation', async () => {
     const mockFn = vi.fn().mockResolvedValue({ id: 1, name: 'Test' });
     const { result } = renderHook(() => useAsyncOperation());
 
-    act(() => {
-      result.current.execute(mockFn);
+    await act(async () => {
+      await result.current.execute(mockFn);
     });
 
-    expect(result.current.isLoading).toBe(true);
+    // Wait for the loading state to complete
+    await waitFor(
+      () => {
+        expect(result.current.isLoading).toBe(false);
+      },
+      { timeout: 3000 }
+    );
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.error /* data not in interface */).toEqual({ id: 1, name: 'Test' });
-      expect(result.current.error).toBeNull();
-    });
+    // Check the final state - separate assertions for better error messages
+    expect(result.current.data).toEqual({ id: 1, name: 'Test' });
+
+    // Debug: Log what error actually is
+    if (result.current.error !== null) {
+      console.error('DEBUG - ERROR IS NOT NULL:', result.current.error);
+      console.error('DEBUG - ERROR TYPE:', typeof result.current.error);
+      console.error('DEBUG - ERROR KEYS:', Object.keys(result.current.error || {}));
+    }
+
+    expect(result.current.error).toBe(null);
   });
 
   it('should handle failed async operation', async () => {
@@ -50,7 +62,7 @@ describe('useAsyncOperation', () => {
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBe(mockError);
-      expect(result.current.error /* data not in interface */).toBeNull();
+      expect(result.current.data).toBeNull();
     });
   });
 
