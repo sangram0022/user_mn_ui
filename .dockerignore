@@ -1,35 +1,70 @@
 # .dockerignore
 # Excludes files from Docker build context for faster builds and smaller images
+# For AWS EC2/Fargate deployment with Docker/Nginx
 
-# Dependencies
-node_modules
+# ==========================================
+# DEVELOPMENT FILES - EXCLUDE FROM DOCKER
+# ==========================================
+
+# Development tools and configurations
+.husky/                          # Git hooks
+.storybook/                      # Component documentation
+e2e/                            # End-to-end tests
+vitest.config.ts                # Unit test config
+playwright.config.ts            # E2E test config
+vitest.shims.d.ts               # Test type definitions
+*.spec.ts                        # Unit tests
+*.spec.tsx                       # React unit tests
+__tests__/                       # Test directories
+.test.*                          # Test files
+
+# ==========================================
+# BUILD & DEPENDENCIES
+# ==========================================
+
+# Dependencies - excluded by npm ci --only=production
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
 # Build outputs
-dist
-dist-ssr
+dist/
+dist-ssr/
 *.local
+build/
 
-# Environment files (NEVER include in Docker images)
+# ==========================================
+# ENVIRONMENT FILES (SECURITY - NEVER INCLUDE)
+# ==========================================
+
 .env
 .env.local
 .env.*.local
 .env.development
 .env.staging
-.env.production
 
-# Testing
-coverage
-.nyc_output
+# Production .env.production is built into Docker with build args
+
+# ==========================================
+# TESTING & COVERAGE
+# ==========================================
+
+coverage/
+.nyc_output/
 *.lcov
+playwright-report/
+test-results/
+.vitest/
 
-# Editor directories and files
+# ==========================================
+# EDITOR & IDE
+# ==========================================
+
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
@@ -39,59 +74,108 @@ coverage
 *.swp
 *.swo
 *~
+.prettierignore
+.eslintignore
 
-# Git
-.git
+# ==========================================
+# GIT & VERSION CONTROL
+# ==========================================
+
+.git/
 .gitignore
 .gitattributes
-.github
+.github/
 
-# CI/CD
+# ==========================================
+# CI/CD CONFIGURATIONS
+# ==========================================
+
 .gitlab-ci.yml
 .travis.yml
 circle.yml
-.circleci
+.circleci/
+.github/workflows/
 
-# Documentation
+# ==========================================
+# DOCUMENTATION (Optional - remove if needed)
+# ==========================================
+
 *.md
 !README.md
 docs/
 CHANGELOG.md
 LICENSE
+*.txt
 
-# Storybook
-storybook-static
-*storybook.log
-.storybook
-
-# Logs
-logs
-*.log
-
-# OS
-Thumbs.db
-.DS_Store
-
-# Temporary files
-tmp
-temp
-*.tmp
+# ==========================================
+# PERFORMANCE & ANALYSIS TOOLS
+# ==========================================
 
 # Lighthouse reports
 lighthouse*.html
 lighthouse*.json
+lighthouse*.report
 
 # Analysis reports
 stats.html
 bundle-analyzer-report.html
+.analyzer-report/
 
-# Playwright
-playwright-report
-test-results
-.cache
+# Vite analysis
+vite-analyze-report.html
 
-# Other
-.cache
-.parcel-cache
-.eslintcache
-.stylelintcache
+# ==========================================
+# CACHING & TEMPORARY FILES
+# ==========================================
+
+.cache/
+.parcel-cache/
+.eslintcache/
+.stylelintcache/
+*.cache
+tmp/
+temp/
+*.tmp
+
+# Logs
+logs/
+*.log
+
+# ==========================================
+# OPERATING SYSTEM FILES
+# ==========================================
+
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ==========================================
+# AWS DEPLOYMENT CONFIGURATION
+# ==========================================
+
+# S3 static website config (not used)
+s3-static-website-config.json
+
+# CloudFront functions (Nginx handles routing)
+cloudfront-url-rewrite.js
+
+# Lighthouse config (dev tool only)
+lighthouserc.json
+
+# Windows dev scripts (platform-specific)
+scripts/*.ps1
+
+# ==========================================
+# MISCELLANEOUS
+# ==========================================
+
+# IDE configs
+*.code-workspace
+.awcache/
+.turbo/
+.next/
+
+# NPM
+npm-shrinkwrap.json (if using alongside package-lock.json)
