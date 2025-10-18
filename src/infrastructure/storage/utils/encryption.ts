@@ -47,9 +47,9 @@ export async function encryptStorageValue(
 ): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(value);
-  
+
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  
+
   const encrypted = await crypto.subtle.encrypt(
     {
       name: 'AES-GCM',
@@ -58,11 +58,11 @@ export async function encryptStorageValue(
     key,
     data
   );
-  
+
   const combined = new Uint8Array(iv.length + encrypted.byteLength);
   combined.set(iv);
   combined.set(new Uint8Array(encrypted), iv.length);
-  
+
   return btoa(String.fromCharCode(...combined));
 }
 
@@ -71,10 +71,10 @@ export async function decryptStorageValue(
   key: CryptoKey
 ): Promise<string> {
   const combined = Uint8Array.from(atob(encrypted), c => c.charCodeAt(0));
-  
+
   const iv = combined.slice(0, 12);
   const data = combined.slice(12);
-  
+
   const decrypted = await crypto.subtle.decrypt(
     {
       name: 'AES-GCM',
@@ -83,7 +83,7 @@ export async function decryptStorageValue(
     key,
     data
   );
-  
+
   const decoder = new TextDecoder();
   return decoder.decode(decrypted);
 }

@@ -340,7 +340,7 @@ export const useAppActions = (): AppActions => {
 export const useAuth = () => {
   const { user, authToken } = useAppState();
   const { login, logout, setUser } = useAppActions();
-  return { user, authToken, login, logout, setUser, isAuthenticated: !!user };
+  return { user, authToken, login, logout, setUser, isAuthenticated: Boolean(user) };
 };
 
 export const useTheme = () => {

@@ -1,7 +1,7 @@
 /**
  * Analytics Dashboard Domain - Public API
  * @module domains/analytics-dashboard
- * 
+ *
  * This module provides analytics and reporting functionality including:
  * - Real-time metrics and dashboards
  * - Custom chart visualizations

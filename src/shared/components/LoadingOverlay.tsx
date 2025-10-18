@@ -8,7 +8,7 @@
  * @created October 12, 2025
  */
 
-import React from 'react';
+import type React from 'react';
 
 interface LoadingOverlayProps {
   isLoading: boolean;

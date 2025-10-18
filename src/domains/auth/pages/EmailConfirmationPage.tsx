@@ -1,5 +1,6 @@
 import { ArrowLeft, CheckCircle, Clock, Mail, RefreshCw } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logger } from './../../../shared/utils/logger';
 

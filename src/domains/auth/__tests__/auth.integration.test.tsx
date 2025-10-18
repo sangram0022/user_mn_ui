@@ -68,8 +68,8 @@ describe('Login Integration', () => {
 
     // Mock successful login response
     server.use(
-      http.post(`${API_BASE_URL}/api/v1/auth/login`, async () => {
-        return HttpResponse.json({
+      http.post(`${API_BASE_URL}/api/v1/auth/login`, async () =>
+        HttpResponse.json({
           access_token: 'mock-access-token',
           refresh_token: 'mock-refresh-token',
           user: {
@@ -78,8 +78,8 @@ describe('Login Integration', () => {
             role: 'admin',
             is_active: true,
           },
-        });
-      })
+        })
+      )
     );
 
     renderWithProviders(<LoginPage />);
@@ -110,15 +110,15 @@ describe('Login Integration', () => {
 
     // Mock failed login response
     server.use(
-      http.post(`${API_BASE_URL}/api/v1/auth/login`, async () => {
-        return HttpResponse.json(
+      http.post(`${API_BASE_URL}/api/v1/auth/login`, async () =>
+        HttpResponse.json(
           {
             error: 'Invalid credentials',
             detail: 'Email or password is incorrect',
           },
           { status: 401 }
-        );
-      })
+        )
+      )
     );
 
     renderWithProviders(<LoginPage />);
@@ -142,11 +142,7 @@ describe('Login Integration', () => {
     const user = userEvent.setup();
 
     // Mock network error
-    server.use(
-      http.post(`${API_BASE_URL}/api/v1/auth/login`, async () => {
-        return HttpResponse.error();
-      })
-    );
+    server.use(http.post(`${API_BASE_URL}/api/v1/auth/login`, async () => HttpResponse.error()));
 
     renderWithProviders(<LoginPage />);
 
@@ -216,8 +212,8 @@ describe('Login Integration', () => {
 
     // Mock rate limit response
     server.use(
-      http.post(`${API_BASE_URL}/api/v1/auth/login`, async () => {
-        return HttpResponse.json(
+      http.post(`${API_BASE_URL}/api/v1/auth/login`, async () =>
+        HttpResponse.json(
           {
             error: 'Too many requests',
             retry_after: 60,
@@ -229,8 +225,8 @@ describe('Login Integration', () => {
               'X-RateLimit-Reset': String(Date.now() + 60000),
             },
           }
-        );
-      })
+        )
+      )
     );
 
     renderWithProviders(<LoginPage />);
@@ -313,9 +309,9 @@ describe('Token Refresh Integration', () => {
 
     // Mock 401 response that should trigger refresh
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/users`, async () => {
-        return HttpResponse.json({ error: 'Token expired' }, { status: 401 });
-      })
+      http.get(`${API_BASE_URL}/api/v1/users`, async () =>
+        HttpResponse.json({ error: 'Token expired' }, { status: 401 })
+      )
     );
 
     // Set up initial auth state

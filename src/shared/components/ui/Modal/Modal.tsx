@@ -12,7 +12,8 @@
 
 import { cn } from '@shared/utils';
 import { X } from 'lucide-react';
-import React, { useEffect, useRef } from 'react';
+import type React from 'react';
+import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';

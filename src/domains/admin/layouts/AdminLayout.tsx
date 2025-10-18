@@ -89,12 +89,9 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
   // Check if user has admin permissions
   const canAccessAdmin = hasPermission('admin') || user?.role === 'admin';
 
-  const isActive = (href: string) => {
-    return (
-      location.pathname === href ||
-      (href !== '/admin/dashboard' && location.pathname.startsWith(href))
-    );
-  };
+  const isActive = (href: string) =>
+    location.pathname === href ||
+    (href !== '/admin/dashboard' && location.pathname.startsWith(href));
 
   const generateBreadcrumbs = () => {
     const pathSegments = location.pathname.split('/').filter(Boolean);

@@ -52,10 +52,11 @@ export function inlineCriticalCSS(): Plugin {
         // Make non-critical CSS load asynchronously
         html = html.replace(
           /<link\s+rel="stylesheet"\s+crossorigin\s+href="([^"]+\.css)"/g,
-          (match, href) => {
-            return `<link rel="preload" as="style" href="${href}" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="${href}"></noscript>`;
-          }
+          (
+            match,
+            href
+          ) => `<link rel="preload" as="style" href="${href}" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="${href}"></noscript>`
         );
 
         return html;

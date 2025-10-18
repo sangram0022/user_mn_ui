@@ -21,7 +21,8 @@
  */
 
 import { cn } from '@shared/utils';
-import React, { forwardRef, useId } from 'react';
+import type React from 'react';
+import { forwardRef, useId } from 'react';
 
 export type InputVariant = 'default' | 'filled' | 'outlined';
 export type InputSize = 'sm' | 'md' | 'lg';

@@ -223,14 +223,15 @@ export function InfiniteUserListWithFilters({
   }, [searchTerm, roleFilter, statusFilter, reset]);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
       }
-    };
-  }, []);
+    },
+    []
+  );
 
   return (
     <div>
@@ -443,14 +444,15 @@ export function InfiniteVirtualUserList() {
   });
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
       }
-    };
-  }, []);
+    },
+    []
+  );
 
   // Virtual scrolling for rendering (import from useVirtualScroll hook)
   // const { virtualItems, totalHeight, containerRef } = useVirtualScroll({
@@ -554,14 +556,15 @@ export function OptimisticInfiniteUserList() {
   });
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
       }
-    };
-  }, []);
+    },
+    []
+  );
 
   return (
     <div>

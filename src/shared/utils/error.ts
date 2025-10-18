@@ -225,7 +225,7 @@ const formatErrorDetails = (errors?: Record<string, unknown>): string[] => {
   Object.entries(errors).forEach(([field, value]) => {
     if (Array.isArray(value)) {
       value.forEach((item) => {
-        if (item != null) {
+        if (item !== null && item !== undefined) {
           detailSet.add(`${field}: ${String(item)}`);
         }
       });
@@ -237,7 +237,7 @@ const formatErrorDetails = (errors?: Record<string, unknown>): string[] => {
       return;
     }
 
-    if (value != null) {
+    if (value !== null && value !== undefined) {
       detailSet.add(`${field}: ${String(value)}`);
     }
   });
@@ -995,9 +995,8 @@ export interface NormalizedApiError {
  * }
  */
 
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null;
-};
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
 
 const normalizeNewErrorFormat = (
   payload: ApiErrorResponse,

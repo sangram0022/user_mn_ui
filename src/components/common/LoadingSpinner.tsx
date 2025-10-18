@@ -8,7 +8,7 @@
  * @created October 12, 2025
  */
 
-import React from 'react';
+import type React from 'react';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -35,13 +35,11 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'md',
   className = '',
   color = 'border-t-blue-600',
-}) => {
-  return (
-    <div className={`inline-block ${className}`} role="status" aria-label="Loading">
-      <div className={`${sizeClasses[size]} border-gray-200 ${color} rounded-full animate-spin`} />
-      <span className="sr-only">Loading...</span>
-    </div>
-  );
-};
+}) => (
+  <div className={`inline-block ${className}`} role="status" aria-label="Loading">
+    <div className={`${sizeClasses[size]} border-gray-200 ${color} rounded-full animate-spin`} />
+    <span className="sr-only">Loading...</span>
+  </div>
+);
 
 export default LoadingSpinner;

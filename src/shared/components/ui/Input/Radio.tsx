@@ -9,7 +9,8 @@
  */
 
 import { cn } from '@shared/utils';
-import React, { forwardRef, useId } from 'react';
+import type React from 'react';
+import { forwardRef, useId } from 'react';
 
 export type RadioSize = 'sm' | 'md' | 'lg';
 

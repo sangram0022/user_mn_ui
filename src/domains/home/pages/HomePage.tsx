@@ -1,5 +1,6 @@
 import { ArrowRight, BarChart3, Lock, Shield, Users } from 'lucide-react';
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import Header from '@shared/components/Header';

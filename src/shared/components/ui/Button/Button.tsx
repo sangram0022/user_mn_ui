@@ -20,7 +20,8 @@
 
 import { cn } from '@shared/utils';
 import { Loader } from 'lucide-react';
-import React, { type ComponentPropsWithoutRef, type ElementType, type ReactNode } from 'react';
+import type React from 'react';
+import { type ComponentPropsWithoutRef, type ElementType, type ReactNode } from 'react';
 
 // ============================================================================
 // Types
@@ -123,13 +124,11 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
   children,
   attached = false,
   className,
-}) => {
-  return (
-    <div className={cn(attached ? 'btn-group-attached' : 'btn-group', className)} role="group">
-      {children}
-    </div>
-  );
-};
+}) => (
+  <div className={cn(attached ? 'btn-group-attached' : 'btn-group', className)} role="group">
+    {children}
+  </div>
+);
 
 // ============================================================================
 // Icon Button
@@ -140,13 +139,11 @@ export interface IconButtonProps extends Omit<ButtonProps, 'children'> {
   'aria-label': string;
 }
 
-export const IconButton: React.FC<IconButtonProps> = ({ icon, className, ...props }) => {
-  return (
-    <Button {...props} className={cn('btn-icon', className)}>
-      {icon}
-    </Button>
-  );
-};
+export const IconButton: React.FC<IconButtonProps> = ({ icon, className, ...props }) => (
+  <Button {...props} className={cn('btn-icon', className)}>
+    {icon}
+  </Button>
+);
 
 // Set display name for debugging
 Button.displayName = 'Button';

@@ -1,11 +1,11 @@
+import ToastProvider from '@app/providers/ToastProvider';
+import RoleManagementPage from '@domains/admin/pages/RoleManagementPage';
+import { AuthProvider } from '@domains/auth/providers/AuthProvider';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { BrowserRouter } from 'react-router-dom';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import ToastProvider from '@app/providers/ToastProvider';
-import { AuthProvider } from '@domains/auth/providers/AuthProvider';
-import RoleManagementPage from '@domains/admin/pages/RoleManagementPage';
 import { server } from '../../../test/mocks/server';
 
 /**
@@ -60,8 +60,8 @@ describe('Role Management Integration', () => {
   it.skip('should load and display roles from API', async () => {
     // Mock successful roles list response
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/roles`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/roles`, async () =>
+        HttpResponse.json({
           roles: [
             {
               id: '1',
@@ -82,8 +82,8 @@ describe('Role Management Integration', () => {
               permissions: ['user:read'],
             },
           ],
-        });
-      })
+        })
+      )
     );
 
     renderWithProviders(<RoleManagementPage />);
@@ -99,12 +99,12 @@ describe('Role Management Integration', () => {
   it.skip('should handle API error when loading roles', async () => {
     // Mock API error
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/roles`, async () => {
-        return HttpResponse.json(
+      http.get(`${API_BASE_URL}/api/v1/roles`, async () =>
+        HttpResponse.json(
           { error: 'Permission denied', detail: 'Insufficient permissions' },
           { status: 403 }
-        );
-      })
+        )
+      )
     );
 
     renderWithProviders(<RoleManagementPage />);
@@ -120,8 +120,8 @@ describe('Role Management Integration', () => {
 
     // Mock GET roles
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/roles`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/roles`, async () =>
+        HttpResponse.json({
           roles: [
             {
               id: '1',
@@ -130,8 +130,8 @@ describe('Role Management Integration', () => {
               permissions: [],
             },
           ],
-        });
-      })
+        })
+      )
     );
 
     // Mock POST to create role
@@ -186,8 +186,8 @@ describe('Role Management Integration', () => {
 
     // Mock roles list
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/roles`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/roles`, async () =>
+        HttpResponse.json({
           roles: [
             {
               id: '1',
@@ -196,8 +196,8 @@ describe('Role Management Integration', () => {
               permissions: ['user:read', 'user:write'],
             },
           ],
-        });
-      })
+        })
+      )
     );
 
     // Mock permission update
@@ -242,8 +242,8 @@ describe('Role Management Integration', () => {
     const deleteSpy = vi.fn();
 
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/roles`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/roles`, async () =>
+        HttpResponse.json({
           roles: [
             {
               id: '3',
@@ -252,8 +252,8 @@ describe('Role Management Integration', () => {
               permissions: [],
             },
           ],
-        });
-      })
+        })
+      )
     );
 
     // Mock delete endpoint
@@ -294,8 +294,8 @@ describe('Role Management Integration', () => {
     const auditSpy = vi.fn();
 
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/roles`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/roles`, async () =>
+        HttpResponse.json({
           roles: [
             {
               id: '1',
@@ -304,8 +304,8 @@ describe('Role Management Integration', () => {
               permissions: [],
             },
           ],
-        });
-      })
+        })
+      )
     );
 
     // Mock audit log endpoint
@@ -319,13 +319,13 @@ describe('Role Management Integration', () => {
 
     // Mock role update
     server.use(
-      http.put(`${API_BASE_URL}/api/v1/roles/1`, async () => {
-        return HttpResponse.json({
+      http.put(`${API_BASE_URL}/api/v1/roles/1`, async () =>
+        HttpResponse.json({
           id: '1',
           name: 'administrator',
           description: 'System Administrator',
-        });
-      })
+        })
+      )
     );
 
     renderWithProviders(<RoleManagementPage />);
@@ -357,14 +357,14 @@ describe('Role Management Integration', () => {
     let updateCount = 0;
 
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/roles`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/roles`, async () =>
+        HttpResponse.json({
           roles: [
             { id: '1', name: 'admin', description: 'Admin', permissions: [] },
             { id: '2', name: 'user', description: 'User', permissions: [] },
           ],
-        });
-      })
+        })
+      )
     );
 
     // Mock concurrent updates
@@ -399,15 +399,15 @@ describe('Role Management Integration', () => {
 
   it.skip('should handle rate limiting on bulk operations', async () => {
     server.use(
-      http.post(`${API_BASE_URL}/api/v1/roles/bulk-update`, async () => {
-        return HttpResponse.json(
+      http.post(`${API_BASE_URL}/api/v1/roles/bulk-update`, async () =>
+        HttpResponse.json(
           { error: 'Too many requests', retry_after: 60 },
           {
             status: 429,
             headers: { 'X-RateLimit-Remaining': '0' },
           }
-        );
-      })
+        )
+      )
     );
 
     renderWithProviders(<RoleManagementPage />);
@@ -449,11 +449,11 @@ describe('Admin Authorization Integration', () => {
 
     // Mock successful response
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/roles`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/roles`, async () =>
+        HttpResponse.json({
           roles: [{ id: '1', name: 'admin', description: 'Admin', permissions: [] }],
-        });
-      })
+        })
+      )
     );
 
     renderWithProviders(<RoleManagementPage />);

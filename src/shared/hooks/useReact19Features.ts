@@ -132,7 +132,7 @@ export function useAdvancedFormState<TData = unknown>({
     submitAction,
     isPending,
     isSuccess: state.success,
-    isError: !!state.error,
+    isError: Boolean(state.error),
     data: state.data,
     error: state.error,
     validationErrors: state.validationErrors,
@@ -205,9 +205,7 @@ export function useOptimisticCRUD<T extends OptimisticListItem>(
     }
   };
 
-  const isOptimistic = (item: T) => {
-    return 'isOptimistic' in item && item.isOptimistic === true;
-  };
+  const isOptimistic = (item: T) => 'isOptimistic' in item && item.isOptimistic === true;
 
   return {
     items,

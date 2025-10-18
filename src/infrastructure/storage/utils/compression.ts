@@ -44,23 +44,23 @@ export function decompressStorageValue<T = unknown>(compressed: string): T {
 export async function compressStorageValue(value: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(value);
-  
+
   const stream = new Response(data).body!
     .pipeThrough(new CompressionStream('gzip'));
-  
+
   const compressed = await new Response(stream).arrayBuffer();
-  
+
   return btoa(String.fromCharCode(...new Uint8Array(compressed)));
 }
 
 export async function decompressStorageValue(compressed: string): Promise<string> {
   const data = Uint8Array.from(atob(compressed), c => c.charCodeAt(0));
-  
+
   const stream = new Response(data).body!
     .pipeThrough(new DecompressionStream('gzip'));
-  
+
   const decompressed = await new Response(stream).arrayBuffer();
-  
+
   const decoder = new TextDecoder();
   return decoder.decode(decompressed);
 }

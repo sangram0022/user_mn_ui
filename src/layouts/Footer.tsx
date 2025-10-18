@@ -70,7 +70,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <div className="flex items-center justify-between text-xs">
                 <span className="text-gray-400">Status:</span>
                 <span className="flex items-center text-green-400">
-                  <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-green-400"></span>
+                  <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-green-400" />
                   All Systems Operational
                 </span>
               </div>
@@ -358,7 +358,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
       </div>
 
       {/* Decorative Bottom Border */}
-      <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+      <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
     </footer>
   );
 };

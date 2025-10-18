@@ -4,7 +4,8 @@
  * Improves accessibility by preventing focus from leaving the active element
  */
 
-import { RefObject, useEffect } from 'react';
+import type { RefObject } from 'react';
+import { useEffect } from 'react';
 
 interface UseFocusTrapOptions {
   enabled?: boolean;

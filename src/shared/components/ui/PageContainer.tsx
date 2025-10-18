@@ -1,5 +1,5 @@
 import { cn } from '@shared/utils';
-import React from 'react';
+import type React from 'react';
 
 /**
  * PageContainer component props
@@ -73,6 +73,4 @@ export const PageContainer: React.FC<PageContainerProps> = ({
   children,
   variant = 'default',
   className = '',
-}) => {
-  return <div className={cn(containerVariants[variant], className)}>{children}</div>;
-};
+}) => <div className={cn(containerVariants[variant], className)}>{children}</div>;

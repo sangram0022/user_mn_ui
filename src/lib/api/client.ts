@@ -300,9 +300,9 @@ export class ApiClient {
       // Simple hash of body for deduplication
       const bodyStr =
         typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
-      const bodyHash = bodyStr.split('').reduce((hash, char) => {
-        return (hash << 5) - hash + char.charCodeAt(0);
-      }, 0);
+      const bodyHash = bodyStr
+        .split('')
+        .reduce((hash, char) => (hash << 5) - hash + char.charCodeAt(0), 0);
       dedupeKey = `${method}:${path}:${bodyHash}`;
     }
 

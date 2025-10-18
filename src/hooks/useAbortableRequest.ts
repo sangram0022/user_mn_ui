@@ -34,11 +34,12 @@ export const useAbortableRequest = <T>(
   const abortControllerRef = useRef<AbortController | undefined>(undefined);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       abortControllerRef.current?.abort();
-    };
-  }, []);
+    },
+    []
+  );
 
   const execute = async (): Promise<T> => {
     // Abort any pending request

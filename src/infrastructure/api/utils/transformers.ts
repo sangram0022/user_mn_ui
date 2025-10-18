@@ -28,13 +28,11 @@ export const transformKeys = (obj: unknown, toCamelCase: boolean): unknown => {
   return result;
 };
 
-export const toCamelCase_fn = (str: string): string => {
-  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-};
+export const toCamelCase_fn = (str: string): string =>
+  str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
 
-export const toSnakeCase = (str: string): string => {
-  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-};
+export const toSnakeCase = (str: string): string =>
+  str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 
 export const removeNullValues = (obj: unknown): unknown => {
   if (obj === null || obj === undefined) {
@@ -114,42 +112,37 @@ export const transformApiResponse = <T>(data: unknown, options: TransformOptions
 };
 
 // Predefined transformers for common use cases
-export const transformUser = (userData: unknown) => {
-  return transformApiResponse(userData, {
+export const transformUser = (userData: unknown) =>
+  transformApiResponse(userData, {
     camelCase: true,
     dateFields: ['created_at', 'updated_at', 'last_login_at'],
     removeNulls: true,
   });
-};
 
-export const transformAuthResponse = (authData: unknown) => {
-  return transformApiResponse(authData, {
+export const transformAuthResponse = (authData: unknown) =>
+  transformApiResponse(authData, {
     camelCase: true,
     dateFields: ['expires_at', 'last_login_at'],
     removeNulls: true,
   });
-};
 
-export const transformAuditLog = (auditData: unknown) => {
-  return transformApiResponse(auditData, {
+export const transformAuditLog = (auditData: unknown) =>
+  transformApiResponse(auditData, {
     camelCase: true,
     dateFields: ['timestamp', 'created_at'],
     removeNulls: true,
   });
-};
 
-export const transformAnalyticsEvent = (eventData: unknown) => {
-  return transformApiResponse(eventData, {
+export const transformAnalyticsEvent = (eventData: unknown) =>
+  transformApiResponse(eventData, {
     camelCase: true,
     dateFields: ['timestamp', 'created_at'],
     removeNulls: true,
   });
-};
 
-export const transformWorkflow = (workflowData: unknown) => {
-  return transformApiResponse(workflowData, {
+export const transformWorkflow = (workflowData: unknown) =>
+  transformApiResponse(workflowData, {
     camelCase: true,
     dateFields: ['created_at', 'updated_at', 'completed_at'],
     removeNulls: true,
   });
-};

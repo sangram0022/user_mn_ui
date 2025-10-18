@@ -13,7 +13,8 @@
 /* eslint-disable react-refresh/only-export-components */
 
 import { safeLocalStorage } from '@shared/utils/safeLocalStorage';
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import type React from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type ThemePalette =
@@ -490,9 +491,10 @@ export function ThemeProvider({
   }, [effectiveTheme, setMode]);
 
   // Get theme-aware colors
-  const getThemeColors = useCallback((): ThemeColors => {
-    return THEME_COLORS[theme.palette]?.[effectiveTheme] || THEME_COLORS.ocean.light;
-  }, [theme.palette, effectiveTheme]);
+  const getThemeColors = useCallback(
+    (): ThemeColors => THEME_COLORS[theme.palette]?.[effectiveTheme] || THEME_COLORS.ocean.light,
+    [theme.palette, effectiveTheme]
+  );
 
   const value: ThemeContextValue = {
     theme,

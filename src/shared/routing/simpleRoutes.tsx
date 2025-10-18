@@ -4,8 +4,10 @@
  * Expert-level React routing with security and performance
  */
 
-import React, { lazy, Suspense } from 'react';
-import { createBrowserRouter, RouteObject } from 'react-router-dom';
+import type React from 'react';
+import { lazy, Suspense } from 'react';
+import type { RouteObject } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { PageErrorBoundary } from '../errors/ErrorBoundary';
 import { SkeletonLoader } from '../performance/lazyLoading';
 

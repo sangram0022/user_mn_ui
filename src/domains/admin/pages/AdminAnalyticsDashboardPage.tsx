@@ -86,34 +86,32 @@ const ENGAGEMENT_COLORS = {
 // Components
 // ============================================================================
 
-const ChartCard: FC<ChartCardProps> = ({ title, description, icon, children, loading = false }) => {
-  return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="text-blue-600">{icon}</div>
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          </div>
-          {description && <p className="text-sm text-gray-600">{description}</p>}
+const ChartCard: FC<ChartCardProps> = ({ title, description, icon, children, loading = false }) => (
+  <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+    <div className="flex items-start justify-between mb-4">
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="text-blue-600">{icon}</div>
+          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        </div>
+        {description && <p className="text-sm text-gray-600">{description}</p>}
+      </div>
+    </div>
+
+    {loading ? (
+      <div className="space-y-3">
+        <Skeleton height={200} />
+        <div className="flex gap-2">
+          <Skeleton width={100} height={20} />
+          <Skeleton width={100} height={20} />
+          <Skeleton width={100} height={20} />
         </div>
       </div>
-
-      {loading ? (
-        <div className="space-y-3">
-          <Skeleton height={200} />
-          <div className="flex gap-2">
-            <Skeleton width={100} height={20} />
-            <Skeleton width={100} height={20} />
-            <Skeleton width={100} height={20} />
-          </div>
-        </div>
-      ) : (
-        <div>{children}</div>
-      )}
-    </div>
-  );
-};
+    ) : (
+      <div>{children}</div>
+    )}
+  </div>
+);
 
 const StatCard: FC<{
   title: string;
@@ -122,24 +120,22 @@ const StatCard: FC<{
   color: string;
   subtitle?: string;
   loading?: boolean;
-}> = ({ title, value, icon, color, subtitle, loading = false }) => {
-  return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          {loading ? (
-            <Skeleton width={80} height={32} />
-          ) : (
-            <p className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</p>
-          )}
-          {subtitle && !loading && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
-        </div>
-        <div className={`p-3 rounded-lg ${color}`}>{icon}</div>
+}> = ({ title, value, icon, color, subtitle, loading = false }) => (
+  <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+    <div className="flex items-start justify-between">
+      <div className="flex-1">
+        <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
+        {loading ? (
+          <Skeleton width={80} height={32} />
+        ) : (
+          <p className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</p>
+        )}
+        {subtitle && !loading && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
       </div>
+      <div className={`p-3 rounded-lg ${color}`}>{icon}</div>
     </div>
-  );
-};
+  </div>
+);
 
 // ============================================================================
 // Main Component
@@ -296,9 +292,9 @@ export const AdminAnalyticsDashboardPage: FC = () => {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing || isLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg 
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg
                      hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
-                     transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 
+                     transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
                      focus:ring-offset-2"
             aria-label="Refresh analytics data"
           >
@@ -311,9 +307,7 @@ export const AdminAnalyticsDashboardPage: FC = () => {
         </div>
 
         {/* Error Display */}
-        {error && (
-          <ErrorAlert error={error} onRetry={loadAnalytics} showDetails={true} className="mb-6" />
-        )}
+        {error && <ErrorAlert error={error} onRetry={loadAnalytics} showDetails className="mb-6" />}
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

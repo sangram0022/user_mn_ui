@@ -1,4 +1,5 @@
-import { ThemeMode, ThemePalette, useTheme } from '@contexts/ThemeContext';
+import type { ThemeMode, ThemePalette } from '@contexts/ThemeContext';
+import { useTheme } from '@contexts/ThemeContext';
 import { Monitor, Moon, Palette, Sun } from 'lucide-react';
 import React from 'react';
 

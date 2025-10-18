@@ -1,7 +1,7 @@
 /**
  * User Management Domain - Public API
  * @module domains/user-management
- * 
+ *
  * This module provides user management functionality including:
  * - User CRUD operations
  * - User search and filtering

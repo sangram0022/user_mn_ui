@@ -10,7 +10,8 @@
 
 import { cn } from '@shared/utils';
 import { Check, Minus } from 'lucide-react';
-import React, { forwardRef, useId } from 'react';
+import type React from 'react';
+import { forwardRef, useId } from 'react';
 
 export type CheckboxSize = 'sm' | 'md' | 'lg';
 

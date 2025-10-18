@@ -94,13 +94,14 @@ export function useInfiniteScroll({
   const [internalLoading, setInternalLoading] = useState(false);
 
   // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (loadTimerRef.current !== null) {
         window.clearTimeout(loadTimerRef.current);
       }
-    };
-  }, []);
+    },
+    []
+  );
 
   // Handle load more with optional delay
   const handleLoadMore = async () => {

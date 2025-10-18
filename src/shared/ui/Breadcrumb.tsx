@@ -19,12 +19,11 @@ interface BreadcrumbItem {
 /**
  * Converts route path to human-readable label
  */
-const pathToLabel = (path: string): string => {
-  return path
+const pathToLabel = (path: string): string =>
+  path
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
-};
 
 /**
  * Route path to display name mapping

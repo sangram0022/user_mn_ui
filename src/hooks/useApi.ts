@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ApiError } from '../types/api.types';
+import type { ApiError } from '../types/api.types';
 
 interface UseApiOptions<T> {
   autoFetch?: boolean;
@@ -108,9 +108,7 @@ export function useApi<T>(apiCall: () => Promise<T>, options: UseApiOptions<T> =
     }
   }, [autoFetch, execute, ...(deps || [])]); // Conditional spread is safe here
 
-  const refetch = useCallback(() => {
-    return execute();
-  }, [execute]);
+  const refetch = useCallback(() => execute(), [execute]);
 
   const reset = useCallback(() => {
     setData(null);

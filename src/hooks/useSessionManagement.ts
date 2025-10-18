@@ -256,7 +256,7 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
     sessionData,
     showWarning,
     remainingTime,
-    isActive: !!sessionData?.isActive,
+    isActive: Boolean(sessionData?.isActive),
     extendSession,
     endSession,
     updateActivity,

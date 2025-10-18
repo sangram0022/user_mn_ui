@@ -6,8 +6,8 @@
  * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import type { ErrorInfo, ReactNode } from 'react';
-import { Component, ComponentType } from 'react';
+import type { ErrorInfo, ReactNode, ComponentType } from 'react';
+import { Component } from 'react';
 import { logger } from './../utils/logger';
 import { categorizeError, ErrorReportingService, type ErrorDetails } from './errorUtils';
 

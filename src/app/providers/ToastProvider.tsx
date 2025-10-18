@@ -13,7 +13,8 @@ import {
 } from '@contexts/ToastContext';
 import { ToastContainer } from '@shared/components/ui/ToastContainer';
 import type { ReactNode } from 'react';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type React from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 export interface ToastProviderProps {
   children: ReactNode;

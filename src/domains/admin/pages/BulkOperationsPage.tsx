@@ -259,7 +259,7 @@ const FileUploadArea: FC<{
             current={progress.loaded}
             total={progress.total}
             status="running"
-            showPercentage={true}
+            showPercentage
           />
         </div>
       </div>

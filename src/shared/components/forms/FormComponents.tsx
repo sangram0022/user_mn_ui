@@ -4,7 +4,7 @@
  */
 
 import { Eye, EyeOff } from 'lucide-react';
-import React from 'react';
+import type React from 'react';
 
 export interface BaseInputProps {
   label: string;
@@ -62,33 +62,31 @@ export const TextInput: React.FC<TextInputProps> = ({
   autoComplete,
   className = '',
   containerClassName = '',
-}) => {
-  return (
-    <div className={`${containerStyles} ${containerClassName}`}>
-      <label className={labelStyles}>
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${inputBaseStyles} ${error ? errorInputStyles : ''} ${className}`}
-        placeholder={placeholder}
-        disabled={disabled}
-        autoComplete={autoComplete}
-        required={required}
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={error ? `${label.replace(/\s+/g, '-')}-error` : undefined}
-      />
-      {error && (
-        <p id={`${label.replace(/\s+/g, '-')}-error`} className={errorStyles} role="alert">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-};
+}) => (
+  <div className={`${containerStyles} ${containerClassName}`}>
+    <label className={labelStyles}>
+      {label}
+      {required && <span className="text-red-500 ml-1">*</span>}
+    </label>
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`${inputBaseStyles} ${error ? errorInputStyles : ''} ${className}`}
+      placeholder={placeholder}
+      disabled={disabled}
+      autoComplete={autoComplete}
+      required={required}
+      aria-invalid={error ? 'true' : 'false'}
+      aria-describedby={error ? `${label.replace(/\s+/g, '-')}-error` : undefined}
+    />
+    {error && (
+      <p id={`${label.replace(/\s+/g, '-')}-error`} className={errorStyles} role="alert">
+        {error}
+      </p>
+    )}
+  </div>
+);
 
 // Password Input Component
 export const PasswordInput: React.FC<PasswordInputProps> = ({
@@ -104,43 +102,41 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
   autoComplete,
   className = '',
   containerClassName = '',
-}) => {
-  return (
-    <div className={`${containerStyles} ${containerClassName}`}>
-      <label className={labelStyles}>
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <div className="relative">
-        <input
-          type={showPassword ? 'text' : 'password'}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`${inputBaseStyles} ${error ? errorInputStyles : ''} pr-10 ${className}`}
-          placeholder={placeholder}
-          disabled={disabled}
-          autoComplete={autoComplete}
-          required={required}
-          aria-invalid={error ? 'true' : 'false'}
-          aria-describedby={error ? `${label.replace(/\s+/g, '-')}-error` : undefined}
-        />
-        <button
-          type="button"
-          onClick={onToggleVisibility}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
-          aria-label={showPassword ? 'Hide password' : 'Show password'}
-        >
-          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-        </button>
-      </div>
-      {error && (
-        <p id={`${label.replace(/\s+/g, '-')}-error`} className={errorStyles} role="alert">
-          {error}
-        </p>
-      )}
+}) => (
+  <div className={`${containerStyles} ${containerClassName}`}>
+    <label className={labelStyles}>
+      {label}
+      {required && <span className="text-red-500 ml-1">*</span>}
+    </label>
+    <div className="relative">
+      <input
+        type={showPassword ? 'text' : 'password'}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`${inputBaseStyles} ${error ? errorInputStyles : ''} pr-10 ${className}`}
+        placeholder={placeholder}
+        disabled={disabled}
+        autoComplete={autoComplete}
+        required={required}
+        aria-invalid={error ? 'true' : 'false'}
+        aria-describedby={error ? `${label.replace(/\s+/g, '-')}-error` : undefined}
+      />
+      <button
+        type="button"
+        onClick={onToggleVisibility}
+        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+        aria-label={showPassword ? 'Hide password' : 'Show password'}
+      >
+        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+      </button>
     </div>
-  );
-};
+    {error && (
+      <p id={`${label.replace(/\s+/g, '-')}-error`} className={errorStyles} role="alert">
+        {error}
+      </p>
+    )}
+  </div>
+);
 
 // Select Input Component
 export const SelectInput: React.FC<SelectInputProps> = ({
@@ -154,37 +150,35 @@ export const SelectInput: React.FC<SelectInputProps> = ({
   disabled = false,
   className = '',
   containerClassName = '',
-}) => {
-  return (
-    <div className={`${containerStyles} ${containerClassName}`}>
-      <label className={labelStyles}>
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${inputBaseStyles} ${error ? errorInputStyles : ''} ${className}`}
-        disabled={disabled}
-        required={required}
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={error ? `${label.replace(/\s+/g, '-')}-error` : undefined}
-      >
-        {placeholder && <option value="">{placeholder}</option>}
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {error && (
-        <p id={`${label.replace(/\s+/g, '-')}-error`} className={errorStyles} role="alert">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-};
+}) => (
+  <div className={`${containerStyles} ${containerClassName}`}>
+    <label className={labelStyles}>
+      {label}
+      {required && <span className="text-red-500 ml-1">*</span>}
+    </label>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`${inputBaseStyles} ${error ? errorInputStyles : ''} ${className}`}
+      disabled={disabled}
+      required={required}
+      aria-invalid={error ? 'true' : 'false'}
+      aria-describedby={error ? `${label.replace(/\s+/g, '-')}-error` : undefined}
+    >
+      {placeholder && <option value="">{placeholder}</option>}
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+    {error && (
+      <p id={`${label.replace(/\s+/g, '-')}-error`} className={errorStyles} role="alert">
+        {error}
+      </p>
+    )}
+  </div>
+);
 
 // Submit Button Component
 export interface SubmitButtonProps {
@@ -232,12 +226,12 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
               r="10"
               stroke="currentColor"
               strokeWidth="4"
-            ></circle>
+            />
             <path
               className="opacity-75"
               fill="currentColor"
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
+            />
           </svg>
           Loading...
         </>
@@ -263,20 +257,18 @@ export const FormContainer: React.FC<FormContainerProps> = ({
   className = '',
   title,
   subtitle,
-}) => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {title && (
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">{title}</h2>
-            {subtitle && <p className="mt-2 text-center text-sm text-gray-600">{subtitle}</p>}
-          </div>
-        )}
-        <form className={`mt-8 space-y-6 ${className}`} onSubmit={onSubmit}>
-          {children}
-        </form>
-      </div>
+}) => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-md w-full space-y-8">
+      {title && (
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">{title}</h2>
+          {subtitle && <p className="mt-2 text-center text-sm text-gray-600">{subtitle}</p>}
+        </div>
+      )}
+      <form className={`mt-8 space-y-6 ${className}`} onSubmit={onSubmit}>
+        {children}
+      </form>
     </div>
-  );
-};
+  </div>
+);

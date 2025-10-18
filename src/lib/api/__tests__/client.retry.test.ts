@@ -140,12 +140,13 @@ describe('ApiClient - Retry Logic', () => {
 
   describe('Max Retry Limit', () => {
     it('should stop retrying after max retries (3) and throw error', async () => {
-      const mockFetch = vi.fn(async () => {
-        return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      });
+      const mockFetch = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          })
+      );
 
       global.fetch = mockFetch;
 
@@ -156,15 +157,13 @@ describe('ApiClient - Retry Logic', () => {
     });
 
     it('should include error details after max retries', async () => {
-      const mockFetch = vi.fn(async () => {
-        return new Response(
-          JSON.stringify({ error: 'Service Error', message: 'Server overloaded' }),
-          {
+      const mockFetch = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: 'Service Error', message: 'Server overloaded' }), {
             status: 503,
             headers: { 'Content-Type': 'application/json' },
-          }
-        );
-      });
+          })
+      );
 
       global.fetch = mockFetch;
 
@@ -181,12 +180,13 @@ describe('ApiClient - Retry Logic', () => {
 
   describe('Non-Retryable Errors', () => {
     it('should NOT retry on 400 bad request error', async () => {
-      const mockFetch = vi.fn(async () => {
-        return new Response(JSON.stringify({ error: 'Bad Request' }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      });
+      const mockFetch = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: 'Bad Request' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          })
+      );
 
       global.fetch = mockFetch;
 
@@ -197,12 +197,13 @@ describe('ApiClient - Retry Logic', () => {
     });
 
     it('should NOT retry on 401 unauthorized error', async () => {
-      const mockFetch = vi.fn(async () => {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      });
+      const mockFetch = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+          })
+      );
 
       global.fetch = mockFetch;
 
@@ -212,12 +213,13 @@ describe('ApiClient - Retry Logic', () => {
     });
 
     it('should NOT retry on 403 forbidden error', async () => {
-      const mockFetch = vi.fn(async () => {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      });
+      const mockFetch = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: 'Forbidden' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' },
+          })
+      );
 
       global.fetch = mockFetch;
 
@@ -227,12 +229,13 @@ describe('ApiClient - Retry Logic', () => {
     });
 
     it('should NOT retry on 404 not found error', async () => {
-      const mockFetch = vi.fn(async () => {
-        return new Response(JSON.stringify({ error: 'Not Found' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      });
+      const mockFetch = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: 'Not Found' }), {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' },
+          })
+      );
 
       global.fetch = mockFetch;
 
@@ -242,12 +245,13 @@ describe('ApiClient - Retry Logic', () => {
     });
 
     it('should NOT retry on 422 validation error', async () => {
-      const mockFetch = vi.fn(async () => {
-        return new Response(JSON.stringify({ error: 'Validation Error' }), {
-          status: 422,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      });
+      const mockFetch = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: 'Validation Error' }), {
+            status: 422,
+            headers: { 'Content-Type': 'application/json' },
+          })
+      );
 
       global.fetch = mockFetch;
 
@@ -339,12 +343,13 @@ describe('ApiClient - Retry Logic', () => {
 
   describe('Successful Immediate Response', () => {
     it('should not retry when request succeeds on first attempt', async () => {
-      const mockFetch = vi.fn(async () => {
-        return new Response(JSON.stringify({ success: true }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      });
+      const mockFetch = vi.fn(
+        async () =>
+          new Response(JSON.stringify({ success: true }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          })
+      );
 
       global.fetch = mockFetch;
 

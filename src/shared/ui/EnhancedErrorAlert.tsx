@@ -11,7 +11,7 @@
 import { getErrorConfig } from '@shared/config/errorMessages';
 import { ApiError } from '@shared/errors/ApiError';
 import { AlertCircle, X } from 'lucide-react';
-import React from 'react';
+import type React from 'react';
 
 interface ErrorAlertProps {
   error: ApiError | Error | string | null;

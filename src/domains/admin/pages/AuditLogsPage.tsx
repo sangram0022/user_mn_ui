@@ -445,8 +445,8 @@ const AuditLogsPage: FC = () => {
     setIsDetailsModalOpen(true);
   };
 
-  const handleExport = async () => {
-    return await measure('export-audit-logs', async () => {
+  const handleExport = async () =>
+    await measure('export-audit-logs', async () => {
       try {
         // Show loading toast
         toast.info('Preparing audit logs export...');
@@ -494,7 +494,6 @@ const AuditLogsPage: FC = () => {
         toast.error('Failed to export audit logs');
       }
     });
-  };
 
   // ============================================================================
   // Effects

@@ -7,7 +7,8 @@
 
 import { Card } from '@shared/components/ui/Card';
 import { Modal } from '@shared/components/ui/Modal/Modal';
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 
 export const ContainerQueriesDemo: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

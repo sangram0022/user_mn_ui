@@ -6,7 +6,7 @@
 // Authentication feature
 export * from './auth';
 
-// Dashboard feature  
+// Dashboard feature
 export * from './dashboard';
 
 // Future features would be exported here:

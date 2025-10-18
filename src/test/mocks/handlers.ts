@@ -161,21 +161,21 @@ export const authHandlers = [
   /**
    * POST /auth/logout - Logout
    */
-  http.post(`${API_BASE_URL}/auth/logout`, () => {
-    return HttpResponse.json(
+  http.post(`${API_BASE_URL}/auth/logout`, () =>
+    HttpResponse.json(
       {
         success: true,
         message: 'Logged out successfully',
       },
       { status: 200 }
-    );
-  }),
+    )
+  ),
 
   /**
    * POST /auth/refresh - Refresh token
    */
-  http.post(`${API_BASE_URL}/auth/refresh`, () => {
-    return HttpResponse.json(
+  http.post(`${API_BASE_URL}/auth/refresh`, () =>
+    HttpResponse.json(
       {
         success: true,
         data: {
@@ -184,47 +184,47 @@ export const authHandlers = [
         },
       },
       { status: 200 }
-    );
-  }),
+    )
+  ),
 
   /**
    * POST /auth/forgot-password - Forgot password
    */
-  http.post(`${API_BASE_URL}/auth/forgot-password`, () => {
-    return HttpResponse.json(
+  http.post(`${API_BASE_URL}/auth/forgot-password`, () =>
+    HttpResponse.json(
       {
         success: true,
         message: 'Password reset email sent',
       },
       { status: 200 }
-    );
-  }),
+    )
+  ),
 
   /**
    * POST /auth/reset-password - Reset password
    */
-  http.post(`${API_BASE_URL}/auth/reset-password`, () => {
-    return HttpResponse.json(
+  http.post(`${API_BASE_URL}/auth/reset-password`, () =>
+    HttpResponse.json(
       {
         success: true,
         message: 'Password reset successfully',
       },
       { status: 200 }
-    );
-  }),
+    )
+  ),
 
   /**
    * GET /auth/me - Get current user
    */
-  http.get(`${API_BASE_URL}/auth/me`, () => {
-    return HttpResponse.json(
+  http.get(`${API_BASE_URL}/auth/me`, () =>
+    HttpResponse.json(
       {
         success: true,
         data: mockUser,
       },
       { status: 200 }
-    );
-  }),
+    )
+  ),
 ];
 
 // ============================================================================
@@ -400,15 +400,15 @@ export const workflowHandlers = [
   /**
    * GET /workflows - Get all workflows
    */
-  http.get(`${API_BASE_URL}/workflows`, () => {
-    return HttpResponse.json(
+  http.get(`${API_BASE_URL}/workflows`, () =>
+    HttpResponse.json(
       {
         success: true,
         data: mockWorkflows,
       },
       { status: 200 }
-    );
-  }),
+    )
+  ),
 
   /**
    * GET /workflows/:id - Get workflow by ID
@@ -505,8 +505,8 @@ export const analyticsHandlers = [
   /**
    * GET /analytics/dashboard - Get dashboard analytics
    */
-  http.get(`${API_BASE_URL}/analytics/dashboard`, () => {
-    return HttpResponse.json(
+  http.get(`${API_BASE_URL}/analytics/dashboard`, () =>
+    HttpResponse.json(
       {
         success: true,
         data: {
@@ -522,8 +522,8 @@ export const analyticsHandlers = [
         },
       },
       { status: 200 }
-    );
-  }),
+    )
+  ),
 ];
 
 // ============================================================================
@@ -534,16 +534,16 @@ export const systemHandlers = [
   /**
    * GET /health - Health check
    */
-  http.get(`${API_BASE_URL}/health`, () => {
-    return HttpResponse.json(
+  http.get(`${API_BASE_URL}/health`, () =>
+    HttpResponse.json(
       {
         success: true,
         status: 'healthy',
         timestamp: new Date().toISOString(),
       },
       { status: 200 }
-    );
-  }),
+    )
+  ),
 ];
 
 // ============================================================================

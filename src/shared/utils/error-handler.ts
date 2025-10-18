@@ -225,7 +225,7 @@ export function handleErrorBoundaryError(error: Error, errorInfo: React.ErrorInf
   if (import.meta.env.PROD) {
     captureException(error, {
       errorBoundary: true,
-      errorInfo: errorInfo,
+      errorInfo,
     });
   }
 }

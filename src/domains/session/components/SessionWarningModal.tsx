@@ -5,7 +5,8 @@
  */
 
 import { Clock, LogOut, RefreshCcw } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface SessionWarningModalProps {
   isOpen: boolean;

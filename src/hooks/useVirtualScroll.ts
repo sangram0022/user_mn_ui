@@ -208,7 +208,7 @@ export function useDynamicVirtualScroll<T>({
 
     for (let i = 0; i < items.length; i++) {
       positions.push(currentOffset);
-      // eslint-disable-next-line react-hooks/refs -- Performance optimization: ref access needed for virtual scroll calculations
+
       const measuredHeight = measurementsRef.current.get(i);
       currentOffset += measuredHeight ?? estimatedItemHeight;
     }
@@ -230,7 +230,7 @@ export function useDynamicVirtualScroll<T>({
     while (left <= right) {
       const mid = Math.floor((left + right) / 2);
       const itemTop = positions[mid];
-      // eslint-disable-next-line react-hooks/refs -- Performance optimization: ref access needed for virtual scroll calculations
+
       const itemHeight = measurementsRef.current.get(mid) ?? estimatedItemHeight;
       const itemBottom = itemTop + itemHeight;
 

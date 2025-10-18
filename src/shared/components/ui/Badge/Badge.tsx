@@ -11,7 +11,7 @@
 
 import { cn } from '@shared/utils';
 import { X } from 'lucide-react';
-import React from 'react';
+import type React from 'react';
 
 export type BadgeVariant =
   | 'default'

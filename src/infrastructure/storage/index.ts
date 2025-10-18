@@ -1,7 +1,7 @@
 /**
  * Infrastructure - Storage Layer
  * Handles all data persistence (localStorage, sessionStorage, IndexedDB)
- * 
+ *
  * @module infrastructure/storage
  */
 
@@ -12,12 +12,7 @@ export { IndexedDBAdapter } from './adapters/IndexedDBAdapter';
 
 // Storage Manager - Unified storage interface
 export { StorageManager } from './StorageManager';
-export type { 
-  StorageAdapter, 
-  StorageOptions,
-  StorageKey,
-  StorageValue 
-} from './types';
+export type { StorageAdapter, StorageOptions, StorageKey, StorageValue } from './types';
 
 // Storage Utilities
 export { createStorageKey } from './utils/keys';

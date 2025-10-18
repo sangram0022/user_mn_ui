@@ -6,7 +6,12 @@
 
 import { apiClient } from '@lib/api';
 import { API_ENDPOINTS } from '../config/api.config';
-import { AuditLog, AuditLogQueryParams, AuditSummary, PaginatedResponse } from '../types/api.types';
+import type {
+  AuditLog,
+  AuditLogQueryParams,
+  AuditSummary,
+  PaginatedResponse,
+} from '../types/api.types';
 
 class AuditService {
   /**

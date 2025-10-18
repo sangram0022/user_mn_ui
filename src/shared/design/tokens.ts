@@ -384,9 +384,8 @@ export const designUtils = {
   },
 
   // Build Tailwind class string
-  buildClass: (...classes: (string | undefined | null | false)[]): string => {
-    return classes.filter(Boolean).join(' ');
-  },
+  buildClass: (...classes: (string | undefined | null | false)[]): string =>
+    classes.filter(Boolean).join(' '),
 
   // Get responsive class string
   responsive: (
@@ -407,9 +406,8 @@ export const designUtils = {
   },
 
   // Merge component variants
-  mergeVariants: (base: string, variant?: string, size?: string, className?: string): string => {
-    return designUtils.buildClass(base, variant, size, className);
-  },
+  mergeVariants: (base: string, variant?: string, size?: string, className?: string): string =>
+    designUtils.buildClass(base, variant, size, className),
 };
 
 export default designTokens;

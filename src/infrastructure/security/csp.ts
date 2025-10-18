@@ -145,11 +145,10 @@ export const createCSPDirectives = (
 /**
  * Convert CSP directives object to header string
  */
-export const buildCSPHeader = (directives: CSPDirectives): string => {
-  return Object.entries(directives)
+export const buildCSPHeader = (directives: CSPDirectives): string =>
+  Object.entries(directives)
     .map(([key, values]) => `${key} ${values.join(' ')}`)
     .join('; ');
-};
 
 /**
  * Get complete CSP header value
@@ -181,19 +180,17 @@ export const getCSPReportOnlyHeader = (nonce: string, reportUri?: string): strin
 /**
  * Development-friendly CSP (less restrictive)
  */
-export const getDevCSPHeader = (nonce: string): string => {
-  return getCSPHeader(nonce, {
+export const getDevCSPHeader = (nonce: string): string =>
+  getCSPHeader(nonce, {
     allowUnsafeEval: true, // Required for HMR/dev tools
     allowInlineStyles: true,
   });
-};
 
 /**
  * Production CSP (strict)
  */
-export const getProdCSPHeader = (nonce: string): string => {
-  return getCSPHeader(nonce, {
+export const getProdCSPHeader = (nonce: string): string =>
+  getCSPHeader(nonce, {
     allowUnsafeEval: false,
     allowInlineStyles: true, // Many CSS-in-JS libs need this
   });
-};

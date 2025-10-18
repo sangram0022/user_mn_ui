@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import React from 'react';
+import type React from 'react';
 
 /**
  * Form input component props
@@ -150,31 +150,30 @@ export const FormInput: React.FC<FormInputProps> = ({
   helperTextContent,
   ToggleIcon,
   onToggle,
-}) => {
-  return (
-    <div className="w-full">
-      <label
-        htmlFor={id}
-        className="block text-sm font-semibold mb-2"
-        style={{ color: 'var(--theme-text)' }}
-      >
-        {label} {required && <span style={{ color: 'var(--theme-error)' }}>*</span>}
-      </label>
-      <div className="relative">
-        {Icon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Icon className="h-5 w-5" style={{ color: 'var(--theme-textSecondary)' }} />
-          </div>
-        )}
-        <input
-          id={id}
-          name={name}
-          type={type}
-          autoComplete={autoComplete}
-          required={required}
-          value={value}
-          onChange={onChange}
-          className={`
+}) => (
+  <div className="w-full">
+    <label
+      htmlFor={id}
+      className="block text-sm font-semibold mb-2"
+      style={{ color: 'var(--theme-text)' }}
+    >
+      {label} {required && <span style={{ color: 'var(--theme-error)' }}>*</span>}
+    </label>
+    <div className="relative">
+      {Icon && (
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon className="h-5 w-5" style={{ color: 'var(--theme-textSecondary)' }} />
+        </div>
+      )}
+      <input
+        id={id}
+        name={name}
+        type={type}
+        autoComplete={autoComplete}
+        required={required}
+        value={value}
+        onChange={onChange}
+        className={`
             block w-full rounded-lg border-2
             ${Icon ? 'pl-10' : 'pl-4'} 
             ${ToggleIcon ? 'pr-12' : 'pr-4'} 
@@ -182,29 +181,28 @@ export const FormInput: React.FC<FormInputProps> = ({
             shadow-sm transition-all duration-200
             focus:outline-none
           `}
-          style={{
-            background: 'var(--theme-input-bg)',
-            borderColor: 'var(--theme-input-border)',
-            color: 'var(--theme-input-text)',
-          }}
-          placeholder={placeholder}
-        />
-        {ToggleIcon && onToggle && (
-          <button
-            type="button"
-            onClick={onToggle}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
-            style={{ color: 'var(--theme-textSecondary)' }}
-          >
-            {ToggleIcon}
-          </button>
-        )}
-      </div>
-      {helperTextContent && (
-        <p className="mt-2 text-sm" style={{ color: 'var(--theme-textSecondary)' }}>
-          {helperTextContent}
-        </p>
+        style={{
+          background: 'var(--theme-input-bg)',
+          borderColor: 'var(--theme-input-border)',
+          color: 'var(--theme-input-text)',
+        }}
+        placeholder={placeholder}
+      />
+      {ToggleIcon && onToggle && (
+        <button
+          type="button"
+          onClick={onToggle}
+          className="absolute inset-y-0 right-0 pr-3 flex items-center bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+          style={{ color: 'var(--theme-textSecondary)' }}
+        >
+          {ToggleIcon}
+        </button>
       )}
     </div>
-  );
-};
+    {helperTextContent && (
+      <p className="mt-2 text-sm" style={{ color: 'var(--theme-textSecondary)' }}>
+        {helperTextContent}
+      </p>
+    )}
+  </div>
+);

@@ -1,2 +1,52 @@
 # Run lint-staged for formatting only (no linting to avoid blocking commits)
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Comprehensive pre-commit code quality checks
+echo "🔍 Running pre-commit code quality checks..."
+echo ""
+
+# Track if any checks failed
+FAILED=0
+
+# 1. Run lint-staged for ESLint and Prettier on staged files
+echo "📝 Running ESLint and Prettier on staged files..."
 npx lint-staged --relative
+if [ $? -ne 0 ]; then
+  FAILED=1
+fi
+
+# 2. Run full ESLint check on TypeScript files
+echo ""
+echo "🔗 Running comprehensive ESLint validation..."
+npm run lint
+if [ $? -ne 0 ]; then
+  FAILED=1
+fi
+
+# 3. Run TypeScript type check
+echo ""
+echo "📘 Running TypeScript type checking..."
+npm run type-check
+if [ $? -ne 0 ]; then
+  FAILED=1
+fi
+
+# 4. Run Prettier format check
+echo ""
+echo "✨ Running Prettier format validation..."
+npx prettier --check "src/**/*.{ts,tsx,json,css}" --ignore-unknown
+if [ $? -ne 0 ]; then
+  FAILED=1
+  echo "⚠️  Some files need formatting. Run: npm run format"
+fi
+
+# Summary
+echo ""
+if [ $FAILED -eq 0 ]; then
+  echo "✅ All pre-commit checks passed!"
+  exit 0
+else
+  echo "❌ Pre-commit checks failed. Please fix the errors above."
+  exit 1
+fi

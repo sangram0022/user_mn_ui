@@ -406,11 +406,10 @@ export const preloadCriticalResources = (resources: {
  * </>
  * ```
  */
-export const preconnectOrigin = (origin: string) => {
+export const preconnectOrigin = (origin: string) =>
   // React 19 doesn't have preconnect API, use declarative approach in your component:
   // <link rel="preconnect" href={origin} />
-  return origin; // Return for potential logging
-};
+  origin; // Return for potential logging
 
 /**
  * Resource loading hooks for React components
@@ -456,10 +455,8 @@ export const usePreloadResources = (resources: Parameters<typeof preloadCritical
  * };
  * ```
  */
-export const usePrefetchRoute = () => {
-  return (href: string) => {
-    prefetchRoute(href);
-  };
+export const usePrefetchRoute = () => (href: string) => {
+  prefetchRoute(href);
 };
 
 /**

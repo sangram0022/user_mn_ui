@@ -40,12 +40,11 @@ export function createMockFactory<T extends Record<string, any>>(
       return { ...defaults, ...generated, ...overrides } as T;
     },
 
-    createMany: (count, overrides = {}) => {
-      return Array.from({ length: count }, (_, i) => {
+    createMany: (count, overrides = {}) =>
+      Array.from({ length: count }, (_, i) => {
         const generated = generator ? generator(i) : {};
         return { ...defaults, ...generated, ...overrides } as T;
-      });
-    },
+      }),
 
     reset: () => {
       callCount = 0;
@@ -124,17 +123,18 @@ export function createMockAsyncFn<T>(
   let resolver: ((value: T) => void) | null = null;
   let rejecter: ((error: Error) => void) | null = null;
 
-  const mockFn = vi.fn().mockImplementation(() => {
-    return new Promise((resolve, reject) => {
-      resolver = resolve as any;
-      rejecter = reject;
-      if (defaultValue !== undefined && delay === 0) {
-        setTimeout(() => resolve(defaultValue as any), 0);
-      } else if (defaultValue !== undefined) {
-        setTimeout(() => resolve(defaultValue as any), delay);
-      }
-    });
-  });
+  const mockFn = vi.fn().mockImplementation(
+    () =>
+      new Promise((resolve, reject) => {
+        resolver = resolve as any;
+        rejecter = reject;
+        if (defaultValue !== undefined && delay === 0) {
+          setTimeout(() => resolve(defaultValue as any), 0);
+        } else if (defaultValue !== undefined) {
+          setTimeout(() => resolve(defaultValue as any), delay);
+        }
+      })
+  );
 
   return Object.assign(mockFn, {
     resolveWith: (value: T) => resolver?.(value),
@@ -185,9 +185,7 @@ export function createLocalStorageMock() {
     get length() {
       return store.size;
     },
-    key: vi.fn((index: number) => {
-      return Array.from(store.keys())[index] ?? null;
-    }),
+    key: vi.fn((index: number) => Array.from(store.keys())[index] ?? null),
     _getStore: () => store,
     _reset: () => {
       store.clear();

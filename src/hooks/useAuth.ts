@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth.service';
-import {
+import type {
   ChangePasswordRequest,
   LoginRequest,
   PasswordResetRequest,
@@ -177,7 +177,7 @@ export const useAuth = () => {
     verifyEmail,
     resendVerification,
     clearError,
-    isAuthenticated: !!user,
+    isAuthenticated: Boolean(user),
     hasRole: authService.hasRole.bind(authService),
     hasAnyRole: authService.hasAnyRole.bind(authService),
     isAdmin: authService.isAdmin.bind(authService),

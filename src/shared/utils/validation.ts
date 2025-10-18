@@ -89,9 +89,8 @@ export const validateForm = (formState: FormState): ValidationErrors => {
 /**
  * Check if form has any errors
  */
-export const hasFormErrors = (formState: FormState): boolean => {
-  return Object.values(validateForm(formState)).some((error) => error !== null);
-};
+export const hasFormErrors = (formState: FormState): boolean =>
+  Object.values(validateForm(formState)).some((error) => error !== null);
 
 /**
  * Check if form is valid and ready to submit

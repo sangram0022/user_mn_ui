@@ -10,7 +10,8 @@
  */
 
 import { cn } from '@shared/utils';
-import React, { useRef, useState } from 'react';
+import type React from 'react';
+import { useRef, useState } from 'react';
 
 export type TooltipPosition = 'top' | 'right' | 'bottom' | 'left';
 

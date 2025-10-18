@@ -651,9 +651,8 @@ export class PerformanceUtils {
       });
     };
 
-    const preloadImages = (sources: string[]): Promise<HTMLImageElement[]> => {
-      return Promise.all(sources.map(loadImage));
-    };
+    const preloadImages = (sources: string[]): Promise<HTMLImageElement[]> =>
+      Promise.all(sources.map(loadImage));
 
     return { loadImage, preloadImages };
   }
@@ -899,13 +898,12 @@ export const useVirtualList = <T>(
   );
 
   // Convert useMemo to IIFE
-  const visibleItems = (() => {
-    return items.slice(startIndex, endIndex + 1).map((item, index) => ({
+  const visibleItems = (() =>
+    items.slice(startIndex, endIndex + 1).map((item, index) => ({
       item,
       index: startIndex + index,
       offsetY: (startIndex + index) * itemHeight,
-    }));
-  })();
+    })))();
 
   const totalHeight = items.length * itemHeight;
 

@@ -1,6 +1,7 @@
 import { useTheme } from '@contexts/ThemeContext';
 import { Palette } from 'lucide-react';
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 
 /**
  * ThemeSelector - Dropdown to select color palette

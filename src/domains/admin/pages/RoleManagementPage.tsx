@@ -467,8 +467,8 @@ const RoleManagementPage: FC = () => {
     });
   };
 
-  const handleAssignRole = async (userId: string, roleId: string, expiresAt?: string) => {
-    return await measure('assign-role', async () => {
+  const handleAssignRole = async (userId: string, roleId: string, expiresAt?: string) =>
+    await measure('assign-role', async () => {
       try {
         await adminService.assignRole(userId, roleId, expiresAt);
         toast.success(t('roles.roleAssignedSuccessfully'));
@@ -479,7 +479,6 @@ const RoleManagementPage: FC = () => {
         throw error;
       }
     });
-  };
 
   // ============================================================================
   // Filter Functions
@@ -495,9 +494,9 @@ const RoleManagementPage: FC = () => {
 
   const categories = Array.from(new Set(permissions.map((p) => p.category)));
 
-  const filteredPermissions = permissions.filter((permission) => {
-    return !selectedCategory || permission.category === selectedCategory;
-  });
+  const filteredPermissions = permissions.filter(
+    (permission) => !selectedCategory || permission.category === selectedCategory
+  );
 
   // ============================================================================
   // Effects

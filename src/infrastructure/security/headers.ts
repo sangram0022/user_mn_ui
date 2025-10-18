@@ -83,8 +83,8 @@ export interface PermissionsPolicyConfig {
 /**
  * Build Permissions-Policy header string
  */
-export const buildPermissionsPolicy = (config: PermissionsPolicyConfig): string => {
-  return Object.entries(config)
+export const buildPermissionsPolicy = (config: PermissionsPolicyConfig): string =>
+  Object.entries(config)
     .map(([feature, allowlist]) => {
       if (allowlist.length === 0) {
         return `${feature}=()`;
@@ -92,7 +92,6 @@ export const buildPermissionsPolicy = (config: PermissionsPolicyConfig): string 
       return `${feature}=(${allowlist.join(' ')})`;
     })
     .join(', ');
-};
 
 /**
  * Default Permissions-Policy (restrictive)
@@ -157,14 +156,12 @@ export const getSecurityHeaders = (
 /**
  * Get security headers for development (less restrictive)
  */
-export const getDevSecurityHeaders = (): Partial<SecurityHeaders> => {
-  return {
-    'X-Frame-Options': 'SAMEORIGIN',
-    'X-Content-Type-Options': 'nosniff',
-    'X-XSS-Protection': '1; mode=block',
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-  };
-};
+export const getDevSecurityHeaders = (): Partial<SecurityHeaders> => ({
+  'X-Frame-Options': 'SAMEORIGIN',
+  'X-Content-Type-Options': 'nosniff',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+});
 
 /**
  * Apply security headers to Response object (for modern frameworks)
@@ -196,22 +193,20 @@ export const createSecureHeaders = (
  * Security headers as meta tags (fallback for static hosting)
  * Note: Not all headers work as meta tags, prefer server-side headers
  */
-export const getSecurityMetaTags = (): Array<{ httpEquiv: string; content: string }> => {
-  return [
-    {
-      httpEquiv: 'X-Content-Type-Options',
-      content: 'nosniff',
-    },
-    {
-      httpEquiv: 'X-XSS-Protection',
-      content: '1; mode=block',
-    },
-    {
-      httpEquiv: 'Referrer-Policy',
-      content: 'strict-origin-when-cross-origin',
-    },
-  ];
-};
+export const getSecurityMetaTags = (): Array<{ httpEquiv: string; content: string }> => [
+  {
+    httpEquiv: 'X-Content-Type-Options',
+    content: 'nosniff',
+  },
+  {
+    httpEquiv: 'X-XSS-Protection',
+    content: '1; mode=block',
+  },
+  {
+    httpEquiv: 'Referrer-Policy',
+    content: 'strict-origin-when-cross-origin',
+  },
+];
 
 /**
  * Validate security headers in response (for testing)

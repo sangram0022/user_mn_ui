@@ -91,9 +91,7 @@ export const usePerformance = (componentName: string, options: UsePerformanceOpt
     return timerName;
   };
 
-  const endTimer = (timerName: string) => {
-    return performanceMonitor.endTimer(timerName);
-  };
+  const endTimer = (timerName: string) => performanceMonitor.endTimer(timerName);
 
   // React 19: Store renderCount in state to avoid ref access during render
   const [currentRenderCount, setCurrentRenderCount] = useState(0);
@@ -212,12 +210,10 @@ export const useWebVitals = (options: UseWebVitalsOptions = {}) => {
     return undefined;
   }, [onVitalChange]);
 
-  const getVitals = () => {
+  const getVitals = () =>
     // This would need to be imported from WebVitalsTracker
     // return webVitalsTracker.getAllVitals();
-    return {};
-  };
-
+    ({});
   return {
     getVitals,
   };
@@ -463,9 +459,7 @@ export const useComponentMetrics = (
     }
   };
 
-  const getMetrics = () => {
-    return { ...metricsRef.current };
-  };
+  const getMetrics = () => ({ ...metricsRef.current });
 
   return {
     trackPropChange,

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
 /**
@@ -145,7 +145,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                 <span
                   className="inline-block w-2 h-2 rounded-full"
                   style={{ background: 'var(--theme-primary)' }}
-                ></span>
+                />
                 Primary Buttons — Call to Action
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -189,7 +189,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                 <span
                   className="inline-block w-2 h-2 rounded-full"
                   style={{ background: 'var(--theme-secondary)' }}
-                ></span>
+                />
                 Secondary Buttons — Supporting Actions
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -223,7 +223,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                 <span
                   className="inline-block w-2 h-2 rounded-full border-2"
                   style={{ borderColor: 'var(--theme-primary)' }}
-                ></span>
+                />
                 Outline Buttons — Subtle Actions
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -269,7 +269,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                 <span
                   className="inline-block w-2 h-2 rounded-full opacity-40"
                   style={{ background: 'var(--theme-primary)' }}
-                ></span>
+                />
                 Ghost Buttons — Minimal Actions
               </h3>
               <div className="flex flex-wrap gap-4">

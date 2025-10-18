@@ -148,9 +148,8 @@ export const useLazyImage = (
 /**
  * Generate responsive image srcset
  */
-export const generateSrcSet = (baseUrl: string, widths: number[]): string => {
-  return widths.map((width) => `${baseUrl}?w=${width} ${width}w`).join(', ');
-};
+export const generateSrcSet = (baseUrl: string, widths: number[]): string =>
+  widths.map((width) => `${baseUrl}?w=${width} ${width}w`).join(', ');
 
 // ============================================================================
 // FONT OPTIMIZATION
@@ -248,10 +247,11 @@ export const useThrottle = <T extends (...args: unknown[]) => unknown>(
 export const useIntersectionObserver = (
   options: IntersectionObserverInit = {}
 ): [React.RefObject<HTMLElement>, boolean] => {
-  const [isIntersecting, setIsIntersecting] = useState(() => {
-    // If IntersectionObserver is not available, assume visible
-    return typeof window === 'undefined' || !('IntersectionObserver' in window);
-  });
+  const [isIntersecting, setIsIntersecting] = useState(
+    () =>
+      // If IntersectionObserver is not available, assume visible
+      typeof window === 'undefined' || !('IntersectionObserver' in window)
+  );
   const targetRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -364,11 +364,10 @@ export class LRUCache<K, V> {
  * Hook for LRU cached values
  * React 19: Use useMemo for stable instance creation
  */
-export const useLRUCache = <K, V>(maxSize: number): LRUCache<K, V> => {
+export const useLRUCache = <K, V>(maxSize: number): LRUCache<K, V> =>
   // React 19: Use useMemo with empty deps to create stable instance
   // This is better than lazy ref initialization for values returned during render
-  return useMemo(() => new LRUCache<K, V>(maxSize), [maxSize]);
-};
+  useMemo(() => new LRUCache<K, V>(maxSize), [maxSize]);
 
 // ============================================================================
 // NETWORK OPTIMIZATION
@@ -499,9 +498,10 @@ export const reportWebVitals = (metric: {
 /**
  * Use View Transitions API for smooth page transitions
  */
-export const useViewTransition = (): ((callback: () => void) => void) => {
+export const useViewTransition =
+  (): ((callback: () => void) => void) =>
   // Convert useCallback to plain function
-  return (callback: () => void) => {
+  (callback: () => void) => {
     if (typeof document === 'undefined') {
       callback();
       return;
@@ -519,7 +519,6 @@ export const useViewTransition = (): ((callback: () => void) => void) => {
       callback();
     }
   };
-};
 
 // ============================================================================
 // VIRTUAL SCROLLING

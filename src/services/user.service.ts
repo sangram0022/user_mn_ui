@@ -9,7 +9,7 @@
 
 import { apiClient } from '@lib/api';
 import { API_ENDPOINTS } from '../config/api.config';
-import {
+import type {
   AdminStats,
   ApproveUserRequest,
   ApproveUserResponse,

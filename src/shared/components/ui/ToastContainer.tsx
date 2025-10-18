@@ -6,7 +6,8 @@
 
 import type { Toast, ToastVariant } from '@contexts/ToastContext';
 import { AlertCircle, CheckCircle2, Info, X, XCircle } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export type ToastPosition =
   | 'top-left'

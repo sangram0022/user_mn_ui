@@ -11,7 +11,8 @@
 
 import { cn } from '@shared/utils';
 import { ChevronDown } from 'lucide-react';
-import React, { forwardRef, useId } from 'react';
+import type React from 'react';
+import { forwardRef, useId } from 'react';
 
 export type SelectVariant = 'default' | 'filled' | 'outlined';
 export type SelectSize = 'sm' | 'md' | 'lg';

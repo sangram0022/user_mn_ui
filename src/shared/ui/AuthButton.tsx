@@ -1,5 +1,5 @@
 import { Loader } from 'lucide-react';
-import React from 'react';
+import type React from 'react';
 
 /**
  * Button variant types

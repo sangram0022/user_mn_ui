@@ -8,13 +8,12 @@ import { describe, expect, it, vi } from 'vitest';
 expect.extend(toHaveNoViolations);
 
 // Import utilities to test
-const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat('en-US', {
+const formatDate = (date: Date): string =>
+  new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   }).format(date);
-};
 
 const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,

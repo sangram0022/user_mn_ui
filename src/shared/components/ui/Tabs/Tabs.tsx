@@ -412,7 +412,7 @@ TabPanel.displayName = 'Tabs.Panel';
 // Create compound component object
 export const Tabs = Object.assign(TabsRoot, {
   List: TabsList,
-  Tab: Tab,
+  Tab,
   Panel: TabPanel,
 });
 

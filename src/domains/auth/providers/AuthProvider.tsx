@@ -18,7 +18,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const hasMountedRef = useRef(false);
 
-  const isAuthenticated = !!user;
+  const isAuthenticated = Boolean(user);
 
   // Check if user is authenticated on app load
   // Use ref to prevent duplicate checks in React StrictMode

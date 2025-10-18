@@ -1,5 +1,6 @@
 import { CheckCircle, Loader2, Mail, XCircle } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';

@@ -222,7 +222,7 @@ export class SecureTokenStore {
    * Check if tokens exist
    */
   static hasTokens(): boolean {
-    return !!(this.getAccessToken() && this.getRefreshToken());
+    return Boolean(this.getAccessToken() && this.getRefreshToken());
   }
 
   /**
@@ -260,8 +260,8 @@ export class SecureTokenStore {
     userRole: string | null;
   } {
     return {
-      hasAccessToken: !!this.getAccessToken(),
-      hasRefreshToken: !!this.getRefreshToken(),
+      hasAccessToken: Boolean(this.getAccessToken()),
+      hasRefreshToken: Boolean(this.getRefreshToken()),
       isExpired: this.isTokenExpired(),
       expiresIn: this.getTimeUntilExpiry(),
       userId: this.getUserId(),

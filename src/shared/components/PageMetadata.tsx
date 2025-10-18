@@ -198,8 +198,7 @@ export const MetadataPresets = {
  * ```
  */
 // eslint-disable-next-line react-refresh/only-export-components
-export const usePageMetadata = (metadata: PageMetadataProps) => {
+export const usePageMetadata = (metadata: PageMetadataProps) =>
   // React 19: Metadata is reactive to state changes
   // No need for useEffect - React handles updates automatically
-  return metadata;
-};
+  metadata;

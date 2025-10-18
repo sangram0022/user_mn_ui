@@ -260,7 +260,7 @@ const UserManagementEnhanced: FC = () => {
           summary.role?.toLowerCase(),
           summary.role_name,
           summary.role_name?.toLowerCase(),
-          summary.id != null ? String(summary.id) : undefined,
+          summary.id !== null && summary.id !== undefined ? String(summary.id) : undefined,
         ].filter((candidate): candidate is string => Boolean(candidate));
 
         const resolvedRole =
@@ -280,7 +280,10 @@ const UserManagementEnhanced: FC = () => {
         const fallbackName = `${summary.first_name ?? ''} ${summary.last_name ?? ''}`.trim();
 
         const userId =
-          summary.user_id ?? (summary.id != null ? String(summary.id) : String(index + 1));
+          summary.user_id ??
+          (summary.id !== null && summary.id !== undefined
+            ? String(summary.id)
+            : String(index + 1));
 
         return {
           id: userId,

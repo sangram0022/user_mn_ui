@@ -6,7 +6,11 @@
 
 import { apiClient } from '@lib/api';
 import { API_ENDPOINTS } from '../config/api.config';
-import { DeleteAccountRequest, DeleteAccountResponse, ExportDataRequest } from '../types/api.types';
+import type {
+  DeleteAccountRequest,
+  DeleteAccountResponse,
+  ExportDataRequest,
+} from '../types/api.types';
 
 class GdprService {
   /**

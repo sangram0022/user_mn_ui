@@ -1,5 +1,5 @@
 import { cn } from '@shared/utils';
-import React from 'react';
+import type React from 'react';
 
 /**
  * Card component props
@@ -91,17 +91,15 @@ export const Card: React.FC<CardProps> = ({
   padding = 'md',
   className = '',
   responsive = false,
-}) => {
-  return (
-    <div
-      className={cn(
-        cardVariants[variant],
-        cardPadding[padding],
-        responsive && 'container-card card-responsive',
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
-};
+}) => (
+  <div
+    className={cn(
+      cardVariants[variant],
+      cardPadding[padding],
+      responsive && 'container-card card-responsive',
+      className
+    )}
+  >
+    {children}
+  </div>
+);

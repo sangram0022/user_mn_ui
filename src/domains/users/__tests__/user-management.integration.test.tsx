@@ -60,8 +60,8 @@ describe('User Management Integration', () => {
   it.skip('should load and display user list from API', async () => {
     // Mock successful user list response
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/users`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/users`, async () =>
+        HttpResponse.json({
           users: [
             { id: '1', email: 'user1@example.com', role: 'user', is_active: true },
             { id: '2', email: 'user2@example.com', role: 'user', is_active: true },
@@ -69,8 +69,8 @@ describe('User Management Integration', () => {
           ],
           total: 3,
           page: 1,
-        });
-      })
+        })
+      )
     );
 
     renderWithProviders(<UserManagementPage />);
@@ -86,12 +86,12 @@ describe('User Management Integration', () => {
   it.skip('should handle API error when loading users', async () => {
     // Mock API error
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/users`, async () => {
-        return HttpResponse.json(
+      http.get(`${API_BASE_URL}/api/v1/users`, async () =>
+        HttpResponse.json(
           { error: 'Internal server error', detail: 'Failed to fetch users' },
           { status: 500 }
-        );
-      })
+        )
+      )
     );
 
     renderWithProviders(<UserManagementPage />);
@@ -168,14 +168,14 @@ describe('User Management Integration', () => {
 
     // Mock user list endpoint
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/users`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/users`, async () =>
+        HttpResponse.json({
           users: [
             { id: '1', email: 'user1@example.com', role: 'user', is_active: true },
             { id: '2', email: 'user2@example.com', role: 'user', is_active: true },
           ],
-        });
-      })
+        })
+      )
     );
 
     // Mock user update endpoint
@@ -213,11 +213,11 @@ describe('User Management Integration', () => {
     const deactivateSpy = vi.fn();
 
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/users`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/users`, async () =>
+        HttpResponse.json({
           users: [{ id: '1', email: 'user1@example.com', role: 'user', is_active: true }],
-        });
-      })
+        })
+      )
     );
 
     // Mock deactivate endpoint
@@ -252,8 +252,8 @@ describe('User Management Integration', () => {
 
   it.skip('should handle rate limiting with retry after header', async () => {
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/users`, async () => {
-        return HttpResponse.json(
+      http.get(`${API_BASE_URL}/api/v1/users`, async () =>
+        HttpResponse.json(
           { error: 'Too many requests', retry_after: 60 },
           {
             status: 429,
@@ -262,8 +262,8 @@ describe('User Management Integration', () => {
               'Retry-After': '60',
             },
           }
-        );
-      })
+        )
+      )
     );
 
     renderWithProviders(<UserManagementPage />);
@@ -336,11 +336,11 @@ describe('Role-Based Access Control Integration', () => {
 
     // Mock successful response for admin
     server.use(
-      http.get(`${API_BASE_URL}/api/v1/users`, async () => {
-        return HttpResponse.json({
+      http.get(`${API_BASE_URL}/api/v1/users`, async () =>
+        HttpResponse.json({
           users: [{ id: '1', email: 'user@example.com', role: 'user', is_active: true }],
-        });
-      })
+        })
+      )
     );
 
     renderWithProviders(<UserManagementPage />);

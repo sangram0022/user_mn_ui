@@ -183,9 +183,8 @@ export function useLocalization(): UseLocalizationReturn {
   /**
    * Format message with type-safe key and interpolation
    */
-  const formatMessage = (messageKey: MessageKey, interpolation?: MessageInterpolation): string => {
-    return t(messageKey, interpolation);
-  };
+  const formatMessage = (messageKey: MessageKey, interpolation?: MessageInterpolation): string =>
+    t(messageKey, interpolation);
 
   /**
    * Format API response message
@@ -279,9 +278,7 @@ export function useLocalization(): UseLocalizationReturn {
   /**
    * Format time
    */
-  const formatTime = (date: Date): string => {
-    return formatters.time.format(date);
-  };
+  const formatTime = (date: Date): string => formatters.time.format(date);
 
   /**
    * Format number with options
@@ -308,9 +305,7 @@ export function useLocalization(): UseLocalizationReturn {
   /**
    * Format percentage
    */
-  const formatPercent = (value: number): string => {
-    return formatters.percent.format(value / 100);
-  };
+  const formatPercent = (value: number): string => formatters.percent.format(value / 100);
 
   /**
    * Format relative time (e.g., "2 hours ago")

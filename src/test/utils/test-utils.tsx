@@ -6,9 +6,10 @@
  * with necessary providers (Router, Auth, Theme, etc.)
  */
 
-import { render, RenderOptions } from '@testing-library/react';
+import type { RenderOptions } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import { AuthProvider } from '../../domains/auth/providers/AuthProvider';

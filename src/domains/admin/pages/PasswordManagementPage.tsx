@@ -217,7 +217,7 @@ const PasswordPolicyEditor: FC<{
 
   return (
     <Modal
-      isOpen={true}
+      isOpen
       onClose={onCancel}
       title="Edit Password Policy"
       size="lg"

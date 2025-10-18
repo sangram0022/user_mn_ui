@@ -12,15 +12,9 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import React, {
-  ComponentType,
-  startTransition,
-  useActionState,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { ComponentType } from 'react';
+import type React from 'react';
+import { startTransition, useActionState, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useToast } from '@hooks/useToast';
@@ -599,7 +593,7 @@ const RegisterPage: React.FC = () => {
               >
                 {isPending ? (
                   <div className="flex items-center">
-                    <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                     Creating account...
                   </div>
                 ) : (

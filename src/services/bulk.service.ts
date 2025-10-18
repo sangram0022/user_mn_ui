@@ -6,7 +6,7 @@
 
 import { apiClient } from '@lib/api';
 import { API_ENDPOINTS } from '../config/api.config';
-import { BulkCreateRequest, BulkOperationResponse } from '../types/api.types';
+import type { BulkCreateRequest, BulkOperationResponse } from '../types/api.types';
 
 class BulkService {
   /**

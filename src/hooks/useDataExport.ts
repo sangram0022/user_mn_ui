@@ -22,8 +22,8 @@ const convertToCSV = (data: ExportableData[]): string => {
   const csvHeaders = headers.join(',');
 
   // Get rows
-  const csvRows = data.map((row) => {
-    return headers
+  const csvRows = data.map((row) =>
+    headers
       .map((header) => {
         const value = row[header];
         // Escape quotes and wrap in quotes if contains comma
@@ -33,8 +33,8 @@ const convertToCSV = (data: ExportableData[]): string => {
         }
         return stringValue;
       })
-      .join(',');
-  });
+      .join(',')
+  );
 
   return [csvHeaders, ...csvRows].join('\n');
 };

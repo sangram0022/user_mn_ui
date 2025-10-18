@@ -87,6 +87,4 @@ export const isFeatureEnabled = (
     | 'VITE_ENABLE_EXPERIMENTAL'
     | 'VITE_ENABLE_ERROR_REPORTING'
   >
-): boolean => {
-  return import.meta.env[feature] === 'true';
-};
+): boolean => import.meta.env[feature] === 'true';

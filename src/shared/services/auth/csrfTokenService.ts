@@ -236,7 +236,7 @@ export class CSRFTokenService {
    * Check if token is available and valid
    */
   isTokenValid(): boolean {
-    return !!this.currentToken && !this.isTokenExpired();
+    return Boolean(this.currentToken) && !this.isTokenExpired();
   }
 
   /**
@@ -281,6 +281,5 @@ export class CSRFTokenService {
 }
 
 // Export singleton instance factory
-export const createCSRFTokenService = (apiBaseUrl: string) => {
-  return CSRFTokenService.getInstance(apiBaseUrl);
-};
+export const createCSRFTokenService = (apiBaseUrl: string) =>
+  CSRFTokenService.getInstance(apiBaseUrl);

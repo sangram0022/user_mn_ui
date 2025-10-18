@@ -10,7 +10,8 @@
  */
 
 import { cn } from '@shared/utils';
-import React, { forwardRef, useEffect, useId, useRef, useState } from 'react';
+import type React from 'react';
+import { forwardRef, useEffect, useId, useRef, useState } from 'react';
 
 export type TextareaVariant = 'default' | 'filled' | 'outlined';
 export type TextareaSize = 'sm' | 'md' | 'lg';

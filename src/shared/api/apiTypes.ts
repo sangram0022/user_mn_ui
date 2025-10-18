@@ -4,42 +4,53 @@
  */
 
 // Base API response structure
-export interface ApiResponse<T = unknown> { data: T;
+export interface ApiResponse<T = unknown> {
+  data: T;
   success: boolean;
   message?: string;
   timestamp: number;
-  requestId: string; }
+  requestId: string;
+}
 
 // Error response structure
-export interface ApiError { code: string;
+export interface ApiError {
+  code: string;
   message: string;
   details?: Record<string, unknown>;
   timestamp: number;
   requestId: string;
-  statusCode: number; }
+  statusCode: number;
+}
 
 // Pagination metadata
-export interface PaginationMeta { page: number;
+export interface PaginationMeta {
+  page: number;
   limit: number;
   total: number;
   totalPages: number;
   hasNext: boolean;
-  hasPrevious: boolean; }
+  hasPrevious: boolean;
+}
 
 // Paginated response
-export interface PaginatedResponse<T> extends ApiResponse<T[]> { meta: PaginationMeta; }
+export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+  meta: PaginationMeta;
+}
 
 // API request configuration
-export interface ApiRequestConfig { method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export interface ApiRequestConfig {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   params?: Record<string, string | number | boolean>;
   timeout?: number;
   retries?: number;
   cache?: boolean;
-  cacheTTL?: number; }
+  cacheTTL?: number;
+}
 
 // User types
-export interface User { id: string;
+export interface User {
+  id: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -48,37 +59,51 @@ export interface User { id: string;
   isActive: boolean;
   lastLoginAt?: string;
   createdAt: string;
-  updatedAt: string; }
+  updatedAt: string;
+}
 
 export type UserRole = 'admin' | 'moderator' | 'user' | 'viewer';
 
-export interface CreateUserRequest { email: string;
+export interface CreateUserRequest {
+  email: string;
   firstName: string;
   lastName: string;
   password: string;
-  role?: UserRole; }
+  role?: UserRole;
+}
 
-export interface UpdateUserRequest { firstName?: string;
+export interface UpdateUserRequest {
+  firstName?: string;
   lastName?: string;
   role?: UserRole;
-  isActive?: boolean; }
+  isActive?: boolean;
+}
 
 // Authentication types
-export interface LoginRequest { email: string;
+export interface LoginRequest {
+  email: string;
   password: string;
-  rememberMe?: boolean; }
+  rememberMe?: boolean;
+}
 
-export interface LoginResponse { user: User;
+export interface LoginResponse {
+  user: User;
   token: string;
   refreshToken: string;
-  expiresIn: number; }
+  expiresIn: number;
+}
 
-export interface RefreshTokenRequest { refreshToken: string; }
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
 
-export interface RegisterRequest extends CreateUserRequest { confirmPassword: string; }
+export interface RegisterRequest extends CreateUserRequest {
+  confirmPassword: string;
+}
 
 // Dashboard types
-export interface DashboardStats { totalUsers: number;
+export interface DashboardStats {
+  totalUsers: number;
   activeUsers: number;
   totalRevenue: number;
   monthlyRevenue: number;
@@ -90,7 +115,8 @@ export interface DashboardStats { totalUsers: number;
   };
 }
 
-export interface ActivityLog { id: string;
+export interface ActivityLog {
+  id: string;
   userId: string;
   user: Pick<User, 'id' | 'firstName' | 'lastName' | 'email'>;
   action: string;
@@ -99,17 +125,20 @@ export interface ActivityLog { id: string;
   metadata?: Record<string, unknown>;
   ipAddress: string;
   userAgent: string;
-  timestamp: string; }
+  timestamp: string;
+}
 
 // System types
-export interface SystemHealth { status: 'healthy' | 'degraded' | 'unhealthy';
+export interface SystemHealth {
+  status: 'healthy' | 'degraded' | 'unhealthy';
   services: {
     database: ServiceStatus;
     cache: ServiceStatus;
     email: ServiceStatus;
     storage: ServiceStatus;
   };
-  metrics: { uptime: number;
+  metrics: {
+    uptime: number;
     responseTime: number;
     errorRate: number;
     memoryUsage: number;
@@ -117,13 +146,16 @@ export interface SystemHealth { status: 'healthy' | 'degraded' | 'unhealthy';
   };
 }
 
-export interface ServiceStatus { status: 'up' | 'down' | 'degraded';
+export interface ServiceStatus {
+  status: 'up' | 'down' | 'degraded';
   responseTime?: number;
   lastChecked: string;
-  version?: string; }
+  version?: string;
+}
 
 // Workflow types
-export interface Workflow { id: string;
+export interface Workflow {
+  id: string;
   name: string;
   description: string;
   status: 'active' | 'inactive' | 'draft';
@@ -131,20 +163,26 @@ export interface Workflow { id: string;
   triggers: WorkflowTrigger[];
   createdBy: string;
   createdAt: string;
-  updatedAt: string; }
+  updatedAt: string;
+}
 
-export interface WorkflowStep { id: string;
+export interface WorkflowStep {
+  id: string;
   name: string;
   type: 'action' | 'condition' | 'delay';
   config: Record<string, unknown>;
-  order: number; }
+  order: number;
+}
 
-export interface WorkflowTrigger { id: string;
+export interface WorkflowTrigger {
+  id: string;
   type: 'manual' | 'scheduled' | 'event';
-  config: Record<string, unknown>; }
+  config: Record<string, unknown>;
+}
 
 // Report types
-export interface Report { id: string;
+export interface Report {
+  id: string;
   title: string;
   description: string;
   type: 'user_activity' | 'system_performance' | 'financial' | 'custom';
@@ -152,15 +190,19 @@ export interface Report { id: string;
   schedule?: ReportSchedule;
   recipients: string[];
   lastGenerated?: string;
-  createdAt: string; }
+  createdAt: string;
+}
 
-export interface ReportSchedule { frequency: 'daily' | 'weekly' | 'monthly';
+export interface ReportSchedule {
+  frequency: 'daily' | 'weekly' | 'monthly';
   time: string;
   timezone: string;
-  isActive: boolean; }
+  isActive: boolean;
+}
 
 // Notification types
-export interface Notification { id: string;
+export interface Notification {
+  id: string;
   userId: string;
   title: string;
   message: string;
@@ -169,86 +211,80 @@ export interface Notification { id: string;
   actionUrl?: string;
   metadata?: Record<string, unknown>;
   createdAt: string;
-  expiresAt?: string; }
+  expiresAt?: string;
+}
 
 // Search and filter types
-export interface SearchFilters { query?: string;
+export interface SearchFilters {
+  query?: string;
   status?: string[];
   role?: UserRole[];
   dateFrom?: string;
   dateTo?: string;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc'; }
+  sortOrder?: 'asc' | 'desc';
+}
 
-export interface SearchResults<T> extends PaginatedResponse<T> { filters: SearchFilters;
+export interface SearchResults<T> extends PaginatedResponse<T> {
+  filters: SearchFilters;
   totalResults: number;
-  searchTime: number; }
+  searchTime: number;
+}
 
 // File upload types
-export interface FileUpload { id: string;
+export interface FileUpload {
+  id: string;
   filename: string;
   originalName: string;
   mimeType: string;
   size: number;
   url: string;
   uploadedBy: string;
-  uploadedAt: string; }
+  uploadedAt: string;
+}
 
-export interface UploadProgress { filename: string;
+export interface UploadProgress {
+  filename: string;
   progress: number;
   status: 'pending' | 'uploading' | 'completed' | 'error';
-  error?: string; }
+  error?: string;
+}
 
 // Validation types
-export interface ValidationError { field: string;
+export interface ValidationError {
+  field: string;
   message: string;
-  code: string; }
+  code: string;
+}
 
-export interface ValidationResponse { isValid: boolean;
-  errors: ValidationError[]; }
+export interface ValidationResponse {
+  isValid: boolean;
+  errors: ValidationError[];
+}
 
 // Generic API endpoints mapping
-export interface ApiEndpoints { // Authentication
+export interface ApiEndpoints {
+  // Authentication
   login: {
     request: LoginRequest;
     response: ApiResponse<LoginResponse>;
   };
-  register: { request: RegisterRequest;
-    response: ApiResponse<User>;
-  };
-  refreshToken: { request: RefreshTokenRequest;
-    response: ApiResponse<LoginResponse>;
-  };
-  
+  register: { request: RegisterRequest; response: ApiResponse<User> };
+  refreshToken: { request: RefreshTokenRequest; response: ApiResponse<LoginResponse> };
+
   // Users
-  getUsers: { request: SearchFilters;
-    response: SearchResults<User>;
-  };
-  getUser: { request: { id: string };
-    response: ApiResponse<User>;
-  };
-  createUser: { request: CreateUserRequest;
-    response: ApiResponse<User>;
-  };
-  updateUser: { request: { id: string; data: UpdateUserRequest };
-    response: ApiResponse<User>;
-  };
-  deleteUser: { request: { id: string };
-    response: ApiResponse<{ deleted: boolean }>;
-  };
-  
+  getUsers: { request: SearchFilters; response: SearchResults<User> };
+  getUser: { request: { id: string }; response: ApiResponse<User> };
+  createUser: { request: CreateUserRequest; response: ApiResponse<User> };
+  updateUser: { request: { id: string; data: UpdateUserRequest }; response: ApiResponse<User> };
+  deleteUser: { request: { id: string }; response: ApiResponse<{ deleted: boolean }> };
+
   // Dashboard
-  getDashboardStats: { request: { period?: string };
-    response: ApiResponse<DashboardStats>;
-  };
-  getActivityLogs: { request: SearchFilters;
-    response: SearchResults<ActivityLog>;
-  };
-  
+  getDashboardStats: { request: { period?: string }; response: ApiResponse<DashboardStats> };
+  getActivityLogs: { request: SearchFilters; response: SearchResults<ActivityLog> };
+
   // System
-  getSystemHealth: { request: Record<string, never>;
-    response: ApiResponse<SystemHealth>;
-  };
+  getSystemHealth: { request: Record<string, never>; response: ApiResponse<SystemHealth> };
 }
 
 // Type utility for extracting request/response types
@@ -256,7 +292,8 @@ export type ApiRequest<T extends keyof ApiEndpoints> = ApiEndpoints[T]['request'
 export type ApiResponseType<T extends keyof ApiEndpoints> = ApiEndpoints[T]['response'];
 
 // HTTP status codes
-export const HTTP_STATUS = { OK: 200,
+export const HTTP_STATUS = {
+  OK: 200,
   CREATED: 201,
   NO_CONTENT: 204,
   BAD_REQUEST: 400,
@@ -267,6 +304,7 @@ export const HTTP_STATUS = { OK: 200,
   UNPROCESSABLE_ENTITY: 422,
   TOO_MANY_REQUESTS: 429,
   INTERNAL_SERVER_ERROR: 500,
-  SERVICE_UNAVAILABLE: 503 } as const;
+  SERVICE_UNAVAILABLE: 503,
+} as const;
 
-export type HttpStatusCode = typeof HTTP_STATUS[keyof typeof HTTP_STATUS];
+export type HttpStatusCode = (typeof HTTP_STATUS)[keyof typeof HTTP_STATUS];

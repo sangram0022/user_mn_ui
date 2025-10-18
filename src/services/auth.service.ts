@@ -17,7 +17,7 @@ import type {
   ResetPasswordRequest as SharedResetPasswordRequest,
 } from '@shared/types';
 import { TOKEN_KEYS } from '../config/api.config';
-import {
+import type {
   ChangePasswordRequest,
   ChangePasswordResponse,
   LoginRequest,
