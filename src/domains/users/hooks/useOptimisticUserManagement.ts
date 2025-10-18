@@ -10,7 +10,7 @@
  * 3. Update CRUD operations to use optimistic methods
  */
 
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 import { useOptimisticCRUD, type OptimisticListItem } from '@shared/hooks/useReact19Features';
 import type { CreateUserRequest, UpdateUserRequest } from '@shared/types';
 

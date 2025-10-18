@@ -11,7 +11,7 @@ import { SESSION } from '@shared/config/constants';
 import type { Dispatch, SetStateAction } from 'react';
 import { startTransition, useEffect, useRef, useState } from 'react';
 
-import { useAuth } from 'src/domains/auth';
+import { useAuth } from '@domains/auth/context/AuthContext';
 
 interface SessionData {
   sessionId: string;

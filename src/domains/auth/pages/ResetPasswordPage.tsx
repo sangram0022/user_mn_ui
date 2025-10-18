@@ -6,7 +6,7 @@ import { logger } from './../../../shared/utils/logger';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 
 const ResetPasswordPage: React.FC = () => {

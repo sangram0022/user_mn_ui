@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logger } from './../../../shared/utils/logger';
 
 import { useToast } from '@hooks/useToast';
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 
 const EmailConfirmationPage: React.FC = () => {
   const { toast } = useToast();

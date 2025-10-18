@@ -17,9 +17,9 @@ import {
   X,
 } from 'lucide-react';
 import { LocaleSelector } from '../../components/common/LocaleSelector';
-import { useAuth } from '../../domains/auth';
+import { useAuth } from '../../domains/auth/context/AuthContext';
 import { useLocalization } from '../../hooks/localization/useLocalization';
-import ThemeSwitcher from '../../shared/components/ui/ThemeSwitcher';
+import ThemeSwitcher from '../../shared/components/ui/ThemeSwitcher/ThemeSwitcher';
 
 // Types
 interface NavigationItem {

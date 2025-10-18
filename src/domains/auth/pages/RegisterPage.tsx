@@ -12,13 +12,13 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import type { ComponentType } from 'react';
 import type React from 'react';
+import type { ComponentType } from 'react';
 import { startTransition, useActionState, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useToast } from '@hooks/useToast';
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 import { PageMetadata } from '@shared/components/PageMetadata';
 import {
   validateEmail,

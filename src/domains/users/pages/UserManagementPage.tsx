@@ -12,7 +12,7 @@ import { logger } from './../../../shared/utils/logger';
 
 import { useToast } from '@hooks/useToast';
 import { useVirtualScroll } from '@hooks/useVirtualScroll';
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 import { SkeletonTable } from '@shared/components/ui/Skeleton';
 import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@shared/types';
 import { PageMetadata } from '@shared/ui';

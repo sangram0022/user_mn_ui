@@ -29,7 +29,7 @@ export type { UseFormStateOptions, UseFormStateResult } from './useFormState';
 export { useErrorHandler, useErrorMessage } from './errors/useErrorHandler';
 
 // Authentication (existing)
-export { useAuth } from 'src/domains/auth';
+export { useAuth } from '@domains/auth/context/AuthContext';
 
 // Session management (existing)
 export { useSessionManagement } from './useSessionManagement';

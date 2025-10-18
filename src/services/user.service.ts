@@ -7,7 +7,7 @@
  * fully mapped in apiClient, maintaining backward compatibility.
  */
 
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 import { API_ENDPOINTS } from '../config/api.config';
 import type {
   AdminStats,

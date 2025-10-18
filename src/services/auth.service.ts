@@ -8,7 +8,7 @@
  * using the modern fetch-based client under the hood.
  */
 
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 import type {
   ChangePasswordRequest as SharedChangePasswordRequest,
   LoginResponse as SharedLoginResponse,

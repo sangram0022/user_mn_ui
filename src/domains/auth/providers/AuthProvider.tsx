@@ -1,7 +1,7 @@
 import type { FC, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 import { tokenService } from '@shared/services/auth/tokenService';
 import type { LoginRequest, UserProfile, UserRoleInfo } from '@shared/types';
 import { logger } from '@shared/utils/logger';

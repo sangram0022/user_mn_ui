@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 import { Button } from '@shared/components/ui';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 

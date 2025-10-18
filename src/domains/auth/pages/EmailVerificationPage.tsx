@@ -5,7 +5,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 
 const EmailVerificationPage: React.FC = () => {
   const { toast } = useToast();

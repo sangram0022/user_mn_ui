@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { startTransition, useActionState, useEffect, useId, useState } from 'react';
 
 import { useToast } from '@hooks/useToast';
-import { apiClient } from '@lib/api';
+import { apiClient } from '@lib/api/client';
 import { PageMetadata } from '@shared/components/PageMetadata';
 import type { UserProfile as BaseUserProfile } from '@shared/types';
 import Breadcrumb from '@shared/ui/Breadcrumb';

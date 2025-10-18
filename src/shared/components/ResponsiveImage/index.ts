@@ -1,3 +1,9 @@
+/**
+ * ResponsiveImage Component Barrel Export
+ *
+ * Exports responsive image components (Avatar, Logo, Generic).
+ */
+
 export {
   AvatarImage,
   LogoImage,

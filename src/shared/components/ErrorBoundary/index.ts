@@ -1,3 +1,9 @@
+/**
+ * ErrorBoundary Component Barrel Export
+ *
+ * Exports error boundary component for graceful error handling.
+ */
+
 export {
   ErrorBoundary,
   ErrorFallback,
