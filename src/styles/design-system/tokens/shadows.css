@@ -101,45 +101,6 @@
 }
 
 /* ========================================================================
-   DARK THEME SHADOWS
-   Darker, more subtle shadows for dark backgrounds
-   ======================================================================== */
-
-[data-theme='dark'],
-.dark {
-  /* Base shadows - darker and more prominent */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.6);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 8px 10px -6px rgba(0, 0, 0, 0.7);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-  --shadow-3xl: 0 35px 60px -15px rgba(0, 0, 0, 0.9);
-
-  /* Inner shadows */
-  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
-  --shadow-inner-md: inset 0 4px 6px 0 rgba(0, 0, 0, 0.4);
-
-  /* Colored shadows - adjusted for dark theme */
-  --shadow-primary-sm: 0 4px 12px rgba(96, 165, 250, 0.25);
-  --shadow-primary-md: 0 8px 16px rgba(96, 165, 250, 0.3);
-  --shadow-primary-lg: 0 12px 24px rgba(96, 165, 250, 0.35);
-
-  --shadow-success-sm: 0 4px 12px rgba(74, 222, 128, 0.25);
-  --shadow-success-md: 0 8px 16px rgba(74, 222, 128, 0.3);
-
-  --shadow-error-sm: 0 4px 12px rgba(248, 113, 113, 0.25);
-  --shadow-error-md: 0 8px 16px rgba(248, 113, 113, 0.3);
-
-  --shadow-warning-sm: 0 4px 12px rgba(251, 146, 60, 0.25);
-  --shadow-warning-md: 0 8px 16px rgba(251, 146, 60, 0.3);
-
-  /* Focus ring */
-  --shadow-focus: 0 0 0 3px rgba(96, 165, 250, 0.4);
-  --shadow-focus-error: 0 0 0 3px rgba(248, 113, 113, 0.4);
-}
-
-/* ========================================================================
    LAYERING SYSTEM
    Consistent z-index values for stacking context
    ======================================================================== */

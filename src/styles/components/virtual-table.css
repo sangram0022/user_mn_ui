@@ -39,14 +39,6 @@
   background: rgb(var(--color-gray-400));
 }
 
-[data-theme='dark'] .virtual-container::-webkit-scrollbar-thumb {
-  background: rgb(var(--color-gray-600));
-}
-
-[data-theme='dark'] .virtual-container::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--color-gray-500));
-}
-
 /* Loading state */
 .virtual-container[data-loading='true'] {
   pointer-events: none;

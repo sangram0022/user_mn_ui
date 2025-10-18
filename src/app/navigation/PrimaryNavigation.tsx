@@ -19,7 +19,6 @@ import {
 import { LocaleSelector } from '../../components/common/LocaleSelector';
 import { useAuth } from '../../domains/auth/context/AuthContext';
 import { useLocalization } from '../../hooks/localization/useLocalization';
-import ThemeSwitcher from '../../shared/components/ui/ThemeSwitcher/ThemeSwitcher';
 
 // Types
 interface NavigationItem {
@@ -194,9 +193,8 @@ const Navigation = () => {
               </div>
             </div>
 
-            {/* Right side - Theme switcher, Locale selector and User menu */}
+            {/* Right side - Locale selector and User menu */}
             <div className="flex items-center gap-4">
-              <ThemeSwitcher />
               <LocaleSelector />
               {user ? (
                 /* User is logged in - show user menu */

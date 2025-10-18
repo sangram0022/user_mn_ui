@@ -133,26 +133,3 @@
 .filter-grid {
   @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
 }
-
-/* Dark Mode Support */
-.dark .card-white,
-.dark .card-white-lg,
-.dark .card-white-hover {
-  @apply bg-gray-800 border-gray-700;
-}
-
-.dark .modal-content,
-.dark .modal-content-md,
-.dark .modal-content-lg {
-  @apply bg-gray-800;
-}
-
-.dark .page-title {
-  @apply text-gray-100;
-}
-
-.dark .section-container,
-.dark .section-container-mb,
-.dark .section-container-mb-8 {
-  @apply bg-gray-800 border-gray-700;
-}

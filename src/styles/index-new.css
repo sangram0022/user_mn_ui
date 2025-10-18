@@ -125,16 +125,6 @@
     opacity: 0.5;
     cursor: not-allowed;
   }
-
-  /* Force dark mode */
-  [data-theme='dark'] {
-    color-scheme: dark;
-  }
-
-  /* Force light mode */
-  [data-theme='light'] {
-    color-scheme: light;
-  }
 }
 
 /* ============================================================================

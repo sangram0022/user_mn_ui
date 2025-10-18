@@ -15,15 +15,6 @@
   overflow: hidden;
 }
 
-[data-theme='dark'] .skeleton {
-  background: linear-gradient(
-    90deg,
-    rgb(var(--color-gray-800)) 0%,
-    rgb(var(--color-gray-700)) 50%,
-    rgb(var(--color-gray-800)) 100%
-  );
-}
-
 /* Pulse animation (default) */
 .skeleton[data-animation='pulse'],
 .skeleton:not([data-animation]) {
@@ -45,15 +36,6 @@
     transparent 100%
   );
   animation: skeleton-wave 1.5s ease-in-out infinite;
-}
-
-[data-theme='dark'] .skeleton[data-animation='wave']::after {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 100%
-  );
 }
 
 /* None animation */

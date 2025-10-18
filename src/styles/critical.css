@@ -50,14 +50,6 @@
   --font-weight-bold: 700;
 }
 
-/* Dark theme critical tokens */
-[data-theme='dark'] {
-  --bg-primary: 17 24 39; /* gray-900 */
-  --bg-secondary: 31 41 55; /* gray-800 */
-  --text-primary: 243 244 246; /* gray-100 */
-  --text-secondary: 156 163 175; /* gray-400 */
-}
-
 /* ==========================================================================
    BASE CRITICAL STYLES
    ========================================================================== */
@@ -162,10 +154,6 @@ body {
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
   border-radius: var(--radius-md);
-}
-
-[data-theme='dark'] .skeleton {
-  background: linear-gradient(90deg, rgb(31 41 55) 0%, rgb(55 65 81) 50%, rgb(31 41 55) 100%);
 }
 
 /* ==========================================================================
@@ -315,20 +303,6 @@ body {
   border-top: 1px solid rgb(var(--color-gray-200));
 }
 
-[data-theme='dark'] .card {
-  background: rgb(31 41 55); /* gray-800 */
-  border-color: rgb(55 65 81); /* gray-700 */
-}
-
-[data-theme='dark'] .card-header,
-[data-theme='dark'] .card-footer {
-  border-color: rgb(55 65 81);
-}
-
-[data-theme='dark'] .card-footer {
-  background: rgb(17 24 39); /* gray-900 */
-}
-
 /* ==========================================================================
    CRITICAL TEXT UTILITIES - Typography
    ========================================================================== */
@@ -396,30 +370,6 @@ body {
   background: rgb(239 246 255);
   border-color: rgb(219 234 254);
   color: rgb(30 64 175);
-}
-
-[data-theme='dark'] .alert-error {
-  background: rgb(127 29 29 / 0.2);
-  border-color: rgb(127 29 29 / 0.3);
-  color: rgb(254 202 202);
-}
-
-[data-theme='dark'] .alert-success {
-  background: rgb(22 101 52 / 0.2);
-  border-color: rgb(22 101 52 / 0.3);
-  color: rgb(187 247 208);
-}
-
-[data-theme='dark'] .alert-warning {
-  background: rgb(133 77 14 / 0.2);
-  border-color: rgb(133 77 14 / 0.3);
-  color: rgb(254 240 138);
-}
-
-[data-theme='dark'] .alert-info {
-  background: rgb(30 64 175 / 0.2);
-  border-color: rgb(30 64 175 / 0.3);
-  color: rgb(191 219 254);
 }
 
 /* ==========================================================================

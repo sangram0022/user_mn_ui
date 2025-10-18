@@ -188,17 +188,6 @@
 }
 
 /* ============================================
-   Dark Mode Support
-   ============================================ */
-
-/* Ensure smooth transitions in dark mode */
-.dark ::view-transition-old(root),
-.dark ::view-transition-new(root) {
-  /* Maintain same animation properties */
-  animation-duration: 300ms;
-}
-
-/* ============================================
    Performance Optimization
    ============================================ */
 

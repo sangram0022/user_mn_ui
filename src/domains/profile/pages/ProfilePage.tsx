@@ -814,33 +814,6 @@ const ProfilePage: FC = () => {
             ))}
           </div>
         </div>
-
-        {/* Theme Settings */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
-            <Settings className="h-5 w-5" />
-            Appearance
-          </h3>
-
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { value: 'light', label: '☀️ Light', active: true },
-              { value: 'dark', label: '🌙 Dark', active: false },
-              { value: 'auto', label: '🔄 Auto', active: false },
-            ].map(({ value, label, active }) => (
-              <button
-                key={value}
-                className={`cursor-pointer rounded-lg border p-4 text-sm font-medium transition-all duration-200 ${
-                  active
-                    ? 'border-blue-500 bg-blue-50 text-blue-500'
-                    : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     );
   }
