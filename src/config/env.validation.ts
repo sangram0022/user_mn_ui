@@ -96,31 +96,37 @@ export function validateEnvironment(): void {
       invalid.push('VITE_API_BASE_URL cannot use localhost or 127.0.0.1 in production');
     }
 
-    // Check for encryption key in production
+    // 🔴 CRITICAL: REQUIRE encryption key in production
     if (!import.meta.env.VITE_ENCRYPTION_KEY) {
-      warnings.push('VITE_ENCRYPTION_KEY is not set. Token encryption will use default key.');
+      invalid.push(
+        'VITE_ENCRYPTION_KEY is REQUIRED in production for secure token encryption. Cannot deploy without it.'
+      );
     }
 
-    // Check for monitoring in production
+    // 🔴 CRITICAL: REQUIRE Sentry DSN in production
     if (!import.meta.env.VITE_SENTRY_DSN) {
-      warnings.push('VITE_SENTRY_DSN is not set. Error monitoring will not be available.');
+      invalid.push(
+        'VITE_SENTRY_DSN is REQUIRED in production for error tracking and monitoring. Cannot deploy without it.'
+      );
     }
 
-    // Check for analytics
+    // Check for analytics (optional but recommended)
     if (!import.meta.env.VITE_ANALYTICS_ID) {
-      warnings.push('VITE_ANALYTICS_ID is not set. Analytics tracking will not be available.');
+      warnings.push(
+        '⚠️  VITE_ANALYTICS_ID is not set. Performance analytics tracking will not be available.'
+      );
     }
 
     // Ensure source maps are disabled in production
     if (import.meta.env.VITE_ENABLE_SOURCEMAPS === 'true') {
-      warnings.push(
-        'VITE_ENABLE_SOURCEMAPS is enabled in production. Consider disabling for security.'
+      invalid.push(
+        'VITE_ENABLE_SOURCEMAPS must be disabled in production. Source maps expose code and are a security risk.'
       );
     }
 
     // Check debug mode
     if (import.meta.env.VITE_ENABLE_DEBUG === 'true') {
-      warnings.push('VITE_ENABLE_DEBUG is enabled in production. This should be disabled.');
+      invalid.push('VITE_ENABLE_DEBUG must be disabled in production for security.');
     }
   }
 

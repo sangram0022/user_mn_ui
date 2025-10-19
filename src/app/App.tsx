@@ -4,6 +4,7 @@ import { LocalizationProvider } from '@contexts/LocalizationProvider';
 import { ThemeProvider } from '@contexts/ThemeContext';
 import { AuthProvider } from '@domains/auth/providers/AuthProvider';
 import { useKeyboardDetection } from '@hooks/useKeyboardDetection';
+import { useRateLimitNotification } from '@hooks/useRateLimitNotification';
 import { notFoundRoute, routes } from '@routing/config';
 import { ProtectedRoute, PublicRoute } from '@routing/RouteGuards';
 import { RoutePreloadTrigger } from '@routing/routePreloader';
@@ -48,6 +49,9 @@ const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode)
 function App() {
   // Initialize keyboard detection for accessibility
   useKeyboardDetection();
+
+  // Initialize rate limit notifications
+  useRateLimitNotification();
 
   // Initialize performance optimizations
   useEffect(() => {

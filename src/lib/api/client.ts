@@ -80,6 +80,7 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 export interface RequestOptions extends RequestInit {
   method?: HttpMethod;
+  timeout?: number; // 🆕 Request timeout in milliseconds (default: 30000)
 }
 
 interface StoredSession {
@@ -324,12 +325,19 @@ export class ApiClient {
   }
 
   /**
-   * Calculate exponential backoff delay
-   * Formula: min(baseDelay * 2^attempt, maxDelay)
+   * Calculate exponential backoff delay with jitter
+   * Prevents "thundering herd" problem when multiple clients retry simultaneously
+   * Formula: delay * (1 + random jitter ±10%)
    */
   private calculateRetryDelay(attempt: number): number {
-    const delay = this.retryConfig.baseDelay * Math.pow(2, attempt);
-    return Math.min(delay, this.retryConfig.maxDelay);
+    const baseDelay = this.retryConfig.baseDelay * Math.pow(2, attempt);
+    const cappedDelay = Math.min(baseDelay, this.retryConfig.maxDelay);
+
+    // 🆕 Add jitter: ±10% of delay to prevent synchronized retries
+    const jitterFactor = 0.9 + Math.random() * 0.2; // Random between 0.9 and 1.1
+    const delayWithJitter = cappedDelay * jitterFactor;
+
+    return Math.round(delayWithJitter);
   }
 
   /**
@@ -367,6 +375,40 @@ export class ApiClient {
    */
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * 🆕 PRODUCTION FIX: Fetch with timeout to prevent hanging requests
+   * Prevents memory leaks from indefinite request hangs
+   * Default timeout: 30 seconds per request
+   */
+  private fetchWithTimeout(
+    url: string,
+    config: RequestInit,
+    timeoutMs: number = 30000
+  ): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      logger.warn(`[API] Request timeout after ${timeoutMs}ms: ${url}`);
+      controller.abort();
+    }, timeoutMs);
+
+    return fetch(url, { ...config, signal: controller.signal })
+      .then((response) => {
+        clearTimeout(timeoutId);
+        return response;
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        if (error?.name === 'AbortError') {
+          throw new ApiError({
+            status: 0,
+            message: `Request timeout after ${timeoutMs}ms`,
+            code: 'REQUEST_TIMEOUT',
+          });
+        }
+        throw error;
+      });
   }
 
   /**
@@ -466,7 +508,9 @@ export class ApiClient {
 
     let response: Response;
     try {
-      response = await fetch(url, config);
+      // 🆕 Use timeout-wrapped fetch (30s default, configurable per request)
+      const requestTimeoutMs = options.timeout || 30000;
+      response = await this.fetchWithTimeout(url, config, requestTimeoutMs);
 
       // Debug logging for response
       if (import.meta.env.DEV) {
@@ -491,15 +535,18 @@ export class ApiClient {
         this.persistSession(null);
       }
 
-      // Handle rate limiting with exponential backoff
+      // 🆕 PRODUCTION FIX: Handle rate limiting (429) with automatic retry
+      // Don't throw immediately - let retryWithBackoff handle it
       if (response.status === 429) {
         const retryAfterHeader = response.headers.get('Retry-After');
         const currentBackoff = rateLimitInfo?.backoffMs ?? 1000;
         const nextBackoff = Math.min(currentBackoff * 2, 60000); // Max 60 seconds
 
+        // Add jitter to retry-after delay to prevent thundering herd
+        const jitterFactor = 0.9 + Math.random() * 0.2; // ±10% jitter
         const retryAfterMs = retryAfterHeader
-          ? parseInt(retryAfterHeader, 10) * 1000
-          : currentBackoff;
+          ? Math.round(parseInt(retryAfterHeader, 10) * 1000 * jitterFactor)
+          : Math.round(currentBackoff * jitterFactor);
 
         this.rateLimitState.set(rateLimitKey, {
           retryAfter: Date.now() + retryAfterMs,
@@ -510,7 +557,20 @@ export class ApiClient {
           endpoint: rateLimitKey,
           backoffMs: nextBackoff,
           retryAfterHeader,
+          jitterApplied: true,
         });
+
+        // 🆕 PRODUCTION READY: Emit event for UI feedback
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('api:rate-limit', {
+              detail: { retryAfterMs, endpoint: rateLimitKey },
+            })
+          );
+        }
+
+        // Wait before throwing so retry logic can pick it up
+        await this.sleep(retryAfterMs);
       }
 
       const errorPayload = await this.parseJson(response);

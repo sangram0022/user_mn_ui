@@ -35,3 +35,6 @@ export type { ViewTransition } from './useViewTransition';
 
 // Enhanced Navigation with View Transitions (NEW - Phase 2 Task 8)
 export { useNavigate } from './useNavigate';
+
+// Rate Limit Notifications (NEW - Production Ready)
+export { useRateLimitNotification } from './useRateLimitNotification';
