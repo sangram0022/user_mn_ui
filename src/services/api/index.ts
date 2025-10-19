@@ -9,9 +9,9 @@
 export {
   authService,
   AuthService,
-  type LoginCredentials,
   type AuthToken,
   type AuthUser,
+  type LoginCredentials,
   type LoginResponse,
 } from './auth.service';
 
@@ -28,11 +28,11 @@ export { gdprService, GDPRService } from './gdpr.service';
 export { auditService, AuditService } from './audit.service';
 
 // Re-export commonly used services as object for convenience
-import { authService } from './auth.service';
-import { userProfileService } from './profile.service';
 import { adminService } from './admin.service';
-import { gdprService } from './gdpr.service';
 import { auditService } from './audit.service';
+import { authService } from './auth.service';
+import { gdprService } from './gdpr.service';
+import { userProfileService } from './profile.service';
 
 /**
  * API Services Container
