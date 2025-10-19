@@ -34,7 +34,6 @@ import { useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
-import { usePerformanceMonitor } from '@hooks/usePerformanceMonitor';
 import { useToast } from '@hooks/useToast';
 import { PageMetadata } from '@shared/components/PageMetadata';
 import { Badge, getSeverityBadgeVariant } from '@shared/components/ui/Badge';
@@ -354,7 +353,6 @@ const AuditLogsPage: FC = () => {
   const { hasPermission } = useAuth();
   const { error, handleError, clearError } = useErrorHandler();
   const { toast } = useToast();
-  const { recordMetric, measure } = usePerformanceMonitor('AuditLogsPage');
 
   // State
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
@@ -380,35 +378,28 @@ const AuditLogsPage: FC = () => {
     if (!canViewAuditLogs) return;
 
     setIsLoading(true);
-    return await measure('load-audit-logs', async () => {
-      try {
-        const response = await adminService.getAuditLogs(filters);
-        setLogs(response.logs);
-        setTotalPages(Math.ceil(response.total / filters.limit));
-        recordMetric('logs-loaded', response.logs.length);
-        recordMetric('total-logs', response.total);
-      } catch (error) {
-        handleError(error, 'Failed to load audit logs');
-        toast.error('Failed to load audit logs');
-      } finally {
-        setIsLoading(false);
-      }
-    });
+    try {
+      const response = await adminService.getAuditLogs(filters);
+      setLogs(response.logs);
+      setTotalPages(Math.ceil(response.total / filters.limit));
+    } catch (error) {
+      handleError(error, 'Failed to load audit logs');
+      toast.error('Failed to load audit logs');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const loadSummary = async () => {
     if (!canViewAuditLogs) return;
 
-    return await measure('load-audit-summary', async () => {
-      try {
-        const summaryData = await adminService.getAuditSummary();
-        setSummary(summaryData);
-        recordMetric('summary-loaded', summaryData.total_events);
-      } catch (error) {
-        handleError(error, 'Failed to load audit summary');
-        toast.error('Failed to load audit summary');
-      }
-    });
+    try {
+      const summaryData = await adminService.getAuditSummary();
+      setSummary(summaryData);
+    } catch (error) {
+      handleError(error, 'Failed to load audit summary');
+      toast.error('Failed to load audit summary');
+    }
   };
 
   // ============================================================================
@@ -433,7 +424,6 @@ const AuditLogsPage: FC = () => {
       limit: 20,
     });
     toast.info('Filters cleared');
-    recordMetric('filters-cleared', 1);
   };
 
   // ============================================================================
@@ -445,55 +435,53 @@ const AuditLogsPage: FC = () => {
     setIsDetailsModalOpen(true);
   };
 
-  const handleExport = async () =>
-    await measure('export-audit-logs', async () => {
-      try {
-        // Show loading toast
-        toast.info('Preparing audit logs export...');
+  const handleExport = async () => {
+    try {
+      // Show loading toast
+      toast.info('Preparing audit logs export...');
 
-        // Export audit logs with current filters
-        const blob = await adminService.exportAuditLogs({
-          action: filters.action,
-          resource: filters.resource,
-          user_id: filters.user_id,
-          start_date: filters.start_date,
-          end_date: filters.end_date,
-          severity: filters.severity,
-          format: 'csv', // Default to CSV format
-        });
+      // Export audit logs with current filters
+      const blob = await adminService.exportAuditLogs({
+        action: filters.action,
+        resource: filters.resource,
+        user_id: filters.user_id,
+        start_date: filters.start_date,
+        end_date: filters.end_date,
+        severity: filters.severity,
+        format: 'csv', // Default to CSV format
+      });
 
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
 
-        // Generate filename with current date and filters
-        const dateStr = new Date().toISOString().split('T')[0];
-        const filterStr = [
-          filters.severity && `severity-${filters.severity}`,
-          filters.action && `action-${filters.action}`,
-          filters.resource && `resource-${filters.resource}`,
-        ]
-          .filter(Boolean)
-          .join('_');
+      // Generate filename with current date and filters
+      const dateStr = new Date().toISOString().split('T')[0];
+      const filterStr = [
+        filters.severity && `severity-${filters.severity}`,
+        filters.action && `action-${filters.action}`,
+        filters.resource && `resource-${filters.resource}`,
+      ]
+        .filter(Boolean)
+        .join('_');
 
-        link.download = `audit-logs_${dateStr}${filterStr ? '_' + filterStr : ''}.csv`;
+      link.download = `audit-logs_${dateStr}${filterStr ? '_' + filterStr : ''}.csv`;
 
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
 
-        // Cleanup
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
-        toast.success('Audit logs exported successfully');
-        recordMetric('logs-exported', 1);
-      } catch (error) {
-        handleError(error, 'Failed to export audit logs');
-        toast.error('Failed to export audit logs');
-      }
-    });
+      toast.success('Audit logs exported successfully');
+    } catch (error) {
+      handleError(error, 'Failed to export audit logs');
+      toast.error('Failed to export audit logs');
+    }
+  };
 
   // ============================================================================
   // Effects

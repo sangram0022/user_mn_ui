@@ -16,15 +16,11 @@ import '@styles/theme-components.css';
 import type { ComponentProps, FC } from 'react';
 import { useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { initPerformanceMonitoring } from '../monitoring/performance';
 import { initSentry } from '../monitoring/sentry';
 import '../shared/config/env'; // Validate environment on app startup
 
 // Initialize Sentry error tracking
 initSentry();
-
-// Initialize performance monitoring
-initPerformanceMonitoring();
 
 type RouterWithFutureProps = ComponentProps<typeof Router> & {
   future?: {

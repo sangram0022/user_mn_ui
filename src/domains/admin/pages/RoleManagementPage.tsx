@@ -19,7 +19,6 @@ import { useActionState, useEffect, useOptimistic, useState, type FC } from 'rea
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useLocalization } from '@hooks/localization/useLocalization';
-import { usePerformanceMonitor } from '@hooks/usePerformanceMonitor';
 import { useToast } from '@hooks/useToast';
 import { PageMetadata } from '@shared/components/PageMetadata';
 import { TextInput } from '@shared/components/forms/FormComponents';
@@ -367,7 +366,6 @@ const RoleManagementPage: FC = () => {
   const { error, handleError, clearError } = useErrorHandler();
   const { t } = useLocalization();
   const { toast } = useToast();
-  const { recordMetric, measure } = usePerformanceMonitor('RoleManagementPage');
 
   // State
   const [roles, setRoles] = useState<Role[]>([]);
@@ -402,31 +400,25 @@ const RoleManagementPage: FC = () => {
   const loadRoles = async () => {
     if (!canViewRoles) return;
 
-    return await measure('load-roles', async () => {
-      try {
-        const rolesData = await adminService.getRoles();
-        setRoles(rolesData);
-        recordMetric('roles-loaded', rolesData.length);
-      } catch (error) {
-        handleError(error, t('roles.failedToLoadRoles'));
-        toast.error(t('roles.failedToLoadRoles'));
-      }
-    });
+    try {
+      const rolesData = await adminService.getRoles();
+      setRoles(rolesData);
+    } catch (error) {
+      handleError(error, t('roles.failedToLoadRoles'));
+      toast.error(t('roles.failedToLoadRoles'));
+    }
   };
 
   const loadPermissions = async () => {
     if (!canViewRoles) return;
 
-    return await measure('load-permissions', async () => {
-      try {
-        const permissionsData = await adminService.getPermissions();
-        setPermissions(permissionsData);
-        recordMetric('permissions-loaded', permissionsData.length);
-      } catch (error) {
-        handleError(error, t('roles.failedToLoadPermissions'));
-        toast.error(t('roles.failedToLoadPermissions'));
-      }
-    });
+    try {
+      const permissionsData = await adminService.getPermissions();
+      setPermissions(permissionsData);
+    } catch (error) {
+      handleError(error, t('roles.failedToLoadPermissions'));
+      toast.error(t('roles.failedToLoadPermissions'));
+    }
   };
 
   const loadAllData = async () => {
@@ -450,35 +442,30 @@ const RoleManagementPage: FC = () => {
     // ✅ React 19: Optimistic delete - instant UI update
     updateOptimisticRoles({ type: 'delete', roleId });
 
-    return await measure('delete-role', async () => {
-      try {
-        await adminService.deleteRole(roleId);
-        // Confirm deletion in real state
-        setRoles((prev) => prev.filter((role) => role.role_id !== roleId));
-        toast.success(t('roles.roleDeletedSuccessfully'));
-        recordMetric('role-deleted', 1);
-      } catch (error) {
-        handleError(error, t('roles.failedToDeleteRole'));
-        toast.error(t('roles.failedToDeleteRole'));
-        // ✅ UI automatically rolls back on error
-        // Re-load to restore the role
-        await loadRoles();
-      }
-    });
+    try {
+      await adminService.deleteRole(roleId);
+      // Confirm deletion in real state
+      setRoles((prev) => prev.filter((role) => role.role_id !== roleId));
+      toast.success(t('roles.roleDeletedSuccessfully'));
+    } catch (error) {
+      handleError(error, t('roles.failedToDeleteRole'));
+      toast.error(t('roles.failedToDeleteRole'));
+      // ✅ UI automatically rolls back on error
+      // Re-load to restore the role
+      await loadRoles();
+    }
   };
 
-  const handleAssignRole = async (userId: string, roleId: string, expiresAt?: string) =>
-    await measure('assign-role', async () => {
-      try {
-        await adminService.assignRole(userId, roleId, expiresAt);
-        toast.success(t('roles.roleAssignedSuccessfully'));
-        recordMetric('role-assigned', 1);
-      } catch (error) {
-        handleError(error, t('roles.failedToAssignRole'));
-        toast.error(t('roles.failedToAssignRole'));
-        throw error;
-      }
-    });
+  const handleAssignRole = async (userId: string, roleId: string, expiresAt?: string) => {
+    try {
+      await adminService.assignRole(userId, roleId, expiresAt);
+      toast.success(t('roles.roleAssignedSuccessfully'));
+    } catch (error) {
+      handleError(error, t('roles.failedToAssignRole'));
+      toast.error(t('roles.failedToAssignRole'));
+      throw error;
+    }
+  };
 
   // ============================================================================
   // Filter Functions
