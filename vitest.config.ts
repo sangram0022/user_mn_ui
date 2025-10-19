@@ -80,9 +80,9 @@ export default defineConfig({
     // Clear mock calls
 
     // Timeout configuration
-    testTimeout: 10000,
-    // 10 seconds
-    hookTimeout: 10000,
+    testTimeout: 20000,
+    // 20 seconds (increased from 10s for rate limit retry tests)
+    hookTimeout: 20000,
     // Test isolation
     isolate: true,
     // Parallel execution
