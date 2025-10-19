@@ -42,7 +42,7 @@ import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { formatDateTime, formatTimestamp } from '@shared/utils';
 import { prefetchRoute } from '@shared/utils/resource-loading';
-import { adminService } from '../../../services/admin-backend.service';
+import { adminService } from '../../../services/api';
 
 // ============================================================================
 // Types & Interfaces

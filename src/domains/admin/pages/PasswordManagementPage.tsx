@@ -33,7 +33,7 @@ import { Modal, ModalFooter } from '@shared/components/ui/Modal';
 import { Skeleton } from '@shared/components/ui/Skeleton';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
-import { adminService } from '../../../services/admin-backend.service';
+import { adminService } from '../../../services/api';
 
 // ============================================================================
 // Types & Interfaces

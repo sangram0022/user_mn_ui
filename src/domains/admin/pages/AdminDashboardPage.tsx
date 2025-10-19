@@ -38,7 +38,7 @@ import { Skeleton } from '@shared/components/ui/Skeleton';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { formatTime } from '@shared/utils';
-import { adminService } from '../../../services/admin-backend.service';
+import { adminService, auditService } from '../../../services/api';
 
 // ============================================================================
 // Types & Interfaces
@@ -227,12 +227,21 @@ const AdminDashboardPage: FC = () => {
 
   const loadSystemHealth = async () => {
     try {
-      const [db, metrics] = await Promise.all([
-        adminService.getDatabaseHealth(),
-        adminService.getSystemHealth(),
-      ]);
-      setDbHealth(db);
-      setSystemMetrics(metrics);
+      // TODO: Health monitoring endpoints not yet available in backend API
+      // Using mock data until backend implements /health endpoints
+      setDbHealth({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        connection_count: 0,
+        response_time: 0,
+      });
+      setSystemMetrics({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        cpu_usage: 0,
+        memory_usage: 0,
+        disk_usage: 0,
+      });
     } catch (error) {
       handleError(error, 'Failed to load system health data');
       toast.error('Failed to load system health data');
@@ -243,7 +252,19 @@ const AdminDashboardPage: FC = () => {
     if (!canViewAuditLogs) return;
 
     try {
-      const summary = await adminService.getAuditSummary();
+      const summaryData = await auditService.getAuditSummary();
+      // Map API response to local type structure
+      const summary: AuditSummary = {
+        total_events: summaryData.total_logs || 0,
+        events_by_severity: {},
+        events_by_action: {},
+        recent_activity:
+          summaryData.recent_actions?.map((log) => ({
+            action: log.action,
+            timestamp: log.timestamp,
+            user_id: log.user_id,
+          })) || [],
+      };
       setAuditSummary(summary);
     } catch (error) {
       handleError(error, 'Failed to load audit summary');
