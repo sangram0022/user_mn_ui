@@ -7,8 +7,8 @@
 
 import { useState } from 'react';
 import { adminService } from '../services/api';
-import type { CreateUserRequest, UpdateUserRequest, UserListParams } from '../types/api.types';
 import type { UserSummary } from '../shared/types';
+import type { CreateUserRequest, UpdateUserRequest, UserListParams } from '../types/api.types';
 
 export const useUsers = () => {
   const [users, setUsers] = useState<UserSummary[]>([]);

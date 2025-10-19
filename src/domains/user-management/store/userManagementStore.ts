@@ -9,7 +9,7 @@
 import { logger } from '@shared/utils/logger';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { userService } from '../../../services/user-backend.service';
+import { adminService } from '../../../services/api';
 import {
   mapManagedUserToUpdateRequest,
   mapUsersToManagedUsers,
@@ -124,9 +124,9 @@ export const useUserManagementStore = create<UserManagementState>()(
           const { pagination } = get();
 
           // Call actual backend API
-          const users = await userService.getUsers({
+          const users = await adminService.getUsers({
             page: pagination.page,
-            page_size: pagination.pageSize,
+            limit: pagination.pageSize,
             role: filters?.role,
             is_active:
               filters?.status === 'active'
@@ -134,11 +134,11 @@ export const useUserManagementStore = create<UserManagementState>()(
                 : filters?.status === 'inactive'
                   ? false
                   : undefined,
-            search: filters?.search,
+            // search: filters?.search, // Not supported by API yet - using client-side filtering instead
           });
 
-          // Map backend User[] to ManagedUser[]
-          const managedUsers = mapUsersToManagedUsers(users);
+          // Map backend UserSummary[] to ManagedUser[]
+          const managedUsers = mapUsersToManagedUsers(users as never);
 
           // Filter by search term if provided (client-side filtering)
           let filteredUsers = managedUsers;
@@ -197,10 +197,16 @@ export const useUserManagementStore = create<UserManagementState>()(
 
         try {
           // Call actual backend API
-          const user = await userService.getUserById(id);
+          // TODO: Backend API doesn't have GET /admin/users/{id} endpoint yet
+          // Temporary workaround: fetch all users and find by ID
+          const users = await adminService.getUsers();
+          const user = users.find((u) => u.id === id);
+          if (!user) {
+            throw new Error(`User with ID ${id} not found`);
+          }
 
           // Map backend User to ManagedUser
-          const managedUser = mapUserToManagedUser(user);
+          const managedUser = mapUserToManagedUser(user as never);
 
           set({
             selectedUser: managedUser,
@@ -234,7 +240,7 @@ export const useUserManagementStore = create<UserManagementState>()(
           }
 
           // Call actual backend API
-          await userService.createUser({
+          await adminService.createUser({
             email: userData.email,
             password: userData.password,
             first_name: userData.firstName,
@@ -271,7 +277,7 @@ export const useUserManagementStore = create<UserManagementState>()(
           const backendUpdates = mapManagedUserToUpdateRequest(updates);
 
           // Call actual backend API
-          await userService.updateUser(id, backendUpdates);
+          await adminService.updateUser(id, backendUpdates);
 
           // Update local state
           set((state) => ({
@@ -305,7 +311,7 @@ export const useUserManagementStore = create<UserManagementState>()(
 
         try {
           // Call actual backend API
-          await userService.deleteUser(id);
+          await adminService.deleteUser(id);
 
           // Remove from local state
           set((state) => ({
