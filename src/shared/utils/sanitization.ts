@@ -1,3 +1,5 @@
+import type { Config } from 'dompurify';
+import DOMPurify from 'dompurify';
 import React from 'react';
 
 /**
@@ -20,8 +22,6 @@ import React from 'react';
  * const safeText = sanitizeInput(userInput);
  */
 
-import DOMPurify from 'dompurify';
-
 /**
  * Sanitize HTML content to prevent XSS attacks
  *
@@ -43,14 +43,15 @@ export function sanitizeHTML(
     allowedAttributes?: string[];
   }
 ): string {
-  const config: DOMPurify.Config = {
+  const config: Config = {
     ALLOWED_TAGS: options?.allowedTags || ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li'],
     ALLOWED_ATTR: options?.allowedAttributes || [],
     KEEP_CONTENT: true,
     RETURN_TRUSTED_TYPE: false,
   };
 
-  return DOMPurify.sanitize(dirty, config);
+  const sanitized = DOMPurify.sanitize(dirty, config);
+  return typeof sanitized === 'string' ? sanitized : '';
 }
 
 /**

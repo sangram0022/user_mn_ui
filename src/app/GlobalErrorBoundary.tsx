@@ -91,7 +91,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
-                We encountered an unexpected error. This has been logged and we'll investigate.
+                We encountered an unexpected error. This has been logged and we&apos;ll investigate.
               </p>
 
               {import.meta.env.DEV && this.state.error && (

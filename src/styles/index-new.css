@@ -41,7 +41,6 @@
 @import './tokens/primitives.css';
 @import './tokens/semantic.css';
 @import './tokens/component-tokens.css';
-@import './tokens/dark-theme.css';
 @import './compositions/layouts.css';
 @import './components/button.css';
 @import './components/alert.css';

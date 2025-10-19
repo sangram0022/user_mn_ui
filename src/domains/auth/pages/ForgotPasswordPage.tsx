@@ -1,12 +1,12 @@
-import { ArrowLeft, CheckCircle, Loader, Mail } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, CheckCircle, Loader, Mail } from 'lucide-react';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
 import { apiClient } from '@lib/api/client';
-import { Button } from '@shared/components/ui';
+import { Button } from '@shared/components/ui/Button/Button';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 
 const ForgotPasswordPage: React.FC = () => {
@@ -63,12 +63,12 @@ const ForgotPasswordPage: React.FC = () => {
         <h1 className="mb-2 text-3xl font-bold text-gray-900">Check Your Email</h1>
 
         <p className="mb-6 text-sm text-gray-500">
-          We've sent a password reset link to <strong>{email}</strong>
+          We&apos;ve sent a password reset link to <strong>{email}</strong>
         </p>
 
         <div className="mb-6 rounded-lg border border-sky-200 bg-sky-50 p-4">
           <p className="m-0 text-sm text-sky-700">
-            The reset link will expire in 1 hour. If you don't see the email, check your spam
+            The reset link will expire in 1 hour. If you don&apos;t see the email, check your spam
             folder.
           </p>
         </div>
@@ -111,7 +111,7 @@ const ForgotPasswordPage: React.FC = () => {
         </div>
         <h1 className="mb-2 text-3xl font-bold text-gray-900">Reset Password</h1>
         <p className="text-sm text-gray-500">
-          Enter your email address and we'll send you a link to reset your password
+          Enter your email address and we&apos;ll send you a link to reset your password
         </p>
       </header>
 

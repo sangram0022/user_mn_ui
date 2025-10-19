@@ -26,7 +26,8 @@
   }
 
   .alert[role='alert'] {
-    /* Ensure alert role for accessibility */
+    /* Inherits all styles from .alert */
+    position: relative;
   }
 
   /* ========================================================================

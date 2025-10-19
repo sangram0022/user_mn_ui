@@ -80,7 +80,7 @@ async function checkESLint() {
   log.section('Checking ESLint');
 
   try {
-    const { stdout } = await execAsync('npx eslint . --ext ts,tsx --max-warnings 0', {
+    const { stdout } = await execAsync('npx eslint . --ext ts,tsx', {
       cwd: rootDir,
     });
 

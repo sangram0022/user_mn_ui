@@ -4,13 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { useToast } from '@hooks/useToast';
 import { PageMetadata } from '@shared/components/PageMetadata';
-import {
-  PasswordInput,
-  SubmitButton,
-  TextInput,
-  useFormFields, // ✅ React 19: Renamed from useFormState
-  usePasswordVisibility,
-} from '@shared/index';
+import { PasswordInput, SubmitButton, TextInput } from '@shared/components/forms/FormComponents';
+import { useFormFields, usePasswordVisibility } from '@shared/hooks/useCommonFormState';
 import { validateEmail, validatePassword } from '@shared/utils/formValidation';
 import { prefetchRoute } from '@shared/utils/resource-loading';
 import { useAuth } from '../context/AuthContext';
@@ -174,7 +169,7 @@ const LoginPage: React.FC = () => {
               label="Email Address"
               type="email"
               value={formData.email}
-              onChange={(value) => updateField('email', value)}
+              onChange={(value: string) => updateField('email', value)}
               required
               placeholder="Enter your email"
               autoComplete="email"
@@ -184,7 +179,7 @@ const LoginPage: React.FC = () => {
             <PasswordInput
               label="Password"
               value={formData.password}
-              onChange={(value) => updateField('password', value)}
+              onChange={(value: string) => updateField('password', value)}
               showPassword={showPassword}
               onToggleVisibility={togglePasswordVisibility}
               required
@@ -236,7 +231,7 @@ const LoginPage: React.FC = () => {
                     color: 'var(--theme-textSecondary)',
                   }}
                 >
-                  Don't have an account?
+                  Don&apos;t have an account?
                 </span>
               </div>
             </div>

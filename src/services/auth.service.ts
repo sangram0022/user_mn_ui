@@ -8,6 +8,7 @@
  * using the modern fetch-based client under the hood.
  */
 
+import { TOKEN_KEYS } from '@config/api.config';
 import { apiClient } from '@lib/api/client';
 import type {
   ChangePasswordRequest as SharedChangePasswordRequest,
@@ -16,7 +17,6 @@ import type {
   ResendVerificationRequest as SharedResendVerificationRequest,
   ResetPasswordRequest as SharedResetPasswordRequest,
 } from '@shared/types';
-import { TOKEN_KEYS } from '../config/api.config';
 import type {
   ChangePasswordRequest,
   ChangePasswordResponse,

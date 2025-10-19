@@ -160,7 +160,7 @@ export const AdminAnalyticsDashboardPage: FC = () => {
 
   const loadAnalytics = async () => {
     if (!canViewAnalytics) {
-      toast.error('You do not have permission to view analytics');
+      toast.toast.error('You do not have permission to view analytics');
       return;
     }
 
@@ -170,7 +170,7 @@ export const AdminAnalyticsDashboardPage: FC = () => {
       clearError();
     } catch (err) {
       handleError(err, 'Failed to load analytics data');
-      toast.error('Failed to load analytics data');
+      toast.toast.error('Failed to load analytics data');
     } finally {
       setIsLoading(false);
     }
@@ -180,7 +180,7 @@ export const AdminAnalyticsDashboardPage: FC = () => {
     setIsRefreshing(true);
     try {
       await loadAnalytics();
-      toast.success('Analytics refreshed successfully');
+      toast.toast.success('Analytics refreshed successfully');
     } finally {
       setIsRefreshing(false);
     }
@@ -244,13 +244,14 @@ export const AdminAnalyticsDashboardPage: FC = () => {
         <PageMetadata
           title="Access Denied - Admin Analytics"
           description="You do not have permission to view this page"
-          keywords={['access denied', 'unauthorized']}
+          keywords="access denied, unauthorized"
         />
         <div className="container mx-auto px-4 py-8">
-          <ErrorAlert
-            error={new Error('You do not have permission to view analytics')}
-            showDetails={false}
-          />
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+            <p className="text-sm text-red-800">
+              You do not have permission to view analytics. Contact your administrator for access.
+            </p>
+          </div>
         </div>
       </>
     );
@@ -261,24 +262,12 @@ export const AdminAnalyticsDashboardPage: FC = () => {
       <PageMetadata
         title="Admin Analytics Dashboard"
         description="Comprehensive analytics dashboard with user growth, engagement metrics, and lifecycle insights"
-        keywords={[
-          'admin analytics',
-          'user metrics',
-          'dashboard',
-          'user growth',
-          'engagement',
-          'lifecycle',
-        ]}
+        keywords="admin analytics, user metrics, dashboard, user growth, engagement, lifecycle"
       />
 
       <div className="container mx-auto px-4 py-8 space-y-6">
-        {/* Breadcrumb Navigation */}
-        <Breadcrumb
-          items={[
-            { label: 'Admin', href: '/admin' },
-            { label: 'Analytics', href: '/admin/analytics' },
-          ]}
-        />
+        {/* Breadcrumb Navigation - auto-generated from route */}
+        <Breadcrumb />
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -408,9 +397,9 @@ export const AdminAnalyticsDashboardPage: FC = () => {
                 />
                 <Legend />
                 <Bar dataKey="count" name="Users" radius={[8, 8, 0, 0]}>
-                  {engagementData.map((entry, index) => (
+                  {engagementData.map((entry) => (
                     <Cell
-                      key={`cell-${index}`}
+                      key={`engagement-${entry.level}`}
                       fill={
                         entry.level === 'High'
                           ? ENGAGEMENT_COLORS.high
@@ -439,14 +428,17 @@ export const AdminAnalyticsDashboardPage: FC = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={(props: unknown) => {
+                    const p = props as { name: string; percent: number };
+                    return `${p.name} ${(p.percent * 100).toFixed(0)}%`;
+                  }}
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {lifecycleData.map((entry, index) => (
+                  {lifecycleData.map((_entry, index) => (
                     <Cell
-                      key={`cell-${index}`}
+                      key={`lifecycle-${lifecycleData[index]?.name || index}`}
                       fill={Object.values(COLORS)[index % Object.values(COLORS).length] as string}
                     />
                   ))}
@@ -516,3 +508,5 @@ export const AdminAnalyticsDashboardPage: FC = () => {
     </>
   );
 };
+
+export default AdminAnalyticsDashboardPage;

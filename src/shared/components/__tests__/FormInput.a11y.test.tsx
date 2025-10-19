@@ -1,4 +1,4 @@
-import { FormInput } from '@/shared/ui/FormInput';
+import { FormInput } from '@shared/ui/FormInput';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe, toHaveNoViolations } from 'jest-axe';

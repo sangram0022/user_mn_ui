@@ -4,9 +4,9 @@
  * Refactored to use unified apiClient from lib/api/client.ts
  */
 
+import { API_ENDPOINTS } from '@config/api.config';
 import { apiClient } from '@lib/api/client';
-import { API_ENDPOINTS } from '../config/api.config';
-import type { BulkCreateRequest, BulkOperationResponse } from '../types/api.types';
+import type { BulkCreateRequest, BulkOperationResponse, BulkUserItem } from '../types/api.types';
 
 class BulkService {
   /**
@@ -51,16 +51,16 @@ class BulkService {
             .filter((line) => line.trim())
             .map((line) => {
               const values = line.split(',').map((v) => v.trim());
-              const item: unknown = {};
+              const item: Record<string, string> = {};
 
               headers.forEach((header, index) => {
-                item[header] = values[index];
+                item[header] = values[index] ?? '';
               });
 
-              return item;
+              return item as unknown as BulkUserItem;
             });
 
-          resolve(items);
+          resolve(items as BulkUserItem[]);
         } catch {
           reject(new Error('Failed to parse CSV file'));
         }
@@ -86,8 +86,11 @@ class BulkService {
     }
 
     // Add failed items
-    result.errors.forEach((error) => {
-      rows.push(`failed,${error.email || 'unknown'},${error.message || 'Unknown error'}`);
+    result.errors.forEach((error: unknown) => {
+      const errorObj = error as Record<string, unknown>;
+      const email = typeof errorObj.email === 'string' ? errorObj.email : 'unknown';
+      const message = typeof errorObj.message === 'string' ? errorObj.message : 'Unknown error';
+      rows.push(`failed,${email},${message}`);
     });
 
     const csv = rows.join('\n');

@@ -4,8 +4,8 @@
  * Refactored to use unified apiClient from lib/api/client.ts
  */
 
+import { API_ENDPOINTS } from '@config/api.config';
 import { apiClient } from '@lib/api/client';
-import { API_ENDPOINTS } from '../config/api.config';
 import type {
   AuditLog,
   AuditLogQueryParams,

@@ -8,7 +8,7 @@
  * @created [Current Date]
  */
 
-import type { User } from '../../types/api.types';
+import type { User, UserProfile } from '../../types/api.types';
 
 /**
  * Role display name mapping
@@ -35,15 +35,29 @@ const ROLE_DISPLAY_NAMES: Record<string, string> = {
  * // Returns: "Administrator" for role "admin"
  * ```
  */
-export function getUserRoleName(user: User | null | undefined): string {
-  if (!user?.role) {
+export function getUserRoleName(
+  user: { role?: string | { name: string } } | User | UserProfile | null | undefined
+): string {
+  if (!user) {
+    return 'Guest';
+  }
+
+  // Handle role as either string or UserRoleInfo object
+  let role: string | undefined;
+  if (typeof user.role === 'string') {
+    role = user.role;
+  } else if (user.role && typeof user.role === 'object' && 'name' in user.role) {
+    role = (user.role as { name: string }).name;
+  }
+
+  if (!role) {
     return 'Guest';
   }
 
   // Return mapped name or capitalize the role
   return (
-    ROLE_DISPLAY_NAMES[user.role.toLowerCase()] ||
-    user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase()
+    ROLE_DISPLAY_NAMES[role.toLowerCase()] ||
+    role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()
   );
 }
 
@@ -80,13 +94,27 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
  * // Returns: ["users.read", "users.write", ...] for admin
  * ```
  */
-export function getUserPermissions(user: User | null | undefined): string[] {
-  if (!user?.role) {
+export function getUserPermissions(
+  user: { role?: string | { name: string } } | User | UserProfile | null | undefined
+): string[] {
+  if (!user) {
     return ROLE_PERMISSIONS.guest || [];
   }
 
-  const role = user.role.toLowerCase();
-  return ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.guest || [];
+  // Handle role as either string or UserRoleInfo object
+  let role: string | undefined;
+  if (typeof user.role === 'string') {
+    role = user.role;
+  } else if (user.role && typeof user.role === 'object' && 'name' in user.role) {
+    role = (user.role as { name: string }).name;
+  }
+
+  if (!role) {
+    return ROLE_PERMISSIONS.guest || [];
+  }
+
+  const roleKey = role.toLowerCase();
+  return ROLE_PERMISSIONS[roleKey] || ROLE_PERMISSIONS.guest || [];
 }
 
 /**

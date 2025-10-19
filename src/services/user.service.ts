@@ -7,8 +7,8 @@
  * fully mapped in apiClient, maintaining backward compatibility.
  */
 
+import { API_ENDPOINTS } from '@config/api.config';
 import { apiClient } from '@lib/api/client';
-import { API_ENDPOINTS } from '../config/api.config';
 import type {
   AdminStats,
   ApproveUserRequest,
