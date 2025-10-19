@@ -6,16 +6,12 @@
  */
 
 import { useState } from 'react';
-import userService from '../services/user.service';
-import type {
-  CreateUserRequest,
-  UpdateUserRequest,
-  User,
-  UserListParams,
-} from '../types/api.types';
+import { adminService } from '../services/api';
+import type { CreateUserRequest, UpdateUserRequest, UserListParams } from '../types/api.types';
+import type { UserSummary } from '../shared/types';
 
 export const useUsers = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +19,7 @@ export const useUsers = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await userService.getUsers(params);
+      const data = await adminService.getUsers(params);
       setUsers(data);
       return data;
     } catch (err: unknown) {
@@ -40,7 +36,7 @@ export const useUsers = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await userService.createUser(data);
+      const response = await adminService.createUser(data);
       await fetchUsers(); // Refresh list
       return response;
     } catch (err: unknown) {
@@ -57,7 +53,7 @@ export const useUsers = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await userService.updateUser(userId, data);
+      const response = await adminService.updateUser(userId, data);
       await fetchUsers(); // Refresh list
       return response;
     } catch (err: unknown) {
@@ -74,7 +70,7 @@ export const useUsers = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await userService.deleteUser(userId);
+      const response = await adminService.deleteUser(userId);
       await fetchUsers(); // Refresh list
       return response;
     } catch (err: unknown) {
@@ -91,7 +87,7 @@ export const useUsers = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await userService.approveUser({ user_id: userId });
+      const response = await adminService.approveUser(userId);
       await fetchUsers(); // Refresh list
       return response;
     } catch (err: unknown) {
@@ -108,7 +104,7 @@ export const useUsers = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await userService.rejectUser(userId, { reason });
+      const response = await adminService.rejectUser(userId, reason);
       await fetchUsers(); // Refresh list
       return response;
     } catch (err: unknown) {

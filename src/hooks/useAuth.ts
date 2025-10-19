@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import authService from '../services/auth.service';
+import { authService } from '../services/api';
 import type {
   ChangePasswordRequest,
   LoginRequest,
@@ -16,14 +16,48 @@ import type {
   ResetPasswordRequest,
 } from '../types/api.types';
 
+interface StoredUser {
+  user_id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  role?: string;
+  is_verified?: boolean;
+  is_approved?: boolean;
+  last_login_at?: string;
+}
+
+interface ApiError {
+  error?: {
+    message?: string;
+  };
+  message?: string;
+}
+
+// Utility functions for user data management
+const getUserFromStorage = (): StoredUser | null => {
+  const userStr = sessionStorage.getItem('user_data');
+  return userStr ? JSON.parse(userStr) : null;
+};
+
+const storeUser = (userData: StoredUser): void => {
+  sessionStorage.setItem('user_data', JSON.stringify(userData));
+};
+
+const clearUserStorage = (): void => {
+  sessionStorage.removeItem('user_data');
+  sessionStorage.removeItem('access_token');
+  sessionStorage.removeItem('refresh_token');
+};
+
 export const useAuth = () => {
-  const [user, setUser] = useState(authService.getCurrentUser());
+  const [user, setUser] = useState<StoredUser | null>(getUserFromStorage());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser();
+    const currentUser = getUserFromStorage();
     setUser(currentUser);
 
     // Listen for auth errors
@@ -40,12 +74,30 @@ export const useAuth = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await authService.login(credentials);
-      setUser(authService.getCurrentUser());
+      const response = await authService.login({
+        email: credentials.email,
+        password: credentials.password,
+      });
+
+      // Store user data
+      const userData: StoredUser = {
+        user_id: response.user.id,
+        email: response.user.email,
+        first_name: response.user.firstName,
+        last_name: response.user.lastName,
+        is_verified: response.user.isEmailVerified,
+        is_approved: response.user.isActive,
+      };
+      storeUser(userData);
+      setUser(userData);
+
       navigate('/dashboard');
       return response;
     } catch (err: unknown) {
-      const errorMessage = err.error?.message || 'Login failed. Please try again.';
+      const errorMessage =
+        (err as ApiError)?.error?.message ||
+        (err as ApiError)?.message ||
+        'Login failed. Please try again.';
       setError(errorMessage);
       throw err;
     } finally {
@@ -57,10 +109,19 @@ export const useAuth = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await authService.register(userData);
+      const response = await authService.register({
+        email: userData.email,
+        password: userData.password,
+        confirm_password: userData.confirm_password,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+      });
       return response;
     } catch (err: unknown) {
-      const errorMessage = err.error?.message || 'Registration failed. Please try again.';
+      const errorMessage =
+        (err as ApiError)?.error?.message ||
+        (err as ApiError)?.message ||
+        'Registration failed. Please try again.';
       setError(errorMessage);
       throw err;
     } finally {
@@ -72,12 +133,13 @@ export const useAuth = () => {
     setIsLoading(true);
     try {
       await authService.logout();
+      clearUserStorage();
       setUser(null);
       navigate('/login');
     } catch (err) {
       console.error('Logout error:', err);
       // Force logout even if API call fails
-      authService.clearAuth();
+      clearUserStorage();
       setUser(null);
       navigate('/login');
     } finally {
@@ -89,10 +151,13 @@ export const useAuth = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await authService.changePassword(data);
+      const response = await authService.changePassword(data as never);
       return response;
     } catch (err: unknown) {
-      const errorMessage = err.error?.message || 'Failed to change password.';
+      const errorMessage =
+        (err as ApiError)?.error?.message ||
+        (err as ApiError)?.message ||
+        'Failed to change password.';
       setError(errorMessage);
       throw err;
     } finally {
@@ -104,10 +169,13 @@ export const useAuth = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await authService.requestPasswordReset(data);
+      const response = await authService.forgotPassword(data.email);
       return response;
     } catch (err: unknown) {
-      const errorMessage = err.error?.message || 'Failed to request password reset.';
+      const errorMessage =
+        (err as ApiError)?.error?.message ||
+        (err as ApiError)?.message ||
+        'Failed to request password reset.';
       setError(errorMessage);
       throw err;
     } finally {
@@ -122,7 +190,10 @@ export const useAuth = () => {
       const response = await authService.resetPassword(data);
       return response;
     } catch (err: unknown) {
-      const errorMessage = err.error?.message || 'Failed to reset password.';
+      const errorMessage =
+        (err as ApiError)?.error?.message ||
+        (err as ApiError)?.message ||
+        'Failed to reset password.';
       setError(errorMessage);
       throw err;
     } finally {
@@ -134,10 +205,13 @@ export const useAuth = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await authService.verifyEmail({ token });
+      const response = await authService.verifyEmail(token);
       return response;
     } catch (err: unknown) {
-      const errorMessage = err.error?.message || 'Email verification failed.';
+      const errorMessage =
+        (err as ApiError)?.error?.message ||
+        (err as ApiError)?.message ||
+        'Email verification failed.';
       setError(errorMessage);
       throw err;
     } finally {
@@ -149,10 +223,13 @@ export const useAuth = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await authService.resendVerification({ email });
+      const response = await authService.resendVerificationEmail(email);
       return response;
     } catch (err: unknown) {
-      const errorMessage = err.error?.message || 'Failed to resend verification email.';
+      const errorMessage =
+        (err as ApiError)?.error?.message ||
+        (err as ApiError)?.message ||
+        'Failed to resend verification email.';
       setError(errorMessage);
       throw err;
     } finally {
@@ -163,6 +240,17 @@ export const useAuth = () => {
   const clearError = () => {
     setError(null);
   };
+
+  // Utility functions (moved from old service)
+  const hasRole = (role: string): boolean => user?.role === role;
+
+  const hasAnyRole = (roles: string[]): boolean => (user?.role ? roles.includes(user.role) : false);
+
+  const isAdmin = (): boolean => hasAnyRole(['admin', 'super_admin']);
+
+  const isVerified = (): boolean => user?.is_verified === true;
+
+  const isApproved = (): boolean => user?.is_approved === true;
 
   return {
     user,
@@ -178,10 +266,10 @@ export const useAuth = () => {
     resendVerification,
     clearError,
     isAuthenticated: Boolean(user),
-    hasRole: authService.hasRole.bind(authService),
-    hasAnyRole: authService.hasAnyRole.bind(authService),
-    isAdmin: authService.isAdmin.bind(authService),
-    isVerified: authService.isVerified.bind(authService),
-    isApproved: authService.isApproved.bind(authService),
+    hasRole,
+    hasAnyRole,
+    isAdmin,
+    isVerified,
+    isApproved,
   };
 };
