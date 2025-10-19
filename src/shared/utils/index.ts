@@ -8,22 +8,22 @@ export * from './apiMessages';
 // Utility functions
 export * from './classNames';
 export * from './dateUtils';
-export * from './error-handler';
 export * from './error';
+export * from './error-handler';
 export * from './formValidation';
 export * from './logger';
 
 // Performance monitoring (metrics collection, web vitals)
 export {
+  performanceMonitor,
   PerformanceUtils,
+  useDebouncedValue,
+  useLargeDataset,
+  usePagination,
   usePerformanceMonitor,
   useResizeObserver,
-  useDebouncedValue,
   useStableCallback,
-  usePagination,
   useVirtualList,
-  useLargeDataset,
-  performanceMonitor,
 } from './performance';
 
 // Rate limiting
@@ -31,20 +31,20 @@ export * from './rateLimiter';
 
 // Resource loading utilities (re-export avoiding conflicts with advanced-performance)
 export {
-  preloadFont,
-  preloadImage,
-  preloadStylesheet,
-  preloadScript,
-  preloadData,
-  preloadFonts,
-  preloadCriticalResources,
+  preconnectOrigin,
   prefetchRoute,
   prefetchScript,
   preinitScript,
   preinitStylesheet,
-  preconnectOrigin,
-  usePreloadResources,
+  preloadCriticalResources,
+  preloadData,
+  preloadFont,
+  preloadFonts,
+  preloadImage,
+  preloadScript,
+  preloadStylesheet,
   usePrefetchRoute,
+  usePreloadResources,
 } from './resource-loading';
 
 // Storage utilities

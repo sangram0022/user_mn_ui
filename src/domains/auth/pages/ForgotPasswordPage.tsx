@@ -1,7 +1,7 @@
+import { ArrowLeft, CheckCircle, Loader, Mail } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, Loader, Mail } from 'lucide-react';
 
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
 import { useToast } from '@hooks/useToast';
