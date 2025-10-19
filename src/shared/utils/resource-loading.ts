@@ -28,13 +28,108 @@ type PrefetchFunction = (href: string, options?: Record<string, unknown>) => voi
 
 type PreinitFunction = (src: string, options: Record<string, unknown>) => void;
 
-// Access React DOM's resource APIs
-// In React 19, these are available but might not be in type definitions yet
+// Lazy-loaded React DOM APIs with fallbacks
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ReactDOM: any = await import('react-dom');
-const preload: PreloadFunction = ReactDOM.preload;
-const prefetch: PrefetchFunction = ReactDOM.prefetch;
-const preinit: PreinitFunction = ReactDOM.preinit;
+let reactDomAPIs: any = null;
+
+const initReactDomAPIs = async () => {
+  if (!reactDomAPIs) {
+    try {
+      reactDomAPIs = await import('react-dom');
+    } catch {
+      // Fallback if react-dom doesn't have these APIs
+      reactDomAPIs = {};
+    }
+  }
+  return reactDomAPIs;
+};
+
+// Initialize on module load
+initReactDomAPIs();
+
+// Preload implementation with React 19 fallback
+const preload: PreloadFunction = (href: string, options?: Record<string, unknown>) => {
+  // Try React 19 API first
+  if (reactDomAPIs?.preload && typeof reactDomAPIs.preload === 'function') {
+    reactDomAPIs.preload(href, options);
+    return;
+  }
+
+  // Fallback: create link element for preload
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.href = href;
+  if (options?.as) {
+    link.as = options.as as string;
+  }
+  if (options?.type) {
+    link.type = options.type as string;
+  }
+  if (options?.crossOrigin) {
+    link.crossOrigin = options.crossOrigin as string;
+  }
+  if (options?.integrity) {
+    link.integrity = options.integrity as string;
+  }
+  document.head.appendChild(link);
+};
+
+// Prefetch implementation with React 19 fallback
+const prefetch: PrefetchFunction = (href: string, options?: Record<string, unknown>) => {
+  // Try React 19 API first
+  if (reactDomAPIs?.prefetch && typeof reactDomAPIs.prefetch === 'function') {
+    reactDomAPIs.prefetch(href, options);
+    return;
+  }
+
+  // Fallback: create link element for prefetch
+  const link = document.createElement('link');
+  link.rel = 'prefetch';
+  link.href = href;
+  if (options?.as) {
+    link.as = options.as as string;
+  }
+  document.head.appendChild(link);
+};
+
+// Preinit implementation with React 19 fallback
+const preinit: PreinitFunction = (src: string, options: Record<string, unknown>) => {
+  // Try React 19 API first
+  if (reactDomAPIs?.preinit && typeof reactDomAPIs.preinit === 'function') {
+    reactDomAPIs.preinit(src, options);
+    return;
+  }
+
+  // Fallback: create script/style element
+  if (options?.as === 'script') {
+    const script = document.createElement('script');
+    script.src = src;
+    if (options?.crossOrigin) {
+      script.crossOrigin = options.crossOrigin as string;
+    }
+    if (options?.integrity) {
+      script.integrity = options.integrity as string;
+    }
+    if (options?.nonce) {
+      script.nonce = options.nonce as string;
+    }
+    document.head.appendChild(script);
+  } else if (options?.as === 'style') {
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = src;
+    if (options?.crossOrigin) {
+      style.crossOrigin = options.crossOrigin as string;
+    }
+    if (options?.integrity) {
+      style.integrity = options.integrity as string;
+    }
+    if (options?.media) {
+      style.media = options.media as string;
+    }
+    document.head.appendChild(style);
+  }
+};
 
 /**
  * Preload Types
