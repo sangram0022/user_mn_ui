@@ -1,4 +1,4 @@
-import { BACKEND_CONFIG } from '@shared/config/api';
+﻿import { BACKEND_CONFIG } from '@shared/config/api';
 import { createCSRFTokenService } from '@shared/services/auth/csrfTokenService';
 import { tokenService } from '@shared/services/auth/tokenService';
 import type {
@@ -80,7 +80,7 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 export interface RequestOptions extends RequestInit {
   method?: HttpMethod;
-  timeout?: number; // 🆕 Request timeout in milliseconds (default: 30000)
+  timeout?: number; // [NEW] Request timeout in milliseconds (default: 30000)
 }
 
 interface StoredSession {
@@ -327,13 +327,13 @@ export class ApiClient {
   /**
    * Calculate exponential backoff delay with jitter
    * Prevents "thundering herd" problem when multiple clients retry simultaneously
-   * Formula: delay * (1 + random jitter ±10%)
+   * Formula: delay * (1 + random jitter +/- 10%)
    */
   private calculateRetryDelay(attempt: number): number {
     const baseDelay = this.retryConfig.baseDelay * Math.pow(2, attempt);
     const cappedDelay = Math.min(baseDelay, this.retryConfig.maxDelay);
 
-    // 🆕 Add jitter: ±10% of delay to prevent synchronized retries
+    // [NEW] Add jitter: +/- 10% of delay to prevent synchronized retries
     const jitterFactor = 0.9 + Math.random() * 0.2; // Random between 0.9 and 1.1
     const delayWithJitter = cappedDelay * jitterFactor;
 
@@ -378,7 +378,7 @@ export class ApiClient {
   }
 
   /**
-   * 🆕 PRODUCTION FIX: Fetch with timeout to prevent hanging requests
+   *  PRODUCTION FIX: Fetch with timeout to prevent hanging requests
    * Prevents memory leaks from indefinite request hangs
    * Default timeout: 30 seconds per request
    */
@@ -508,7 +508,7 @@ export class ApiClient {
 
     let response: Response;
     try {
-      // 🆕 Use timeout-wrapped fetch (30s default, configurable per request)
+      //  Use timeout-wrapped fetch (30s default, configurable per request)
       const requestTimeoutMs = options.timeout || 30000;
       response = await this.fetchWithTimeout(url, config, requestTimeoutMs);
 
@@ -535,7 +535,7 @@ export class ApiClient {
         this.persistSession(null);
       }
 
-      // 🆕 PRODUCTION FIX: Handle rate limiting (429) with automatic retry
+      //  PRODUCTION FIX: Handle rate limiting (429) with automatic retry
       // Don't throw immediately - let retryWithBackoff handle it
       if (response.status === 429) {
         const retryAfterHeader = response.headers.get('Retry-After');
@@ -543,7 +543,7 @@ export class ApiClient {
         const nextBackoff = Math.min(currentBackoff * 2, 60000); // Max 60 seconds
 
         // Add jitter to retry-after delay to prevent thundering herd
-        const jitterFactor = 0.9 + Math.random() * 0.2; // ±10% jitter
+        const jitterFactor = 0.9 + Math.random() * 0.2; // 10% jitter
         const retryAfterMs = retryAfterHeader
           ? Math.round(parseInt(retryAfterHeader, 10) * 1000 * jitterFactor)
           : Math.round(currentBackoff * jitterFactor);
@@ -560,7 +560,7 @@ export class ApiClient {
           jitterApplied: true,
         });
 
-        // 🆕 PRODUCTION READY: Emit event for UI feedback
+        //  PRODUCTION READY: Emit event for UI feedback
         if (typeof window !== 'undefined') {
           window.dispatchEvent(
             new CustomEvent('api:rate-limit', {

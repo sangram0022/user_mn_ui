@@ -43,7 +43,7 @@ function getRequiredEnvVar(key: string, description: string): string {
 
   if (!value || value.trim() === '') {
     throw new Error(
-      `❌ Missing required environment variable: ${key}\n` +
+      `[ERROR] Missing required environment variable: ${key}\n` +
         `   Description: ${description}\n` +
         `   Please set this variable in your .env file.`
     );
@@ -87,7 +87,7 @@ function getNumberEnvVar(key: string, defaultValue: number): number {
   const num = parseInt(value.trim(), 10);
 
   if (isNaN(num)) {
-    console.warn(`⚠️  Invalid number for ${key}: "${value}". Using default: ${defaultValue}`);
+    console.warn(`[WARNING] Invalid number for ${key}: "${value}". Using default: ${defaultValue}`);
     return defaultValue;
   }
 
@@ -106,7 +106,7 @@ function validateUrl(url: string, name: string): void {
     }
   } catch (error) {
     throw new Error(
-      `❌ Invalid URL for ${name}: "${url}"\n` +
+      `[ERROR] Invalid URL for ${name}: "${url}"\n` +
         `   ${error instanceof Error ? error.message : 'Invalid URL format'}`
     );
   }
@@ -116,7 +116,7 @@ function validateUrl(url: string, name: string): void {
  * Validate and load environment configuration
  */
 function validateEnvironment(): EnvironmentConfig {
-  console.warn('🔍 Validating environment configuration...');
+  console.warn('[INFO] Validating environment configuration...');
 
   // Required variables
   const backendUrl = getRequiredEnvVar(
@@ -168,7 +168,7 @@ function validateEnvironment(): EnvironmentConfig {
   // Validate session timeout is reasonable
   if (sessionTimeout < 5 || sessionTimeout > 1440) {
     console.warn(
-      `⚠️  Session timeout (${sessionTimeout} minutes) is outside recommended range (5-1440). ` +
+      `[WARNING] Session timeout (${sessionTimeout} minutes) is outside recommended range (5-1440). ` +
         `Using default: 30 minutes.`
     );
   }
@@ -176,7 +176,7 @@ function validateEnvironment(): EnvironmentConfig {
   // Validate token refresh is less than session timeout
   if (tokenRefreshInterval >= sessionTimeout) {
     throw new Error(
-      `❌ Token refresh interval (${tokenRefreshInterval} min) must be less than ` +
+      `[ERROR] Token refresh interval (${tokenRefreshInterval} min) must be less than ` +
         `session timeout (${sessionTimeout} min)`
     );
   }
@@ -197,14 +197,14 @@ function validateEnvironment(): EnvironmentConfig {
 
   // Log configuration in development
   if (config.isDevelopment) {
-    console.warn('✅ Environment validated:', {
+    console.warn('[DONE] Environment validated:', {
       environment: config.environment,
       backendUrl: config.backendUrl,
       apiBaseUrl: config.apiBaseUrl,
       features: config.features,
     });
   } else {
-    console.warn(`✅ Environment validated: ${config.environment}`);
+    console.warn(`[DONE] Environment validated: ${config.environment}`);
   }
 
   return config;

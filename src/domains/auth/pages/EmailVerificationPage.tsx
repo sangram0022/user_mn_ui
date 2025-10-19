@@ -1,4 +1,4 @@
-import { CheckCircle, Loader2, Mail, XCircle } from 'lucide-react';
+﻿import { CheckCircle, Loader2, Mail, XCircle } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -134,9 +134,9 @@ const EmailVerificationPage: React.FC = () => {
                   <strong>What you can do:</strong>
                 </p>
                 <ul className="text-sm text-red-700 space-y-1 ml-4">
-                  <li>• Check if the link is correct and not expired</li>
-                  <li>• Request a new verification email</li>
-                  <li>• Contact support if the problem persists</li>
+                  <li> Check if the link is correct and not expired</li>
+                  <li> Request a new verification email</li>
+                  <li> Contact support if the problem persists</li>
                 </ul>
               </div>
             </div>

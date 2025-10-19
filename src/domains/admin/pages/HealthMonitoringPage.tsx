@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Health Monitoring Page
  *
  * Dedicated system health dashboard with real-time metrics, service status,
@@ -396,7 +396,7 @@ const AlertCard: FC<{
             <p className="text-xs text-gray-500">
               {formatDateTime(alert.timestamp)}
               {alert.acknowledged && alert.acknowledged_by && (
-                <span className="ml-2">• Acknowledged by {alert.acknowledged_by}</span>
+                <span className="ml-2"> Acknowledged by {alert.acknowledged_by}</span>
               )}
             </p>
           </div>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LocaleSelector Component
  *
  * Dropdown component to select and change the application locale.
@@ -21,17 +21,17 @@ interface LocaleOption {
 }
 
 const LOCALE_OPTIONS: LocaleOption[] = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
-  { code: 'pt', name: 'Português', flag: '🇵🇹' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' },
-  { code: 'ko', name: '한국어', flag: '🇰🇷' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
-  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+  { code: 'en', name: 'English', flag: '' },
+  { code: 'es', name: 'Espaol', flag: '' },
+  { code: 'fr', name: 'Franais', flag: '' },
+  { code: 'de', name: 'Deutsch', flag: '' },
+  { code: 'it', name: 'Italiano', flag: '' },
+  { code: 'pt', name: 'Portugus', flag: '' },
+  { code: 'ja', name: '', flag: '' },
+  { code: 'ko', name: '', flag: '' },
+  { code: 'zh', name: '', flag: '' },
+  { code: 'hi', name: '', flag: '' },
+  { code: 'ar', name: '', flag: '' },
 ];
 
 // ============================================================================
@@ -90,7 +90,7 @@ export function LocaleSelector({
     return (
       <div className={`locale-selector error ${className}`}>
         <div className="flex items-center gap-2 text-red-600">
-          <span className="text-xs">⚠️</span>
+          <span className="text-xs" />
           <span className="text-sm">{t('errors.localization.loadFailed')}</span>
         </div>
       </div>

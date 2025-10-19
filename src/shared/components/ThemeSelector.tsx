@@ -118,7 +118,7 @@ export const ThemeSelector: React.FC = () => {
                       }}
                     />
                     <span className="text-sm font-medium">{palette.name}</span>
-                    {isActive && <span className="ml-auto text-xs font-semibold">✓</span>}
+                    {isActive && <span className="ml-auto text-xs font-semibold">[ACTIVE]</span>}
                   </button>
                 );
               })}

@@ -1,7 +1,7 @@
-/**
+﻿/**
  * SIMPLIFIED LIGHT THEME CONTEXT
  *
- * ✅ Professional Light Theme Only
+ *  Professional Light Theme Only
  * - Single, professional light theme
  * - Optimized for readability and accessibility
  * - Tailwind CSS integration
@@ -15,13 +15,13 @@ import { safeLocalStorage } from '@shared/utils/safeLocalStorage';
 import type React from 'react';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
-// ✅ LIGHT THEME ONLY - Single professional palette
+//  LIGHT THEME ONLY - Single professional palette
 export type ThemePalette = 'professional'; // Simplified to single theme
 export type EffectiveTheme = 'light'; // Always light
 
 export interface ThemeConfig {
   palette: ThemePalette;
-  mode: 'light'; // ✅ Fixed to light only
+  mode: 'light'; //  Fixed to light only
 }
 
 export interface ThemeContextValue {
@@ -72,13 +72,13 @@ const THEME_STORAGE_KEY = 'app-theme-config';
 const THEME_ATTRIBUTE = 'data-theme';
 const PALETTE_ATTRIBUTE = 'data-palette';
 
-// ✅ LIGHT THEME ONLY - Single professional configuration
+//  LIGHT THEME ONLY - Single professional configuration
 const DEFAULT_THEME: ThemeConfig = {
   palette: 'professional',
   mode: 'light',
 };
 
-// ✅ PROFESSIONAL LIGHT THEME ONLY - Clean, modern, professional colors
+//  PROFESSIONAL LIGHT THEME ONLY - Clean, modern, professional colors
 // Professional light theme palette only
 const THEME_PALETTES: Record<ThemePalette, PaletteColors> = {
   professional: {

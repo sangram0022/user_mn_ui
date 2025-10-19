@@ -5,9 +5,9 @@
  * of the parent <form> action, including pending state, data, method, and action URL.
  *
  * Benefits:
- * - ✅ Automatic pending state (no manual prop drilling)
- * - ✅ Child components can access parent form status
- * - ✅ Cleaner API than manual isPending props
+ * - [DONE] Automatic pending state (no manual prop drilling)
+ * - [DONE] Child components can access parent form status
+ * - [DONE] Cleaner API than manual isPending props
  *
  * @module useFormStatus
  */
@@ -37,7 +37,7 @@ export function SubmitButtonWithStatus({
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   loadingText?: string;
 }) {
-  const { pending } = useFormStatus(); // ✅ React 19: Automatic from parent form
+  const { pending } = useFormStatus(); // [DONE] React 19: Automatic from parent form
 
   return (
     <button
@@ -49,7 +49,7 @@ export function SubmitButtonWithStatus({
       {pending ? (
         <>
           <span className="animate-spin mr-2" aria-hidden="true">
-            ⏳
+            [LOADING]
           </span>
           {loadingText}
         </>
@@ -86,7 +86,7 @@ export function FormStatusIndicator() {
       aria-live="polite"
     >
       <span className="animate-spin" aria-hidden="true">
-        ⏳
+        [LOADING]
       </span>
       <span>Submitting form...</span>
     </div>

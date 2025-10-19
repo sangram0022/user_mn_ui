@@ -6,10 +6,10 @@
  * and for unwrapping promises in Suspense boundaries.
  *
  * Benefits:
- * - ✅ Simpler syntax than useContext
- * - ✅ Can be used conditionally (inside if/else)
- * - ✅ Better TypeScript inference
- * - ✅ Supports promise unwrapping
+ * - [DONE] Simpler syntax than useContext
+ * - [DONE] Can be used conditionally (inside if/else)
+ * - [DONE] Better TypeScript inference
+ * - [DONE] Supports promise unwrapping
  *
  * @module useReact19Context
  */
@@ -43,7 +43,7 @@ export function useContextValue<T>(context: Context<T>): T {
  * @example
  * ```tsx
  * function MyComponent({ useTheme }: { useTheme: boolean }) {
- *   // ✅ React 19: Can use conditionally!
+ *   // [DONE] React 19: Can use conditionally!
  *   const theme = useConditionalContext(ThemeContext, useTheme);
  *
  *   if (!theme) return <div>Default theme</div>;
@@ -66,7 +66,7 @@ export function useConditionalContext<T>(context: Context<T>, condition: boolean
  * @example
  * ```tsx
  * function DataDisplay({ dataPromise }: { dataPromise: Promise<Data> }) {
- *   // ✅ React 19: Unwrap promise with use()
+ *   // [DONE] React 19: Unwrap promise with use()
  *   const data = usePromise(dataPromise);
  *   return <div>{data.value}</div>;
  * }

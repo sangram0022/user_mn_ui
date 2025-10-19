@@ -308,7 +308,7 @@ export const useUserSession = (options: UseUserSessionOptions = {}) => {
     try {
       sessionStorage.setItem(storageKey, JSON.stringify(session));
     } catch {
-      // Silent fail – storage might be unavailable
+      // Silent fail - storage might be unavailable
     }
   };
 

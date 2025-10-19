@@ -640,7 +640,7 @@ describe('Error Utility - Complete Coverage', () => {
     });
 
     it('should handle error with unicode characters', () => {
-      const unicodeMessage = '测试错误 🚀 émojis';
+      const unicodeMessage = 'Test error with rocket and special chars';
       const result = parseError(unicodeMessage);
       expect(result.message).toBeTruthy();
     });

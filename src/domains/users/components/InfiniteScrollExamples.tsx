@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Infinite Scroll Integration Examples
  *
  * This file demonstrates various ways to integrate infinite scrolling
@@ -80,7 +80,7 @@ export function InfiniteUserList() {
   });
 
   // Load initial data - loadMore is stable due to useCallback
-  // βœ… StrictMode Protection: Use ref guard to prevent double initial load
+  //  StrictMode Protection: Use ref guard to prevent double initial load
   useEffect(() => {
     if (hasInitialLoadedRef.current) return; // Skip if already loaded
     hasInitialLoadedRef.current = true;
@@ -89,7 +89,7 @@ export function InfiniteUserList() {
 
     // Cleanup: abort pending requests on unmount
     return () => {
-      // βœ… Don't reset ref - keep it true to prevent re-initialization
+      //  Don't reset ref - keep it true to prevent re-initialization
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;

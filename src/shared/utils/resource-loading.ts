@@ -259,7 +259,7 @@ export interface PreinitStyleOptions {
 }
 
 /**
- * ✅ React 19: Preload a critical font
+ * [DONE] React 19: Preload a critical font
  *
  * Preloads fonts to prevent FOUT (Flash of Unstyled Text)
  *
@@ -279,14 +279,14 @@ export const preloadFont = (href: string, options?: { crossOrigin?: PreloadCross
 };
 
 /**
- * ✅ React 19: Preload a critical image
+ * [DONE] React 19: Preload a critical image
  *
- * Preloads images for hero sections or above-the-fold content
+ * Preloads critical images for LCP (Largest Contentful Paint) optimization
  *
  * @example
  * ```tsx
  * useEffect(() => {
- *   preloadImage('/images/hero.jpg', { fetchPriority: 'high' });
+ *   preloadImage('/images/hero-image.webp');
  * }, []);
  * ```
  */
@@ -307,9 +307,9 @@ export const preloadImage = (
 };
 
 /**
- * ✅ React 19: Preload a stylesheet
+ * [DONE] React 19: Preload a stylesheet
  *
- * Preloads CSS files for faster paint
+ * Preloads stylesheets to optimize critical rendering path
  *
  * @example
  * ```tsx
@@ -326,14 +326,14 @@ export const preloadStylesheet = (href: string, options?: { integrity?: string }
 };
 
 /**
- * ✅ React 19: Preload a script
+ * [DONE] React 19: Preload a script
  *
- * Preloads JavaScript files for faster execution
+ * Preloads scripts that are needed for page functionality
  *
  * @example
  * ```tsx
  * useEffect(() => {
- *   preloadScript('/scripts/analytics.js', { fetchPriority: 'low' });
+ *   preloadScript('/scripts/analytics.js');
  * }, []);
  * ```
  */
@@ -349,14 +349,14 @@ export const preloadScript = (
 };
 
 /**
- * ✅ React 19: Preload data/fetch
+ * [DONE] React 19: Preload data/fetch
  *
- * Preloads API responses or JSON data
+ * Preloads data from API endpoints to reduce waterfall requests
  *
  * @example
  * ```tsx
  * useEffect(() => {
- *   preloadData('/api/users');
+ *   preloadData('https://api.example.com/initial-data');
  * }, []);
  * ```
  */
@@ -368,14 +368,14 @@ export const preloadData = (href: string, options?: { crossOrigin?: PreloadCross
 };
 
 /**
- * ✅ React 19: Prefetch a route/document
+ * [DONE] React 19: Prefetch a route/document
  *
- * Prefetches pages for future navigation
+ * Prefetches a document for faster navigation. Less urgent than preload.
  *
  * @example
  * ```tsx
  * useEffect(() => {
- *   prefetchRoute('/users'); // Prefetch for faster navigation
+ *   prefetchDocument('/dashboard');
  * }, []);
  * ```
  */
@@ -384,14 +384,14 @@ export const prefetchRoute = (href: string) => {
 };
 
 /**
- * ✅ React 19: Prefetch a script
+ * [DONE] React 19: Prefetch a script
  *
- * Prefetches JavaScript for future use
+ * Prefetches a script for faster execution when it's needed
  *
  * @example
  * ```tsx
  * useEffect(() => {
- *   prefetchScript('/scripts/chart.js'); // Load when idle
+ *   prefetchScript('/scripts/modal.js');
  * }, []);
  * ```
  */
@@ -400,14 +400,15 @@ export const prefetchScript = (href: string) => {
 };
 
 /**
- * ✅ React 19: Preinit and execute a script
+ * [DONE] React 19: Preinit and execute a script
  *
- * Loads and executes a script immediately
+ * Preinit is the most aggressive - it initializes the script immediately
+ * Use for critical scripts that block rendering
  *
  * @example
  * ```tsx
  * useEffect(() => {
- *   preinitScript('/scripts/analytics.js');
+ *   preinitScript('https://cdn.example.com/critical-lib.js');
  * }, []);
  * ```
  */
@@ -419,14 +420,15 @@ export const preinitScript = (src: string, options?: Omit<PreinitScriptOptions, 
 };
 
 /**
- * ✅ React 19: Preinit a stylesheet
+ * [DONE] React 19: Preinit a stylesheet
  *
- * Loads and applies a stylesheet immediately
+ * Initializes and loads a stylesheet with high priority
+ * Use for critical CSS needed for initial render
  *
  * @example
  * ```tsx
  * useEffect(() => {
- *   preinitStylesheet('/styles/theme-dark.css', { precedence: 'theme' });
+ *   preinitStylesheet('https://cdn.example.com/theme.css');
  * }, []);
  * ```
  */
@@ -438,16 +440,16 @@ export const preinitStylesheet = (href: string, options?: Omit<PreinitStyleOptio
 };
 
 /**
- * ✅ React 19: Preload multiple fonts at once
+ * [DONE] React 19: Preload multiple fonts at once
  *
- * Batch preload fonts for better performance
+ * Batch preload multiple fonts for better performance
  *
  * @example
  * ```tsx
  * useEffect(() => {
  *   preloadFonts([
- *     '/fonts/inter-regular.woff2',
- *     '/fonts/inter-bold.woff2',
+ *     { href: '/fonts/inter-regular.woff2', weight: '400' },
+ *     { href: '/fonts/inter-bold.woff2', weight: '700' },
  *   ]);
  * }, []);
  * ```
@@ -457,18 +459,14 @@ export const preloadFonts = (fonts: string[]) => {
 };
 
 /**
- * ✅ React 19: Preload critical resources
+ * [DONE] React 19: Preload critical resources
  *
- * Preloads essential resources for initial page load
+ * Preload all critical resources for a page (fonts, images, styles)
  *
  * @example
  * ```tsx
  * useEffect(() => {
- *   preloadCriticalResources({
- *     fonts: ['/fonts/inter.woff2'],
- *     images: ['/images/logo.svg'],
- *     styles: ['/styles/critical.css'],
- *   });
+ *   preloadCriticalResources('/pages/home');
  * }, []);
  * ```
  */
@@ -487,7 +485,7 @@ export const preloadCriticalResources = (resources: {
 };
 
 /**
- * ✅ React 19: Preconnect to external origins
+ * [DONE] React 19: Preconnect to external origins
  *
  * Note: React doesn't have built-in preconnect, but we can use DNS prefetch
  * For full preconnect, use <link rel="preconnect"> in HTML head
@@ -560,7 +558,7 @@ export const usePrefetchRoute = () => (href: string) => {
 export const migrationGuide = {
   before: {
     example: `
-      // ❌ Old way (custom DOM manipulation)
+      // [OLD] Old way (custom DOM manipulation)
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'font';
@@ -571,7 +569,7 @@ export const migrationGuide = {
   },
   after: {
     example: `
-      // ✅ React 19 way (built-in API)
+      // [DONE] React 19 way (built-in API)
       import { preloadFont } from '@/shared/utils/resource-loading';
       
       useEffect(() => {

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * React 19 Optimistic Updates Integration for UserManagementPage
  *
  * This file provides optimistic CRUD helpers that can be integrated
@@ -171,10 +171,10 @@ export function useOptimisticUserManagement(initialUsers: OptimisticUser[]) {
  *
  * Step 1: Replace useState for users
  * ```tsx
- * // ❌ Old way
+ * //  Old way
  * const [users, setUsers] = useState<User[]>([]);
  *
- * // ✅ New way
+ * //  New way
  * const {
  *   users,
  *   createUser,
@@ -188,7 +188,7 @@ export function useOptimisticUserManagement(initialUsers: OptimisticUser[]) {
  *
  * Step 2: Update CRUD handlers
  * ```tsx
- * // ❌ Old way
+ * //  Old way
  * const handleDeleteUser = async (userId: string) => {
  *   setActionLoading(`delete-${userId}`);
  *   try {
@@ -201,7 +201,7 @@ export function useOptimisticUserManagement(initialUsers: OptimisticUser[]) {
  *   }
  * };
  *
- * // ✅ New way with optimistic updates
+ * //  New way with optimistic updates
  * const handleDeleteUser = async (userId: string) => {
  *   if (!window.confirm('Are you sure?')) return;
  *
@@ -237,24 +237,24 @@ export function useOptimisticUserManagement(initialUsers: OptimisticUser[]) {
  *
  * Step 4: Update toggle handler
  * ```tsx
- * // ❌ Old way
+ * //  Old way
  * case 'activate':
  *   await apiClient.updateUser(userId, { is_active: true });
  *   await loadUsers();
  *   break;
  *
- * // ✅ New way
+ * //  New way
  * case 'activate':
  *   await toggleUserStatus(userId, false); // Instant toggle!
  *   break;
  * ```
  *
  * Benefits:
- * - ✅ Instant UI feedback (perceived 50-80% faster)
- * - ✅ Automatic rollback on errors
- * - ✅ No manual state updates needed
- * - ✅ Better UX on slow networks
- * - ✅ Less boilerplate code
+ * -  Instant UI feedback (perceived 50-80% faster)
+ * -  Automatic rollback on errors
+ * -  No manual state updates needed
+ * -  Better UX on slow networks
+ * -  Less boilerplate code
  */
 
 export default useOptimisticUserManagement;

@@ -1,4 +1,4 @@
-import { BarChart, Github, Heart, Linkedin, Mail, Shield, Twitter, Users, Zap } from 'lucide-react';
+﻿import { BarChart, Github, Heart, Linkedin, Mail, Shield, Twitter, Users, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface FooterProps {
@@ -77,7 +77,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
               <div className="mt-2 flex items-center justify-between text-xs">
                 <span className="text-gray-400">Version:</span>
                 <span className="text-gray-300">
-                  {apiVersion} • Build {buildVersion}
+                  {apiVersion} Build {buildVersion}
                 </span>
               </div>
             </div>
@@ -96,7 +96,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Dashboard
                 </Link>
               </li>
@@ -106,7 +106,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   User Management
                 </Link>
               </li>
@@ -116,7 +116,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Analytics
                 </Link>
               </li>
@@ -126,7 +126,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Workflows
                 </Link>
               </li>
@@ -136,7 +136,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Security Center
                 </Link>
               </li>
@@ -146,7 +146,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Pricing
                 </a>
               </li>
@@ -166,7 +166,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   About Us
                 </a>
               </li>
@@ -176,7 +176,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Careers
                 </a>
               </li>
@@ -186,7 +186,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Blog
                 </a>
               </li>
@@ -196,7 +196,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Press Kit
                 </a>
               </li>
@@ -206,7 +206,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Contact Us
                 </a>
               </li>
@@ -216,7 +216,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Partners
                 </a>
               </li>
@@ -236,7 +236,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Privacy Policy
                 </a>
               </li>
@@ -246,7 +246,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Terms of Service
                 </a>
               </li>
@@ -256,7 +256,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Cookie Policy
                 </a>
               </li>
@@ -266,7 +266,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   GDPR Compliance
                 </a>
               </li>
@@ -276,7 +276,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   Help Center
                 </Link>
               </li>
@@ -286,7 +286,7 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
                   className="flex items-center text-sm no-underline transition-colors duration-200"
                   style={{ color: 'var(--theme-textSecondary)' }}
                 >
-                  <span className="mr-2">→</span>
+                  <span className="mr-2" />
                   API Documentation
                 </a>
               </li>
@@ -321,8 +321,8 @@ const Footer = ({ apiVersion = 'v1.0', buildVersion = '2024.8.2' }: FooterProps)
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             {/* Copyright */}
             <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-400">
-              <span>© {currentYear} UserManagement System. All rights reserved.</span>
-              <span className="hidden md:inline">•</span>
+              <span> {currentYear} UserManagement System. All rights reserved.</span>
+              <span className="hidden md:inline" />
               <span className="flex items-center">
                 Made with <Heart className="mx-1 h-4 w-4 animate-pulse fill-current text-red-500" />{' '}
                 by the UMS Team

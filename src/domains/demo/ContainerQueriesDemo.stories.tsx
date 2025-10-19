@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+﻿import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ContainerQueriesDemo } from './ContainerQueriesDemo';
 
 const meta = {
@@ -220,7 +220,7 @@ export const BrowserSupport: Story = {
                 : 'bg-red-100 text-red-800 border-2 border-red-500'
             }`}
           >
-            {hasSupport ? '✓ Supported' : '✗ Not Supported'}
+            {hasSupport ? ' Supported' : ' Not Supported'}
           </div>
         </div>
 

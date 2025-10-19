@@ -332,7 +332,7 @@ describe('StrictMode Compatibility Tests', () => {
           window.addEventListener('resize', handler);
 
           return () => {
-            // βœ… CORRECT: Don't reset ref in cleanup for StrictMode safety
+            // [CORRECT] Don't reset ref in cleanup for StrictMode safety
             window.removeEventListener('resize', handler);
           };
         }, []);
@@ -367,7 +367,7 @@ describe('StrictMode Compatibility Tests', () => {
           executionCount++;
 
           return () => {
-            // βœ… CORRECT: Don't reset ref in cleanup for StrictMode safety
+            // [CORRECT] Don't reset ref in cleanup for StrictMode safety
             // hasMountedRef.current = false; // This would cause double execution!
           };
         }, []);
@@ -419,7 +419,7 @@ describe('Integration: Complex Component with Multiple Effects', () => {
           .catch(() => {});
 
         return () => {
-          // βœ… CORRECT: Don't reset ref in cleanup for StrictMode safety
+          // [CORRECT] Don't reset ref in cleanup for StrictMode safety
           abortControllerRef.current?.abort();
           abortControllerRef.current = null;
         };

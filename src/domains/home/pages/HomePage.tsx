@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart3, Lock, Shield, Users } from 'lucide-react';
+﻿import { ArrowRight, BarChart3, Lock, Shield, Users } from 'lucide-react';
 import type React from 'react';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -209,7 +209,7 @@ const HomePage: React.FC = () => {
               </span>
             </div>
             <p className="text-sm" style={{ color: 'var(--theme-textSecondary)' }}>
-              © 2024 User Management Platform. All rights reserved.
+              2024 User Management Platform. All rights reserved.
             </p>
           </div>
         </footer>

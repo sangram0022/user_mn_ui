@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Session Management Hook
  *
  * React 19 Migration: All memoization removed - React Compiler handles optimization
@@ -130,7 +130,7 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
     setShowWarning(false);
   };
 
-  // ✅ FIX 1: Activity listeners - prevent duplicates with ref guard
+  //  FIX 1: Activity listeners - prevent duplicates with ref guard
   useEffect(() => {
     // Prevent duplicate setup in StrictMode
     if (activityListenersSetupRef.current) return;
@@ -148,7 +148,7 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
     });
 
     return () => {
-      // βœ… StrictMode Fix: Don't reset ref - keep it true to prevent re-setup
+      //  StrictMode Fix: Don't reset ref - keep it true to prevent re-setup
       // The ref staying true ensures listeners are only added once, even with StrictMode double-mount
       activities.forEach((activity) => {
         document.removeEventListener(activity, handleActivity, { capture: true });
@@ -156,7 +156,7 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
     };
   }, []); // Empty deps - only setup once
 
-  // ✅ FIX 2: Session check interval - prevent duplicate timers
+  //  FIX 2: Session check interval - prevent duplicate timers
   useEffect(() => {
     // Clear any existing timer
     if (sessionTimerRef.current) {
@@ -182,7 +182,7 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
     };
   }, [user, sessionData]); // Minimal deps
 
-  // ✅ FIX 3: Initialize session - use startTransition instead of setTimeout(0)
+  //  FIX 3: Initialize session - use startTransition instead of setTimeout(0)
   useEffect(() => {
     // Prevent duplicate initialization in StrictMode
     if (hasInitializedRef.current || !user || sessionData) return;
@@ -207,12 +207,12 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
     }
 
     return () => {
-      // βœ… StrictMode Fix: Don't reset ref - keep it true to prevent re-initialization
+      //  StrictMode Fix: Don't reset ref - keep it true to prevent re-initialization
       // hasInitializedRef.current = false; // Removed
     };
   }, [user, sessionData]);
 
-  // ✅ FIX 4: Cleanup on user logout - use startTransition
+  //  FIX 4: Cleanup on user logout - use startTransition
   useEffect(() => {
     if (!user && sessionData) {
       // Use startTransition for non-urgent updates
@@ -223,7 +223,7 @@ export const useSessionManagement = (config: Partial<SessionConfig> = {}) => {
     }
   }, [user, sessionData]);
 
-  // ✅ FIX 5: Remaining time calculation - prevent duplicate timers
+  //  FIX 5: Remaining time calculation - prevent duplicate timers
   useEffect(() => {
     // Clear any existing timer
     if (remainingTimeTimerRef.current) {

@@ -1,4 +1,4 @@
-import { GlobalErrorBoundary } from '@app/GlobalErrorBoundary';
+﻿import { GlobalErrorBoundary } from '@app/GlobalErrorBoundary';
 import { SkipLink } from '@components/common/SkipLink';
 import { LocalizationProvider } from '@contexts/LocalizationProvider';
 import { ThemeProvider } from '@contexts/ThemeContext';
@@ -51,10 +51,10 @@ function App() {
 
   // Initialize performance optimizations
   useEffect(() => {
-    // ✅ React 19: Initialize navigation preloading system
+    //  React 19: Initialize navigation preloading system
     initializePreloading();
 
-    // ✅ React 19: Preload commonly accessed routes
+    //  React 19: Preload commonly accessed routes
     preloadPredictedRoutes('/');
 
     // Preconnect to API

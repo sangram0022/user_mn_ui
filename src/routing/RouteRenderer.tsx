@@ -42,7 +42,7 @@ const RouteRenderer: FC<{ route: RouteConfig }> = ({ route }) => {
     });
   }, []);
 
-  // ✅ React 19: No longer need manual document.title manipulation
+  // [DONE] React 19: No longer need manual document.title manipulation
   // Components now use <PageMetadata> for declarative metadata
   // Keeping route config for backward compatibility, but metadata is now handled by components
 

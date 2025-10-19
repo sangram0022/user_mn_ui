@@ -28,7 +28,7 @@ export const useLoadingState = (initialLoading = false) => {
 };
 
 // Form data state with validation
-// ✅ React 19: Renamed from useFormState to avoid conflict with React 19's deprecated hook
+// [DONE] React 19: Renamed from useFormState to avoid conflict with React 19's deprecated hook
 export const useFormFields = <T extends Record<string, unknown>>(initialData: T) => {
   const [formData, setFormData] = useState<T>(initialData);
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
@@ -256,5 +256,5 @@ export const usePaginationState = (initialPage = 0, initialLimit = 20) => {
   };
 };
 
-// Re-export for convenience - ✅ React 19: useFormFields renamed from useFormState
+// Re-export for convenience - [DONE] React 19: useFormFields renamed from useFormState
 export { useFormFields as useFormState };

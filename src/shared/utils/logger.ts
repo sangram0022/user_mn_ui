@@ -134,18 +134,18 @@ class Logger {
       switch (logMessage.level) {
         case 'debug':
           // eslint-disable-next-line no-console
-          console.debug(`🐛 ${prefix}`, logMessage.message, logMessage.context || '');
+          console.debug(`[DEBUG] ${prefix}`, logMessage.message, logMessage.context || '');
           break;
         case 'info':
           // eslint-disable-next-line no-console
-          console.info(`ℹ️ ${prefix}`, logMessage.message, logMessage.context || '');
+          console.info(`[INFO] ${prefix}`, logMessage.message, logMessage.context || '');
           break;
         case 'warn':
-          console.warn(`⚠️ ${prefix}`, logMessage.message, logMessage.context || '');
+          console.warn(`[WARNING] ${prefix}`, logMessage.message, logMessage.context || '');
           break;
         case 'error':
           console.error(
-            `❌ ${prefix}`,
+            `[ERROR] ${prefix}`,
             logMessage.message,
             logMessage.error || logMessage.context || ''
           );

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * GDPR Compliance Page
  *
  * Data export and account deletion self-service with proper consent tracking
@@ -1084,7 +1084,7 @@ const GDPRCompliancePage: FC = () => {
                                 <div>
                                   <div className="font-medium text-gray-900">{record.email}</div>
                                   <div className="text-sm text-gray-500">
-                                    {record.consent_type} • {record.legal_basis}
+                                    {record.consent_type} {record.legal_basis}
                                   </div>
                                 </div>
                               </div>

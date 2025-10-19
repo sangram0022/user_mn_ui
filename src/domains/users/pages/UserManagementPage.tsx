@@ -1,4 +1,4 @@
-import { Eye, Filter, Plus, Search, Trash2, UserCheck, Users, UserX } from 'lucide-react';
+﻿import { Eye, Filter, Plus, Search, Trash2, UserCheck, Users, UserX } from 'lucide-react';
 import type { FC, FormEvent } from 'react';
 import {
   startTransition,
@@ -51,7 +51,7 @@ const UserManagementEnhanced: FC = () => {
   const { hasPermission, user } = useAuth();
   const { toast } = useToast();
 
-  // ✅ AWS-Optimized: Using CloudWatch for infrastructure monitoring
+  //  AWS-Optimized: Using CloudWatch for infrastructure monitoring
   // User feedback is provided through toast notifications
 
   const debugEnabled = (() => {
@@ -99,7 +99,7 @@ const UserManagementEnhanced: FC = () => {
     );
   }, [debugEnabled, debugLog, hasPermission, user]);
 
-  // ✅ React 19: Optimistic User Management with instant UI updates
+  //  React 19: Optimistic User Management with instant UI updates
   const {
     users,
     setUsers,
@@ -111,7 +111,7 @@ const UserManagementEnhanced: FC = () => {
     isOptimistic,
   } = useOptimisticUserManagement([]);
 
-  // ✅ React 19: Consolidated state (11 useState → 5 state groups)
+  //  React 19: Consolidated state (11 useState  5 state groups)
   const [roles, setRoles] = useState<Role[]>([]);
   const roleMap = (() => {
     const map = new Map<string, Role>();
@@ -131,23 +131,23 @@ const UserManagementEnhanced: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 2. Filters state (consolidated 3 → 1)
+  // 2. Filters state (consolidated 3  1)
   const [filters, setFilters] = useState({
     searchTerm: '',
     role: '',
     isActive: undefined as boolean | undefined,
   });
 
-  // ✅ React 19: useDeferredValue for search to avoid blocking input
+  //  React 19: useDeferredValue for search to avoid blocking input
   const deferredSearchTerm = useDeferredValue(filters.searchTerm);
 
-  // ✅ React 19: useTransition for filter changes
+  //  React 19: useTransition for filter changes
   const [isPending, startTransition] = useTransition();
 
   // 3. Pagination state
   const [pagination, setPagination] = useState({ skip: 0, limit: 20, total: 0, hasMore: false });
 
-  // 4. UI state (consolidated 4 → 1)
+  // 4. UI state (consolidated 4  1)
   const [uiState, setUIState] = useState({
     selectedUser: null as User | null,
     showUserModal: false,
@@ -158,7 +158,7 @@ const UserManagementEnhanced: FC = () => {
   // 5. Action loading state
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // ✅ React 19: Virtual scrolling configuration for performance
+  //  React 19: Virtual scrolling configuration for performance
   const ITEM_HEIGHT = 80; // Height of each table row in pixels
   const CONTAINER_HEIGHT = 600; // Height of scrollable viewport
   const OVERSCAN = 5; // Extra items to render for smooth scrolling
@@ -232,9 +232,9 @@ const UserManagementEnhanced: FC = () => {
     debugLog('Loading users...', {
       skip: pagination.skip,
       limit: pagination.limit,
-      searchTerm: deferredSearchTerm, // ✅ Use deferred value
-      filterRole: filters.role, // ✅ From consolidated state
-      filterActive: filters.isActive, // ✅ From consolidated state
+      searchTerm: deferredSearchTerm, //  Use deferred value
+      filterRole: filters.role, //  From consolidated state
+      filterActive: filters.isActive, //  From consolidated state
     });
 
     try {
@@ -246,9 +246,9 @@ const UserManagementEnhanced: FC = () => {
         limit: pagination.limit,
       };
 
-      if (deferredSearchTerm) params['search'] = deferredSearchTerm; // ✅ Use deferred value
-      if (filters.role) params['role'] = filters.role; // ✅ From consolidated state
-      if (filters.isActive !== undefined) params['is_active'] = filters.isActive; // ✅ From consolidated state
+      if (deferredSearchTerm) params['search'] = deferredSearchTerm; //  Use deferred value
+      if (filters.role) params['role'] = filters.role; //  From consolidated state
+      if (filters.isActive !== undefined) params['is_active'] = filters.isActive; //  From consolidated state
 
       debugLog('Requesting users with params', params);
 
@@ -393,7 +393,7 @@ const UserManagementEnhanced: FC = () => {
 
       return { ...prev, skip: 0 };
     });
-  }, [filters.isActive, filters.role, filters.searchTerm]); // ✅ React 19: Consolidated state dependencies
+  }, [filters.isActive, filters.role, filters.searchTerm]); //  React 19: Consolidated state dependencies
 
   const handleUserAction = async (action: string, userId: string, data?: UpdateUserData) => {
     try {
@@ -401,16 +401,16 @@ const UserManagementEnhanced: FC = () => {
 
       switch (action) {
         case 'activate':
-          // ✅ React 19: Optimistic status toggle - instant UI update
+          //  React 19: Optimistic status toggle - instant UI update
           await toggleUserStatusOptimistic(userId, false);
           break;
         case 'deactivate':
-          // ✅ React 19: Optimistic status toggle - instant UI update
+          //  React 19: Optimistic status toggle - instant UI update
           await toggleUserStatusOptimistic(userId, true);
           break;
         case 'delete':
           if (window.confirm('Are you sure you want to delete this user?')) {
-            // ✅ React 19: Optimistic delete - instant UI update
+            //  React 19: Optimistic delete - instant UI update
             await deleteUserOptimistic(userId);
           } else {
             return;
@@ -424,7 +424,7 @@ const UserManagementEnhanced: FC = () => {
               break;
             }
 
-            // ✅ React 19: Optimistic update - instant UI update
+            //  React 19: Optimistic update - instant UI update
             await updateUserOptimistic(userId, payload);
           }
           break;
@@ -445,7 +445,7 @@ const UserManagementEnhanced: FC = () => {
               : action;
       toast.success(`User ${actionLabel} successfully`);
 
-      // ✅ No need to call loadUsers() - optimistic updates already handled it!
+      //  No need to call loadUsers() - optimistic updates already handled it!
     } catch (error) {
       logger.error(
         `Action ${action} failed:`,
@@ -459,7 +459,7 @@ const UserManagementEnhanced: FC = () => {
           onClick: () => handleUserAction(action, userId),
         },
       });
-      // ✅ UI automatically rolls back on error
+      //  UI automatically rolls back on error
     } finally {
       setActionLoading(null);
     }
@@ -468,11 +468,11 @@ const UserManagementEnhanced: FC = () => {
   const handleCreateUser = async (userData: CreateUserData) => {
     try {
       setActionLoading('create-user');
-      // ✅ React 19: Optimistic create - instant UI update
+      //  React 19: Optimistic create - instant UI update
       await createUserOptimistic(buildCreateUserRequest(userData));
-      setUIState((prev) => ({ ...prev, showCreateModal: false })); // ✅ Consolidated state
+      setUIState((prev) => ({ ...prev, showCreateModal: false })); //  Consolidated state
       toast.success('User created successfully!');
-      // ✅ No need to call loadUsers() - optimistic updates already handled it!
+      //  No need to call loadUsers() - optimistic updates already handled it!
     } catch (error) {
       logger.error('Create user failed:', undefined, { error });
       const errorMsg = 'Failed to create user';
@@ -483,32 +483,32 @@ const UserManagementEnhanced: FC = () => {
           onClick: () => setUIState((prev) => ({ ...prev, showCreateModal: true })),
         },
       });
-      // ✅ UI automatically rolls back on error
+      //  UI automatically rolls back on error
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleBulkDelete = async () => {
-    if (uiState.selectedUsers.size === 0) return; // ✅ Consolidated state
+    if (uiState.selectedUsers.size === 0) return; //  Consolidated state
 
     const count = uiState.selectedUsers.size;
     if (window.confirm(`Are you sure you want to delete ${count} users?`)) {
       try {
         setActionLoading('bulk-delete');
 
-        // ✅ React 19: Optimistic bulk delete - instant UI update
-        await bulkDeleteOptimistic(Array.from(uiState.selectedUsers)); // ✅ Consolidated state
+        //  React 19: Optimistic bulk delete - instant UI update
+        await bulkDeleteOptimistic(Array.from(uiState.selectedUsers)); //  Consolidated state
 
-        setUIState((prev) => ({ ...prev, selectedUsers: new Set<string>() })); // ✅ Consolidated state
+        setUIState((prev) => ({ ...prev, selectedUsers: new Set<string>() })); //  Consolidated state
         toast.success(`Successfully deleted ${count} user${count > 1 ? 's' : ''}`);
-        // ✅ No need to call loadUsers() - optimistic updates already handled it!
+        //  No need to call loadUsers() - optimistic updates already handled it!
       } catch (error) {
         logger.error('Bulk delete failed:', undefined, { error });
         const errorMsg = 'Failed to delete some users';
         setError(errorMsg);
         toast.error(errorMsg);
-        // ✅ UI automatically rolls back on error
+        //  UI automatically rolls back on error
       } finally {
         setActionLoading(null);
       }
@@ -523,7 +523,7 @@ const UserManagementEnhanced: FC = () => {
       } else {
         newSet.delete(userId);
       }
-      return { ...prev, selectedUsers: newSet }; // ✅ Return full state object
+      return { ...prev, selectedUsers: newSet }; //  Return full state object
     });
   };
 
@@ -551,7 +551,7 @@ const UserManagementEnhanced: FC = () => {
     });
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 p-12 text-center">
-        <h3 className="mb-4 text-red-600">⛔ Access Denied</h3>
+        <h3 className="mb-4 text-red-600"> Access Denied</h3>
         <p className="text-red-900">You don't have permission to manage users.</p>
         <p className="mt-4 text-sm text-red-900">Required: user:read permission</p>
       </div>
@@ -581,7 +581,7 @@ const UserManagementEnhanced: FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* ✅ React 19: Enhanced bulk actions with ARIA live regions */}
+            {/*  React 19: Enhanced bulk actions with ARIA live regions */}
             {uiState.selectedUsers.size > 0 && (
               <div
                 className="flex items-center gap-2 rounded-lg bg-sky-100 px-4 py-2 text-sky-700"
@@ -626,7 +626,7 @@ const UserManagementEnhanced: FC = () => {
           </div>
         </div>
 
-        {/* ✅ React 19: Accessible filters with semantic HTML */}
+        {/*  React 19: Accessible filters with semantic HTML */}
         <div className="mb-8 rounded-xl border border-gray-200 bg-gray-50 p-6" role="search">
           <h2 className="sr-only">Filter users</h2>
           <div className="grid items-end gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -638,7 +638,7 @@ const UserManagementEnhanced: FC = () => {
                 <span>
                   <Search className="mr-2 inline h-4 w-4" aria-hidden="true" />
                   Search Users
-                  {/* ✅ Show pending indicator when search is deferred */}
+                  {/*  Show pending indicator when search is deferred */}
                   {filters.searchTerm !== deferredSearchTerm && (
                     <span className="ml-2 text-xs text-blue-600" role="status" aria-live="polite">
                       Searching...
@@ -668,7 +668,7 @@ const UserManagementEnhanced: FC = () => {
                 <span>
                   <Filter className="mr-2 inline h-4 w-4" aria-hidden="true" />
                   Filter by Role
-                  {/* ✅ Show transition pending indicator */}
+                  {/*  Show transition pending indicator */}
                   {isPending && (
                     <span className="ml-2 text-xs text-blue-600" role="status" aria-live="polite">
                       Updating...
@@ -679,7 +679,7 @@ const UserManagementEnhanced: FC = () => {
                   id="filter-role"
                   value={filters.role}
                   onChange={(e) => {
-                    // ✅ React 19: Mark filter change as non-urgent
+                    //  React 19: Mark filter change as non-urgent
                     startTransition(() => {
                       setFilters((prev) => ({ ...prev, role: e.target.value }));
                     });
@@ -759,7 +759,7 @@ const UserManagementEnhanced: FC = () => {
             </div>
           ) : (
             <>
-              {/* ✅ Virtual Scrolling: Fixed Header */}
+              {/*  Virtual Scrolling: Fixed Header */}
               <div className="border-b-2 border-gray-200 bg-gray-50" role="rowgroup">
                 <table className="w-full border-collapse" role="presentation">
                   <thead>
@@ -795,7 +795,7 @@ const UserManagementEnhanced: FC = () => {
                 </table>
               </div>
 
-              {/* ✅ Virtual Scrolling: Scrollable Body */}
+              {/*  Virtual Scrolling: Scrollable Body */}
               <div
                 ref={containerRef}
                 className="virtual-container overflow-x-auto"
@@ -845,7 +845,7 @@ const UserManagementEnhanced: FC = () => {
                                 <div>
                                   <div className="font-medium text-gray-900 flex items-center gap-2">
                                     {user.full_name || user.username || user.email}
-                                    {/* ✅ React 19: Visual indicator for optimistic updates */}
+                                    {/*  React 19: Visual indicator for optimistic updates */}
                                     {isOptimistic(user) && (
                                       <span className="text-xs text-amber-600 font-normal animate-pulse">
                                         Saving...
@@ -886,7 +886,7 @@ const UserManagementEnhanced: FC = () => {
                             <td className="p-4 text-gray-600">{formatDate(user.created_at)}</td>
                             <td className="p-4">
                               <div className="flex gap-2" role="group" aria-label="User actions">
-                                {/* ✅ React 19: Enhanced accessibility with ARIA labels */}
+                                {/*  React 19: Enhanced accessibility with ARIA labels */}
                                 <button
                                   onClick={() => {
                                     setUIState((prev) => ({
@@ -955,7 +955,7 @@ const UserManagementEnhanced: FC = () => {
                 </div>
               </div>
 
-              {/* ✅ Virtual Scrolling: Footer with Scroll to Top */}
+              {/*  Virtual Scrolling: Footer with Scroll to Top */}
               <div
                 className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-8 py-4"
                 role="navigation"
@@ -972,7 +972,7 @@ const UserManagementEnhanced: FC = () => {
                     title="Scroll to top"
                     aria-label="Scroll to top of user list"
                   >
-                    ↑ Top
+                    Top
                   </button>
                   <button
                     onClick={() => scrollToIndex(users.length - 1)}
@@ -980,7 +980,7 @@ const UserManagementEnhanced: FC = () => {
                     title="Scroll to bottom"
                     aria-label="Scroll to bottom of user list"
                   >
-                    ↓ Bottom
+                    Bottom
                   </button>
                 </div>
               </div>

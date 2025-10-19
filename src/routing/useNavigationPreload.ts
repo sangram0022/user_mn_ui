@@ -285,11 +285,11 @@ export function initializePreloading(): void {
  * ```
  *
  * Benefits:
- * - ✅ Instant navigation on hover/focus
- * - ✅ Predictive loading of likely next routes
- * - ✅ Prioritized loading strategy
- * - ✅ Better UX with zero perceived delay
- * - ✅ Accessibility support (keyboard navigation)
+ * - [DONE] Instant navigation on hover/focus
+ * - [DONE] Predictive loading of likely next routes
+ * - [DONE] Prioritized loading strategy
+ * - [DONE] Better UX with zero perceived delay
+ * - [DONE] Accessibility support (keyboard navigation)
  */
 
 export default {

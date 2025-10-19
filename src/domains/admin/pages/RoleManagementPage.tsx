@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Role Management Page
  *
  * Comprehensive role and permission management interface.
@@ -38,7 +38,7 @@ interface Role {
   role_name: string;
   description: string;
   permissions: string[];
-  isOptimistic?: boolean; // ✅ React 19: Add optimistic flag
+  isOptimistic?: boolean; //  React 19: Add optimistic flag
 }
 
 interface Permission {
@@ -370,7 +370,7 @@ const RoleManagementPage: FC = () => {
   // State
   const [roles, setRoles] = useState<Role[]>([]);
 
-  // ✅ React 19: useOptimistic for instant UI updates
+  //  React 19: useOptimistic for instant UI updates
   const [optimisticRoles, updateOptimisticRoles] = useOptimistic(
     roles,
     (state: Role[], action: { type: 'delete'; roleId: string }) => {
@@ -439,7 +439,7 @@ const RoleManagementPage: FC = () => {
   const handleDeleteRole = async (roleId: string) => {
     if (!confirm(t('roles.confirmDeleteRole'))) return;
 
-    // ✅ React 19: Optimistic delete - instant UI update
+    //  React 19: Optimistic delete - instant UI update
     updateOptimisticRoles({ type: 'delete', roleId });
 
     try {
@@ -450,7 +450,7 @@ const RoleManagementPage: FC = () => {
     } catch (error) {
       handleError(error, t('roles.failedToDeleteRole'));
       toast.error(t('roles.failedToDeleteRole'));
-      // ✅ UI automatically rolls back on error
+      //  UI automatically rolls back on error
       // Re-load to restore the role
       await loadRoles();
     }
@@ -471,7 +471,7 @@ const RoleManagementPage: FC = () => {
   // Filter Functions
   // ============================================================================
 
-  // ✅ React 19: Use optimisticRoles for instant UI updates
+  //  React 19: Use optimisticRoles for instant UI updates
   const filteredRoles = optimisticRoles.filter((role) => {
     const matchesSearch =
       role.role_name.toLowerCase().includes(searchTerm.toLowerCase()) ||

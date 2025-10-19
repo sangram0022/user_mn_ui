@@ -52,7 +52,7 @@ export function HealthPage() {
 
   return (
     <div style={styles.container}>
-      <h1>🏥 Application Health</h1>
+      <h1>[HEALTH] Application Health</h1>
 
       <div
         style={{
@@ -111,7 +111,7 @@ export function HealthPage() {
                     color: status === 'ok' ? '#16a34a' : '#dc2626',
                   }}
                 >
-                  {status === 'ok' ? '✓ OK' : '✗ ERROR'}
+                  {status === 'ok' ? '[OK]' : '[ERROR]'}
                 </div>
               </div>
             ))}
@@ -121,7 +121,7 @@ export function HealthPage() {
 
       {error && (
         <div style={styles.error}>
-          <p>⚠️ Warning: {error}</p>
+          <p>[WARNING] Warning: {error}</p>
         </div>
       )}
 

@@ -38,7 +38,7 @@ export async function initCloudWatchRUM(): Promise<boolean> {
   // Only initialize in production
   if (!import.meta.env.PROD) {
     if (import.meta.env.DEV) {
-      console.warn('📊 CloudWatch RUM disabled in development');
+      console.warn('[INFO] CloudWatch RUM disabled in development');
     }
     return false;
   }
@@ -50,7 +50,7 @@ export async function initCloudWatchRUM(): Promise<boolean> {
 
   if (!appId || !poolId || !region) {
     console.warn(
-      '⚠️ CloudWatch RUM not configured. Set VITE_CLOUDWATCH_APP_ID, VITE_COGNITO_POOL_ID, VITE_AWS_REGION'
+      '[WARNING] CloudWatch RUM not configured. Set VITE_CLOUDWATCH_APP_ID, VITE_COGNITO_POOL_ID, VITE_AWS_REGION'
     );
     return false;
   }
@@ -64,7 +64,7 @@ export async function initCloudWatchRUM(): Promise<boolean> {
     const AwsRum = module.default || module.AwsRum;
 
     if (!AwsRum) {
-      console.warn('⚠️ aws-rum-web module not available');
+      console.warn('[WARNING] aws-rum-web module not available');
       return false;
     }
 
@@ -98,7 +98,7 @@ export async function initCloudWatchRUM(): Promise<boolean> {
     AwsRum.logPageView();
 
     isInitialized = true;
-    console.warn('✅ CloudWatch RUM initialized');
+    console.warn('[SUCCESS] CloudWatch RUM initialized');
 
     // Record application version
     recordAppVersion();
@@ -108,7 +108,7 @@ export async function initCloudWatchRUM(): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('❌ Failed to initialize CloudWatch RUM:', error);
+    console.error('[ERROR] Failed to initialize CloudWatch RUM:', error);
     return false;
   }
 }
@@ -204,7 +204,7 @@ function recordRUMMetric(metricName: string, value: number): void {
       window.dispatchEvent(evt);
 
       if (import.meta.env.DEV) {
-        console.warn(`📊 Core Web Vital: ${metricName} = ${value}`);
+        console.warn(`[INFO] Core Web Vital: ${metricName} = ${value}`);
       }
     }
   } catch (error) {
@@ -225,7 +225,7 @@ export function recordCustomEvent(eventName: string, attributes?: Record<string,
       window.dispatchEvent(evt);
 
       if (import.meta.env.DEV) {
-        console.warn(`📊 Custom Event: ${eventName}`, attributes);
+        console.warn(`[INFO] Custom Event: ${eventName}`, attributes);
       }
     }
   } catch (error) {

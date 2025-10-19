@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Production Environment Validation
  *
  * Validates all required environment variables at build time to prevent
@@ -96,14 +96,14 @@ export function validateEnvironment(): void {
       invalid.push('VITE_API_BASE_URL cannot use localhost or 127.0.0.1 in production');
     }
 
-    // 🔴 CRITICAL: REQUIRE encryption key in production
+    //  CRITICAL: REQUIRE encryption key in production
     if (!import.meta.env.VITE_ENCRYPTION_KEY) {
       invalid.push(
         'VITE_ENCRYPTION_KEY is REQUIRED in production for secure token encryption. Cannot deploy without it.'
       );
     }
 
-    // 🔴 CRITICAL: REQUIRE Sentry DSN in production
+    //  CRITICAL: REQUIRE Sentry DSN in production
     if (!import.meta.env.VITE_SENTRY_DSN) {
       invalid.push(
         'VITE_SENTRY_DSN is REQUIRED in production for error tracking and monitoring. Cannot deploy without it.'
@@ -113,7 +113,7 @@ export function validateEnvironment(): void {
     // Check for analytics (optional but recommended)
     if (!import.meta.env.VITE_ANALYTICS_ID) {
       warnings.push(
-        '⚠️  VITE_ANALYTICS_ID is not set. Performance analytics tracking will not be available.'
+        '  VITE_ANALYTICS_ID is not set. Performance analytics tracking will not be available.'
       );
     }
 
@@ -138,7 +138,7 @@ export function validateEnvironment(): void {
     const errorMessages: string[] = [];
 
     if (missing.length > 0) {
-      errorMessages.push('❌ Missing required environment variables:');
+      errorMessages.push(' Missing required environment variables:');
       missing.forEach((key) => {
         errorMessages.push(`   - ${key}`);
       });
@@ -146,7 +146,7 @@ export function validateEnvironment(): void {
     }
 
     if (invalid.length > 0) {
-      errorMessages.push('❌ Invalid environment variables:');
+      errorMessages.push(' Invalid environment variables:');
       invalid.forEach((msg) => {
         errorMessages.push(`   - ${msg}`);
       });
@@ -154,7 +154,7 @@ export function validateEnvironment(): void {
     }
 
     if (warnings.length > 0 && import.meta.env.PROD) {
-      errorMessages.push('⚠️  Environment warnings:');
+      errorMessages.push('  Environment warnings:');
       warnings.forEach((msg) => {
         errorMessages.push(`   - ${msg}`);
       });
@@ -184,7 +184,7 @@ export function validateEnvironment(): void {
 
   // Log success in development
   if (import.meta.env.DEV) {
-    console.warn('✅ Environment validation passed');
+    console.warn(' Environment validation passed');
     console.warn('Environment:', import.meta.env.VITE_APP_ENV || import.meta.env.MODE);
     console.warn('Backend URL:', import.meta.env.VITE_BACKEND_URL);
     console.warn('API URL:', import.meta.env.VITE_API_BASE_URL);

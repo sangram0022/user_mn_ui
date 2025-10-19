@@ -61,7 +61,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                 className="block text-sm font-semibold mb-3 uppercase tracking-wide"
                 style={{ color: 'var(--theme-textSecondary)' }}
               >
-                Color Palette — {theme.palette}
+                Color Palette - {theme.palette}
               </label>
               <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
                 {palettes.map((palette) => {
@@ -91,7 +91,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                 className="block text-sm font-semibold mb-3 uppercase tracking-wide"
                 style={{ color: 'var(--theme-textSecondary)' }}
               >
-                Display Mode — {theme.mode}
+                Display Mode - {theme.mode}
               </label>
               <div
                 className="inline-flex gap-0 rounded-xl overflow-hidden shadow-md"
@@ -146,7 +146,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="inline-block w-2 h-2 rounded-full"
                   style={{ background: 'var(--theme-primary)' }}
                 />
-                Primary Buttons — Call to Action
+                Primary Buttons - Call to Action
               </h3>
               <div className="flex flex-wrap gap-4">
                 <button
@@ -190,7 +190,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="inline-block w-2 h-2 rounded-full"
                   style={{ background: 'var(--theme-secondary)' }}
                 />
-                Secondary Buttons — Supporting Actions
+                Secondary Buttons - Supporting Actions
               </h3>
               <div className="flex flex-wrap gap-4">
                 <button
@@ -224,7 +224,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="inline-block w-2 h-2 rounded-full border-2"
                   style={{ borderColor: 'var(--theme-primary)' }}
                 />
-                Outline Buttons — Subtle Actions
+                Outline Buttons - Subtle Actions
               </h3>
               <div className="flex flex-wrap gap-4">
                 <button
@@ -270,7 +270,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="inline-block w-2 h-2 rounded-full opacity-40"
                   style={{ background: 'var(--theme-primary)' }}
                 />
-                Ghost Buttons — Minimal Actions
+                Ghost Buttons - Minimal Actions
               </h3>
               <div className="flex flex-wrap gap-4">
                 <button
@@ -387,7 +387,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                     background: `var(--theme-${card.color})`,
                   }}
                 >
-                  <span className="text-2xl">✓</span>
+                  <span className="text-2xl">[YES]</span>
                 </div>
                 <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text)' }}>
                   {card.title}
@@ -491,7 +491,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                   style={{ background: 'var(--theme-primary)', color: 'var(--theme-onPrimary)' }}
                 >
-                  ℹ
+                  [INFO]
                 </div>
                 <div>
                   <h4 className="font-bold mb-1" style={{ color: 'var(--theme-text)' }}>
@@ -524,7 +524,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                   style={{ background: 'var(--theme-accent)', color: 'var(--theme-onPrimary)' }}
                 >
-                  ✓
+                  [OK]
                 </div>
                 <div>
                   <h4 className="font-bold mb-1" style={{ color: 'var(--theme-text)' }}>
@@ -557,7 +557,7 @@ export default function ThemeTestPage(): React.JSX.Element {
                   className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                   style={{ background: 'var(--theme-secondary)', color: 'var(--theme-onPrimary)' }}
                 >
-                  ⚠
+                  [WARN]
                 </div>
                 <div>
                   <h4 className="font-bold mb-1" style={{ color: 'var(--theme-text)' }}>

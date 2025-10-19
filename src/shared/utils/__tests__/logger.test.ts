@@ -49,7 +49,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.debug('Debug message', { key: 'value' });
 
       expect(consoleDebugSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🐛'),
+        expect.stringContaining('[DEBUG]'),
         'Debug message',
         expect.objectContaining({ key: 'value' })
       );
@@ -59,7 +59,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.debug('Debug without context');
 
       expect(consoleDebugSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🐛'),
+        expect.stringContaining('[DEBUG]'),
         'Debug without context',
         ''
       );
@@ -77,7 +77,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.info('Info message', { data: 123 });
 
       expect(consoleInfoSpy).toHaveBeenCalledWith(
-        expect.stringContaining('ℹ️'),
+        expect.stringContaining('[INFO]'),
         'Info message',
         expect.objectContaining({ data: 123 })
       );
@@ -87,7 +87,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.info('Info without context');
 
       expect(consoleInfoSpy).toHaveBeenCalledWith(
-        expect.stringContaining('ℹ️'),
+        expect.stringContaining('[INFO]'),
         'Info without context',
         ''
       );
@@ -109,7 +109,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.warn('Warning message', { warning: true });
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('⚠️'),
+        expect.stringContaining('[WARNING]'),
         'Warning message',
         expect.objectContaining({ warning: true })
       );
@@ -118,7 +118,11 @@ describe('Logger Utility - Complete Coverage', () => {
     it('should log warn without context', () => {
       logger.warn('Warning');
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('⚠️'), 'Warning', '');
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[WARNING]'),
+        'Warning',
+        ''
+      );
     });
 
     it('should handle complex context objects', () => {
@@ -143,7 +147,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.error('Error occurred', error, { userId: '123' });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('❌'),
+        expect.stringContaining('[ERROR]'),
         'Error occurred',
         error
       );
@@ -153,7 +157,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.error('Simple error');
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('❌'),
+        expect.stringContaining('[ERROR]'),
         'Simple error',
         ''
       );
@@ -163,7 +167,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.error('Error with context', undefined, { action: 'save' });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('❌'),
+        expect.stringContaining('[ERROR]'),
         'Error with context',
         expect.objectContaining({ action: 'save' })
       );
@@ -494,7 +498,7 @@ describe('Logger Utility - Complete Coverage', () => {
     });
 
     it('should handle special characters in message', () => {
-      logger.info('Special chars: 🎉 emoji, <script>, "quotes", \'apostrophe\'');
+      logger.info('Special chars: [PARTY] emoji, <script>, "quotes", \'apostrophe\'');
 
       expect(consoleInfoSpy).toHaveBeenCalled();
     });
@@ -593,7 +597,7 @@ describe('Logger Utility - Complete Coverage', () => {
 
       // Verify error was logged
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('❌'),
+        expect.stringContaining('[ERROR]'),
         'System failure',
         expect.objectContaining({ name: 'Error', message: 'Critical failure' })
       );
@@ -781,7 +785,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.info('Nested context', nestedContext);
 
       expect(consoleInfoSpy).toHaveBeenCalledWith(
-        expect.stringContaining('ℹ️'),
+        expect.stringContaining('[INFO]'),
         'Nested context',
         expect.objectContaining({
           level1: expect.objectContaining({
@@ -800,7 +804,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.info('Array context', arrayContext);
 
       expect(consoleInfoSpy).toHaveBeenCalledWith(
-        expect.stringContaining('ℹ️'),
+        expect.stringContaining('[INFO]'),
         'Array context',
         expect.objectContaining({
           items: expect.arrayContaining([1, 2, 3]),
@@ -854,7 +858,7 @@ describe('Logger Utility - Complete Coverage', () => {
       logger.error('Type error occurred', typeError);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('❌'),
+        expect.stringContaining('[ERROR]'),
         'Type error occurred',
         expect.objectContaining({ name: 'TypeError' })
       );

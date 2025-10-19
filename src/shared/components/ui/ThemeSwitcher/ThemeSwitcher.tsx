@@ -20,63 +20,63 @@ const THEME_OPTIONS: ThemeOption[] = [
     palette: 'ocean',
     name: 'Ocean',
     description: 'Cool blues and calming waters',
-    icon: '🌊',
+    icon: '[OCEAN]',
     gradient: 'bg-ocean-gradient',
   },
   {
     palette: 'forest',
     name: 'Forest',
     description: 'Rich greens and natural earth tones',
-    icon: '🌲',
+    icon: '[FOREST]',
     gradient: 'bg-forest-gradient',
   },
   {
     palette: 'sunset',
     name: 'Sunset',
     description: 'Warm oranges and golden hues',
-    icon: '🌅',
+    icon: '[SUNSET]',
     gradient: 'bg-sunset-gradient',
   },
   {
     palette: 'midnight',
     name: 'Midnight',
     description: 'Deep blues and mysterious purples',
-    icon: '🌙',
+    icon: '[NIGHT]',
     gradient: 'bg-midnight-gradient',
   },
   {
     palette: 'aurora',
     name: 'Aurora',
     description: 'Vibrant greens and mystical blues',
-    icon: '✨',
+    icon: '[AURORA]',
     gradient: 'bg-aurora-gradient',
   },
   {
     palette: 'crimson',
     name: 'Crimson',
     description: 'Deep reds and passionate burgundies',
-    icon: '🔴',
+    icon: '[RED]',
     gradient: 'bg-crimson-gradient',
   },
   {
     palette: 'lavender',
     name: 'Lavender',
     description: 'Soft purples and dreamy lavenders',
-    icon: '💜',
+    icon: '[PURPLE]',
     gradient: 'bg-lavender-gradient',
   },
   {
     palette: 'amber',
     name: 'Amber',
     description: 'Warm yellows and golden ambers',
-    icon: '🟡',
+    icon: '[YELLOW]',
     gradient: 'bg-amber-gradient',
   },
   {
     palette: 'slate',
     name: 'Slate',
     description: 'Modern grays and sophisticated tones',
-    icon: '⚫',
+    icon: '[BLACK]',
     gradient: 'bg-slate-gradient',
   },
 ];
@@ -144,7 +144,7 @@ export function ThemeSwitcher({ className = '' }: ThemeSwitcherProps) {
             {/* Header */}
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                🎨 Choose Your Theme
+                [PALETTE] Choose Your Theme
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Select a color palette and lighting mode that feels right for you

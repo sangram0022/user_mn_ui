@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+﻿import type { FC } from 'react';
 import { startTransition, useActionState, useEffect, useId, useState } from 'react';
 
 import { useToast } from '@hooks/useToast';
@@ -322,7 +322,7 @@ const ProfilePage: FC = () => {
             <p className="mb-2 text-sm text-gray-500">{profile?.email}</p>
             <div className="flex items-center gap-4">
               <span className="rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-600">
-                ✓ Verified
+                Verified
               </span>
               <span className="text-xs text-gray-500">
                 Member since {formatDate(profile?.created_at || '')}
@@ -583,7 +583,7 @@ const ProfilePage: FC = () => {
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-sky-700">
-                {securitySettings?.two_factor_enabled ? '✓' : '⚠️'}
+                {securitySettings?.two_factor_enabled ? '' : ''}
               </div>
               <p className="m-0 text-xs text-sky-700">Two-Factor Auth</p>
             </div>
@@ -594,7 +594,7 @@ const ProfilePage: FC = () => {
               <p className="m-0 text-xs text-sky-700">Active Sessions</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-sky-700">✓</div>
+              <div className="text-2xl font-bold text-sky-700" />
               <p className="m-0 text-xs text-sky-700">Email Verified</p>
             </div>
           </div>

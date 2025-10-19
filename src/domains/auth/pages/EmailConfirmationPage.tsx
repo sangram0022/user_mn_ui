@@ -1,4 +1,4 @@
-import { ArrowLeft, CheckCircle, Clock, Mail, RefreshCw } from 'lucide-react';
+﻿import { ArrowLeft, CheckCircle, Clock, Mail, RefreshCw } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -92,9 +92,9 @@ const EmailConfirmationPage: React.FC = () => {
               <div className="text-left">
                 <h3 className="text-sm font-semibold text-blue-900 mb-1">What happens next?</h3>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Click the verification link in your email</li>
-                  <li>• Your account will be activated automatically</li>
-                  <li>• You can then sign in with your credentials</li>
+                  <li> Click the verification link in your email</li>
+                  <li> Your account will be activated automatically</li>
+                  <li> You can then sign in with your credentials</li>
                 </ul>
               </div>
             </div>
@@ -112,9 +112,9 @@ const EmailConfirmationPage: React.FC = () => {
                   Didn't receive the email?
                 </h3>
                 <ul className="text-sm text-amber-800 space-y-1">
-                  <li>• Check your spam or junk folder</li>
-                  <li>• The link expires in 24 hours</li>
-                  <li>• Make sure to check all email aliases</li>
+                  <li> Check your spam or junk folder</li>
+                  <li> The link expires in 24 hours</li>
+                  <li> Make sure to check all email aliases</li>
                 </ul>
               </div>
             </div>

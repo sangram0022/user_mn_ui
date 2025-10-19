@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Container Queries Demo Page
  *
  * Demonstrates modern CSS container queries for component-based responsive design.
@@ -147,7 +147,7 @@ export const ContainerQueriesDemo: React.FC = () => {
 
                   <div className="card-meta flex gap-4 text-sm text-gray-600 dark:text-gray-400">
                     <span>Member since 2024</span>
-                    <span>•</span>
+                    <span />
                     <span>Last login: Today</span>
                   </div>
                 </div>

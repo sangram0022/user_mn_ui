@@ -104,7 +104,7 @@ export const API_ENDPOINTS = {
  * Debug information
  */
 export const getApiDebugInfo = () => {
-  logger.info('🔧 API Configuration Debug:');
+  logger.info('[INFO] API Configuration Debug:');
   logger.info('Current Environment', { env: CURRENT_ENV });
   logger.info('API Base URL', { url: API_BASE_URL });
   logger.info('Health Check URL', { url: HEALTH_CHECK_URL });

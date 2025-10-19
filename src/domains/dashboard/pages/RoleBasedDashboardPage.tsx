@@ -1,4 +1,4 @@
-import type { FC, MouseEvent } from 'react';
+﻿import type { FC, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { logger } from './../../../shared/utils/logger';
 
@@ -51,8 +51,8 @@ const RoleBasedDashboard: FC = () => {
 
   const handleFeatureClick = (href: string, event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    logger.info(`🧭 Dashboard navigation clicked: ${href}`);
-    logger.info('🔧 Using navigate() to route to:', { href });
+    logger.info(` Dashboard navigation clicked: ${href}`);
+    logger.info(' Using navigate() to route to:', { href });
     try {
       navigate(href);
     } catch (error) {
@@ -373,9 +373,7 @@ const RoleBasedDashboard: FC = () => {
                       <p className="mb-3 text-sm opacity-80">{feature.description}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-medium opacity-60">{feature.stats}</span>
-                        <span className="text-xs font-medium" aria-hidden="true">
-                          →
-                        </span>
+                        <span className="text-xs font-medium" aria-hidden="true" />
                       </div>
                     </div>
                   </div>
@@ -400,26 +398,26 @@ const RoleBasedDashboard: FC = () => {
             >
               {isAdmin && (
                 <>
-                  <div role="listitem">• Use the Security Center to monitor system threats</div>
-                  <div role="listitem">• Review user analytics for platform insights</div>
-                  <div role="listitem">• Set up automated workflows for efficiency</div>
-                  <div role="listitem">• Regular backup and security audits are recommended</div>
+                  <div role="listitem"> Use the Security Center to monitor system threats</div>
+                  <div role="listitem"> Review user analytics for platform insights</div>
+                  <div role="listitem"> Set up automated workflows for efficiency</div>
+                  <div role="listitem"> Regular backup and security audits are recommended</div>
                 </>
               )}
               {isModerator && (
                 <>
-                  <div role="listitem">• Check pending approvals daily</div>
-                  <div role="listitem">• Monitor user activity for unusual patterns</div>
-                  <div role="listitem">• Review reported content promptly</div>
-                  <div role="listitem">• Use analytics to identify trends</div>
+                  <div role="listitem"> Check pending approvals daily</div>
+                  <div role="listitem"> Monitor user activity for unusual patterns</div>
+                  <div role="listitem"> Review reported content promptly</div>
+                  <div role="listitem"> Use analytics to identify trends</div>
                 </>
               )}
               {isUser && (
                 <>
-                  <div role="listitem">• Complete your profile for better experience</div>
-                  <div role="listitem">• Check your activity dashboard regularly</div>
-                  <div role="listitem">• Submit workflow requests when needed</div>
-                  <div role="listitem">• Keep your account settings up to date</div>
+                  <div role="listitem"> Complete your profile for better experience</div>
+                  <div role="listitem"> Check your activity dashboard regularly</div>
+                  <div role="listitem"> Submit workflow requests when needed</div>
+                  <div role="listitem"> Keep your account settings up to date</div>
                 </>
               )}
             </div>
