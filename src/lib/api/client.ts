@@ -46,7 +46,9 @@ import type {
   UserRole,
   UserSummary,
 } from '@shared/types';
+import type { BackendApiErrorResponse } from '@shared/types/api-backend.types';
 import { normalizeApiError } from '@shared/utils/error';
+import { mapApiErrorToMessage } from '@shared/utils/errorMapper';
 import { logger } from './../../shared/utils/logger';
 
 import { ApiError } from './error';
@@ -673,18 +675,22 @@ export class ApiClient {
       const errorPayload = await this.parseJson(response);
       const normalized = normalizeApiError(response.status, response.statusText, errorPayload);
 
+      // Get localized error message using error mapper
+      const localizedMessage = mapApiErrorToMessage(errorPayload as BackendApiErrorResponse);
+
       // Debug logging for error code extraction
       if (import.meta.env.DEV) {
         logger.info('[API] Error normalization', {
           errorPayload,
           normalized,
           extractedCode: normalized.code,
+          localizedMessage,
         });
       }
 
       throw new ApiError({
         status: normalized.status,
-        message: normalized.message,
+        message: localizedMessage, // Use localized message instead of normalized.message
         code: normalized.code,
         details: normalized.detail,
         errors: normalized.errors,

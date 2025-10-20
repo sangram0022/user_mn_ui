@@ -103,7 +103,8 @@ export interface LogoutResponse {
   logged_out_at: string; // ISO 8601
 }
 
-export interface RefreshTokenResponse extends LoginResponse {}
+// Refresh token response is identical to login response
+export type RefreshTokenResponse = LoginResponse;
 
 // ============================================================================
 // PROFILE MODELS

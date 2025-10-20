@@ -40,7 +40,8 @@ const LazyAdminDashboardPage = lazy(() => import('../domains/admin/pages/AdminDa
 const LazyAdminAnalyticsDashboardPage = lazy(
   () => import('../domains/admin/pages/AdminAnalyticsDashboardPage')
 );
-const LazyAuditLogsPage = lazy(() => import('../domains/admin/pages/AuditLogsPage'));
+const LazyAdminUsersPage = lazy(() => import('../domains/admin/pages/AdminUsersPage'));
+const LazyAuditLogsPage = lazy(() => import('../domains/admin/pages/AdminAuditLogPage'));
 const LazyBulkOperationsPage = lazy(() => import('../domains/admin/pages/BulkOperationsPage'));
 const LazyRoleManagementPage = lazy(() => import('../domains/admin/pages/RoleManagementPage'));
 const LazyGDPRCompliancePage = lazy(() => import('../domains/admin/pages/GDPRCompliancePage'));
@@ -221,6 +222,15 @@ export const routes: RouteConfig[] = [
     title: 'Admin Dashboard',
     description: 'Administrative dashboard with system overview and quick actions.',
     suspenseFallback: createElement(DashboardSkeleton),
+  },
+  {
+    path: '/admin/users',
+    component: LazyAdminUsersPage,
+    layout: 'admin',
+    guard: 'protected',
+    title: 'User Management',
+    description: 'Manage users, approvals, and account status with advanced filtering.',
+    suspenseFallback: createElement(TableSkeleton, { rows: 10, columns: 7 }),
   },
   {
     path: '/admin/roles',

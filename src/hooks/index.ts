@@ -38,3 +38,6 @@ export { useNavigate } from './useNavigate';
 
 // Rate Limit Notifications (NEW - Production Ready)
 export { useRateLimitNotification } from './useRateLimitNotification';
+
+// API Call Management (NEW - Backend Integration)
+export { useApiCall, usePaginatedApiCall } from './useApiCall';

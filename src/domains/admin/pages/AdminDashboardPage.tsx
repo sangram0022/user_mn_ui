@@ -21,8 +21,6 @@ import {
   ArrowDown,
   ArrowUp,
   Clock,
-  Database,
-  Monitor,
   RefreshCw,
   Shield,
   UserCheck,
@@ -39,6 +37,7 @@ import Breadcrumb from '@shared/ui/Breadcrumb';
 import ErrorAlert from '@shared/ui/ErrorAlert';
 import { formatTime } from '@shared/utils';
 import { adminService, auditService } from '../../../services/api';
+import { HealthMonitoringDashboard } from '../components/HealthMonitoringDashboard';
 
 // ============================================================================
 // Types & Interfaces
@@ -48,21 +47,6 @@ interface AdminStats {
   total_users: number;
   active_users: number;
   pending_approvals: number;
-}
-
-interface DatabaseHealth {
-  status: string;
-  timestamp: string;
-  connection_count: number;
-  response_time: number;
-}
-
-interface SystemMetrics {
-  status: string;
-  timestamp: string;
-  cpu_usage: number;
-  memory_usage: number;
-  disk_usage: number;
 }
 
 interface AuditSummary {
@@ -155,37 +139,6 @@ const StatCard: FC<StatCardProps> = ({ title, value, icon, trend, color, loading
   );
 };
 
-const HealthStatusBadge: FC<{ status: string; className?: string }> = ({
-  status,
-  className = '',
-}) => {
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'healthy':
-      case 'up':
-      case 'online':
-        return 'bg-green-100 text-green-800';
-      case 'warning':
-      case 'degraded':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'error':
-      case 'down':
-      case 'offline':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)} ${className}`}
-    >
-      {status}
-    </span>
-  );
-};
-
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -198,8 +151,6 @@ const AdminDashboardPage: FC = () => {
 
   // State
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
-  const [dbHealth, setDbHealth] = useState<DatabaseHealth | null>(null);
-  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics | null>(null);
   const [auditSummary, setAuditSummary] = useState<AuditSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -217,34 +168,11 @@ const AdminDashboardPage: FC = () => {
     if (!canViewAdminData) return;
 
     try {
-      const stats = await adminService.getStats();
+      const stats = (await adminService.getStats()) as AdminStats;
       setAdminStats(stats);
     } catch (error) {
       handleError(error, 'Failed to load admin statistics');
       toast.error('Failed to load admin statistics');
-    }
-  };
-
-  const loadSystemHealth = async () => {
-    try {
-      // TODO: Health monitoring endpoints not yet available in backend API
-      // Using mock data until backend implements /health endpoints
-      setDbHealth({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        connection_count: 0,
-        response_time: 0,
-      });
-      setSystemMetrics({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        cpu_usage: 0,
-        memory_usage: 0,
-        disk_usage: 0,
-      });
-    } catch (error) {
-      handleError(error, 'Failed to load system health data');
-      toast.error('Failed to load system health data');
     }
   };
 
@@ -277,7 +205,7 @@ const AdminDashboardPage: FC = () => {
     clearError();
 
     try {
-      await Promise.all([loadAdminStats(), loadSystemHealth(), loadAuditSummary()]);
+      await Promise.all([loadAdminStats(), loadAuditSummary()]);
     } finally {
       setIsLoading(false);
     }
@@ -300,17 +228,6 @@ const AdminDashboardPage: FC = () => {
   useEffect(() => {
     loadAllData();
   }, [loadAllData]);
-
-  // Auto-refresh every 30 seconds for health data
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isLoading && !isRefreshing) {
-        loadSystemHealth();
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [isLoading, isRefreshing, loadSystemHealth]);
 
   // ============================================================================
   // Render
@@ -396,135 +313,9 @@ const AdminDashboardPage: FC = () => {
           </div>
         )}
 
-        {/* System Health Section */}
-        <div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8"
-          role="region"
-          aria-label="System health monitoring"
-        >
-          {/* Database Health */}
-          <div className="card-white">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center">
-                <Database className="w-5 h-5 text-blue-600 mr-2" aria-hidden="true" />
-                <h3 className="text-lg font-medium text-gray-900">
-                  {t('dashboard.databaseHealth')}
-                </h3>
-                {dbHealth && <HealthStatusBadge status={dbHealth.status} className="ml-auto" />}
-              </div>
-            </div>
-            <div className="p-6" role="group" aria-labelledby="db-health-title">
-              <span id="db-health-title" className="sr-only">
-                Database health metrics
-              </span>
-              {isLoading ? (
-                <div className="space-y-3" role="status" aria-label="Loading database health">
-                  <span className="sr-only">Loading database health information</span>
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ) : dbHealth ? (
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">
-                      {t('dashboard.activeConnections')}
-                    </span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`${dbHealth.connection_count} active connections`}
-                    >
-                      {dbHealth.connection_count}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t('dashboard.responseTime')}</span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`Response time ${dbHealth.response_time} milliseconds`}
-                    >
-                      {dbHealth.response_time}ms
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t('dashboard.lastCheck')}</span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`Last checked at ${formatTime(dbHealth.timestamp)}`}
-                    >
-                      {formatTime(dbHealth.timestamp)}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500" role="alert">
-                  {t('dashboard.unableToLoadDatabaseHealth')}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* System Metrics */}
-          <div className="card-white">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center">
-                <Monitor className="w-5 h-5 text-green-600 mr-2" aria-hidden="true" />
-                <h3 className="text-lg font-medium text-gray-900">
-                  {t('dashboard.systemMetrics')}
-                </h3>
-                {systemMetrics && (
-                  <HealthStatusBadge status={systemMetrics.status} className="ml-auto" />
-                )}
-              </div>
-            </div>
-            <div className="p-6" role="group" aria-labelledby="system-metrics-title">
-              <span id="system-metrics-title" className="sr-only">
-                System performance metrics
-              </span>
-              {isLoading ? (
-                <div className="space-y-3" role="status" aria-label="Loading system metrics">
-                  <span className="sr-only">Loading system performance information</span>
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ) : systemMetrics ? (
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t('dashboard.cpuUsage')}</span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`CPU usage ${systemMetrics.cpu_usage.toFixed(1)} percent`}
-                    >
-                      {systemMetrics.cpu_usage.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t('dashboard.memoryUsage')}</span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`Memory usage ${systemMetrics.memory_usage.toFixed(1)} percent`}
-                    >
-                      {systemMetrics.memory_usage.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t('dashboard.diskUsage')}</span>
-                    <span
-                      className="text-sm font-medium"
-                      aria-label={`Disk usage ${systemMetrics.disk_usage.toFixed(1)} percent`}
-                    >
-                      {systemMetrics.disk_usage.toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500" role="alert">
-                  {t('dashboard.unableToLoadSystemMetrics')}
-                </p>
-              )}
-            </div>
-          </div>
+        {/* Health Monitoring Dashboard */}
+        <div className="mb-8" role="region" aria-label="System health monitoring">
+          <HealthMonitoringDashboard />
         </div>
 
         {/* Recent Activity */}
@@ -549,14 +340,14 @@ const AdminDashboardPage: FC = () => {
                 <div className="space-y-3" role="status" aria-label="Loading recent activity">
                   <span className="sr-only">Loading recent audit activity</span>
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-4 w-full" />
+                    <Skeleton key={`skeleton-${i}`} className="h-4 w-full" />
                   ))}
                 </div>
               ) : auditSummary.recent_activity.length > 0 ? (
                 <div className="space-y-3" role="list" aria-label="Recent audit activities">
                   {auditSummary.recent_activity.slice(0, 5).map((activity, index) => (
                     <div
-                      key={index}
+                      key={`activity-${activity.timestamp}-${index}`}
                       role="listitem"
                       className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
                       aria-label={`${activity.action}${activity.user_id ? ` by ${activity.user_id}` : ''} at ${formatTime(activity.timestamp)}`}

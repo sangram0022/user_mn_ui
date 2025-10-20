@@ -1,6 +1,7 @@
 ﻿import type { FC } from 'react';
 import { startTransition, useActionState, useEffect, useId, useState } from 'react';
 
+import { useNavigate } from '@hooks/useNavigate';
 import { useToast } from '@hooks/useToast';
 import { apiClient } from '@lib/api/client';
 import { PageMetadata } from '@shared/components/PageMetadata';
@@ -15,6 +16,7 @@ import {
   Edit3,
   Eye,
   EyeOff,
+  FileText,
   Globe,
   Loader,
   MapPin,
@@ -25,6 +27,8 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '../../auth';
+import { GDPRAccountDeletion } from '../components/GDPRAccountDeletion';
+import { GDPRDataExport } from '../components/GDPRDataExport';
 
 type ApiUserProfile = BaseUserProfile & {
   bio?: string | null;
@@ -127,12 +131,15 @@ async function changePasswordAction(
 const ProfilePage: FC = () => {
   const { refreshProfile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<ApiUserProfile | null>(null);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [success, setSuccess] = useState('');
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences' | 'privacy'>(
+    'profile'
+  );
 
   // Use React 19's useActionState for profile update
   const [profileState, submitProfileAction, isProfilePending] = useActionState(
@@ -284,6 +291,22 @@ const ProfilePage: FC = () => {
     });
   };
 
+  // Render tab functions
+  const renderPrivacyTab = () => (
+    <div className="p-6 space-y-6">
+      {/* GDPR Data Export */}
+      <GDPRDataExport />
+
+      {/* GDPR Account Deletion */}
+      <GDPRAccountDeletion
+        onDeleteSuccess={() => {
+          // Logout and redirect to home
+          navigate('/');
+        }}
+      />
+    </div>
+  );
+
   // Determine tab content
   let tabContent = null;
   switch (activeTab) {
@@ -295,6 +318,9 @@ const ProfilePage: FC = () => {
       break;
     case 'preferences':
       tabContent = renderPreferencesTab();
+      break;
+    case 'privacy':
+      tabContent = renderPrivacyTab();
       break;
   }
 
@@ -874,10 +900,13 @@ const ProfilePage: FC = () => {
                 { id: 'profile', label: 'Profile', icon: UserIcon },
                 { id: 'security', label: 'Security', icon: Shield },
                 { id: 'preferences', label: 'Preferences', icon: Settings },
+                { id: 'privacy', label: 'Privacy & Data', icon: FileText },
               ].map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
-                  onClick={() => setActiveTab(id as 'profile' | 'security' | 'preferences')}
+                  onClick={() =>
+                    setActiveTab(id as 'profile' | 'security' | 'preferences' | 'privacy')
+                  }
                   className={`flex flex-1 items-center justify-center gap-2 border-b-2 border-none p-4 text-sm font-medium transition-all duration-200 ${
                     activeTab === id
                       ? 'border-b-blue-500 bg-slate-50 text-blue-500'
