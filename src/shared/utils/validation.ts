@@ -1,5 +1,7 @@
 // Form validation utilities with React 19 best practices
 
+import { VALIDATION_RULES as BACKEND_VALIDATION_RULES } from '@shared/types';
+
 export type ValidationValue = string | number | boolean | null | undefined;
 
 export interface ValidationRule {
@@ -37,6 +39,191 @@ export const PHONE_REGEX = /^[+]?[1-9][\d]{0,15}$/;
 // URL validation regex
 export const URL_REGEX =
   /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/;
+
+// ============================================================================
+// BACKEND API-SPECIFIC VALIDATION FUNCTIONS ✅ NEW
+// Reference: backend_api_details/API_ERROR_CODES.md
+// ============================================================================
+
+export interface BackendValidationResult {
+  valid: boolean;
+  error?: string;
+}
+
+/**
+ * Validate email format and length (Backend API spec)
+ * - Must be valid email format (RFC 5322)
+ * - Maximum length: 255 characters
+ *
+ * @param email Email address to validate
+ * @returns Validation result with error message if invalid
+ */
+export function validateBackendEmail(email: string): BackendValidationResult {
+  if (!email || email.trim().length === 0) {
+    return {
+      valid: false,
+      error: 'Email is required',
+    };
+  }
+
+  if (email.length > BACKEND_VALIDATION_RULES.EMAIL.MAX_LENGTH) {
+    return {
+      valid: false,
+      error: `Email must be at most ${BACKEND_VALIDATION_RULES.EMAIL.MAX_LENGTH} characters`,
+    };
+  }
+
+  if (!BACKEND_VALIDATION_RULES.EMAIL.PATTERN.test(email)) {
+    return {
+      valid: false,
+      error: 'Invalid email format',
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Validate password strength (Backend API spec)
+ * - Minimum length: 8 characters
+ * - Must contain at least one uppercase letter
+ * - Must contain at least one lowercase letter
+ * - Must contain at least one digit
+ *
+ * @param password Password to validate
+ * @returns Validation result with error message if invalid
+ */
+export function validateBackendPassword(password: string): BackendValidationResult {
+  if (!password || password.trim().length === 0) {
+    return {
+      valid: false,
+      error: 'Password is required',
+    };
+  }
+
+  if (password.length < BACKEND_VALIDATION_RULES.PASSWORD.MIN_LENGTH) {
+    return {
+      valid: false,
+      error: `Password must be at least ${BACKEND_VALIDATION_RULES.PASSWORD.MIN_LENGTH} characters long`,
+    };
+  }
+
+  // Check for uppercase, lowercase, and digit (Backend spec)
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasDigit = /\d/.test(password);
+
+  if (!hasUppercase || !hasLowercase || !hasDigit) {
+    return {
+      valid: false,
+      error:
+        'Password must contain at least one uppercase letter, one lowercase letter, and one digit',
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Validate name (first name or last name) (Backend API spec)
+ * - Length: 1-100 characters
+ * - Must contain only letters, spaces, hyphens, and apostrophes
+ *
+ * @param name Name to validate
+ * @param fieldName Field name for error message (e.g., 'First name', 'Last name')
+ * @returns Validation result with error message if invalid
+ */
+export function validateBackendName(name: string, fieldName = 'Name'): BackendValidationResult {
+  if (!name || name.trim().length === 0) {
+    return {
+      valid: false,
+      error: `${fieldName} is required`,
+    };
+  }
+
+  if (
+    name.length < BACKEND_VALIDATION_RULES.NAME.MIN_LENGTH ||
+    name.length > BACKEND_VALIDATION_RULES.NAME.MAX_LENGTH
+  ) {
+    return {
+      valid: false,
+      error: `${fieldName} must be between ${BACKEND_VALIDATION_RULES.NAME.MIN_LENGTH} and ${BACKEND_VALIDATION_RULES.NAME.MAX_LENGTH} characters`,
+    };
+  }
+
+  if (!BACKEND_VALIDATION_RULES.NAME.PATTERN.test(name)) {
+    return {
+      valid: false,
+      error: `${fieldName} can only contain letters and spaces`,
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Validate GDPR delete confirmation (Backend API spec)
+ *
+ * @param confirmation Confirmation string from user
+ * @returns Validation result with error message if confirmation is invalid
+ */
+export function validateGDPRConfirmation(confirmation: string): BackendValidationResult {
+  if (confirmation !== 'DELETE_MY_ACCOUNT') {
+    return {
+      valid: false,
+      error: 'Please type DELETE_MY_ACCOUNT to confirm account deletion',
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Validate all fields in a registration form (Backend API spec)
+ *
+ * @param data Registration form data
+ * @returns Object with validation results for each field
+ */
+export function validateBackendRegistrationForm(data: {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+}): {
+  valid: boolean;
+  errors: {
+    email?: string;
+    password?: string;
+    first_name?: string;
+    last_name?: string;
+  };
+} {
+  const emailResult = validateBackendEmail(data.email);
+  const passwordResult = validateBackendPassword(data.password);
+  const firstNameResult = validateBackendName(data.first_name, 'First name');
+  const lastNameResult = validateBackendName(data.last_name, 'Last name');
+
+  const errors: {
+    email?: string;
+    password?: string;
+    first_name?: string;
+    last_name?: string;
+  } = {};
+
+  if (!emailResult.valid) errors.email = emailResult.error;
+  if (!passwordResult.valid) errors.password = passwordResult.error;
+  if (!firstNameResult.valid) errors.first_name = firstNameResult.error;
+  if (!lastNameResult.valid) errors.last_name = lastNameResult.error;
+
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors,
+  };
+}
+
+// ============================================================================
+// ORIGINAL VALIDATION FUNCTIONS (EXISTING)
+// ============================================================================
 
 /**
  * Validate a single field based on its rules

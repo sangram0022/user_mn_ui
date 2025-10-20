@@ -7,6 +7,9 @@ export * from './error';
 // Export utility types
 export * from './utilities';
 
+// Export comprehensive backend API types (100% matching backend documentation)
+export * from './api-backend.types';
+
 // ============================================================================
 // API Response Types
 // ============================================================================

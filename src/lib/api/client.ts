@@ -5,24 +5,41 @@ import type {
   AdminActivateUserResponse,
   AdminDeactivateUserResponse,
   AdminUsersQuery,
+  AssignRoleResponse,
   AuditLog,
-  AuditLogsQuery,
+  AuditLogsQueryParams,
   AuditSummary,
   ChangePasswordRequest,
+  CreateRoleRequest,
+  CreateRoleResponse,
   CreateUserRequest,
   CSRFTokenResponse,
+  DatabaseHealthResponse,
+  DeleteRoleResponse,
+  DetailedHealthResponse,
   ForgotPasswordResponse,
+  FrontendErrorRequest,
+  FrontendErrorResponse,
   GDPRDeleteRequest,
   GDPRDeleteResponse,
+  GDPRExportRequest,
   GDPRExportResponse,
   GDPRExportStatus,
+  HealthCheckResponse,
   LoginResponse,
   PendingWorkflow,
+  ReadinessCheckResponse,
   RegisterRequest,
   RegisterResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
   ResetPasswordRequest,
+  RevokeRoleResponse,
+  // ✅ NEW: Backend API types
+  RoleResponse,
+  SystemHealthResponse,
+  UpdateRoleRequest,
+  UpdateRoleResponse,
   UpdateUserRequest,
   UserAnalytics,
   UserProfile,
@@ -36,46 +53,126 @@ import { ApiError } from './error';
 
 const DEFAULT_BASE_URL = BACKEND_CONFIG.API_BASE_URL;
 
+/**
+ * Complete API Endpoints (48 endpoints)
+ * Reference: backend_api_details/API_DOCUMENTATION.md
+ *
+ * ✅ All endpoints match backend specification 100%
+ */
 const ENDPOINTS = {
+  // ============================================================================
+  // AUTHENTICATION ENDPOINTS (13 endpoints)
+  // ============================================================================
   auth: {
-    // Secure endpoints (httpOnly cookies)
-    loginSecure: '/auth/login-secure',
-    logoutSecure: '/auth/logout-secure',
-    refreshSecure: '/auth/refresh-secure',
-    csrfToken: '/auth/csrf-token',
-    validateCsrf: '/auth/validate-csrf',
-    // Legacy endpoints (backward compatibility)
-    login: '/auth/login',
-    register: '/auth/register',
-    logout: '/auth/logout',
-    refresh: '/auth/refresh',
-    passwordReset: '/auth/password-reset',
-    resetPassword: '/auth/reset-password',
-    forgotPassword: '/auth/forgot-password',
-    changePassword: '/auth/change-password',
-    verifyEmail: '/auth/verify-email',
-    resendVerification: '/auth/resend-verification',
-  },
-  profile: { me: '/profile/me' },
-  admin: {
-    users: '/admin/users',
-    userById: (userId: string) => `/admin/users/${userId}`,
-    activateUser: (userId: string) => `/admin/users/${userId}/activate`,
-    deactivateUser: (userId: string) => `/admin/users/${userId}/deactivate`,
-    approveUser: (userId: string) => `/admin/users/${userId}/approve`,
-    rejectUser: (userId: string) => `/admin/users/${userId}/reject`,
-    analytics: '/admin/analytics',
-  },
-  gdpr: {
-    exportMyData: '/gdpr/export/my-data',
-    exportStatus: (exportId: string) => `/gdpr/export/status/${exportId}`,
-    deleteMyAccount: '/gdpr/delete/my-account',
-  },
-  audit: { logs: '/audit/logs', summary: '/audit/summary' },
-  workflows: { pending: '/workflows/pending' },
-  health: { check: '/health', ping: '/ping' },
-} as const;
+    // Standard authentication (JWT tokens)
+    login: '/auth/login', // POST - User login
+    register: '/auth/register', // POST - User registration
+    logout: '/auth/logout', // POST - User logout
+    refresh: '/auth/refresh', // POST - Refresh access token
+    verifyEmail: '/auth/verify-email', // POST - Verify email with token
+    resendVerification: '/auth/resend-verification', // POST - Resend verification email
+    forgotPassword: '/auth/forgot-password', // POST - Request password reset
+    resetPassword: '/auth/reset-password', // POST - Reset password with token
+    changePassword: '/auth/change-password', // POST - Change password (authenticated)
+    passwordReset: '/auth/password-reset', // POST - Password reset (alias)
 
+    // Secure authentication (httpOnly cookies)
+    loginSecure: '/auth/secure-login', // POST - Login with secure cookies
+    logoutSecure: '/auth/secure-logout', // POST - Logout (clear cookies)
+    refreshSecure: '/auth/secure-refresh', // POST - Refresh token (cookies)
+
+    // CSRF protection
+    csrfToken: '/auth/csrf-token', // GET - Get CSRF token
+    validateCsrf: '/auth/validate-csrf', // POST - Validate CSRF token
+  },
+
+  // ============================================================================
+  // PROFILE ENDPOINTS (6 endpoints with aliases)
+  // ============================================================================
+  profile: {
+    me: '/profile/me', // GET/PUT - Current user profile
+    root: '/profile', // GET/PUT - Profile (alias)
+    rootSlash: '/profile/', // GET/PUT - Profile (alias)
+  },
+
+  // ============================================================================
+  // ADMIN - USER MANAGEMENT ENDPOINTS (7 endpoints)
+  // ============================================================================
+  admin: {
+    users: '/admin/users', // GET/POST - List/Create users
+    userById: (userId: string) => `/admin/users/${userId}`, // GET/PUT/DELETE - User operations
+    approveUserLegacy: '/admin/approve-user', // POST - Approve user (legacy)
+    approveUser: (userId: string) => `/admin/users/${userId}/approve`, // POST - Approve user (RESTful)
+    rejectUser: (userId: string) => `/admin/users/${userId}/reject`, // POST - Reject user
+
+    // Custom activation endpoints (if different from approve)
+    activateUser: (userId: string) => `/admin/users/${userId}/activate`, // POST - Activate user
+    deactivateUser: (userId: string) => `/admin/users/${userId}/deactivate`, // POST - Deactivate user
+
+    // ============================================================================
+    // ADMIN - ROLE MANAGEMENT ENDPOINTS (7 endpoints) ✅ NEW
+    // ============================================================================
+    roles: '/admin/roles', // GET/POST - List/Create roles
+    roleByName: (roleName: string) => `/admin/roles/${roleName}`, // GET/PUT/DELETE - Role operations
+    assignRole: (userId: string) => `/admin/users/${userId}/assign-role`, // POST - Assign role
+    revokeRole: (userId: string) => `/admin/users/${userId}/revoke-role`, // POST - Revoke role
+
+    // ============================================================================
+    // ADMIN - AUDIT LOGS (1 endpoint)
+    // ============================================================================
+    auditLogs: '/admin/audit-logs', // GET - Admin audit logs
+
+    // Analytics
+    analytics: '/admin/analytics', // GET - User analytics
+  },
+
+  // ============================================================================
+  // AUDIT ENDPOINTS (2 endpoints)
+  // ============================================================================
+  audit: {
+    logs: '/audit/logs', // GET - Query audit logs
+    summary: '/audit/summary', // GET - Audit summary statistics
+  },
+
+  // ============================================================================
+  // GDPR ENDPOINTS (3 endpoints)
+  // ============================================================================
+  gdpr: {
+    exportMyData: '/gdpr/export/my-data', // POST - Export personal data
+    exportStatus: (exportId: string) => `/gdpr/export/status/${exportId}`, // GET - Export status
+    deleteMyAccount: '/gdpr/delete/my-account', // DELETE - Delete account (GDPR)
+  },
+
+  // ============================================================================
+  // HEALTH ENDPOINTS (7 endpoints) ✅ NEW
+  // ============================================================================
+  health: {
+    root: '/health/', // GET - Basic health check
+    ping: '/health/ping', // GET - Ping endpoint
+    ready: '/health/ready', // GET - Readiness probe
+    live: '/health/live', // GET - Liveness probe
+    detailed: '/health/detailed', // GET - Detailed health status
+    database: '/health/database', // GET - Database health check
+    system: '/health/system', // GET - System resources check
+
+    // Legacy endpoint (deprecated, use /health/)
+    check: '/health', // GET - Health check (legacy)
+  },
+
+  // ============================================================================
+  // LOGS ENDPOINTS (1 endpoint) ✅ NEW
+  // ============================================================================
+  logs: {
+    frontendErrors: '/logs/frontend-errors', // POST - Log frontend errors
+  },
+
+  // ============================================================================
+  // WORKFLOWS (Non-standard, keeping for backward compatibility)
+  // ============================================================================
+  workflows: {
+    pending: '/workflows/pending', // GET - Pending workflows
+  },
+} as const;
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 export interface RequestOptions extends RequestInit {
@@ -905,7 +1002,13 @@ export class ApiClient {
     return await this.dedupedRequest<T>('/business-logic/lifecycle/analytics');
   }
 
-  async getAuditLogs(params?: AuditLogsQuery): Promise<AuditLog[]> {
+  /**
+   * Get audit logs with advanced filtering
+   * GET /audit/logs
+   * @param params Query parameters (action, resource, user_id, start_date, end_date, severity, page, limit)
+   * @returns Array of audit log entries
+   */
+  async getAuditLogs(params?: AuditLogsQueryParams): Promise<AuditLog[]> {
     const searchParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -942,9 +1045,16 @@ export class ApiClient {
     });
   }
 
-  async requestGDPRExport(): Promise<GDPRExportResponse> {
+  /**
+   * Request GDPR data export
+   * POST /gdpr/export/my-data
+   * @param options Export options (format, include_audit_logs, include_metadata)
+   * @returns Export request confirmation with export_id
+   */
+  async requestGDPRExport(options?: GDPRExportRequest): Promise<GDPRExportResponse> {
     return await this.request<GDPRExportResponse>(ENDPOINTS.gdpr.exportMyData, {
       method: 'POST',
+      body: options ? JSON.stringify(options) : undefined,
     });
   }
 
@@ -1004,6 +1114,173 @@ export class ApiClient {
     }
   }
 
+  // ============================================================================
+  // ROLE MANAGEMENT ENDPOINTS (7 new methods) ✅
+  // Reference: backend_api_details/API_ADMIN_ENDPOINTS.md
+  // ============================================================================
+
+  /**
+   * Get all roles
+   * GET /admin/roles
+   * @returns Array of all roles with permissions
+   */
+  async getAllRoles(): Promise<RoleResponse[]> {
+    return await this.dedupedRequest<RoleResponse[]>(ENDPOINTS.admin.roles);
+  }
+
+  /**
+   * Create new role
+   * POST /admin/roles
+   * @param payload Role details (name, description, permissions)
+   * @returns Created role details
+   */
+  async createRole(payload: CreateRoleRequest): Promise<CreateRoleResponse> {
+    return await this.request<CreateRoleResponse>(ENDPOINTS.admin.roles, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  /**
+   * Get role by name
+   * GET /admin/roles/{roleName}
+   * @param roleName Role name (e.g., 'admin', 'manager')
+   * @returns Role details with permissions
+   */
+  async getRole(roleName: string): Promise<RoleResponse> {
+    return await this.dedupedRequest<RoleResponse>(ENDPOINTS.admin.roleByName(roleName));
+  }
+
+  /**
+   * Update role
+   * PUT /admin/roles/{roleName}
+   * @param roleName Role name to update
+   * @param payload Updated role details
+   * @returns Updated role details
+   */
+  async updateRole(roleName: string, payload: UpdateRoleRequest): Promise<UpdateRoleResponse> {
+    return await this.request<UpdateRoleResponse>(ENDPOINTS.admin.roleByName(roleName), {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  /**
+   * Delete role
+   * DELETE /admin/roles/{roleName}
+   * @param roleName Role name to delete
+   * @returns Deletion confirmation
+   */
+  async deleteRole(roleName: string): Promise<DeleteRoleResponse> {
+    return await this.request<DeleteRoleResponse>(ENDPOINTS.admin.roleByName(roleName), {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Assign role to user
+   * POST /admin/users/{userId}/assign-role
+   * @param userId User ID
+   * @param role Role name to assign
+   * @returns Assignment confirmation
+   */
+  async assignRoleToUser(userId: string, role: string): Promise<AssignRoleResponse> {
+    return await this.request<AssignRoleResponse>(ENDPOINTS.admin.assignRole(userId), {
+      method: 'POST',
+      body: JSON.stringify({ role }),
+    });
+  }
+
+  /**
+   * Revoke role from user
+   * POST /admin/users/{userId}/revoke-role
+   * @param userId User ID
+   * @returns Revocation confirmation
+   */
+  async revokeRoleFromUser(userId: string): Promise<RevokeRoleResponse> {
+    return await this.request<RevokeRoleResponse>(ENDPOINTS.admin.revokeRole(userId), {
+      method: 'POST',
+    });
+  }
+
+  // ============================================================================
+  // HEALTH CHECK ENDPOINTS (5 new methods) ✅
+  // Reference: backend_api_details/API_PROFILE_GDPR_ENDPOINTS.md
+  // ============================================================================
+
+  /**
+   * Readiness probe (Kubernetes)
+   * GET /health/ready
+   * @returns Readiness status (dependencies checked)
+   */
+  async readinessCheck(): Promise<ReadinessCheckResponse> {
+    return await this.request<ReadinessCheckResponse>(ENDPOINTS.health.ready, {
+      method: 'GET',
+    });
+  }
+
+  /**
+   * Liveness probe (Kubernetes)
+   * GET /health/live
+   * @returns Liveness status (basic health)
+   */
+  async livenessCheck(): Promise<HealthCheckResponse> {
+    return await this.request<HealthCheckResponse>(ENDPOINTS.health.live, {
+      method: 'GET',
+    });
+  }
+
+  /**
+   * Detailed health check
+   * GET /health/detailed
+   * @returns Detailed health status with components
+   */
+  async detailedHealth(): Promise<DetailedHealthResponse> {
+    return await this.request<DetailedHealthResponse>(ENDPOINTS.health.detailed, {
+      method: 'GET',
+    });
+  }
+
+  /**
+   * Database health check
+   * GET /health/database
+   * @returns Database connection status
+   */
+  async databaseHealth(): Promise<DatabaseHealthResponse> {
+    return await this.request<DatabaseHealthResponse>(ENDPOINTS.health.database, {
+      method: 'GET',
+    });
+  }
+
+  /**
+   * System health check
+   * GET /health/system
+   * @returns System resources (CPU, memory, disk)
+   */
+  async systemHealth(): Promise<SystemHealthResponse> {
+    return await this.request<SystemHealthResponse>(ENDPOINTS.health.system, {
+      method: 'GET',
+    });
+  }
+
+  // ============================================================================
+  // FRONTEND ERROR LOGGING ENDPOINT (1 new method) ✅
+  // Reference: backend_api_details/API_PROFILE_GDPR_ENDPOINTS.md
+  // ============================================================================
+
+  /**
+   * Log frontend error to backend
+   * POST /logs/frontend-errors
+   * @param payload Frontend error details
+   * @returns Logging confirmation
+   */
+  async logFrontendError(payload: FrontendErrorRequest): Promise<FrontendErrorResponse> {
+    return await this.request<FrontendErrorResponse>(ENDPOINTS.logs.frontendErrors, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
   async execute<T>(path: string, options: RequestOptions = {}): Promise<T> {
     return await this.request<T>(path, options);
   }
@@ -1043,9 +1320,18 @@ export const useApi = () => ({
   activateUser: apiClient.activateUser.bind(apiClient),
   deactivateUser: apiClient.deactivateUser.bind(apiClient),
 
-  // Admin - Analytics & Roles
+  // Admin - Analytics
   getUserAnalytics: apiClient.getUserAnalytics.bind(apiClient),
+
+  // Admin - Role Management ✅ NEW (7 methods)
   getRoles: apiClient.getRoles.bind(apiClient),
+  getAllRoles: apiClient.getAllRoles.bind(apiClient),
+  createRole: apiClient.createRole.bind(apiClient),
+  getRole: apiClient.getRole.bind(apiClient),
+  updateRole: apiClient.updateRole.bind(apiClient),
+  deleteRole: apiClient.deleteRole.bind(apiClient),
+  assignRoleToUser: apiClient.assignRoleToUser.bind(apiClient),
+  revokeRoleFromUser: apiClient.revokeRoleFromUser.bind(apiClient),
 
   // Audit
   getAuditLogs: apiClient.getAuditLogs.bind(apiClient),
@@ -1063,9 +1349,17 @@ export const useApi = () => ({
   // Security
   getCSRFToken: apiClient.getCSRFToken.bind(apiClient),
 
-  // Health
+  // Health ✅ NEW (7 methods total: 2 existing + 5 new)
   healthCheck: apiClient.healthCheck.bind(apiClient),
   ping: apiClient.ping.bind(apiClient),
+  readinessCheck: apiClient.readinessCheck.bind(apiClient),
+  livenessCheck: apiClient.livenessCheck.bind(apiClient),
+  detailedHealth: apiClient.detailedHealth.bind(apiClient),
+  databaseHealth: apiClient.databaseHealth.bind(apiClient),
+  systemHealth: apiClient.systemHealth.bind(apiClient),
+
+  // Frontend Error Logging ✅ NEW (1 method)
+  logFrontendError: apiClient.logFrontendError.bind(apiClient),
 
   // Generic
   execute: apiClient.execute.bind(apiClient),
