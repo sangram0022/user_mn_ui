@@ -10,7 +10,9 @@
 ## ⚡ Get Started in 5 Minutes
 
 ### Step 1: Understand What You're Testing
+
 The User Management UI has 6 major features:
+
 1. ✅ **User Management** - Search, filter, export users
 2. ✅ **Audit Logging** - Track user actions with filtering
 3. ✅ **GDPR Compliance** - Data export & account deletion
@@ -19,22 +21,26 @@ The User Management UI has 6 major features:
 6. ✅ **Error Handling** - User-friendly error messages
 
 ### Step 2: Start Development Server
+
 ```bash
 npm run dev
 # Application will be available at http://localhost:5173
 ```
 
 ### Step 3: Open Test Checklist
+
 - **File**: `docs/QA_TESTING_CHECKLIST.md`
 - **Contains**: Master checklist with 50+ test cases
 - **Use**: Mark each test as PASS/FAIL
 
 ### Step 4: Follow Testing Procedures
+
 - **File**: `docs/MANUAL_TESTING_PROCEDURES.md`
 - **Contains**: Step-by-step instructions for each test
 - **Follow**: Exactly as written
 
 ### Step 5: Document Issues
+
 - **For each failed test**: Note what went wrong
 - **Screenshot**: Capture the issue
 - **Reproduce**: Try to reproduce 2-3 times
@@ -45,9 +51,11 @@ npm run dev
 ## 📋 Testing Modules - In Order
 
 ### Module 1: Authentication (30 min) - 5 Tests
+
 **What to test**: Login/logout and session management
 
 **Key tests**:
+
 - [ ] Login with valid credentials
 - [ ] Login with invalid password (shows error)
 - [ ] Session persists on page refresh
@@ -59,9 +67,11 @@ npm run dev
 ---
 
 ### Module 2: User Management (1 hour) - 8 Tests
+
 **What to test**: User list with filtering and export
 
 **Key tests**:
+
 - [ ] User list displays correctly
 - [ ] Search by email works
 - [ ] Filter by role works
@@ -76,9 +86,11 @@ npm run dev
 ---
 
 ### Module 3: Audit Log (45 min) - 6 Tests
+
 **What to test**: Audit logging with filtering
 
 **Key tests**:
+
 - [ ] Audit log displays entries
 - [ ] Filter by action type works
 - [ ] Filter by date range works
@@ -91,9 +103,11 @@ npm run dev
 ---
 
 ### Module 4: Health Monitoring (45 min) - 8 Tests
+
 **What to test**: System health dashboard
 
 **Key tests**:
+
 - [ ] Dashboard loads correctly
 - [ ] System status shows correct value
 - [ ] Database connection status displays
@@ -108,9 +122,11 @@ npm run dev
 ---
 
 ### Module 5: Profile Management (45 min) - 6 Tests
+
 **What to test**: User profile and preferences
 
 **Key tests**:
+
 - [ ] Profile information displays
 - [ ] Can navigate to all tabs
 - [ ] Language preference can be changed
@@ -123,9 +139,11 @@ npm run dev
 ---
 
 ### Module 6: GDPR Features (1 hour) - 8 Tests
+
 **What to test**: Data export and account deletion
 
 **Key tests**:
+
 - [ ] Export data button works
 - [ ] Exported file is valid JSON
 - [ ] Exported file contains user data
@@ -140,9 +158,11 @@ npm run dev
 ---
 
 ### Module 7: Error Handling (30 min) - 5 Tests
+
 **What to test**: Error messages and notifications
 
 **Key tests**:
+
 - [ ] Network error shows message
 - [ ] Validation errors display
 - [ ] Success notifications show
@@ -154,9 +174,11 @@ npm run dev
 ---
 
 ### Module 8: Mobile/Responsive (1 hour) - 4 Tests
+
 **What to test**: Different screen sizes
 
 **Key tests**:
+
 - [ ] Mobile (320px) layout works
 - [ ] Tablet (768px) layout works
 - [ ] Desktop (1920px) layout works
@@ -169,21 +191,26 @@ npm run dev
 ## 🛠️ Testing Environment Setup
 
 ### Browser Setup
+
 1. Open **Chrome** (or Firefox, Edge, Safari)
 2. Open **DevTools** (F12)
 3. Go to **Console** tab
 4. Keep DevTools open during testing
 
 ### Test Credentials
+
 **Admin Account:**
+
 - Email: `admin@example.com`
 - Password: `Test@123456`
 
 **Regular User Account:**
+
 - Email: `user@example.com`
 - Password: `Test@123456`
 
 ### Before You Start
+
 - [ ] Development server running (`npm run dev`)
 - [ ] Application loads at http://localhost:5173
 - [ ] DevTools open and console clear
@@ -196,22 +223,26 @@ npm run dev
 ## 📊 Testing Execution Plan
 
 ### Day 1 Morning
+
 - **Module 1**: Authentication (30 min)
 - **Module 2**: User Management (1 hour)
 - **Module 3**: Audit Log (45 min)
 - **Time**: ~2.5 hours
 
 ### Day 1 Afternoon
+
 - **Module 4**: Health Monitoring (45 min)
 - **Module 5**: Profile Management (45 min)
 - **Time**: ~1.5 hours
 
 ### Day 2 Morning
+
 - **Module 6**: GDPR Features (1 hour)
 - **Module 7**: Error Handling (30 min)
 - **Time**: ~1.5 hours
 
 ### Day 2 Afternoon
+
 - **Module 8**: Mobile/Responsive (1 hour)
 - **Issue Triage**: Categorize and document issues (1 hour)
 - **Time**: ~2 hours
@@ -268,22 +299,26 @@ npm run dev
 ✅ **Most tests pass** (85-95% pass rate expected)
 
 ⚠️ **A few minor issues** (2-5 issues expected)
+
 - UI/UX minor issues
 - Tooltip text improvements
 - Styling edge cases
 
 ❌ **Very few critical issues** (0-2 expected)
+
 - Features completely broken
 - Security issues
 - Data loss
 
 ### What NOT to Worry About
+
 - Minor styling differences
 - Tooltip text wording
 - Animation timing
 - Console warnings (if non-critical)
 
 ### What TO Worry About
+
 - Features completely broken
 - Security issues
 - Data not saving
@@ -294,6 +329,7 @@ npm run dev
 ## 📝 Documentation During Testing
 
 ### Keep Track Of:
+
 1. **Tests passed**: Number of passing tests
 2. **Tests failed**: Number of failing tests
 3. **Issues found**: Description of each issue
@@ -301,6 +337,7 @@ npm run dev
 5. **Severity**: Critical, Major, or Minor
 
 ### Use These Forms:
+
 - **QA_TESTING_CHECKLIST.md** - Mark each test result
 - **MANUAL_TESTING_PROCEDURES.md** - Reference for steps
 - **Notes section**: Record observations
@@ -339,12 +376,14 @@ Testing phase is **SUCCESSFUL** when:
 ### During Testing
 
 **If you get stuck**:
+
 1. Check MANUAL_TESTING_PROCEDURES.md for the test you're running
 2. Review DOCUMENTATION_INDEX.md for feature information
 3. Check PROJECT_SUMMARY_AND_DEPLOYMENT_READINESS.md for context
 4. Refer to feature-specific docs (STEP5_GDPR_FEATURES.md, etc.)
 
 **If something seems wrong**:
+
 1. Try to reproduce it 2-3 times
 2. Try different browser if possible
 3. Clear browser cache (Ctrl+Shift+Delete)
@@ -356,6 +395,7 @@ Testing phase is **SUCCESSFUL** when:
 ## 🎓 Tips for Successful QA Testing
 
 ### DO ✅
+
 - ✅ Follow procedures exactly as written
 - ✅ Test methodically - one test at a time
 - ✅ Take screenshots of failures
@@ -368,6 +408,7 @@ Testing phase is **SUCCESSFUL** when:
 - ✅ Be thorough but efficient
 
 ### DON'T ❌
+
 - ❌ Skip steps in procedures
 - ❌ Assume things work
 - ❌ Test randomly
@@ -384,6 +425,7 @@ Testing phase is **SUCCESSFUL** when:
 ## 📊 Sample Issue Documentation
 
 ### Example 1: Minor Issue
+
 ```
 Issue Title: Search field placeholder text unclear
 Severity: Minor
@@ -397,6 +439,7 @@ Screenshot: [attached]
 ```
 
 ### Example 2: Major Issue
+
 ```
 Issue Title: Export CSV button doesn't download file
 Severity: Major
@@ -412,6 +455,7 @@ Screenshot: [attached]
 ```
 
 ### Example 3: Critical Issue
+
 ```
 Issue Title: Cannot delete account - process fails silently
 Severity: Critical
@@ -433,6 +477,7 @@ Screenshot: [attached]
 ## 🏁 After Testing
 
 ### When Done:
+
 1. [ ] All 50+ tests executed
 2. [ ] All results documented
 3. [ ] All issues categorized (Critical/Major/Minor)
@@ -440,6 +485,7 @@ Screenshot: [attached]
 5. [ ] Report sent to development team
 
 ### Next Steps:
+
 1. **If all pass**: Proceed to deployment
 2. **If issues found**: Development team fixes them
 3. **After fixes**: Retest affected areas
@@ -451,13 +497,13 @@ Screenshot: [attached]
 
 **Need info?** Check these:
 
-| Need | File | Location |
-|------|------|----------|
-| Test procedures | MANUAL_TESTING_PROCEDURES.md | docs/ |
-| Test checklist | QA_TESTING_CHECKLIST.md | docs/ |
-| Feature info | STEP5_GDPR_FEATURES.md | docs/ |
-| Deployment info | PROJECT_SUMMARY_AND_DEPLOYMENT_READINESS.md | docs/ |
-| Finding things | DOCUMENTATION_INDEX.md | docs/ |
+| Need            | File                                        | Location |
+| --------------- | ------------------------------------------- | -------- |
+| Test procedures | MANUAL_TESTING_PROCEDURES.md                | docs/    |
+| Test checklist  | QA_TESTING_CHECKLIST.md                     | docs/    |
+| Feature info    | STEP5_GDPR_FEATURES.md                      | docs/    |
+| Deployment info | PROJECT_SUMMARY_AND_DEPLOYMENT_READINESS.md | docs/    |
+| Finding things  | DOCUMENTATION_INDEX.md                      | docs/    |
 
 ---
 
@@ -480,9 +526,10 @@ Screenshot: [attached]
 
 ## 🎉 You're Ready!
 
-All setup is complete. 
+All setup is complete.
 
 **Start with Module 1: Authentication** (30 min)
+
 - Open: `docs/MANUAL_TESTING_PROCEDURES.md`
 - Find: "Module 1: Authentication Flow"
 - Follow: Step-by-step instructions
@@ -497,4 +544,3 @@ All setup is complete.
 **Document Version**: 1.0  
 **Created**: October 20, 2025  
 **Next Step**: Begin Module 1 Testing
-
