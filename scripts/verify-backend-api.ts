@@ -33,7 +33,7 @@ async function testEndpoint(
   }
 
   const startTime = Date.now();
-  
+
   try {
     const response = await fetch(`${API_BASE}${endpoint}`, {
       method,
@@ -104,10 +104,10 @@ async function testEndpoint(
 
 async function runTests() {
   console.log('\n🔍 Backend API Verification');
-  console.log('=' .repeat(80));
+  console.log('='.repeat(80));
   console.log(`Backend URL: ${BACKEND_URL}`);
   console.log(`API Base: ${API_BASE}`);
-  console.log('=' .repeat(80));
+  console.log('='.repeat(80));
   console.log('');
 
   // ============================================================================
@@ -115,7 +115,7 @@ async function runTests() {
   // ============================================================================
   console.log('📊 1. HEALTH ENDPOINTS');
   console.log('-'.repeat(80));
-  
+
   results.push(await testEndpoint('/health', 'GET'));
   results.push(await testEndpoint('/health/', 'GET'));
   results.push(await testEndpoint('/health/ping', 'GET'));
@@ -130,7 +130,7 @@ async function runTests() {
   // ============================================================================
   console.log('\n🔐 2. AUTHENTICATION ENDPOINTS');
   console.log('-'.repeat(80));
-  
+
   results.push(await testEndpoint('/auth/login', 'POST', true));
   results.push(await testEndpoint('/auth/secure-login', 'POST', true));
   results.push(await testEndpoint('/auth/register', 'POST', true));
@@ -150,7 +150,7 @@ async function runTests() {
   // ============================================================================
   console.log('\n👤 3. PROFILE ENDPOINTS');
   console.log('-'.repeat(80));
-  
+
   results.push(await testEndpoint('/profile', 'GET', true, true)); // Skip (requires auth)
   results.push(await testEndpoint('/profile/', 'GET', true, true)); // Skip (requires auth)
   results.push(await testEndpoint('/profile/me', 'GET', true, true)); // Skip (requires auth)
@@ -160,34 +160,34 @@ async function runTests() {
   // ============================================================================
   console.log('\n👥 4. ADMIN - USER MANAGEMENT ENDPOINTS');
   console.log('-'.repeat(80));
-  
+
   results.push(await testEndpoint('/admin/users', 'GET', true, true)); // Skip (requires admin auth)
   results.push(await testEndpoint('/admin/users', 'POST', true, true)); // Skip (requires admin auth)
   // Can't test dynamic routes without user ID
-  
+
   // ============================================================================
   // 5. ADMIN - ROLE MANAGEMENT ENDPOINTS (4 tests)
   // ============================================================================
   console.log('\n🎭 5. ADMIN - ROLE MANAGEMENT ENDPOINTS');
   console.log('-'.repeat(80));
-  
+
   results.push(await testEndpoint('/admin/roles', 'GET', true, true)); // Skip (requires admin auth)
   results.push(await testEndpoint('/admin/roles', 'POST', true, true)); // Skip (requires admin auth)
-  
+
   // ============================================================================
   // 6. ADMIN - AUDIT LOGS (1 test)
   // ============================================================================
   console.log('\n📋 6. ADMIN - AUDIT LOGS');
   console.log('-'.repeat(80));
-  
+
   results.push(await testEndpoint('/admin/audit-logs', 'GET', true, true)); // Skip (requires admin auth)
-  
+
   // ============================================================================
   // 7. AUDIT ENDPOINTS (2 tests)
   // ============================================================================
   console.log('\n📝 7. AUDIT ENDPOINTS');
   console.log('-'.repeat(80));
-  
+
   results.push(await testEndpoint('/audit/logs', 'GET', true, true)); // Skip (requires auth)
   results.push(await testEndpoint('/audit/summary', 'GET', true, true)); // Skip (requires auth)
 
@@ -196,7 +196,7 @@ async function runTests() {
   // ============================================================================
   console.log('\n🔒 8. GDPR ENDPOINTS');
   console.log('-'.repeat(80));
-  
+
   results.push(await testEndpoint('/gdpr/export/my-data', 'POST', true, true)); // Skip (requires auth)
   results.push(await testEndpoint('/gdpr/delete/my-account', 'DELETE', true, true)); // Skip (requires auth)
 
@@ -205,7 +205,7 @@ async function runTests() {
   // ============================================================================
   console.log('\n📜 9. LOGS ENDPOINTS');
   console.log('-'.repeat(80));
-  
+
   results.push(await testEndpoint('/logs/frontend-errors', 'POST', true));
 
   // ============================================================================
@@ -233,12 +233,15 @@ async function runTests() {
   results.forEach((result) => {
     const statusIcon = result.status === 'PASS' ? '✅' : result.status === 'FAIL' ? '❌' : '⏭️';
     const timeStr = result.responseTime ? ` (${result.responseTime}ms)` : '';
-    console.log(`${statusIcon} ${result.method.padEnd(6)} ${result.endpoint.padEnd(40)} ${result.message}${timeStr}`);
+    console.log(
+      `${statusIcon} ${result.method.padEnd(6)} ${result.endpoint.padEnd(40)} ${result.message}${timeStr}`
+    );
   });
 
   // Critical failures
   const criticalFailures = results.filter(
-    (r) => r.status === 'FAIL' && !r.endpoint.startsWith('/admin') && !r.endpoint.startsWith('/profile')
+    (r) =>
+      r.status === 'FAIL' && !r.endpoint.startsWith('/admin') && !r.endpoint.startsWith('/profile')
   );
 
   if (criticalFailures.length > 0) {
@@ -274,9 +277,11 @@ async function runTests() {
 }
 
 // Run tests
-runTests().then((summary) => {
-  process.exit(summary.criticalFailures > 0 ? 1 : 0);
-}).catch((error) => {
-  console.error('\n❌ Test execution failed:', error);
-  process.exit(1);
-});
+runTests()
+  .then((summary) => {
+    process.exit(summary.criticalFailures > 0 ? 1 : 0);
+  })
+  .catch((error) => {
+    console.error('\n❌ Test execution failed:', error);
+    process.exit(1);
+  });

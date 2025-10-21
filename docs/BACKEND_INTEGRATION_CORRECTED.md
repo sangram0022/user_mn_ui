@@ -32,17 +32,17 @@
 
 ## 📋 Complete Backend Endpoints (48 Total) ✅ CORRECTED
 
-| Category              | Endpoints | Implemented | Details                               |
-| --------------------- | --------- | ----------- | ------------------------------------- |
-| **Authentication**    | 13        | ✅ All      | Standard JWT + Secure cookie variants |
-| **Profile**           | 6         | ✅ All      | Main + 5 alias endpoints              |
-| **Admin Users**       | 9         | ✅ All      | CRUD + Approve/Reject + Audit         |
-| **Admin Roles**       | 7         | ✅ All      | Full RBAC management                  |
-| **Audit Logs**        | 2         | ✅ All      | Query + Summary                       |
-| **GDPR**              | 3         | ✅ All      | Export + Status + Delete              |
-| **Health**            | 7         | ✅ All      | Basic + Detailed + K8s probes         |
-| **Logs**              | 1         | ✅ All      | Frontend error logging                |
-| **TOTAL**             | **48**    | ✅ **100%** | Complete coverage                     |
+| Category           | Endpoints | Implemented | Details                               |
+| ------------------ | --------- | ----------- | ------------------------------------- |
+| **Authentication** | 13        | ✅ All      | Standard JWT + Secure cookie variants |
+| **Profile**        | 6         | ✅ All      | Main + 5 alias endpoints              |
+| **Admin Users**    | 9         | ✅ All      | CRUD + Approve/Reject + Audit         |
+| **Admin Roles**    | 7         | ✅ All      | Full RBAC management                  |
+| **Audit Logs**     | 2         | ✅ All      | Query + Summary                       |
+| **GDPR**           | 3         | ✅ All      | Export + Status + Delete              |
+| **Health**         | 7         | ✅ All      | Basic + Detailed + K8s probes         |
+| **Logs**           | 1         | ✅ All      | Frontend error logging                |
+| **TOTAL**          | **48**    | ✅ **100%** | Complete coverage                     |
 
 ---
 
@@ -152,8 +152,8 @@ curl http://127.0.0.1:8001/health
 ✅ 200 OK - Backend healthy
 
 # Login test (needs admin user)
-Invoke-RestMethod -Uri "http://127.0.0.1:8001/api/v1/auth/login" -Method Post -Body '{"email":"admin@example.com","password":"Admin@123456"}'
-❌ 500 Error - Admin user not created yet
+Invoke-RestMethod -Uri "http://127.0.0.1:8001/api/v1/auth/login" -Method Post -Body '{"email":"sangram0202@gmail.com","password":"Sangram@1"}'
+❌ 500 Error - Admin user not created yet (if not set up)
 ```
 
 ### Integration Test Script
@@ -164,6 +164,7 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8001/api/v1/auth/login" -Method Post -B
 - Tests protected routes
 
 **Test Results**:
+
 - Health: ❌ 404 (wrong path used: `/api/v1/health/` instead of `/health`)
 - Login: ❌ 500 (admin user not created)
 - Protected: ⏭️ Skipped (no auth token)
@@ -179,6 +180,7 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8001/api/v1/auth/login" -Method Post -B
 **Solution**: Run `python seed_rbac_roles.py` in backend directory
 
 **Test Command**:
+
 ```powershell
 cd d:\code\python\user_mn
 python seed_rbac_roles.py
@@ -219,7 +221,7 @@ curl http://127.0.0.1:8001/health
 Invoke-RestMethod -Uri "http://127.0.0.1:8001/api/v1/auth/login" `
   -Method Post `
   -ContentType "application/json" `
-  -Body '{"email":"admin@example.com","password":"Admin@123456"}'
+  -Body '{"email":"sangram0202@gmail.com","password":"Sangram@1"}'
 
 # Expected: JSON with access_token, refresh_token
 ```
@@ -234,7 +236,7 @@ cd d:\code\reactjs\user_mn_ui
 npm run dev
 
 # Open browser: http://localhost:5173
-# Login: admin@example.com / Admin@123456
+# Login: sangram0202@gmail.com / Sangram@1
 ```
 
 ---
@@ -254,6 +256,7 @@ npm run dev
 **Correction Made**: Backend has **48 endpoints** (not 39)
 
 **Breakdown of Missed Endpoints**:
+
 - Authentication: +3 endpoints (secure login variants)
 - Profile: +5 endpoints (alias routes)
 - Admin Users: +2 endpoints (approve legacy + audit logs)

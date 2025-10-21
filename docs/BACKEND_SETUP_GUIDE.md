@@ -62,7 +62,7 @@ curl http://127.0.0.1:8001/health
 Invoke-RestMethod -Uri "http://127.0.0.1:8001/api/v1/auth/login" `
   -Method Post `
   -ContentType "application/json" `
-  -Body '{"email":"admin@example.com","password":"Admin@123456"}'
+  -Body '{"email":"sangram0202@gmail.com","password":"Sangram@1"}'
 
 # Should return:
 # {
@@ -108,11 +108,13 @@ The API client in `src/lib/api/client.ts` is configured to use:
 - `POST /api/v1/auth/resend-verification` - Resend verification
 - `POST /api/v1/auth/forgot-password` - Request password reset
 - `POST /api/v1/auth/reset-password` - Reset password
+
 9. `POST /api/v1/auth/change-password` - Change password
 10. `POST /api/v1/auth/password-reset` - Password reset (alias)
 11. `POST /api/v1/auth/secure-login` - Secure login (cookies)
 12. `POST /api/v1/auth/secure-logout` - Secure logout
 13. `POST /api/v1/auth/secure-refresh` - Secure refresh
+
 - `GET /api/v1/auth/csrf-token` - Get CSRF token
 
 ### Profile Endpoints (1)
@@ -125,6 +127,7 @@ The API client in `src/lib/api/client.ts` is configured to use:
 4. `PUT /api/v1/profile/me` - Update current user profile
 5. `PUT /api/v1/profile` - Update profile (alias)
 6. `PUT /api/v1/profile/` - Update profile (alias)
+
 - `PUT /api/v1/profile/me` - Update current user profile
 
 ### Admin Users (9 endpoints)
@@ -192,7 +195,7 @@ curl http://127.0.0.1:8001/health
 Invoke-RestMethod -Uri "http://127.0.0.1:8001/api/v1/auth/login" `
   -Method Post `
   -ContentType "application/json" `
-  -Body '{"email":"admin@example.com","password":"Admin@123456"}'
+  -Body '{"email":"sangram0202@gmail.com","password":"Sangram@1"}'
 
 # 3. Save the token
 $token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." # Use actual token from step 2
@@ -225,8 +228,8 @@ npm run dev
 # Navigate to: http://localhost:5173
 
 # Login with admin credentials
-# Email: admin@example.com
-# Password: Admin@123456
+# Email: sangram0202@gmail.com
+# Password: Sangram@1
 ```
 
 ---

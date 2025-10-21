@@ -12,13 +12,13 @@ Edit `scripts/test-backend-integration.ts` and update these credentials:
 
 ```typescript
 const TEST_ADMIN = {
-  email: 'YOUR_ADMIN_EMAIL@example.com',    // ← Update this
-  password: 'YOUR_ADMIN_PASSWORD',           // ← Update this
+  email: 'YOUR_ADMIN_EMAIL@example.com', // ← Update this
+  password: 'YOUR_ADMIN_PASSWORD', // ← Update this
 };
 
 const TEST_USER = {
-  email: 'YOUR_USER_EMAIL@example.com',     // ← Update this  
-  password: 'YOUR_USER_PASSWORD',            // ← Update this
+  email: 'YOUR_USER_EMAIL@example.com', // ← Update this
+  password: 'YOUR_USER_PASSWORD', // ← Update this
 };
 ```
 
@@ -31,6 +31,7 @@ npx tsx scripts/test-backend-integration.ts
 ```
 
 This will test:
+
 - ✅ Authentication (login, register, logout)
 - ✅ Profile endpoints (GET/PUT /profile/me)
 - ✅ Admin user management (GET/POST/PUT /admin/users)
@@ -43,6 +44,7 @@ This will test:
 ## ✅ Step 3: Review Results
 
 The test will show:
+
 - **Passed**: Endpoints working correctly ✅
 - **Failed**: Endpoints with errors ❌
 - **Skipped**: Endpoints that need authentication ⏭️
@@ -52,16 +54,20 @@ The test will show:
 ## 🔍 What We've Already Fixed
 
 ### 1. API Client Configuration
+
 ✅ Disabled secure endpoints (httpOnly cookies) - using standard JWT
 ✅ Configured base URL: `http://127.0.0.1:8001/api/v1`
 ✅ Standard authentication working
 
 ### 2. Known Backend Limitations
+
 ⚠️ **Health endpoints not implemented** (`/health/*`)
+
 - Impact: Health monitoring dashboard won't have real data
 - Solution: Using mock data in UI
 
 ⚠️ **Secure auth endpoints not implemented** (`/auth/secure-*`)
+
 - Impact: httpOnly cookie auth not available
 - Solution: Using standard JWT authentication (already configured)
 
@@ -72,9 +78,10 @@ The test will show:
 Based on verification test, your backend has these endpoints:
 
 ### ✅ Authentication (Working)
+
 ```
 POST   /auth/login                 - Login with email/password
-POST   /auth/register             - Register new user  
+POST   /auth/register             - Register new user
 POST   /auth/logout               - Logout user
 POST   /auth/refresh              - Refresh access token
 POST   /auth/verify-email         - Verify email with token
@@ -86,6 +93,7 @@ GET    /auth/csrf-token           - Get CSRF token
 ```
 
 ### ✅ Profile (Requires Auth)
+
 ```
 GET    /profile/me                - Get current user profile
 PUT    /profile/me                - Update current user profile
@@ -93,6 +101,7 @@ GET    /profile                   - Get profile (alias)
 ```
 
 ### ✅ Admin - Users (Requires Admin Auth)
+
 ```
 GET    /admin/users               - List all users (with filters)
 POST   /admin/users               - Create new user
@@ -104,6 +113,7 @@ POST   /admin/users/{id}/reject   - Reject user
 ```
 
 ### ✅ Admin - Roles (Requires Admin Auth)
+
 ```
 GET    /admin/roles               - List all roles
 POST   /admin/roles               - Create new role
@@ -115,6 +125,7 @@ POST   /admin/users/{id}/revoke-role  - Revoke role from user
 ```
 
 ### ✅ Audit Logs (Requires Admin Auth)
+
 ```
 GET    /audit/logs                - Get audit logs (with filters)
 GET    /audit/summary             - Get audit summary statistics
@@ -122,6 +133,7 @@ GET    /admin/audit-logs          - Admin audit logs (alias)
 ```
 
 ### ✅ GDPR (Requires Auth)
+
 ```
 POST   /gdpr/export/my-data       - Request data export
 GET    /gdpr/export/status/{id}   - Check export status
@@ -129,11 +141,13 @@ DELETE /gdpr/delete/my-account    - Delete account (GDPR)
 ```
 
 ### ✅ Logs
+
 ```
 POST   /logs/frontend-errors      - Log frontend errors to backend
 ```
 
 ### ❌ Health (NOT Implemented)
+
 ```
 GET    /health                    - Basic health check (404)
 GET    /health/ping               - Ping endpoint (404)
@@ -149,6 +163,7 @@ GET    /health/system             - System health (404)
 ## 🎯 Next Steps
 
 ### Option 1: Run Full Integration Test (Recommended)
+
 ```powershell
 # 1. Update credentials in scripts/test-backend-integration.ts
 # 2. Run the test
@@ -156,6 +171,7 @@ npx tsx scripts/test-backend-integration.ts
 ```
 
 ### Option 2: Start Dev Server & Manual Test
+
 ```powershell
 # Start frontend
 npm run dev
@@ -165,6 +181,7 @@ npm run dev
 ```
 
 ### Option 3: Check Specific Endpoint
+
 ```powershell
 # Test login endpoint
 curl -X POST http://127.0.0.1:8001/api/v1/auth/login \
@@ -221,4 +238,3 @@ npx tsx scripts/test-backend-integration.ts
 ```
 
 And share the results! I'll help you fix any issues.
-

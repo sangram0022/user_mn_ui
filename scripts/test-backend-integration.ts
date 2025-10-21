@@ -1,7 +1,7 @@
 /**
  * Backend Integration Test
  * Tests real backend at http://127.0.0.1:8001
- * 
+ *
  * Usage: npx tsx scripts/test-backend-integration.ts
  */
 
@@ -23,10 +23,10 @@ const results: TestResult[] = [];
 let authToken: string | null = null;
 let testUserId: string | null = null;
 
-// Test credentials
+// Test credentials (CORRECTED)
 const TEST_ADMIN = {
-  email: 'admin@example.com',
-  password: 'Admin@123456'
+  email: 'sangram0202@gmail.com',
+  password: 'Sangram@1',
 };
 
 async function makeRequest(
@@ -36,7 +36,7 @@ async function makeRequest(
   useAuth: boolean = false
 ): Promise<{ status: number; data?: any; responseTime: number }> {
   const startTime = Date.now();
-  
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -73,7 +73,9 @@ function addResult(result: TestResult) {
   results.push(result);
   const statusIcon = result.status === 'PASS' ? '✅' : result.status === 'FAIL' ? '❌' : '⏭️';
   const timeStr = result.responseTime ? ` (${result.responseTime}ms)` : '';
-  console.log(`${statusIcon} ${result.method.padEnd(6)} ${result.endpoint.padEnd(45)} ${result.message}${timeStr}`);
+  console.log(
+    `${statusIcon} ${result.method.padEnd(6)} ${result.endpoint.padEnd(45)} ${result.message}${timeStr}`
+  );
 }
 
 async function testHealthEndpoints() {
@@ -110,7 +112,7 @@ async function testAuthEndpoints() {
 
   try {
     const { status, data, responseTime } = await makeRequest('/auth/login', 'POST', TEST_ADMIN);
-    
+
     if (status === 200 && data?.access_token) {
       authToken = data.access_token;
       addResult({
@@ -173,7 +175,7 @@ async function testProfileEndpoints() {
 
   try {
     const { status, data, responseTime } = await makeRequest('/profile/me', 'GET', undefined, true);
-    
+
     if (status === 200 && data?.user_id) {
       testUserId = data.user_id;
       addResult({
@@ -224,8 +226,13 @@ async function testAdminEndpoints() {
   }
 
   try {
-    const { status, data, responseTime } = await makeRequest('/admin/users', 'GET', undefined, true);
-    
+    const { status, data, responseTime } = await makeRequest(
+      '/admin/users',
+      'GET',
+      undefined,
+      true
+    );
+
     if (status === 200 && Array.isArray(data)) {
       addResult({
         category: 'Admin',
@@ -276,7 +283,7 @@ async function testAuditEndpoints() {
 
   try {
     const { status, data, responseTime } = await makeRequest('/audit/logs', 'GET', undefined, true);
-    
+
     if (status === 200 && Array.isArray(data)) {
       addResult({
         category: 'Audit',
@@ -345,7 +352,9 @@ async function runTests() {
   console.log('='.repeat(100));
   console.log(`✅ .env file: VITE_BACKEND_URL=${BACKEND_URL}`);
   console.log(`✅ .env file: VITE_API_BASE_URL=${API_BASE}`);
-  console.log(`${authToken ? '✅' : '❌'} Authentication: ${authToken ? 'Token obtained' : 'No token'}`);
+  console.log(
+    `${authToken ? '✅' : '❌'} Authentication: ${authToken ? 'Token obtained' : 'No token'}`
+  );
 
   // Recommendations
   console.log('\n' + '='.repeat(100));
@@ -365,9 +374,9 @@ async function runTests() {
     console.log('   3. Login: admin@example.com / Admin@123456');
   }
 
-  console.log('=' .repeat(100) + '\n');
+  console.log('='.repeat(100) + '\n');
 
-  return { passed, failed, skipped, total, hasAuth: !!authToken };
+  return { passed, failed, skipped, total, hasAuth: Boolean(authToken) };
 }
 
 runTests()
