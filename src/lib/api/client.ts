@@ -259,12 +259,12 @@ export class ApiClient {
     retryableErrors: ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'ENETUNREACH'], // Network errors
   };
 
-  constructor(baseURL: string = DEFAULT_BASE_URL, useSecureEndpoints = true) {
+  constructor(baseURL: string = DEFAULT_BASE_URL, useSecureEndpoints = false) {
     this.baseURL = baseURL;
     this.session = this.loadSession();
     this.pendingRequests = new Map();
     this.csrfTokenService = createCSRFTokenService(baseURL);
-    this.useSecureEndpoints = useSecureEndpoints;
+    this.useSecureEndpoints = useSecureEndpoints; // Default to false for standard JWT auth
     this.rateLimitState = new Map();
   }
 
