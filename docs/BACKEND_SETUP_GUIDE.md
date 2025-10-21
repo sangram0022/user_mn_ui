@@ -8,11 +8,13 @@
 ## 🔍 Current Status
 
 ### ✅ What's Working
+
 - Backend is running at `http://127.0.0.1:8001`
 - Health endpoint accessible: `/health`
 - API endpoints responding (some with errors)
 
 ### ❌ What Needs Setup
+
 - Admin user not created
 - Database may need initialization
 - RBAC roles need to be seeded
@@ -87,6 +89,7 @@ VITE_API_BASE_URL=http://127.0.0.1:8001/api/v1
 ### API Client Configuration
 
 The API client in `src/lib/api/client.ts` is configured to use:
+
 - Base URL: `http://127.0.0.1:8001/api/v1`
 - JWT Bearer token authentication
 - All 48 backend endpoints mapped
@@ -96,6 +99,7 @@ The API client in `src/lib/api/client.ts` is configured to use:
 ## 📋 Backend Endpoints Available
 
 ### Authentication Endpoints (10)
+
 - `POST /api/v1/auth/login` - User login
 - `POST /api/v1/auth/register` - User registration
 - `POST /api/v1/auth/logout` - User logout
@@ -104,14 +108,27 @@ The API client in `src/lib/api/client.ts` is configured to use:
 - `POST /api/v1/auth/resend-verification` - Resend verification
 - `POST /api/v1/auth/forgot-password` - Request password reset
 - `POST /api/v1/auth/reset-password` - Reset password
-- `POST /api/v1/auth/change-password` - Change password
+9. `POST /api/v1/auth/change-password` - Change password
+10. `POST /api/v1/auth/password-reset` - Password reset (alias)
+11. `POST /api/v1/auth/secure-login` - Secure login (cookies)
+12. `POST /api/v1/auth/secure-logout` - Secure logout
+13. `POST /api/v1/auth/secure-refresh` - Secure refresh
 - `GET /api/v1/auth/csrf-token` - Get CSRF token
 
 ### Profile Endpoints (1)
-- `GET /api/v1/profile/me` - Get current user profile
+
+### Profile (6 endpoints)
+
+1. `GET /api/v1/profile/me` - Get current user profile
+2. `GET /api/v1/profile` - Get profile (alias)
+3. `GET /api/v1/profile/` - Get profile (alias)
+4. `PUT /api/v1/profile/me` - Update current user profile
+5. `PUT /api/v1/profile` - Update profile (alias)
+6. `PUT /api/v1/profile/` - Update profile (alias)
 - `PUT /api/v1/profile/me` - Update current user profile
 
-### Admin User Management (7)
+### Admin Users (9 endpoints)
+
 - `GET /api/v1/admin/users` - List all users
 - `POST /api/v1/admin/users` - Create user
 - `GET /api/v1/admin/users/{userId}` - Get user details
@@ -121,6 +138,7 @@ The API client in `src/lib/api/client.ts` is configured to use:
 - `POST /api/v1/admin/users/{userId}/reject` - Reject user
 
 ### Admin Role Management (7)
+
 - `GET /api/v1/admin/roles` - List all roles
 - `POST /api/v1/admin/roles` - Create role
 - `GET /api/v1/admin/roles/{roleName}` - Get role details
@@ -130,18 +148,22 @@ The API client in `src/lib/api/client.ts` is configured to use:
 - `POST /api/v1/admin/users/{userId}/revoke-role` - Revoke role
 
 ### Audit Endpoints (2)
+
 - `GET /api/v1/audit/logs` - Query audit logs
 - `GET /api/v1/audit/summary` - Get audit summary
 
 ### GDPR Endpoints (3)
+
 - `POST /api/v1/gdpr/export/my-data` - Export personal data
 - `GET /api/v1/gdpr/export/status/{exportId}` - Check export status
 - `DELETE /api/v1/gdpr/delete/my-account` - Delete account
 
 ### Health Endpoints (1)
+
 - `GET /health` - Basic health check (Note: NO /api/v1 prefix)
 
 ### Logs Endpoints (1)
+
 - `POST /api/v1/logs/frontend-errors` - Log frontend errors
 
 **Total: 39 endpoints**
@@ -216,6 +238,7 @@ npm run dev
 **Cause**: Admin user not created in backend
 
 **Solution**:
+
 ```powershell
 cd d:\code\python\user_mn
 python seed_rbac_roles.py
@@ -226,6 +249,7 @@ python seed_rbac_roles.py
 **Cause**: Backend not running
 
 **Solution**:
+
 ```powershell
 cd d:\code\python\user_mn
 # Check if backend is running
@@ -283,4 +307,3 @@ You'll know everything is working when:
 **Backend needs setup ❌** - Admin user must be created
 
 **Next immediate action**: Run `python seed_rbac_roles.py` in backend directory
-
