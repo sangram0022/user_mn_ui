@@ -5,6 +5,12 @@ export * from './advanced-performance';
 // API utilities
 export * from './apiMessages';
 
+// Array utilities (groupBy, sortBy, unique, chunk, etc.)
+export * from './array';
+
+// Async utilities (debounce, throttle, retry, delay, etc.)
+export * from './async';
+
 // Utility functions
 export * from './classNames';
 export * from './dateUtils';
@@ -13,6 +19,12 @@ export * from './error';
 export * from './error-handler';
 export * from './formValidation';
 export * from './logger';
+
+// String utilities (capitalize, truncate, slugify, etc.)
+export * from './string';
+
+// URL and query parameter utilities
+export * from './url';
 
 // Performance monitoring (metrics collection, web vitals)
 export {
