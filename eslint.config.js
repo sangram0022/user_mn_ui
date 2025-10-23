@@ -65,7 +65,7 @@ export default tseslint.config(
         'no-debugger': 'error',
         'no-var': 'error',
         'prefer-const': 'error',
-        'eqeqeq': ['error', 'always'],
+        eqeqeq: ['error', 'always'],
         'no-implicit-coercion': 'error',
         'no-multi-spaces': 'error',
         'no-trailing-spaces': 'error',
@@ -132,6 +132,14 @@ export default tseslint.config(
         // Allow any in test helpers/mocks to keep tests concise
         '@typescript-eslint/no-explicit-any': 'off',
         'import/no-default-export': 'off',
+      },
+    },
+    // Scripts - allow console and any types for testing/utilities
+    {
+      files: ['scripts/**/*.{ts,tsx,js}'],
+      rules: {
+        'no-console': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
       },
     },
     // Config files - more relaxed rules

@@ -34,6 +34,21 @@ export interface LoginResponse {
   issued_at?: string;
 }
 
+// Secure login response (httpOnly cookies - no tokens in body)
+export interface SecureLoginResponse {
+  message: string;
+  user: {
+    user_id: string;
+    email: string;
+    role: UserRoleType;
+    last_login_at: string | null;
+    first_name?: string;
+    last_name?: string;
+    is_verified?: boolean;
+    is_active?: boolean;
+  };
+}
+
 export interface RegisterRequest {
   email: string; // Valid email, unique, max 255 chars
   password: string; // Min 8 chars, 1 uppercase, 1 lowercase, 1 digit
@@ -487,7 +502,7 @@ export type ErrorSeverity = 'error' | 'warning' | 'info';
 export interface FrontendErrorRequest {
   message: string; // Error message
   stack?: string; // Stack trace
-  severity: ErrorSeverity;
+  level?: ErrorSeverity; // Log level (matches backend 'level' field)
   url?: string; // Page URL where error occurred
   user_agent?: string; // Browser user agent
   timestamp?: string; // ISO 8601
@@ -495,9 +510,8 @@ export interface FrontendErrorRequest {
 }
 
 export interface FrontendErrorResponse {
-  message: string;
-  error_id: string;
-  received_at: string; // ISO 8601
+  status: string; // "accepted"
+  message: string; // "Error logged successfully"
 }
 
 // ============================================================================

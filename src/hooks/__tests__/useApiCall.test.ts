@@ -1,13 +1,13 @@
 /**
  * Unit tests for useApiCall hook
- * 
+ *
  * Tests API call wrapper with loading states, error handling, and toast notifications
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useApiCall } from '../useApiCall';
 import type { ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useApiCall } from '../useApiCall';
 
 // Mock the toast hook
 const mockToast = {
@@ -22,9 +22,8 @@ vi.mock('@hooks/useToast', () => ({
 }));
 
 // Wrapper component for hooks that need providers
-const wrapper = ({ children }: { children: ReactNode }) => {
-  return <>{children}</>;
-};
+
+const wrapper = ({ children }: { children: ReactNode }) => children;
 
 describe('useApiCall', () => {
   beforeEach(() => {
@@ -57,12 +56,14 @@ describe('useApiCall', () => {
 
     it('should set loading state during API call', async () => {
       const { result } = renderHook(() => useApiCall(), { wrapper });
-      const mockApiFunction = vi.fn().mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve({ data: 'test' }), 100))
-      );
+      const mockApiFunction = vi
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(() => resolve({ data: 'test' }), 100))
+        );
 
       const promise = result.current.execute(mockApiFunction);
-      
+
       // Should be loading immediately
       expect(result.current.loading).toBe(true);
 
@@ -94,7 +95,7 @@ describe('useApiCall', () => {
 
       // First call fails
       await expect(result.current.execute(mockErrorFunction)).rejects.toThrow();
-      
+
       await waitFor(() => {
         expect(result.current.error).toBeTruthy();
       });
@@ -144,11 +145,12 @@ describe('useApiCall', () => {
 
     it('should use custom success message', async () => {
       const customMessage = 'Operation completed successfully';
-      const { result } = renderHook(() => 
-        useApiCall({ 
-          showSuccessToast: true,
-          successMessage: customMessage 
-        }), 
+      const { result } = renderHook(
+        () =>
+          useApiCall({
+            showSuccessToast: true,
+            successMessage: customMessage,
+          }),
         { wrapper }
       );
       const mockApiFunction = vi.fn().mockResolvedValue({ success: true });
@@ -162,11 +164,12 @@ describe('useApiCall', () => {
 
     it('should use custom error message', async () => {
       const customMessage = 'Operation failed';
-      const { result } = renderHook(() => 
-        useApiCall({ 
-          showErrorToast: true,
-          errorMessage: customMessage 
-        }), 
+      const { result } = renderHook(
+        () =>
+          useApiCall({
+            showErrorToast: true,
+            errorMessage: customMessage,
+          }),
         { wrapper }
       );
       const mockApiFunction = vi.fn().mockRejectedValue(new Error('Error'));
@@ -312,7 +315,7 @@ describe('useApiCall', () => {
       const mockFunction2 = vi.fn().mockResolvedValue(mockData2);
 
       await result.current.execute(mockFunction1);
-      
+
       await waitFor(() => {
         expect(result.current.data).toEqual(mockData1);
       });
@@ -327,17 +330,18 @@ describe('useApiCall', () => {
 
   describe('Integration scenarios', () => {
     it('should work with user management API', async () => {
-      const { result } = renderHook(() => 
-        useApiCall({ 
-          showSuccessToast: true,
-          successMessage: 'User updated successfully'
-        }), 
+      const { result } = renderHook(
+        () =>
+          useApiCall({
+            showSuccessToast: true,
+            successMessage: 'User updated successfully',
+          }),
         { wrapper }
       );
-      
-      const mockUpdateUser = vi.fn().mockResolvedValue({ 
-        id: 1, 
-        status: 'active' 
+
+      const mockUpdateUser = vi.fn().mockResolvedValue({
+        id: 1,
+        status: 'active',
       });
 
       await result.current.execute(mockUpdateUser);
@@ -350,7 +354,7 @@ describe('useApiCall', () => {
       const { result } = renderHook(() => useApiCall(), { wrapper });
       const mockExportData = vi.fn().mockResolvedValue({
         data: { user: 'data' },
-        format: 'json'
+        format: 'json',
       });
 
       const response = await result.current.execute(mockExportData);
@@ -363,7 +367,7 @@ describe('useApiCall', () => {
       const { result } = renderHook(() => useApiCall(), { wrapper });
       const mockFetchLogs = vi.fn().mockResolvedValue({
         logs: [],
-        total: 0
+        total: 0,
       });
 
       const response = await result.current.execute(mockFetchLogs);

@@ -1137,15 +1137,13 @@ export function normalizeApiError(a: unknown, b?: unknown, c?: unknown): Normali
 export interface ErrorLogEntry {
   timestamp: string;
   error: ParsedError;
+  stack?: string; // Stack trace from original Error object
   userAgent: string;
   url: string;
-  userId?: string;
-  sessionId?: string;
+  userId: string | null;
+  sessionId: string | null;
   additionalContext?: Record<string, unknown>;
-  performance?: {
-    memoryUsage?: number;
-    timestamp: number;
-  };
+  performance?: Record<string, unknown>;
 }
 
 class ErrorLogger {
@@ -1158,13 +1156,18 @@ class ErrorLogger {
   // Accept unknown inputs and normalize internally for resilience
   log(error: unknown, context?: Record<string, unknown>): void {
     const parsed = parseApiError(error);
+
+    // Extract stack trace if available
+    const stack = error instanceof Error ? error.stack : undefined;
+
     const entry: ErrorLogEntry = {
       timestamp: new Date().toISOString(),
       error: parsed,
+      stack, // Store stack separately for backend logging
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
       url: typeof window !== 'undefined' ? window.location.href : 'unknown',
-      userId: this.getUserId(),
-      sessionId: this.getSessionId(),
+      userId: this.getUserId() || null,
+      sessionId: this.getSessionId() || null,
       additionalContext: context,
       performance: this.getPerformanceData(),
     };
@@ -1202,13 +1205,39 @@ class ErrorLogger {
       const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
       const timeoutId = controller ? setTimeout(() => controller.abort(), 5000) : undefined;
 
+      // Transform to backend-expected format
+      const payload = {
+        message: entry.error.message,
+        stack: entry.stack, // Use stored stack trace from original Error
+        level:
+          entry.error.severity === 'critical' || entry.error.severity === 'high'
+            ? 'error'
+            : entry.error.severity === 'medium'
+              ? 'warning'
+              : 'info',
+        url: entry.url,
+        user_agent: entry.userAgent,
+        timestamp: entry.timestamp,
+        metadata: {
+          ...entry.additionalContext,
+          code: entry.error.code,
+          details: entry.error.details,
+          category: entry.error.category,
+          severity: entry.error.severity,
+          userId: entry.userId,
+          sessionId: entry.sessionId,
+          performance: entry.performance,
+        },
+      };
+
       const response = await fetch(this.apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(entry),
+        body: JSON.stringify(payload),
         signal: controller?.signal,
+        credentials: 'include', // Include httpOnly cookies
       });
 
       if (timeoutId) {

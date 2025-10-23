@@ -42,13 +42,41 @@ const wrapWithGuard = (route: (typeof routes)[number], element: React.ReactNode)
   }
 };
 
-function App() {
+/**
+ * AppContent component with hooks that need providers
+ */
+function AppContent() {
   // Initialize keyboard detection for accessibility
   useKeyboardDetection();
 
-  // Initialize rate limit notifications
+  // Initialize rate limit notifications (requires ToastProvider)
   useRateLimitNotification();
 
+  return (
+    <AuthProvider>
+      <RouterWithFuture future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        {/* Skip link for keyboard navigation */}
+        <SkipLink />
+        <RoutePreloadTrigger>
+          <main id="main-content">
+            <Routes>
+              {routes.map((route) => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={wrapWithGuard(route, <RouteRenderer route={route} />)}
+                />
+              ))}
+              <Route path="*" element={<RouteRenderer route={notFoundRoute} />} />
+            </Routes>
+          </main>
+        </RoutePreloadTrigger>
+      </RouterWithFuture>
+    </AuthProvider>
+  );
+}
+
+function App() {
   // Initialize performance optimizations
   useEffect(() => {
     //  React 19: Initialize navigation preloading system
@@ -73,26 +101,7 @@ function App() {
         <ThemeProvider>
           <LocalizationProvider defaultLocale="en">
             <ToastProvider>
-              <AuthProvider>
-                <RouterWithFuture future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                  {/* Skip link for keyboard navigation */}
-                  <SkipLink />
-                  <RoutePreloadTrigger>
-                    <main id="main-content">
-                      <Routes>
-                        {routes.map((route) => (
-                          <Route
-                            key={route.path}
-                            path={route.path}
-                            element={wrapWithGuard(route, <RouteRenderer route={route} />)}
-                          />
-                        ))}
-                        <Route path="*" element={<RouteRenderer route={notFoundRoute} />} />
-                      </Routes>
-                    </main>
-                  </RoutePreloadTrigger>
-                </RouterWithFuture>
-              </AuthProvider>
+              <AppContent />
             </ToastProvider>
           </LocalizationProvider>
         </ThemeProvider>

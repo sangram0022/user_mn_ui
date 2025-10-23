@@ -74,6 +74,13 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_BACKEND_URL || 'http://127.0.0.1:8001',
           changeOrigin: true,
           secure: false,
+          cookieDomainRewrite: {
+            '127.0.0.1': 'localhost',
+            localhost: 'localhost',
+          },
+          cookiePathRewrite: {
+            '*': '/',
+          },
           // Remove the /api prefix when forwarding to backend since backend already includes /api/v1
           // Frontend: /api/v1/auth/login -> Backend: /api/v1/auth/login
         },

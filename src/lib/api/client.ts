@@ -26,7 +26,6 @@ import type {
   GDPRExportResponse,
   GDPRExportStatus,
   HealthCheckResponse,
-  LoginResponse,
   PendingWorkflow,
   ReadinessCheckResponse,
   RegisterRequest,
@@ -46,7 +45,12 @@ import type {
   UserRole,
   UserSummary,
 } from '@shared/types';
-import type { BackendApiErrorResponse } from '@shared/types/api-backend.types';
+// Import LoginResponse and SecureLoginResponse from backend types (with nested user object)
+import type {
+  BackendApiErrorResponse,
+  LoginResponse,
+  SecureLoginResponse,
+} from '@shared/types/api-backend.types';
 import { normalizeApiError } from '@shared/utils/error';
 import { mapApiErrorToMessage } from '@shared/utils/errorMapper';
 import { logger } from './../../shared/utils/logger';
@@ -79,9 +83,9 @@ const ENDPOINTS = {
     passwordReset: '/auth/password-reset', // POST - Password reset (alias)
 
     // Secure authentication (httpOnly cookies)
-    loginSecure: '/auth/secure-login', // POST - Login with secure cookies
-    logoutSecure: '/auth/secure-logout', // POST - Logout (clear cookies)
-    refreshSecure: '/auth/secure-refresh', // POST - Refresh token (cookies)
+    loginSecure: '/auth/login-secure', // POST - Login with secure cookies
+    logoutSecure: '/auth/logout-secure', // POST - Logout (clear cookies)
+    refreshSecure: '/auth/refresh-secure', // POST - Refresh token (cookies)
 
     // CSRF protection
     csrfToken: '/auth/csrf-token', // GET - Get CSRF token
@@ -112,12 +116,15 @@ const ENDPOINTS = {
     deactivateUser: (userId: string) => `/admin/users/${userId}/deactivate`, // POST - Deactivate user
 
     // ============================================================================
-    // ADMIN - ROLE MANAGEMENT ENDPOINTS (7 endpoints) ✅ NEW
+    // ADMIN - ROLE MANAGEMENT ENDPOINTS (OLD - Basic Roles) - DEPRECATED
     // ============================================================================
-    roles: '/admin/roles', // GET/POST - List/Create roles
-    roleByName: (roleName: string) => `/admin/roles/${roleName}`, // GET/PUT/DELETE - Role operations
-    assignRole: (userId: string) => `/admin/users/${userId}/assign-role`, // POST - Assign role
-    revokeRole: (userId: string) => `/admin/users/${userId}/revoke-role`, // POST - Revoke role
+    roles: '/admin/rbac/roles', // GET/POST - List/Create roles
+    roleByName: (roleName: string) => `/admin/rbac/roles/${roleName}`, // GET/PUT/DELETE - Role operations
+    assignRoleToUser: '/admin/rbac/users/roles', // POST - Assign role to user (body: { user_id, role_id, expires_at })
+    removeRoleFromUser: (userId: string, roleId: string) =>
+      `/admin/rbac/users/${userId}/roles/${roleId}`, // DELETE - Remove role from user
+    userRoles: (userId: string) => `/admin/rbac/users/${userId}/roles`, // GET - Get user roles
+    permissions: '/admin/rbac/permissions', // GET - List permissions
 
     // ============================================================================
     // ADMIN - AUDIT LOGS (1 endpoint)
@@ -126,6 +133,33 @@ const ENDPOINTS = {
 
     // Analytics
     analytics: '/admin/analytics', // GET - User analytics
+    stats: '/admin/stats', // GET - Admin statistics
+  },
+
+  // ============================================================================
+  // ADMIN - RBAC ROLE MANAGEMENT ENDPOINTS (12 endpoints) ✅ MATCHING BACKEND
+  // Reference: API_INTEGRATION_GUIDE.md - Section 5. Admin - RBAC Role Management
+  // ============================================================================
+  rbac: {
+    // Role Management
+    roles: '/admin/rbac/roles', // GET/POST - List all roles / Create new role
+    roleById: (roleId: string) => `/admin/rbac/roles/${roleId}`, // GET/PUT/DELETE - Get/Update/Delete role
+
+    // Permission Management
+    permissions: '/admin/rbac/permissions', // GET - List permission categories
+
+    // User-Role Assignment
+    assignUserRole: '/admin/rbac/users/roles', // POST - Assign role to user
+    revokeUserRole: (userId: string, roleId: string) =>
+      `/admin/rbac/users/${userId}/roles/${roleId}`, // DELETE - Remove role from user
+    userRoles: (userId: string) => `/admin/rbac/users/${userId}/roles`, // GET - Get user roles and permissions
+
+    // Cache Management
+    cacheStats: '/admin/rbac/cache/stats', // GET - Get cache statistics
+    cacheClear: '/admin/rbac/cache/clear', // POST - Clear RBAC cache
+
+    // Database Sync
+    syncDatabase: '/admin/rbac/sync-database', // POST - Sync roles from database
   },
 
   // ============================================================================
@@ -344,12 +378,10 @@ export class ApiClient {
       headers['Authorization'] = `Bearer ${this.session.accessToken}`;
     }
 
-    // Add CSRF token for state-changing requests (when using new secure endpoints)
-    if (this.useSecureEndpoints) {
-      const csrfHeader = this.csrfTokenService.getTokenHeader();
-      if (csrfHeader) {
-        Object.assign(headers, csrfHeader);
-      }
+    // Always add CSRF token for state-changing requests
+    const csrfHeader = this.csrfTokenService.getTokenHeader();
+    if (csrfHeader) {
+      Object.assign(headers, csrfHeader);
     }
 
     return headers;
@@ -588,8 +620,8 @@ export class ApiClient {
 
     const config: RequestInit = {
       method,
-      // Enable httpOnly cookie transmission (required for secure endpoints)
-      credentials: this.useSecureEndpoints ? 'include' : 'same-origin',
+      // Always include credentials for cookie-based authentication
+      credentials: 'include',
       ...options,
       headers: {
         ...this.getHeaders(),
@@ -708,16 +740,55 @@ export class ApiClient {
     return body as T;
   }
 
-  setSessionTokens(loginResponse: LoginResponse): void {
+  setSessionTokens(loginResponse: LoginResponse | SecureLoginResponse): void {
+    // Check if this is a secure login response (no tokens in body)
+    if ('message' in loginResponse) {
+      // Secure login - tokens are in httpOnly cookies, just store user data
+      const secureResponse = loginResponse as SecureLoginResponse;
+      // For secure login, we don't have tokens in the response
+      // They're in httpOnly cookies, so we just need to mark as authenticated
+      const legacyFormat = {
+        access_token: '', // Not available in secure response
+        refresh_token: '', // Not available in secure response
+        token_type: 'bearer' as const,
+        expires_in: 900, // 15 minutes
+        refresh_expires_in: 604800, // 7 days
+        user_id: secureResponse.user.user_id,
+        email: secureResponse.user.email,
+        role: secureResponse.user.role,
+        last_login_at: secureResponse.user.last_login_at || new Date().toISOString(),
+        issued_at: new Date().toISOString(),
+      };
+      tokenService.storeTokens(legacyFormat);
+
+      // Don't persist tokens in session storage for secure login
+      return;
+    }
+
+    // Regular login with tokens in response body
+    const regularResponse = loginResponse as LoginResponse;
+    const legacyFormat = {
+      access_token: regularResponse.access_token,
+      refresh_token: regularResponse.refresh_token,
+      token_type: regularResponse.token_type,
+      expires_in: regularResponse.expires_in,
+      refresh_expires_in: 2592000, // 30 days in seconds
+      user_id: regularResponse.user.user_id,
+      email: regularResponse.user.email,
+      role: regularResponse.user.role,
+      last_login_at: new Date().toISOString(),
+      issued_at: regularResponse.issued_at || new Date().toISOString(),
+    };
+
     // Use enterprise token service for secure storage
-    tokenService.storeTokens(loginResponse);
+    tokenService.storeTokens(legacyFormat);
 
     // Also maintain backward compatibility with existing session storage
     const session: StoredSession = {
-      accessToken: loginResponse.access_token,
-      refreshToken: loginResponse.refresh_token,
-      issuedAt: loginResponse.issued_at,
-      expiresIn: loginResponse.expires_in,
+      accessToken: regularResponse.access_token,
+      refreshToken: regularResponse.refresh_token,
+      issuedAt: regularResponse.issued_at,
+      expiresIn: regularResponse.expires_in,
     };
     this.persistSession(session);
   }
@@ -738,7 +809,7 @@ export class ApiClient {
   async login(
     emailOrCredentials: string | { email: string; password: string },
     password?: string
-  ): Promise<LoginResponse> {
+  ): Promise<LoginResponse | SecureLoginResponse> {
     const credentials =
       typeof emailOrCredentials === 'string'
         ? { email: emailOrCredentials, password: password ?? '' }
@@ -747,7 +818,7 @@ export class ApiClient {
     // Use secure endpoint if enabled, otherwise fallback to legacy endpoint
     const endpoint = this.useSecureEndpoints ? ENDPOINTS.auth.loginSecure : ENDPOINTS.auth.login;
 
-    const response = await this.request<LoginResponse>(endpoint, {
+    const response = await this.request<LoginResponse | SecureLoginResponse>(endpoint, {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
@@ -775,13 +846,13 @@ export class ApiClient {
   async loginSecure(
     emailOrCredentials: string | { email: string; password: string },
     password?: string
-  ): Promise<LoginResponse> {
+  ): Promise<SecureLoginResponse> {
     const credentials =
       typeof emailOrCredentials === 'string'
         ? { email: emailOrCredentials, password: password ?? '' }
         : emailOrCredentials;
 
-    const response = await this.request<LoginResponse>(ENDPOINTS.auth.loginSecure, {
+    const response = await this.request<SecureLoginResponse>(ENDPOINTS.auth.loginSecure, {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
@@ -865,6 +936,40 @@ export class ApiClient {
     return await this.request<ResendVerificationResponse>(ENDPOINTS.auth.resendVerification, {
       method: 'POST',
       body: JSON.stringify(payload),
+    });
+  }
+
+  /**
+   * Refresh access token using secure httpOnly cookies
+   * Used in cookie-based authentication flow
+   */
+  async refreshSecure(): Promise<LoginResponse> {
+    return await this.request<LoginResponse>(ENDPOINTS.auth.refreshSecure, {
+      method: 'POST',
+      credentials: 'include', // Include httpOnly cookies
+    });
+  }
+
+  /**
+   * Logout and clear secure httpOnly cookies
+   * Used in cookie-based authentication flow
+   */
+  async logoutSecure(): Promise<LogoutResponse> {
+    return await this.request<LogoutResponse>(ENDPOINTS.auth.logoutSecure, {
+      method: 'POST',
+      credentials: 'include', // Include httpOnly cookies for clearing
+    });
+  }
+
+  /**
+   * Manually validate CSRF token
+   * Typically handled automatically by CSRF interceptor
+   */
+  async validateCsrf(token: string): Promise<{ message: string }> {
+    return await this.request<{ message: string }>(ENDPOINTS.auth.validateCsrf, {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': token },
+      body: JSON.stringify({}),
     });
   }
 
@@ -1191,9 +1296,10 @@ export class ApiClient {
    * @returns Assignment confirmation
    */
   async assignRoleToUser(userId: string, role: string): Promise<AssignRoleResponse> {
-    return await this.request<AssignRoleResponse>(ENDPOINTS.admin.assignRole(userId), {
+    // New RBAC endpoint expects body: { user_id, role_id, expires_at? }
+    return await this.request<AssignRoleResponse>(ENDPOINTS.admin.assignRoleToUser, {
       method: 'POST',
-      body: JSON.stringify({ role }),
+      body: JSON.stringify({ user_id: userId, role_id: role }),
     });
   }
 
@@ -1203,8 +1309,87 @@ export class ApiClient {
    * @param userId User ID
    * @returns Revocation confirmation
    */
-  async revokeRoleFromUser(userId: string): Promise<RevokeRoleResponse> {
-    return await this.request<RevokeRoleResponse>(ENDPOINTS.admin.revokeRole(userId), {
+  async revokeRoleFromUser(userId: string, roleId?: string): Promise<RevokeRoleResponse> {
+    // Backend RBAC exposes removal via DELETE /admin/rbac/users/{userId}/roles/{roleId}
+    if (!roleId) {
+      // If roleId is not provided, call generic revoke endpoint to revoke all roles (fallback)
+      return await this.request<RevokeRoleResponse>('/admin/rbac/users/revoke', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: userId }),
+      });
+    }
+
+    return await this.request<RevokeRoleResponse>(
+      ENDPOINTS.admin.removeRoleFromUser(userId, roleId),
+      {
+        method: 'DELETE',
+      }
+    );
+  }
+
+  // ============================================================================
+  // RBAC - ADDITIONAL ENDPOINTS ✅ (permissions, user roles, cache)
+  // Reference: API_INTEGRATION_GUIDE.md - Section 5
+  // ============================================================================
+
+  /**
+   * List permission categories
+   * GET /admin/rbac/permissions
+   * @returns Permission categories grouped by resource
+   */
+  async listPermissions(): Promise<Record<string, string[]>> {
+    return await this.dedupedRequest<Record<string, string[]>>(ENDPOINTS.rbac.permissions);
+  }
+
+  /**
+   * Get user roles and permissions
+   * GET /admin/rbac/users/{userId}/roles
+   * @param userId User ID
+   * @returns User roles with inherited permissions
+   */
+  async getUserRolesAndPermissions(userId: string): Promise<{
+    user_id: string;
+    roles: string[];
+    permissions: string[];
+    role_details: RoleResponse[];
+  }> {
+    return await this.dedupedRequest(ENDPOINTS.rbac.userRoles(userId));
+  }
+
+  /**
+   * Get RBAC cache statistics
+   * GET /admin/rbac/cache/stats
+   * @returns Cache statistics (hits, misses, hit rate)
+   */
+  async getRBACCacheStats(): Promise<{
+    hits: number;
+    misses: number;
+    errors: number;
+    hit_rate: string;
+    backend: string;
+    memory_cache_size: number;
+  }> {
+    return await this.dedupedRequest(ENDPOINTS.rbac.cacheStats);
+  }
+
+  /**
+   * Clear RBAC cache
+   * POST /admin/rbac/cache/clear
+   * @returns Cache clear confirmation
+   */
+  async clearRBACCache(): Promise<void> {
+    return await this.request(ENDPOINTS.rbac.cacheClear, {
+      method: 'POST',
+    });
+  }
+
+  /**
+   * Sync roles from database
+   * POST /admin/rbac/sync-database
+   * @returns Sync confirmation
+   */
+  async syncRBACDatabase(): Promise<{ message: string }> {
+    return await this.request(ENDPOINTS.rbac.syncDatabase, {
       method: 'POST',
     });
   }
@@ -1292,7 +1477,8 @@ export class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient();
+// Use secure endpoints by default for httpOnly cookie authentication
+export const apiClient = new ApiClient(DEFAULT_BASE_URL, true);
 
 export const useApi = () => ({
   isAuthenticated: apiClient.isAuthenticated.bind(apiClient),
@@ -1338,6 +1524,13 @@ export const useApi = () => ({
   deleteRole: apiClient.deleteRole.bind(apiClient),
   assignRoleToUser: apiClient.assignRoleToUser.bind(apiClient),
   revokeRoleFromUser: apiClient.revokeRoleFromUser.bind(apiClient),
+
+  // RBAC - Additional endpoints ✅ NEW (5 methods)
+  listPermissions: apiClient.listPermissions.bind(apiClient),
+  getUserRolesAndPermissions: apiClient.getUserRolesAndPermissions.bind(apiClient),
+  getRBACCacheStats: apiClient.getRBACCacheStats.bind(apiClient),
+  clearRBACCache: apiClient.clearRBACCache.bind(apiClient),
+  syncRBACDatabase: apiClient.syncRBACDatabase.bind(apiClient),
 
   // Audit
   getAuditLogs: apiClient.getAuditLogs.bind(apiClient),

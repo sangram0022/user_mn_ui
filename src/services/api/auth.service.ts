@@ -61,26 +61,57 @@ export class AuthService {
 
       const response = await apiClient.login(credentials.email, credentials.password);
 
+      // Check if this is a secure login response (httpOnly cookies)
+      if ('message' in response) {
+        const secureResponse =
+          response as import('@shared/types/api-backend.types').SecureLoginResponse;
+        logger.info('[AuthService] Secure login successful', {
+          userId: secureResponse.user.user_id,
+          email: credentials.email,
+        });
+
+        return {
+          token: {
+            accessToken: '', // Not in response body for secure login
+            refreshToken: '', // Not in response body for secure login
+            expiresIn: 900, // 15 minutes
+            tokenType: 'bearer',
+          },
+          user: {
+            id: secureResponse.user.user_id,
+            email: secureResponse.user.email,
+            firstName: secureResponse.user.first_name || '',
+            lastName: secureResponse.user.last_name || '',
+            isEmailVerified: secureResponse.user.is_verified ?? true,
+            isActive: secureResponse.user.is_active ?? true,
+            createdAt: secureResponse.user.last_login_at || new Date().toISOString(),
+          },
+          message: secureResponse.message,
+        };
+      }
+
+      // Regular login response with tokens
+      const regularResponse = response as import('@shared/types/api-backend.types').LoginResponse;
       logger.info('[AuthService] Login successful', {
-        userId: response.user_id,
+        userId: regularResponse.user.user_id,
         email: credentials.email,
       });
 
       return {
         token: {
-          accessToken: response.access_token,
-          refreshToken: response.refresh_token,
-          expiresIn: response.expires_in,
-          tokenType: response.token_type,
+          accessToken: regularResponse.access_token,
+          refreshToken: regularResponse.refresh_token,
+          expiresIn: regularResponse.expires_in,
+          tokenType: regularResponse.token_type,
         },
         user: {
-          id: response.user_id ?? '',
-          email: response.email ?? '',
-          firstName: '',
-          lastName: '',
-          isEmailVerified: false,
-          isActive: true,
-          createdAt: '',
+          id: regularResponse.user.user_id,
+          email: regularResponse.user.email,
+          firstName: regularResponse.user.first_name,
+          lastName: regularResponse.user.last_name,
+          isEmailVerified: regularResponse.user.is_verified,
+          isActive: regularResponse.user.is_active,
+          createdAt: new Date().toISOString(),
         },
         message: 'Login successful',
       };
@@ -111,27 +142,27 @@ export class AuthService {
       const response = await apiClient.loginSecure(credentials.email, credentials.password);
 
       logger.info('[AuthService] Secure login successful', {
-        userId: response.user_id,
+        userId: response.user.user_id,
         email: credentials.email,
       });
 
       return {
         token: {
-          accessToken: response.access_token,
-          refreshToken: response.refresh_token,
-          expiresIn: response.expires_in,
-          tokenType: response.token_type,
+          accessToken: '', // Not in response body for secure login
+          refreshToken: '', // Not in response body for secure login
+          expiresIn: 900, // 15 minutes
+          tokenType: 'bearer',
         },
         user: {
-          id: response.user_id ?? '',
-          email: response.email ?? '',
-          firstName: '',
-          lastName: '',
-          isEmailVerified: false,
-          isActive: true,
-          createdAt: '',
+          id: response.user.user_id,
+          email: response.user.email,
+          firstName: response.user.first_name || '',
+          lastName: response.user.last_name || '',
+          isEmailVerified: response.user.is_verified ?? true,
+          isActive: response.user.is_active ?? true,
+          createdAt: response.user.last_login_at || new Date().toISOString(),
         },
-        message: 'Secure login successful',
+        message: response.message,
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -441,6 +472,110 @@ export class AuthService {
         logger.error('[AuthService] Failed to get CSRF token');
       }
       throw error;
+    }
+  }
+
+  /**
+   * Refresh Token (Secure - httpOnly Cookies)
+   * POST /auth/refresh-secure
+   *
+   * Refresh access token using httpOnly cookies.
+   * Token is automatically stored in secure httpOnly cookie.
+   *
+   * @returns LoginResponse with updated token
+   */
+  async refreshSecure(): Promise<LoginResponse> {
+    try {
+      logger.debug('[AuthService] Refreshing token (secure)');
+
+      const response = await apiClient.refreshSecure();
+
+      logger.info('[AuthService] Token refreshed successfully (secure)');
+
+      return {
+        token: {
+          accessToken: response.access_token,
+          refreshToken: response.refresh_token,
+          expiresIn: response.expires_in,
+          tokenType: response.token_type,
+        },
+        user: {
+          id: response.user_id ?? '',
+          email: response.email ?? '',
+          firstName: '',
+          lastName: '',
+          isEmailVerified: false,
+          isActive: true,
+          createdAt: '',
+        },
+        message: 'Token refreshed',
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error('[AuthService] Secure token refresh failed', error);
+      } else {
+        logger.error('[AuthService] Secure token refresh failed');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Logout (Secure - httpOnly Cookies)
+   * POST /auth/logout-secure
+   *
+   * Logout and clear httpOnly cookies.
+   *
+   * @returns Logout response
+   */
+  async logoutSecure() {
+    try {
+      logger.debug('[AuthService] Logging out (secure)');
+
+      const response = await apiClient.logoutSecure();
+
+      logger.info('[AuthService] Logged out successfully (secure)');
+
+      // Clear any local session data
+      sessionStorage.removeItem('user');
+
+      return response;
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error('[AuthService] Secure logout failed', error);
+      } else {
+        logger.error('[AuthService] Secure logout failed');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Validate CSRF Token
+   * POST /auth/validate-csrf
+   *
+   * Manually validate CSRF token.
+   * Typically handled automatically by CSRF interceptor.
+   *
+   * @param token - CSRF token to validate
+   * @returns True if token is valid
+   */
+  async validateCsrf(token: string): Promise<boolean> {
+    try {
+      logger.debug('[AuthService] Validating CSRF token');
+
+      await apiClient.validateCsrf(token);
+
+      logger.debug('[AuthService] CSRF token is valid');
+
+      return true;
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error('[AuthService] CSRF validation failed', error);
+      } else {
+        logger.error('[AuthService] CSRF validation failed');
+      }
+      return false;
     }
   }
 }

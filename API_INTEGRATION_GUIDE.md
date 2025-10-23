@@ -1,757 +1,2070 @@
-# API Integration Guide
+# Backend API Documentation for UI Team
 
-This guide shows how to integrate the backend API with the frontend components created in Phase 1-4.
+**Version:** 1.0  
+**Last Updated:** October 22, 2025  
+**Base URL:** `http://localhost:8001` (Development) | `https://api.yourdomain.com` (Production)  
+**API Prefix:** `/api/v1`
+
+---
 
 ## Table of Contents
 
-1. [Prerequisites](#prerequisites)
-2. [API Client Integration](#api-client-integration)
-3. [Error Mapper Integration](#error-mapper-integration)
-4. [Component Integration](#component-integration)
-5. [Testing Integration](#testing-integration)
-6. [Troubleshooting](#troubleshooting)
-
-## Prerequisites
-
-### Required Files Created
-
-✅ **Phase 1: Error Localization**
-
-- `src/locales/en/errors.json` - Error code translations
-- `src/shared/utils/errorMapper.ts` - Error mapping utility
-
-✅ **Phase 2: UI-Side Filtering**
-
-- `src/domains/admin/components/UserListFilters.tsx`
-- `src/domains/admin/hooks/useUserListFilters.ts`
-- `src/domains/admin/components/AuditLogFilters.tsx`
-- `src/domains/admin/hooks/useAuditLogFilters.ts`
-
-✅ **Phase 3: GDPR Features**
-
-- `src/domains/profile/components/GDPRDataExport.tsx`
-- `src/domains/profile/components/GDPRAccountDeletion.tsx`
-
-✅ **Phase 4: Health Monitoring**
-
-- `src/domains/admin/components/HealthMonitoringDashboard.tsx`
-
-✅ **Examples**
-
-- `src/examples/BackendIntegrationExamples.tsx`
-
-### Backend API Endpoints (48 total)
-
-The backend provides these endpoints:
-
-- User Management: 10 endpoints
-- Authentication: 8 endpoints
-- Profile: 6 endpoints
-- Admin: 12 endpoints
-- Audit: 4 endpoints
-- GDPR: 2 endpoints
-- Health: 2 endpoints
-- Role Management: 4 endpoints
-
-## API Client Integration
-
-### Step 1: Update API Client with Error Mapper
-
-Update `src/lib/api/client.ts` to use the error mapper:
-
-```typescript
-// Add import
-import { mapApiErrorToMessage } from '@/shared/utils/errorMapper';
-
-// Update error handling in the apiClient (around line 674)
-const handleApiError = (error: unknown): never => {
-  if (error instanceof Error) {
-    // Use error mapper instead of direct error messages
-    const message = mapApiErrorToMessage(error);
-    throw new Error(message);
-  }
-
-  // For API error responses
-  const apiError = error as ApiErrorResponse;
-  const message = mapApiErrorToMessage(apiError);
-  throw new Error(message);
-};
-```
-
-### Step 2: Add Missing API Endpoints
-
-Add these endpoints to `src/lib/api/client.ts`:
-
-```typescript
-// GDPR Endpoints
-export const gdprApi = {
-  exportData: async (format: 'json' | 'csv' = 'json') => {
-    return apiClient.post<{ download_url: string; expires_at: string }>('/profile/gdpr/export', {
-      format,
-    });
-  },
-
-  deleteAccount: async () => {
-    return apiClient.post<{ message: string }>('/profile/gdpr/delete', {});
-  },
-};
-
-// Health Monitoring Endpoints
-export const healthApi = {
-  getHealth: async () => {
-    return apiClient.get<HealthCheckResponse>('/health');
-  },
-
-  getDetailedHealth: async () => {
-    return apiClient.get<DetailedHealthResponse>('/health/detailed');
-  },
-};
-
-// Audit Log Endpoints
-export const auditApi = {
-  getLogs: async (params?: {
-    page?: number;
-    page_size?: number;
-    start_date?: string;
-    end_date?: string;
-    action?: string;
-    severity?: string;
-  }) => {
-    return apiClient.get<PaginatedResponse<AuditLogEntry>>('/admin/audit', { params });
-  },
-};
-
-// Admin User Management Endpoints
-export const adminUserApi = {
-  getUsers: async (params?: {
-    page?: number;
-    page_size?: number;
-    role?: string;
-    is_active?: boolean;
-  }) => {
-    return apiClient.get<PaginatedResponse<AdminUserListResponse>>('/admin/users', { params });
-  },
-
-  approveUser: async (userId: string) => {
-    return apiClient.post<{ message: string }>(`/admin/users/${userId}/approve`, {});
-  },
-
-  suspendUser: async (userId: string, reason: string) => {
-    return apiClient.post<{ message: string }>(`/admin/users/${userId}/suspend`, { reason });
-  },
-};
-```
-
-### Step 3: Add TypeScript Types
-
-Ensure these types exist in `src/shared/types/api-backend.types.ts`:
-
-```typescript
-export interface HealthCheckResponse {
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  timestamp: string;
-  uptime_seconds: number;
-  checks: {
-    database: {
-      status: 'healthy' | 'unhealthy';
-      response_time_ms: number;
-      connections: {
-        active: number;
-        idle: number;
-        total: number;
-      };
-    };
-    cache: {
-      status: 'healthy' | 'unhealthy';
-      response_time_ms: number;
-    };
-  };
-}
-
-export interface DetailedHealthResponse extends HealthCheckResponse {
-  system: {
-    memory: {
-      used_mb: number;
-      total_mb: number;
-      percentage: number;
-    };
-    cpu: {
-      usage_percentage: number;
-    };
-  };
-}
-```
-
-## Error Mapper Integration
-
-### Update All API Calls to Use Error Mapper
-
-#### Before (old approach):
-
-```typescript
-try {
-  const response = await apiClient.get('/users');
-  // Handle response
-} catch (error) {
-  // Direct error message - DON'T DO THIS
-  toast.showToast((error as Error).message, 'error');
-}
-```
-
-#### After (using error mapper):
-
-```typescript
-import { useErrorMapper } from '@/shared/utils/errorMapper';
-
-const { mapApiError } = useErrorMapper();
-const { showToast } = useToast();
-
-try {
-  const response = await apiClient.get('/users');
-  // Handle response
-} catch (error) {
-  const message = mapApiError(error as ApiErrorResponse);
-  showToast(message, 'error');
-}
-```
-
-### Hook-Based Approach (Recommended):
-
-Create a custom hook for API calls with built-in error handling:
-
-```typescript
-// src/hooks/useApiCall.ts
-import { useState } from 'react';
-import { useErrorMapper } from '@/shared/utils/errorMapper';
-import { useToast } from './useToast';
-import type { ApiErrorResponse } from '@/shared/types/api-backend.types';
-
-export function useApiCall<T>() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { mapApiError } = useErrorMapper();
-  const { showToast } = useToast();
-
-  const execute = async (
-    apiCall: () => Promise<T>,
-    options?: {
-      onSuccess?: (data: T) => void;
-      onError?: (error: string) => void;
-      showErrorToast?: boolean;
-    }
-  ): Promise<T | null> => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await apiCall();
-      options?.onSuccess?.(data);
-      return data;
-    } catch (err) {
-      const errorMessage = mapApiError(err as ApiErrorResponse);
-      setError(errorMessage);
-
-      if (options?.showErrorToast !== false) {
-        showToast(errorMessage, 'error');
-      }
-
-      options?.onError?.(errorMessage);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { loading, error, execute };
-}
-```
-
-Usage:
-
-```typescript
-const { loading, error, execute } = useApiCall<User[]>();
-
-const loadUsers = async () => {
-  await execute(() => apiClient.get('/users'), {
-    onSuccess: (users) => setUsers(users),
-    showErrorToast: true,
-  });
-};
-```
-
-## Component Integration
-
-### 1. Integrate User List Filters
-
-#### File: `src/pages/AdminUsersPage.tsx`
-
-```typescript
-import { useState, useEffect } from 'react';
-import { UserListFilters } from '@/domains/admin/components/UserListFilters';
-import {
-  useUserListFilters,
-  downloadUsersAsCSV,
-} from '@/domains/admin/hooks/useUserListFilters';
-import type { UserFilters } from '@/domains/admin/components/UserListFilters';
-import type { AdminUserListResponse } from '@/shared/types/api-backend.types';
-import { adminUserApi } from '@/lib/api/client';
-import { useApiCall } from '@/hooks/useApiCall';
-
-export function AdminUsersPage() {
-  const [users, setUsers] = useState<AdminUserListResponse[]>([]);
-  const [filters, setFilters] = useState<UserFilters>({
-    searchText: '',
-    role: 'all',
-    status: 'all',
-    verified: 'all',
-    approved: 'all',
-    sortBy: 'created_at',
-    sortOrder: 'desc',
-  });
-
-  const { loading, execute } = useApiCall<PaginatedResponse<AdminUserListResponse>>();
-  const { filteredUsers, filteredCount, totalCount } = useUserListFilters({
-    users,
-    filters,
-  });
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    const response = await execute(() => adminUserApi.getUsers());
-    if (response) {
-      setUsers(response.items);
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">User Management</h1>
-
-      <UserListFilters
-        onFilterChange={setFilters}
-        totalCount={totalCount}
-        filteredCount={filteredCount}
-      />
-
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => downloadUsersAsCSV(filteredUsers)}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-        >
-          Export to CSV
-        </button>
-        <button
-          type="button"
-          onClick={loadUsers}
-          disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? 'Loading...' : 'Refresh'}
-        </button>
-      </div>
-
-      {/* User table */}
-      <UserTable users={filteredUsers} onRefresh={loadUsers} />
-    </div>
-  );
-}
-```
-
-### 2. Integrate Audit Log Filters
-
-#### File: `src/pages/AdminAuditLogPage.tsx`
-
-```typescript
-import { useState, useEffect } from 'react';
-import { AuditLogFilters } from '@/domains/admin/components/AuditLogFilters';
-import {
-  useAuditLogFilters,
-  downloadAuditLogsAsCSV,
-  getAuditLogStats,
-} from '@/domains/admin/hooks/useAuditLogFilters';
-import type { AuditLogFilters as AuditFilters } from '@/domains/admin/components/AuditLogFilters';
-import type { AuditLogEntry } from '@/shared/types/api-backend.types';
-import { auditApi } from '@/lib/api/client';
-import { useApiCall } from '@/hooks/useApiCall';
-
-export function AdminAuditLogPage() {
-  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
-  const [filters, setFilters] = useState<AuditFilters>({
-    dateFrom: '',
-    dateTo: '',
-    action: 'all',
-    resourceType: 'all',
-    severity: 'all',
-    outcome: 'all',
-    userId: '',
-    sortOrder: 'desc',
-  });
-
-  const { loading, execute } = useApiCall<PaginatedResponse<AuditLogEntry>>();
-  const { filteredLogs, filteredCount, totalCount } = useAuditLogFilters({
-    logs,
-    filters,
-  });
-
-  useEffect(() => {
-    loadLogs();
-  }, []);
-
-  const loadLogs = async () => {
-    const response = await execute(() => auditApi.getLogs());
-    if (response) {
-      setLogs(response.items);
-    }
-  };
-
-  const stats = getAuditLogStats(filteredLogs);
-
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Audit Logs</h1>
-
-      <AuditLogFilters
-        onFilterChange={setFilters}
-        totalCount={totalCount}
-        filteredCount={filteredCount}
-      />
-
-      {/* Statistics */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-        <h3 className="text-lg font-semibold mb-2">Statistics</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatCard label="Total Logs" value={stats.total} />
-          <StatCard label="Success Rate" value={`${stats.successRate}%`} color="green" />
-          <StatCard label="Failures" value={stats.failureCount} color="red" />
-          <StatCard label="Warnings" value={stats.countBySeverity.warning} color="yellow" />
-        </div>
-      </div>
-
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => downloadAuditLogsAsCSV(filteredLogs, 'audit-logs.csv')}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-        >
-          Export to CSV
-        </button>
-        <button
-          type="button"
-          onClick={loadLogs}
-          disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? 'Loading...' : 'Refresh'}
-        </button>
-      </div>
-
-      {/* Audit log table */}
-      <AuditLogTable logs={filteredLogs} />
-    </div>
-  );
-}
-```
-
-### 3. Integrate GDPR Components
-
-#### File: `src/pages/ProfileSettingsPage.tsx`
-
-```typescript
-import { useState } from 'react';
-import { GDPRDataExport } from '@/domains/profile/components/GDPRDataExport';
-import { GDPRAccountDeletion } from '@/domains/profile/components/GDPRAccountDeletion';
-
-export function ProfileSettingsPage() {
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'privacy'>('profile');
-
-  const handleDeleteSuccess = () => {
-    // Logout and redirect to home
-    localStorage.removeItem('auth_token');
-    window.location.href = '/';
-  };
-
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Settings</h1>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="-mb-px flex space-x-8">
-          <TabButton
-            label="Profile"
-            active={activeTab === 'profile'}
-            onClick={() => setActiveTab('profile')}
-          />
-          <TabButton
-            label="Security"
-            active={activeTab === 'security'}
-            onClick={() => setActiveTab('security')}
-          />
-          <TabButton
-            label="Privacy & Data"
-            active={activeTab === 'privacy'}
-            onClick={() => setActiveTab('privacy')}
-          />
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'profile' && <ProfileTab />}
-      {activeTab === 'security' && <SecurityTab />}
-      {activeTab === 'privacy' && (
-        <div className="space-y-8">
-          <section>
-            <h2 className="text-xl font-semibold mb-4">Export Your Data</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Download a copy of your personal data in JSON or CSV format.
-            </p>
-            <GDPRDataExport />
-          </section>
-
-          <section className="border-t pt-8">
-            <h2 className="text-xl font-semibold mb-4">Delete Your Account</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Permanently delete your account and all associated data.
-            </p>
-            <GDPRAccountDeletion onDeleteSuccess={handleDeleteSuccess} />
-          </section>
-        </div>
-      )}
-    </div>
-  );
-}
-```
-
-### 4. Integrate Health Monitoring Dashboard
-
-#### File: `src/pages/AdminDashboardPage.tsx`
-
-```typescript
-import { HealthMonitoringDashboard } from '@/domains/admin/components/HealthMonitoringDashboard';
-
-export function AdminDashboardPage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <QuickStatCard label="Total Users" value={1234} />
-        <QuickStatCard label="Active Users" value={890} />
-        <QuickStatCard label="Pending Approvals" value={12} />
-        <QuickStatCard label="System Load" value="45%" />
-      </div>
-
-      {/* System Health */}
-      <section>
-        <h2 className="text-xl font-semibold mb-4">System Health</h2>
-        <HealthMonitoringDashboard />
-      </section>
-
-      {/* Recent Activity */}
-      <section>
-        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-        <RecentActivityList />
-      </section>
-    </div>
-  );
-}
-```
-
-## Testing Integration
-
-### Unit Tests
-
-```typescript
-// src/__tests__/errorMapper.test.ts
-import { describe, it, expect } from 'vitest';
-import { mapApiErrorToMessage } from '@/shared/utils/errorMapper';
-
-describe('errorMapper', () => {
-  it('should map known error codes to localized messages', () => {
-    const error = {
-      error_code: 'INVALID_CREDENTIALS',
-      message: 'Invalid credentials',
-      status_code: 401,
-    };
-
-    const message = mapApiErrorToMessage(error);
-    expect(message).toBe('Invalid email or password');
-  });
-
-  it('should handle unknown error codes', () => {
-    const error = {
-      error_code: 'UNKNOWN_ERROR',
-      message: 'Something went wrong',
-      status_code: 500,
-    };
-
-    const message = mapApiErrorToMessage(error);
-    expect(message).toContain('An unexpected error occurred');
-  });
-});
-```
-
-### Integration Tests
-
-```typescript
-// src/__tests__/integration/userList.test.tsx
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AdminUsersPage } from '@/pages/AdminUsersPage';
-import { adminUserApi } from '@/lib/api/client';
-
-vi.mock('@/lib/api/client');
-
-describe('Admin Users Page Integration', () => {
-  it('should load and filter users', async () => {
-    const mockUsers = [
-      { user_id: '1', email: 'user1@example.com', role: 'user' },
-      { user_id: '2', email: 'admin@example.com', role: 'admin' },
-    ];
-
-    vi.mocked(adminUserApi.getUsers).mockResolvedValue({
-      items: mockUsers,
-      total: 2,
-      page: 1,
-      page_size: 10,
-      total_pages: 1,
-    });
-
-    render(<AdminUsersPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText('user1@example.com')).toBeInTheDocument();
-    });
-
-    // Test filtering by role
-    const roleFilter = screen.getByLabelText('Role');
-    fireEvent.change(roleFilter, { target: { value: 'admin' } });
-
-    expect(screen.getByText('admin@example.com')).toBeInTheDocument();
-    expect(screen.queryByText('user1@example.com')).not.toBeInTheDocument();
-  });
-});
-```
-
-### E2E Tests
-
-```typescript
-// e2e/admin-workflow.spec.ts
-import { test, expect } from '@playwright/test';
-
-test('admin can view and filter users', async ({ page }) => {
-  await page.goto('/admin/users');
-
-  // Wait for users to load
-  await expect(page.locator('table tbody tr')).toHaveCount(10);
-
-  // Filter by role
-  await page.selectOption('select[name="role"]', 'admin');
-  await expect(page.locator('table tbody tr')).toHaveCount(2);
-
-  // Export to CSV
-  const downloadPromise = page.waitForEvent('download');
-  await page.click('button:has-text("Export to CSV")');
-  const download = await downloadPromise;
-  expect(download.suggestedFilename()).toContain('.csv');
-});
-
-test('user can export GDPR data', async ({ page }) => {
-  await page.goto('/settings?tab=privacy');
-
-  // Request data export
-  await page.click('button:has-text("Request Data Export")');
-
-  // Wait for success message
-  await expect(page.locator('.toast-success')).toContainText('Data export request submitted');
-});
-```
-
-## Troubleshooting
-
-### Issue 1: Error Messages Not Translated
-
-**Problem**: Backend error codes are displayed directly instead of localized messages.
-
-**Solution**: Ensure `errors.json` contains the error code:
+1. [Authentication](#1-authentication)
+2. [Secure Authentication (httpOnly Cookies)](#2-secure-authentication-httponly-cookies)
+3. [Profile Management](#3-profile-management)
+4. [Admin - User Management](#4-admin---user-management)
+5. [Admin - RBAC Role Management](#5-admin---rbac-role-management)
+6. [GDPR Compliance](#6-gdpr-compliance)
+7. [Audit Logs](#7-audit-logs)
+8. [Frontend Error Logging](#8-frontend-error-logging)
+9. [Common Response Codes](#9-common-response-codes)
+10. [Error Response Format](#10-error-response-format)
+11. [Authentication Flow Examples](#11-authentication-flow-examples)
+
+---
+
+## 1. Authentication
+
+All authentication endpoints use JWT tokens. Access tokens expire in 15 minutes, refresh tokens in 7 days.
+
+### 1.1 User Registration
+
+**Endpoint:** `POST /api/v1/auth/register`  
+**Authentication:** Not required  
+**Rate Limit:** Standard
+
+**Request Body:**
 
 ```json
 {
-  "errors": {
-    "YOUR_ERROR_CODE": "Your localized message here"
+  "email": "user@example.com",
+  "password": "SecurePass123!",
+  "confirm_password": "SecurePass123!",
+  "first_name": "John",
+  "last_name": "Doe"
+}
+```
+
+**Field Validations:**
+
+- `email`: Valid email format, lowercase
+- `password`: Min 8 chars, must contain uppercase, lowercase, numbers, special characters
+- `confirm_password`: Must match password
+- `first_name`: 2-50 chars, no special characters
+- `last_name`: 2-50 chars, no special characters
+
+**Success Response (201):**
+
+```json
+{
+  "message": "User registered successfully. Please check your email for verification.",
+  "user_id": "usr_abc123xyz",
+  "email": "user@example.com",
+  "verification_required": true,
+  "approval_required": true,
+  "created_at": "2025-10-22T10:30:00Z",
+  "verification_token": null
+}
+```
+
+**Error Responses:**
+
+- `400`: Validation errors (passwords don't match, weak password, invalid email)
+- `409`: User already exists
+- `422`: Field validation errors (detailed below)
+
+**Field Validation Error Example:**
+
+```json
+{
+  "error_code": "VALIDATION_ERROR",
+  "message": "Registration validation failed",
+  "status_code": 422,
+  "field_errors": [
+    {
+      "field": "password",
+      "message": "Password must include upper and lower case letters, numbers, and special characters",
+      "code": "PASSWORD_WEAK",
+      "severity": "error"
+    }
+  ]
+}
+```
+
+---
+
+### 1.2 User Login
+
+**Endpoint:** `POST /api/v1/auth/login`  
+**Authentication:** Not required  
+**Rate Limit:** 5 requests per minute per IP, 3 requests per minute per email
+
+**Request Body:**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "expires_in": 900,
+  "refresh_expires_in": 604800,
+  "user_id": "usr_abc123xyz",
+  "email": "user@example.com",
+  "role": "user",
+  "last_login_at": "2025-10-22T10:25:00Z",
+  "issued_at": "2025-10-22T10:30:00Z"
+}
+```
+
+**Error Responses:**
+
+- `401`: Invalid credentials, user not found
+- `403`: Email not verified, user inactive, account not approved
+- `422`: Validation errors
+- `429`: Too many requests (rate limited)
+
+**Rate Limit Response (429):**
+
+```json
+{
+  "error_code": "RATE_LIMIT_EXCEEDED",
+  "message": "Too many login attempts. Please try again later.",
+  "status_code": 429,
+  "retry_after": 60
+}
+```
+
+---
+
+### 1.3 Refresh Token
+
+**Endpoint:** `POST /api/v1/auth/refresh`  
+**Authentication:** Required (refresh token in Authorization header)  
+**Rate Limit:** Standard
+
+**Headers:**
+
+```
+Authorization: Bearer <refresh_token>
+```
+
+**Success Response (200):**
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "expires_in": 900,
+  "refresh_expires_in": 604800,
+  "user_id": "usr_abc123xyz",
+  "email": "user@example.com",
+  "role": "user",
+  "last_login_at": "2025-10-22T10:30:00Z",
+  "issued_at": "2025-10-22T10:35:00Z"
+}
+```
+
+**Error Responses:**
+
+- `401`: Invalid or expired refresh token
+- `500`: Token refresh failed
+
+---
+
+### 1.4 Logout
+
+**Endpoint:** `POST /api/v1/auth/logout`  
+**Authentication:** Required  
+**Rate Limit:** Standard
+
+**Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Success Response (200):**
+
+```json
+{
+  "message": "Successfully logged out",
+  "logged_out_at": "2025-10-22T10:40:00Z",
+  "success": true
+}
+```
+
+---
+
+### 1.5 Verify Email
+
+**Endpoint:** `POST /api/v1/auth/verify-email`  
+**Authentication:** Not required  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "token": "email_verification_token_here"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "message": "Email verified successfully",
+  "verified_at": "2025-10-22T10:30:00Z",
+  "user_id": null,
+  "approval_required": true
+}
+```
+
+**Error Responses:**
+
+- `401`: Invalid or expired token
+- `404`: User not found
+- `500`: Verification failed
+
+---
+
+### 1.6 Resend Verification Email
+
+**Endpoint:** `POST /api/v1/auth/resend-verification`  
+**Authentication:** Not required  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "message": "If the email exists in our system, a verification email has been sent.",
+  "email": "user@example.com",
+  "resent_at": "2025-10-22T10:30:00Z"
+}
+```
+
+**Note:** Always returns success (security feature to prevent email enumeration)
+
+---
+
+### 1.7 Forgot Password
+
+**Endpoint:** `POST /api/v1/auth/forgot-password`  
+**Authentication:** Not required  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "message": "Password reset instructions have been sent to your email",
+  "email": "user@example.com",
+  "success": true,
+  "requested_at": "2025-10-22T10:30:00Z"
+}
+```
+
+**Note:** Always returns success (security feature to prevent email enumeration)
+
+---
+
+### 1.8 Reset Password
+
+**Endpoint:** `POST /api/v1/auth/reset-password`  
+**Authentication:** Not required  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "token": "password_reset_token_here",
+  "new_password": "NewSecurePass123!",
+  "confirm_password": "NewSecurePass123!"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "message": "Password reset successfully",
+  "reset_at": "2025-10-22T10:30:00Z",
+  "success": true
+}
+```
+
+**Error Responses:**
+
+- `401`: Invalid or expired token
+- `404`: User not found
+- `422`: Validation errors (passwords don't match, weak password)
+
+---
+
+### 1.9 Change Password (Authenticated)
+
+**Endpoint:** `POST /api/v1/auth/change-password`  
+**Authentication:** Required  
+**Rate Limit:** Standard
+
+**Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body:**
+
+```json
+{
+  "current_password": "OldSecurePass123!",
+  "new_password": "NewSecurePass123!",
+  "confirm_password": "NewSecurePass123!"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "message": "Password changed successfully",
+  "changed_at": "2025-10-22T10:30:00Z",
+  "success": true
+}
+```
+
+**Error Responses:**
+
+- `401`: Current password incorrect
+- `404`: User not found
+- `422`: Validation errors
+
+---
+
+## 2. Secure Authentication (httpOnly Cookies)
+
+These endpoints use httpOnly cookies for XSS protection. Tokens are stored in secure cookies instead of response body.
+
+### 2.1 Login (Secure)
+
+**Endpoint:** `POST /api/v1/auth/login-secure`  
+**Authentication:** Not required  
+**Rate Limit:** Same as regular login
+
+**Request Body:**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "message": "Login successful",
+  "user": {
+    "user_id": "usr_abc123xyz",
+    "email": "user@example.com",
+    "role": "user",
+    "last_login_at": "2025-10-22T10:25:00Z"
   }
 }
 ```
 
-### Issue 2: Filters Not Working
+**Response Cookies:**
 
-**Problem**: Filters don't update the displayed data.
+- `access_token`: httpOnly, Secure, SameSite=Strict, max-age=900
+- `refresh_token`: httpOnly, Secure, SameSite=Strict, max-age=604800, path=/api/v1/auth
 
-**Solution**: Ensure you're passing the `filters` state to the hook:
+---
 
-```typescript
-const { filteredUsers } = useUserListFilters({ users, filters });
+### 2.2 Logout (Secure)
+
+**Endpoint:** `POST /api/v1/auth/logout-secure`  
+**Authentication:** Required (cookie)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "message": "Successfully logged out",
+  "logged_out_at": "2025-10-22T10:40:00Z",
+  "success": true
+}
 ```
 
-### Issue 3: GDPR Components Not Connected to API
+**Note:** Clears all authentication cookies
 
-**Problem**: GDPR components don't trigger actual API calls.
+---
 
-**Solution**: Update the components to use the actual API client. See the integration examples above.
+### 2.3 Refresh Token (Secure)
 
-### Issue 4: Health Dashboard Shows Mock Data
+**Endpoint:** `POST /api/v1/auth/refresh-secure`  
+**Authentication:** Required (refresh cookie)  
+**Rate Limit:** Standard
 
-**Problem**: Health dashboard displays static mock data.
+**Success Response (200):**
 
-**Solution**: Update `HealthMonitoringDashboard.tsx` to use `healthApi.getDetailedHealth()`:
+```json
+{
+  "message": "Token refreshed successfully"
+}
+```
 
-```typescript
-// In HealthMonitoringDashboard.tsx
-useEffect(() => {
-  const fetchHealth = async () => {
-    try {
-      const data = await healthApi.getDetailedHealth();
-      setHealthData(data);
-    } catch (error) {
-      setError(mapApiError(error));
+**Response Cookies:** New access_token and refresh_token cookies
+
+---
+
+### 2.4 Get CSRF Token
+
+**Endpoint:** `GET /api/v1/auth/csrf-token`  
+**Authentication:** Required  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "csrf_token": "csrf_token_abc123xyz",
+  "expires_at": "2025-10-22T11:30:00Z"
+}
+```
+
+**Usage:** Include in `X-CSRF-Token` header for all POST/PUT/DELETE requests when using cookie auth
+
+---
+
+### 2.5 Validate CSRF Token
+
+**Endpoint:** `POST /api/v1/auth/validate-csrf`  
+**Authentication:** Required  
+**Rate Limit:** Standard
+
+**Headers:**
+
+```
+X-CSRF-Token: csrf_token_abc123xyz
+```
+
+**Success Response (200):**
+
+```json
+{
+  "message": "CSRF token is valid"
+}
+```
+
+**Error Response (403):**
+
+```json
+{
+  "error": "Invalid or expired CSRF token"
+}
+```
+
+---
+
+## 3. Profile Management
+
+### 3.1 Get My Profile
+
+**Endpoint:** `GET /api/v1/profile/me`  
+**Authentication:** Required  
+**Rate Limit:** Standard
+
+**Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Success Response (200):**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "email": "user@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "role": "user",
+  "status": "active",
+  "is_verified": true,
+  "created_at": "2025-01-01T00:00:00Z",
+  "last_login": "2025-10-22T10:30:00Z"
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `404`: Profile not found
+- `500`: Profile retrieval failed
+
+---
+
+### 3.2 Update My Profile
+
+**Endpoint:** `PUT /api/v1/profile/me`  
+**Authentication:** Required  
+**Rate Limit:** Standard
+
+**Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Request Body (all fields optional):**
+
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Smith"
+}
+```
+
+**Field Validations:**
+
+- `first_name`: 2-50 chars
+- `last_name`: 2-50 chars
+
+**Success Response (200):**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "email": "user@example.com",
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "role": "user",
+  "status": "active",
+  "is_verified": true,
+  "created_at": "2025-01-01T00:00:00Z",
+  "last_login": "2025-10-22T10:30:00Z"
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `404`: Profile not found
+- `422`: Validation errors
+- `500`: Profile update failed
+
+---
+
+## 4. Admin - User Management
+
+**Required Role:** `admin`, `super_admin`
+
+### 4.1 List All Users
+
+**Endpoint:** `GET /api/v1/admin/users`  
+**Authentication:** Required (Admin)  
+**Rate Limit:** Standard
+
+**Query Parameters:**
+
+- `page`: Page number (default: 1, min: 1)
+- `limit`: Items per page (default: 10, min: 1, max: 100)
+- `role`: Filter by role (optional)
+- `is_active`: Filter by active status (optional, boolean)
+
+**Example:** `GET /api/v1/admin/users?page=1&limit=20&role=user&is_active=true`
+
+**Success Response (200):**
+
+```json
+[
+  {
+    "user_id": "usr_abc123xyz",
+    "email": "user@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "role": "user",
+    "is_active": true,
+    "is_verified": true,
+    "is_approved": true,
+    "approved_by": "admin@example.com",
+    "approved_at": "2025-01-01T12:00:00Z",
+    "created_at": "2025-01-01T00:00:00Z",
+    "last_login_at": "2025-10-22T10:30:00Z"
+  }
+]
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Not admin
+- `500`: User list retrieval failed
+
+---
+
+### 4.2 Create User (Admin)
+
+**Endpoint:** `POST /api/v1/admin/users`  
+**Authentication:** Required (Admin)  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "email": "newuser@example.com",
+  "password": "SecurePass123!",
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "role": "user",
+  "is_active": true
+}
+```
+
+**Field Validations:**
+
+- `email`: Valid email format
+- `password`: Min 8 chars, complexity requirements
+- `first_name`: 1-50 chars
+- `last_name`: 1-50 chars
+- `role`: One of: `user`, `manager`, `admin`, `super_admin`, `auditor`
+- `is_active`: Boolean (default: true)
+
+**Success Response (201):**
+
+```json
+{
+  "user_id": "usr_xyz789abc",
+  "email": "newuser@example.com",
+  "message": "User created successfully"
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Not admin
+- `409`: User already exists
+- `422`: Validation errors
+- `500`: User creation failed
+
+---
+
+### 4.3 Get User Details
+
+**Endpoint:** `GET /api/v1/admin/users/{user_id}`  
+**Authentication:** Required (Admin)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "email": "user@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "role": "user",
+  "is_active": true,
+  "is_verified": true,
+  "is_approved": true,
+  "approved_by": "admin@example.com",
+  "approved_at": "2025-01-01T12:00:00Z",
+  "created_at": "2025-01-01T00:00:00Z",
+  "updated_at": "2025-10-15T14:20:00Z",
+  "last_login_at": "2025-10-22T10:30:00Z",
+  "login_count": 42
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Not admin
+- `404`: User not found
+- `500`: User retrieval failed
+
+---
+
+### 4.4 Update User
+
+**Endpoint:** `PUT /api/v1/admin/users/{user_id}`  
+**Authentication:** Required (Admin)  
+**Rate Limit:** Standard
+
+**Request Body (all fields optional):**
+
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "role": "manager",
+  "is_active": true,
+  "is_verified": true
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "email": "user@example.com",
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "role": "manager",
+  "is_active": true,
+  "is_verified": true,
+  "is_approved": true,
+  "approved_by": "admin@example.com",
+  "approved_at": "2025-01-01T12:00:00Z",
+  "created_at": "2025-01-01T00:00:00Z",
+  "updated_at": "2025-10-22T10:40:00Z",
+  "last_login_at": "2025-10-22T10:30:00Z",
+  "login_count": 42
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Not admin
+- `404`: User not found
+- `422`: Validation errors
+- `500`: User update failed
+
+---
+
+### 4.5 Delete User
+
+**Endpoint:** `DELETE /api/v1/admin/users/{user_id}`  
+**Authentication:** Required (Admin)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "email": "user@example.com",
+  "message": "User deleted successfully",
+  "deleted_at": "2025-10-22T10:40:00Z"
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Not admin, cannot delete yourself
+- `404`: User not found
+- `500`: User deletion failed
+
+---
+
+### 4.6 Approve User
+
+**Endpoint:** `POST /api/v1/admin/users/{user_id}/approve`  
+**Authentication:** Required (Admin)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "email": "user@example.com",
+  "approved_by": "admin@example.com",
+  "approved_at": "2025-10-22T10:40:00Z",
+  "message": "User approved successfully"
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Not admin
+- `404`: User not found
+- `422`: Validation errors
+- `500`: User approval failed
+
+---
+
+### 4.7 Reject User
+
+**Endpoint:** `POST /api/v1/admin/users/{user_id}/reject`  
+**Authentication:** Required (Admin)  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "reason": "Does not meet requirements"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "email": "user@example.com",
+  "rejected_by": "admin@example.com",
+  "rejected_at": "2025-10-22T10:40:00Z",
+  "message": "User registration rejected"
+}
+```
+
+---
+
+### 4.8 Get Admin Statistics
+
+**Endpoint:** `GET /api/v1/admin/stats`  
+**Authentication:** Required (Admin)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "total_users": 1250,
+  "active_users": 1100,
+  "pending_approvals": 15,
+  "new_users_today": 8,
+  "new_users_this_week": 47,
+  "new_users_this_month": 203,
+  "users_by_role": {
+    "user": 1000,
+    "manager": 200,
+    "admin": 45,
+    "super_admin": 5
+  }
+}
+```
+
+---
+
+### 4.9 Get Audit Logs
+
+**Endpoint:** `GET /api/v1/admin/audit-logs`  
+**Authentication:** Required (Admin)  
+**Rate Limit:** Standard
+
+**Query Parameters:**
+
+- `page`: Page number (default: 1)
+- `limit`: Items per page (default: 10, max: 100)
+- `event_type`: Filter by event type (optional)
+- `user_id`: Filter by user ID (optional)
+
+**Success Response (200):**
+
+```json
+[
+  {
+    "event_id": "audit-001",
+    "event_type": "user_login",
+    "user_id": "usr_abc123xyz",
+    "timestamp": "2025-10-22T10:30:00Z",
+    "details": {
+      "success": true
+    },
+    "ip_address": "192.168.1.1"
+  }
+]
+```
+
+---
+
+## 5. Admin - RBAC Role Management
+
+**Required Permissions:** Various (specified per endpoint)
+
+### 5.1 List All Roles
+
+**Endpoint:** `GET /api/v1/admin/rbac/roles`  
+**Authentication:** Required (Admin or Super Admin)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+[
+  {
+    "role_id": "user",
+    "role_name": "Standard User",
+    "description": "Basic user access",
+    "permissions": ["users:read", "profile:read", "profile:write"],
+    "priority": 0,
+    "is_system_role": true,
+    "inherits_from": [],
+    "metadata": {},
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": null
+  },
+  {
+    "role_id": "admin",
+    "role_name": "Administrator",
+    "description": "Full administrative access",
+    "permissions": ["*"],
+    "priority": 100,
+    "is_system_role": true,
+    "inherits_from": ["manager"],
+    "metadata": {},
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-10-15T10:00:00Z"
+  }
+]
+```
+
+---
+
+### 5.2 Get Role by ID
+
+**Endpoint:** `GET /api/v1/admin/rbac/roles/{role_id}`  
+**Authentication:** Required (Admin or Super Admin)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "role_id": "manager",
+  "role_name": "Manager",
+  "description": "Team management access",
+  "permissions": ["users:read", "users:write", "reports:read"],
+  "priority": 50,
+  "is_system_role": false,
+  "inherits_from": ["user"],
+  "metadata": {
+    "department": "operations"
+  },
+  "created_at": "2025-01-01T00:00:00Z",
+  "updated_at": "2025-10-15T10:00:00Z"
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Not admin
+- `404`: Role not found
+
+---
+
+### 5.3 Create Role
+
+**Endpoint:** `POST /api/v1/admin/rbac/roles`  
+**Authentication:** Required (Permissions: `roles:create`, `roles:write`)  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "role_id": "data_analyst",
+  "role_name": "Data Analyst",
+  "description": "Access to analytics and reporting",
+  "permissions": ["reports:read", "analytics:read", "data:export"],
+  "priority": 30,
+  "inherits_from": ["user"],
+  "is_system_role": false,
+  "metadata": {
+    "department": "analytics"
+  }
+}
+```
+
+**Field Validations:**
+
+- `role_id`: Unique identifier (required)
+- `role_name`: Human-readable name (required)
+- `description`: Role description (required)
+- `permissions`: List of permission IDs (default: [])
+- `priority`: Integer (default: 0)
+- `inherits_from`: List of parent role IDs (default: [])
+- `is_system_role`: Boolean (default: false)
+- `metadata`: Additional metadata (default: {})
+
+**Success Response (201):**
+
+```json
+{
+  "role_id": "data_analyst",
+  "role_name": "Data Analyst",
+  "description": "Access to analytics and reporting",
+  "permissions": ["reports:read", "analytics:read", "data:export"],
+  "priority": 30,
+  "is_system_role": false,
+  "inherits_from": ["user"],
+  "metadata": {
+    "department": "analytics"
+  },
+  "created_at": "2025-10-22T10:40:00Z",
+  "updated_at": null
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Insufficient permissions
+- `409`: Role already exists
+- `400`: Parent role not found
+- `500`: Role creation failed
+
+---
+
+### 5.4 Update Role
+
+**Endpoint:** `PUT /api/v1/admin/rbac/roles/{role_id}`  
+**Authentication:** Required (Permissions: `roles:update`, `roles:write`)  
+**Rate Limit:** Standard
+
+**Request Body (all fields optional):**
+
+```json
+{
+  "role_name": "Senior Data Analyst",
+  "description": "Advanced analytics access",
+  "permissions": ["reports:read", "reports:write", "analytics:read", "data:export"],
+  "priority": 35,
+  "inherits_from": ["user"],
+  "metadata": {
+    "department": "analytics",
+    "level": "senior"
+  }
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "role_id": "data_analyst",
+  "role_name": "Senior Data Analyst",
+  "description": "Advanced analytics access",
+  "permissions": ["reports:read", "reports:write", "analytics:read", "data:export"],
+  "priority": 35,
+  "is_system_role": false,
+  "inherits_from": ["user"],
+  "metadata": {
+    "department": "analytics",
+    "level": "senior"
+  },
+  "created_at": "2025-10-22T10:40:00Z",
+  "updated_at": "2025-10-22T11:00:00Z"
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Insufficient permissions, cannot modify system roles
+- `404`: Role not found
+- `400`: Parent role not found
+- `500`: Role update failed
+
+---
+
+### 5.5 Delete Role
+
+**Endpoint:** `DELETE /api/v1/admin/rbac/roles/{role_id}`  
+**Authentication:** Required (Permissions: `roles:delete`, `roles:write`)  
+**Rate Limit:** Standard
+
+**Success Response (204):** No content
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Insufficient permissions, system roles cannot be deleted
+- `404`: Role not found or cannot be deleted
+- `500`: Role deletion failed
+
+---
+
+### 5.6 Assign Role to User
+
+**Endpoint:** `POST /api/v1/admin/rbac/users/roles`  
+**Authentication:** Required (Permissions: `users:write`, `roles:assign`)  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "role_id": "data_analyst",
+  "expires_at": "2026-10-22T10:40:00Z"
+}
+```
+
+**Field Validations:**
+
+- `user_id`: Target user ID (required)
+- `role_id`: Role ID to assign (required)
+- `expires_at`: ISO format expiration datetime (optional)
+
+**Success Response (201):**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "role_id": "data_analyst",
+  "assigned_by": "admin_xyz",
+  "assigned_at": "2025-10-22T10:40:00Z",
+  "expires_at": "2026-10-22T10:40:00Z"
+}
+```
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Insufficient permissions
+- `404`: Role not found
+- `500`: Role assignment failed
+
+---
+
+### 5.7 Remove Role from User
+
+**Endpoint:** `DELETE /api/v1/admin/rbac/users/{user_id}/roles/{role_id}`  
+**Authentication:** Required (Permissions: `users:write`, `roles:assign`)  
+**Rate Limit:** Standard
+
+**Success Response (204):** No content
+
+**Error Responses:**
+
+- `401`: Not authenticated
+- `403`: Insufficient permissions
+- `404`: Role assignment not found
+- `500`: Role removal failed
+
+---
+
+### 5.8 Get User Roles and Permissions
+
+**Endpoint:** `GET /api/v1/admin/rbac/users/{user_id}/roles`  
+**Authentication:** Required (Permissions: `users:read`, `roles:read`)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "user_id": "usr_abc123xyz",
+  "roles": ["user", "data_analyst"],
+  "permissions": [
+    "users:read",
+    "profile:read",
+    "profile:write",
+    "reports:read",
+    "analytics:read",
+    "data:export"
+  ],
+  "role_details": [
+    {
+      "role_id": "user",
+      "role_name": "Standard User",
+      "description": "Basic user access",
+      "permissions": ["users:read", "profile:read", "profile:write"],
+      "priority": 0,
+      "is_system_role": true,
+      "inherits_from": [],
+      "metadata": {},
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": null
+    },
+    {
+      "role_id": "data_analyst",
+      "role_name": "Data Analyst",
+      "description": "Access to analytics and reporting",
+      "permissions": ["reports:read", "analytics:read", "data:export"],
+      "priority": 30,
+      "is_system_role": false,
+      "inherits_from": ["user"],
+      "metadata": {
+        "department": "analytics"
+      },
+      "created_at": "2025-10-22T10:40:00Z",
+      "updated_at": null
     }
-  };
-
-  fetchHealth();
-  const interval = setInterval(fetchHealth, 30000); // 30 seconds
-  return () => clearInterval(interval);
-}, []);
+  ]
+}
 ```
 
-### Issue 5: TypeScript Errors in API Calls
+---
 
-**Problem**: Type errors when calling API endpoints.
+### 5.9 List Permission Categories
 
-**Solution**: Ensure all types are properly imported and defined in `api-backend.types.ts`.
+**Endpoint:** `GET /api/v1/admin/rbac/permissions`  
+**Authentication:** Required (Admin or Super Admin)  
+**Rate Limit:** Standard
 
-## Next Steps
+**Success Response (200):**
 
-1. ✅ Complete API client integration (add all endpoints)
-2. ✅ Update error handling to use error mapper everywhere
-3. ✅ Integrate all components into their respective pages
-4. ✅ Write comprehensive unit tests
-5. ✅ Write integration tests
-6. ✅ Write E2E tests for critical flows
-7. ✅ Test with real backend (staging environment)
-8. ✅ Performance testing (Lighthouse >90)
-9. ✅ Accessibility testing (WCAG AA)
-10. ✅ Deploy to production
+```json
+{
+  "users": ["users:read", "users:write", "users:delete"],
+  "roles": [
+    "roles:read",
+    "roles:write",
+    "roles:create",
+    "roles:update",
+    "roles:delete",
+    "roles:assign"
+  ],
+  "reports": ["reports:read", "reports:write", "reports:export"],
+  "analytics": ["analytics:read", "analytics:write"],
+  "audit": ["audit:read", "audit:export"],
+  "system": ["system:admin", "cache:write"]
+}
+```
+
+---
+
+### 5.10 Get Cache Statistics
+
+**Endpoint:** `GET /api/v1/admin/rbac/cache/stats`  
+**Authentication:** Required (Admin or Super Admin)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "hits": 15420,
+  "misses": 342,
+  "errors": 5,
+  "hit_rate": "97.83%",
+  "backend": "redis",
+  "memory_cache_size": 128
+}
+```
+
+---
+
+### 5.11 Clear RBAC Cache
+
+**Endpoint:** `POST /api/v1/admin/rbac/cache/clear`  
+**Authentication:** Required (Permissions: `system:admin`, `cache:write`)  
+**Rate Limit:** Standard
+
+**Success Response (204):** No content
+
+**Warning:** Use with caution. Clears all RBAC caches.
+
+---
+
+### 5.12 Sync Roles from Database
+
+**Endpoint:** `POST /api/v1/admin/rbac/sync-database`  
+**Authentication:** Required (Admin or Super Admin)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "message": "Roles synced successfully"
+}
+```
+
+**Error Response (500):**
+
+```json
+{
+  "detail": "Failed to sync roles from database"
+}
+```
+
+---
+
+## 6. GDPR Compliance
+
+### 6.1 Export My Data
+
+**Endpoint:** `POST /api/v1/gdpr/export/my-data`  
+**Authentication:** Required  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "format": "json",
+  "include_audit_logs": true,
+  "include_metadata": true
+}
+```
+
+**Field Validations:**
+
+- `format`: `"json"` or `"csv"` (default: `"json"`)
+- `include_audit_logs`: Boolean (default: `true`)
+- `include_metadata`: Boolean (default: `true`)
+
+**Success Response (200):**
+
+- **Content-Type:** `application/json; charset=utf-8` (for JSON) or `text/csv` (for CSV)
+- **Headers:**
+  - `Content-Disposition: attachment; filename="gdpr_export_{user_id}_{export_id}.json"`
+  - `X-Export-ID: exp_abc123`
+  - `X-Record-Count: 42`
+
+**Response Body (JSON format):**
+
+```json
+{
+  "metadata": {
+    "export_id": "exp_abc123",
+    "user_id": "usr_xyz789",
+    "export_date": "2025-10-22T10:40:00Z",
+    "format": "json",
+    "record_count": 42,
+    "categories": ["user_profile", "account_settings", "activity_logs"]
+  },
+  "personal_data": {
+    "user_profile": {
+      "user_id": "usr_xyz789",
+      "email": "user@example.com",
+      "first_name": "John",
+      "last_name": "Doe",
+      "phone": "+1234567890",
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2025-10-15T10:30:00Z"
+    },
+    "account_settings": {
+      "language": "en",
+      "timezone": "UTC",
+      "email_notifications": true
+    },
+    "activity_logs": [
+      {
+        "action": "login",
+        "timestamp": "2025-10-22T10:00:00Z",
+        "ip_address": "192.168.1.1"
+      }
+    ]
+  }
+}
+```
+
+**GDPR Compliance Notes:**
+
+- Implements Article 15 (Right of Access)
+- Data provided in structured, machine-readable format
+- Includes all personal data categories
+
+---
+
+### 6.2 Delete My Account
+
+**Endpoint:** `DELETE /api/v1/gdpr/delete/my-account`  
+**Authentication:** Required  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "confirmation": "DELETE MY ACCOUNT",
+  "reason": "No longer need the service"
+}
+```
+
+**Field Validations:**
+
+- `confirmation`: Must be exactly `"DELETE MY ACCOUNT"` (required)
+- `reason`: Optional reason, max 500 chars
+
+**Success Response (200):**
+
+```json
+{
+  "deletion_id": "del_xyz789",
+  "user_id": "usr_abc123",
+  "deletion_date": "2025-10-22T10:40:00Z",
+  "records_deleted": 47,
+  "categories_deleted": ["user_profile", "activity_logs", "audit_logs_anonymized", "sessions"],
+  "anonymization_applied": true
+}
+```
+
+**GDPR Compliance Notes:**
+
+- Implements Article 17 (Right to Erasure / "Right to be Forgotten")
+- User profile: DELETED
+- Activity logs: DELETED
+- Audit logs: ANONYMIZED (PII removed, retained for compliance)
+- Financial records: RETAINED (legal requirement, 7 years)
+- **WARNING:** This action is IRREVERSIBLE
+
+**Error Response (500):**
+
+```json
+{
+  "detail": "Account deletion failed: {error_message}"
+}
+```
+
+---
+
+### 6.3 Get Export Status
+
+**Endpoint:** `GET /api/v1/gdpr/export/status/{export_id}`  
+**Authentication:** Required  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "export_id": "exp_abc123",
+  "status": "synchronous_mode",
+  "message": "Exports are currently synchronous. For async support, implement DynamoDB tracking table.",
+  "implementation_note": "See router.py docstring for implementation details"
+}
+```
+
+**Note:** Currently exports are synchronous. This endpoint is a placeholder for future async export support.
+
+---
+
+## 7. Audit Logs
+
+**Required Role:** `admin`, `super_admin`, `auditor`
+
+### 7.1 Query Audit Logs
+
+**Endpoint:** `GET /api/v1/audit/logs`  
+**Authentication:** Required (Auditor or Admin)  
+**Rate Limit:** Standard
+
+**Query Parameters:**
+
+- `action`: Filter by action (optional)
+- `resource`: Filter by resource type (optional)
+- `user_id`: Filter by user ID (optional)
+- `start_date`: Start date UTC (optional, ISO format)
+- `end_date`: End date UTC (optional, ISO format)
+- `severity`: Filter by severity (`info`, `warning`, `error`, `critical`) (optional)
+- `page`: Page number (default: 1, min: 1)
+- `limit`: Items per page (default: 10, min: 1, max: 100)
+
+**Example:**
+
+```
+GET /api/v1/audit/logs?action=user_login&severity=info&start_date=2025-10-01T00:00:00Z&end_date=2025-10-22T23:59:59Z&page=1&limit=20
+```
+
+**Success Response (200):**
+
+```json
+{
+  "items": [
+    {
+      "audit_id": "audit_abc123",
+      "user_id": "usr_xyz789",
+      "action": "user_login",
+      "resource_type": "authentication",
+      "resource_id": null,
+      "severity": "info",
+      "timestamp": "2025-10-22T10:30:00Z",
+      "metadata": {
+        "ip_address": "192.168.1.1",
+        "user_agent": "Mozilla/5.0...",
+        "success": true
+      },
+      "outcome": "success",
+      "ip_address": "192.168.1.1",
+      "user_agent": "Mozilla/5.0..."
+    }
+  ],
+  "total": 1542,
+  "limit": 20,
+  "offset": 0,
+  "has_next": true,
+  "has_prev": false
+}
+```
+
+**Error Responses:**
+
+- `400`: Invalid date range (start_date > end_date)
+- `401`: Not authenticated
+- `403`: Not auditor/admin
+- `422`: Validation errors
+- `500`: Audit log retrieval failed
+
+---
+
+### 7.2 Get Audit Summary
+
+**Endpoint:** `GET /api/v1/audit/summary`  
+**Authentication:** Required (Auditor or Admin)  
+**Rate Limit:** Standard
+
+**Success Response (200):**
+
+```json
+{
+  "total_logs": 15420,
+  "recent_actions": [
+    "user_login",
+    "user_updated",
+    "role_assigned",
+    "user_created",
+    "password_changed"
+  ],
+  "security_events": 247
+}
+```
+
+**Error Response (500):**
+
+```json
+{
+  "code": "RETRIEVAL_FAILED",
+  "message": "Failed to retrieve audit summary",
+  "details": {
+    "data": []
+  }
+}
+```
+
+---
+
+## 8. Frontend Error Logging
+
+### 8.1 Log Frontend Errors
+
+**Endpoint:** `POST /api/v1/logs/frontend-errors`  
+**Authentication:** Not required  
+**Rate Limit:** Standard
+
+**Request Body:**
+
+```json
+{
+  "message": "TypeError: Cannot read property 'map' of undefined",
+  "stack": "Error: TypeError: Cannot read property 'map' of undefined\n    at Component.render (app.js:123:45)\n    ...",
+  "url": "https://app.example.com/dashboard",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+  "timestamp": "2025-10-22T10:40:00.123Z",
+  "level": "error",
+  "metadata": {
+    "component": "Dashboard",
+    "user_id": "usr_abc123",
+    "session_id": "sess_xyz789"
+  }
+}
+```
+
+**Field Validations:**
+
+- `message`: Error message (required)
+- `stack`: Stack trace (optional)
+- `url`: URL where error occurred (optional)
+- `user_agent`: Browser user agent (optional)
+- `timestamp`: Client timestamp ISO format (optional)
+- `level`: Log level - `"error"`, `"warning"`, `"info"` (default: `"error"`)
+- `metadata`: Additional metadata (optional)
+
+**Success Response (202):**
+
+```json
+{
+  "status": "accepted",
+  "message": "Error logged successfully"
+}
+```
+
+**Use Cases:**
+
+- Log JavaScript errors
+- Track user-facing issues
+- Monitor client-side performance
+- Debug production issues
+
+---
+
+## 9. Common Response Codes
+
+| Code | Status                | Description                              |
+| ---- | --------------------- | ---------------------------------------- |
+| 200  | OK                    | Request successful                       |
+| 201  | Created               | Resource created successfully            |
+| 202  | Accepted              | Request accepted (async processing)      |
+| 204  | No Content            | Request successful, no content to return |
+| 400  | Bad Request           | Invalid request format or parameters     |
+| 401  | Unauthorized          | Authentication required or token invalid |
+| 403  | Forbidden             | Insufficient permissions                 |
+| 404  | Not Found             | Resource not found                       |
+| 409  | Conflict              | Resource already exists                  |
+| 422  | Unprocessable Entity  | Validation errors                        |
+| 429  | Too Many Requests     | Rate limit exceeded                      |
+| 500  | Internal Server Error | Server error                             |
+
+---
+
+## 10. Error Response Format
+
+All error responses follow a consistent format:
+
+### Standard Error Response
+
+```json
+{
+  "error_code": "ERROR_CODE_HERE",
+  "message": "Human-readable error message",
+  "status_code": 400,
+  "timestamp": "2025-10-22T10:40:00Z",
+  "path": "/api/v1/auth/login",
+  "details": {
+    "additional": "context"
+  }
+}
+```
+
+### Field Validation Error Response
+
+```json
+{
+  "error_code": "VALIDATION_ERROR",
+  "message": "Validation failed",
+  "status_code": 422,
+  "field_errors": [
+    {
+      "field": "email",
+      "message": "Invalid email format",
+      "code": "EMAIL_INVALID",
+      "severity": "error"
+    },
+    {
+      "field": "password",
+      "message": "Password must contain at least 8 characters",
+      "code": "PASSWORD_TOO_SHORT",
+      "severity": "error"
+    }
+  ]
+}
+```
+
+### Common Error Codes
+
+#### Authentication Errors
+
+- `INVALID_CREDENTIALS`: Invalid email or password
+- `TOKEN_INVALID`: Invalid or expired token
+- `TOKEN_MISSING`: Authorization token not provided
+- `EMAIL_NOT_VERIFIED`: Email not verified
+- `USER_INACTIVE`: User account is inactive
+- `USER_NOT_APPROVED`: User pending admin approval
+
+#### Validation Errors
+
+- `VALIDATION_ERROR`: General validation error
+- `EMAIL_INVALID`: Invalid email format
+- `PASSWORD_TOO_SHORT`: Password less than 8 characters
+- `PASSWORD_WEAK`: Password doesn't meet complexity requirements
+- `FIELD_REQUIRED`: Required field missing
+
+#### User Management Errors
+
+- `USER_NOT_FOUND`: User does not exist
+- `USER_ALREADY_EXISTS`: User with email already exists
+- `PROFILE_NOT_FOUND`: User profile not found
+- `SELF_DELETE_FORBIDDEN`: Cannot delete your own account
+
+#### Authorization Errors
+
+- `ACCESS_DENIED`: Insufficient permissions
+- `ADMIN_REQUIRED`: Admin access required
+- `RBAC_ACCESS_DENIED`: RBAC permission denied
+
+#### Rate Limiting Errors
+
+- `RATE_LIMIT_EXCEEDED`: Too many requests
+
+#### System Errors
+
+- `INTERNAL_ERROR`: Unexpected server error
+- `SERVICE_UNAVAILABLE`: Service temporarily unavailable
+
+---
+
+## 11. Authentication Flow Examples
+
+### Standard JWT Flow
+
+```javascript
+// 1. Login
+const loginResponse = await fetch('http://localhost:8001/api/v1/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'user@example.com',
+    password: 'SecurePass123!',
+  }),
+});
+
+const { access_token, refresh_token } = await loginResponse.json();
+
+// 2. Store tokens securely (use httpOnly cookies in production)
+localStorage.setItem('access_token', access_token);
+localStorage.setItem('refresh_token', refresh_token);
+
+// 3. Make authenticated request
+const profileResponse = await fetch('http://localhost:8001/api/v1/profile/me', {
+  headers: {
+    Authorization: `Bearer ${access_token}`,
+  },
+});
+
+const profile = await profileResponse.json();
+
+// 4. Handle token expiration
+if (profileResponse.status === 401) {
+  // Refresh token
+  const refreshResponse = await fetch('http://localhost:8001/api/v1/auth/refresh', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${refresh_token}`,
+    },
+  });
+
+  const newTokens = await refreshResponse.json();
+  localStorage.setItem('access_token', newTokens.access_token);
+  localStorage.setItem('refresh_token', newTokens.refresh_token);
+
+  // Retry original request
+  const retryResponse = await fetch('http://localhost:8001/api/v1/profile/me', {
+    headers: {
+      Authorization: `Bearer ${newTokens.access_token}`,
+    },
+  });
+}
+
+// 5. Logout
+await fetch('http://localhost:8001/api/v1/auth/logout', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${access_token}`,
+  },
+});
+
+localStorage.removeItem('access_token');
+localStorage.removeItem('refresh_token');
+```
+
+### Secure Cookie Flow (Recommended for Production)
+
+```javascript
+// 1. Login (tokens stored in httpOnly cookies automatically)
+const loginResponse = await fetch('http://localhost:8001/api/v1/auth/login-secure', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  credentials: 'include', // Important: include cookies
+  body: JSON.stringify({
+    email: 'user@example.com',
+    password: 'SecurePass123!',
+  }),
+});
+
+const { user } = await loginResponse.json();
+// No tokens in response body - they're in httpOnly cookies
+
+// 2. Get CSRF token
+const csrfResponse = await fetch('http://localhost:8001/api/v1/auth/csrf-token', {
+  credentials: 'include',
+});
+
+const { csrf_token } = await csrfResponse.json();
+localStorage.setItem('csrf_token', csrf_token);
+
+// 3. Make authenticated request
+const profileResponse = await fetch('http://localhost:8001/api/v1/profile/me', {
+  credentials: 'include', // Automatically sends cookies
+});
+
+const profile = await profileResponse.json();
+
+// 4. Make mutating request (POST/PUT/DELETE) with CSRF token
+const updateResponse = await fetch('http://localhost:8001/api/v1/profile/me', {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRF-Token': localStorage.getItem('csrf_token'),
+  },
+  credentials: 'include',
+  body: JSON.stringify({
+    first_name: 'Jane',
+    last_name: 'Smith',
+  }),
+});
+
+// 5. Refresh token (automatic with cookies)
+const refreshResponse = await fetch('http://localhost:8001/api/v1/auth/refresh-secure', {
+  method: 'POST',
+  credentials: 'include',
+});
+
+// 6. Logout
+await fetch('http://localhost:8001/api/v1/auth/logout-secure', {
+  method: 'POST',
+  credentials: 'include',
+});
+
+localStorage.removeItem('csrf_token');
+```
+
+### Registration Flow
+
+```javascript
+// 1. Register new user
+const registerResponse = await fetch('http://localhost:8001/api/v1/auth/register', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'newuser@example.com',
+    password: 'SecurePass123!',
+    confirm_password: 'SecurePass123!',
+    first_name: 'John',
+    last_name: 'Doe',
+  }),
+});
+
+const registerData = await registerResponse.json();
+// registerData.verification_required === true
+// registerData.approval_required === true
+
+// 2. User receives email with verification link
+// Link contains token: https://app.example.com/verify-email?token=xyz
+
+// 3. Verify email
+const verifyResponse = await fetch('http://localhost:8001/api/v1/auth/verify-email', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    token: 'xyz',
+  }),
+});
+
+const verifyData = await verifyResponse.json();
+// verifyData.approval_required === true (still needs admin approval)
+
+// 4. Admin approves user (via admin panel)
+// Now user can login
+
+// 5. Login
+const loginResponse = await fetch('http://localhost:8001/api/v1/auth/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'newuser@example.com',
+    password: 'SecurePass123!',
+  }),
+});
+
+const { access_token } = await loginResponse.json();
+```
+
+### Password Reset Flow
+
+```javascript
+// 1. User forgets password
+const forgotResponse = await fetch('http://localhost:8001/api/v1/auth/forgot-password', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    email: 'user@example.com',
+  }),
+});
+
+// Always returns success (security)
+
+// 2. User receives email with reset link
+// Link contains token: https://app.example.com/reset-password?token=xyz
+
+// 3. Reset password
+const resetResponse = await fetch('http://localhost:8001/api/v1/auth/reset-password', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    token: 'xyz',
+    new_password: 'NewSecurePass123!',
+    confirm_password: 'NewSecurePass123!',
+  }),
+});
+
+const resetData = await resetResponse.json();
+// resetData.success === true
+
+// 4. Login with new password
+```
+
+---
+
+## Rate Limiting
+
+**Default Limits:**
+
+- Standard endpoints: 100 requests per minute per IP
+- Login endpoints: 5 requests per minute per IP, 3 requests per minute per email
+- Registration: 10 requests per hour per IP
+
+**Rate Limit Headers:**
+
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1729594800
+```
+
+**Rate Limit Exceeded Response (429):**
+
+```json
+{
+  "error_code": "RATE_LIMIT_EXCEEDED",
+  "message": "Too many requests. Please try again later.",
+  "status_code": 429,
+  "retry_after": 60
+}
+```
+
+---
+
+## CORS Configuration
+
+**Development:**
+
+- Allowed Origins: `http://localhost:3000`, `http://localhost:3001`
+- Credentials: Allowed
+
+**Production:**
+
+- Configure allowed origins in environment variables
+- Credentials: Allowed for cookie-based auth
+
+---
+
+## Pagination
+
+List endpoints support pagination with these query parameters:
+
+- `page`: Page number (1-indexed)
+- `limit`: Items per page (max 100)
+
+**Paginated Response Format:**
+
+```json
+{
+  "items": [...],
+  "total": 1542,
+  "limit": 20,
+  "offset": 0,
+  "has_next": true,
+  "has_prev": false
+}
+```
+
+---
+
+## Date/Time Format
+
+All timestamps are in ISO 8601 format with UTC timezone:
+
+- Format: `YYYY-MM-DDTHH:mm:ss.sssZ`
+- Example: `2025-10-22T10:40:00.123Z`
+
+---
+
+## Best Practices for UI Integration
+
+1. **Token Management:**
+   - Use secure cookie auth for production (`/auth/login-secure`)
+   - Implement automatic token refresh
+   - Clear tokens on logout
+
+2. **Error Handling:**
+   - Display field-level validation errors
+   - Show user-friendly error messages
+   - Log errors to backend (`/logs/frontend-errors`)
+
+3. **Security:**
+   - Never store tokens in localStorage for production
+   - Include CSRF tokens for cookie-based auth
+   - Validate all inputs client-side before submission
+
+4. **UX:**
+   - Show loading states during API calls
+   - Implement retry logic for failed requests
+   - Display rate limit messages clearly
+
+5. **Performance:**
+   - Cache non-sensitive data
+   - Implement debouncing for search/filter
+   - Use pagination for large lists
+
+---
 
 ## Support
 
-For issues or questions:
+For questions or issues with API integration:
 
-- Check `QUICK_START_GUIDE.md` for component usage
-- Check `SESSION_SUMMARY.md` for implementation details
-- Check `IMPLEMENTATION_PROGRESS.md` for progress tracking
-- Review backend API documentation (48 endpoints)
+- Documentation: This file
+- API Errors: Check error codes section
+- Contact: backend-team@example.com
+
+---
+
+**End of Documentation**

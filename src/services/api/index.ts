@@ -27,12 +27,16 @@ export { gdprService, GDPRService } from './gdpr.service';
 // Audit Logging
 export { auditService, AuditService } from './audit.service';
 
+// RBAC Management
+export { rbacService, RBACService } from './rbac.service';
+
 // Re-export commonly used services as object for convenience
 import { adminService } from './admin.service';
 import { auditService } from './audit.service';
 import { authService } from './auth.service';
 import { gdprService } from './gdpr.service';
 import { userProfileService } from './profile.service';
+import { rbacService } from './rbac.service';
 
 /**
  * API Services Container
@@ -86,6 +90,12 @@ export const api = {
    * Handles audit logging and compliance tracking
    */
   audit: auditService,
+
+  /**
+   * RBAC Service
+   * Handles Role-Based Access Control: roles, permissions, and assignments
+   */
+  rbac: rbacService,
 };
 
 export default api;

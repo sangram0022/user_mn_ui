@@ -147,7 +147,7 @@ export class CSRFTokenService {
 
       // Mark that we're refreshing
       this.refreshPromise = (async () => {
-        const response = await fetch(`${this.apiBaseUrl}/api/v1/auth/csrf-token`, {
+        const response = await fetch(`${this.apiBaseUrl}/auth/csrf-token`, {
           method: 'GET',
           credentials: 'include', // Send cookies with request
           headers: {

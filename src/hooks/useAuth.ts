@@ -79,19 +79,20 @@ export const useAuth = () => {
         password: credentials.password,
       });
 
-      // Store user data
+      // Store user data from auth service (already converted to camelCase)
       const userData: StoredUser = {
         user_id: response.user.id,
         email: response.user.email,
         first_name: response.user.firstName,
         last_name: response.user.lastName,
+        role: response.user.role,
         is_verified: response.user.isEmailVerified,
         is_approved: response.user.isActive,
       };
       storeUser(userData);
       setUser(userData);
 
-      navigate('/dashboard');
+      // Don't navigate here - let the caller handle navigation
       return response;
     } catch (err: unknown) {
       const errorMessage =
