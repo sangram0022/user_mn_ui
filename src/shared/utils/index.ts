@@ -49,6 +49,7 @@ export {
 
 // Storage utilities
 export * from './safeLocalStorage';
+export * from './safeSessionStorage';
 
 // Security utilities
 export * from './sanitization';

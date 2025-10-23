@@ -53,6 +53,8 @@ import type {
 } from '@shared/types/api-backend.types';
 import { normalizeApiError } from '@shared/utils/error';
 import { mapApiErrorToMessage } from '@shared/utils/errorMapper';
+import { getCurrentISOTimestamp, getISOTimestamp } from '@shared/utils/dateUtils';
+import { safeSessionStorage } from '@shared/utils/safeSessionStorage';
 import { logger } from './../../shared/utils/logger';
 
 import { ApiError } from './error';
@@ -303,70 +305,14 @@ export class ApiClient {
   }
 
   private loadSession(): StoredSession | null {
-    if (typeof window === 'undefined') {
-      return null;
-    }
-
-    try {
-      // Use sessionStorage for better security (tokens cleared on tab close)
-      const accessToken =
-        window.sessionStorage.getItem('access_token') ??
-        window.sessionStorage.getItem('token') ??
-        undefined;
-      if (!accessToken) {
-        return null;
-      }
-
-      const refreshToken = window.sessionStorage.getItem('refresh_token') ?? undefined;
-      const issuedAt = window.sessionStorage.getItem('token_issued_at') ?? undefined;
-      const expiresInString = window.sessionStorage.getItem('token_expires_in') ?? undefined;
-      const expiresIn = expiresInString ? Number(expiresInString) : undefined;
-
-      return { accessToken, refreshToken, issuedAt, expiresIn };
-    } catch (error) {
-      logger.warn('Failed to load auth session', { error });
-      return null;
-    }
+    // Use centralized safeSessionStorage utility for SSR-safe, error-handled session loading
+    return safeSessionStorage.loadAuthSession();
   }
 
   private persistSession(session: StoredSession | null): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    try {
-      if (!session) {
-        // Clear all token data from sessionStorage
-        window.sessionStorage.removeItem('access_token');
-        window.sessionStorage.removeItem('refresh_token');
-        window.sessionStorage.removeItem('token_issued_at');
-        window.sessionStorage.removeItem('token_expires_in');
-        window.sessionStorage.removeItem('token');
-        this.session = null;
-        return;
-      }
-
-      // Store tokens in sessionStorage (cleared on tab close for better security)
-      window.sessionStorage.setItem('access_token', session.accessToken);
-      window.sessionStorage.setItem('token', session.accessToken);
-      if (session.refreshToken) {
-        window.sessionStorage.setItem('refresh_token', session.refreshToken);
-      } else {
-        window.sessionStorage.removeItem('refresh_token');
-      }
-
-      if (session.issuedAt) {
-        window.sessionStorage.setItem('token_issued_at', session.issuedAt);
-      }
-
-      if (typeof session.expiresIn === 'number') {
-        window.sessionStorage.setItem('token_expires_in', String(session.expiresIn));
-      }
-
-      this.session = session;
-    } catch (error) {
-      logger.warn('Failed to persist auth session', { error });
-    }
+    // Use centralized safeSessionStorage utility for SSR-safe, error-handled session persistence
+    safeSessionStorage.saveAuthSession(session);
+    this.session = session;
   }
 
   private getHeaders(): HeadersInit {
@@ -756,8 +702,8 @@ export class ApiClient {
         user_id: secureResponse.user.user_id,
         email: secureResponse.user.email,
         role: secureResponse.user.role,
-        last_login_at: secureResponse.user.last_login_at || new Date().toISOString(),
-        issued_at: new Date().toISOString(),
+        last_login_at: getISOTimestamp(secureResponse.user.last_login_at),
+        issued_at: getCurrentISOTimestamp(),
       };
       tokenService.storeTokens(legacyFormat);
 
@@ -776,8 +722,8 @@ export class ApiClient {
       user_id: regularResponse.user.user_id,
       email: regularResponse.user.email,
       role: regularResponse.user.role,
-      last_login_at: new Date().toISOString(),
-      issued_at: regularResponse.issued_at || new Date().toISOString(),
+      last_login_at: getCurrentISOTimestamp(),
+      issued_at: getISOTimestamp(regularResponse.issued_at),
     };
 
     // Use enterprise token service for secure storage

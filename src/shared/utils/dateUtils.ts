@@ -182,3 +182,40 @@ export function isValidDate(date: string | Date): boolean {
     return false;
   }
 }
+
+/**
+ * Get current ISO timestamp
+ * Useful for consistent timestamp generation and easier testing/mocking
+ *
+ * @returns Current date/time in ISO 8601 format
+ *
+ * @example
+ * getCurrentISOTimestamp() // "2024-01-15T10:30:00.000Z"
+ */
+export function getCurrentISOTimestamp(): string {
+  return new Date().toISOString();
+}
+
+/**
+ * Get ISO timestamp from date or default to current time
+ * Provides a fallback to current time if no date is provided
+ *
+ * @param date - Optional date to convert (string or Date object)
+ * @returns ISO 8601 timestamp
+ *
+ * @example
+ * getISOTimestamp() // "2024-01-15T10:30:00.000Z" (current time)
+ * getISOTimestamp(myDate) // "2024-01-10T08:00:00.000Z"
+ * getISOTimestamp('2024-01-10') // "2024-01-10T00:00:00.000Z"
+ */
+export function getISOTimestamp(date?: string | Date | null): string {
+  if (!date) return new Date().toISOString();
+
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toISOString();
+  } catch {
+    // If date parsing fails, return current timestamp
+    return new Date().toISOString();
+  }
+}
