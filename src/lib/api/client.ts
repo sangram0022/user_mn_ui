@@ -55,6 +55,7 @@ import { normalizeApiError } from '@shared/utils/error';
 import { mapApiErrorToMessage } from '@shared/utils/errorMapper';
 import { getCurrentISOTimestamp, getISOTimestamp } from '@shared/utils/dateUtils';
 import { safeSessionStorage } from '@shared/utils/safeSessionStorage';
+import { isBrowser } from '@shared/utils/env';
 import { logger } from './../../shared/utils/logger';
 
 import { ApiError } from './error';
@@ -638,7 +639,7 @@ export class ApiClient {
         });
 
         //  PRODUCTION READY: Emit event for UI feedback
-        if (typeof window !== 'undefined') {
+        if (isBrowser()) {
           window.dispatchEvent(
             new CustomEvent('api:rate-limit', {
               detail: { retryAfterMs, endpoint: rateLimitKey },

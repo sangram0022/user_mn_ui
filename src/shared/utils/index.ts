@@ -8,6 +8,7 @@ export * from './apiMessages';
 // Utility functions
 export * from './classNames';
 export * from './dateUtils';
+export * from './env';
 export * from './error';
 export * from './error-handler';
 export * from './formValidation';
