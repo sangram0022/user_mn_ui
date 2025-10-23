@@ -1205,23 +1205,31 @@ export class ApiClient {
     });
   }
 
+  /**
+   * Get roles (legacy method - use getAllRoles() instead)
+   * @deprecated Use getAllRoles() which returns proper RoleResponse[] from /admin/rbac/roles
+   */
   async getRoles(): Promise<UserRole[]> {
     try {
-      return await this.request<UserRole[]>('/admin/roles');
+      // Use correct endpoint from ENDPOINTS constant
+      return await this.request<UserRole[]>(ENDPOINTS.admin.roles);
     } catch (error) {
-      if (import.meta.env.DEV) {
-        logger.warn('Roles endpoint unavailable, using fallback roles', { error });
+      // Only use fallback in development AND only for specific errors (not 404)
+      if (import.meta.env.DEV && error instanceof ApiError && error.status >= 500) {
+        logger.warn('Roles endpoint unavailable (server error), using fallback roles', { error });
+        return [
+          { id: 1, name: 'admin', description: 'Administrator', permissions: ['admin'] },
+          { id: 2, name: 'user', description: 'Standard User', permissions: [] },
+          {
+            id: 3,
+            name: 'manager',
+            description: 'Manager',
+            permissions: ['user:read', 'user:write'],
+          },
+        ];
       }
-      return [
-        { id: 1, name: 'admin', description: 'Administrator', permissions: ['admin'] },
-        { id: 2, name: 'user', description: 'Standard User', permissions: [] },
-        {
-          id: 3,
-          name: 'manager',
-          description: 'Manager',
-          permissions: ['user:read', 'user:write'],
-        },
-      ];
+      // Re-throw error for 404 and other client errors - don't retry
+      throw error;
     }
   }
 
