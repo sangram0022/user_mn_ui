@@ -28,14 +28,13 @@ import { useEffect, useState } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useApiCall } from '@hooks/useApiCall';
-import { apiClient } from '@lib/api/client';
 import { PageMetadata } from '@shared/components/PageMetadata';
 import { Badge, getSeverityBadgeVariant } from '@shared/components/ui/Badge';
 import { Skeleton } from '@shared/components/ui/Skeleton';
-import type { AuditLog } from '@shared/types';
-import type { AuditLogEntry } from '@shared/types/api-backend.types';
+import type { AuditLogEntry, AuditLogsResponse } from '@shared/types/api-complete.types';
 import Breadcrumb from '@shared/ui/Breadcrumb';
 import { formatDateTime, formatTimestamp } from '@shared/utils';
+import { auditService } from '../../../services/api';
 import {
   AuditLogFilters,
   type AuditLogFilters as AuditLogFiltersType,
@@ -57,15 +56,15 @@ const getSeverityIcon = (severity: string) => {
   switch (severity.toLowerCase()) {
     case 'critical':
     case 'error':
-      return <AlertCircle className="w-3 h-3" />;
+      return <AlertCircle className="icon-xs" />;
     case 'warning':
-      return <AlertTriangle className="w-3 h-3" />;
+      return <AlertTriangle className="icon-xs" />;
     case 'info':
-      return <Info className="w-3 h-3" />;
+      return <Info className="icon-xs" />;
     case 'success':
-      return <CheckCircle className="w-3 h-3" />;
+      return <CheckCircle className="icon-xs" />;
     default:
-      return <Info className="w-3 h-3" />;
+      return <Info className="icon-xs" />;
   }
 };
 
@@ -82,10 +81,12 @@ function AuditLogRow({ log, onViewDetails }: AuditLogRowProps) {
   const { date, time } = formatTimestamp(log.timestamp);
 
   return (
-    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+    <tr className="hover:bg-[color:var(--color-background-secondary)] dark:hover:bg-[var(--color-surface-primary)] transition-colors">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
         {date}
-        <div className="text-xs text-gray-500 dark:text-gray-400">{time}</div>
+        <div className="text-xs text-[color:var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+          {time}
+        </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <Badge
@@ -97,10 +98,10 @@ function AuditLogRow({ log, onViewDetails }: AuditLogRowProps) {
           {log.severity}
         </Badge>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
         {log.action.replace(/_/g, ' ')}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
         {log.resource_type}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
@@ -108,17 +109,21 @@ function AuditLogRow({ log, onViewDetails }: AuditLogRowProps) {
           {log.outcome}
         </Badge>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-        {log.user_id || <span className="text-gray-400 dark:text-gray-500">System</span>}
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
+        {log.user_id || (
+          <span className="text-[color:var(--color-text-tertiary)] dark:text-[var(--color-text-tertiary)]">
+            System
+          </span>
+        )}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <button
           onClick={() => onViewDetails(log)}
-          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded p-1"
+          className="text-[color:var(--color-primary)] hover:text-[var(--color-primary)] dark:text-[var(--color-primary)] dark:hover:text-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:ring-offset-1 rounded w-8 h-8 max-md:w-11 max-md:h-11 flex items-center justify-center"
           aria-label={`View details for ${log.action} on ${log.resource_type}`}
           title="View log details"
         >
-          <Eye className="w-4 h-4" aria-hidden="true" />
+          <Eye className="icon-sm max-md:icon-md" aria-hidden="true" />
         </button>
       </td>
     </tr>
@@ -143,7 +148,7 @@ function DetailsModal({ log, isOpen, onClose }: DetailsModalProps) {
     >
       <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          className="fixed inset-0 bg-[var(--color-surface-secondary)] bg-opacity-75 transition-opacity"
           aria-hidden="true"
           onClick={onClose}
         />
@@ -152,15 +157,18 @@ function DetailsModal({ log, isOpen, onClose }: DetailsModalProps) {
           &#8203;
         </span>
 
-        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-          <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div className="inline-block align-bottom bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+          <div className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 id="modal-title" className="text-lg font-medium text-gray-900 dark:text-white">
+              <h3
+                id="modal-title"
+                className="text-lg font-medium text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]"
+              >
                 Audit Log Details
               </h3>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                className="text-[color:var(--color-text-tertiary)] hover:text-[color:var(--color-text-secondary)] dark:hover:text-[var(--color-text-tertiary)]"
                 aria-label="Close modal"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -177,15 +185,15 @@ function DetailsModal({ log, isOpen, onClose }: DetailsModalProps) {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Audit ID
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100 font-mono">
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)] font-mono">
                     {log.audit_id}
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Severity
                   </h4>
                   <Badge
@@ -200,15 +208,15 @@ function DetailsModal({ log, isOpen, onClose }: DetailsModalProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Action
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
                     {log.action.replace(/_/g, ' ')}
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Outcome
                   </h4>
                   <Badge variant={log.outcome === 'success' ? 'success' : 'error'} size="sm">
@@ -219,33 +227,37 @@ function DetailsModal({ log, isOpen, onClose }: DetailsModalProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Resource Type
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">{log.resource_type}</p>
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
+                    {log.resource_type}
+                  </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Resource ID
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">{log.resource_id}</p>
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
+                    {log.resource_id}
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     User ID
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
                     {log.user_id || 'System'}
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Timestamp
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
                     {formatDateTime(log.timestamp)}
                   </p>
                 </div>
@@ -253,10 +265,10 @@ function DetailsModal({ log, isOpen, onClose }: DetailsModalProps) {
 
               {log.ip_address && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     IP Address
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100 font-mono">
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)] font-mono">
                     {log.ip_address}
                   </p>
                 </div>
@@ -264,10 +276,10 @@ function DetailsModal({ log, isOpen, onClose }: DetailsModalProps) {
 
               {log.user_agent && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     User Agent
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100 break-all">
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)] break-all">
                     {log.user_agent}
                   </p>
                 </div>
@@ -275,10 +287,10 @@ function DetailsModal({ log, isOpen, onClose }: DetailsModalProps) {
 
               {log.metadata && Object.keys(log.metadata).length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Metadata
                   </h4>
-                  <pre className="text-sm text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900 p-3 rounded-md overflow-auto max-h-48">
+                  <pre className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)] bg-[color:var(--color-background-secondary)] dark:bg-[color:var(--color-background-tertiary)] p-3 rounded-md overflow-auto max-h-48">
                     {JSON.stringify(log.metadata, null, 2)}
                   </pre>
                 </div>
@@ -286,11 +298,11 @@ function DetailsModal({ log, isOpen, onClose }: DetailsModalProps) {
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <div className="bg-[color:var(--color-background-secondary)] dark:bg-[var(--color-surface-primary)] px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
             <button
               type="button"
               onClick={onClose}
-              className="w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm"
+              className="w-full inline-flex justify-center rounded-md border border-[color:var(--color-border-primary)] dark:border-[var(--color-border)] shadow-sm px-4 py-2 bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] text-base font-medium text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)] hover:bg-[color:var(--color-background-secondary)] dark:hover:bg-[var(--color-surface-primary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--color-primary)] sm:w-auto sm:text-sm"
             >
               Close
             </button>
@@ -324,7 +336,7 @@ export default function AdminAuditLogPage() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   // API calls with useApiCall hook
-  const { loading, execute } = useApiCall<AuditLog[]>();
+  const { loading, execute } = useApiCall<AuditLogsResponse>();
 
   // Client-side filtering and statistics
   const { filteredLogs, filteredCount, totalCount } = useAuditLogFilters({
@@ -347,7 +359,8 @@ export default function AdminAuditLogPage() {
     // Load all logs for client-side filtering (up to reasonable limit)
     const response = await execute(
       () =>
-        apiClient.getAuditLogs({
+        auditService.queryAuditLogs({
+          page: 1,
           limit: 1000, // Load last 1000 logs
         }),
       {
@@ -356,21 +369,8 @@ export default function AdminAuditLogPage() {
     );
 
     if (response) {
-      // Map AuditLog to AuditLogEntry format expected by filters
-      const mappedLogs: AuditLogEntry[] = response.map((log: AuditLog) => ({
-        audit_id: log.log_id,
-        user_id: log.user_id,
-        action: log.action as AuditLogEntry['action'],
-        resource_type: log.resource,
-        resource_id: log.resource_id,
-        severity: 'info' as AuditLogEntry['severity'], // Default severity if not provided
-        timestamp: log.timestamp,
-        metadata: log.details || {},
-        outcome: 'success' as AuditLogEntry['outcome'], // Default outcome if not provided
-        ip_address: log.ip_address,
-        user_agent: log.user_agent,
-      }));
-      setLogs(mappedLogs);
+      // Use the items array from AuditLogsResponse
+      setLogs(response.items);
     }
   };
 
@@ -406,14 +406,14 @@ export default function AdminAuditLogPage() {
 
   if (!canViewAuditLogs) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-        <PageMetadata
-          title="Access Denied"
-          description="You do not have permission to view this page"
-        />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <p className="text-red-800 dark:text-red-200">
+      <div className="page-wrapper">
+        <div className="container-narrow">
+          <PageMetadata
+            title="Access Denied"
+            description="You do not have permission to view this page"
+          />
+          <div className="bg-[color:var(--color-error-50)] dark:bg-[var(--color-error)]/20 border border-[color:var(--color-error)] dark:border-[var(--color-error)] rounded-lg p-4">
+            <p className="text-[var(--color-error)] dark:text-[var(--color-error)]">
               You don&apos;t have permission to view audit logs
             </p>
           </div>
@@ -429,15 +429,17 @@ export default function AdminAuditLogPage() {
         description="View and analyze system audit logs with advanced filtering"
       />
 
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-wrapper">
+        <div className="container-full">
           {/* Header */}
           <div className="mb-8">
             <Breadcrumb />
             <div className="mt-4 flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Audit Logs</h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                <h1 className="text-2xl font-bold text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
+                  Audit Logs
+                </h1>
+                <p className="text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)] mt-1">
                   System activity and security events
                 </p>
               </div>
@@ -445,20 +447,20 @@ export default function AdminAuditLogPage() {
                 <button
                   onClick={handleExportCSV}
                   disabled={filteredCount === 0}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-[var(--color-text-primary)] bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-700)] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
                   aria-label="Export filtered audit logs to CSV"
                 >
-                  <Download className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <Download className="icon-sm mr-2" aria-hidden="true" />
                   Export CSV
                 </button>
                 <button
                   onClick={loadAuditLogs}
                   disabled={loading}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-4 py-2 border border-[color:var(--color-border-primary)] dark:border-[var(--color-border)] rounded-md shadow-sm text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)] bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] hover:bg-[color:var(--color-background-secondary)] dark:hover:bg-[var(--color-surface-primary)] disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
                   aria-label={loading ? 'Refreshing audit logs' : 'Refresh audit logs'}
                 >
                   <RefreshCw
-                    className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`}
+                    className={`icon-sm mr-2 ${loading ? 'animate-spin' : ''}`}
                     aria-hidden="true"
                   />
                   Refresh
@@ -469,61 +471,68 @@ export default function AdminAuditLogPage() {
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] rounded-lg shadow-sm border border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)] p-6">
               <div className="flex items-center">
-                <Activity className="w-8 h-8 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                <Activity
+                  className="icon-xl text-[color:var(--color-primary)] dark:text-[var(--color-primary)]"
+                  aria-hidden="true"
+                />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p className="text-sm font-medium text-[color:var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                     Total Events
                   </p>
-                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-semibold text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                     {filteredCount}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] rounded-lg shadow-sm border border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)] p-6">
               <div className="flex items-center">
                 <CheckCircle
-                  className="w-8 h-8 text-green-600 dark:text-green-400"
+                  className="icon-xl text-[color:var(--color-success)] dark:text-[var(--color-success)]"
                   aria-hidden="true"
                 />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Success</p>
-                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-[color:var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+                    Success
+                  </p>
+                  <p className="text-2xl font-semibold text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                     {stats.successCount}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] rounded-lg shadow-sm border border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)] p-6">
               <div className="flex items-center">
                 <AlertCircle
-                  className="w-8 h-8 text-red-600 dark:text-red-400"
+                  className="icon-xl text-[color:var(--color-error)] dark:text-[var(--color-error)]"
                   aria-hidden="true"
                 />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Failures</p>
-                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-[color:var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+                    Failures
+                  </p>
+                  <p className="text-2xl font-semibold text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                     {stats.failureCount}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] rounded-lg shadow-sm border border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)] p-6">
               <div className="flex items-center">
                 <AlertTriangle
-                  className="w-8 h-8 text-yellow-600 dark:text-yellow-400"
+                  className="icon-xl text-[color:var(--color-warning)] dark:text-[var(--color-warning)]"
                   aria-hidden="true"
                 />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p className="text-sm font-medium text-[color:var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                     Success Rate
                   </p>
-                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-semibold text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                     {stats.successRate}%
                   </p>
                 </div>
@@ -539,50 +548,50 @@ export default function AdminAuditLogPage() {
           />
 
           {/* Logs Table */}
-          <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          <div className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] shadow-sm rounded-lg border border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)] overflow-hidden">
+            <div className="px-6 py-4 border-b border-[color:var(--color-border-primary)] dark:border-[var(--color-border)]">
+              <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                 Audit Events ({filteredCount} of {totalCount})
               </h3>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700">
+              <table className="min-w-full divide-y divide-[var(--color-border)] dark:divide-[var(--color-border)]">
+                <thead className="bg-[color:var(--color-background-secondary)] dark:bg-[var(--color-surface-primary)]">
                   <tr>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
                     >
                       Timestamp
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
                     >
                       Severity
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
                     >
                       Action
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
                     >
                       Resource
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
                     >
                       Outcome
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)] uppercase tracking-wider"
                     >
                       User
                     </th>
@@ -591,7 +600,7 @@ export default function AdminAuditLogPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] divide-y divide-[var(--color-border)] dark:divide-[var(--color-border)]">
                   {loading ? (
                     Array.from({ length: 10 }, (_, i) => `skeleton-${i}`).map((key) => (
                       <tr key={key}>
@@ -626,13 +635,13 @@ export default function AdminAuditLogPage() {
                     <tr>
                       <td colSpan={7} className="px-6 py-12 text-center">
                         <Activity
-                          className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4"
+                          className="w-12 h-12 text-[color:var(--color-text-tertiary)] dark:text-[color:var(--color-text-secondary)] mx-auto mb-4"
                           aria-hidden="true"
                         />
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2">
                           No audit logs found
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400">
+                        <p className="text-[color:var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                           No events match your current filter criteria.
                         </p>
                       </td>
@@ -642,17 +651,17 @@ export default function AdminAuditLogPage() {
               </table>
             </div>
           </div>
-        </div>
 
-        {/* Details Modal */}
-        <DetailsModal
-          log={selectedLog}
-          isOpen={isDetailsModalOpen}
-          onClose={() => {
-            setIsDetailsModalOpen(false);
-            setSelectedLog(null);
-          }}
-        />
+          {/* Details Modal */}
+          <DetailsModal
+            log={selectedLog}
+            isOpen={isDetailsModalOpen}
+            onClose={() => {
+              setIsDetailsModalOpen(false);
+              setSelectedLog(null);
+            }}
+          />
+        </div>
       </div>
     </>
   );

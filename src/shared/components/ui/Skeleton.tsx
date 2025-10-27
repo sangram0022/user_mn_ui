@@ -85,7 +85,7 @@ export function Skeleton({
 
   const animationClasses = {
     pulse: 'animate-pulse',
-    wave: 'animate-shimmer bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%]',
+    wave: 'animate-shimmer bg-gradient-to-r from-[var(--color-surface-secondary)] via-[var(--color-surface-secondary)] to-[var(--color-surface-secondary)] bg-[length:200%_100%]',
     none: '',
   };
 
@@ -229,7 +229,7 @@ export function SkeletonCard({
 }: SkeletonCardProps) {
   return (
     <div
-      className={`p-4 border border-gray-200 dark:border-gray-700 rounded-lg ${className}`}
+      className={`p-4 border border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)] rounded-lg ${className}`}
       data-testid="skeleton-card"
     >
       {showAvatar && (
@@ -478,7 +478,7 @@ export function PageSkeleton({
         </div>
 
         {/* Content */}
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+        <div className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] shadow rounded-lg p-6">
           <div className="space-y-4">
             <Skeleton height="16px" />
             <Skeleton width="83%" height="16px" />
@@ -535,7 +535,10 @@ export function DashboardSkeleton({
         {/* Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Array.from({ length: 4 }, (_, i) => ({ id: `metric-card-${i}` })).map(({ id }) => (
-            <div key={id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <div
+              key={id}
+              className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] shadow rounded-lg p-6"
+            >
               <Skeleton width="96px" height="16px" className="mb-4" />
               <Skeleton width="128px" height="32px" className="mb-2" />
               <Skeleton width="80px" height="12px" />
@@ -546,7 +549,10 @@ export function DashboardSkeleton({
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {Array.from({ length: 2 }, (_, i) => ({ id: `chart-${i}` })).map(({ id }) => (
-            <div key={id} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <div
+              key={id}
+              className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] shadow rounded-lg p-6"
+            >
               <Skeleton width="192px" height="24px" className="mb-4" />
               <Skeleton height="256px" />
             </div>
@@ -572,9 +578,9 @@ export function TableSkeleton({ rows = 5, columns = 4 }: TableSkeletonProps) {
       role="status"
       aria-label="Loading table"
     >
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] shadow rounded-lg overflow-hidden">
         {/* Table Header */}
-        <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-6 py-4">
+        <div className="border-b border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)] bg-[color:var(--color-background-secondary)] dark:bg-[color:var(--color-background-tertiary)]/50 px-6 py-4">
           <div className="flex space-x-4">
             {Array.from({ length: columns }, (_, i) => ({ id: `table-header-${i}` })).map(
               ({ id }) => (
@@ -585,7 +591,7 @@ export function TableSkeleton({ rows = 5, columns = 4 }: TableSkeletonProps) {
         </div>
 
         {/* Table Rows */}
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="divide-y divide-[var(--color-border)] dark:divide-[var(--color-border)]">
           {Array.from({ length: rows }, (_, rowIndex) => ({
             id: `table-row-${rowIndex}`,
             rowIndex,

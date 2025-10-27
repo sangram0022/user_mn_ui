@@ -203,14 +203,6 @@ export default defineConfig(({ mode }) => {
               return 'domain-admin';
             }
 
-            // Workflow engine domain
-            if (
-              id.includes('/src/domains/workflow-engine') ||
-              id.includes('/src/domains/workflows')
-            ) {
-              return 'domain-workflow-engine';
-            }
-
             // Analytics dashboard domain
             if (
               id.includes('/src/domains/analytics-dashboard') ||

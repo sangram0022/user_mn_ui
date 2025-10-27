@@ -3,6 +3,8 @@
  * Expert-level type patterns by 20-year React developer
  */
 
+import { EMAIL_REGEX } from '../utils/validation';
+
 // ==================== BASIC UTILITY TYPES ====================
 
 /**
@@ -395,8 +397,8 @@ export function isFunction(value: unknown): value is (...args: unknown[]) => unk
  * Type guard for checking if value is email
  */
 export function isEmail(value: string): value is Email {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(value);
+  // ✅ Use centralized EMAIL_REGEX from validation.ts (single source of truth)
+  return EMAIL_REGEX.test(value);
 }
 
 /**

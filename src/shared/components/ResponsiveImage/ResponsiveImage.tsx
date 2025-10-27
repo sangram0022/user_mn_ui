@@ -144,7 +144,7 @@ export function ResponsiveImage({
   if (!isLoaded && placeholder === 'skeleton') {
     return (
       <div
-        className={`animate-pulse bg-gray-200 dark:bg-gray-700 ${className}`}
+        className={`animate-pulse bg-[var(--color-border)] dark:bg-[var(--color-surface-primary)] ${className}`}
         style={{
           aspectRatio: aspectRatio || undefined,
         }}
@@ -157,7 +157,7 @@ export function ResponsiveImage({
   if (hasError) {
     return (
       <div
-        className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 ${className}`}
+        className={`flex items-center justify-center bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)] ${className}`}
         style={{
           aspectRatio: aspectRatio || undefined,
         }}
@@ -165,7 +165,7 @@ export function ResponsiveImage({
         aria-label={alt}
       >
         <svg
-          className="h-12 w-12 text-gray-400"
+          className="icon-xl text-[var(--color-text-tertiary)]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -255,10 +255,10 @@ export function AvatarImage({
   ...restProps
 }: AvatarImageProps) {
   const sizeClasses = {
-    sm: 'w-8 h-8',
-    md: 'w-12 h-12',
-    lg: 'w-16 h-16',
-    xl: 'w-24 h-24',
+    sm: 'size-8',
+    md: 'size-12',
+    lg: 'size-16',
+    xl: 'size-24',
   };
 
   return (
@@ -271,7 +271,7 @@ export function AvatarImage({
       />
       {showOnline && (
         <span
-          className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-800"
+          className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-[var(--color-success)] ring-2 ring-white dark:ring-[var(--color-border)]"
           aria-label="Online"
         />
       )}

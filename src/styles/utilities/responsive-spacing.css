@@ -1,0 +1,256 @@
+/**
+ * RESPONSIVE SPACING UTILITIES
+ * 
+ * Standardized responsive spacing to replace inline responsive
+ * classes like max-md:p-4, max-lg:mb-8, etc.
+ * 
+ * Benefits:
+ * - Consistent spacing patterns
+ * - Reduces inline responsive classes
+ * - Easier to maintain
+ * - Mobile-first approach
+ */
+
+@layer utilities {
+  /* ========================================================================
+     RESPONSIVE PADDING - Adapts to screen size
+     ======================================================================== */
+
+  /* Padding that scales with viewport */
+  .p-responsive {
+    padding: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .p-responsive {
+      padding: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .p-responsive {
+      padding: 2rem;
+    }
+  }
+
+  /* Horizontal padding only */
+  .px-responsive {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .px-responsive {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .px-responsive {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  /* Vertical padding only */
+  .py-responsive {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .py-responsive {
+      padding-top: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .py-responsive {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+  }
+
+  /* ========================================================================
+     RESPONSIVE MARGIN - Adapts to screen size
+     ======================================================================== */
+
+  /* Margin that scales with viewport */
+  .m-responsive {
+    margin: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .m-responsive {
+      margin: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .m-responsive {
+      margin: 2rem;
+    }
+  }
+
+  /* Bottom margin only */
+  .mb-responsive {
+    margin-bottom: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .mb-responsive {
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mb-responsive {
+      margin-bottom: 2rem;
+    }
+  }
+
+  /* Top margin only */
+  .mt-responsive {
+    margin-top: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .mt-responsive {
+      margin-top: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .mt-responsive {
+      margin-top: 2rem;
+    }
+  }
+
+  /* ========================================================================
+     RESPONSIVE GAP - For flexbox/grid layouts
+     ======================================================================== */
+
+  .gap-responsive {
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .gap-responsive {
+      gap: 1rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .gap-responsive {
+      gap: 1.5rem;
+    }
+  }
+
+  /* Smaller gap variant */
+  .gap-responsive-sm {
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .gap-responsive-sm {
+      gap: 0.75rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .gap-responsive-sm {
+      gap: 1rem;
+    }
+  }
+
+  /* Larger gap variant */
+  .gap-responsive-lg {
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .gap-responsive-lg {
+      gap: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .gap-responsive-lg {
+      gap: 2rem;
+    }
+  }
+
+  /* ========================================================================
+     RESPONSIVE TEXT SIZING - Scale typography
+     ======================================================================== */
+
+  .text-responsive-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .text-responsive-sm {
+      font-size: 0.9375rem;
+      line-height: 1.375rem;
+    }
+  }
+
+  .text-responsive-base {
+    font-size: 0.9375rem;
+    line-height: 1.375rem;
+  }
+
+  @media (min-width: 768px) {
+    .text-responsive-base {
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+  }
+
+  .text-responsive-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .text-responsive-lg {
+      font-size: 1.25rem;
+      line-height: 1.875rem;
+    }
+  }
+
+  .text-responsive-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .text-responsive-xl {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .text-responsive-xl {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+    }
+  }
+}
+
+/**
+ * MIGRATION PATTERNS
+ * ==================
+ * 
+ * Replace these common patterns:
+ * 
+ * p-4 max-md:p-6              →  p-responsive
+ * px-4 md:px-6 lg:px-8        →  px-responsive
+ * py-4 md:py-6 lg:py-8        →  py-responsive
+ * mb-4 md:mb-6 lg:mb-8        →  mb-responsive
+ * gap-3 md:gap-4 lg:gap-6     →  gap-responsive
+ */

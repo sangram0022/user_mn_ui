@@ -1,0 +1,213 @@
+/**
+ * SHADOW UTILITIES
+ * 
+ * Standardized shadow system for consistent elevation
+ * throughout the application
+ * 
+ * Benefits:
+ * - Consistent depth perception
+ * - Clear hierarchy
+ * - Semantic class names
+ * - Easy to maintain
+ */
+
+@layer utilities {
+  /* ========================================================================
+     ELEVATION SHADOWS - Standard depth levels
+     ======================================================================== */
+
+  /* No shadow - flush with background */
+  .shadow-none {
+    box-shadow: none;
+  }
+
+  /* Subtle shadow - minimal elevation */
+  .shadow-subtle {
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+
+  /* Card shadow - default card elevation */
+  .shadow-card {
+    box-shadow:
+      0 1px 3px 0 rgb(0 0 0 / 0.1),
+      0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+
+  /* Elevated shadow - raised components */
+  .shadow-elevated {
+    box-shadow:
+      0 4px 6px -1px rgb(0 0 0 / 0.1),
+      0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  /* Float shadow - floating elements */
+  .shadow-float {
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+
+  /* Modal shadow - overlay components */
+  .shadow-modal {
+    box-shadow:
+      0 20px 25px -5px rgb(0 0 0 / 0.1),
+      0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  /* Maximum shadow - highest elevation */
+  .shadow-maximum {
+    box-shadow:
+      0 25px 50px -12px rgb(0 0 0 / 0.25),
+      0 12px 24px -6px rgb(0 0 0 / 0.15);
+  }
+
+  /* ========================================================================
+     INTERACTIVE SHADOWS - Hover states
+     ======================================================================== */
+
+  .shadow-hover-card {
+    transition: box-shadow var(--transition-fast, 150ms);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  }
+
+  .shadow-hover-card:hover {
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+
+  .shadow-hover-elevated {
+    transition: box-shadow var(--transition-fast, 150ms);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  }
+
+  .shadow-hover-elevated:hover {
+    box-shadow:
+      0 20px 25px -5px rgb(0 0 0 / 0.1),
+      0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  /* ========================================================================
+     COLORED SHADOWS - Brand emphasis
+     ======================================================================== */
+
+  .shadow-primary {
+    box-shadow: 0 4px 12px -2px oklch(from var(--color-brand-primary) l c h / 0.3);
+  }
+
+  .shadow-success {
+    box-shadow: 0 4px 12px -2px oklch(from var(--color-success) l c h / 0.3);
+  }
+
+  .shadow-warning {
+    box-shadow: 0 4px 12px -2px oklch(from var(--color-warning) l c h / 0.3);
+  }
+
+  .shadow-error {
+    box-shadow: 0 4px 12px -2px oklch(from var(--color-error) l c h / 0.3);
+  }
+
+  /* ========================================================================
+     INNER SHADOWS - Inset effects
+     ======================================================================== */
+
+  .shadow-inner {
+    box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  }
+
+  .shadow-inner-strong {
+    box-shadow: inset 0 2px 8px 0 rgb(0 0 0 / 0.1);
+  }
+
+  /* ========================================================================
+     FOCUS SHADOWS - Keyboard navigation
+     ======================================================================== */
+
+  .shadow-focus {
+    box-shadow: 0 0 0 3px oklch(from var(--color-brand-primary) l c h / 0.1);
+  }
+
+  .shadow-focus-error {
+    box-shadow: 0 0 0 3px oklch(from var(--color-error) l c h / 0.1);
+  }
+
+  .shadow-focus-success {
+    box-shadow: 0 0 0 3px oklch(from var(--color-success) l c h / 0.1);
+  }
+
+  /* ========================================================================
+     GLOW EFFECTS - Attention-grabbing
+     ======================================================================== */
+
+  .shadow-glow-primary {
+    box-shadow:
+      0 0 20px 2px oklch(from var(--color-brand-primary) l c h / 0.3),
+      0 4px 8px -2px rgb(0 0 0 / 0.1);
+  }
+
+  .shadow-glow-success {
+    box-shadow:
+      0 0 20px 2px oklch(from var(--color-success) l c h / 0.3),
+      0 4px 8px -2px rgb(0 0 0 / 0.1);
+  }
+
+  /* ========================================================================
+     RESPONSIVE SHADOWS - Scale with viewport
+     ======================================================================== */
+
+  .shadow-responsive {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  }
+
+  @media (min-width: 768px) {
+    .shadow-responsive {
+      box-shadow:
+        0 4px 6px -1px rgb(0 0 0 / 0.1),
+        0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .shadow-responsive {
+      box-shadow:
+        0 10px 15px -3px rgb(0 0 0 / 0.1),
+        0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+  }
+
+  /* ========================================================================
+     SHADOW TRANSITIONS - Smooth animations
+     ======================================================================== */
+
+  .shadow-transition {
+    transition: box-shadow var(--transition-base, 200ms) cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .shadow-transition-fast {
+    transition: box-shadow var(--transition-fast, 150ms) cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/**
+ * SHADOW HIERARCHY GUIDE
+ * =======================
+ * 
+ * Level 0: shadow-none       - Flat elements (badges, tags)
+ * Level 1: shadow-subtle     - Minimal separation (dividers)
+ * Level 2: shadow-card       - Default cards and panels
+ * Level 3: shadow-elevated   - Active/selected states
+ * Level 4: shadow-float      - Dropdowns, popovers
+ * Level 5: shadow-modal      - Modals, dialogs
+ * Level 6: shadow-maximum    - Toasts, notifications
+ * 
+ * USAGE PATTERNS
+ * ==============
+ * 
+ * Static cards:      shadow-card
+ * Interactive cards: shadow-hover-card
+ * Buttons (hover):   shadow-primary
+ * Dropdowns:         shadow-float
+ * Modals:            shadow-modal
+ * Inputs (focus):    shadow-focus
+ * Notifications:     shadow-maximum
+ */

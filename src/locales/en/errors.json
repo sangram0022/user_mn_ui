@@ -209,7 +209,6 @@
     "RULE_ACTIVATED": "Rule activated successfully.",
     "SCHEDULE_CREATED": "Schedule created successfully.",
     "TASK_COMPLETED": "Task completed successfully.",
-    "WORKFLOW_EXECUTED": "Workflow executed successfully.",
     "REPORT_GENERATED": "Report generated successfully.",
     "ANALYSIS_COMPLETED": "Analysis completed successfully.",
     "OPTIMIZATION_SUCCESS": "Optimization completed successfully."

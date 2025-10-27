@@ -235,7 +235,7 @@ async function testAuthenticationEndpoints() {
 
   // Test refresh token
   if (loginData?.refresh_token) {
-    const refreshData = await makeRequest('/auth/refresh', 'POST', undefined, false);
+    const _refreshData = await makeRequest('/auth/refresh', 'POST', undefined, false);
     // Add manual Authorization header with refresh token
     const headers = { Authorization: `Bearer ${loginData.refresh_token}` };
     const response = await fetch(`${API_BASE}/auth/refresh`, {

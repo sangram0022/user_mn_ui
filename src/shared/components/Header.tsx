@@ -1,10 +1,9 @@
 import { ChevronDown, LogOut, Menu, Settings, Shield, UserCircle, X } from 'lucide-react';
 import type { FC } from 'react';
-import { memo, useCallback, useState } from 'react';
+import { memo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
-import { ThemeSelector } from './ThemeSelector';
 
 /**
  * Unified Header component used across all layouts
@@ -18,32 +17,33 @@ const Header: FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  const handleLogout = useCallback(async () => {
+  // React 19: Removed useCallback - compiler handles event handler optimization
+  const handleLogout = async () => {
     await logout();
     navigate('/');
     setIsUserMenuOpen(false);
-  }, [logout, navigate]);
+  };
 
-  const toggleMobileMenu = useCallback(() => {
+  const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
-  }, []);
+  };
 
-  const toggleUserMenu = useCallback(() => {
+  const toggleUserMenu = () => {
     setIsUserMenuOpen((prev) => !prev);
-  }, []);
+  };
 
-  const closeUserMenu = useCallback(() => {
+  const closeUserMenu = () => {
     setIsUserMenuOpen(false);
-  }, []);
+  };
 
-  const closeMobileMenu = useCallback(() => {
+  const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
-  }, []);
+  };
 
-  const handleLogoutAndCloseMobile = useCallback(async () => {
+  const handleLogoutAndCloseMobile = async () => {
     await handleLogout();
     setIsMobileMenuOpen(false);
-  }, [handleLogout]);
+  };
 
   // Navigation items based on user role
   const getNavItems = () => {
@@ -57,7 +57,7 @@ const Header: FC = () => {
     ];
 
     // Add admin-specific items
-    if (user.is_superuser || user.role === 'admin' || user.role_name === 'admin') {
+    if (user.is_superuser || user.roles?.includes('admin') || user.role_name === 'admin') {
       baseItems.splice(1, 0, { name: 'Users', href: '/users' });
       baseItems.splice(2, 0, { name: 'Analytics', href: '/analytics' });
     }
@@ -71,8 +71,8 @@ const Header: FC = () => {
     <header
       className="backdrop-blur-sm border-b sticky top-0 z-50"
       style={{
-        background: 'rgba(var(--theme-surface-rgb, 255, 255, 255), 0.8)',
-        borderColor: 'var(--theme-border)',
+        background: 'rgba(var(--color-surface-rgb, 255, 255, 255), 0.8)',
+        borderColor: 'var(--color-border-primary)',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -80,37 +80,34 @@ const Header: FC = () => {
           {/* Logo - Always visible */}
           <Link to="/" className="flex items-center space-x-2">
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: 'var(--theme-primary)' }}
+              className="size-8 rounded-lg flex items-center justify-center"
+              style={{ background: 'var(--color-primary)' }}
             >
-              <Shield className="w-5 h-5 text-white" />
+              <Shield className="icon-md text-white" />
             </div>
-            <span className="text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
+            <span className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
               User Management
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            {/* Theme Selector */}
-            <ThemeSelector />
-
             {user ? (
-              // Authenticated user navigation
               <>
+                {/* Navigation items for authenticated users */}
                 {navItems.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
                     className="px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-opacity-10"
-                    style={{ color: 'var(--theme-textSecondary)' }}
+                    style={{ color: 'var(--color-text-secondary)' }}
                     onMouseOver={(e) => {
-                      e.currentTarget.style.color = 'var(--theme-text)';
+                      e.currentTarget.style.color = 'var(--color-text-primary)';
                       e.currentTarget.style.background =
-                        'rgba(var(--theme-primary-rgb, 59, 130, 246), 0.1)';
+                        'rgba(var(--color-primary-rgb, 59, 130, 246), 0.1)';
                     }}
                     onMouseOut={(e) => {
-                      e.currentTarget.style.color = 'var(--theme-textSecondary)';
+                      e.currentTarget.style.color = 'var(--color-text-secondary)';
                       e.currentTarget.style.background = 'transparent';
                     }}
                   >
@@ -118,12 +115,12 @@ const Header: FC = () => {
                   </Link>
                 ))}
 
-                {/* User Menu Dropdown */}
+                {/* User Menu Dropdown - Only for authenticated users */}
                 <div className="relative ml-3">
                   <button
                     onClick={toggleUserMenu}
                     className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                    style={{ color: 'var(--theme-textSecondary)' }}
+                    style={{ color: 'var(--color-text-secondary)' }}
                   >
                     <UserCircle className="w-5 h-5" />
                     <span>{user.email?.split('@')[0] || 'User'}</span>
@@ -145,16 +142,16 @@ const Header: FC = () => {
 
                       {/* Dropdown Menu */}
                       <div
-                        className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-20 border"
+                        className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-20 border animate-slide-down"
                         style={{
-                          background: 'var(--theme-surface)',
-                          borderColor: 'var(--theme-border)',
+                          background: 'var(--color-background-elevated)',
+                          borderColor: 'var(--color-border-primary)',
                         }}
                       >
                         <Link
                           to="/profile"
-                          className="flex items-center px-4 py-2 text-sm transition-colors"
-                          style={{ color: 'var(--theme-text)' }}
+                          className="flex items-center px-4 py-2 text-sm transition-colors hover:bg-[var(--color-surface-secondary)]"
+                          style={{ color: 'var(--color-text-primary)' }}
                           onClick={closeUserMenu}
                         >
                           <UserCircle className="w-4 h-4 mr-3" />
@@ -162,18 +159,21 @@ const Header: FC = () => {
                         </Link>
                         <Link
                           to="/settings"
-                          className="flex items-center px-4 py-2 text-sm transition-colors"
-                          style={{ color: 'var(--theme-text)' }}
+                          className="flex items-center px-4 py-2 text-sm transition-colors hover:bg-[var(--color-surface-secondary)]"
+                          style={{ color: 'var(--color-text-primary)' }}
                           onClick={closeUserMenu}
                         >
                           <Settings className="w-4 h-4 mr-3" />
                           Settings
                         </Link>
-                        <hr className="my-1" style={{ borderColor: 'var(--theme-border)' }} />
+                        <hr
+                          className="my-1"
+                          style={{ borderColor: 'var(--color-border-primary)' }}
+                        />
                         <button
                           onClick={handleLogout}
                           className="flex items-center w-full text-left px-4 py-2 text-sm transition-colors rounded-md hover:opacity-80"
-                          style={{ color: 'var(--theme-error)' }}
+                          style={{ color: 'var(--color-error)' }}
                         >
                           <LogOut className="w-4 h-4 mr-3" />
                           Sign Out
@@ -184,92 +184,78 @@ const Header: FC = () => {
                 </div>
               </>
             ) : (
-              // Guest user navigation
               <>
-                <Link
-                  to="/login"
-                  className="px-4 py-2 rounded-xl text-sm font-semibold shadow-lg transition-all duration-200 hover:opacity-90"
-                  style={{ background: 'var(--theme-secondary)', color: 'var(--theme-onPrimary)' }}
-                >
+                {/* Guest user - Show Sign In (outline) and Get Started (solid) buttons with consistent styling */}
+                <Link to="/login" className="btn-base btn-secondary">
                   Sign In
                 </Link>
-                <Link
-                  to="/register"
-                  className="px-4 py-2 rounded-xl text-sm font-semibold shadow-lg transition-all duration-200 hover:opacity-90"
-                  style={{ background: 'var(--theme-primary)', color: 'var(--theme-onPrimary)' }}
-                >
+                <Link to="/register" className="btn-base btn-primary">
                   Get Started
                 </Link>
               </>
             )}
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMobileMenu}
-            className="md:hidden p-2 rounded-md transition-colors"
-            style={{ color: 'var(--theme-textSecondary)' }}
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile Menu Button - Only for authenticated users */}
+          {user && (
+            <button
+              onClick={toggleMobileMenu}
+              className="md:hidden p-2 rounded-md transition-colors"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          )}
+
+          {/* Mobile Sign In/Register buttons - Only for guests */}
+          {!user && (
+            <div className="flex md:hidden items-center gap-2">
+              <Link to="/login" className="btn-base btn-secondary btn-sm">
+                Sign In
+              </Link>
+              <Link to="/register" className="btn-base btn-primary btn-sm">
+                Get Started
+              </Link>
+            </div>
+          )}
         </div>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
-            {user ? (
-              <>
-                {navItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className="block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                    style={{ color: 'var(--theme-textSecondary)' }}
-                    onClick={closeMobileMenu}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-                <hr className="my-2" style={{ borderColor: 'var(--theme-border)' }} />
-                <div className="px-3 py-2 text-sm" style={{ color: 'var(--theme-textSecondary)' }}>
-                  Signed in as {user.email}
-                </div>
-                <Link
-                  to="/settings"
-                  className="block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                  style={{ color: 'var(--theme-textSecondary)' }}
-                  onClick={closeMobileMenu}
-                >
-                  Settings
-                </Link>
-                <button
-                  onClick={handleLogoutAndCloseMobile}
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors"
-                  style={{ color: 'var(--theme-error)' }}
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="block px-3 py-2 rounded-xl text-base font-semibold shadow-lg transition-all duration-200 hover:opacity-90"
-                  style={{ background: 'var(--theme-secondary)', color: 'var(--theme-onPrimary)' }}
-                  onClick={closeMobileMenu}
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="block px-3 py-2 rounded-xl text-base font-semibold shadow-lg transition-all duration-200 hover:opacity-90 mt-2"
-                  style={{ background: 'var(--theme-primary)', color: 'var(--theme-onPrimary)' }}
-                  onClick={closeMobileMenu}
-                >
-                  Get Started
-                </Link>
-              </>
-            )}
+        {/* Mobile Navigation - Only for authenticated users */}
+        {user && isMobileMenuOpen && (
+          <div
+            className="md:hidden py-4 border-t"
+            style={{ borderColor: 'var(--color-border-primary)' }}
+          >
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className="block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                style={{ color: 'var(--color-text-secondary)' }}
+                onClick={closeMobileMenu}
+              >
+                {item.name}
+              </Link>
+            ))}
+            <hr className="my-2" style={{ borderColor: 'var(--color-border-primary)' }} />
+            <div className="px-3 py-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Signed in as {user.email}
+            </div>
+            <Link
+              to="/settings"
+              className="block px-3 py-2 rounded-md text-base font-medium transition-colors"
+              style={{ color: 'var(--color-text-secondary)' }}
+              onClick={closeMobileMenu}
+            >
+              Settings
+            </Link>
+            <button
+              onClick={handleLogoutAndCloseMobile}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors"
+              style={{ color: 'var(--color-error)' }}
+            >
+              Sign Out
+            </button>
           </div>
         )}
       </div>

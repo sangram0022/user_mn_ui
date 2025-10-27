@@ -279,7 +279,7 @@ export const sizes = {
     xl: 'px-4 py-3 text-base',
   },
 
-  icon: { xs: 'w-3 h-3', sm: 'w-4 h-4', md: 'w-5 h-5', lg: 'w-6 h-6', xl: 'w-8 h-8' },
+  icon: { xs: 'icon-xs', sm: 'icon-sm', md: 'icon-md', lg: 'icon-lg', xl: 'icon-xl' },
 } as const;
 
 // Breakpoints

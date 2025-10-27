@@ -1,6 +1,7 @@
 import type { Config } from 'dompurify';
 import DOMPurify from 'dompurify';
 import React from 'react';
+import { EMAIL_REGEX } from './validation';
 
 /**
  * Input Sanitization Utilities
@@ -101,9 +102,8 @@ export function sanitizeInput(input: string, maxLength: number = 1000): string {
  */
 export function sanitizeEmail(email: string): string {
   const sanitized = sanitizeInput(email, 254); // RFC 5321 max length
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  return emailRegex.test(sanitized) ? sanitized.toLowerCase() : '';
+  // ✅ Use centralized EMAIL_REGEX from validation.ts (single source of truth)
+  return EMAIL_REGEX.test(sanitized) ? sanitized.toLowerCase() : '';
 }
 
 /**
@@ -240,7 +240,8 @@ export function SanitizedHTML({
 }
 
 /**
- * Hook for sanitizing form input in real-time
+ * React hook for automatic input sanitization
+ * React 19: Removed useMemo - compiler handles memoization automatically
  *
  * @param initialValue - Initial input value
  * @param sanitizer - Sanitization function to use
@@ -254,7 +255,8 @@ export function useSanitizedInput(
   sanitizer: (input: string) => string = sanitizeInput
 ): [string, (value: string) => void, string] {
   const [value, setValue] = React.useState(initialValue);
-  const sanitized = React.useMemo(() => sanitizer(value), [value, sanitizer]);
+  // React 19 Compiler handles memoization automatically
+  const sanitized = sanitizer(value);
 
   return [value, setValue, sanitized];
 }

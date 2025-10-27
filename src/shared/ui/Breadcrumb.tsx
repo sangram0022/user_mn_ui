@@ -35,8 +35,6 @@ const ROUTE_LABELS: Record<string, string> = {
   settings: 'Settings',
   analytics: 'Analytics',
   reports: 'Reports',
-  workflows: 'Workflows',
-  'my-workflows': 'My Workflows',
   approvals: 'Approvals',
   activity: 'Activity',
   security: 'Security',
@@ -86,19 +84,25 @@ const Breadcrumb = () => {
           return (
             <li key={crumb.path} className="flex items-center">
               {index > 0 && (
-                <ChevronRight className="w-4 h-4 mx-2 text-gray-400" aria-hidden="true" />
+                <ChevronRight
+                  className="icon-sm mx-2 text-[color:var(--color-text-tertiary)]"
+                  aria-hidden="true"
+                />
               )}
               {isLast ? (
-                <span className="font-medium text-gray-900" aria-current="page">
-                  {isFirst && <Home className="w-4 h-4 inline mr-1" aria-hidden="true" />}
+                <span
+                  className="font-medium text-[color:var(--color-text-primary)]"
+                  aria-current="page"
+                >
+                  {isFirst && <Home className="icon-sm inline mr-1" aria-hidden="true" />}
                   {crumb.label}
                 </span>
               ) : (
                 <Link
                   to={crumb.path}
-                  className="text-gray-600 hover:text-blue-600 transition-colors flex items-center"
+                  className="text-[color:var(--color-text-secondary)] hover:text-[color:var(--color-primary)] transition-colors flex items-center"
                 >
-                  {isFirst && <Home className="w-4 h-4 inline mr-1" aria-hidden="true" />}
+                  {isFirst && <Home className="icon-sm inline mr-1" aria-hidden="true" />}
                   {crumb.label}
                 </Link>
               )}

@@ -1,5 +1,5 @@
 /**
- * Alert Component Styles
+ * 🎯 Alert Component Styles - Tailwind CSS v4 Compatible
  * 
  * Zero inline styles alert system with:
  * - Design token based colors
@@ -7,9 +7,13 @@
  * - Dark mode support
  * - Accessible focus states
  * - Smooth animations
+ * 
+ * Tailwind v4:
+ * - Using @layer base for component classes (correct pattern)
+ * - Alert is a UI component, belongs in base layer
  */
 
-@layer components {
+@layer base {
   /* ========================================================================
      Base Alert Styles
      ======================================================================== */
@@ -23,6 +27,9 @@
     border: 1px solid;
     font-size: var(--font-size-sm);
     line-height: var(--line-height-normal);
+
+    /* 🚀 CSS Containment - Isolate alert for faster rendering */
+    contain: layout style paint;
   }
 
   .alert[role='alert'] {

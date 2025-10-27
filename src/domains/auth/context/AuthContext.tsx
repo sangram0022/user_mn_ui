@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext, use } from 'react';
 
 import type { LoginRequest, UserProfile } from '@shared/types';
 
@@ -18,8 +18,12 @@ export type { AuthContextType };
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * React 19: Hook to access auth context using use() hook
+ * Can be called conditionally unlike useContext
+ */
 export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
+  const context = use(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

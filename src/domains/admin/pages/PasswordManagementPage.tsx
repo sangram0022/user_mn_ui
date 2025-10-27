@@ -86,69 +86,89 @@ const StatusBadge: FC<{ status: string; type: 'reset' | 'security' | 'strength' 
       switch (status) {
         case 'pending':
           return {
-            color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            color:
+              'bg-[var(--color-warning-light)] text-[var(--color-warning)] border-[var(--color-warning)]',
             icon: Clock,
             label: 'Pending',
           };
         case 'used':
           return {
-            color: 'bg-green-100 text-green-800 border-green-200',
+            color:
+              'bg-[var(--color-success-light)] text-[var(--color-success)] border-[var(--color-success)]',
             icon: CheckCircle,
             label: 'Used',
           };
         case 'expired':
           return {
-            color: 'bg-red-100 text-red-800 border-red-200',
+            color:
+              'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]',
             icon: XCircle,
             label: 'Expired',
           };
         case 'cancelled':
           return {
-            color: 'bg-gray-100 text-gray-800 border-gray-200',
+            color:
+              'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]',
             icon: XCircle,
             label: 'Cancelled',
           };
         default:
-          return { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: Clock, label: status };
+          return {
+            color:
+              'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]',
+            icon: Clock,
+            label: status,
+          };
       }
     } else if (type === 'strength') {
       switch (status) {
         case 'strong':
           return {
-            color: 'bg-green-100 text-green-800 border-green-200',
+            color:
+              'bg-[var(--color-success-light)] text-[var(--color-success)] border-[var(--color-success)]',
             icon: Shield,
             label: 'Strong',
           };
         case 'good':
           return {
-            color: 'bg-blue-100 text-blue-800 border-blue-200',
+            color:
+              'bg-[var(--color-primary-light)] text-[var(--color-primary)] border-[var(--color-primary)]',
             icon: Shield,
             label: 'Good',
           };
         case 'fair':
           return {
-            color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            color:
+              'bg-[var(--color-warning-light)] text-[var(--color-warning)] border-[var(--color-warning)]',
             icon: AlertTriangle,
             label: 'Fair',
           };
         case 'weak':
           return {
-            color: 'bg-red-100 text-red-800 border-red-200',
+            color:
+              'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]',
             icon: AlertTriangle,
             label: 'Weak',
           };
         default:
           return {
-            color: 'bg-gray-100 text-gray-800 border-gray-200',
+            color:
+              'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]',
             icon: Shield,
             label: status,
           };
       }
     } else if (type === 'lock') {
       return status === 'locked'
-        ? { color: 'bg-red-100 text-red-800 border-red-200', icon: Lock, label: 'Locked' }
+        ? {
+            color:
+              'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]',
+            icon: Lock,
+            label: 'Locked',
+          }
         : {
-            color: 'bg-green-100 text-green-800 border-green-200',
+            color:
+              'bg-[var(--color-success-light)] text-[var(--color-success)] border-[var(--color-success)]',
             icon: Unlock,
             label: 'Unlocked',
           };
@@ -156,30 +176,39 @@ const StatusBadge: FC<{ status: string; type: 'reset' | 'security' | 'strength' 
       switch (status) {
         case 'critical':
           return {
-            color: 'bg-red-100 text-red-800 border-red-200',
+            color:
+              'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]',
             icon: XCircle,
             label: 'Critical',
           };
         case 'high':
           return {
-            color: 'bg-orange-100 text-orange-800 border-orange-200',
+            color:
+              'bg-[var(--color-warning)] text-[var(--color-warning)] border-[var(--color-warning)]',
             icon: AlertTriangle,
             label: 'High',
           };
         case 'medium':
           return {
-            color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            color:
+              'bg-[var(--color-warning-light)] text-[var(--color-warning)] border-[var(--color-warning)]',
             icon: AlertTriangle,
             label: 'Medium',
           };
         case 'low':
           return {
-            color: 'bg-green-100 text-green-800 border-green-200',
+            color:
+              'bg-[var(--color-success-light)] text-[var(--color-success)] border-[var(--color-success)]',
             icon: CheckCircle,
             label: 'Low',
           };
         default:
-          return { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: Clock, label: status };
+          return {
+            color:
+              'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]',
+            icon: Clock,
+            label: status,
+          };
       }
     }
   };
@@ -192,7 +221,7 @@ const StatusBadge: FC<{ status: string; type: 'reset' | 'security' | 'strength' 
       role="status"
       aria-label={`${type === 'reset' ? 'Reset request' : type === 'strength' ? 'Password strength' : type === 'lock' ? 'Account' : 'Security'} status: ${label}`}
     >
-      <Icon className="w-3 h-3 mr-1" aria-hidden="true" />
+      <Icon className="icon-xs mr-1" aria-hidden="true" />
       {status}
     </span>
   );
@@ -226,7 +255,7 @@ const PasswordPolicyEditor: FC<{
           secondaryAction={
             <button
               onClick={onCancel}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[var(--color-surface-hover)]"
             >
               Cancel
             </button>
@@ -235,11 +264,11 @@ const PasswordPolicyEditor: FC<{
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-[var(--color-text-primary)] bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-700)] disabled:opacity-50"
             >
               {isSaving ? (
                 <>
-                  <RefreshCw className="animate-spin w-4 h-4 mr-2" />
+                  <RefreshCw className="spinner spinner-sm mr-2" />
                   Saving...
                 </>
               ) : (
@@ -253,7 +282,10 @@ const PasswordPolicyEditor: FC<{
       <div className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="minLength" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="minLength"
+              className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+            >
               Minimum Length
             </label>
             <input
@@ -268,11 +300,14 @@ const PasswordPolicyEditor: FC<{
                   min_length: parseInt(e.target.value),
                 }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
             />
           </div>
           <div>
-            <label htmlFor="maxAge" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="maxAge"
+              className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+            >
               Maximum Age (days)
             </label>
             <input
@@ -287,13 +322,15 @@ const PasswordPolicyEditor: FC<{
                   max_age_days: parseInt(e.target.value),
                 }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
             />
           </div>
         </div>
 
         <div>
-          <h4 className="text-sm font-medium text-gray-900 mb-3">Character Requirements</h4>
+          <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] mb-3">
+            Character Requirements
+          </h4>
           <div className="space-y-2">
             {[
               { key: 'require_uppercase', label: 'Require uppercase letters' },
@@ -311,9 +348,9 @@ const PasswordPolicyEditor: FC<{
                       [key]: e.target.checked,
                     }))
                   }
-                  className="mr-2 rounded border-gray-300"
+                  className="mr-2 rounded border-[var(--color-border)]"
                 />
-                <span className="text-sm text-gray-700">{label}</span>
+                <span className="text-sm text-[var(--color-text-secondary)]">{label}</span>
               </label>
             ))}
           </div>
@@ -321,7 +358,10 @@ const PasswordPolicyEditor: FC<{
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="historyCount" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="historyCount"
+              className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+            >
               Password History Count
             </label>
             <input
@@ -336,13 +376,13 @@ const PasswordPolicyEditor: FC<{
                   history_count: parseInt(e.target.value),
                 }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
             />
           </div>
           <div>
             <label
               htmlFor="lockoutAttempts"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
             >
               Lockout After Attempts
             </label>
@@ -358,13 +398,16 @@ const PasswordPolicyEditor: FC<{
                   lockout_attempts: parseInt(e.target.value),
                 }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="lockoutDuration" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="lockoutDuration"
+            className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+          >
             Lockout Duration (minutes)
           </label>
           <input
@@ -379,7 +422,7 @@ const PasswordPolicyEditor: FC<{
                 lockout_duration_minutes: parseInt(e.target.value),
               }))
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
           />
         </div>
       </div>
@@ -424,7 +467,7 @@ const BulkPasswordResetModal: FC<{
           secondaryAction={
             <button
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[var(--color-surface-hover)]"
             >
               Cancel
             </button>
@@ -433,11 +476,11 @@ const BulkPasswordResetModal: FC<{
             <button
               onClick={handleSubmit}
               disabled={!userEmails.trim() || isSubmitting}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-[var(--color-text-primary)] bg-[var(--color-error)] hover:bg-[var(--color-error)] disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
-                  <RefreshCw className="animate-spin w-4 h-4 mr-2" />
+                  <RefreshCw className="spinner spinner-sm mr-2" />
                   Processing...
                 </>
               ) : (
@@ -450,7 +493,10 @@ const BulkPasswordResetModal: FC<{
     >
       <div className="space-y-4">
         <div>
-          <label htmlFor="userEmails" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="userEmails"
+            className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+          >
             User Emails (one per line)
           </label>
           <textarea
@@ -459,7 +505,7 @@ const BulkPasswordResetModal: FC<{
             value={userEmails}
             onChange={(e) => setUserEmails(e.target.value)}
             placeholder="user1@example.com&#10;user2@example.com&#10;user3@example.com"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
           />
         </div>
 
@@ -468,9 +514,11 @@ const BulkPasswordResetModal: FC<{
             type="checkbox"
             checked={forceChange}
             onChange={(e) => setForceChange(e.target.checked)}
-            className="mr-2 rounded border-gray-300"
+            className="mr-2 rounded border-[var(--color-border)]"
           />
-          <span className="text-sm text-gray-700">Force password change on next login</span>
+          <span className="text-sm text-[var(--color-text-secondary)]">
+            Force password change on next login
+          </span>
         </label>
       </div>
     </Modal>
@@ -618,12 +666,16 @@ const PasswordManagementPage: FC = () => {
 
   if (!canManagePasswords) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-wrapper">
+        <div className="container-narrow">
           <div className="text-center py-12">
-            <Key className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
-            <p className="text-gray-600">You don't have permission to manage passwords.</p>
+            <Key className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+              Access Restricted
+            </h3>
+            <p className="text-[var(--color-text-secondary)]">
+              You don&apos;t have permission to manage passwords.
+            </p>
           </div>
         </div>
       </div>
@@ -631,32 +683,34 @@ const PasswordManagementPage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="page-wrapper">
+      <div className="container-full">
         {/* Header */}
         <div className="mb-8">
           <Breadcrumb />
           <div className="mt-4 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Password Management</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                Password Management
+              </h1>
+              <p className="text-[color:var(--color-text-secondary)] mt-1">
                 Security policies, password resets, and breach monitoring
               </p>
             </div>
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowBulkReset(true)}
-                className="inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100"
+                className="inline-flex items-center px-4 py-2 border border-[var(--color-error)] rounded-md shadow-sm text-sm font-medium text-[var(--color-error)] bg-[color:var(--color-error-50)] hover:bg-[var(--color-error-light)]"
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCw className="icon-sm mr-2" />
                 Bulk Reset
               </button>
               <button
                 onClick={loadPasswordData}
                 disabled={isLoading}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                className="inline-flex items-center px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[color:var(--color-background-secondary)] disabled:opacity-50"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`icon-sm mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
               </button>
             </div>
@@ -678,86 +732,108 @@ const PasswordManagementPage: FC = () => {
             aria-label="Password management statistics"
           >
             <div
-              className="bg-white rounded-lg shadow-sm border p-4"
+              className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
               role="status"
               aria-label={`${stats.total_users} total users`}
             >
               <div className="flex items-center">
-                <User className="w-6 h-6 text-blue-600 mr-3" aria-hidden="true" />
+                <User
+                  className="w-6 h-6 text-[color:var(--color-primary)] mr-3"
+                  aria-hidden="true"
+                />
                 <div>
-                  <p className="text-xs font-medium text-gray-600">Total Users</p>
-                  <p className="text-lg font-semibold text-gray-900">{stats.total_users}</p>
+                  <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+                    Total Users
+                  </p>
+                  <p className="text-lg font-semibold text-[var(--color-text-primary)]">
+                    {stats.total_users}
+                  </p>
                 </div>
               </div>
             </div>
             <div
-              className="bg-white rounded-lg shadow-sm border p-4"
+              className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
               role="status"
               aria-label={`${stats.users_with_weak_passwords} users with weak passwords`}
             >
               <div className="flex items-center">
-                <AlertTriangle className="w-6 h-6 text-red-600 mr-3" aria-hidden="true" />
+                <AlertTriangle
+                  className="w-6 h-6 text-[color:var(--color-error)] mr-3"
+                  aria-hidden="true"
+                />
                 <div>
-                  <p className="text-xs font-medium text-gray-600">Weak Passwords</p>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+                    Weak Passwords
+                  </p>
+                  <p className="text-lg font-semibold text-[var(--color-text-primary)]">
                     {stats.users_with_weak_passwords}
                   </p>
                 </div>
               </div>
             </div>
             <div
-              className="bg-white rounded-lg shadow-sm border p-4"
+              className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
               role="status"
               aria-label={`${stats.users_with_expired_passwords} users with expired passwords`}
             >
               <div className="flex items-center">
-                <Clock className="w-6 h-6 text-yellow-600 mr-3" aria-hidden="true" />
+                <Clock
+                  className="w-6 h-6 text-[color:var(--color-warning)] mr-3"
+                  aria-hidden="true"
+                />
                 <div>
-                  <p className="text-xs font-medium text-gray-600">Expired</p>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-xs font-medium text-[var(--color-text-secondary)]">Expired</p>
+                  <p className="text-lg font-semibold text-[var(--color-text-primary)]">
                     {stats.users_with_expired_passwords}
                   </p>
                 </div>
               </div>
             </div>
             <div
-              className="bg-white rounded-lg shadow-sm border p-4"
+              className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
               role="status"
               aria-label={`${stats.locked_accounts} locked accounts`}
             >
               <div className="flex items-center">
-                <Lock className="w-6 h-6 text-orange-600 mr-3" aria-hidden="true" />
+                <Lock className="w-6 h-6 text-[var(--color-warning)] mr-3" aria-hidden="true" />
                 <div>
-                  <p className="text-xs font-medium text-gray-600">Locked</p>
-                  <p className="text-lg font-semibold text-gray-900">{stats.locked_accounts}</p>
+                  <p className="text-xs font-medium text-[var(--color-text-secondary)]">Locked</p>
+                  <p className="text-lg font-semibold text-[var(--color-text-primary)]">
+                    {stats.locked_accounts}
+                  </p>
                 </div>
               </div>
             </div>
             <div
-              className="bg-white rounded-lg shadow-sm border p-4"
+              className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
               role="status"
               aria-label={`${stats.recent_breaches_detected} recent breaches detected`}
             >
               <div className="flex items-center">
-                <Shield className="w-6 h-6 text-purple-600 mr-3" aria-hidden="true" />
+                <Shield className="w-6 h-6 text-[var(--color-primary)] mr-3" aria-hidden="true" />
                 <div>
-                  <p className="text-xs font-medium text-gray-600">Breaches</p>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-xs font-medium text-[var(--color-text-secondary)]">Breaches</p>
+                  <p className="text-lg font-semibold text-[var(--color-text-primary)]">
                     {stats.recent_breaches_detected}
                   </p>
                 </div>
               </div>
             </div>
             <div
-              className="bg-white rounded-lg shadow-sm border p-4"
+              className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
               role="status"
               aria-label={`${stats.pending_reset_requests} pending reset requests`}
             >
               <div className="flex items-center">
-                <RefreshCw className="w-6 h-6 text-green-600 mr-3" aria-hidden="true" />
+                <RefreshCw
+                  className="w-6 h-6 text-[color:var(--color-success)] mr-3"
+                  aria-hidden="true"
+                />
                 <div>
-                  <p className="text-xs font-medium text-gray-600">Reset Requests</p>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+                    Reset Requests
+                  </p>
+                  <p className="text-lg font-semibold text-[var(--color-text-primary)]">
                     {stats.pending_reset_requests}
                   </p>
                 </div>
@@ -767,8 +843,8 @@ const PasswordManagementPage: FC = () => {
         )}
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="border-b border-gray-200">
+        <div className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border">
+          <div className="border-b border-[var(--color-border)]">
             <div className="flex items-center justify-between px-6 py-4">
               <div role="tablist" aria-label="Password management sections">
                 <nav className="-mb-px flex space-x-8">
@@ -789,8 +865,8 @@ const PasswordManagementPage: FC = () => {
                       aria-controls={`${key}-panel`}
                       className={`py-2 px-1 border-b-2 font-medium text-sm ${
                         activeTab === key
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                          : 'border-transparent text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:border-[var(--color-border)]'
                       }`}
                     >
                       {label}
@@ -803,7 +879,7 @@ const PasswordManagementPage: FC = () => {
                 <div className="flex space-x-4">
                   <div className="relative" role="search">
                     <Search
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[color:var(--color-text-tertiary)] icon-sm"
                       aria-hidden="true"
                     />
                     <input
@@ -812,7 +888,7 @@ const PasswordManagementPage: FC = () => {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       aria-label="Search records"
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="pl-10 pr-4 py-2 border border-[color:var(--color-border-primary)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
                     />
                   </div>
                   {activeTab === 'users' && (
@@ -820,7 +896,7 @@ const PasswordManagementPage: FC = () => {
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
                       aria-label="Filter users by status"
-                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
                     >
                       <option value="all">All Users</option>
                       <option value="locked">Locked</option>
@@ -840,25 +916,25 @@ const PasswordManagementPage: FC = () => {
               <div role="tabpanel" id="overview-panel" aria-labelledby="overview-tab">
                 <div className="space-y-6">
                   {passwordPolicy && (
-                    <div className="bg-gray-50 rounded-lg p-6">
-                      <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    <div className="bg-[color:var(--color-background-secondary)] rounded-lg p-6">
+                      <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-4">
                         Current Password Policy
                       </h3>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-500">Min Length</p>
+                          <p className="text-[var(--color-text-tertiary)]">Min Length</p>
                           <p className="font-medium">{passwordPolicy.min_length} characters</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Max Age</p>
+                          <p className="text-[var(--color-text-tertiary)]">Max Age</p>
                           <p className="font-medium">{passwordPolicy.max_age_days} days</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">History</p>
+                          <p className="text-[var(--color-text-tertiary)]">History</p>
                           <p className="font-medium">{passwordPolicy.history_count} passwords</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Lockout</p>
+                          <p className="text-[var(--color-text-tertiary)]">Lockout</p>
                           <p className="font-medium">{passwordPolicy.lockout_attempts} attempts</p>
                         </div>
                       </div>
@@ -866,11 +942,14 @@ const PasswordManagementPage: FC = () => {
                   )}
 
                   <div className="text-center py-8">
-                    <Key className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <Key
+                      className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
+                      aria-hidden="true"
+                    />
+                    <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
                       Password Management Overview
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-[color:var(--color-text-secondary)] mb-4">
                       Use the tabs above to manage password policies, view user status, and monitor
                       security events.
                     </p>
@@ -884,76 +963,88 @@ const PasswordManagementPage: FC = () => {
               <div role="tabpanel" id="policy-panel" aria-labelledby="policy-tab">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
                       Password Policy Configuration
                     </h3>
                     <button
                       onClick={() => setShowPolicyEditor(true)}
-                      className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                      className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-[var(--color-text-primary)] bg-[color:var(--color-primary)] hover:bg-[var(--color-primary-hover)]"
                     >
-                      <Settings className="w-4 h-4 mr-2" />
+                      <Settings className="icon-sm mr-2" />
                       Edit Policy
                     </button>
                   </div>
 
-                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                      <h4 className="font-medium text-gray-900">Current Settings</h4>
+                  <div className="bg-[var(--color-surface-primary)] border border-[color:var(--color-border-primary)] rounded-lg overflow-hidden">
+                    <div className="px-6 py-4 bg-[color:var(--color-background-secondary)] border-b border-[var(--color-border)]">
+                      <h4 className="font-medium text-[var(--color-text-primary)]">
+                        Current Settings
+                      </h4>
                     </div>
                     <div className="p-6 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <h5 className="font-medium text-gray-900 mb-3">Length & Complexity</h5>
+                          <h5 className="font-medium text-[color:var(--color-text-primary)] mb-3">
+                            Length & Complexity
+                          </h5>
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Minimum length:</span>
+                              <span className="text-[var(--color-text-secondary)]">
+                                Minimum length:
+                              </span>
                               <span className="font-medium">
                                 {passwordPolicy.min_length} characters
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Uppercase letters:</span>
+                              <span className="text-[var(--color-text-secondary)]">
+                                Uppercase letters:
+                              </span>
                               <span
                                 className={
                                   passwordPolicy.require_uppercase
-                                    ? 'text-green-600'
-                                    : 'text-gray-400'
+                                    ? 'text-[var(--color-success)]'
+                                    : 'text-[var(--color-text-tertiary)]'
                                 }
                               >
                                 {passwordPolicy.require_uppercase ? 'Required' : 'Optional'}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Lowercase letters:</span>
+                              <span className="text-[var(--color-text-secondary)]">
+                                Lowercase letters:
+                              </span>
                               <span
                                 className={
                                   passwordPolicy.require_lowercase
-                                    ? 'text-green-600'
-                                    : 'text-gray-400'
+                                    ? 'text-[var(--color-success)]'
+                                    : 'text-[var(--color-text-tertiary)]'
                                 }
                               >
                                 {passwordPolicy.require_lowercase ? 'Required' : 'Optional'}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Numbers:</span>
+                              <span className="text-[var(--color-text-secondary)]">Numbers:</span>
                               <span
                                 className={
                                   passwordPolicy.require_numbers
-                                    ? 'text-green-600'
-                                    : 'text-gray-400'
+                                    ? 'text-[var(--color-success)]'
+                                    : 'text-[var(--color-text-tertiary)]'
                                 }
                               >
                                 {passwordPolicy.require_numbers ? 'Required' : 'Optional'}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Special characters:</span>
+                              <span className="text-[var(--color-text-secondary)]">
+                                Special characters:
+                              </span>
                               <span
                                 className={
                                   passwordPolicy.require_special_chars
-                                    ? 'text-green-600'
-                                    : 'text-gray-400'
+                                    ? 'text-[var(--color-success)]'
+                                    : 'text-[var(--color-text-tertiary)]'
                                 }
                               >
                                 {passwordPolicy.require_special_chars ? 'Required' : 'Optional'}
@@ -963,28 +1054,38 @@ const PasswordManagementPage: FC = () => {
                         </div>
 
                         <div>
-                          <h5 className="font-medium text-gray-900 mb-3">Security & Lockout</h5>
+                          <h5 className="font-medium text-[color:var(--color-text-primary)] mb-3">
+                            Security & Lockout
+                          </h5>
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Maximum age:</span>
+                              <span className="text-[var(--color-text-secondary)]">
+                                Maximum age:
+                              </span>
                               <span className="font-medium">
                                 {passwordPolicy.max_age_days} days
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">History count:</span>
+                              <span className="text-[var(--color-text-secondary)]">
+                                History count:
+                              </span>
                               <span className="font-medium">
                                 {passwordPolicy.history_count} passwords
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Lockout attempts:</span>
+                              <span className="text-[var(--color-text-secondary)]">
+                                Lockout attempts:
+                              </span>
                               <span className="font-medium">
                                 {passwordPolicy.lockout_attempts} failed logins
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Lockout duration:</span>
+                              <span className="text-[var(--color-text-secondary)]">
+                                Lockout duration:
+                              </span>
                               <span className="font-medium">
                                 {passwordPolicy.lockout_duration_minutes} minutes
                               </span>
@@ -1003,51 +1104,51 @@ const PasswordManagementPage: FC = () => {
               <div role="tabpanel" id="users-panel" aria-labelledby="users-tab">
                 <div className="overflow-x-auto">
                   <table
-                    className="min-w-full divide-y divide-gray-200"
+                    className="min-w-full divide-y divide-[var(--color-border)]"
                     role="table"
                     aria-label="User password status"
                   >
-                    <thead className="bg-gray-50">
+                    <thead className="bg-[var(--color-surface-secondary)]">
                       <tr>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                         >
                           User
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                         >
                           Password Age
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                         >
                           Strength
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                         >
                           Status
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                         >
                           Failed Attempts
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="px-6 py-3 text-right text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                         >
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-[var(--color-surface-primary)] divide-y divide-[var(--color-border)]">
                       {isLoading ? (
                         Array.from({ length: 5 }).map((_, i) => (
                           <tr key={i}>
@@ -1073,24 +1174,29 @@ const PasswordManagementPage: FC = () => {
                         ))
                       ) : filteredUsers.length > 0 ? (
                         filteredUsers.map((user) => (
-                          <tr key={user.user_id} className="hover:bg-gray-50">
+                          <tr key={user.user_id} className="hover:bg-[var(--color-surface-hover)]">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                <User className="w-4 h-4 text-gray-400 mr-2" aria-hidden="true" />
+                                <User
+                                  className="icon-sm text-[color:var(--color-text-tertiary)] mr-2"
+                                  aria-hidden="true"
+                                />
                                 <div>
-                                  <div className="text-sm font-medium text-gray-900">
+                                  <div className="text-sm font-medium text-[var(--color-text-primary)]">
                                     {user.email}
                                   </div>
-                                  <div className="text-sm text-gray-500">{user.user_id}</div>
+                                  <div className="text-sm text-[var(--color-text-tertiary)]">
+                                    {user.user_id}
+                                  </div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]">
                               {user.password_age_days} days
                               {passwordPolicy &&
                                 user.password_age_days > passwordPolicy.max_age_days && (
                                   <span
-                                    className="ml-1 text-red-500"
+                                    className="ml-1 text-[var(--color-error)]"
                                     role="img"
                                     aria-label="Expired"
                                   >
@@ -1108,7 +1214,7 @@ const PasswordManagementPage: FC = () => {
                               />
                               {user.breach_detected && (
                                 <span
-                                  className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                                  className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[var(--color-primary)] text-[var(--color-primary)]"
                                   role="status"
                                   aria-label="Password breach detected"
                                 >
@@ -1116,7 +1222,7 @@ const PasswordManagementPage: FC = () => {
                                 </span>
                               )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]">
                               {user.failed_login_attempts}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -1124,18 +1230,18 @@ const PasswordManagementPage: FC = () => {
                                 {user.account_locked && (
                                   <button
                                     onClick={() => handleUnlockAccount(user.user_id)}
-                                    className="text-blue-600 hover:text-blue-900"
+                                    className="text-[color:var(--color-primary)] hover:text-[var(--color-primary)]"
                                     aria-label={`Unlock account for ${user.email}`}
                                   >
-                                    <Unlock className="w-4 h-4" aria-hidden="true" />
+                                    <Unlock className="icon-sm" aria-hidden="true" />
                                   </button>
                                 )}
                                 <button
                                   onClick={() => handleForcePasswordChange(user.user_id)}
-                                  className="text-orange-600 hover:text-orange-900"
+                                  className="text-[var(--color-warning)] hover:text-[var(--color-warning)]"
                                   aria-label={`Force password change for ${user.email}`}
                                 >
-                                  <RefreshCw className="w-4 h-4" aria-hidden="true" />
+                                  <RefreshCw className="icon-sm" aria-hidden="true" />
                                 </button>
                               </div>
                             </td>
@@ -1145,13 +1251,13 @@ const PasswordManagementPage: FC = () => {
                         <tr>
                           <td colSpan={6} className="px-6 py-12 text-center">
                             <User
-                              className="w-12 h-12 text-gray-400 mx-auto mb-4"
+                              className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
                               aria-hidden="true"
                             />
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
                               No users found
                             </h3>
-                            <p className="text-gray-600">
+                            <p className="text-[var(--color-text-secondary)]">
                               No users match your current filter criteria.
                             </p>
                           </td>
@@ -1167,11 +1273,16 @@ const PasswordManagementPage: FC = () => {
             {activeTab === 'resets' && (
               <div role="tabpanel" id="resets-panel" aria-labelledby="resets-tab">
                 <div className="text-center py-8">
-                  <RefreshCw className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <RefreshCw
+                    className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
+                    aria-hidden="true"
+                  />
+                  <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
                     Password Reset Requests
                   </h3>
-                  <p className="text-gray-600">Reset request management interface would go here.</p>
+                  <p className="text-[var(--color-text-secondary)]">
+                    Reset request management interface would go here.
+                  </p>
                 </div>
               </div>
             )}
@@ -1179,9 +1290,14 @@ const PasswordManagementPage: FC = () => {
             {activeTab === 'security' && (
               <div role="tabpanel" id="security-panel" aria-labelledby="security-tab">
                 <div className="text-center py-8">
-                  <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Security Events</h3>
-                  <p className="text-gray-600">
+                  <Shield
+                    className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
+                    aria-hidden="true"
+                  />
+                  <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+                    Security Events
+                  </h3>
+                  <p className="text-[var(--color-text-secondary)]">
                     Security event monitoring interface would go here.
                   </p>
                 </div>
@@ -1189,22 +1305,22 @@ const PasswordManagementPage: FC = () => {
             )}
           </div>
         </div>
-      </div>
 
-      {/* Modals */}
-      {showPolicyEditor && passwordPolicy && (
-        <PasswordPolicyEditor
-          policy={passwordPolicy}
-          onSave={handleSavePolicy}
-          onCancel={() => setShowPolicyEditor(false)}
+        {/* Modals */}
+        {showPolicyEditor && passwordPolicy && (
+          <PasswordPolicyEditor
+            policy={passwordPolicy}
+            onSave={handleSavePolicy}
+            onCancel={() => setShowPolicyEditor(false)}
+          />
+        )}
+
+        <BulkPasswordResetModal
+          isOpen={showBulkReset}
+          onClose={() => setShowBulkReset(false)}
+          onSubmit={handleBulkReset}
         />
-      )}
-
-      <BulkPasswordResetModal
-        isOpen={showBulkReset}
-        onClose={() => setShowBulkReset(false)}
-        onSubmit={handleBulkReset}
-      />
+      </div>
     </div>
   );
 };

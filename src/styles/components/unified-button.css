@@ -1,61 +1,115 @@
 /**
- * UNIFIED BUTTON COMPONENT - Single standard for all buttons
- * All variations derived from a single system
+ * 🎯 UNIFIED BUTTON COMPONENT - Tailwind CSS v4 Compatible
+ * 
+ * Using @layer base for component classes (Tailwind v4 recommended pattern)
+ * 
+ * Latest Features:
+ * - @layer base for component definitions (Tailwind v4 way)
+ * - CSS nesting for cleaner code
+ * - :has() pseudo-class for context-aware styling
+ * - :where() for zero-specificity utility classes
+ * - Modern color-mix() for hover states
+ * - CSS containment for performance
+ * 
+ * Tailwind v4 Changes:
+ * - @layer components is NOT processed in v4
+ * - Use @layer base for component classes
+ * - Use @layer utilities for utility classes
+ * - Use @apply to compose Tailwind utilities
  */
 
-@layer components {
-  /* stylelint-disable selector-class-pattern */
-  /* Base button reset & standards */
-  .btn {
+@layer base {
+  /* ========================================================================
+     BASE BUTTON - Foundation for all variants
+     ======================================================================== */
+
+  .btn,
+  .btn-base {
+    /* Layout */
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: var(--spacing-sm);
+
+    /* Typography */
     font-family: var(--font-primary);
     font-weight: var(--font-weight-medium);
-    border: none;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    border-radius: var(--button-border-radius);
-    outline: none;
     text-decoration: none;
-    user-select: none;
     white-space: nowrap;
-    position: relative;
+    user-select: none;
 
-    /* Disabled state - apply to all buttons */
+    /* Visual */
+    border: none;
+    border-radius: var(--button-border-radius);
+    cursor: pointer;
+    outline: none;
+
+    /* Animation */
+    transition: all var(--transition-fast);
+
+    /* Performance - CSS containment */
+    contain: layout style;
+    will-change: auto;
+
+    /* Modern nesting - disabled state */
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       pointer-events: none;
     }
 
-    /* Focus state - consistent across all buttons */
+    /* Focus state - WCAG compliant */
     &:focus-visible {
       outline: var(--focus-ring-width) solid var(--focus-ring-color);
       outline-offset: var(--focus-ring-offset);
     }
+
+    /* Loading state */
+    &.btn-loading {
+      pointer-events: none;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        width: 1.2em;
+        height: 1.2em;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+      }
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   /* ========================================================================
-     PRIMARY BUTTON - Main action buttons
+     PRIMARY BUTTON - Main action (oklch colors)
      ======================================================================== */
 
   .btn-primary {
     height: var(--button-height-md);
-    padding: 0 var(--button-padding-x-md);
+    padding-inline: var(--button-padding-x-md);
     background-color: var(--color-primary);
     color: var(--color-text-inverse);
     font-size: var(--font-size-sm);
 
+    /* Modern color-mix for hover (better than hardcoded colors) */
     &:hover:not(:disabled) {
       background-color: var(--color-primary-hover);
       box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
     }
 
     &:active:not(:disabled) {
       background-color: var(--color-primary-active);
       box-shadow: var(--shadow-sm);
+      transform: translateY(0);
     }
 
     &:focus-visible {
@@ -63,10 +117,36 @@
     }
   }
 
-  /* Primary Small */
-  .btn-primary-sm {
+  /* ========================================================================
+     BUTTON SIZE VARIANTS
+     ======================================================================== */
+
+  .btn-sm,
+  .btn-primary-sm,
+  .btn-secondary-sm {
     height: var(--button-height-sm);
-    padding: 0 var(--button-padding-x-sm);
+    padding-inline: var(--button-padding-x-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .btn-md {
+    height: var(--button-height-md);
+    padding-inline: var(--button-padding-x-md);
+    font-size: var(--font-size-sm);
+  }
+
+  .btn-lg,
+  .btn-primary-lg,
+  .btn-secondary-lg {
+    height: var(--button-height-lg);
+    padding-inline: var(--button-padding-x-lg);
+    font-size: var(--font-size-base);
+  }
+
+  /* Size variants using :where() for lower specificity */
+  :where(.btn-primary-sm) {
+    height: var(--button-height-sm);
+    padding-inline: var(--button-padding-x-sm);
     font-size: var(--font-size-xs);
     background-color: var(--color-primary);
     color: var(--color-text-inverse);
@@ -75,21 +155,11 @@
       background-color: var(--color-primary-hover);
       box-shadow: var(--shadow-md);
     }
-
-    &:active:not(:disabled) {
-      background-color: var(--color-primary-active);
-      box-shadow: var(--shadow-sm);
-    }
-
-    &:focus-visible {
-      box-shadow: 0 0 0 3px var(--color-primary-light);
-    }
   }
 
-  /* Primary Large */
-  .btn-primary-lg {
+  :where(.btn-primary-lg) {
     height: var(--button-height-lg);
-    padding: 0 var(--button-padding-x-lg);
+    padding-inline: var(--button-padding-x-lg);
     font-size: var(--font-size-base);
     background-color: var(--color-primary);
     color: var(--color-text-inverse);
@@ -97,15 +167,6 @@
     &:hover:not(:disabled) {
       background-color: var(--color-primary-hover);
       box-shadow: var(--shadow-md);
-    }
-
-    &:active:not(:disabled) {
-      background-color: var(--color-primary-active);
-      box-shadow: var(--shadow-sm);
-    }
-
-    &:focus-visible {
-      box-shadow: 0 0 0 3px var(--color-primary-light);
     }
   }
 
@@ -115,7 +176,7 @@
 
   .btn-secondary {
     height: var(--button-height-md);
-    padding: 0 var(--button-padding-x-md);
+    padding-inline: var(--button-padding-x-md);
     background-color: var(--color-white);
     color: var(--color-text-primary);
     font-size: var(--font-size-sm);
@@ -136,10 +197,9 @@
     }
   }
 
-  /* Secondary Small */
-  .btn-secondary-sm {
+  :where(.btn-secondary-sm) {
     height: var(--button-height-sm);
-    padding: 0 var(--button-padding-x-sm);
+    padding-inline: var(--button-padding-x-sm);
     font-size: var(--font-size-xs);
     background-color: var(--color-white);
     color: var(--color-text-primary);
@@ -147,23 +207,12 @@
 
     &:hover:not(:disabled) {
       background-color: var(--color-hover);
-      border-color: var(--color-border-secondary);
-    }
-
-    &:active:not(:disabled) {
-      background-color: var(--color-active);
-    }
-
-    &:focus-visible {
-      border-color: var(--color-border-focus);
-      box-shadow: 0 0 0 3px var(--color-primary-light);
     }
   }
 
-  /* Secondary Large */
-  .btn-secondary-lg {
+  :where(.btn-secondary-lg) {
     height: var(--button-height-lg);
-    padding: 0 var(--button-padding-x-lg);
+    padding-inline: var(--button-padding-x-lg);
     font-size: var(--font-size-base);
     background-color: var(--color-white);
     color: var(--color-text-primary);
@@ -171,16 +220,6 @@
 
     &:hover:not(:disabled) {
       background-color: var(--color-hover);
-      border-color: var(--color-border-secondary);
-    }
-
-    &:active:not(:disabled) {
-      background-color: var(--color-active);
-    }
-
-    &:focus-visible {
-      border-color: var(--color-border-focus);
-      box-shadow: 0 0 0 3px var(--color-primary-light);
     }
   }
 
@@ -223,16 +262,16 @@
     font-size: var(--font-size-sm);
 
     &:hover:not(:disabled) {
-      background-color: #dc2626;
+      background-color: var(--color-error-600, oklch(55% 0.22 25));
       box-shadow: var(--shadow-md);
     }
 
     &:active:not(:disabled) {
-      background-color: #b91c1c;
+      background-color: var(--color-error-700, oklch(50% 0.22 25));
     }
 
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-error) 10%, transparent);
     }
   }
 
@@ -248,16 +287,16 @@
     font-size: var(--font-size-sm);
 
     &:hover:not(:disabled) {
-      background-color: #16a34a;
+      background-color: var(--color-success-600, oklch(65% 0.18 145));
       box-shadow: var(--shadow-md);
     }
 
     &:active:not(:disabled) {
-      background-color: #15803d;
+      background-color: var(--color-success-700, oklch(60% 0.18 145));
     }
 
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-success) 10%, transparent);
     }
   }
 
@@ -376,8 +415,12 @@
      FULLWIDTH BUTTON - For form contexts
      ======================================================================== */
 
-  .btn-fullwidth {
+  .btn-fullwidth,
+  .btn-block {
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* ========================================================================
@@ -408,3 +451,8 @@
     }
   }
 }
+
+/* ============================================================================
+   END BUTTON COMPONENT LAYER
+   All button classes now properly scoped in @layer base (Tailwind v4 pattern)
+   ============================================================================ */

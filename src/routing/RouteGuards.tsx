@@ -39,7 +39,7 @@ export const AdminRoute: FC<RouteGuardProps> = ({ children }) => {
   }
 
   // Check if user has admin permissions
-  const canAccessAdmin = hasPermission('admin') || user.role === 'admin';
+  const canAccessAdmin = hasPermission('admin') || user.roles?.includes('admin');
 
   if (!canAccessAdmin) {
     return <Navigate to="/dashboard" replace />;

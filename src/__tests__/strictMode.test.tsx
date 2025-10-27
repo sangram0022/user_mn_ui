@@ -13,8 +13,7 @@
 
 import { AuthProvider } from '@domains/auth/providers/AuthProvider';
 import { InfiniteUserList } from '@domains/users/components/InfiniteScrollExamples';
-import { useApi } from '@hooks/useApi';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { StrictMode, useEffect, useRef } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -160,85 +159,6 @@ describe('StrictMode Compatibility Tests', () => {
       unmount();
 
       // Abort should be called on unmount
-      expect(abortSpy).toHaveBeenCalled();
-
-      global.AbortController = originalAbortController;
-    });
-  });
-
-  describe('useApi - Stable Dependencies', () => {
-    it('should not re-execute on callback changes', async () => {
-      let executeCount = 0;
-
-      function TestComponent({ onSuccess }: { onSuccess: () => void }) {
-        const { data } = useApi(
-          async () => {
-            executeCount++;
-            return { test: 'data' };
-          },
-          { autoFetch: true, onSuccess }
-        );
-
-        return <div>{data ? 'loaded' : 'loading'}</div>;
-      }
-
-      const { rerender } = render(
-        <StrictMode>
-          <TestComponent
-            onSuccess={() => {
-              /* callback v1 */
-            }}
-          />
-        </StrictMode>
-      );
-
-      await waitFor(() => {
-        expect(executeCount).toBe(1); // Initial fetch
-      });
-
-      // Change onSuccess callback - should not trigger re-fetch
-      rerender(
-        <StrictMode>
-          <TestComponent
-            onSuccess={() => {
-              /* callback v2 */
-            }}
-          />
-        </StrictMode>
-      );
-
-      await waitFor(() => {
-        // Should still be 1 - callback change doesn't trigger re-execution
-        expect(executeCount).toBe(1);
-      });
-    });
-
-    it('should cleanup abort controller on unmount', async () => {
-      const abortSpy = vi.fn();
-      const originalAbortController = global.AbortController;
-
-      global.AbortController = class MockAbortController {
-        signal = { aborted: false };
-        abort = abortSpy;
-      } as any;
-
-      function TestComponent() {
-        const { data } = useApi(async () => ({ test: 'data' }), { autoFetch: true });
-        return <div>{data ? 'loaded' : 'loading'}</div>;
-      }
-
-      const { unmount } = render(
-        <StrictMode>
-          <TestComponent />
-        </StrictMode>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText(/loading|loaded/)).toBeInTheDocument();
-      });
-
-      unmount();
-
       expect(abortSpy).toHaveBeenCalled();
 
       global.AbortController = originalAbortController;

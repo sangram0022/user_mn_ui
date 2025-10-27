@@ -1,4 +1,4 @@
-﻿import { ArrowLeft, CheckCircle, Clock, Mail, RefreshCw } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Mail, RefreshCw } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -65,114 +65,127 @@ const EmailConfirmationPage: React.FC = () => {
   };
 
   return (
-    <div className="sm:mx-auto sm:w-full sm:max-w-md">
-      <div className="bg-white shadow-xl sm:rounded-2xl border border-gray-100 p-8 sm:p-10">
-        <div className="text-center">
-          <div className="mx-auto w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-6">
-            <Mail className="w-8 h-8 text-white" aria-hidden="true" />
-          </div>
-
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Check your email</h2>
-
-          <p className="text-gray-600 mb-6">
-            We've sent a verification link to{' '}
-            <span className="font-medium text-gray-900">{email || 'your email address'}</span>
-          </p>
-
-          <div
-            className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6"
-            role="region"
-            aria-label="Next steps information"
-          >
-            <div className="flex items-start gap-3">
-              <CheckCircle
-                className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"
-                aria-hidden="true"
-              />
-              <div className="text-left">
-                <h3 className="text-sm font-semibold text-blue-900 mb-1">What happens next?</h3>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li> Click the verification link in your email</li>
-                  <li> Your account will be activated automatically</li>
-                  <li> You can then sign in with your credentials</li>
-                </ul>
+    <div className="page-wrapper">
+      <div className="auth-layout">
+        <div className="container-form">
+          <div className="card-base card-form">
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mb-6">
+                <Mail className="icon-xl text-[var(--color-text-primary)]" aria-hidden="true" />
               </div>
-            </div>
-          </div>
 
-          <div
-            className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6"
-            role="region"
-            aria-label="Troubleshooting tips"
-          >
-            <div className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
-              <div className="text-left">
-                <h3 className="text-sm font-semibold text-amber-900 mb-1">
-                  Didn't receive the email?
-                </h3>
-                <ul className="text-sm text-amber-800 space-y-1">
-                  <li> Check your spam or junk folder</li>
-                  <li> The link expires in 24 hours</li>
-                  <li> Make sure to check all email aliases</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+              <h2 className="text-3xl font-bold tracking-tight text-[var(--color-text-primary)] mb-2">
+                Check your email
+              </h2>
 
-          <div className="space-y-4">
-            {resendMessage && (
+              <p className="text-[var(--color-text-secondary)] mb-6">
+                We&apos;ve sent a verification link to{' '}
+                <span className="font-medium text-[var(--color-text-primary)]">
+                  {email || 'your email address'}
+                </span>
+              </p>
+
               <div
-                role="status"
-                aria-live="polite"
-                className={`p-3 rounded-lg text-sm ${
-                  resendMessage.includes('successfully')
-                    ? 'bg-green-50 border border-green-200 text-green-800'
-                    : 'bg-red-50 border border-red-200 text-red-800'
-                }`}
+                className="bg-[var(--color-primary-light)] border border-[var(--color-primary)] rounded-lg p-4 mb-6"
+                role="region"
+                aria-label="Next steps information"
               >
-                {resendMessage}
+                <div className="flex items-start gap-3">
+                  <CheckCircle
+                    className="icon-md text-[var(--color-primary)] mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                  <div className="text-left">
+                    <h3 className="text-sm font-semibold text-[var(--color-primary)] mb-1">
+                      What happens next?
+                    </h3>
+                    <ul className="text-sm text-[var(--color-primary)] space-y-1">
+                      <li> Click the verification link in your email</li>
+                      <li> Your account will be activated automatically</li>
+                      <li> You can then sign in with your credentials</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
-            )}
 
-            <button
-              type="button"
-              onClick={handleResendEmail}
-              disabled={isResending || !email}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label={
-                isResending ? 'Resending verification email' : 'Resend verification email'
-              }
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${isResending ? 'animate-spin' : ''}`}
-                aria-hidden="true"
-              />
-              {isResending ? 'Resending...' : 'Resend verification email'}
-            </button>
+              <div
+                className="bg-[var(--color-warning)] border border-[var(--color-warning)] rounded-lg p-4 mb-6"
+                role="region"
+                aria-label="Troubleshooting tips"
+              >
+                <div className="flex items-start gap-3">
+                  <Clock
+                    className="icon-md text-[var(--color-warning)] mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                  <div className="text-left">
+                    <h3 className="text-sm font-semibold text-[var(--color-warning)] mb-1">
+                      Didn&apos;t receive the email?
+                    </h3>
+                    <ul className="text-sm text-[var(--color-warning)] space-y-1">
+                      <li> Check your spam or junk folder</li>
+                      <li> The link expires in 24 hours</li>
+                      <li> Make sure to check all email aliases</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
 
-            <Link
-              to="/login"
-              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              Back to login
-            </Link>
+              <div className="stack-md">
+                {resendMessage && (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className={`p-3 rounded-lg text-sm ${
+                      resendMessage.includes('successfully')
+                        ? 'bg-[var(--color-success-light)] border border-[var(--color-success)] text-[var(--color-success)]'
+                        : 'bg-[var(--color-error-light)] border border-[var(--color-error)] text-[var(--color-error)]'
+                    }`}
+                  >
+                    {resendMessage}
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleResendEmail}
+                  disabled={isResending || !email}
+                  className="btn-base btn-secondary"
+                  aria-label={
+                    isResending ? 'Resending verification email' : 'Resend verification email'
+                  }
+                >
+                  <RefreshCw
+                    className={`icon-sm ${isResending ? 'animate-spin' : ''}`}
+                    aria-hidden="true"
+                  />
+                  {isResending ? 'Resending...' : 'Resend verification email'}
+                </button>
+
+                <Link to="/login" className="btn-base btn-primary">
+                  <ArrowLeft className="icon-sm" aria-hidden="true" />
+                  Back to login
+                </Link>
+              </div>
+
+              <p className="mt-4 text-xs text-[var(--color-text-tertiary)]">
+                Auto-redirecting to login in {countdown} seconds...
+              </p>
+            </div>
           </div>
 
-          <p className="mt-4 text-xs text-gray-500">
-            Auto-redirecting to login in {countdown} seconds...
-          </p>
+          <div className="mt-8 text-center">
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              Need help?{' '}
+              <Link
+                to="/help"
+                className="font-medium text-[var(--color-primary)] hover:text-[var(--color-primary)]"
+              >
+                Contact support
+              </Link>
+            </p>
+          </div>
         </div>
-      </div>
-
-      <div className="mt-8 text-center">
-        <p className="text-sm text-gray-600">
-          Need help?{' '}
-          <Link to="/help" className="font-medium text-blue-600 hover:text-blue-500">
-            Contact support
-          </Link>
-        </p>
       </div>
     </div>
   );

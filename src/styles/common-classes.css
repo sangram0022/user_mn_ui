@@ -1,135 +1,285 @@
 /**
- * Common CSS Utility Classes
+ * 🎨 Common CSS Utility Classes - Tailwind CSS v4 Compatible
  * 
- * Extracted from repeated patterns across the codebase
- * for better maintainability and consistency
+ * Converted from @apply to pure CSS for better performance
+ * and compatibility with Tailwind v4+
+ * 
+ * Benefits:
+ * - Smaller bundle size
+ * - Faster CSS parsing
+ * - No deprecated @apply directive
+ * - Better maintainability
+ * 
+ * Tailwind v4:
+ * - Using @layer utilities for utility classes (correct pattern)
+ * - Helper/utility classes belong in utilities layer
+ * - Component classes belong in base layer
  */
 
-/* Card Styles */
-.card-white {
-  @apply bg-white rounded-lg shadow-sm border;
-}
+@layer utilities {
+  /* ========================================================================
+     CARD STYLES - Reusable card components
+     ======================================================================== */
 
-.card-white-lg {
-  @apply bg-white rounded-lg shadow-xl border;
-}
+  .card-white {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--card-shadow-flat, 0 1px 2px 0 rgb(0 0 0 / 0.05));
+    border: 1px solid var(--color-border-card, oklch(92% 0 0));
+  }
 
-.card-white-hover {
-  @apply bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow;
-}
+  .card-white-lg {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--card-shadow-interactive, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+    border: 1px solid var(--color-border-card, oklch(92% 0 0));
+  }
 
-/* Modal Styles */
-.modal-container {
-  @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50;
-}
+  .card-white-hover {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-lg, 0.75rem);
+    border: 1px solid var(--color-border-default, oklch(90% 0 0));
+    transition: box-shadow var(--transition-fast, 150ms);
+  }
 
-.modal-content {
-  @apply bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden;
-}
+  .card-white-hover:hover {
+    box-shadow: var(--card-shadow-elevated, 0 4px 6px -1px rgb(0 0 0 / 0.1));
+  }
 
-.modal-content-md {
-  @apply bg-white rounded-lg shadow-xl w-full max-w-md;
-}
+  /* ========================================================================
+     MODAL STYLES - Consistent modal components
+     ======================================================================== */
 
-.modal-content-lg {
-  @apply bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden;
-}
+  .modal-container {
+    position: fixed;
+    inset: 0;
+    background-color: rgb(0 0 0 / 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal-backdrop, 1040);
+  }
 
-.modal-header {
-  @apply px-6 py-4 border-b border-gray-200;
-}
+  .modal-content {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-xl, 1rem);
+    box-shadow: var(--card-shadow-interactive, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+    width: 100%;
+    max-width: 42rem;
+    max-height: 80vh;
+    overflow: hidden;
+  }
 
-.modal-body {
-  @apply px-6 py-4 overflow-y-auto;
-}
+  .modal-content-md {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-xl, 1rem);
+    box-shadow: var(--card-shadow-interactive, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+    width: 100%;
+    max-width: 28rem;
+  }
 
-.modal-footer {
-  @apply px-6 py-4 border-t border-gray-200 flex justify-end gap-3;
-}
+  .modal-content-lg {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-xl, 1rem);
+    box-shadow: var(--card-shadow-interactive, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+    width: 100%;
+    max-width: 42rem;
+    max-height: 90vh;
+    overflow: hidden;
+  }
 
-/* Section Containers */
-.section-container {
-  @apply bg-white rounded-lg shadow-sm border p-6;
-}
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-border-default, oklch(90% 0 0));
+  }
 
-.section-container-mb {
-  @apply bg-white rounded-lg shadow-sm border mb-6;
-}
+  .modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
 
-.section-container-mb-8 {
-  @apply bg-white rounded-lg shadow-sm border mb-8 p-6;
-}
+  .modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--color-border-default, oklch(90% 0 0));
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
 
-/* Flex Utilities */
-.flex-center {
-  @apply flex justify-center items-center;
-}
+  /* ========================================================================
+     SECTION CONTAINERS - Page section wrappers
+     ======================================================================== */
 
-.flex-between {
-  @apply flex justify-between items-center;
-}
+  .section-container {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--card-shadow-flat, 0 1px 2px 0 rgb(0 0 0 / 0.05));
+    border: 1px solid var(--color-border-card, oklch(92% 0 0));
+    padding: 1.5rem;
+  }
 
-.flex-start {
-  @apply flex justify-start items-center;
-}
+  .section-container-mb {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--card-shadow-flat, 0 1px 2px 0 rgb(0 0 0 / 0.05));
+    border: 1px solid var(--color-border-card, oklch(92% 0 0));
+    margin-bottom: 1.5rem;
+  }
 
-.flex-end {
-  @apply flex justify-end items-center;
-}
+  .section-container-mb-8 {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--card-shadow-flat, 0 1px 2px 0 rgb(0 0 0 / 0.05));
+    border: 1px solid var(--color-border-card, oklch(92% 0 0));
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+  }
 
-/* Page Layout */
-.page-header {
-  @apply flex justify-between items-center mb-6;
-}
+  /* ========================================================================
+     FLEX UTILITIES - Common flex layouts
+     ======================================================================== */
 
-.page-title {
-  @apply text-2xl font-bold text-gray-900;
-}
+  .flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-.page-subtitle {
-  @apply text-sm text-gray-600;
-}
+  .flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-/* Stats Card */
-.stats-card {
-  @apply bg-white rounded-lg shadow-sm border p-6;
-}
+  .flex-start {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
 
-.stats-card-value {
-  @apply text-3xl font-bold;
-}
+  .flex-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
 
-.stats-card-label {
-  @apply text-sm text-gray-600;
-}
+  /* ========================================================================
+     PAGE LAYOUT - Page headers and titles
+     ======================================================================== */
 
-/* Badge Styles */
-.badge-base {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border;
-}
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
 
-/* Table Styles */
-.table-container {
-  @apply bg-white rounded-lg shadow-sm border overflow-hidden;
-}
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-heading, oklch(20% 0 0));
+  }
 
-.table-header {
-  @apply bg-gray-50 border-b border-gray-200;
-}
+  .page-subtitle {
+    font-size: 0.875rem;
+    color: var(--color-text-muted, oklch(55% 0 0));
+  }
 
-.table-cell {
-  @apply px-6 py-4 whitespace-nowrap text-sm;
-}
+  /* ========================================================================
+     STATS CARD - Dashboard statistics cards
+     ======================================================================== */
 
-.table-cell-primary {
-  @apply px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900;
-}
+  .stats-card {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--card-shadow-flat, 0 1px 2px 0 rgb(0 0 0 / 0.05));
+    border: 1px solid var(--color-border-card, oklch(92% 0 0));
+    padding: 1.5rem;
+  }
 
-/* Filter Section */
-.filter-section {
-  @apply bg-white rounded-lg shadow-sm border p-6 mb-6;
-}
+  .stats-card-value {
+    font-size: 1.875rem;
+    font-weight: 700;
+  }
 
-.filter-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
+  .stats-card-label {
+    font-size: 0.875rem;
+    color: var(--color-text-muted, oklch(55% 0 0));
+  }
+
+  /* ========================================================================
+     BADGE STYLES - Status badges and labels
+     ======================================================================== */
+
+  .badge-base {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid currentColor;
+  }
+
+  /* ========================================================================
+     TABLE STYLES - Data table components
+     ======================================================================== */
+
+  .table-container {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--card-shadow-flat, 0 1px 2px 0 rgb(0 0 0 / 0.05));
+    border: 1px solid var(--color-border-card, oklch(92% 0 0));
+    overflow: hidden;
+  }
+
+  .table-header {
+    background-color: var(--color-surface-hover, oklch(97% 0 0));
+    border-bottom: 1px solid var(--color-border-default, oklch(90% 0 0));
+  }
+
+  .table-cell {
+    padding: 1rem 1.5rem;
+    white-space: nowrap;
+    font-size: 0.875rem;
+  }
+
+  .table-cell-primary {
+    padding: 1rem 1.5rem;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-heading, oklch(20% 0 0));
+  }
+
+  /* ========================================================================
+     FILTER SECTION - Search and filter containers
+     ======================================================================== */
+
+  .filter-section {
+    background-color: var(--color-surface-elevated, white);
+    border-radius: var(--radius-lg, 0.75rem);
+    box-shadow: var(--card-shadow-flat, 0 1px 2px 0 rgb(0 0 0 / 0.05));
+    border: 1px solid var(--color-border-card, oklch(92% 0 0));
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .filter-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .filter-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
 }

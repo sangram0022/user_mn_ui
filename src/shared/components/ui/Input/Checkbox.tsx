@@ -41,18 +41,18 @@ export interface CheckboxProps
 
 const sizeStyles: Record<CheckboxSize, { box: string; icon: string; text: string }> = {
   sm: {
-    box: 'w-4 h-4',
-    icon: 'w-3 h-3',
+    box: 'size-4',
+    icon: 'icon-xs',
     text: 'text-sm',
   },
   md: {
-    box: 'w-4 h-4',
-    icon: 'w-3 h-3',
+    box: 'size-4',
+    icon: 'icon-xs',
     text: 'text-base',
   },
   lg: {
-    box: 'w-5 h-5',
-    icon: 'w-4 h-4',
+    box: 'size-5',
+    icon: 'icon-sm',
     text: 'text-lg',
   },
 };
@@ -85,18 +85,18 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       border-2 rounded
       transition-all duration-200
       cursor-pointer
-      ${hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'}
+      ${hasError ? 'border-[var(--color-error)] dark:border-[var(--color-error)]' : 'border-[var(--color-border)] dark:border-[var(--color-border)]'}
       ${
         checked || indeterminate
-          ? 'bg-blue-500 border-blue-500 dark:bg-blue-600 dark:border-blue-600'
-          : 'bg-white dark:bg-gray-800'
+          ? 'bg-[var(--color-primary)] border-[var(--color-primary)] dark:bg-[var(--color-primary)] dark:border-[var(--color-primary)]'
+          : 'bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)]'
       }
       ${
         disabled
           ? 'opacity-50 cursor-not-allowed'
-          : 'hover:border-blue-400 dark:hover:border-blue-500'
+          : 'hover:border-[var(--color-primary)] dark:hover:border-[var(--color-primary)]'
       }
-      focus-within:ring-2 focus-within:ring-blue-500/20
+      focus-within:ring-2 focus-within:ring-[var(--color-primary)]/20
     `;
 
     return (
@@ -121,7 +121,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           <label htmlFor={checkboxId} className={cn(boxStyles, sizeStyles[size].box, className)}>
             {/* Check or Indeterminate Icon */}
             {(checked || indeterminate) && (
-              <span className="text-white">
+              <span className="text-[var(--color-text-primary)]">
                 {indeterminate ? (
                   <Minus className={sizeStyles[size].icon} strokeWidth={3} />
                 ) : (
@@ -141,8 +141,8 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
                     'font-medium cursor-pointer',
                     sizeStyles[size].text,
                     hasError
-                      ? 'text-red-600 dark:text-red-400'
-                      : 'text-gray-700 dark:text-gray-300',
+                      ? 'text-[color:var(--color-error)] dark:text-[color:var(--color-error)]'
+                      : 'text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]',
                     disabled && 'opacity-50 cursor-not-allowed',
                     labelClassName
                   )}
@@ -153,7 +153,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               {helperText && !error && (
                 <p
                   id={`${checkboxId}-helper`}
-                  className="mt-0.5 text-sm text-gray-500 dark:text-gray-400"
+                  className="mt-0.5 text-sm text-[color:var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]"
                 >
                   {helperText}
                 </p>
@@ -166,7 +166,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         {error && (
           <p
             id={`${checkboxId}-error`}
-            className="mt-1.5 text-sm text-red-600 dark:text-red-400"
+            className="mt-1.5 text-sm text-[color:var(--color-error)] dark:text-[var(--color-error)]"
             role="alert"
           >
             {error}

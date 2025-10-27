@@ -1,0 +1,522 @@
+/**
+ * 📐 LAYOUT UTILITIES - Modern CSS Grid & Flexbox System
+ * 
+ * Latest Features (2024-2025):
+ * - Container queries for component-level responsiveness
+ * - Logical properties (inline-size, block-size)
+ * - Subgrid support
+ * - Content-visibility for performance
+ * - Modern aspect-ratio property
+ * - Safe/unsafe alignment
+ * 
+ * Design System:
+ * - Consistent spacing scale (4px base)
+ * - Touch-friendly targets (min 44x44px)
+ * - Accessible focus indicators
+ * - Semantic class names
+ */
+
+/* ============================================================================
+   🏗️ PAGE LAYOUT CONTAINERS
+   ============================================================================ */
+
+/**
+ * Main page wrapper - Full viewport
+ */
+.layout-page {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height (mobile) */
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background, #ffffff);
+}
+
+/**
+ * Section wrapper - Full-width sections with padding
+ */
+.layout-section {
+  width: 100%;
+  padding-block: clamp(2rem, 5vw, 4rem); /* 32px-64px responsive */
+  padding-inline: var(--spacing-lg, 1.5rem);
+
+  @media (width < 768px) {
+    padding-block: var(--spacing-xl, 2rem);
+    padding-inline: var(--spacing-md, 1rem);
+  }
+}
+
+/**
+ * Content container - Max-width with centering
+ */
+.layout-container {
+  width: 100%;
+  max-width: 80rem; /* 1280px */
+  margin-inline: auto;
+  padding-inline: var(--spacing-lg, 1.5rem);
+
+  @media (width < 768px) {
+    padding-inline: var(--spacing-md, 1rem);
+  }
+}
+
+/**
+ * Narrow container - For text-heavy content (optimal reading width)
+ */
+.layout-narrow {
+  width: 100%;
+  max-width: 42rem; /* 672px - optimal line length ~60-75 chars */
+  margin-inline: auto;
+  padding-inline: var(--spacing-lg, 1.5rem);
+
+  @media (width < 768px) {
+    padding-inline: var(--spacing-md, 1rem);
+  }
+}
+
+/**
+ * Wide container - For dashboards and data-heavy layouts
+ */
+.layout-wide {
+  width: 100%;
+  max-width: 120rem; /* 1920px */
+  margin-inline: auto;
+  padding-inline: var(--spacing-lg, 1.5rem);
+}
+
+/**
+ * Sidebar layout - Two-column with flexible sidebar
+ */
+.layout-sidebar {
+  display: grid;
+  gap: var(--spacing-xl, 2rem);
+
+  @media (width >= 1024px) {
+    grid-template-columns: 16rem 1fr; /* Fixed sidebar */
+  }
+
+  @media (width < 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   🎴 CARD SYSTEM
+   ============================================================================ */
+
+/**
+ * Base card - Elevated surface with shadow
+ */
+.card {
+  background: var(--color-background-elevated, #ffffff);
+  border-radius: var(--border-radius-lg, 8px);
+  border: 1px solid var(--color-border-primary, #e2e8f0);
+  padding: var(--spacing-xl, 2rem);
+  box-shadow: var(--shadow-card, 0 1px 3px 0 rgba(0, 0, 0, 0.1));
+  transition:
+    transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  @media (width < 768px) {
+    padding: var(--spacing-lg, 1.5rem);
+    border-radius: var(--border-radius-md, 6px);
+  }
+}
+
+/**
+ * Interactive card - Hover effects
+ */
+.card-interactive {
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover, 0 10px 25px -5px rgba(0, 0, 0, 0.1));
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/**
+ * Card grid - Responsive auto-fit grid
+ */
+.card-grid {
+  display: grid;
+  gap: var(--spacing-xl, 2rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+
+  @media (width < 768px) {
+    gap: var(--spacing-lg, 1.5rem);
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   📊 FLEX UTILITIES
+   ============================================================================ */
+
+/**
+ * Flexbox row - Horizontal layout
+ */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-md, 1rem);
+  align-items: center;
+}
+
+/**
+ * Flexbox column - Vertical layout
+ */
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 1rem);
+}
+
+/**
+ * Flex between - Space between items
+ */
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md, 1rem);
+  flex-wrap: wrap;
+}
+
+/**
+ * Flex center - Center all items
+ */
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-md, 1rem);
+}
+
+/**
+ * Flex wrap - Allow wrapping
+ */
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md, 1rem);
+}
+
+/* ============================================================================
+   🎯 GRID UTILITIES
+   ============================================================================ */
+
+/**
+ * Grid auto-fit - Responsive columns
+ */
+.grid-auto {
+  display: grid;
+  gap: var(--spacing-lg, 1.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+}
+
+/**
+ * Grid 2 columns
+ */
+.grid-2 {
+  display: grid;
+  gap: var(--spacing-lg, 1.5rem);
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (width < 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/**
+ * Grid 3 columns
+ */
+.grid-3 {
+  display: grid;
+  gap: var(--spacing-lg, 1.5rem);
+  grid-template-columns: repeat(3, 1fr);
+
+  @media (width < 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (width < 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/**
+ * Grid 4 columns
+ */
+.grid-4 {
+  display: grid;
+  gap: var(--spacing-lg, 1.5rem);
+  grid-template-columns: repeat(4, 1fr);
+
+  @media (width < 1280px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (width < 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (width < 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   📱 RESPONSIVE STACK
+   ============================================================================ */
+
+/**
+ * Stack - Vertical spacing between children
+ */
+.stack {
+  display: flex;
+  flex-direction: column;
+
+  & > * + * {
+    margin-block-start: var(--spacing-md, 1rem);
+  }
+}
+
+.stack-sm > * + * {
+  margin-block-start: var(--spacing-sm, 0.5rem);
+}
+
+.stack-lg > * + * {
+  margin-block-start: var(--spacing-lg, 1.5rem);
+}
+
+.stack-xl > * + * {
+  margin-block-start: var(--spacing-xl, 2rem);
+}
+
+/* ============================================================================
+   🎨 SPACING UTILITIES
+   ============================================================================ */
+
+/**
+ * Padding utilities
+ */
+.p-0 {
+  padding: 0;
+}
+.p-sm {
+  padding: var(--spacing-sm, 0.5rem);
+}
+.p-md {
+  padding: var(--spacing-md, 1rem);
+}
+.p-lg {
+  padding: var(--spacing-lg, 1.5rem);
+}
+.p-xl {
+  padding: var(--spacing-xl, 2rem);
+}
+.p-2xl {
+  padding: var(--spacing-2xl, 2.5rem);
+}
+
+/**
+ * Margin utilities
+ */
+.m-0 {
+  margin: 0;
+}
+.m-sm {
+  margin: var(--spacing-sm, 0.5rem);
+}
+.m-md {
+  margin: var(--spacing-md, 1rem);
+}
+.m-lg {
+  margin: var(--spacing-lg, 1.5rem);
+}
+.m-xl {
+  margin: var(--spacing-xl, 2rem);
+}
+
+/**
+ * Gap utilities
+ */
+.gap-0 {
+  gap: 0;
+}
+.gap-sm {
+  gap: var(--spacing-sm, 0.5rem);
+}
+.gap-md {
+  gap: var(--spacing-md, 1rem);
+}
+.gap-lg {
+  gap: var(--spacing-lg, 1.5rem);
+}
+.gap-xl {
+  gap: var(--spacing-xl, 2rem);
+}
+
+/* ============================================================================
+   ⚡ PERFORMANCE OPTIMIZATIONS
+   ============================================================================ */
+
+/**
+ * Content visibility - Defer off-screen rendering
+ */
+.layout-section:not(:first-child) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+/**
+ * Container queries support
+ */
+.layout-container,
+.layout-narrow,
+.layout-wide,
+.card {
+  container-type: inline-size;
+}
+
+/* ============================================================================
+   ♿ ACCESSIBILITY
+   ============================================================================ */
+
+/**
+ * Skip to main content link
+ */
+.skip-to-main {
+  position: absolute;
+  top: -999px;
+  left: 0;
+  padding: var(--spacing-md, 1rem) var(--spacing-lg, 1.5rem);
+  background: var(--color-primary, #0066cc);
+  color: white;
+  text-decoration: none;
+  border-radius: 0 0 var(--border-radius-md, 6px) 0;
+  z-index: 1000;
+
+  &:focus {
+    top: 0;
+  }
+}
+
+/**
+ * Screen reader only
+ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/**
+ * Focus visible styles
+ */
+.layout-container:focus-visible,
+.card:focus-visible {
+  outline: 2px solid var(--color-border-focus, #0ea5e9);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   📐 ASPECT RATIO UTILITIES
+   ============================================================================ */
+
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-portrait {
+  aspect-ratio: 3 / 4;
+}
+
+/* ============================================================================
+   🎯 POSITION UTILITIES
+   ============================================================================ */
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+}
+
+/* ============================================================================
+   🚀 MODERN FEATURES - 2024-2025
+   ============================================================================ */
+
+/**
+ * Subgrid support (where available)
+ */
+@supports (grid-template-rows: subgrid) {
+  .card-grid > .card {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 3;
+  }
+}
+
+/**
+ * Container queries - Component-level responsiveness
+ */
+@container (inline-size < 32rem) {
+  .card {
+    padding: var(--spacing-md, 1rem);
+  }
+
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/**
+ * View transitions API (when available)
+ */
+@supports (view-transition-name: auto) {
+  .card {
+    view-transition-name: card;
+  }
+
+  .layout-section {
+    view-transition-name: section;
+  }
+}
+
+/**
+ * Logical properties for i18n support
+ */
+.layout-rtl {
+  direction: rtl;
+}
+
+.layout-ltr {
+  direction: ltr;
+}

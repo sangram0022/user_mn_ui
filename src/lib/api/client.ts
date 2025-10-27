@@ -26,7 +26,6 @@ import type {
   GDPRExportResponse,
   GDPRExportStatus,
   HealthCheckResponse,
-  PendingWorkflow,
   ReadinessCheckResponse,
   RegisterRequest,
   RegisterResponse,
@@ -51,11 +50,11 @@ import type {
   LoginResponse,
   SecureLoginResponse,
 } from '@shared/types/api-backend.types';
+import { getCurrentISOTimestamp, getISOTimestamp } from '@shared/utils/dateUtils';
+import { isBrowser } from '@shared/utils/env';
 import { normalizeApiError } from '@shared/utils/error';
 import { mapApiErrorToMessage } from '@shared/utils/errorMapper';
-import { getCurrentISOTimestamp, getISOTimestamp } from '@shared/utils/dateUtils';
 import { safeSessionStorage } from '@shared/utils/safeSessionStorage';
-import { isBrowser } from '@shared/utils/env';
 import { logger } from './../../shared/utils/logger';
 
 import { ApiError } from './error';
@@ -204,13 +203,6 @@ const ENDPOINTS = {
   logs: {
     frontendErrors: '/logs/frontend-errors', // POST - Log frontend errors
   },
-
-  // ============================================================================
-  // WORKFLOWS (Non-standard, keeping for backward compatibility)
-  // ============================================================================
-  workflows: {
-    pending: '/workflows/pending', // GET - Pending workflows
-  },
 } as const;
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -231,7 +223,7 @@ interface UserListResponse {
   email: string;
   first_name: string;
   last_name: string;
-  role: string;
+  roles: string[];
   is_active: boolean;
   is_verified: boolean;
   is_approved: boolean;
@@ -289,11 +281,26 @@ export class ApiClient {
   private rateLimitState: Map<string, { retryAfter: number; backoffMs: number }>;
   // Retry configuration for transient errors
   private retryConfig = {
-    maxRetries: 3,
+    maxRetries: 5, // Maximum 5 retry attempts for 5xx server errors and network failures
     baseDelay: 1000, // 1 second
     maxDelay: 30000, // 30 seconds
-    retryableStatusCodes: [500, 502, 503, 504], // Server errors
+    retryableStatusCodes: [500, 502, 503, 504], // Server errors only (5xx)
     retryableErrors: ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'ENETUNREACH'], // Network errors
+  };
+  // 🔴 Circuit Breaker Pattern: Stop calling failing endpoints temporarily
+  private circuitBreaker: Map<
+    string,
+    {
+      state: 'CLOSED' | 'OPEN' | 'HALF_OPEN'; // CLOSED=normal, OPEN=failing, HALF_OPEN=testing
+      failures: number; // Consecutive failure count
+      lastFailureTime: number; // Timestamp of last failure
+      nextAttemptTime: number; // When to try again (for OPEN state)
+    }
+  >;
+  private circuitBreakerConfig = {
+    failureThreshold: 5, // Open circuit after 5 consecutive failures
+    resetTimeout: 60000, // Try again after 60 seconds
+    halfOpenMaxAttempts: 1, // Only 1 attempt in HALF_OPEN state
   };
 
   constructor(baseURL: string = DEFAULT_BASE_URL, useSecureEndpoints = false) {
@@ -303,6 +310,7 @@ export class ApiClient {
     this.csrfTokenService = createCSRFTokenService(baseURL);
     this.useSecureEndpoints = useSecureEndpoints; // Default to false for standard JWT auth
     this.rateLimitState = new Map();
+    this.circuitBreaker = new Map(); // Initialize circuit breaker
   }
 
   private loadSession(): StoredSession | null {
@@ -420,18 +428,31 @@ export class ApiClient {
 
   /**
    * Check if error is retryable (transient failure)
+   * 🚫 NEVER retry 4xx client errors (400-499) including 401, 403, 404, 429
+   * ✅ Only retry 5xx server errors and network failures
    */
   private isRetryableError(error: unknown): boolean {
     // Retryable HTTP status codes (5xx server errors)
     if (error instanceof ApiError) {
-      // Retry server errors (5xx)
+      // 🚫 NEVER retry client errors (4xx) - these are permanent failures
+      // 401: Authentication required → logout, don't retry
+      // 403: Forbidden → permission denied, don't retry
+      // 404: Not found → resource doesn't exist, don't retry
+      // 429: Rate limited → handled separately with exponential backoff
+      if (error.status >= 400 && error.status < 500) {
+        return false;
+      }
+
+      // ✅ Retry server errors (5xx) - these are transient failures
       if (this.retryConfig.retryableStatusCodes.includes(error.status)) {
         return true;
       }
-      // Retry network errors (status 0 = network failure)
+
+      // ✅ Retry network errors (status 0 = network failure)
       if (error.status === 0 && error.code === 'NETWORK_ERROR') {
         return true;
       }
+
       return false;
     }
 
@@ -543,12 +564,131 @@ export class ApiClient {
   }
 
   /**
+   * 🔴 Circuit Breaker: Check if endpoint is temporarily blocked due to repeated failures
+   */
+  private checkCircuitBreaker(endpoint: string): void {
+    const circuit = this.circuitBreaker.get(endpoint);
+
+    if (!circuit) {
+      // No circuit breaker for this endpoint yet - allow request
+      return;
+    }
+
+    const now = Date.now();
+
+    if (circuit.state === 'OPEN') {
+      // Circuit is open (failing) - check if we should try again
+      if (now < circuit.nextAttemptTime) {
+        const waitSeconds = Math.ceil((circuit.nextAttemptTime - now) / 1000);
+        logger.warn(`[Circuit Breaker] Endpoint blocked: ${endpoint}`, {
+          state: 'OPEN',
+          failureCount: circuit.failures,
+          waitSeconds,
+        });
+
+        throw new ApiError({
+          status: 503,
+          message: `Service temporarily unavailable. Circuit breaker is OPEN. Retry in ${waitSeconds}s.`,
+          code: 'CIRCUIT_BREAKER_OPEN',
+        });
+      }
+
+      // Time to test - transition to HALF_OPEN
+      circuit.state = 'HALF_OPEN';
+      logger.info(`[Circuit Breaker] Testing endpoint: ${endpoint}`, {
+        state: 'HALF_OPEN → Testing recovery',
+      });
+    }
+  }
+
+  /**
+   * 🔴 Circuit Breaker: Record successful request
+   */
+  private recordCircuitSuccess(endpoint: string): void {
+    const circuit = this.circuitBreaker.get(endpoint);
+
+    if (!circuit) {
+      return;
+    }
+
+    if (circuit.state === 'HALF_OPEN') {
+      // Success in HALF_OPEN → Close circuit (recovery successful)
+      logger.info(`[Circuit Breaker] Endpoint recovered: ${endpoint}`, {
+        state: 'HALF_OPEN → CLOSED',
+        previousFailures: circuit.failures,
+      });
+      this.circuitBreaker.delete(endpoint); // Remove circuit breaker
+    } else if (circuit.state === 'CLOSED') {
+      // Reset failure count on success
+      circuit.failures = 0;
+    }
+  }
+
+  /**
+   * 🔴 Circuit Breaker: Record failed request
+   */
+  private recordCircuitFailure(endpoint: string, error: unknown): void {
+    // Only track server errors and network failures
+    if (!this.isRetryableError(error)) {
+      return; // Don't count 4xx client errors
+    }
+
+    const circuit = this.circuitBreaker.get(endpoint) || {
+      state: 'CLOSED' as const,
+      failures: 0,
+      lastFailureTime: Date.now(),
+      nextAttemptTime: 0,
+    };
+
+    circuit.failures += 1;
+    circuit.lastFailureTime = Date.now();
+
+    if (circuit.state === 'HALF_OPEN') {
+      // Failed in HALF_OPEN → Re-open circuit
+      circuit.state = 'OPEN';
+      circuit.nextAttemptTime = Date.now() + this.circuitBreakerConfig.resetTimeout;
+
+      logger.warn(`[Circuit Breaker] Test failed, re-opening: ${endpoint}`, {
+        state: 'HALF_OPEN → OPEN',
+        failures: circuit.failures,
+        nextAttemptIn: `${this.circuitBreakerConfig.resetTimeout / 1000}s`,
+      });
+    } else if (circuit.failures >= this.circuitBreakerConfig.failureThreshold) {
+      // Threshold exceeded → Open circuit
+      circuit.state = 'OPEN';
+      circuit.nextAttemptTime = Date.now() + this.circuitBreakerConfig.resetTimeout;
+
+      logger.error(`[Circuit Breaker] Threshold exceeded, opening: ${endpoint}`, {
+        state: 'CLOSED → OPEN',
+        failures: circuit.failures,
+        threshold: this.circuitBreakerConfig.failureThreshold,
+        nextAttemptIn: `${this.circuitBreakerConfig.resetTimeout / 1000}s`,
+      });
+
+      // Emit circuit breaker event for monitoring
+      if (isBrowser()) {
+        window.dispatchEvent(
+          new CustomEvent('api:circuit-breaker-open', {
+            detail: { endpoint, failures: circuit.failures },
+          })
+        );
+      }
+    }
+
+    this.circuitBreaker.set(endpoint, circuit);
+  }
+
+  /**
    * Execute HTTP request (internal implementation)
    * Called by request() with retry wrapper
    */
   private async _executeRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const url = `${this.baseURL}${path.startsWith('/') ? path : `/${path}`}`;
     const method = options.method ?? 'GET';
+    const endpoint = `${method}:${path}`;
+
+    // 🔴 STEP 1: Check circuit breaker before making request
+    this.checkCircuitBreaker(endpoint);
 
     // Check for active rate limit on this endpoint
     const rateLimitKey = `${method}:${path}`;
@@ -599,18 +739,78 @@ export class ApiClient {
         });
       }
     } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      if (error instanceof Error) {
-        throw new ApiError({ status: 0, message: error.message, code: 'NETWORK_ERROR' });
-      }
-      throw new ApiError({ status: 0, message: 'Network request failed', code: 'NETWORK_ERROR' });
+      // 🔴 Record circuit breaker failure for network errors
+      const apiError =
+        error instanceof ApiError
+          ? error
+          : error instanceof Error
+            ? new ApiError({ status: 0, message: error.message, code: 'NETWORK_ERROR' })
+            : new ApiError({ status: 0, message: 'Network request failed', code: 'NETWORK_ERROR' });
+
+      this.recordCircuitFailure(endpoint, apiError);
+      throw apiError;
     }
 
     if (!response.ok) {
+      //  CRITICAL FIX: 401 Unauthorized → Clear session and stop immediately
+      // Don't retry authentication failures - they won't succeed without re-login
       if (response.status === 401) {
         this.persistSession(null);
+        logger.warn(`[API] 401 Unauthorized: Authentication required for ${method} ${path}`);
+
+        // Emit authentication failure event for UI to handle (redirect to login)
+        if (isBrowser()) {
+          window.dispatchEvent(
+            new CustomEvent('api:auth-failed', {
+              detail: { status: 401, endpoint: `${method} ${path}` },
+            })
+          );
+        }
+
+        // Throw immediately - do NOT retry
+        const errorPayload = await this.parseJson(response);
+        const normalized = normalizeApiError(response.status, response.statusText, errorPayload);
+        const localizedMessage = mapApiErrorToMessage(errorPayload as BackendApiErrorResponse);
+
+        throw new ApiError({
+          status: 401,
+          message: localizedMessage,
+          code: normalized.code,
+          details: normalized.detail,
+          errors: normalized.errors,
+          headers: response.headers,
+          payload: errorPayload,
+        });
+      }
+
+      //  CRITICAL FIX: 403 Forbidden → Permission denied, don't retry
+      // User doesn't have permission to access this resource
+      if (response.status === 403) {
+        logger.warn(`[API] 403 Forbidden: Permission denied for ${method} ${path}`);
+
+        // Emit permission denied event for UI to handle
+        if (isBrowser()) {
+          window.dispatchEvent(
+            new CustomEvent('api:permission-denied', {
+              detail: { status: 403, endpoint: `${method} ${path}` },
+            })
+          );
+        }
+
+        // Throw immediately - do NOT retry
+        const errorPayload = await this.parseJson(response);
+        const normalized = normalizeApiError(response.status, response.statusText, errorPayload);
+        const localizedMessage = mapApiErrorToMessage(errorPayload as BackendApiErrorResponse);
+
+        throw new ApiError({
+          status: 403,
+          message: localizedMessage,
+          code: normalized.code,
+          details: normalized.detail,
+          errors: normalized.errors,
+          headers: response.headers,
+          payload: errorPayload,
+        });
       }
 
       //  PRODUCTION FIX: Handle rate limiting (429) with automatic retry
@@ -667,7 +867,7 @@ export class ApiClient {
         });
       }
 
-      throw new ApiError({
+      const apiError = new ApiError({
         status: normalized.status,
         message: localizedMessage, // Use localized message instead of normalized.message
         code: normalized.code,
@@ -676,7 +876,15 @@ export class ApiClient {
         headers: response.headers,
         payload: errorPayload,
       });
+
+      // 🔴 STEP 3: Record circuit breaker failure
+      this.recordCircuitFailure(endpoint, apiError);
+
+      throw apiError;
     }
+
+    // 🔴 STEP 2: Record circuit breaker success on successful response
+    this.recordCircuitSuccess(endpoint);
 
     // Clear rate limit state on successful request
     if (rateLimitInfo) {
@@ -702,7 +910,7 @@ export class ApiClient {
         refresh_expires_in: 604800, // 7 days
         user_id: secureResponse.user.user_id,
         email: secureResponse.user.email,
-        role: secureResponse.user.role,
+        roles: secureResponse.user.roles,
         last_login_at: getISOTimestamp(secureResponse.user.last_login_at),
         issued_at: getCurrentISOTimestamp(),
       };
@@ -722,7 +930,7 @@ export class ApiClient {
       refresh_expires_in: 2592000, // 30 days in seconds
       user_id: regularResponse.user.user_id,
       email: regularResponse.user.email,
-      role: regularResponse.user.role,
+      roles: regularResponse.user.roles,
       last_login_at: getCurrentISOTimestamp(),
       issued_at: getISOTimestamp(regularResponse.issued_at),
     };
@@ -937,7 +1145,7 @@ export class ApiClient {
       email: user.email,
       first_name: user.first_name,
       last_name: user.last_name,
-      role: user.role,
+      roles: user.roles,
       is_active: user.is_active,
       is_verified: user.is_verified,
       is_approved: user.is_approved,
@@ -1084,17 +1292,6 @@ export class ApiClient {
 
   async getAuditSummary(): Promise<AuditSummary> {
     return await this.dedupedRequest<AuditSummary>(ENDPOINTS.audit.summary);
-  }
-
-  async getPendingApprovals(): Promise<PendingWorkflow[]> {
-    try {
-      return await this.dedupedRequest<PendingWorkflow[]>(ENDPOINTS.workflows.pending);
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        logger.warn('Pending workflows endpoint unavailable', { error });
-      }
-      return [];
-    }
   }
 
   async getCSRFToken(): Promise<CSRFTokenResponse> {
@@ -1490,9 +1687,6 @@ export const useApi = () => ({
   // Audit
   getAuditLogs: apiClient.getAuditLogs.bind(apiClient),
   getAuditSummary: apiClient.getAuditSummary.bind(apiClient),
-
-  // Workflows
-  getPendingApprovals: apiClient.getPendingApprovals.bind(apiClient),
 
   // GDPR
   requestGDPRExport: apiClient.requestGDPRExport.bind(apiClient),

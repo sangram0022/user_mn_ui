@@ -78,11 +78,13 @@ interface StatCardProps {
 
 const StatCard: FC<StatCardProps> = ({ title, value, icon, trend, color, loading = false }) => {
   const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600 border-blue-200',
-    green: 'bg-green-50 text-green-600 border-green-200',
-    yellow: 'bg-yellow-50 text-yellow-600 border-yellow-200',
-    red: 'bg-red-50 text-red-600 border-red-200',
-    purple: 'bg-purple-50 text-purple-600 border-purple-200',
+    blue: 'bg-[var(--color-primary-light)] text-[var(--color-primary)] border-[var(--color-primary)]',
+    green:
+      'bg-[var(--color-success-light)] text-[var(--color-success)] border-[var(--color-success)]',
+    yellow:
+      'bg-[var(--color-warning-light)] text-[var(--color-warning)] border-[var(--color-warning)]',
+    red: 'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]',
+    purple: 'bg-[var(--color-primary)] text-[var(--color-primary)] border-[var(--color-primary)]',
   };
 
   if (loading) {
@@ -109,25 +111,28 @@ const StatCard: FC<StatCardProps> = ({ title, value, icon, trend, color, loading
         <div className="ml-4 flex-1">
           <p
             id={`stat-${title.replace(/\s+/g, '-')}`}
-            className="text-sm font-medium text-gray-600"
+            className="text-sm font-medium text-[var(--color-text-secondary)]"
           >
             {title}
           </p>
           <div className="flex items-end">
-            <p className="text-2xl font-semibold text-gray-900" aria-label={`${value} ${title}`}>
+            <p
+              className="text-2xl font-semibold text-[var(--color-text-primary)]"
+              aria-label={`${value} ${title}`}
+            >
               {value}
             </p>
             {trend && (
               <div
                 className={`ml-2 flex items-center text-sm ${
-                  trend.isPositive ? 'text-green-600' : 'text-red-600'
+                  trend.isPositive ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'
                 }`}
                 aria-label={`Trend: ${trend.isPositive ? 'increased' : 'decreased'} by ${Math.abs(trend.value)} percent`}
               >
                 {trend.isPositive ? (
-                  <ArrowUp className="w-3 h-3" aria-hidden="true" />
+                  <ArrowUp className="icon-xs" aria-hidden="true" />
                 ) : (
-                  <ArrowDown className="w-3 h-3" aria-hidden="true" />
+                  <ArrowDown className="icon-xs" aria-hidden="true" />
                 )}
                 <span className="ml-1">{Math.abs(trend.value)}%</span>
               </div>
@@ -235,14 +240,14 @@ const AdminDashboardPage: FC = () => {
 
   if (!canViewAdminData) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-wrapper">
+        <div className="container-narrow">
           <div className="text-center py-12">
-            <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <Shield className="w-12 h-12 text-[var(--color-text-tertiary)] mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-2">
               {t('dashboard.accessRestricted')}
             </h3>
-            <p className="text-gray-600">{t('dashboard.noPermission')}</p>
+            <p className="text-[var(--color-text-secondary)]">{t('dashboard.noPermission')}</p>
           </div>
         </div>
       </div>
@@ -250,24 +255,28 @@ const AdminDashboardPage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="page-wrapper">
+      <div className="container-full">
         {/* Header */}
         <div className="mb-8">
           <Breadcrumb />
           <div className="mt-4 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
-              <p className="text-gray-600 mt-1">{t('dashboard.description')}</p>
+              <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                {t('dashboard.title')}
+              </h1>
+              <p className="text-[var(--color-text-secondary)] mt-1">
+                {t('dashboard.description')}
+              </p>
             </div>
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="inline-flex items-center px-4 py-2 border border-[var(--color-border)] rounded-md shadow-sm text-sm font-medium text-[var(--color-text-secondary)] bg-[var(--color-surface-primary)] hover:bg-[color:var(--color-background-secondary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
               aria-label={isRefreshing ? 'Refreshing dashboard data' : 'Refresh dashboard data'}
             >
               <RefreshCw
-                className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
+                className={`icon-sm mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
                 aria-hidden="true"
               />
               {t('dashboard.refresh')}
@@ -321,14 +330,17 @@ const AdminDashboardPage: FC = () => {
         {/* Recent Activity */}
         {canViewAuditLogs && auditSummary && (
           <div className="card-white" role="region" aria-labelledby="recent-activity-title">
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-[var(--color-border)]">
               <div className="flex items-center">
-                <Activity className="w-5 h-5 text-purple-600 mr-2" aria-hidden="true" />
-                <h3 id="recent-activity-title" className="text-lg font-medium text-gray-900">
+                <Activity className="icon-md text-[var(--color-primary)] mr-2" aria-hidden="true" />
+                <h3
+                  id="recent-activity-title"
+                  className="text-lg font-medium text-[var(--color-text-primary)]"
+                >
                   {t('dashboard.recentActivity')}
                 </h3>
                 <span
-                  className="ml-auto text-sm text-gray-500"
+                  className="ml-auto text-sm text-[var(--color-text-tertiary)]"
                   aria-label={`${auditSummary.total_events} total events`}
                 >
                   {auditSummary.total_events} {t('dashboard.totalEvents')}
@@ -349,24 +361,31 @@ const AdminDashboardPage: FC = () => {
                     <div
                       key={`activity-${activity.timestamp}-${index}`}
                       role="listitem"
-                      className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
+                      className="flex items-center justify-between py-2 border-b border-[var(--color-border)] last:border-0"
                       aria-label={`${activity.action}${activity.user_id ? ` by ${activity.user_id}` : ''} at ${formatTime(activity.timestamp)}`}
                     >
                       <div className="flex items-center">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full mr-3" aria-hidden="true" />
-                        <span className="text-sm text-gray-900">{activity.action}</span>
+                        <div
+                          className="w-2 h-2 bg-[var(--color-primary)] rounded-full mr-3"
+                          aria-hidden="true"
+                        />
+                        <span className="text-sm text-[var(--color-text-primary)]">
+                          {activity.action}
+                        </span>
                         {activity.user_id && (
-                          <span className="text-xs text-gray-500 ml-2">by {activity.user_id}</span>
+                          <span className="text-xs text-[var(--color-text-tertiary)] ml-2">
+                            by {activity.user_id}
+                          </span>
                         )}
                       </div>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-[var(--color-text-tertiary)]">
                         {formatTime(activity.timestamp)}
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500" role="status">
+                <p className="text-sm text-[var(--color-text-tertiary)]" role="status">
                   {t('dashboard.noRecentActivity')}
                 </p>
               )}

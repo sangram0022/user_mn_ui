@@ -57,20 +57,20 @@ export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectE
 
 const variantStyles: Record<SelectVariant, string> = {
   default: `
-    border border-gray-300 dark:border-gray-600
-    bg-white dark:bg-gray-800
-    focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+    border border-[var(--color-border)] dark:border-[var(--color-border)]
+    bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)]
+    focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20
   `,
   filled: `
-    border-0 border-b-2 border-gray-300 dark:border-gray-600
-    bg-gray-50 dark:bg-gray-800/50
+    border-0 border-b-2 border-[var(--color-border)] dark:border-[var(--color-border)]
+    bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)]/50
     rounded-t-lg rounded-b-none
-    focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800
+    focus:border-[var(--color-primary)] focus:bg-[var(--color-surface-primary)] dark:focus:bg-[var(--color-surface-primary)]
   `,
   outlined: `
-    border-2 border-gray-300 dark:border-gray-600
+    border-2 border-[var(--color-border)] dark:border-[var(--color-border)]
     bg-transparent
-    focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+    focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20
   `,
 };
 
@@ -108,11 +108,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     const baseStyles = `
       w-full
       font-medium
-      text-gray-900 dark:text-gray-100
+      text-[var(--color-text-primary)] dark:text-[var(--color-text-secondary)]
       rounded-lg
       transition-all duration-200
       disabled:opacity-50 disabled:cursor-not-allowed
-      disabled:bg-gray-100 dark:disabled:bg-gray-900
+      disabled:bg-[var(--color-surface-secondary)] dark:disabled:bg-[var(--color-surface-primary)]
       focus:outline-none
       appearance-none
       pr-10
@@ -121,8 +121,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 
     const errorStyles = hasError
       ? `
-        border-red-500 dark:border-red-500
-        focus:border-red-500 focus:ring-red-500/20
+        border-[var(--color-error)] dark:border-[var(--color-error)]
+        focus:border-[var(--color-error)] focus:ring-[var(--color-error)]/20
       `
       : '';
 
@@ -142,14 +142,14 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             htmlFor={selectId}
             className={cn(
               'block mb-2 text-sm font-medium',
-              'text-gray-700 dark:text-gray-300',
-              hasError && 'text-red-600 dark:text-red-400',
+              'text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]',
+              hasError && 'text-[color:var(--color-error)] dark:text-[color:var(--color-error)]',
               disabled && 'opacity-50',
               labelClassName
             )}
           >
             {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
+            {required && <span className="text-[color:var(--color-error)] ml-1">*</span>}
           </label>
         )}
 
@@ -180,8 +180,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </select>
 
           {/* Chevron Icon */}
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 dark:text-gray-500">
-            <ChevronDown className="w-5 h-5" />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[color:var(--color-text-tertiary)] dark:text-[var(--color-text-tertiary)]">
+            <ChevronDown className="icon-md" />
           </div>
         </div>
 
@@ -191,7 +191,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             id={error ? `${selectId}-error` : `${selectId}-helper`}
             className={cn(
               'mt-1.5 text-sm',
-              error ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'
+              error
+                ? 'text-[color:var(--color-error)] dark:text-[color:var(--color-error)]'
+                : 'text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)]'
             )}
             role={error ? 'alert' : undefined}
           >

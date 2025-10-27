@@ -85,8 +85,8 @@ export function Tooltip({
           className={cn(
             'absolute whitespace-nowrap z-tooltip',
             'px-3 py-2 text-sm',
-            'bg-gray-900 dark:bg-gray-700',
-            'text-white',
+            'bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)]',
+            'text-[var(--color-text-primary)]',
             'rounded-lg shadow-lg',
             'pointer-events-none',
             'animate-fade-in',

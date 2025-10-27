@@ -1,8 +1,9 @@
-﻿import { Eye, Filter, Plus, Search, Trash2, UserCheck, Users, UserX } from 'lucide-react';
+import { Eye, Filter, Plus, Search, Trash2, UserCheck, Users, UserX } from 'lucide-react';
 import type { FC, FormEvent } from 'react';
 import {
   startTransition,
   useActionState,
+  useCallback,
   useDeferredValue,
   useEffect,
   useState,
@@ -12,13 +13,13 @@ import { logger } from './../../../shared/utils/logger';
 
 import { useToast } from '@hooks/useToast';
 import { useVirtualScroll } from '@hooks/useVirtualScroll';
-import { apiClient } from '@lib/api/client';
 import { SkeletonTable } from '@shared/components/ui/Skeleton';
 import type { CreateUserRequest, UpdateUserRequest, UserRole, UserSummary } from '@shared/types';
 import { PageMetadata } from '@shared/ui';
 import { formatDate } from '@shared/utils';
 import { prefetchRoute } from '@shared/utils/resource-loading';
 import { getUserPermissions, getUserRoleName } from '@shared/utils/user';
+import { adminService, rbacService } from '../../../services/api';
 import { useAuth } from '../../auth';
 import {
   useOptimisticUserManagement,
@@ -84,7 +85,7 @@ const UserManagementEnhanced: FC = () => {
 
     debugLog('Permission snapshot', {
       user,
-      role: user?.role,
+      roles: user?.roles,
       isSuperuser: user?.is_superuser,
       permissions: user ? getUserPermissions(user) : [],
       hasUserRead: hasPermission('user:read'),
@@ -228,7 +229,7 @@ const UserManagementEnhanced: FC = () => {
 
   // Define functions before useEffect
   // React 19 Compiler handles memoization
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     debugLog('Loading users...', {
       skip: pagination.skip,
       limit: pagination.limit,
@@ -252,15 +253,24 @@ const UserManagementEnhanced: FC = () => {
 
       debugLog('Requesting users with params', params);
 
-      const summaries = await apiClient.getUsers(params);
+      // Use enhanced adminService with pagination
+      const response = await adminService.getUsers({
+        page: typeof params['page'] === 'number' ? params['page'] : 1,
+        limit: typeof params['page_size'] === 'number' ? params['page_size'] : 100,
+        role: typeof params['role'] === 'string' ? params['role'] : undefined,
+        is_active: typeof params['is_active'] === 'boolean' ? params['is_active'] : undefined,
+      });
 
-      const mappedUsers = summaries.map((summary: UserSummary, index) => {
+      const summaries = response.items;
+
+      const mappedUsers = summaries.map((summary, index) => {
+        // Extract first role from roles array for compatibility
+        const primaryRole = summary.roles?.[0] || 'user';
+
         const roleCandidates = [
-          summary.role,
-          summary.role?.toLowerCase(),
-          summary.role_name,
-          summary.role_name?.toLowerCase(),
-          summary.id !== null && summary.id !== undefined ? String(summary.id) : undefined,
+          primaryRole,
+          primaryRole.toLowerCase(),
+          summary.roles?.[0]?.toLowerCase(),
         ].filter((candidate): candidate is string => Boolean(candidate));
 
         const resolvedRole =
@@ -271,32 +281,27 @@ const UserManagementEnhanced: FC = () => {
             return roleMap.get(key);
           }, undefined) ??
           ({
-            id: typeof summary.id === 'number' ? summary.id : index + 1,
-            name: summary.role,
-            description: summary.role_name ?? summary.role,
+            id: index + 1,
+            name: primaryRole,
+            description: primaryRole,
             permissions: [],
           } satisfies Role);
 
         const fallbackName = `${summary.first_name ?? ''} ${summary.last_name ?? ''}`.trim();
 
-        const userId =
-          summary.user_id ??
-          (summary.id !== null && summary.id !== undefined
-            ? String(summary.id)
-            : String(index + 1));
-
         return {
-          id: userId,
+          id: summary.user_id,
           email: summary.email,
-          username: summary.username ?? null,
-          full_name: summary.full_name ?? (fallbackName || summary.email),
+          username: null,
+          full_name: fallbackName || summary.email,
           first_name: summary.first_name,
           last_name: summary.last_name,
           is_active: summary.is_active,
           is_verified: summary.is_verified,
           is_approved: summary.is_approved,
           role: resolvedRole,
-          lifecycle_stage: summary.role_name ?? null,
+          roles: summary.roles, // Add roles array for OptimisticUser compatibility
+          lifecycle_stage: primaryRole,
           activity_score: null,
           last_login_at: summary.last_login_at ?? null,
           created_at: summary.created_at,
@@ -334,17 +339,30 @@ const UserManagementEnhanced: FC = () => {
       setIsLoading(false);
       debugLog('loadUsers completed');
     }
-  };
+  }, [
+    debugLog,
+    deferredSearchTerm,
+    filters.isActive,
+    filters.role,
+    pagination.limit,
+    pagination.skip,
+    roleMap,
+    setUsers,
+    toast,
+  ]); // ?? FIX: Memoize to prevent infinite loops
 
-  const loadRoles = async () => {
+  const loadRoles = useCallback(async () => {
     try {
       debugLog('Loading roles from backend...');
-      const fetchedRoles = await apiClient.getRoles();
+      const fetchedRoles = await rbacService.listRoles();
 
       const normalizedRoles = fetchedRoles.map((role, index) => ({
-        ...role,
         id:
-          typeof role.id === 'number' ? role.id : Number.parseInt(String(role.id), 10) || index + 1,
+          typeof role.role_id === 'string'
+            ? Number.parseInt(role.role_id, 10) || index + 1
+            : index + 1,
+        name: role.role_name,
+        description: role.description,
         permissions: role.permissions ?? [],
       }));
 
@@ -364,7 +382,7 @@ const UserManagementEnhanced: FC = () => {
         },
       ]);
     }
-  };
+  }, [debugLog]); // Only depends on debugLog which is stable
 
   // Prefetch likely next routes for improved navigation performance
   useEffect(() => {
@@ -374,16 +392,20 @@ const UserManagementEnhanced: FC = () => {
   }, []);
 
   useEffect(() => {
-    debugLog('UserManagementEnhanced mounted', {
-      userEmail: user?.email,
-      hasAdminPermission: hasPermission('admin'),
-    });
-    loadRoles();
-  }, [debugLog, hasPermission, loadRoles, user?.email]);
+    if (hasPermission('user:read') || user?.is_superuser) {
+      debugLog('UserManagementEnhanced mounted', {
+        userEmail: user?.email,
+        hasAdminPermission: hasPermission('admin'),
+      });
+      loadRoles();
+    }
+  }, [debugLog, loadRoles, hasPermission, user]); // ?? FIX: Only depend on memoized loadRoles
 
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    if (hasPermission('user:read') || user?.is_superuser) {
+      loadUsers();
+    }
+  }, [loadUsers, hasPermission, user]); // ?? FIX: Only depend on memoized loadUsers
 
   useEffect(() => {
     setPagination((prev) => {
@@ -550,10 +572,14 @@ const UserManagementEnhanced: FC = () => {
       },
     });
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-12 text-center">
-        <h3 className="mb-4 text-red-600"> Access Denied</h3>
-        <p className="text-red-900">You don't have permission to manage users.</p>
-        <p className="mt-4 text-sm text-red-900">Required: user:read permission</p>
+      <div className="rounded-xl border border-[color:var(--color-error)] bg-[color:var(--color-error-50)] p-12 text-center">
+        <h3 className="mb-4 text-[color:var(--color-error)]"> Access Denied</h3>
+        <p className="text-[color:var(--color-error-700)]">
+          You don&apos;t have permission to manage users.
+        </p>
+        <p className="mt-4 text-sm text-[color:var(--color-error-700)]">
+          Required: user:read permission
+        </p>
       </div>
     );
   }
@@ -567,450 +593,494 @@ const UserManagementEnhanced: FC = () => {
         keywords="users, user management, user list, user administration, RBAC"
       />
 
-      <div className="mx-auto max-w-7xl p-8">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="mb-2 flex items-center gap-2 text-gray-900">
-              <Users className="h-6 w-6" aria-hidden="true" />
-              User Management
-            </h1>
-            <p className="m-0 text-gray-600" role="status">
-              Manage user accounts, roles, and permissions ({users.length} total users)
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/*  React 19: Enhanced bulk actions with ARIA live regions */}
-            {uiState.selectedUsers.size > 0 && (
-              <div
-                className="flex items-center gap-2 rounded-lg bg-sky-100 px-4 py-2 text-sky-700"
-                role="status"
-                aria-live="polite"
-              >
-                <span aria-label={`${uiState.selectedUsers.size} users selected`}>
-                  {uiState.selectedUsers.size} selected
-                </span>
-                <button
-                  onClick={handleBulkDelete}
-                  disabled={actionLoading === 'bulk-delete'}
-                  className="flex cursor-pointer items-center gap-1 rounded border-none bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all"
-                  aria-label={`Delete ${uiState.selectedUsers.size} selected users`}
-                  aria-busy={actionLoading === 'bulk-delete'}
-                >
-                  <Trash2 className="h-3 w-3" aria-hidden="true" />
-                  {actionLoading === 'bulk-delete' ? 'Deleting...' : 'Delete'}
-                </button>
-                <button
-                  onClick={() =>
-                    setUIState((prev) => ({ ...prev, selectedUsers: new Set<string>() }))
-                  }
-                  className="cursor-pointer rounded border-none bg-gray-600 px-2 py-1 text-xs text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all"
-                  aria-label="Clear selection"
-                >
-                  Clear
-                </button>
-              </div>
-            )}
-
-            {hasPermission('user:write') && (
-              <button
-                onClick={() => setUIState((prev) => ({ ...prev, showCreateModal: true }))}
-                className="flex items-center gap-2 rounded-lg border-none bg-blue-500 px-6 py-3 font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
-                aria-label="Create new user"
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Create New User
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/*  React 19: Accessible filters with semantic HTML */}
-        <div className="mb-8 rounded-xl border border-gray-200 bg-gray-50 p-6" role="search">
-          <h2 className="sr-only">Filter users</h2>
-          <div className="grid items-end gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="page-wrapper">
+        <div className="container-full">
+          {/* Header */}
+          <div className="mb-8 flex items-center justify-between">
             <div>
-              <label
-                htmlFor="search-users"
-                className="flex flex-col gap-2 font-medium text-gray-700"
-              >
-                <span>
-                  <Search className="mr-2 inline h-4 w-4" aria-hidden="true" />
-                  Search Users
-                  {/*  Show pending indicator when search is deferred */}
-                  {filters.searchTerm !== deferredSearchTerm && (
-                    <span className="ml-2 text-xs text-blue-600" role="status" aria-live="polite">
-                      Searching...
-                    </span>
-                  )}
-                </span>
-                <input
-                  id="search-users"
-                  type="text"
-                  placeholder="Search by email, username..."
-                  value={filters.searchTerm}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, searchTerm: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
-                  aria-label="Search users by email or username"
-                  aria-describedby={
-                    filters.searchTerm !== deferredSearchTerm ? 'search-status' : undefined
-                  }
-                />
-              </label>
-            </div>
-
-            <div>
-              <label
-                htmlFor="filter-role"
-                className="flex flex-col gap-2 font-medium text-gray-700"
-              >
-                <span>
-                  <Filter className="mr-2 inline h-4 w-4" aria-hidden="true" />
-                  Filter by Role
-                  {/*  Show transition pending indicator */}
-                  {isPending && (
-                    <span className="ml-2 text-xs text-blue-600" role="status" aria-live="polite">
-                      Updating...
-                    </span>
-                  )}
-                </span>
-                <select
-                  id="filter-role"
-                  value={filters.role}
-                  onChange={(e) => {
-                    //  React 19: Mark filter change as non-urgent
-                    startTransition(() => {
-                      setFilters((prev) => ({ ...prev, role: e.target.value }));
-                    });
-                  }}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
-                  aria-label="Filter users by role"
-                >
-                  <option value="">All Roles</option>
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.name}>
-                      {role.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            <div>
-              <label
-                htmlFor="filter-status"
-                className="flex flex-col gap-2 font-medium text-gray-700"
-              >
-                <span>Status</span>
-                <select
-                  id="filter-status"
-                  value={filters.isActive === undefined ? '' : filters.isActive.toString()}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFilters((prev) => ({
-                      ...prev,
-                      isActive: value === '' ? undefined : value === 'true',
-                    }));
-                  }}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
-                  aria-label="Filter users by status"
-                >
-                  <option value="">All Status</option>
-                  <option value="true">Active</option>
-                  <option value="false">Inactive</option>
-                </select>
-              </label>
-            </div>
-
-            <button
-              onClick={() => {
-                setFilters({ searchTerm: '', role: '', isActive: undefined });
-              }}
-              className="cursor-pointer rounded-md border-none bg-gray-600 px-4 py-3 font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all"
-              aria-label="Clear all filters"
-            >
-              Clear Filters
-            </button>
-          </div>
-        </div>
-
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
-            {error}
-          </div>
-        )}
-
-        {/* Users Table */}
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-          {isLoading ? (
-            <div className="p-4">
-              <SkeletonTable rows={8} columns={5} showHeader />
-            </div>
-          ) : users.length === 0 ? (
-            <div className="p-12 text-center">
-              <Users className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-              <h3 className="mb-2 text-gray-900">No users found</h3>
-              <p className="text-gray-600">
-                {filters.searchTerm || filters.role || filters.isActive !== undefined
-                  ? 'Try adjusting your filters'
-                  : 'Get started by creating your first user'}
+              <h1 className="mb-2 flex items-center gap-2 text-[color:var(--color-text-primary)]">
+                <Users className="icon-lg" aria-hidden="true" />
+                User Management
+              </h1>
+              <p className="m-0 text-[color:var(--color-text-secondary)]" role="status">
+                Manage user accounts, roles, and permissions ({users.length} total users)
               </p>
             </div>
-          ) : (
-            <>
-              {/*  Virtual Scrolling: Fixed Header */}
-              <div className="border-b-2 border-gray-200 bg-gray-50" role="rowgroup">
-                <table className="w-full border-collapse" role="presentation">
-                  <thead>
-                    <tr role="row">
-                      <th className="p-4 text-left font-semibold text-gray-700" scope="col">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={
-                              uiState.selectedUsers.size === users.length && users.length > 0
-                            }
-                            onChange={(e) => handleSelectAll(e.target.checked)}
-                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                            aria-label="Select all users"
-                          />
-                          <span>User</span>
-                        </label>
-                      </th>
-                      <th className="p-4 text-left font-semibold text-gray-700" scope="col">
-                        Role
-                      </th>
-                      <th className="p-4 text-left font-semibold text-gray-700" scope="col">
-                        Status
-                      </th>
-                      <th className="p-4 text-left font-semibold text-gray-700" scope="col">
-                        Created
-                      </th>
-                      <th className="p-4 text-left font-semibold text-gray-700" scope="col">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                </table>
+
+            <div className="flex items-center gap-4">
+              {/*  React 19: Enhanced bulk actions with ARIA live regions */}
+              {uiState.selectedUsers.size > 0 && (
+                <div
+                  className="flex items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-[var(--color-primary)]"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span aria-label={`${uiState.selectedUsers.size} users selected`}>
+                    {uiState.selectedUsers.size} selected
+                  </span>
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={actionLoading === 'bulk-delete'}
+                    className="flex cursor-pointer items-center gap-1 max-md:gap-2 rounded border-none bg-[color:var(--color-error-50)]0 px-3 py-2 max-md:px-4 max-md:py-3 text-xs max-md:text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-error)] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[var(--color-error)] focus:ring-offset-2 transition-all min-h-[32px] max-md:min-h-[44px]"
+                    aria-label={`Delete ${uiState.selectedUsers.size} selected users`}
+                    aria-busy={actionLoading === 'bulk-delete'}
+                  >
+                    <Trash2 className="icon-responsive-xs" aria-hidden="true" />
+                    <span>{actionLoading === 'bulk-delete' ? 'Deleting...' : 'Delete'}</span>
+                  </button>
+                  <button
+                    onClick={() =>
+                      setUIState((prev) => ({ ...prev, selectedUsers: new Set<string>() }))
+                    }
+                    className="cursor-pointer rounded border-none bg-[color:var(--color-background-tertiary)] px-3 py-2 max-md:px-4 max-md:py-3 text-xs max-md:text-sm text-[var(--color-text-primary)] hover:bg-[color:var(--color-background-elevated)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-background-tertiary)] focus:ring-offset-2 transition-all min-h-[32px] max-md:min-h-[44px]"
+                    aria-label="Clear selection"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+
+              {hasPermission('user:write') && (
+                <button
+                  onClick={() => setUIState((prev) => ({ ...prev, showCreateModal: true }))}
+                  className="flex items-center gap-2 rounded-lg border-none bg-[color:var(--color-primary)] px-6 py-3 font-medium text-[var(--color-text-primary)] hover:bg-[color:var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:ring-offset-2 transition-all"
+                  aria-label="Create new user"
+                >
+                  <Plus className="icon-sm" aria-hidden="true" />
+                  Create New User
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/*  React 19: Accessible filters with semantic HTML */}
+          <div
+            className="mb-8 rounded-xl border border-[color:var(--color-border-primary)] bg-[color:var(--color-background-secondary)] p-6"
+            role="search"
+          >
+            <h2 className="sr-only">Filter users</h2>
+            <div className="grid items-end gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label
+                  htmlFor="search-users"
+                  className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]"
+                >
+                  <span>
+                    <Search className="mr-2 inline icon-sm" aria-hidden="true" />
+                    Search Users
+                    {/*  Show pending indicator when search is deferred */}
+                    {filters.searchTerm !== deferredSearchTerm && (
+                      <span
+                        className="ml-2 text-xs text-[color:var(--color-primary)]"
+                        role="status"
+                        aria-live="polite"
+                      >
+                        Searching...
+                      </span>
+                    )}
+                  </span>
+                  <input
+                    id="search-users"
+                    type="text"
+                    placeholder="Search by email, username..."
+                    value={filters.searchTerm}
+                    onChange={(e) =>
+                      setFilters((prev) => ({ ...prev, searchTerm: e.target.value }))
+                    }
+                    className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20 focus:outline-none transition-all"
+                    aria-label="Search users by email or username"
+                    aria-describedby={
+                      filters.searchTerm !== deferredSearchTerm ? 'search-status' : undefined
+                    }
+                  />
+                </label>
               </div>
 
-              {/*  Virtual Scrolling: Scrollable Body */}
-              <div
-                ref={containerRef}
-                className="virtual-container overflow-x-auto"
-                style={
-                  {
-                    '--container-height': `${CONTAINER_HEIGHT}px`,
-                  } as React.CSSProperties
-                }
-                role="region"
-                aria-label="User list"
-              >
-                <div
-                  className="virtual-spacer"
-                  style={{ '--total-height': `${totalHeight}px` } as React.CSSProperties}
+              <div>
+                <label
+                  htmlFor="filter-role"
+                  className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]"
                 >
-                  {virtualItems.map(({ index, data: user, offsetTop }) => (
-                    <div
-                      key={user.id}
-                      className="virtual-row"
-                      style={
-                        {
-                          '--row-height': `${ITEM_HEIGHT}px`,
-                          '--row-offset': `${offsetTop}px`,
-                        } as React.CSSProperties
-                      }
-                    >
-                      <table className="w-full border-collapse" role="presentation">
-                        <tbody>
-                          <tr
-                            className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${
-                              isOptimistic(user) ? 'opacity-60 transition-opacity' : ''
-                            }`}
-                            role="row"
-                          >
-                            <td className="p-4">
-                              <div className="flex items-center gap-3">
-                                <label className="flex items-center cursor-pointer">
-                                  <input
-                                    type="checkbox"
-                                    checked={uiState.selectedUsers.has(user.id)}
-                                    onChange={(e) => handleSelectUser(user.id, e.target.checked)}
-                                    disabled={isOptimistic(user)}
-                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                    aria-label={`Select ${user.full_name || user.email}`}
-                                  />
-                                </label>
-                                <div>
-                                  <div className="font-medium text-gray-900 flex items-center gap-2">
-                                    {user.full_name || user.username || user.email}
-                                    {/*  React 19: Visual indicator for optimistic updates */}
-                                    {isOptimistic(user) && (
-                                      <span className="text-xs text-amber-600 font-normal animate-pulse">
-                                        Saving...
-                                      </span>
-                                    )}
+                  <span>
+                    <Filter className="mr-2 inline icon-sm" aria-hidden="true" />
+                    Filter by Role
+                    {/*  Show transition pending indicator */}
+                    {isPending && (
+                      <span
+                        className="ml-2 text-xs text-[color:var(--color-primary)]"
+                        role="status"
+                        aria-live="polite"
+                      >
+                        Updating...
+                      </span>
+                    )}
+                  </span>
+                  <select
+                    id="filter-role"
+                    value={filters.role}
+                    onChange={(e) => {
+                      //  React 19: Mark filter change as non-urgent
+                      startTransition(() => {
+                        setFilters((prev) => ({ ...prev, role: e.target.value }));
+                      });
+                    }}
+                    className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20 focus:outline-none transition-all"
+                    aria-label="Filter users by role"
+                  >
+                    <option value="">All Roles</option>
+                    {roles.map((role) => (
+                      <option key={role.id} value={role.name}>
+                        {role.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="filter-status"
+                  className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]"
+                >
+                  <span>Status</span>
+                  <select
+                    id="filter-status"
+                    value={filters.isActive === undefined ? '' : filters.isActive.toString()}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFilters((prev) => ({
+                        ...prev,
+                        isActive: value === '' ? undefined : value === 'true',
+                      }));
+                    }}
+                    className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20 focus:outline-none transition-all"
+                    aria-label="Filter users by status"
+                  >
+                    <option value="">All Status</option>
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </label>
+              </div>
+
+              <button
+                onClick={() => {
+                  setFilters({ searchTerm: '', role: '', isActive: undefined });
+                }}
+                className="cursor-pointer rounded-md border-none bg-[color:var(--color-background-tertiary)] px-4 py-3 font-medium text-[var(--color-text-primary)] hover:bg-[color:var(--color-background-elevated)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-background-tertiary)] focus:ring-offset-2 transition-all"
+                aria-label="Clear all filters"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div className="mb-6 rounded-lg border border-[color:var(--color-error)] bg-[color:var(--color-error-50)] p-4 text-[color:var(--color-error)]">
+              {error}
+            </div>
+          )}
+
+          {/* Users Table */}
+          <div className="overflow-hidden rounded-xl border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)]">
+            {isLoading ? (
+              <div className="p-4">
+                <SkeletonTable rows={8} columns={5} showHeader />
+              </div>
+            ) : users.length === 0 ? (
+              <div className="p-12 text-center">
+                <Users className="mx-auto mb-4 h-12 w-12 text-[color:var(--color-text-tertiary)]" />
+                <h3 className="mb-2 text-[color:var(--color-text-primary)]">No users found</h3>
+                <p className="text-[color:var(--color-text-secondary)]">
+                  {filters.searchTerm || filters.role || filters.isActive !== undefined
+                    ? 'Try adjusting your filters'
+                    : 'Get started by creating your first user'}
+                </p>
+              </div>
+            ) : (
+              <>
+                {/*  Virtual Scrolling: Fixed Header */}
+                <div
+                  className="border-b-2 border-[color:var(--color-border-primary)] bg-[color:var(--color-background-secondary)]"
+                  role="rowgroup"
+                >
+                  <table className="w-full border-collapse" role="presentation">
+                    <thead>
+                      <tr role="row">
+                        <th
+                          className="p-4 text-left font-semibold text-[color:var(--color-text-primary)]"
+                          scope="col"
+                        >
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={
+                                uiState.selectedUsers.size === users.length && users.length > 0
+                              }
+                              onChange={(e) => handleSelectAll(e.target.checked)}
+                              className="form-checkbox-lg rounded border-[color:var(--color-border-primary)] text-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)] focus:ring-offset-2 flex-shrink-0"
+                              aria-label="Select all users"
+                            />
+                            <span>User</span>
+                          </label>
+                        </th>
+                        <th
+                          className="p-4 text-left font-semibold text-[color:var(--color-text-primary)]"
+                          scope="col"
+                        >
+                          Role
+                        </th>
+                        <th
+                          className="p-4 text-left font-semibold text-[color:var(--color-text-primary)]"
+                          scope="col"
+                        >
+                          Status
+                        </th>
+                        <th
+                          className="p-4 text-left font-semibold text-[color:var(--color-text-primary)]"
+                          scope="col"
+                        >
+                          Created
+                        </th>
+                        <th
+                          className="p-4 text-left font-semibold text-[color:var(--color-text-primary)]"
+                          scope="col"
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+
+                {/*  Virtual Scrolling: Scrollable Body */}
+                <div
+                  ref={containerRef}
+                  className="virtual-container overflow-x-auto"
+                  style={
+                    {
+                      '--container-height': `${CONTAINER_HEIGHT}px`,
+                    } as React.CSSProperties
+                  }
+                  role="region"
+                  aria-label="User list"
+                >
+                  <div
+                    className="virtual-spacer"
+                    style={{ '--total-height': `${totalHeight}px` } as React.CSSProperties}
+                  >
+                    {virtualItems.map(({ index, data: user, offsetTop }) => (
+                      <div
+                        key={user.id}
+                        className="virtual-row"
+                        style={
+                          {
+                            '--row-height': `${ITEM_HEIGHT}px`,
+                            '--row-offset': `${offsetTop}px`,
+                          } as React.CSSProperties
+                        }
+                      >
+                        <table className="w-full border-collapse" role="presentation">
+                          <tbody>
+                            <tr
+                              className={`border-b border-[color:var(--color-border-primary)] ${index % 2 === 0 ? 'bg-[var(--color-surface-primary)]' : 'bg-[color:var(--color-background-secondary)]'} ${
+                                isOptimistic(user) ? 'opacity-60 transition-opacity' : ''
+                              }`}
+                              role="row"
+                            >
+                              <td className="p-4">
+                                <div className="flex items-center gap-3">
+                                  <label className="flex items-center cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={uiState.selectedUsers.has(user.id)}
+                                      onChange={(e) => handleSelectUser(user.id, e.target.checked)}
+                                      disabled={isOptimistic(user)}
+                                      className="form-checkbox-lg rounded border-[color:var(--color-border-primary)] text-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)] focus:ring-offset-2 flex-shrink-0"
+                                      aria-label={`Select ${user.full_name || user.email}`}
+                                    />
+                                  </label>
+                                  <div>
+                                    <div className="font-medium text-[color:var(--color-text-primary)] flex items-center gap-2">
+                                      {user.full_name || user.username || user.email}
+                                      {/*  React 19: Visual indicator for optimistic updates */}
+                                      {isOptimistic(user) && (
+                                        <span className="text-xs text-[var(--color-warning)] font-normal animate-bounce-subtle">
+                                          Saving...
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-sm text-[color:var(--color-text-secondary)]">
+                                      {user.email}
+                                    </div>
                                   </div>
-                                  <div className="text-sm text-gray-600">{user.email}</div>
                                 </div>
-                              </div>
-                            </td>
-                            <td className="p-4">
-                              <span
-                                className={`rounded-2xl px-3 py-1 text-sm font-medium ${
-                                  user.role.name === 'admin'
-                                    ? 'bg-sky-100 text-sky-700'
-                                    : 'bg-blue-50 text-sky-600'
-                                }`}
-                              >
-                                {user.role.name}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <div className="flex items-center gap-2">
-                                {user.is_active ? (
-                                  <UserCheck className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <UserX className="h-4 w-4 text-red-600" />
-                                )}
+                              </td>
+                              <td className="p-4">
                                 <span
-                                  className={`font-medium ${
-                                    user.is_active ? 'text-green-600' : 'text-red-600'
+                                  className={`badge ${
+                                    user.roles?.includes('admin')
+                                      ? 'badge-admin animate-bounce-subtle'
+                                      : 'badge-role'
                                   }`}
                                 >
-                                  {user.is_active ? 'Active' : 'Inactive'}
+                                  {user.roles?.[0] || 'user'}
                                 </span>
-                              </div>
-                            </td>
-                            <td className="p-4 text-gray-600">{formatDate(user.created_at)}</td>
-                            <td className="p-4">
-                              <div className="flex gap-2" role="group" aria-label="User actions">
-                                {/*  React 19: Enhanced accessibility with ARIA labels */}
-                                <button
-                                  onClick={() => {
-                                    setUIState((prev) => ({
-                                      ...prev,
-                                      selectedUser: user,
-                                      showUserModal: true,
-                                    }));
-                                  }}
-                                  className="flex cursor-pointer items-center gap-1 rounded border-none bg-blue-500 p-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
-                                  title="View/Edit User"
-                                  aria-label={`View or edit ${user.full_name || user.email}`}
-                                >
-                                  <Eye className="h-3 w-3" aria-hidden="true" />
-                                  <span className="sr-only">View/Edit</span>
-                                </button>
+                              </td>
+                              <td className="p-4">
+                                <div className="flex items-center gap-2">
+                                  {user.is_active ? (
+                                    <UserCheck className="icon-sm icon-success" />
+                                  ) : (
+                                    <UserX className="icon-sm icon-error" />
+                                  )}
+                                  <span
+                                    className={`font-medium ${
+                                      user.is_active
+                                        ? 'text-[color:var(--color-success)]'
+                                        : 'text-[color:var(--color-error)]'
+                                    }`}
+                                  >
+                                    {user.is_active ? 'Active' : 'Inactive'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="p-4 text-[color:var(--color-text-secondary)]">
+                                {formatDate(user.created_at)}
+                              </td>
+                              <td className="p-4">
+                                <div className="flex gap-2" role="group" aria-label="User actions">
+                                  {/*  React 19: Enhanced accessibility with ARIA labels */}
+                                  <button
+                                    onClick={() => {
+                                      setUIState((prev) => ({
+                                        ...prev,
+                                        selectedUser: user,
+                                        showUserModal: true,
+                                      }));
+                                    }}
+                                    className="flex cursor-pointer items-center gap-1 rounded border-none bg-[color:var(--color-primary)] p-2 text-[var(--color-text-primary)] hover:bg-[color:var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:ring-offset-2 transition-all"
+                                    title="View/Edit User"
+                                    aria-label={`View or edit ${user.full_name || user.email}`}
+                                  >
+                                    <Eye className="h-3 w-3" aria-hidden="true" />
+                                    <span className="sr-only">View/Edit</span>
+                                  </button>
 
-                                {hasPermission('user:write') && (
-                                  <>
-                                    <button
-                                      onClick={() =>
-                                        handleUserAction(
-                                          user.is_active ? 'deactivate' : 'activate',
-                                          user.id
-                                        )
-                                      }
-                                      disabled={actionLoading?.includes(user.id)}
-                                      className={`flex cursor-pointer items-center gap-1 rounded border-none p-2 text-white disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
-                                        user.is_active
-                                          ? 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500'
-                                          : 'bg-green-500 hover:bg-green-600 focus:ring-green-500'
-                                      }`}
-                                      title={user.is_active ? 'Deactivate User' : 'Activate User'}
-                                      aria-label={`${user.is_active ? 'Deactivate' : 'Activate'} ${user.full_name || user.email}`}
-                                      aria-busy={actionLoading?.includes(user.id)}
-                                    >
-                                      {user.is_active ? (
-                                        <UserX className="h-3 w-3" aria-hidden="true" />
-                                      ) : (
-                                        <UserCheck className="h-3 w-3" aria-hidden="true" />
-                                      )}
-                                      <span className="sr-only">
-                                        {user.is_active ? 'Deactivate' : 'Activate'}
-                                      </span>
-                                    </button>
+                                  {hasPermission('user:write') && (
+                                    <>
+                                      <button
+                                        onClick={() =>
+                                          handleUserAction(
+                                            user.is_active ? 'deactivate' : 'activate',
+                                            user.id
+                                          )
+                                        }
+                                        disabled={actionLoading?.includes(user.id)}
+                                        className={`flex cursor-pointer items-center gap-1 rounded border-none p-2 text-[var(--color-text-primary)] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
+                                          user.is_active
+                                            ? 'bg-[var(--color-warning)] hover:bg-[var(--color-warning)] focus:ring-[var(--color-warning)]'
+                                            : 'bg-[var(--color-success)] hover:bg-[var(--color-success)] focus:ring-[var(--color-success)]'
+                                        }`}
+                                        title={user.is_active ? 'Deactivate User' : 'Activate User'}
+                                        aria-label={`${user.is_active ? 'Deactivate' : 'Activate'} ${user.full_name || user.email}`}
+                                        aria-busy={actionLoading?.includes(user.id)}
+                                      >
+                                        {user.is_active ? (
+                                          <UserX className="h-3 w-3" aria-hidden="true" />
+                                        ) : (
+                                          <UserCheck className="h-3 w-3" aria-hidden="true" />
+                                        )}
+                                        <span className="sr-only">
+                                          {user.is_active ? 'Deactivate' : 'Activate'}
+                                        </span>
+                                      </button>
 
-                                    <button
-                                      onClick={() => handleUserAction('delete', user.id)}
-                                      disabled={actionLoading?.includes(user.id)}
-                                      className="flex cursor-pointer items-center gap-1 rounded border-none bg-red-500 p-2 text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all"
-                                      title="Delete User"
-                                      aria-label={`Delete ${user.full_name || user.email}`}
-                                      aria-busy={actionLoading?.includes(user.id)}
-                                    >
-                                      <Trash2 className="h-3 w-3" aria-hidden="true" />
-                                      <span className="sr-only">Delete</span>
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  ))}
+                                      <button
+                                        onClick={() => handleUserAction('delete', user.id)}
+                                        disabled={actionLoading?.includes(user.id)}
+                                        className="flex cursor-pointer items-center gap-1 rounded border-none bg-[color:var(--color-error-50)]0 p-2 text-[var(--color-text-primary)] hover:bg-[var(--color-error)] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[var(--color-error)] focus:ring-offset-2 transition-all"
+                                        title="Delete User"
+                                        aria-label={`Delete ${user.full_name || user.email}`}
+                                        aria-busy={actionLoading?.includes(user.id)}
+                                      >
+                                        <Trash2 className="h-3 w-3" aria-hidden="true" />
+                                        <span className="sr-only">Delete</span>
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/*  Virtual Scrolling: Footer with Scroll to Top */}
-              <div
-                className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-8 py-4"
-                role="navigation"
-                aria-label="Table navigation"
-              >
-                <div className="text-gray-600" role="status" aria-live="polite" aria-atomic="true">
-                  Showing {virtualItems.length} of {users.length} users
-                  {users.length > virtualItems.length && ' (virtual scrolling active)'}
-                </div>
-                <div className="flex gap-2" role="group" aria-label="Scroll controls">
-                  <button
-                    onClick={() => scrollToIndex(0)}
-                    className="cursor-pointer rounded-md border-none bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
-                    title="Scroll to top"
-                    aria-label="Scroll to top of user list"
+                {/*  Virtual Scrolling: Footer with Scroll to Top */}
+                <div
+                  className="flex items-center justify-between border-t border-[color:var(--color-border-primary)] bg-[color:var(--color-background-secondary)] px-8 py-4"
+                  role="navigation"
+                  aria-label="Table navigation"
+                >
+                  <div
+                    className="text-[color:var(--color-text-secondary)]"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
                   >
-                    Top
-                  </button>
-                  <button
-                    onClick={() => scrollToIndex(users.length - 1)}
-                    className="cursor-pointer rounded-md border-none bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
-                    title="Scroll to bottom"
-                    aria-label="Scroll to bottom of user list"
-                  >
-                    Bottom
-                  </button>
+                    Showing {virtualItems.length} of {users.length} users
+                    {users.length > virtualItems.length && ' (virtual scrolling active)'}
+                  </div>
+                  <div className="flex gap-2" role="group" aria-label="Scroll controls">
+                    <button
+                      onClick={() => scrollToIndex(0)}
+                      className="cursor-pointer rounded-md border-none bg-[color:var(--color-primary)] px-4 py-2 font-medium text-[var(--color-text-primary)] hover:bg-[color:var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:ring-offset-2 transition-all"
+                      title="Scroll to top"
+                      aria-label="Scroll to top of user list"
+                    >
+                      Top
+                    </button>
+                    <button
+                      onClick={() => scrollToIndex(users.length - 1)}
+                      className="cursor-pointer rounded-md border-none bg-[color:var(--color-primary)] px-4 py-2 font-medium text-[var(--color-text-primary)] hover:bg-[color:var(--color-primary-600)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:ring-offset-2 transition-all"
+                      title="Scroll to bottom"
+                      aria-label="Scroll to bottom of user list"
+                    >
+                      Bottom
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </>
+              </>
+            )}
+          </div>
+
+          {/* Create User Modal */}
+          {uiState.showCreateModal && (
+            <CreateUserModal
+              roles={roles}
+              onSave={handleCreateUser}
+              onClose={() => setUIState((prev) => ({ ...prev, showCreateModal: false }))}
+              isLoading={actionLoading === 'create-user'}
+            />
+          )}
+
+          {/* Edit User Modal */}
+          {uiState.showUserModal && uiState.selectedUser && (
+            <EditUserModal
+              user={uiState.selectedUser}
+              roles={roles}
+              onSave={(data) => {
+                handleUserAction('update', uiState.selectedUser!.id, data);
+                setUIState((prev) => ({ ...prev, showUserModal: false }));
+              }}
+              onClose={() => setUIState((prev) => ({ ...prev, showUserModal: false }))}
+              isLoading={actionLoading?.includes(uiState.selectedUser.id) || false}
+            />
           )}
         </div>
-
-        {/* Create User Modal */}
-        {uiState.showCreateModal && (
-          <CreateUserModal
-            roles={roles}
-            onSave={handleCreateUser}
-            onClose={() => setUIState((prev) => ({ ...prev, showCreateModal: false }))}
-            isLoading={actionLoading === 'create-user'}
-          />
-        )}
-
-        {/* Edit User Modal */}
-        {uiState.showUserModal && uiState.selectedUser && (
-          <EditUserModal
-            user={uiState.selectedUser}
-            roles={roles}
-            onSave={(data) => {
-              handleUserAction('update', uiState.selectedUser!.id, data);
-              setUIState((prev) => ({ ...prev, showUserModal: false }));
-            }}
-            onClose={() => setUIState((prev) => ({ ...prev, showUserModal: false }))}
-            isLoading={actionLoading?.includes(uiState.selectedUser.id) || false}
-          />
-        )}
       </div>
     </>
   );
@@ -1062,7 +1132,7 @@ async function createUserAction(
   };
 
   try {
-    const user = await apiClient.createUser(request);
+    const user = await adminService.createUser(request);
     return { success: true, error: null, data: user };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to create user';
@@ -1120,40 +1190,40 @@ const CreateUserModal: FC<{
 
   return (
     <div className="fixed bottom-0 left-0 right-0 top-0 z-[1000] flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-[90%] max-w-[500px] overflow-y-auto rounded-xl bg-white p-8">
-        <h2 className="mb-6 text-gray-900">Create New User</h2>
+      <div className="max-h-[90vh] w-[90%] max-w-[500px] overflow-y-auto rounded-xl bg-[var(--color-surface-primary)] p-8">
+        <h2 className="mb-6 text-[color:var(--color-text-primary)]">Create New User</h2>
 
         {/* Error Alert */}
         {state.error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          <div className="mb-4 rounded-lg border border-[color:var(--color-error)] bg-[color:var(--color-error-50)] p-4 text-[var(--color-error)]">
             {state.error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="flex flex-col gap-2 font-medium text-gray-700">
+            <label className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]">
               <span>Email *</span>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                 required
               />
             </label>
           </div>
 
           <div className="mb-4">
-            <label className="flex flex-col gap-2 font-medium text-gray-700">
+            <label className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]">
               <span>Password *</span>
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                 required
                 minLength={8}
               />
@@ -1161,39 +1231,39 @@ const CreateUserModal: FC<{
           </div>
 
           <div className="mb-4">
-            <label className="flex flex-col gap-2 font-medium text-gray-700">
+            <label className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]">
               <span>Username</span>
               <input
                 type="text"
                 name="username"
                 value={formData.username}
                 onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
               />
             </label>
           </div>
 
           <div className="mb-4">
-            <label className="flex flex-col gap-2 font-medium text-gray-700">
+            <label className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]">
               <span>Full Name</span>
               <input
                 type="text"
                 name="full_name"
                 value={formData.full_name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, full_name: e.target.value }))}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
               />
             </label>
           </div>
 
           <div className="mb-4">
-            <label className="flex flex-col gap-2 font-medium text-gray-700">
+            <label className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]">
               <span>Role</span>
               <select
                 name="role"
                 value={formData.role}
                 onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
               >
                 {roles.map((role) => (
                   <option key={role.id} value={role.name}>
@@ -1205,14 +1275,15 @@ const CreateUserModal: FC<{
           </div>
 
           <div className="mb-8">
-            <label className="flex cursor-pointer items-center gap-2 text-gray-700">
+            <label className="flex cursor-pointer items-center gap-3 text-[color:var(--color-text-primary)]">
               <input
                 type="checkbox"
                 name="is_active"
                 checked={formData.is_active}
                 onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.checked }))}
+                className="form-checkbox rounded border-[color:var(--color-border-primary)] text-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)] flex-shrink-0"
               />
-              Active User
+              <span>Active User</span>
             </label>
           </div>
 
@@ -1221,14 +1292,14 @@ const CreateUserModal: FC<{
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="cursor-pointer rounded-md border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-6 py-3 text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-background-secondary)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="cursor-pointer rounded-md border-none bg-blue-500 px-6 py-3 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer rounded-md border-none bg-[color:var(--color-primary)] px-6 py-3 text-[var(--color-text-primary)] hover:bg-[color:var(--color-primary-600)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPending ? 'Creating...' : 'Create User'}
             </button>
@@ -1251,7 +1322,7 @@ const EditUserModal: FC<{
     email: user.email,
     username: user.username || '',
     full_name: user.full_name || '',
-    role: user.role.name,
+    role: user.roles?.[0] || user.role_name || 'user',
     is_active: user.is_active,
   });
 
@@ -1262,53 +1333,53 @@ const EditUserModal: FC<{
 
   return (
     <div className="fixed bottom-0 left-0 right-0 top-0 z-[1000] flex items-center justify-center bg-black/50">
-      <div className="max-h-[90vh] w-[90%] max-w-[500px] overflow-y-auto rounded-xl bg-white p-8">
-        <h2 className="mb-6 text-gray-900">Edit User</h2>
+      <div className="max-h-[90vh] w-[90%] max-w-[500px] overflow-y-auto rounded-xl bg-[var(--color-surface-primary)] p-8">
+        <h2 className="mb-6 text-[color:var(--color-text-primary)]">Edit User</h2>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="flex flex-col gap-2 font-medium text-gray-700">
+            <label className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]">
               <span>Email</span>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
               />
             </label>
           </div>
 
           <div className="mb-4">
-            <label className="flex flex-col gap-2 font-medium text-gray-700">
+            <label className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]">
               <span>Username</span>
               <input
                 type="text"
                 value={formData.username}
                 onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
               />
             </label>
           </div>
 
           <div className="mb-4">
-            <label className="flex flex-col gap-2 font-medium text-gray-700">
+            <label className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]">
               <span>Full Name</span>
               <input
                 type="text"
                 value={formData.full_name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, full_name: e.target.value }))}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
               />
             </label>
           </div>
 
           <div className="mb-4">
-            <label className="flex flex-col gap-2 font-medium text-gray-700">
+            <label className="flex flex-col gap-2 font-medium text-[color:var(--color-text-primary)]">
               <span>Role</span>
               <select
                 value={formData.role}
                 onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 text-[color:var(--color-text-primary)] focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
               >
                 {roles.map((role) => (
                   <option key={role.id} value={role.name}>
@@ -1320,13 +1391,14 @@ const EditUserModal: FC<{
           </div>
 
           <div className="mb-8">
-            <label className="flex cursor-pointer items-center gap-2 text-gray-700">
+            <label className="flex cursor-pointer items-center gap-3 text-[color:var(--color-text-primary)]">
               <input
                 type="checkbox"
                 checked={formData.is_active}
                 onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.checked }))}
+                className="form-checkbox rounded border-[color:var(--color-border-primary)] text-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)] flex-shrink-0"
               />
-              Active User
+              <span>Active User</span>
             </label>
           </div>
 
@@ -1335,14 +1407,14 @@ const EditUserModal: FC<{
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="cursor-pointer rounded-md border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer rounded-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-6 py-3 text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-background-secondary)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="cursor-pointer rounded-md border-none bg-blue-500 px-6 py-3 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="cursor-pointer rounded-md border-none bg-[color:var(--color-primary)] px-6 py-3 text-[var(--color-text-primary)] hover:bg-[color:var(--color-primary-600)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? 'Updating...' : 'Update User'}
             </button>

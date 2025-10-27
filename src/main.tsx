@@ -1,6 +1,4 @@
-// Environment validation (must be first import)
-import './config/env.validation';
-
+// Environment validation is handled by shared/config/env.ts
 import { logger } from '@shared/utils/logger';
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -13,13 +11,14 @@ import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 
-// Unified light theme - using legacy styles as temporary compatibility layer
-import './styles/index-new.css';
+// 🎨 MODERN CSS SYSTEM - Tailwind v4 First, Minimal Custom CSS
+// Single import - Clean, fast, responsive
+import './styles/app.css';
 
 // Performance monitoring - Web Vitals
 if (import.meta.env.PROD) {
   import('web-vitals')
-    .then(({ onCLS, onFID, onFCP, onLCP, onTTFB, onINP }) => {
+    .then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
       const reportMetric = (metric: Metric) => {
         logger.info('[Web Vitals]', {
           name: metric.name,
@@ -31,7 +30,6 @@ if (import.meta.env.PROD) {
       };
 
       onCLS(reportMetric);
-      onFID(reportMetric);
       onFCP(reportMetric);
       onLCP(reportMetric);
       onTTFB(reportMetric);

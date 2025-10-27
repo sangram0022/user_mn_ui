@@ -25,7 +25,7 @@ import {
   Users,
   XCircle,
 } from 'lucide-react';
-import { useEffect, useRef, useState, type FC } from 'react';
+import { useCallback, useEffect, useRef, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -107,37 +107,43 @@ const StatusBadge: FC<{ status: string }> = ({ status }) => {
     switch (status) {
       case 'pending':
         return {
-          color: 'bg-gray-100 text-gray-800 border-gray-200',
+          color:
+            'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]',
           icon: AlertCircle,
           label: 'Pending',
         };
       case 'running':
         return {
-          color: 'bg-blue-100 text-blue-800 border-blue-200',
+          color:
+            'bg-[var(--color-primary-light)] text-[var(--color-primary)] border-[var(--color-primary)]',
           icon: Play,
           label: 'Running',
         };
       case 'completed':
         return {
-          color: 'bg-green-100 text-green-800 border-green-200',
+          color:
+            'bg-[var(--color-success-light)] text-[var(--color-success)] border-[var(--color-success)]',
           icon: CheckCircle,
           label: 'Completed',
         };
       case 'failed':
         return {
-          color: 'bg-red-100 text-red-800 border-red-200',
+          color:
+            'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]',
           icon: XCircle,
           label: 'Failed',
         };
       case 'paused':
         return {
-          color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+          color:
+            'bg-[var(--color-warning-light)] text-[var(--color-warning)] border-[var(--color-warning)]',
           icon: Pause,
           label: 'Paused',
         };
       default:
         return {
-          color: 'bg-gray-100 text-gray-800 border-gray-200',
+          color:
+            'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]',
           icon: AlertCircle,
           label: 'Unknown',
         };
@@ -152,7 +158,7 @@ const StatusBadge: FC<{ status: string }> = ({ status }) => {
       role="status"
       aria-label={`Operation status: ${label}`}
     >
-      <Icon className="w-3 h-3 mr-1" aria-hidden="true" />
+      <Icon className="icon-xs mr-1" aria-hidden="true" />
       {status}
     </span>
   );
@@ -169,28 +175,28 @@ const ProgressBar: FC<{
   const getBarColor = () => {
     switch (status) {
       case 'completed':
-        return 'bg-green-500';
+        return 'bg-[var(--color-success)]';
       case 'failed':
-        return 'bg-red-500';
+        return 'bg-[var(--color-error)]';
       case 'running':
-        return 'bg-blue-500';
+        return 'bg-[var(--color-primary)]';
       case 'paused':
-        return 'bg-yellow-500';
+        return 'bg-[var(--color-warning)]';
       default:
-        return 'bg-gray-500';
+        return 'bg-[var(--color-surface-secondary)]';
     }
   };
 
   return (
     <div className="w-full" role="group" aria-label="Operation progress">
-      <div className="flex justify-between text-sm text-gray-600 mb-1">
+      <div className="flex justify-between text-sm text-[color:var(--color-text-secondary)] mb-1">
         <span aria-label={`Processed ${current} of ${total} records`}>
           {current} / {total}
         </span>
         {showPercentage && <span aria-label={`${percentage} percent complete`}>{percentage}%</span>}
       </div>
       <div
-        className="w-full bg-gray-200 rounded-full h-2"
+        className="w-full bg-[color:var(--color-background-elevated)] rounded-full h-2"
         role="progressbar"
         aria-valuenow={percentage}
         aria-valuemin={0}
@@ -247,13 +253,15 @@ const FileUploadArea: FC<{
   if (isUploading && progress) {
     return (
       <div
-        className="border-2 border-blue-300 border-dashed rounded-lg p-8 text-center bg-blue-50"
+        className="border-2 border-[var(--color-primary)] border-dashed rounded-lg p-8 text-center bg-[var(--color-primary-light)]"
         role="status"
         aria-live="polite"
         aria-label="Uploading file"
       >
-        <FileUp className="w-12 h-12 text-blue-400 mx-auto mb-4" aria-hidden="true" />
-        <p className="text-lg font-medium text-gray-900 mb-2">Uploading file...</p>
+        <FileUp className="w-12 h-12 text-[var(--color-primary)] mx-auto mb-4" aria-hidden="true" />
+        <p className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+          Uploading file...
+        </p>
         <div className="max-w-xs mx-auto">
           <ProgressBar
             current={progress.loaded}
@@ -270,7 +278,9 @@ const FileUploadArea: FC<{
     <button
       type="button"
       className={`w-full border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
-        isDragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-white hover:border-gray-400'
+        isDragOver
+          ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)]'
+          : 'border-[var(--color-border)] bg-[var(--color-surface-primary)] hover:border-[var(--color-border)]'
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -278,10 +288,17 @@ const FileUploadArea: FC<{
       onClick={() => fileInputRef.current?.click()}
       aria-label="Upload CSV file for bulk operations. Drag and drop or click to browse."
     >
-      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-      <h3 className="text-lg font-medium text-gray-900 mb-2">Upload CSV File</h3>
-      <p className="text-gray-600 mb-4">Drag and drop your CSV file here, or click to browse</p>
-      <p className="text-sm text-gray-500">
+      <Upload
+        className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
+        aria-hidden="true"
+      />
+      <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+        Upload CSV File
+      </h3>
+      <p className="text-[color:var(--color-text-secondary)] mb-4">
+        Drag and drop your CSV file here, or click to browse
+      </p>
+      <p className="text-sm text-[var(--color-text-tertiary)]">
         Supports CSV files with columns: email, first_name, last_name, roles (optional)
       </p>
       <input
@@ -314,13 +331,18 @@ const ValidationResults: FC<{
         role="group"
         aria-label="Validation summary"
       >
-        <div className="bg-white p-4 rounded-lg border" role="status">
+        <div className="bg-[var(--color-surface-primary)] p-4 rounded-lg border" role="status">
           <div className="flex items-center">
-            <CheckCircle className="w-8 h-8 text-green-500 mr-3" aria-hidden="true" />
+            <CheckCircle
+              className="w-8 h-8 text-[color:var(--color-success)] mr-3"
+              aria-hidden="true"
+            />
             <div>
-              <p className="text-sm font-medium text-gray-600">Valid Records</p>
+              <p className="text-sm font-medium text-[var(--color-text-secondary)]">
+                Valid Records
+              </p>
               <p
-                className="text-2xl font-bold text-gray-900"
+                className="text-2xl font-bold text-[var(--color-text-primary)]"
                 aria-label={`${validation.valid_count} valid records`}
               >
                 {validation.valid_count}
@@ -328,13 +350,15 @@ const ValidationResults: FC<{
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border" role="status">
+        <div className="bg-[var(--color-surface-primary)] p-4 rounded-lg border" role="status">
           <div className="flex items-center">
-            <XCircle className="w-8 h-8 text-red-500 mr-3" aria-hidden="true" />
+            <XCircle className="w-8 h-8 text-[color:var(--color-error)] mr-3" aria-hidden="true" />
             <div>
-              <p className="text-sm font-medium text-gray-600">Invalid Records</p>
+              <p className="text-sm font-medium text-[var(--color-text-secondary)]">
+                Invalid Records
+              </p>
               <p
-                className="text-2xl font-bold text-gray-900"
+                className="text-2xl font-bold text-[var(--color-text-primary)]"
                 aria-label={`${validation.invalid_count} invalid records`}
               >
                 {validation.invalid_count}
@@ -342,13 +366,16 @@ const ValidationResults: FC<{
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border" role="status">
+        <div className="bg-[var(--color-surface-primary)] p-4 rounded-lg border" role="status">
           <div className="flex items-center">
-            <AlertTriangle className="w-8 h-8 text-yellow-500 mr-3" aria-hidden="true" />
+            <AlertTriangle
+              className="w-8 h-8 text-[var(--color-warning)] mr-3"
+              aria-hidden="true"
+            />
             <div>
-              <p className="text-sm font-medium text-gray-600">Warnings</p>
+              <p className="text-sm font-medium text-[var(--color-text-secondary)]">Warnings</p>
               <p
-                className="text-2xl font-bold text-gray-900"
+                className="text-2xl font-bold text-[var(--color-text-primary)]"
                 aria-label={`${validation.warnings.length} warnings`}
               >
                 {validation.warnings.length}
@@ -363,32 +390,32 @@ const ValidationResults: FC<{
         {validation.errors.length > 0 && (
           <button
             onClick={() => setShowErrors(!showErrors)}
-            className="inline-flex items-center px-4 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100"
+            className="inline-flex items-center px-4 py-2 border border-[var(--color-error)] rounded-md text-sm font-medium text-[var(--color-error)] bg-[color:var(--color-error-50)] hover:bg-[var(--color-error-light)]"
             aria-label={`${showErrors ? 'Hide' : 'View'} ${validation.errors.length} validation errors`}
             aria-expanded={showErrors}
           >
-            <XCircle className="w-4 h-4 mr-2" aria-hidden="true" />
+            <XCircle className="icon-sm mr-2" aria-hidden="true" />
             View Errors ({validation.errors.length})
           </button>
         )}
         {validation.warnings.length > 0 && (
           <button
             onClick={() => setShowWarnings(!showWarnings)}
-            className="inline-flex items-center px-4 py-2 border border-yellow-300 rounded-md text-sm font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100"
+            className="inline-flex items-center px-4 py-2 border border-[var(--color-warning)] rounded-md text-sm font-medium text-[var(--color-warning)] bg-[color:var(--color-warning-50)] hover:bg-[var(--color-warning-light)]"
             aria-label={`${showWarnings ? 'Hide' : 'View'} ${validation.warnings.length} validation warnings`}
             aria-expanded={showWarnings}
           >
-            <AlertTriangle className="w-4 h-4 mr-2" aria-hidden="true" />
+            <AlertTriangle className="icon-sm mr-2" aria-hidden="true" />
             View Warnings ({validation.warnings.length})
           </button>
         )}
         <button
           onClick={() => setShowPreview(!showPreview)}
-          className="inline-flex items-center px-4 py-2 border border-blue-300 rounded-md text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100"
+          className="inline-flex items-center px-4 py-2 border border-[var(--color-primary)] rounded-md text-sm font-medium text-[color:var(--color-primary-700)] bg-[color:var(--color-primary-50)] hover:bg-[var(--color-primary-light)]"
           aria-label={`${showPreview ? 'Hide' : 'Show'} data preview of ${validation.preview.length} records`}
           aria-expanded={showPreview}
         >
-          <Eye className="w-4 h-4 mr-2" aria-hidden="true" />
+          <Eye className="icon-sm mr-2" aria-hidden="true" />
           Preview Data ({validation.preview.length})
         </button>
       </div>
@@ -396,19 +423,19 @@ const ValidationResults: FC<{
       {/* Error Details */}
       {showErrors && validation.errors.length > 0 && (
         <div
-          className="bg-red-50 border border-red-200 rounded-md p-4"
+          className="bg-[color:var(--color-error-50)] border border-[color:var(--color-error)] rounded-md p-4"
           role="alert"
           aria-labelledby="errors-title"
         >
-          <h4 id="errors-title" className="font-medium text-red-800 mb-3">
+          <h4 id="errors-title" className="font-medium text-[var(--color-error)] mb-3">
             Validation Errors
           </h4>
           <div className="space-y-2 max-h-48 overflow-y-auto" role="list">
             {validation.errors.map((error, index) => (
               <div key={`error-${error.row}-${index}`} className="text-sm" role="listitem">
-                <span className="font-medium text-red-700">Row {error.row}:</span>
-                {error.field && <span className="text-red-600"> [{error.field}]</span>}
-                <span className="text-red-800"> {error.message}</span>
+                <span className="font-medium text-[var(--color-error)]">Row {error.row}:</span>
+                {error.field && <span className="text-[var(--color-error)]"> [{error.field}]</span>}
+                <span className="text-[var(--color-error)]"> {error.message}</span>
               </div>
             ))}
           </div>
@@ -418,19 +445,21 @@ const ValidationResults: FC<{
       {/* Warning Details */}
       {showWarnings && validation.warnings.length > 0 && (
         <div
-          className="bg-yellow-50 border border-yellow-200 rounded-md p-4"
+          className="bg-[color:var(--color-warning-50)] border border-[color:var(--color-warning)] rounded-md p-4"
           role="alert"
           aria-labelledby="warnings-title"
         >
-          <h4 id="warnings-title" className="font-medium text-yellow-800 mb-3">
+          <h4 id="warnings-title" className="font-medium text-[var(--color-warning)] mb-3">
             Validation Warnings
           </h4>
           <div className="space-y-2 max-h-48 overflow-y-auto" role="list">
             {validation.warnings.map((warning, index) => (
               <div key={`warning-${warning.row}-${index}`} className="text-sm" role="listitem">
-                <span className="font-medium text-yellow-700">Row {warning.row}:</span>
-                {warning.field && <span className="text-yellow-600"> [{warning.field}]</span>}
-                <span className="text-yellow-800"> {warning.message}</span>
+                <span className="font-medium text-[var(--color-warning)]">Row {warning.row}:</span>
+                {warning.field && (
+                  <span className="text-[var(--color-warning)]"> [{warning.field}]</span>
+                )}
+                <span className="text-[var(--color-warning)]"> {warning.message}</span>
               </div>
             ))}
           </div>
@@ -440,69 +469,71 @@ const ValidationResults: FC<{
       {/* Preview Data */}
       {showPreview && validation.preview.length > 0 && (
         <div
-          className="bg-white border border-gray-200 rounded-md overflow-hidden"
+          className="bg-[var(--color-surface-primary)] border border-[color:var(--color-border-primary)] rounded-md overflow-hidden"
           role="region"
           aria-labelledby="preview-title"
         >
-          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-            <h4 id="preview-title" className="font-medium text-gray-900">
+          <div className="px-4 py-3 border-b border-[color:var(--color-border-primary)] bg-[var(--color-surface-secondary)]">
+            <h4 id="preview-title" className="font-medium text-[var(--color-text-primary)]">
               Data Preview
             </h4>
           </div>
           <div className="overflow-x-auto">
             <table
-              className="min-w-full divide-y divide-gray-200"
+              className="min-w-full divide-y divide-[var(--color-border)]"
               role="table"
               aria-label="Data preview table"
             >
-              <thead className="bg-gray-50">
+              <thead className="bg-[var(--color-surface-secondary)]">
                 <tr>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase"
                   >
                     Row
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase"
                   >
                     Email
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase"
                   >
                     First Name
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase"
                   >
                     Last Name
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                    className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase"
                   >
                     Roles
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-[var(--color-surface-primary)] divide-y divide-[var(--color-border)]">
                 {validation.preview.slice(0, 10).map((row, index) => (
                   <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.row}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]">
+                      {row.row}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]">
                       {row.email}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]">
                       {row.first_name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]">
                       {row.last_name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-tertiary)]">
                       {row.roles ? row.roles.join(', ') : 'None'}
                     </td>
                   </tr>
@@ -515,13 +546,13 @@ const ValidationResults: FC<{
 
       {/* Action Buttons */}
       <div
-        className="flex justify-end space-x-3 pt-6 border-t border-gray-200"
+        className="flex justify-end space-x-3 pt-6 border-t border-[var(--color-border)]"
         role="group"
         aria-label="Import actions"
       >
         <button
           onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          className="px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[var(--color-surface-hover)]"
           aria-label="Cancel import and clear validation results"
         >
           Cancel
@@ -529,7 +560,7 @@ const ValidationResults: FC<{
         <button
           onClick={onProceed}
           disabled={validation.invalid_count > 0 || isProcessing}
-          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-[var(--color-text-primary)] bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-700)] disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label={
             validation.invalid_count > 0
               ? 'Cannot proceed: Fix validation errors first'
@@ -540,12 +571,12 @@ const ValidationResults: FC<{
         >
           {isProcessing ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+              <div className="spinner spinner-sm mr-2" />
               Processing...
             </>
           ) : (
             <>
-              <Play className="w-4 h-4 mr-2" />
+              <Play className="icon-sm mr-2" />
               Import {validation.valid_count} Users
             </>
           )}
@@ -565,9 +596,16 @@ const OperationsList: FC<{
   if (operations.length === 0) {
     return (
       <div className="text-center py-12" role="status">
-        <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No bulk operations</h3>
-        <p className="text-gray-600">Upload a CSV file to start importing users.</p>
+        <Users
+          className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
+          aria-hidden="true"
+        />
+        <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+          No bulk operations
+        </h3>
+        <p className="text-[var(--color-text-secondary)]">
+          Upload a CSV file to start importing users.
+        </p>
       </div>
     );
   }
@@ -577,13 +615,13 @@ const OperationsList: FC<{
       {operations.map((operation) => (
         <div
           key={operation.operation_id}
-          className="bg-white border border-gray-200 rounded-lg p-6"
+          className="bg-[var(--color-surface-primary)] border border-[color:var(--color-border-primary)] rounded-lg p-6"
           role="listitem"
           aria-label={`${operation.type} operation: ${operation.status}`}
         >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
                 {operation.type.replace('_', ' ').toUpperCase()}
               </h3>
               <StatusBadge status={operation.status} />
@@ -591,50 +629,50 @@ const OperationsList: FC<{
             <div className="flex space-x-2" role="group" aria-label="Operation actions">
               <button
                 onClick={() => onViewDetails(operation)}
-                className="p-2 text-gray-400 hover:text-gray-500"
+                className="p-2 text-[color:var(--color-text-tertiary)] hover:text-[var(--color-text-tertiary)]"
                 aria-label="View operation details"
                 title="View Details"
               >
-                <Eye className="w-4 h-4" aria-hidden="true" />
+                <Eye className="icon-sm" aria-hidden="true" />
               </button>
               {operation.status === 'running' && (
                 <button
                   onClick={() => onPauseResume(operation.operation_id)}
-                  className="p-2 text-yellow-600 hover:text-yellow-700"
+                  className="p-2 text-[color:var(--color-warning)] hover:text-[var(--color-warning)]"
                   aria-label="Pause operation"
                   title="Pause"
                 >
-                  <Pause className="w-4 h-4" aria-hidden="true" />
+                  <Pause className="icon-sm" aria-hidden="true" />
                 </button>
               )}
               {operation.status === 'paused' && (
                 <button
                   onClick={() => onPauseResume(operation.operation_id)}
-                  className="p-2 text-blue-600 hover:text-blue-700"
+                  className="p-2 text-[color:var(--color-primary)] hover:text-[var(--color-primary-hover)]"
                   aria-label="Resume operation"
                   title="Resume"
                 >
-                  <Play className="w-4 h-4" aria-hidden="true" />
+                  <Play className="icon-sm" aria-hidden="true" />
                 </button>
               )}
               {(operation.status === 'running' || operation.status === 'paused') && (
                 <button
                   onClick={() => onCancel(operation.operation_id)}
-                  className="p-2 text-red-600 hover:text-red-700"
+                  className="p-2 text-[color:var(--color-error)] hover:text-[var(--color-error)]"
                   aria-label="Cancel operation"
                   title="Cancel"
                 >
-                  <Square className="w-4 h-4" aria-hidden="true" />
+                  <Square className="icon-sm" aria-hidden="true" />
                 </button>
               )}
               {operation.status === 'completed' && operation.successful_records > 0 && (
                 <button
                   onClick={() => onRollback(operation.operation_id)}
-                  className="p-2 text-orange-600 hover:text-orange-700"
+                  className="p-2 text-[var(--color-warning)] hover:text-[var(--color-warning)]"
                   aria-label="Rollback operation"
                   title="Rollback"
                 >
-                  <RotateCcw className="w-4 h-4" aria-hidden="true" />
+                  <RotateCcw className="icon-sm" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -646,36 +684,36 @@ const OperationsList: FC<{
             aria-label="Operation statistics"
           >
             <div>
-              <p className="text-sm text-gray-500">Total Records</p>
+              <p className="text-sm text-[var(--color-text-tertiary)]">Total Records</p>
               <p
-                className="text-lg font-semibold text-gray-900"
+                className="text-lg font-semibold text-[var(--color-text-primary)]"
                 aria-label={`${operation.total_records} total records`}
               >
                 {operation.total_records}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Processed</p>
+              <p className="text-sm text-[var(--color-text-tertiary)]">Processed</p>
               <p
-                className="text-lg font-semibold text-gray-900"
+                className="text-lg font-semibold text-[var(--color-text-primary)]"
                 aria-label={`${operation.processed_records} processed`}
               >
                 {operation.processed_records}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Successful</p>
+              <p className="text-sm text-[var(--color-text-tertiary)]">Successful</p>
               <p
-                className="text-lg font-semibold text-green-600"
+                className="text-lg font-semibold text-[var(--color-success)]"
                 aria-label={`${operation.successful_records} successful`}
               >
                 {operation.successful_records}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Failed</p>
+              <p className="text-sm text-[var(--color-text-tertiary)]">Failed</p>
               <p
-                className="text-lg font-semibold text-red-600"
+                className="text-lg font-semibold text-[var(--color-error)]"
                 aria-label={`${operation.failed_records} failed`}
               >
                 {operation.failed_records}
@@ -690,7 +728,7 @@ const OperationsList: FC<{
               status={operation.status}
             />
           ) : (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-[var(--color-text-tertiary)]">
               <p>Created: {formatDateTime(operation.created_at)}</p>
               {operation.completed_at && <p>Completed: {formatDateTime(operation.completed_at)}</p>}
             </div>
@@ -726,10 +764,11 @@ const BulkOperationsPage: FC = () => {
   // ============================================================================
   // Data Loading Functions
   // ============================================================================
-  // React 19 Compiler handles memoization
+  // ✅ FIXED: Wrapped with useCallback to prevent infinite re-renders
 
-  const loadOperations = async () => {
-    if (!canManageBulkOps) return;
+  const loadOperations = useCallback(async () => {
+    // Check permission inside function, not in dependencies
+    if (!hasPermission('admin') && !hasPermission('users:bulk')) return;
 
     setIsLoading(true);
     try {
@@ -741,7 +780,7 @@ const BulkOperationsPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [hasPermission, handleError, toast]);
 
   // ============================================================================
   // File Upload & Validation
@@ -873,11 +912,15 @@ const BulkOperationsPage: FC = () => {
   // ============================================================================
 
   useEffect(() => {
-    loadOperations();
-  }, [loadOperations]);
+    if (canManageBulkOps) {
+      loadOperations(); // ✅ Safe - loadOperations is now memoized
+    }
+  }, [loadOperations, canManageBulkOps]);
 
   // Auto-refresh operations when there are active ones
   useEffect(() => {
+    if (!canManageBulkOps) return undefined;
+
     const activeOperations = operations.filter(
       (op) => op.status === 'running' || op.status === 'pending'
     );
@@ -889,7 +932,7 @@ const BulkOperationsPage: FC = () => {
 
     // Return undefined for the case where there are no active operations
     return undefined;
-  }, [operations, loadOperations]);
+  }, [operations, loadOperations, canManageBulkOps]); // ✅ Safe - loadOperations is now memoized
 
   // ============================================================================
   // Render
@@ -897,12 +940,16 @@ const BulkOperationsPage: FC = () => {
 
   if (!canManageBulkOps) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-wrapper">
+        <div className="container-narrow">
           <div className="text-center py-12">
-            <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
-            <p className="text-gray-600">You don't have permission to manage bulk operations.</p>
+            <Users className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+              Access Restricted
+            </h3>
+            <p className="text-[var(--color-text-secondary)]">
+              You don't have permission to manage bulk operations.
+            </p>
           </div>
         </div>
       </div>
@@ -916,23 +963,27 @@ const BulkOperationsPage: FC = () => {
         description="Upload, validate, and manage large-scale user imports with realtime progress tracking."
         keywords="admin bulk operations, user import csv, bulk user management, admin automation tools"
       />
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-wrapper">
+        <div className="container-full">
           {/* Header */}
           <div className="mb-8">
             <Breadcrumb />
             <div className="mt-4 flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Bulk Operations</h1>
-                <p className="text-gray-600 mt-1">Import and manage users in bulk with CSV files</p>
+                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                  Bulk Operations
+                </h1>
+                <p className="text-[color:var(--color-text-secondary)] mt-1">
+                  Import and manage users in bulk with CSV files
+                </p>
               </div>
               <div className="flex space-x-3">
                 <button
                   onClick={loadOperations}
                   disabled={isLoading}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                  className="inline-flex items-center px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[color:var(--color-background-secondary)] disabled:opacity-50"
                 >
-                  <Download className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                  <Download className={`icon-sm mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                   Sample CSV
                 </button>
               </div>
@@ -948,12 +999,14 @@ const BulkOperationsPage: FC = () => {
 
           {/* File Upload Section */}
           {!validation && (
-            <div className="bg-white rounded-lg shadow-sm border mb-8 p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Upload User Data</h2>
+            <div className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border mb-8 p-6">
+              <h2 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-4">
+                Upload User Data
+              </h2>
               {isValidating ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
-                  <p className="text-gray-600">Validating file...</p>
+                  <div className="spinner spinner-lg spinner-primary mx-auto mb-4" />
+                  <p className="text-[var(--color-text-secondary)]">Validating file...</p>
                 </div>
               ) : (
                 <FileUploadArea
@@ -967,8 +1020,10 @@ const BulkOperationsPage: FC = () => {
 
           {/* Validation Results */}
           {validation && (
-            <div className="bg-white rounded-lg shadow-sm border mb-8 p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-6">Validation Results</h2>
+            <div className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border mb-8 p-6">
+              <h2 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-6">
+                Validation Results
+              </h2>
               <ValidationResults
                 validation={validation}
                 onProceed={handleProceedWithImport}
@@ -980,12 +1035,15 @@ const BulkOperationsPage: FC = () => {
 
           {/* Operations List */}
           <div
-            className="bg-white rounded-lg shadow-sm border"
+            className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border"
             role="region"
             aria-labelledby="operations-list-title"
           >
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 id="operations-list-title" className="text-lg font-medium text-gray-900">
+            <div className="px-6 py-4 border-b border-[var(--color-border)]">
+              <h2
+                id="operations-list-title"
+                className="text-lg font-medium text-[var(--color-text-primary)]"
+              >
                 Recent Operations
               </h2>
             </div>
@@ -994,7 +1052,10 @@ const BulkOperationsPage: FC = () => {
                 <div className="space-y-4" role="status" aria-label="Loading operations">
                   <span className="sr-only">Loading bulk operations list</span>
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="border border-gray-200 rounded-lg p-6">
+                    <div
+                      key={i}
+                      className="border border-[color:var(--color-border-primary)] rounded-lg p-6"
+                    >
                       <div className="flex items-center justify-between mb-4">
                         <Skeleton className="h-6 w-32" />
                         <Skeleton className="h-6 w-20" />

@@ -146,6 +146,7 @@ export const RATE_LIMITS = {
 
 /**
  * React hook for rate-limited actions
+ * React 19: Removed useCallback - compiler handles memoization automatically
  *
  * @param key - Unique identifier for the action
  * @param config - Rate limit configuration
@@ -161,15 +162,13 @@ export const RATE_LIMITS = {
  *   });
  * };
  */
-export function useRateLimitedAction(
-  key: string,
-  config: { maxRequests: number; windowMs: number }
-) {
+export function useRateLimitHook(key: string, config: { maxRequests: number; windowMs: number }) {
   const [canExecute, setCanExecute] = React.useState(true);
   const [remaining, setRemaining] = React.useState(config.maxRequests);
   const [waitTime, setWaitTime] = React.useState(0);
 
-  const updateState = React.useCallback(() => {
+  // React 19: Removed useCallback - compiler handles memoization automatically
+  const updateState = () => {
     const allowed = rateLimiter.canMakeRequest(key, config.maxRequests, config.windowMs);
     const remainingRequests = rateLimiter.getRemainingRequests(
       key,
@@ -183,20 +182,18 @@ export function useRateLimitedAction(
     setWaitTime(wait);
 
     return allowed;
-  }, [key, config.maxRequests, config.windowMs]);
+  };
 
-  const execute = React.useCallback(
-    (action: () => void | Promise<void>) => {
-      if (updateState()) {
-        return action();
-      }
-    },
-    [updateState]
-  );
+  // React 19: Removed useCallback - compiler handles memoization automatically
+  const execute = (action: () => void | Promise<void>) => {
+    if (updateState()) {
+      return action();
+    }
+  };
 
   React.useEffect(() => {
     updateState();
-  }, [updateState]);
+  }, [key, config.maxRequests, config.windowMs]);
 
   return {
     canExecute,
@@ -204,6 +201,7 @@ export function useRateLimitedAction(
     waitTime,
     waitTimeSeconds: Math.ceil(waitTime / 1000),
     execute,
+    reset: () => rateLimiter.reset(key),
   };
 }
 

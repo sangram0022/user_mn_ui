@@ -9,7 +9,7 @@
  */
 
 import { useMemo } from 'react';
-import type { AuditLogEntry } from '../../../shared/types/api-backend.types';
+import type { AuditLogEntry } from '../../../shared/types/api-complete.types';
 import type { AuditLogFilters } from '../components/AuditLogFilters';
 
 export interface UseAuditLogFiltersProps {
@@ -79,7 +79,7 @@ export function useAuditLogFilters({
     // User ID filter
     if (filters.userId) {
       const userIdLower = filters.userId.toLowerCase();
-      result = result.filter((log) => log.user_id.toLowerCase().includes(userIdLower));
+      result = result.filter((log) => log.user_id?.toLowerCase().includes(userIdLower));
     }
 
     // Sorting by timestamp
@@ -212,8 +212,10 @@ export function getAuditLogStats(logs: AuditLogEntry[]): {
     // Count by action
     byAction[log.action] = (byAction[log.action] || 0) + 1;
 
-    // Count by outcome
-    byOutcome[log.outcome] = (byOutcome[log.outcome] || 0) + 1;
+    // Count by outcome (skip nulls)
+    if (log.outcome) {
+      byOutcome[log.outcome] = (byOutcome[log.outcome] || 0) + 1;
+    }
   });
 
   return {

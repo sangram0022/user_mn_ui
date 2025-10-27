@@ -1,0 +1,555 @@
+/**
+ * 🚀 ULTRA-MODERN CSS UTILITIES (2024-2025)
+ *
+ * Latest CSS Features:
+ * ✅ Container queries (@container)
+ * ✅ :has() relational pseudo-class
+ * ✅ :is() and :where() (specificity control)
+ * ✅ color-mix() dynamic colors
+ * ✅ CSS Nesting (native)
+ * ✅ content-visibility (performance)
+ * ✅ backdrop-filter effects
+ * ✅ View Transitions API
+ * ✅ scroll-timeline animations
+ * ✅ text-wrap: balance/pretty
+ * ✅ Relative color syntax (oklch from)
+ * ✅ @supports feature queries
+ */
+
+@layer utilities {
+  /* =========================================================================
+     CONTAINER QUERIES - Responsive components
+     ========================================================================= */
+
+  .container-inline {
+    container-type: inline-size;
+    container-name: main;
+  }
+
+  .container-size {
+    container-type: size;
+  }
+
+  /* Responsive grid using container queries */
+  .grid-responsive {
+    display: grid;
+    gap: var(--spacing-4, 1rem);
+    grid-template-columns: 1fr;
+
+    @container (min-width: 400px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @container (min-width: 700px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @container (min-width: 1000px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* =========================================================================
+     MODERN PSEUDO-CLASSES - :has(), :is(), :where()
+     ========================================================================= */
+
+  /* Parent selector - style based on children */
+  .card {
+    &:has(.card-image) {
+      padding: 0;
+
+      & > .card-content {
+        padding: var(--spacing-4, 1rem);
+      }
+    }
+
+    &:has(.card-loading) {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    &:has(.card-error) {
+      border-color: var(--color-error);
+    }
+  }
+
+  /* Zero specificity grouping */
+  :where(h1, h2, h3, h4, h5, h6) {
+    font-weight: 600;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  /* Regular specificity grouping */
+  :is(button, a, input, select, textarea):focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm, 0.25rem);
+  }
+
+  /* =========================================================================
+     DYNAMIC COLORS - color-mix() and relative colors
+     ========================================================================= */
+
+  /* Lighter variant using color-mix */
+  .bg-primary-light {
+    background-color: color-mix(in oklch, var(--color-primary) 10%, white);
+  }
+
+  .bg-success-light {
+    background-color: color-mix(in oklch, var(--color-success) 10%, white);
+  }
+
+  .bg-warning-light {
+    background-color: color-mix(in oklch, var(--color-warning) 10%, white);
+  }
+
+  .bg-error-light {
+    background-color: color-mix(in oklch, var(--color-error) 10%, white);
+  }
+
+  /* Darker variants */
+  .bg-primary-dark {
+    background-color: color-mix(in oklch, var(--color-primary) 80%, black);
+  }
+
+  /* Transparent variants */
+  .bg-primary-alpha-10 {
+    background-color: oklch(from var(--color-primary) l c h / 0.1);
+  }
+
+  .bg-primary-alpha-20 {
+    background-color: oklch(from var(--color-primary) l c h / 0.2);
+  }
+
+  /* =========================================================================
+     PERFORMANCE OPTIMIZATIONS
+     ========================================================================= */
+
+  /* GPU acceleration */
+  .gpu-accelerated {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* Lazy rendering with content-visibility */
+  .lazy-render {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+  }
+
+  .lazy-render-small {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 200px;
+  }
+
+  /* CSS containment for isolated components */
+  .contain-strict {
+    contain: strict;
+  }
+
+  .contain-content {
+    contain: content;
+  }
+
+  .contain-layout {
+    contain: layout;
+  }
+
+  /* will-change for animated elements */
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .will-change-opacity {
+    will-change: opacity;
+  }
+
+  /* =========================================================================
+     MODERN TYPOGRAPHY
+     ========================================================================= */
+
+  /* Modern text wrapping */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  .text-stable {
+    text-wrap: stable;
+  }
+
+  /* Fluid typography helpers */
+  .text-fluid-sm {
+    font-size: clamp(0.875rem, 0.8rem + 0.3vw, 0.95rem);
+  }
+
+  .text-fluid-base {
+    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  }
+
+  .text-fluid-lg {
+    font-size: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
+  }
+
+  .text-fluid-xl {
+    font-size: clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem);
+  }
+
+  .text-fluid-2xl {
+    font-size: clamp(1.5rem, 1.35rem + 0.65vw, 1.875rem);
+  }
+
+  .text-fluid-3xl {
+    font-size: clamp(1.875rem, 1.65rem + 1vw, 2.25rem);
+  }
+
+  /* =========================================================================
+     BACKDROP EFFECTS
+     ========================================================================= */
+
+  .backdrop-blur {
+    backdrop-filter: blur(8px);
+    background-color: oklch(from white l c h / 0.8);
+  }
+
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+    background-color: oklch(from white l c h / 0.9);
+  }
+
+  .backdrop-blur-lg {
+    backdrop-filter: blur(12px);
+    background-color: oklch(from white l c h / 0.7);
+  }
+
+  .backdrop-saturate {
+    backdrop-filter: saturate(180%);
+  }
+
+  .backdrop-blur-saturate {
+    backdrop-filter: blur(8px) saturate(180%);
+    background-color: oklch(from white l c h / 0.8);
+  }
+
+  /* =========================================================================
+     MODERN GRADIENTS
+     ========================================================================= */
+
+  .gradient-primary {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary) 0%,
+      var(--color-primary-600, oklch(48% 0.18 250)) 100%
+    );
+  }
+
+  .bg-gradient-primary {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary) 0%,
+      var(--color-primary-600, oklch(48% 0.18 250)) 100%
+    );
+  }
+
+  .bg-gradient-page {
+    background: linear-gradient(
+      135deg,
+      oklch(from var(--color-primary) l c h / 0.1) 0%,
+      white 50%,
+      oklch(from var(--color-primary) l c h / 0.1) 100%
+    );
+  }
+
+  .gradient-mesh {
+    background:
+      radial-gradient(at 0% 0%, oklch(from var(--color-primary) l c h / 0.2) 0%, transparent 50%),
+      radial-gradient(
+        at 100% 100%,
+        oklch(from var(--color-success) l c h / 0.2) 0%,
+        transparent 50%
+      ),
+      radial-gradient(at 0% 100%, oklch(from var(--color-warning) l c h / 0.2) 0%, transparent 50%);
+  }
+
+  .gradient-shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      oklch(from var(--color-primary) l c h / 0.1),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* =========================================================================
+     MICRO-INTERACTIONS
+     ========================================================================= */
+
+  .hover-lift {
+    transition: transform var(--transition-fast, 150ms) ease-out;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .hover-scale {
+    transition: transform var(--transition-fast, 150ms) ease-out;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .hover-glow {
+    transition: box-shadow var(--transition-base, 250ms) ease-out;
+
+    &:hover {
+      box-shadow: 0 0 20px oklch(from var(--color-primary) l c h / 0.3);
+    }
+  }
+
+  /* =========================================================================
+     MODERN SHADOWS - Sophisticated depth system
+     ========================================================================= */
+
+  .shadow-modern {
+    box-shadow:
+      0 1px 2px oklch(0% 0 0 / 0.05),
+      0 2px 8px oklch(0% 0 0 / 0.08);
+  }
+
+  .shadow-elevated-modern {
+    box-shadow:
+      0 4px 6px oklch(0% 0 0 / 0.07),
+      0 10px 20px oklch(0% 0 0 / 0.1),
+      0 2px 4px oklch(0% 0 0 / 0.06);
+  }
+
+  /* =========================================================================
+     GLASSMORPHISM - Modern frosted glass effect
+     ========================================================================= */
+
+  .glass-card-modern {
+    background: oklch(from var(--color-surface) l c h / 0.8);
+    backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid oklch(from var(--color-border) l c h / 0.2);
+
+    @supports not (backdrop-filter: blur(12px)) {
+      background: var(--color-surface);
+    }
+  }
+
+  /* =========================================================================
+     SCROLL ANIMATIONS
+     ========================================================================= */
+
+  @supports (animation-timeline: scroll()) {
+    .scroll-fade-in {
+      animation: scroll-fade linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+
+    @keyframes scroll-fade {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  /* =========================================================================
+     VIEW TRANSITIONS API
+     ========================================================================= */
+
+  @supports (view-transition-name: none) {
+    .view-transition-fade {
+      view-transition-name: fade;
+    }
+
+    .view-transition-slide {
+      view-transition-name: slide;
+    }
+
+    ::view-transition-old(slide) {
+      animation: slide-out 300ms ease-out;
+    }
+
+    ::view-transition-new(slide) {
+      animation: slide-in 300ms ease-out;
+    }
+
+    @keyframes slide-out {
+      to {
+        transform: translateX(-100%);
+      }
+    }
+
+    @keyframes slide-in {
+      from {
+        transform: translateX(100%);
+      }
+    }
+  }
+
+  /* =========================================================================
+     MODERN ANIMATIONS (2024-2025)
+     ========================================================================= */
+
+  /* Slide in from bottom (for modals) */
+  .animate-slide-in-up {
+    animation: slide-in-up 300ms ease-out;
+  }
+
+  @keyframes slide-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Slide in from right (for toasts) */
+  .animate-slide-in-right {
+    animation: slide-in-right 300ms ease-out;
+  }
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* =========================================================================
+     UTILITY CLASSES
+     ========================================================================= */
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* Custom thin scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-gray-400, #999) transparent;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--color-gray-400, #999);
+      border-radius: 4px;
+
+      &:hover {
+        background: var(--color-gray-500, #666);
+      }
+    }
+  }
+
+  /* Truncate text with ellipsis */
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
+  /* Screen reader only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Focus visible helper */
+  .focus-ring {
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm, 0.25rem);
+    }
+  }
+
+  /* Skip navigation link */
+  .skip-link {
+    position: absolute;
+    top: -100px;
+    left: 0;
+    background: var(--color-primary);
+    color: white;
+    padding: var(--spacing-2, 0.5rem) var(--spacing-4, 1rem);
+    z-index: 1000;
+    text-decoration: none;
+
+    &:focus {
+      top: 0;
+    }
+  }
+}

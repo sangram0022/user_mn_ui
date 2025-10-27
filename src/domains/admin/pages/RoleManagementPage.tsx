@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Role Management Page
  *
  * Comprehensive role and permission management interface.
@@ -14,7 +14,7 @@
  */
 
 import { Lock, Plus, Search, Shield, Trash2, UserPlus } from 'lucide-react';
-import { useActionState, useEffect, useOptimistic, useState, type FC } from 'react';
+import { useActionState, useCallback, useEffect, useOptimistic, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -166,21 +166,24 @@ const CreateRoleModal: FC<CreateRoleModalProps> = ({ isOpen, onClose, permission
       <form action={submitAction} className="flex flex-col h-full">
         {/* Inline error display */}
         {state.error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+          <div className="mb-4 rounded-lg border border-[color:var(--color-error)] bg-[color:var(--color-error-50)] px-4 py-2 text-sm text-[var(--color-error)]">
             {state.error}
           </div>
         )}
 
         {/* Role Name */}
         <div className="mb-4">
-          <label htmlFor="role_name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="role_name"
+            className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+          >
             {t('roles.roleName')}
           </label>
           <input
             id="role_name"
             name="role_name"
             type="text"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm placeholder-[var(--color-text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
             placeholder={t('roles.enterRoleName')}
             required
           />
@@ -188,13 +191,16 @@ const CreateRoleModal: FC<CreateRoleModalProps> = ({ isOpen, onClose, permission
 
         {/* Description */}
         <div className="mb-4">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+          >
             {t('roles.description')}
           </label>
           <textarea
             id="description"
             name="description"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm placeholder-[var(--color-text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
             placeholder={t('roles.enterRoleDescription')}
             rows={3}
             required
@@ -203,14 +209,17 @@ const CreateRoleModal: FC<CreateRoleModalProps> = ({ isOpen, onClose, permission
 
         {/* Permissions */}
         <div className="mb-4">
-          <label htmlFor="permissions" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="permissions"
+            className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-2"
+          >
             {t('roles.permissions')}
           </label>
-          <div className="border border-gray-300 rounded-md max-h-48 overflow-y-auto">
+          <div className="border border-[color:var(--color-border-primary)] rounded-md max-h-48 overflow-y-auto">
             {permissions.map((permission) => (
               <div
                 key={permission.permission_id}
-                className="flex items-center p-3 border-b border-gray-100 last:border-0 hover:bg-gray-50"
+                className="flex items-center p-3 border-b border-[var(--color-border)] last:border-0 hover:bg-[color:var(--color-background-secondary)] min-h-[auto] max-md:min-h-[44px]"
               >
                 <input
                   type="checkbox"
@@ -218,17 +227,20 @@ const CreateRoleModal: FC<CreateRoleModalProps> = ({ isOpen, onClose, permission
                   value={permission.permission_id}
                   checked={selectedPermissions.has(permission.permission_id)}
                   onChange={() => togglePermission(permission.permission_id)}
-                  className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="mr-3 w-6 h-6 max-md:w-11 max-md:h-11 text-[color:var(--color-primary)] focus:ring-[color:var(--color-primary)] border-[color:var(--color-border-primary)] rounded flex-shrink-0 cursor-pointer"
+                  aria-label={`Permission: ${permission.action} - ${permission.resource}`}
                 />
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-sm font-medium text-[var(--color-text-primary)]">
                     {permission.action} - {permission.resource}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-[var(--color-text-tertiary)]">
                     {t('roles.category')}: {permission.category}
                   </div>
                   {permission.description && (
-                    <div className="text-xs text-gray-600 mt-1">{permission.description}</div>
+                    <div className="text-xs text-[color:var(--color-text-secondary)] mt-1">
+                      {permission.description}
+                    </div>
                   )}
                 </div>
               </div>
@@ -242,7 +254,7 @@ const CreateRoleModal: FC<CreateRoleModalProps> = ({ isOpen, onClose, permission
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-4 py-2 text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] border border-[color:var(--color-border-primary)] rounded-md hover:bg-[color:var(--color-background-secondary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
             >
               {t('roles.cancel')}
             </button>
@@ -251,7 +263,7 @@ const CreateRoleModal: FC<CreateRoleModalProps> = ({ isOpen, onClose, permission
             <button
               type="submit"
               disabled={isPending || selectedPermissions.size === 0}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] bg-[color:var(--color-primary)] border border-transparent rounded-md hover:bg-[color:var(--color-primary-700)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
             >
               {isPending ? t('roles.creating') : t('roles.createRole')}
             </button>
@@ -299,14 +311,17 @@ const AssignRoleModal: FC<AssignRoleModalProps> = ({ isOpen, onClose, roles, onA
           />
 
           <div>
-            <label htmlFor="roleSelect" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="roleSelect"
+              className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+            >
               Role
             </label>
             <select
               id="roleSelect"
               value={selectedRoleId}
               onChange={(e) => setSelectedRoleId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
               required
             >
               <option value="">Select a role</option>
@@ -319,7 +334,10 @@ const AssignRoleModal: FC<AssignRoleModalProps> = ({ isOpen, onClose, roles, onA
           </div>
 
           <div>
-            <label htmlFor="expiresAt" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="expiresAt"
+              className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+            >
               Expires At (Optional)
             </label>
             <input
@@ -327,7 +345,7 @@ const AssignRoleModal: FC<AssignRoleModalProps> = ({ isOpen, onClose, roles, onA
               type="datetime-local"
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
             />
           </div>
         </div>
@@ -337,7 +355,7 @@ const AssignRoleModal: FC<AssignRoleModalProps> = ({ isOpen, onClose, roles, onA
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] border border-[color:var(--color-border-primary)] rounded-md hover:bg-[var(--color-surface-secondary)]"
             >
               Cancel
             </button>
@@ -346,7 +364,7 @@ const AssignRoleModal: FC<AssignRoleModalProps> = ({ isOpen, onClose, roles, onA
             <button
               type="submit"
               disabled={isLoading || !userId || !selectedRoleId}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] bg-[color:var(--color-primary)] border border-transparent rounded-md hover:bg-[color:var(--color-primary-700)] disabled:opacity-50"
             >
               {isLoading ? 'Assigning...' : 'Assign Role'}
             </button>
@@ -395,10 +413,11 @@ const RoleManagementPage: FC = () => {
   // ============================================================================
   // Data Loading Functions
   // ============================================================================
-  // React 19 Compiler handles memoization
+  // ? FIXED: Wrapped with useCallback to prevent infinite re-renders
 
-  const loadRoles = async () => {
-    if (!canViewRoles) return;
+  const loadRoles = useCallback(async () => {
+    // Check permission inside function, not in dependencies
+    if (!hasPermission('admin') && !hasPermission('rbac:read')) return;
 
     try {
       const rolesData = await adminService.getRoles();
@@ -407,10 +426,11 @@ const RoleManagementPage: FC = () => {
       handleError(error, t('roles.failedToLoadRoles'));
       toast.error(t('roles.failedToLoadRoles'));
     }
-  };
+  }, [hasPermission, handleError, t, toast]);
 
-  const loadPermissions = async () => {
-    if (!canViewRoles) return;
+  const loadPermissions = useCallback(async () => {
+    // Check permission inside function, not in dependencies
+    if (!hasPermission('admin') && !hasPermission('rbac:read')) return;
 
     try {
       const permissionsData = await adminService.getPermissions();
@@ -419,9 +439,9 @@ const RoleManagementPage: FC = () => {
       handleError(error, t('roles.failedToLoadPermissions'));
       toast.error(t('roles.failedToLoadPermissions'));
     }
-  };
+  }, [hasPermission, handleError, t, toast]);
 
-  const loadAllData = async () => {
+  const loadAllData = useCallback(async () => {
     setIsLoading(true);
     clearError();
 
@@ -430,7 +450,7 @@ const RoleManagementPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [loadRoles, loadPermissions, clearError]);
 
   // ============================================================================
   // Action Functions
@@ -497,8 +517,11 @@ const RoleManagementPage: FC = () => {
   }, []);
 
   useEffect(() => {
-    loadAllData();
-  }, [loadAllData]);
+    // Only load data if user has permission to view roles
+    if (canViewRoles) {
+      loadAllData(); // ? Safe - loadAllData is now memoized
+    }
+  }, [loadAllData, canViewRoles]);
 
   // ============================================================================
   // Render
@@ -506,12 +529,16 @@ const RoleManagementPage: FC = () => {
 
   if (!canViewRoles) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-wrapper">
+        <div className="container-narrow">
           <div className="text-center py-12">
-            <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
-            <p className="text-gray-600">You don't have permission to view role management.</p>
+            <Shield className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+              Access Restricted
+            </h3>
+            <p className="text-[var(--color-text-secondary)]">
+              You don&apos;t have permission to view role management.
+            </p>
           </div>
         </div>
       </div>
@@ -527,32 +554,36 @@ const RoleManagementPage: FC = () => {
         ogTitle="Role Management - User Management System"
         ogDescription="Comprehensive role-based access control management interface."
       />
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-wrapper">
+        <div className="container-full">
           {/* Header */}
           <div className="mb-8">
             <Breadcrumb />
             <div className="mt-4 flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Role Management</h1>
-                <p className="text-gray-600 mt-1">Manage user roles and permissions</p>
+                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                  Role Management
+                </h1>
+                <p className="text-[color:var(--color-text-secondary)] mt-1">
+                  Manage user roles and permissions
+                </p>
               </div>
               {canManageRoles && (
                 <div className="flex space-x-3" role="group" aria-label="Role management actions">
                   <button
                     onClick={() => setIsAssignModalOpen(true)}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="inline-flex items-center px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[color:var(--color-background-secondary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
                     aria-label="Assign role to user"
                   >
-                    <UserPlus className="w-4 h-4 mr-2" aria-hidden="true" />
+                    <UserPlus className="icon-sm mr-2" aria-hidden="true" />
                     {t('roles.assignRole')}
                   </button>
                   <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-[var(--color-text-primary)] bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-700)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
                     aria-label="Create new role"
                   >
-                    <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
+                    <Plus className="icon-sm mr-2" aria-hidden="true" />
                     {t('roles.createRole')}
                   </button>
                 </div>
@@ -569,7 +600,7 @@ const RoleManagementPage: FC = () => {
 
           {/* Search and Filters */}
           <div
-            className="bg-white rounded-lg shadow-sm border mb-6"
+            className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border mb-6"
             role="search"
             aria-label="Role search"
           >
@@ -578,7 +609,7 @@ const RoleManagementPage: FC = () => {
                 <div className="flex-1">
                   <div className="relative">
                     <Search
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[color:var(--color-text-tertiary)] icon-md"
                       aria-hidden="true"
                     />
                     <input
@@ -588,7 +619,7 @@ const RoleManagementPage: FC = () => {
                       placeholder="Search roles..."
                       aria-label="Search roles by name or description"
                       aria-describedby="search-help"
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-[color:var(--color-border-primary)] rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
                     />
                     <span id="search-help" className="sr-only">
                       Filter roles by searching in role name or description
@@ -600,9 +631,9 @@ const RoleManagementPage: FC = () => {
           </div>
 
           {/* Roles List */}
-          <div className="bg-white rounded-lg shadow-sm border">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">
+          <div className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border">
+            <div className="px-6 py-4 border-b border-[var(--color-border)]">
+              <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
                 {t('roles.roles', { count: filteredRoles.length })}
               </h3>
             </div>
@@ -617,7 +648,10 @@ const RoleManagementPage: FC = () => {
                 <div className="space-y-4" role="status" aria-label="Loading roles">
                   <span className="sr-only">Loading roles, please wait...</span>
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="p-4 border border-gray-200 rounded-lg">
+                    <div
+                      key={i}
+                      className="p-4 border border-[color:var(--color-border-primary)] rounded-lg"
+                    >
                       <Skeleton className="h-4 w-1/4 mb-2" />
                       <Skeleton className="h-3 w-3/4 mb-2" />
                       <Skeleton className="h-3 w-1/2" />
@@ -629,17 +663,20 @@ const RoleManagementPage: FC = () => {
                   {filteredRoles.map((role) => (
                     <div
                       key={role.role_id}
-                      className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+                      className="p-4 border border-[color:var(--color-border-primary)] rounded-lg hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:ring-offset-2"
                       role="listitem"
                       aria-labelledby={`role-name-${role.role_id}`}
                       aria-describedby={`role-desc-${role.role_id}`}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center">
-                          <Shield className="w-5 h-5 text-blue-600 mr-2" aria-hidden="true" />
+                          <Shield
+                            className="icon-md text-[color:var(--color-primary)] mr-2"
+                            aria-hidden="true"
+                          />
                           <h4
                             id={`role-name-${role.role_id}`}
-                            className="text-lg font-medium text-gray-900"
+                            className="text-lg font-medium text-[var(--color-text-primary)]"
                           >
                             {role.role_name}
                           </h4>
@@ -648,33 +685,36 @@ const RoleManagementPage: FC = () => {
                           <div className="flex space-x-1">
                             <button
                               onClick={() => handleDeleteRole(role.role_id)}
-                              className="text-red-600 hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded p-1"
+                              className="text-[color:var(--color-error)] hover:text-[var(--color-error)] focus:outline-none focus:ring-2 focus:ring-[var(--color-error)] focus:ring-offset-1 rounded w-8 h-8 max-md:w-11 max-md:h-11 flex items-center justify-center"
                               aria-label={`Delete role ${role.role_name}`}
                               title={`Delete ${role.role_name}`}
                             >
-                              <Trash2 className="w-4 h-4" aria-hidden="true" />
+                              <Trash2 className="icon-sm max-md:icon-md" aria-hidden="true" />
                             </button>
                           </div>
                         )}
                       </div>
-                      <p id={`role-desc-${role.role_id}`} className="text-gray-600 text-sm mb-3">
+                      <p
+                        id={`role-desc-${role.role_id}`}
+                        className="text-[color:var(--color-text-secondary)] text-sm mb-3"
+                      >
                         {role.description}
                       </p>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-[var(--color-text-tertiary)]">
                           {t('roles.permissionsCount', { count: role.permissions.length })}
                         </span>
                         <div className="flex flex-wrap gap-1">
                           {role.permissions.slice(0, 3).map((permission) => (
                             <span
                               key={permission}
-                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[color:var(--color-primary-100)] text-[var(--color-primary)]"
                             >
                               {permission}
                             </span>
                           ))}
                           {role.permissions.length > 3 && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[color:var(--color-background-secondary)] text-[var(--color-text-primary)]">
                               {t('roles.more', { count: role.permissions.length - 3 })}
                             </span>
                           )}
@@ -685,11 +725,14 @@ const RoleManagementPage: FC = () => {
                 </div>
               ) : (
                 <div className="text-center py-12" role="status">
-                  <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <Shield
+                    className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
+                    aria-hidden="true"
+                  />
+                  <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
                     {t('roles.noRolesFound')}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-[var(--color-text-secondary)]">
                     {searchTerm ? t('roles.noRolesMatchSearch') : t('roles.noRolesCreatedYet')}
                   </p>
                 </div>
@@ -698,16 +741,16 @@ const RoleManagementPage: FC = () => {
           </div>
 
           {/* Available Permissions */}
-          <div className="mt-8 bg-white rounded-lg shadow-sm border">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="mt-8 bg-[var(--color-surface-primary)] rounded-lg shadow-sm border">
+            <div className="px-6 py-4 border-b border-[var(--color-border)]">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
                   {t('roles.availablePermissions')}
                 </h3>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
                   aria-label="Filter permissions by category"
                 >
                   <option value="">{t('roles.allCategories')}</option>
@@ -737,24 +780,29 @@ const RoleManagementPage: FC = () => {
                   {filteredPermissions.map((permission) => (
                     <div
                       key={permission.permission_id}
-                      className="p-3 border border-gray-200 rounded-lg focus-within:ring-2 focus-within:ring-blue-500"
+                      className="p-3 border border-[color:var(--color-border-primary)] rounded-lg focus-within:ring-2 focus-within:ring-[var(--color-primary)]"
                       role="listitem"
                       aria-labelledby={`permission-${permission.permission_id}`}
                     >
                       <div className="flex items-center mb-2">
-                        <Lock className="w-4 h-4 text-gray-600 mr-2" aria-hidden="true" />
+                        <Lock
+                          className="icon-sm text-[color:var(--color-text-secondary)] mr-2"
+                          aria-hidden="true"
+                        />
                         <span
                           id={`permission-${permission.permission_id}`}
-                          className="font-medium text-gray-900"
+                          className="font-medium text-[var(--color-text-primary)]"
                         >
                           {permission.action} - {permission.resource}
                         </span>
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-[var(--color-text-secondary)]">
                         Category: <span className="font-medium">{permission.category}</span>
                       </div>
                       {permission.description && (
-                        <div className="text-xs text-gray-500 mt-1">{permission.description}</div>
+                        <div className="text-xs text-[color:var(--color-text-secondary)] mt-1">
+                          {permission.description}
+                        </div>
                       )}
                     </div>
                   ))}

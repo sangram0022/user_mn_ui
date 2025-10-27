@@ -1,4 +1,4 @@
-﻿/**
+/**
  * GDPR Compliance Page
  *
  * Data export and account deletion self-service with proper consent tracking
@@ -20,6 +20,7 @@ import {
   RefreshCw,
   Search,
   Shield,
+  ShieldAlert,
   Trash2,
   User,
   XCircle,
@@ -101,43 +102,50 @@ const StatusBadge: FC<{ status: string; type: 'export' | 'deletion' }> = ({ stat
       switch (status) {
         case 'pending':
           return {
-            color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            color:
+              'bg-[var(--color-warning-light)] text-[var(--color-warning)] border-[var(--color-warning)]',
             icon: Clock,
             label: 'Pending',
           };
         case 'processing':
           return {
-            color: 'bg-blue-100 text-blue-800 border-blue-200',
+            color:
+              'bg-[var(--color-primary-light)] text-[var(--color-primary)] border-[var(--color-primary)]',
             icon: RefreshCw,
             label: 'Processing',
           };
         case 'ready':
           return {
-            color: 'bg-green-100 text-green-800 border-green-200',
+            color:
+              'bg-[var(--color-success-light)] text-[var(--color-success)] border-[var(--color-success)]',
             icon: CheckCircle,
             label: 'Ready',
           };
         case 'downloaded':
           return {
-            color: 'bg-gray-100 text-gray-800 border-gray-200',
+            color:
+              'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]',
             icon: Download,
             label: 'Downloaded',
           };
         case 'expired':
           return {
-            color: 'bg-red-100 text-red-800 border-red-200',
+            color:
+              'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]',
             icon: XCircle,
             label: 'Expired',
           };
         case 'failed':
           return {
-            color: 'bg-red-100 text-red-800 border-red-200',
+            color:
+              'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]',
             icon: XCircle,
             label: 'Failed',
           };
         default:
           return {
-            color: 'bg-gray-100 text-gray-800 border-gray-200',
+            color:
+              'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]',
             icon: Clock,
             label: 'Unknown',
           };
@@ -146,43 +154,50 @@ const StatusBadge: FC<{ status: string; type: 'export' | 'deletion' }> = ({ stat
       switch (status) {
         case 'pending':
           return {
-            color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            color:
+              'bg-[var(--color-warning-light)] text-[var(--color-warning)] border-[var(--color-warning)]',
             icon: Clock,
             label: 'Pending',
           };
         case 'approved':
           return {
-            color: 'bg-blue-100 text-blue-800 border-blue-200',
+            color:
+              'bg-[var(--color-primary-light)] text-[var(--color-primary)] border-[var(--color-primary)]',
             icon: CheckCircle,
             label: 'Approved',
           };
         case 'processing':
           return {
-            color: 'bg-blue-100 text-blue-800 border-blue-200',
+            color:
+              'bg-[var(--color-primary-light)] text-[var(--color-primary)] border-[var(--color-primary)]',
             icon: RefreshCw,
             label: 'Processing',
           };
         case 'completed':
           return {
-            color: 'bg-green-100 text-green-800 border-green-200',
+            color:
+              'bg-[var(--color-success-light)] text-[var(--color-success)] border-[var(--color-success)]',
             icon: CheckCircle,
             label: 'Completed',
           };
         case 'rejected':
           return {
-            color: 'bg-red-100 text-red-800 border-red-200',
+            color:
+              'bg-[var(--color-error-light)] text-[var(--color-error)] border-[var(--color-error)]',
             icon: XCircle,
             label: 'Rejected',
           };
         case 'cancelled':
           return {
-            color: 'bg-gray-100 text-gray-800 border-gray-200',
+            color:
+              'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]',
             icon: XCircle,
             label: 'Cancelled',
           };
         default:
           return {
-            color: 'bg-gray-100 text-gray-800 border-gray-200',
+            color:
+              'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)] border-[var(--color-border)]',
             icon: Clock,
             label: 'Unknown',
           };
@@ -198,7 +213,7 @@ const StatusBadge: FC<{ status: string; type: 'export' | 'deletion' }> = ({ stat
       role="status"
       aria-label={`${type === 'export' ? 'Export' : 'Deletion'} request status: ${label}`}
     >
-      <Icon className="w-3 h-3 mr-1" aria-hidden="true" />
+      <Icon className="icon-xs mr-1" aria-hidden="true" />
       {status}
     </span>
   );
@@ -214,51 +229,51 @@ const ExportRequestsTable: FC<{
     return (
       <div className="overflow-x-auto">
         <table
-          className="min-w-full divide-y divide-gray-200"
+          className="min-w-full divide-y divide-[var(--color-border)]"
           role="table"
           aria-label="Data export requests"
         >
-          <thead className="bg-gray-50">
+          <thead className="bg-[var(--color-surface-secondary)]">
             <tr>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 User
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 Type
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 Status
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 Created
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 Expires
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-right text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-[var(--color-surface-primary)] divide-y divide-[var(--color-border)]">
             {Array.from({ length: 5 }).map((_, i) => (
               <tr key={i}>
                 <td className="px-6 py-4">
@@ -290,80 +305,87 @@ const ExportRequestsTable: FC<{
   return (
     <div className="overflow-x-auto">
       <table
-        className="min-w-full divide-y divide-gray-200"
+        className="min-w-full divide-y divide-[var(--color-border)]"
         role="table"
         aria-label="Data export requests"
       >
-        <thead className="bg-gray-50">
+        <thead className="bg-[var(--color-surface-secondary)]">
           <tr>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               User
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               Type
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               Status
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               Created
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               Expires
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-right text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               Actions
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-[var(--color-surface-primary)] divide-y divide-[var(--color-border)]">
           {requests.length > 0 ? (
             requests.map((request) => (
-              <tr key={request.request_id} className="hover:bg-gray-50">
+              <tr key={request.request_id} className="hover:bg-[var(--color-surface-hover)]">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    <User className="w-4 h-4 text-gray-400 mr-2" aria-hidden="true" />
+                    <User
+                      className="icon-sm text-[color:var(--color-text-tertiary)] mr-2"
+                      aria-hidden="true"
+                    />
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{request.email}</div>
-                      <div className="text-sm text-gray-500">{request.user_id}</div>
+                      <div className="text-sm font-medium text-[var(--color-text-primary)]">
+                        {request.email}
+                      </div>
+                      <div className="text-sm text-[var(--color-text-tertiary)]">
+                        {request.user_id}
+                      </div>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]">
                   {request.request_type.replace('_', ' ')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <StatusBadge status={request.status} type="export" />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]">
                   {formatDate(request.created_at)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]">
                   {request.expires_at ? formatDate(request.expires_at) : 'N/A'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
                     <button
                       onClick={() => onViewDetails(request)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-[color:var(--color-primary)] hover:text-[var(--color-primary)]"
                       aria-label={`View details for export request by ${request.email}`}
                     >
                       <Eye className="w-4 h-4" aria-hidden="true" />
@@ -371,7 +393,7 @@ const ExportRequestsTable: FC<{
                     {request.status === 'ready' && request.download_url && (
                       <button
                         onClick={() => onDownload(request.request_id)}
-                        className="text-green-600 hover:text-green-900"
+                        className="text-[color:var(--color-success)] hover:text-[var(--color-success)]"
                         aria-label={`Download export file for ${request.email}`}
                       >
                         <Download className="w-4 h-4" aria-hidden="true" />
@@ -384,9 +406,16 @@ const ExportRequestsTable: FC<{
           ) : (
             <tr>
               <td colSpan={6} className="px-6 py-12 text-center">
-                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No export requests</h3>
-                <p className="text-gray-600">No data export requests have been made.</p>
+                <FileText
+                  className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
+                  aria-hidden="true"
+                />
+                <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+                  No export requests
+                </h3>
+                <p className="text-[var(--color-text-secondary)]">
+                  No data export requests have been made.
+                </p>
               </td>
             </tr>
           )}
@@ -418,51 +447,51 @@ const DeletionRequestsTable: FC<{
     return (
       <div className="overflow-x-auto">
         <table
-          className="min-w-full divide-y divide-gray-200"
+          className="min-w-full divide-y divide-[var(--color-border)]"
           role="table"
           aria-label="Account deletion requests"
         >
-          <thead className="bg-gray-50">
+          <thead className="bg-[var(--color-surface-secondary)]">
             <tr>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 User
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 Reason
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 Status
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 Created
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 Consent
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-right text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
               >
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-[var(--color-surface-primary)] divide-y divide-[var(--color-border)]">
             {Array.from({ length: 5 }).map((_, i) => (
               <tr key={i}>
                 <td className="px-6 py-4">
@@ -494,87 +523,97 @@ const DeletionRequestsTable: FC<{
   return (
     <div className="overflow-x-auto">
       <table
-        className="min-w-full divide-y divide-gray-200"
+        className="min-w-full divide-y divide-[var(--color-border)]"
         role="table"
         aria-label="Account deletion requests"
       >
-        <thead className="bg-gray-50">
+        <thead className="bg-[var(--color-surface-secondary)]">
           <tr>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               User
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               Reason
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               Status
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               Created
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               Consent
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+              className="px-6 py-3 text-right text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
             >
               Actions
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-[var(--color-surface-primary)] divide-y divide-[var(--color-border)]">
           {requests.length > 0 ? (
             requests.map((request) => (
-              <tr key={request.request_id} className="hover:bg-gray-50">
+              <tr key={request.request_id} className="hover:bg-[var(--color-surface-hover)]">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    <User className="w-4 h-4 text-gray-400 mr-2" aria-hidden="true" />
+                    <User
+                      className="icon-sm text-[color:var(--color-text-tertiary)] mr-2"
+                      aria-hidden="true"
+                    />
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{request.email}</div>
-                      <div className="text-sm text-gray-500">{request.user_id}</div>
+                      <div className="text-sm font-medium text-[var(--color-text-primary)]">
+                        {request.email}
+                      </div>
+                      <div className="text-sm text-[var(--color-text-tertiary)]">
+                        {request.user_id}
+                      </div>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                <td className="px-6 py-4 text-sm text-[color:var(--color-text-primary)] max-w-xs truncate">
                   {request.reason}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <StatusBadge status={request.status} type="deletion" />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]">
                   {formatDate(request.created_at)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {request.consent_confirmed ? (
                     <CheckCircle
-                      className="w-5 h-5 text-green-500"
+                      className="icon-md text-[var(--color-success)]"
                       aria-label="Consent confirmed"
                     />
                   ) : (
-                    <XCircle className="w-5 h-5 text-red-500" aria-label="Consent not confirmed" />
+                    <XCircle
+                      className="icon-md text-[var(--color-error)]"
+                      aria-label="Consent not confirmed"
+                    />
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
                     <button
                       onClick={() => onViewDetails(request)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-[color:var(--color-primary)] hover:text-[var(--color-primary)]"
                       aria-label={`View details for deletion request by ${request.email}`}
                     >
                       <Eye className="w-4 h-4" aria-hidden="true" />
@@ -583,14 +622,14 @@ const DeletionRequestsTable: FC<{
                       <>
                         <button
                           onClick={() => onApprove(request.request_id)}
-                          className="text-green-600 hover:text-green-900"
+                          className="text-[color:var(--color-success)] hover:text-[var(--color-success)]"
                           aria-label={`Approve deletion request for ${request.email}`}
                         >
                           <CheckCircle className="w-4 h-4" aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => setRejectingId(request.request_id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-[color:var(--color-error)] hover:text-[var(--color-error)]"
                           aria-label={`Reject deletion request for ${request.email}`}
                         >
                           <XCircle className="w-4 h-4" aria-hidden="true" />
@@ -604,9 +643,16 @@ const DeletionRequestsTable: FC<{
           ) : (
             <tr>
               <td colSpan={6} className="px-6 py-12 text-center">
-                <Trash2 className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No deletion requests</h3>
-                <p className="text-gray-600">No account deletion requests have been made.</p>
+                <Trash2
+                  className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
+                  aria-hidden="true"
+                />
+                <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+                  No deletion requests
+                </h3>
+                <p className="text-[var(--color-text-secondary)]">
+                  No account deletion requests have been made.
+                </p>
               </td>
             </tr>
           )}
@@ -630,7 +676,7 @@ const DeletionRequestsTable: FC<{
                   setRejectingId(null);
                   setRejectionReason('');
                 }}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                className="px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[var(--color-surface-hover)]"
               >
                 Cancel
               </button>
@@ -639,7 +685,7 @@ const DeletionRequestsTable: FC<{
               <button
                 onClick={() => rejectingId && handleReject(rejectingId)}
                 disabled={!rejectionReason.trim()}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-[var(--color-text-primary)] bg-[var(--color-error)] hover:bg-[var(--color-error)] disabled:opacity-50"
               >
                 Reject Request
               </button>
@@ -647,7 +693,10 @@ const DeletionRequestsTable: FC<{
           />
         }
       >
-        <label htmlFor="rejectionReason" className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          htmlFor="rejectionReason"
+          className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-2"
+        >
           Reason for rejection
         </label>
         <textarea
@@ -656,7 +705,7 @@ const DeletionRequestsTable: FC<{
           value={rejectionReason}
           onChange={(e) => setRejectionReason(e.target.value)}
           placeholder="Explain why this deletion request is being rejected..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
         />
       </Modal>
     </div>
@@ -792,12 +841,16 @@ const GDPRCompliancePage: FC = () => {
 
   if (!canManageGDPR) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-wrapper">
+        <div className="container-narrow">
           <div className="text-center py-12">
-            <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
-            <p className="text-gray-600">You don't have permission to manage GDPR compliance.</p>
+            <Shield className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+              Access Restricted
+            </h3>
+            <p className="text-[var(--color-text-secondary)]">
+              You don't have permission to manage GDPR compliance.
+            </p>
           </div>
         </div>
       </div>
@@ -808,18 +861,20 @@ const GDPRCompliancePage: FC = () => {
     <>
       <PageMetadata
         title="GDPR Compliance Center"
-        description="Manage data export, deletion, and consent workflows to keep your organization compliant with GDPR mandates."
+        description="Manage data export, deletion, and consent requests to keep your organization compliant with GDPR mandates."
         keywords="gdpr compliance, data export requests, account deletion, consent management"
       />
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-wrapper">
+        <div className="container-full">
           {/* Header */}
           <div className="mb-8">
             <Breadcrumb />
             <div className="mt-4 flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">GDPR Compliance</h1>
-                <p className="text-gray-600 mt-1">
+                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                  GDPR Compliance
+                </h1>
+                <p className="text-[color:var(--color-text-secondary)] mt-1">
                   Data protection and privacy compliance management
                 </p>
               </div>
@@ -827,9 +882,9 @@ const GDPRCompliancePage: FC = () => {
                 <button
                   onClick={loadGDPRData}
                   disabled={isLoading}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                  className="inline-flex items-center px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[color:var(--color-background-secondary)] disabled:opacity-50"
                 >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`icon-sm mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                   Refresh
                 </button>
               </div>
@@ -851,84 +906,140 @@ const GDPRCompliancePage: FC = () => {
               aria-label="GDPR statistics summary"
             >
               <div
-                className="bg-white rounded-lg shadow-sm border p-4"
+                className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
+                role="status"
+                aria-label={`${stats.total_data_breaches} data breaches`}
+              >
+                <div className="flex items-center">
+                  <ShieldAlert
+                    className="icon-lg text-[color:var(--color-text-secondary)] mr-3"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+                      Data Breaches
+                    </p>
+                    <p className="text-lg font-semibold text-[var(--color-text-primary)]">
+                      {stats.total_data_breaches}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
                 role="status"
                 aria-label={`${stats.total_export_requests} export requests`}
               >
                 <div className="flex items-center">
-                  <Download className="w-6 h-6 text-blue-600 mr-3" aria-hidden="true" />
+                  <Download
+                    className="icon-lg text-[color:var(--color-primary)] mr-3"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <p className="text-xs font-medium text-gray-600">Export Requests</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+                      Export Requests
+                    </p>
+                    <p className="text-lg font-semibold text-[var(--color-text-primary)]">
                       {stats.total_export_requests}
                     </p>
                   </div>
                 </div>
               </div>
               <div
-                className="bg-white rounded-lg shadow-sm border p-4"
+                className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
                 role="status"
-                aria-label={`${stats.pending_exports} pending export requests`}
+                aria-label={`${stats.pending_export} pending export requests`}
               >
                 <div className="flex items-center">
-                  <Clock className="w-6 h-6 text-yellow-600 mr-3" aria-hidden="true" />
+                  <Clock
+                    className="icon-lg text-[color:var(--color-warning)] mr-3"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <p className="text-xs font-medium text-gray-600">Pending Exports</p>
-                    <p className="text-lg font-semibold text-gray-900">{stats.pending_exports}</p>
+                    <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+                      Pending Exports
+                    </p>
+                    <p className="text-lg font-semibold text-[var(--color-text-primary)]">
+                      {stats.pending_exports}
+                    </p>
                   </div>
                 </div>
               </div>
               <div
-                className="bg-white rounded-lg shadow-sm border p-4"
+                className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
                 role="status"
                 aria-label={`${stats.total_deletion_requests} deletion requests`}
               >
                 <div className="flex items-center">
-                  <Trash2 className="w-6 h-6 text-red-600 mr-3" aria-hidden="true" />
+                  <Trash2
+                    className="icon-lg text-[color:var(--color-error)] mr-3"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <p className="text-xs font-medium text-gray-600">Deletion Requests</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+                      Deletion Requests
+                    </p>
+                    <p className="text-lg font-semibold text-[var(--color-text-primary)]">
                       {stats.total_deletion_requests}
                     </p>
                   </div>
                 </div>
               </div>
               <div
-                className="bg-white rounded-lg shadow-sm border p-4"
+                className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
                 role="status"
-                aria-label={`${stats.pending_deletions} pending deletion requests`}
+                aria-label={`${stats.pending_deletion} pending deletion requests`}
               >
                 <div className="flex items-center">
-                  <AlertTriangle className="w-6 h-6 text-orange-600 mr-3" aria-hidden="true" />
+                  <AlertTriangle
+                    className="icon-lg text-[var(--color-warning)] mr-3"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <p className="text-xs font-medium text-gray-600">Pending Deletions</p>
-                    <p className="text-lg font-semibold text-gray-900">{stats.pending_deletions}</p>
+                    <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+                      Pending Deletions
+                    </p>
+                    <p className="text-lg font-semibold text-[var(--color-text-primary)]">
+                      {stats.pending_deletions}
+                    </p>
                   </div>
                 </div>
               </div>
               <div
-                className="bg-white rounded-lg shadow-sm border p-4"
+                className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
                 role="status"
                 aria-label={`${stats.active_consents} active consents`}
               >
                 <div className="flex items-center">
-                  <CheckCircle className="w-6 h-6 text-green-600 mr-3" aria-hidden="true" />
+                  <CheckCircle
+                    className="icon-lg text-[color:var(--color-success)] mr-3"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <p className="text-xs font-medium text-gray-600">Active Consents</p>
-                    <p className="text-lg font-semibold text-gray-900">{stats.active_consents}</p>
+                    <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+                      Active Consents
+                    </p>
+                    <p className="text-lg font-semibold text-[var(--color-text-primary)]">
+                      {stats.active_consents}
+                    </p>
                   </div>
                 </div>
               </div>
               <div
-                className="bg-white rounded-lg shadow-sm border p-4"
+                className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-4"
                 role="status"
                 aria-label={`${stats.withdrawn_consents} withdrawn consents`}
               >
                 <div className="flex items-center">
-                  <XCircle className="w-6 h-6 text-gray-600 mr-3" aria-hidden="true" />
+                  <XCircle
+                    className="icon-lg text-[color:var(--color-text-secondary)] mr-3"
+                    aria-hidden="true"
+                  />
                   <div>
-                    <p className="text-xs font-medium text-gray-600">Withdrawn</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+                      Withdrawn
+                    </p>
+                    <p className="text-lg font-semibold text-[var(--color-text-primary)]">
                       {stats.withdrawn_consents}
                     </p>
                   </div>
@@ -938,8 +1049,8 @@ const GDPRCompliancePage: FC = () => {
           )}
 
           {/* Tabs and Filters */}
-          <div className="bg-white rounded-lg shadow-sm border mb-6">
-            <div className="border-b border-gray-200">
+          <div className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border mb-6">
+            <div className="border-b border-[var(--color-border)]">
               <div className="flex items-center justify-between px-6 py-4">
                 <div role="tablist" aria-label="GDPR data categories">
                   <nav className="-mb-px flex space-x-8">
@@ -950,8 +1061,8 @@ const GDPRCompliancePage: FC = () => {
                       aria-controls="exports-panel"
                       className={`py-2 px-1 border-b-2 font-medium text-sm ${
                         activeTab === 'exports'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                          : 'border-transparent text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:border-[var(--color-border)]'
                       }`}
                     >
                       Data Export Requests
@@ -963,8 +1074,8 @@ const GDPRCompliancePage: FC = () => {
                       aria-controls="deletions-panel"
                       className={`py-2 px-1 border-b-2 font-medium text-sm ${
                         activeTab === 'deletions'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                          : 'border-transparent text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:border-[var(--color-border)]'
                       }`}
                     >
                       Deletion Requests
@@ -976,8 +1087,8 @@ const GDPRCompliancePage: FC = () => {
                       aria-controls="consents-panel"
                       className={`py-2 px-1 border-b-2 font-medium text-sm ${
                         activeTab === 'consents'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                          : 'border-transparent text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:border-[var(--color-border)]'
                       }`}
                     >
                       Consent Records
@@ -988,7 +1099,7 @@ const GDPRCompliancePage: FC = () => {
                 <div className="flex space-x-4">
                   <div className="relative" role="search">
                     <Search
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[color:var(--color-text-tertiary)] icon-sm"
                       aria-hidden="true"
                     />
                     <input
@@ -997,7 +1108,7 @@ const GDPRCompliancePage: FC = () => {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       aria-label="Search GDPR records"
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="pl-10 pr-4 py-2 border border-[color:var(--color-border-primary)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
                     />
                   </div>
                   {activeTab !== 'consents' && (
@@ -1005,7 +1116,7 @@ const GDPRCompliancePage: FC = () => {
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
                       aria-label="Filter by status"
-                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
                     >
                       <option value="all">All Statuses</option>
                       <option value="pending">Pending</option>
@@ -1056,7 +1167,7 @@ const GDPRCompliancePage: FC = () => {
                         {Array.from({ length: 5 }).map((_, i) => (
                           <div
                             key={i}
-                            className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                            className="flex items-center justify-between p-4 border border-[color:var(--color-border-primary)] rounded-lg"
                             role="status"
                             aria-label="Loading consent record"
                           >
@@ -1077,13 +1188,18 @@ const GDPRCompliancePage: FC = () => {
                           filteredConsentRecords.map((record) => (
                             <div
                               key={record.consent_id}
-                              className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                              className="flex items-center justify-between p-4 border border-[color:var(--color-border-primary)] rounded-lg hover:bg-[var(--color-surface-hover)]"
                             >
                               <div className="flex items-center space-x-4">
-                                <User className="w-10 h-10 text-gray-400" aria-hidden="true" />
+                                <User
+                                  className="w-10 h-10 text-[var(--color-text-tertiary)]"
+                                  aria-hidden="true"
+                                />
                                 <div>
-                                  <div className="font-medium text-gray-900">{record.email}</div>
-                                  <div className="text-sm text-gray-500">
+                                  <div className="font-medium text-[var(--color-text-primary)]">
+                                    {record.email}
+                                  </div>
+                                  <div className="text-sm text-[var(--color-text-tertiary)]">
                                     {record.consent_type} {record.legal_basis}
                                   </div>
                                 </div>
@@ -1091,24 +1207,24 @@ const GDPRCompliancePage: FC = () => {
                               <div className="flex items-center space-x-3">
                                 {record.granted ? (
                                   <span
-                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[color:var(--color-success-100)] text-[var(--color-success)]"
                                     role="status"
                                     aria-label={`Consent granted on ${formatDate(record.granted_at!)}`}
                                   >
-                                    <CheckCircle className="w-3 h-3 mr-1" aria-hidden="true" />
+                                    <CheckCircle className="icon-xs mr-1" aria-hidden="true" />
                                     Granted
                                   </span>
                                 ) : (
                                   <span
-                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[color:var(--color-error-100)] text-[var(--color-error)]"
                                     role="status"
                                     aria-label={`Consent withdrawn on ${formatDate(record.withdrawn_at!)}`}
                                   >
-                                    <XCircle className="w-3 h-3 mr-1" aria-hidden="true" />
+                                    <XCircle className="icon-xs mr-1" aria-hidden="true" />
                                     Withdrawn
                                   </span>
                                 )}
-                                <div className="text-sm text-gray-500">
+                                <div className="text-sm text-[var(--color-text-tertiary)]">
                                   {record.granted
                                     ? formatDate(record.granted_at!)
                                     : formatDate(record.withdrawn_at!)}
@@ -1119,13 +1235,13 @@ const GDPRCompliancePage: FC = () => {
                         ) : (
                           <div className="text-center py-12">
                             <Shield
-                              className="w-12 h-12 text-gray-400 mx-auto mb-4"
+                              className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
                               aria-hidden="true"
                             />
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
                               No consent records
                             </h3>
-                            <p className="text-gray-600">
+                            <p className="text-[var(--color-text-secondary)]">
                               No consent records match your search criteria.
                             </p>
                           </div>

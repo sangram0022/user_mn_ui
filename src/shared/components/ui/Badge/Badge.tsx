@@ -51,44 +51,45 @@ export interface BadgeProps {
 
 const variantStyles: Record<BadgeVariant, string> = {
   default:
-    'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600',
+    'bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)] text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)] border border-[var(--color-border)] dark:border-[var(--color-border)]',
   primary:
-    'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
+    'bg-[var(--color-primary-light)] dark:bg-[var(--color-primary)]/30 text-[var(--color-primary)] dark:text-[var(--color-primary)] border border-[var(--color-primary)] dark:border-[var(--color-primary)]',
   success:
-    'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800',
+    'bg-[var(--color-success-light)] dark:bg-[var(--color-success)]/30 text-[var(--color-success)] dark:text-[var(--color-success)] border border-[var(--color-success)] dark:border-[var(--color-success)]',
   warning:
-    'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800',
+    'bg-[var(--color-warning-light)] dark:bg-[var(--color-warning)]/30 text-[var(--color-warning)] dark:text-[var(--color-warning)] border border-[var(--color-warning)] dark:border-[var(--color-warning)]',
   error:
-    'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800',
-  info: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800',
-  critical: 'bg-red-600 dark:bg-red-700 text-white border border-red-700 dark:border-red-600',
+    'bg-[var(--color-error-light)] dark:bg-[var(--color-error)]/30 text-[var(--color-error)] dark:text-[var(--color-error)] border border-[var(--color-error)] dark:border-[var(--color-error)]',
+  info: 'bg-[var(--color-primary-light)] dark:bg-[var(--color-primary)]/20 text-[var(--color-primary)] dark:text-[var(--color-primary)] border border-[var(--color-primary)] dark:border-[var(--color-primary)]',
+  critical:
+    'bg-[var(--color-error)] dark:bg-[var(--color-error)] text-[var(--color-text-primary)] border border-[var(--color-error)] dark:border-[var(--color-error)]',
 };
 
 const dotColors: Record<BadgeVariant, string> = {
-  default: 'bg-gray-500',
-  primary: 'bg-blue-500',
-  success: 'bg-green-500',
-  warning: 'bg-yellow-500',
-  error: 'bg-red-500',
-  info: 'bg-blue-400',
-  critical: 'bg-white',
+  default: 'bg-[var(--color-surface-secondary)]',
+  primary: 'bg-[var(--color-primary)]',
+  success: 'bg-[var(--color-success)]',
+  warning: 'bg-[var(--color-warning)]',
+  error: 'bg-[var(--color-error)]',
+  info: 'bg-[var(--color-primary)]',
+  critical: 'bg-[var(--color-surface-primary)]',
 };
 
 const sizeStyles: Record<BadgeSize, { container: string; dot: string; icon: string }> = {
   sm: {
     container: 'px-2 py-0.5 text-xs',
     dot: 'w-1.5 h-1.5',
-    icon: 'w-3 h-3',
+    icon: 'icon-xs',
   },
   md: {
     container: 'px-2.5 py-1 text-sm',
     dot: 'w-2 h-2',
-    icon: 'w-3.5 h-3.5',
+    icon: 'icon-xs',
   },
   lg: {
     container: 'px-3 py-1.5 text-base',
     dot: 'w-2.5 h-2.5',
-    icon: 'w-4 h-4',
+    icon: 'icon-sm',
   },
 };
 
@@ -128,7 +129,7 @@ export function Badge({
           onClick={onRemove}
           className={cn(
             'rounded-full',
-            'hover:bg-black/10 dark:hover:bg-white/10',
+            'hover:bg-black/10 dark:hover:bg-[var(--color-surface-primary)]/10',
             'transition-colors',
             'focus:outline-none focus:ring-1 focus:ring-current',
             '-mr-1'

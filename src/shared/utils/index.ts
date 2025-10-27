@@ -17,7 +17,6 @@ export * from './dateUtils';
 export * from './env';
 export * from './error';
 export * from './error-handler';
-export * from './formValidation';
 export * from './logger';
 
 // String utilities (capitalize, truncate, slugify, etc.)
@@ -28,8 +27,8 @@ export * from './url';
 
 // Performance monitoring (metrics collection, web vitals)
 export {
-  performanceMonitor,
   PerformanceUtils,
+  performanceMonitor,
   useDebouncedValue,
   useLargeDataset,
   usePagination,
@@ -69,6 +68,9 @@ export * from './sanitization';
 
 // User utilities
 export * from './user';
+
+// Role-based permission utilities
+export * from './rolePermissions';
 
 // Validation utilities
 export * from './validation';

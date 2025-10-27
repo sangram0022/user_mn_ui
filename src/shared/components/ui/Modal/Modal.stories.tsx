@@ -106,10 +106,7 @@ export const Default: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Open Modal
           </button>
           <Modal isOpen={isOpen} onClose={onClose} title="Default Modal">
@@ -127,10 +124,7 @@ export const WithFooter: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Open Modal with Footer
           </button>
           <Modal
@@ -139,10 +133,7 @@ export const WithFooter: Story = {
             title="Confirm Action"
             footer={
               <div className="flex justify-end gap-2">
-                <button
-                  onClick={onClose}
-                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-                >
+                <button onClick={onClose} className="btn btn-secondary">
                   Cancel
                 </button>
                 <button
@@ -150,7 +141,7 @@ export const WithFooter: Story = {
                     alert('Confirmed!');
                     onClose();
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="btn btn-primary"
                 >
                   Confirm
                 </button>
@@ -158,7 +149,9 @@ export const WithFooter: Story = {
             }
           >
             <p>Are you sure you want to proceed with this action?</p>
-            <p className="mt-2 text-sm text-gray-600">This action cannot be undone.</p>
+            <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+              This action cannot be undone.
+            </p>
           </Modal>
         </>
       )}
@@ -175,10 +168,7 @@ export const SmallSize: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Small Modal
           </button>
           <Modal isOpen={isOpen} onClose={onClose} title="Small Modal" size="sm">
@@ -195,10 +185,7 @@ export const MediumSize: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Medium Modal
           </button>
           <Modal isOpen={isOpen} onClose={onClose} title="Medium Modal" size="md">
@@ -218,10 +205,7 @@ export const LargeSize: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Large Modal
           </button>
           <Modal isOpen={isOpen} onClose={onClose} title="Large Modal" size="lg">
@@ -250,10 +234,7 @@ export const ExtraLargeSize: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Extra Large Modal
           </button>
           <Modal isOpen={isOpen} onClose={onClose} title="Extra Large Modal" size="xl">
@@ -280,10 +261,7 @@ export const FullSize: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Full Size Modal
           </button>
           <Modal isOpen={isOpen} onClose={onClose} title="Full Size Modal" size="full">
@@ -318,10 +296,7 @@ export const NoBackdropClose: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Open (No Backdrop Close)
           </button>
           <Modal
@@ -344,10 +319,7 @@ export const NoEscapeClose: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Open (No Escape Close)
           </button>
           <Modal isOpen={isOpen} onClose={onClose} title="No Escape Modal" closeOnEscape={false}>
@@ -365,10 +337,7 @@ export const NoCloseButton: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Open (No Close Button)
           </button>
           <Modal
@@ -377,10 +346,7 @@ export const NoCloseButton: Story = {
             title="Custom Close Modal"
             showCloseButton={false}
             footer={
-              <button
-                onClick={onClose}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
+              <button onClick={onClose} className="btn btn-primary btn-block">
                 Got It!
               </button>
             }
@@ -403,10 +369,7 @@ export const FormModal: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Create New User
           </button>
           <Modal
@@ -415,10 +378,7 @@ export const FormModal: Story = {
             title="Create New User"
             footer={
               <div className="flex justify-end gap-2">
-                <button
-                  onClick={onClose}
-                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-                >
+                <button onClick={onClose} className="btn btn-secondary">
                   Cancel
                 </button>
                 <button
@@ -426,7 +386,7 @@ export const FormModal: Story = {
                     alert('User created!');
                     onClose();
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="btn btn-primary"
                 >
                   Create
                 </button>
@@ -441,7 +401,7 @@ export const FormModal: Story = {
                 <input
                   id="user-name"
                   type="text"
-                  className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-[var(--color-primary)]"
                   placeholder="John Doe"
                 />
               </div>
@@ -452,7 +412,7 @@ export const FormModal: Story = {
                 <input
                   id="user-email"
                   type="email"
-                  className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-[var(--color-primary)]"
                   placeholder="john@example.com"
                 />
               </div>
@@ -462,7 +422,7 @@ export const FormModal: Story = {
                 </label>
                 <select
                   id="user-role"
-                  className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-[var(--color-primary)]"
                 >
                   <option>User</option>
                   <option>Admin</option>
@@ -484,7 +444,7 @@ export const ConfirmationModal: Story = {
         <>
           <button
             onClick={onOpen}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className="px-4 py-2 bg-[var(--color-error)] text-[var(--color-text-primary)] rounded hover:bg-[var(--color-error)]"
           >
             Delete Account
           </button>
@@ -498,7 +458,7 @@ export const ConfirmationModal: Story = {
               <div className="flex justify-end gap-2">
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                  className="px-4 py-2 border border-[var(--color-border)] rounded hover:bg-[var(--color-surface-secondary)]"
                 >
                   Cancel
                 </button>
@@ -507,15 +467,19 @@ export const ConfirmationModal: Story = {
                     alert('Account deleted');
                     onClose();
                   }}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                  className="px-4 py-2 bg-[var(--color-error)] text-[var(--color-text-primary)] rounded hover:bg-[var(--color-error)]"
                 >
                   Delete
                 </button>
               </div>
             }
           >
-            <p className="text-gray-700">Are you sure you want to delete your account?</p>
-            <p className="mt-2 text-sm text-red-600 font-semibold">This action cannot be undone.</p>
+            <p className="text-[var(--color-text-secondary)]">
+              Are you sure you want to delete your account?
+            </p>
+            <p className="mt-2 text-sm text-[var(--color-error)] font-semibold">
+              This action cannot be undone.
+            </p>
           </Modal>
         </>
       )}
@@ -528,10 +492,7 @@ export const ScrollableContent: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             View Terms & Conditions
           </button>
           <Modal
@@ -540,29 +501,26 @@ export const ScrollableContent: Story = {
             title="Terms and Conditions"
             size="lg"
             footer={
-              <button
-                onClick={onClose}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
+              <button onClick={onClose} className="btn btn-primary btn-block">
                 I Agree
               </button>
             }
           >
             <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
               <h3 className="font-semibold">1. Introduction</h3>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-[var(--color-text-secondary)]">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
                 incididunt ut labore et dolore magna aliqua.
               </p>
 
               <h3 className="font-semibold">2. User Responsibilities</h3>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-[var(--color-text-secondary)]">
                 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
                 ex ea commodo consequat.
               </p>
 
               <h3 className="font-semibold">3. Privacy Policy</h3>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-[var(--color-text-secondary)]">
                 Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
                 fugiat nulla pariatur.
               </p>
@@ -572,7 +530,7 @@ export const ScrollableContent: Story = {
                 ({ id, index }) => (
                   <div key={id}>
                     <h3 className="font-semibold">{index + 4}. Additional Section</h3>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-[var(--color-text-secondary)]">
                       Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
                       deserunt mollit anim id est laborum.
                     </p>
@@ -596,10 +554,7 @@ export const DarkMode: Story = {
     <ModalWrapper>
       {(isOpen, onClose, onOpen) => (
         <>
-          <button
-            onClick={onOpen}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <button onClick={onOpen} className="btn btn-primary">
             Open Modal (Dark Mode)
           </button>
           <Modal
@@ -607,10 +562,7 @@ export const DarkMode: Story = {
             onClose={onClose}
             title="Dark Mode Modal"
             footer={
-              <button
-                onClick={onClose}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
+              <button onClick={onClose} className="btn btn-primary">
                 Close
               </button>
             }

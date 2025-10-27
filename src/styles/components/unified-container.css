@@ -1,14 +1,43 @@
 /**
- * UNIFIED CARD & CONTAINER STYLES
+ * 🎯 UNIFIED CARD & CONTAINER STYLES - Tailwind CSS v4 Compatible
  * Consistent spacing, shadows, and layouts
+ * 
+ * Tailwind v4:
+ * - Using @layer base for component classes (correct pattern)
+ * - Container and card components belong in base layer
  */
 
-@layer components {
+@layer base {
+  /* ========================================================================
+     PAGE WRAPPER - Main page container
+     ======================================================================== */
+
+  .page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-page-background, var(--color-background));
+  }
+
+  /* ========================================================================
+     AUTH LAYOUT - Authentication pages layout
+     ======================================================================== */
+
+  .auth-layout {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+    background-color: var(--color-page-background, var(--color-background));
+  }
+
   /* ========================================================================
      CARD - Base component for content containers
      ======================================================================== */
 
-  .card {
+  .card,
+  .card-base {
     background-color: var(--color-white);
     border: var(--card-border-width) solid var(--color-border-primary);
     border-radius: var(--card-border-radius);
@@ -41,6 +70,17 @@
         transform: translateY(0);
       }
     }
+  }
+
+  /* Card for forms */
+  .card-form {
+    background-color: var(--color-white);
+    border: var(--card-border-width) solid var(--color-border-primary);
+    border-radius: var(--card-border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    max-width: 28rem;
+    width: 100%;
   }
 
   /* Card sizing variants */
@@ -110,10 +150,20 @@
      CONTAINER - Page content containers
      ======================================================================== */
 
-  .container {
+  .container,
+  .container-base {
     width: 100%;
     margin: 0 auto;
     padding: 0 var(--spacing-md);
+  }
+
+  .container-full {
+    max-width: 80rem; /* 1280px */
+  }
+
+  .container-form {
+    max-width: 28rem; /* 448px */
+    width: 100%;
   }
 
   .container-xs {
@@ -152,21 +202,43 @@
     &.stack-row {
       flex-direction: row;
     }
+  }
 
-    &.stack-xs {
-      gap: var(--spacing-xs);
-    }
+  /* Stack size variants as standalone classes */
+  .stack-xs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
 
-    &.stack-sm {
-      gap: var(--spacing-sm);
-    }
+  .stack-sm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
 
-    &.stack-lg {
-      gap: var(--spacing-lg);
-    }
+  .stack-md {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
 
-    &.stack-xl {
-      gap: var(--spacing-xl);
+  .stack-lg {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .stack-xl {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+  }
+
+  /* Stack modifiers */
+  .stack {
+    &.stack-row {
+      flex-direction: row;
     }
 
     &.stack-center {

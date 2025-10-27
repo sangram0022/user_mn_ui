@@ -31,7 +31,7 @@ const StatCard: FC<StatCardProps> = ({ title, value, icon, trend, variant = 'pri
           <p className="text-3xl font-bold">{value}</p>
           {trend !== undefined && (
             <div className="cluster" data-gap="xs">
-              <TrendingUp className="w-4 h-4 text-success" />
+              <TrendingUp className="icon-sm text-success" />
               <span className="text-sm text-success">+{trend}%</span>
             </div>
           )}
@@ -51,7 +51,7 @@ export const DashboardExample: FC = () => (
       <div className="cluster" data-align="between">
         <div className="stack" data-gap="xs">
           <h1 className="text-4xl font-bold">Dashboard</h1>
-          <p className="text-secondary">Welcome back! Here's what's happening.</p>
+          <p className="text-secondary">Welcome back! Here&apos;s what&apos;s happening.</p>
         </div>
 
         {/* Button group */}
@@ -70,27 +70,27 @@ export const DashboardExample: FC = () => (
         <StatCard
           title="Total Users"
           value="12,345"
-          icon={<Users className="w-8 h-8" />}
+          icon={<Users className="icon-xl" />}
           trend={12.5}
           variant="primary"
         />
         <StatCard
           title="Active Sessions"
           value="1,234"
-          icon={<CheckCircle className="w-8 h-8" />}
+          icon={<CheckCircle className="icon-xl" />}
           trend={5.2}
           variant="success"
         />
         <StatCard
           title="Pending"
           value="45"
-          icon={<AlertCircle className="w-8 h-8" />}
+          icon={<AlertCircle className="icon-xl" />}
           variant="warning"
         />
         <StatCard
           title="Success Rate"
           value="98.5%"
-          icon={<TrendingUp className="w-8 h-8" />}
+          icon={<TrendingUp className="icon-xl" />}
           trend={2.1}
           variant="success"
         />
@@ -120,7 +120,7 @@ export const DashboardExample: FC = () => (
           </div>
           <div className="card-body">
             <div className="stack" data-gap="md">
-              <p>This is an example of the new CSS architecture. Notice how we're using:</p>
+              <p>This is an example of the new CSS architecture. Notice how we&apos;re using:</p>
               <ul className="list-disc list-inside stack" data-gap="xs">
                 <li>Layout compositions (stack, cluster, auto-grid)</li>
                 <li>Design tokens for colors and spacing</li>

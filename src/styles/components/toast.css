@@ -1,11 +1,15 @@
 /**
- * TOAST COMPONENT STYLES
+ * 🎯 TOAST COMPONENT STYLES - Tailwind CSS v4 Compatible
  * 
  * Toast notification styles with progress indicator.
  * Replaces inline styles from ToastContainer.tsx
+ * 
+ * Tailwind v4:
+ * - Using @layer base for component classes (correct pattern)
+ * - Toast is a UI component, belongs in base layer
  */
 
-@layer components {
+@layer base {
   /* ========================================================================
      TOAST CONTAINER
      ======================================================================== */
@@ -71,6 +75,9 @@
     box-shadow: var(--toast-shadow);
     pointer-events: auto;
     overflow: hidden;
+
+    /* 🚀 CSS Containment - Faster rendering for toast notifications */
+    contain: layout style paint;
 
     /* Animation */
     animation: toast-slide-in var(--duration-base) var(--ease-spring);

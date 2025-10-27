@@ -7,6 +7,7 @@
  * Backend API: POST /profile/gdpr/export
  */
 
+import { Info } from 'lucide-react';
 import { useState } from 'react';
 import { useAsyncOperation } from '../../../hooks/useAsyncOperation';
 import { useToast } from '../../../hooks/useToast';
@@ -110,12 +111,12 @@ export function GDPRDataExport() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="border-l-4 border-blue-500 pl-4 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+    <div className="bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)] rounded-lg shadow p-6">
+      <div className="border-l-4 border-[var(--color-primary)] pl-4 mb-6">
+        <h2 className="text-xl font-semibold text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2">
           Export Your Data
         </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
           Download a copy of all your personal data stored in our system. This includes your profile
           information, activity history, and more.
         </p>
@@ -124,7 +125,7 @@ export function GDPRDataExport() {
       <div className="space-y-6">
         {/* Format Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)] mb-2">
             Export Format
           </label>
           <div className="flex gap-4">
@@ -135,9 +136,9 @@ export function GDPRDataExport() {
                 value="json"
                 checked={options.format === 'json'}
                 onChange={(e) => setOptions({ ...options, format: e.target.value as ExportFormat })}
-                className="mr-2 text-blue-600 focus:ring-blue-500"
+                className="mr-2 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                 JSON (machine-readable)
               </span>
             </label>
@@ -148,9 +149,9 @@ export function GDPRDataExport() {
                 value="csv"
                 checked={options.format === 'csv'}
                 onChange={(e) => setOptions({ ...options, format: e.target.value as ExportFormat })}
-                className="mr-2 text-blue-600 focus:ring-blue-500"
+                className="mr-2 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                 CSV (spreadsheet-friendly)
               </span>
             </label>
@@ -159,7 +160,7 @@ export function GDPRDataExport() {
 
         {/* Include Options */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)] mb-2">
             Include in Export
           </label>
           <div className="space-y-2">
@@ -168,9 +169,9 @@ export function GDPRDataExport() {
                 type="checkbox"
                 checked={options.includeAuditLogs}
                 onChange={(e) => setOptions({ ...options, includeAuditLogs: e.target.checked })}
-                className="mr-2 text-blue-600 focus:ring-blue-500 rounded"
+                className="mr-2 text-[var(--color-primary)] focus:ring-[color:var(--color-primary)] rounded"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                 Audit logs (activity history)
               </span>
             </label>
@@ -179,44 +180,39 @@ export function GDPRDataExport() {
                 type="checkbox"
                 checked={options.includeLoginHistory}
                 onChange={(e) => setOptions({ ...options, includeLoginHistory: e.target.checked })}
-                className="mr-2 text-blue-600 focus:ring-blue-500 rounded"
+                className="mr-2 text-[var(--color-primary)] focus:ring-[color:var(--color-primary)] rounded"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Login history</span>
+              <span className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+                Login history
+              </span>
             </label>
           </div>
         </div>
 
         {/* Export Button */}
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="pt-4 border-t border-[var(--color-border)] dark:border-[var(--color-border)]">
           <button
             type="button"
             onClick={() => exportData()}
             disabled={loading}
-            className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn btn-primary btn-lg w-full sm:w-auto"
           >
             {loading ? 'Preparing Export...' : 'Download My Data'}
           </button>
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-xs text-[var(--color-text-tertiary)] dark:text-[var(--color-text-tertiary)]">
             The export may take a few moments to prepare. Your download will start automatically
             when ready.
           </p>
         </div>
 
         {/* Info Box */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+        <div className="bg-[var(--color-primary-light)] dark:bg-[var(--color-primary)]/20 border border-[var(--color-primary)] dark:border-[var(--color-primary)] rounded-md p-4">
           <div className="flex">
-            <svg
-              className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <div className="text-sm text-blue-800 dark:text-blue-300">
+            <Info
+              className="icon-md text-[var(--color-primary)] dark:text-[var(--color-primary)] mr-2 flex-shrink-0"
+              aria-hidden="true"
+            />
+            <div className="text-sm text-[var(--color-primary)] dark:text-[var(--color-primary)]">
               <p className="font-medium mb-1">About GDPR Data Export</p>
               <ul className="list-disc list-inside space-y-1 text-xs">
                 <li>This export includes all personal data we store about you</li>

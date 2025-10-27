@@ -1,4 +1,4 @@
-﻿import type { FC, MouseEvent } from 'react';
+import type { FC, MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { logger } from './../../../shared/utils/logger';
 
@@ -16,9 +16,7 @@ import {
   Settings,
   Shield,
   TrendingUp,
-  UserCheck,
   Users,
-  Workflow,
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { PageMetadata } from '../../../shared/components/PageMetadata';
@@ -38,12 +36,10 @@ const RoleBasedDashboard: FC = () => {
     prefetchRoute('/profile');
     prefetchRoute('/settings');
 
-    // Admin-specific prefetching - user.role can be string or UserRoleInfo
-    const roleValue = typeof user.role === 'string' ? user.role : user.role?.name;
-    if (user.is_superuser || roleValue === 'admin') {
+    // Admin-specific prefetching
+    if (user.is_superuser || user.roles?.includes('admin')) {
       prefetchRoute('/users');
       prefetchRoute('/analytics');
-      prefetchRoute('/workflows');
     }
   }, [user]);
 
@@ -82,14 +78,6 @@ const RoleBasedDashboard: FC = () => {
       href: '/analytics',
       color: 'purple',
       stats: '99.9% Uptime',
-    },
-    {
-      title: 'Workflow Management',
-      description: 'Manage approval workflows and business processes',
-      icon: Workflow,
-      href: '/workflows',
-      color: 'green',
-      stats: '23 Pending',
     },
     {
       title: 'Security Center',
@@ -135,14 +123,6 @@ const RoleBasedDashboard: FC = () => {
       stats: '8 Reviews',
     },
     {
-      title: 'Approval Workflows',
-      description: 'Handle pending approvals and user requests',
-      icon: UserCheck,
-      href: '/approvals',
-      color: 'orange',
-      stats: '15 Pending',
-    },
-    {
       title: 'Activity Analytics',
       description: 'Monitor user engagement and platform activity',
       icon: BarChart3,
@@ -178,14 +158,6 @@ const RoleBasedDashboard: FC = () => {
       stats: '85% Active',
     },
     {
-      title: 'My Workflows',
-      description: 'View your submitted requests and their status',
-      icon: Clock,
-      href: '/my-workflows',
-      color: 'orange',
-      stats: '2 In Progress',
-    },
-    {
       title: 'Account Settings',
       description: 'Manage your account preferences and security',
       icon: Settings,
@@ -207,20 +179,20 @@ const RoleBasedDashboard: FC = () => {
         title: 'Administrator Dashboard',
         description: 'You have full administrative access to the system',
         icon: Crown,
-        color: 'text-yellow-600 bg-yellow-100',
+        color: 'text-[var(--color-warning)] bg-[var(--color-warning-light)]',
       } as const;
     if (isModerator)
       return {
         title: 'Moderator Dashboard',
         description: 'You can moderate users and manage content',
         icon: Shield,
-        color: 'text-blue-600 bg-blue-100',
+        color: 'text-[var(--color-primary)] bg-[var(--color-primary-light)]',
       } as const;
     return {
       title: 'My Dashboard',
       description: 'Access your personalized features and tools',
       icon: Users,
-      color: 'text-green-600 bg-green-100',
+      color: 'text-[var(--color-success)] bg-[var(--color-success-light)]',
     } as const;
   };
 
@@ -237,21 +209,21 @@ const RoleBasedDashboard: FC = () => {
         ogTitle={`${roleInfo.title} - User Management System`}
         ogDescription={roleInfo.description}
       />
-      <div className="min-h-screen bg-gray-50">
-        <div className="mx-auto max-w-7xl px-4 py-8">
+      <div className="page-wrapper">
+        <div className="container-full">
           <div className="mb-8">
             <div
               className={`inline-flex items-center gap-3 rounded-lg p-4 ${
                 roleInfo.color.includes('yellow')
-                  ? 'bg-amber-100 text-amber-800'
+                  ? 'bg-[var(--color-warning)] text-[var(--color-warning)]'
                   : roleInfo.color.includes('blue')
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-green-100 text-green-800'
+                    ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)]'
+                    : 'bg-[var(--color-success-light)] text-[var(--color-success)]'
               }`}
               role="status"
               aria-label={`${roleInfo.title}: ${roleInfo.description}`}
             >
-              <RoleIcon className="h-6 w-6" aria-hidden="true" />
+              <RoleIcon className="icon-lg" aria-hidden="true" />
               <div>
                 <h1 className="text-2xl font-bold">{roleInfo.title}</h1>
                 <p className="text-sm opacity-80">{roleInfo.description}</p>
@@ -266,62 +238,70 @@ const RoleBasedDashboard: FC = () => {
               aria-label="System statistics"
             >
               <div
-                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-primary)] p-6 shadow-sm"
                 role="status"
                 aria-label="1,234 total users"
               >
                 <div className="flex items-center">
-                  <div className="rounded-lg bg-blue-100 p-3">
-                    <Users className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                  <div className="rounded-lg bg-[var(--color-primary-light)] p-3">
+                    <Users className="icon-lg text-[var(--color-primary)]" aria-hidden="true" />
                   </div>
                   <div className="ml-4">
-                    <div className="text-2xl font-bold text-gray-900">1,234</div>
-                    <div className="text-sm text-gray-500">Total Users</div>
+                    <div className="text-2xl font-bold text-[var(--color-text-primary)]">1,234</div>
+                    <div className="text-sm text-[var(--color-text-tertiary)]">Total Users</div>
                   </div>
                 </div>
               </div>
               <div
-                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-primary)] p-6 shadow-sm"
                 role="status"
                 aria-label="99.9% system uptime"
               >
                 <div className="flex items-center">
-                  <div className="rounded-lg bg-green-100 p-3">
-                    <CheckCircle className="h-6 w-6 text-green-600" aria-hidden="true" />
+                  <div className="rounded-lg bg-[var(--color-success-light)] p-3">
+                    <CheckCircle
+                      className="icon-lg text-[var(--color-success)]"
+                      aria-hidden="true"
+                    />
                   </div>
                   <div className="ml-4">
-                    <div className="text-2xl font-bold text-gray-900">99.9%</div>
-                    <div className="text-sm text-gray-500">System Uptime</div>
+                    <div className="text-2xl font-bold text-[var(--color-text-primary)]">99.9%</div>
+                    <div className="text-sm text-[var(--color-text-tertiary)]">System Uptime</div>
                   </div>
                 </div>
               </div>
               <div
-                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-primary)] p-6 shadow-sm"
                 role="status"
                 aria-label="23 pending approvals"
               >
                 <div className="flex items-center">
-                  <div className="rounded-lg bg-orange-100 p-3">
-                    <Clock className="h-6 w-6 text-orange-600" aria-hidden="true" />
+                  <div className="rounded-lg bg-[var(--color-warning)] p-3">
+                    <Clock className="icon-lg text-[var(--color-warning)]" aria-hidden="true" />
                   </div>
                   <div className="ml-4">
-                    <div className="text-2xl font-bold text-gray-900">23</div>
-                    <div className="text-sm text-gray-500">Pending Approvals</div>
+                    <div className="text-2xl font-bold text-[var(--color-text-primary)]">23</div>
+                    <div className="text-sm text-[var(--color-text-tertiary)]">
+                      Pending Approvals
+                    </div>
                   </div>
                 </div>
               </div>
               <div
-                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-primary)] p-6 shadow-sm"
                 role="status"
                 aria-label="5 security alerts"
               >
                 <div className="flex items-center">
-                  <div className="rounded-lg bg-red-100 p-3">
-                    <AlertTriangle className="h-6 w-6 text-red-600" aria-hidden="true" />
+                  <div className="rounded-lg bg-[var(--color-error-light)] p-3">
+                    <AlertTriangle
+                      className="icon-lg text-[var(--color-error)]"
+                      aria-hidden="true"
+                    />
                   </div>
                   <div className="ml-4">
-                    <div className="text-2xl font-bold text-gray-900">5</div>
-                    <div className="text-sm text-gray-500">Security Alerts</div>
+                    <div className="text-2xl font-bold text-[var(--color-text-primary)]">5</div>
+                    <div className="text-sm text-[var(--color-text-tertiary)]">Security Alerts</div>
                   </div>
                 </div>
               </div>
@@ -342,7 +322,7 @@ const RoleBasedDashboard: FC = () => {
                   key={feature.href}
                   to={feature.href}
                   onClick={(event) => handleFeatureClick(feature.href, event)}
-                  className={`group block rounded-lg border-2 border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg no-underline text-inherit hover:border-${
+                  className={`group block rounded-lg border-2 border-[var(--color-border)] bg-[var(--color-surface-primary)] p-6 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg no-underline text-inherit hover:border-${
                     feature.color === 'blue'
                       ? 'blue-500'
                       : feature.color === 'green'
@@ -356,14 +336,14 @@ const RoleBasedDashboard: FC = () => {
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0">
                       <Icon
-                        className={`h-8 w-8 ${
+                        className={`icon-xl ${
                           feature.color === 'blue'
-                            ? 'text-blue-500'
+                            ? 'text-[var(--color-primary)]'
                             : feature.color === 'green'
-                              ? 'text-green-500'
+                              ? 'text-[var(--color-success)]'
                               : feature.color === 'purple'
-                                ? 'text-purple-500'
-                                : 'text-gray-500'
+                                ? 'text-[var(--color-primary)]'
+                                : 'text-[var(--color-text-tertiary)]'
                         }`}
                         aria-hidden="true"
                       />
@@ -383,24 +363,23 @@ const RoleBasedDashboard: FC = () => {
           </div>
 
           <div
-            className="mt-8 rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-purple-50 p-6"
+            className="mt-8 rounded-lg border border-[var(--color-primary)] bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)] p-6"
             role="region"
             aria-label={
               isAdmin ? 'Admin tips' : isModerator ? 'Moderator tips' : 'Getting started tips'
             }
           >
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+            <h3 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)]">
               {isAdmin ? 'Admin Tips' : isModerator ? 'Moderator Tips' : 'Getting Started'}
             </h3>
             <div
-              className="grid grid-cols-1 gap-4 text-sm text-gray-700 md:grid-cols-2"
+              className="grid grid-cols-1 gap-4 text-sm text-[var(--color-text-secondary)] md:grid-cols-2"
               role="list"
             >
               {isAdmin && (
                 <>
                   <div role="listitem"> Use the Security Center to monitor system threats</div>
                   <div role="listitem"> Review user analytics for platform insights</div>
-                  <div role="listitem"> Set up automated workflows for efficiency</div>
                   <div role="listitem"> Regular backup and security audits are recommended</div>
                 </>
               )}
@@ -416,7 +395,6 @@ const RoleBasedDashboard: FC = () => {
                 <>
                   <div role="listitem"> Complete your profile for better experience</div>
                   <div role="listitem"> Check your activity dashboard regularly</div>
-                  <div role="listitem"> Submit workflow requests when needed</div>
                   <div role="listitem"> Keep your account settings up to date</div>
                 </>
               )}

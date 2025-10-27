@@ -27,7 +27,7 @@ import {
   RefreshCw,
   Shield,
 } from 'lucide-react';
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { PageMetadata } from '@shared/components/PageMetadata';
@@ -67,15 +67,15 @@ const getSeverityIcon = (severity: string) => {
   switch (severity.toLowerCase()) {
     case 'critical':
     case 'error':
-      return <AlertCircle className="w-3 h-3" />;
+      return <AlertCircle className="icon-xs" />;
     case 'warning':
-      return <AlertTriangle className="w-3 h-3" />;
+      return <AlertTriangle className="icon-xs" />;
     case 'info':
-      return <Info className="w-3 h-3" />;
+      return <Info className="icon-xs" />;
     case 'success':
-      return <CheckCircle className="w-3 h-3" />;
+      return <CheckCircle className="icon-xs" />;
     default:
-      return <Info className="w-3 h-3" />;
+      return <Info className="icon-xs" />;
   }
 };
 
@@ -86,10 +86,12 @@ const AuditLogRow: FC<{ log: AuditLog; onViewDetails: (log: AuditLog) => void }>
   const { date, time } = formatTimestamp(log.timestamp);
 
   return (
-    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700">
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+    <tr className="hover:bg-[color:var(--color-background-secondary)] dark:hover:bg-[var(--color-surface-primary)]">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
         {date}
-        <div className="text-xs text-gray-500 dark:text-gray-400">{time}</div>
+        <div className="text-xs text-[color:var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+          {time}
+        </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <Badge
@@ -101,23 +103,27 @@ const AuditLogRow: FC<{ log: AuditLog; onViewDetails: (log: AuditLog) => void }>
           {log.severity}
         </Badge>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
         {log.action}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
         {log.resource_type}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-        {log.user_id || <span className="text-gray-400 dark:text-gray-500">System</span>}
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
+        {log.user_id || (
+          <span className="text-[color:var(--color-text-tertiary)] dark:text-[var(--color-text-tertiary)]">
+            System
+          </span>
+        )}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <button
           onClick={() => onViewDetails(log)}
-          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded p-1"
+          className="text-[color:var(--color-primary)] hover:text-[var(--color-primary)] dark:text-[var(--color-primary)] dark:hover:text-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:ring-offset-1 rounded w-8 h-8 max-md:w-11 max-md:h-11 flex items-center justify-center"
           aria-label={`View details for ${log.action} on ${log.resource_type}`}
           title="View log details"
         >
-          <Eye className="w-4 h-4" aria-hidden="true" />
+          <Eye className="icon-sm max-md:icon-md" aria-hidden="true" />
         </button>
       </td>
     </tr>
@@ -140,7 +146,7 @@ const DetailsModal: FC<{
     >
       <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          className="fixed inset-0 bg-[var(--color-surface-secondary)] bg-opacity-75 transition-opacity"
           aria-hidden="true"
           onClick={onClose}
         />
@@ -149,15 +155,18 @@ const DetailsModal: FC<{
           &#8203;
         </span>
 
-        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-          <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div className="inline-block align-bottom bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+          <div className="bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 id="modal-title" className="text-lg font-medium text-gray-900 dark:text-white">
+              <h3
+                id="modal-title"
+                className="text-lg font-medium text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]"
+              >
                 Audit Log Details
               </h3>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                className="text-[color:var(--color-text-tertiary)] hover:text-[color:var(--color-text-secondary)] dark:hover:text-[var(--color-text-tertiary)]"
                 aria-label="Close modal"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -174,15 +183,15 @@ const DetailsModal: FC<{
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Audit ID
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100 font-mono">
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)] font-mono">
                     {log.audit_id}
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Severity
                   </h4>
                   <Badge
@@ -197,13 +206,15 @@ const DetailsModal: FC<{
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Action
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">{log.action}</p>
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
+                    {log.action}
+                  </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Outcome
                   </h4>
                   <Badge variant={log.outcome === 'success' ? 'success' : 'error'} size="sm">
@@ -214,33 +225,37 @@ const DetailsModal: FC<{
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Resource Type
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">{log.resource_type}</p>
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
+                    {log.resource_type}
+                  </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Resource ID
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">{log.resource_id}</p>
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
+                    {log.resource_id}
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     User ID
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
                     {log.user_id || 'System'}
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Timestamp
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)]">
                     {formatDateTime(log.timestamp)}
                   </p>
                 </div>
@@ -248,10 +263,10 @@ const DetailsModal: FC<{
 
               {log.ip_address && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     IP Address
                   </h4>
-                  <p className="text-sm text-gray-900 dark:text-gray-100 font-mono">
+                  <p className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)] font-mono">
                     {log.ip_address}
                   </p>
                 </div>
@@ -259,10 +274,10 @@ const DetailsModal: FC<{
 
               {log.metadata && Object.keys(log.metadata).length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <h4 className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-tertiary)] mb-1">
                     Metadata
                   </h4>
-                  <pre className="text-sm text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900 p-3 rounded-md overflow-auto max-h-48">
+                  <pre className="text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)] bg-[color:var(--color-background-secondary)] dark:bg-[color:var(--color-background-tertiary)] p-3 rounded-md overflow-auto max-h-48">
                     {JSON.stringify(log.metadata, null, 2)}
                   </pre>
                 </div>
@@ -270,11 +285,11 @@ const DetailsModal: FC<{
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <div className="bg-[color:var(--color-background-secondary)] dark:bg-[var(--color-surface-primary)] px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
             <button
               type="button"
               onClick={onClose}
-              className="w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm"
+              className="w-full inline-flex justify-center rounded-md border border-[color:var(--color-border-primary)] dark:border-[var(--color-border)] shadow-sm px-4 py-2 bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] text-base font-medium text-[color:var(--color-text-primary)] dark:text-[var(--color-text-secondary)] hover:bg-[color:var(--color-background-secondary)] dark:hover:bg-[var(--color-surface-primary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--color-primary)] sm:w-auto sm:text-sm"
             >
               Close
             </button>
@@ -324,26 +339,26 @@ const Pagination: FC<{
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-white">
+    <div className="flex items-center justify-between px-6 py-3 border-t border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)]">
       <div className="flex justify-between sm:hidden">
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1 || isLoading}
-          className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+          className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-[color:var(--color-text-secondary)] bg-[var(--color-surface-primary)] border border-[color:var(--color-border-primary)] rounded-md hover:bg-[color:var(--color-background-secondary)] disabled:opacity-50"
         >
           Previous
         </button>
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages || isLoading}
-          className="relative ml-3 inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+          className="relative ml-3 inline-flex items-center px-4 py-2 text-sm font-medium text-[color:var(--color-text-secondary)] bg-[var(--color-surface-primary)] border border-[color:var(--color-border-primary)] rounded-md hover:bg-[color:var(--color-background-secondary)] disabled:opacity-50"
         >
           Next
         </button>
       </div>
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-[var(--color-text-secondary)]">
             Page <span className="font-medium">{currentPage}</span> of{' '}
             <span className="font-medium">{totalPages}</span>
           </p>
@@ -353,9 +368,9 @@ const Pagination: FC<{
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage <= 1 || isLoading}
-              className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+              className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] text-sm font-medium text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-background-secondary)] disabled:opacity-50"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="icon-md" />
             </button>
             {getVisiblePages().map((page, index) => (
               <button
@@ -364,8 +379,8 @@ const Pagination: FC<{
                 disabled={typeof page !== 'number' || isLoading}
                 className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                   page === currentPage
-                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    ? 'z-10 bg-[var(--color-primary-light)] border-[var(--color-primary)] text-[var(--color-primary)]'
+                    : 'bg-[var(--color-surface-primary)] border-[var(--color-border)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-secondary)]'
                 } ${typeof page !== 'number' ? 'cursor-default' : 'cursor-pointer'}`}
               >
                 {page}
@@ -374,9 +389,9 @@ const Pagination: FC<{
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage >= totalPages || isLoading}
-              className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+              className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] text-sm font-medium text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-background-secondary)] disabled:opacity-50"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="icon-md" />
             </button>
           </nav>
         </div>
@@ -412,10 +427,11 @@ const AuditLogsPage: FC = () => {
   // ============================================================================
   // Data Loading Functions
   // ============================================================================
-  // React 19 Compiler handles memoization
+  // ✅ FIXED: Wrapped with useCallback to prevent infinite re-renders
 
-  const loadAuditLogs = async () => {
-    if (!canViewAuditLogs) return;
+  const loadAuditLogs = useCallback(async () => {
+    // Check permission inside function, not in dependencies
+    if (!hasPermission('admin') && !hasPermission('audit:read')) return;
 
     setIsLoading(true);
     try {
@@ -428,10 +444,11 @@ const AuditLogsPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [hasPermission, filters, handleError, toast]);
 
-  const loadSummary = async () => {
-    if (!canViewAuditLogs) return;
+  const loadSummary = useCallback(async () => {
+    // Check permission inside function, not in dependencies
+    if (!hasPermission('admin') && !hasPermission('audit:read')) return;
 
     try {
       const summaryData = await adminService.getAuditSummary();
@@ -440,7 +457,7 @@ const AuditLogsPage: FC = () => {
       handleError(error, 'Failed to load audit summary');
       toast.error('Failed to load audit summary');
     }
-  };
+  }, [hasPermission, handleError, toast]);
 
   // ============================================================================
   // Filter Functions
@@ -534,12 +551,16 @@ const AuditLogsPage: FC = () => {
   }, []);
 
   useEffect(() => {
-    loadAuditLogs();
-  }, [filters, loadAuditLogs]);
+    if (canViewAuditLogs) {
+      loadAuditLogs(); // ✅ Safe - loadAuditLogs is now memoized
+    }
+  }, [loadAuditLogs, canViewAuditLogs]);
 
   useEffect(() => {
-    loadSummary();
-  }, [loadSummary]);
+    if (canViewAuditLogs) {
+      loadSummary(); // ✅ Safe - loadSummary is now memoized
+    }
+  }, [loadSummary, canViewAuditLogs]);
 
   // ============================================================================
   // Render
@@ -547,12 +568,16 @@ const AuditLogsPage: FC = () => {
 
   if (!canViewAuditLogs) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-wrapper">
+        <div className="container-narrow">
           <div className="text-center py-12">
-            <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
-            <p className="text-gray-600">You don't have permission to view audit logs.</p>
+            <Shield className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+              Access Restricted
+            </h3>
+            <p className="text-[var(--color-text-secondary)]">
+              You don't have permission to view audit logs.
+            </p>
           </div>
         </div>
       </div>
@@ -568,40 +593,42 @@ const AuditLogsPage: FC = () => {
         ogTitle="Audit Logs - User Management System"
         ogDescription="Monitor and review system activity with comprehensive audit trail."
       />
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-wrapper">
+        <div className="container-full">
           {/* Header */}
           <div className="mb-8">
             <Breadcrumb />
             <div className="mt-4 flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
-                <p className="text-gray-600 mt-1">System activity and security events</p>
+                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Audit Logs</h1>
+                <p className="text-[color:var(--color-text-secondary)] mt-1">
+                  System activity and security events
+                </p>
               </div>
               <div className="flex space-x-3" role="group" aria-label="Audit log actions">
                 <button
                   onClick={clearFilters}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[color:var(--color-background-secondary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
                   aria-label="Clear all filters"
                 >
                   Clear Filters
                 </button>
                 <button
                   onClick={handleExport}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-[var(--color-text-primary)] bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-700)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
                   aria-label="Export audit logs"
                 >
-                  <Download className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <Download className="icon-sm mr-2" aria-hidden="true" />
                   Export
                 </button>
                 <button
                   onClick={loadAuditLogs}
                   disabled={isLoading}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[color:var(--color-background-secondary)] disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
                   aria-label={isLoading ? 'Refreshing audit logs' : 'Refresh audit logs'}
                 >
                   <RefreshCw
-                    className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
+                    className={`icon-sm mr-2 ${isLoading ? 'animate-spin' : ''}`}
                     aria-hidden="true"
                   />
                   Refresh
@@ -625,18 +652,21 @@ const AuditLogsPage: FC = () => {
               aria-label="Audit log summary statistics"
             >
               <div
-                className="bg-white rounded-lg shadow-sm border p-6"
+                className="bg-[var(--color-surface-primary)] rounded-lg shadow-sm border p-6"
                 role="group"
                 aria-labelledby="total-events-label"
               >
                 <div className="flex items-center">
-                  <Activity className="w-8 h-8 text-blue-600" aria-hidden="true" />
+                  <Activity className="icon-xl text-[var(--color-primary)]" aria-hidden="true" />
                   <div className="ml-4">
-                    <p id="total-events-label" className="text-sm font-medium text-gray-600">
+                    <p
+                      id="total-events-label"
+                      className="text-sm font-medium text-[var(--color-text-secondary)]"
+                    >
                       Total Events
                     </p>
                     <p
-                      className="text-2xl font-semibold text-gray-900"
+                      className="text-2xl font-semibold text-[var(--color-text-primary)]"
                       aria-label={`${summary.total_events} total events`}
                     >
                       {summary.total_events}
@@ -650,13 +680,16 @@ const AuditLogsPage: FC = () => {
                 aria-labelledby="critical-events-label"
               >
                 <div className="flex items-center">
-                  <AlertCircle className="w-8 h-8 text-red-600" aria-hidden="true" />
+                  <AlertCircle className="icon-xl text-[var(--color-error)]" aria-hidden="true" />
                   <div className="ml-4">
-                    <p id="critical-events-label" className="text-sm font-medium text-gray-600">
+                    <p
+                      id="critical-events-label"
+                      className="text-sm font-medium text-[var(--color-text-secondary)]"
+                    >
                       Critical
                     </p>
                     <p
-                      className="text-2xl font-semibold text-gray-900"
+                      className="text-2xl font-semibold text-[var(--color-text-primary)]"
                       aria-label={`${summary.events_by_severity.critical || 0} critical events`}
                     >
                       {summary.events_by_severity.critical || 0}
@@ -670,13 +703,19 @@ const AuditLogsPage: FC = () => {
                 aria-labelledby="warning-events-label"
               >
                 <div className="flex items-center">
-                  <AlertTriangle className="w-8 h-8 text-yellow-600" aria-hidden="true" />
+                  <AlertTriangle
+                    className="icon-xl text-[var(--color-warning)]"
+                    aria-hidden="true"
+                  />
                   <div className="ml-4">
-                    <p id="warning-events-label" className="text-sm font-medium text-gray-600">
+                    <p
+                      id="warning-events-label"
+                      className="text-sm font-medium text-[var(--color-text-secondary)]"
+                    >
                       Warnings
                     </p>
                     <p
-                      className="text-2xl font-semibold text-gray-900"
+                      className="text-2xl font-semibold text-[var(--color-text-primary)]"
                       aria-label={`${summary.events_by_severity.warning || 0} warning events`}
                     >
                       {summary.events_by_severity.warning || 0}
@@ -690,13 +729,16 @@ const AuditLogsPage: FC = () => {
                 aria-labelledby="success-events-label"
               >
                 <div className="flex items-center">
-                  <CheckCircle className="w-8 h-8 text-green-600" aria-hidden="true" />
+                  <CheckCircle className="icon-xl text-[var(--color-success)]" aria-hidden="true" />
                   <div className="ml-4">
-                    <p id="success-events-label" className="text-sm font-medium text-gray-600">
+                    <p
+                      id="success-events-label"
+                      className="text-sm font-medium text-[var(--color-text-secondary)]"
+                    >
                       Success
                     </p>
                     <p
-                      className="text-2xl font-semibold text-gray-900"
+                      className="text-2xl font-semibold text-[var(--color-text-primary)]"
                       aria-label={`${summary.events_by_severity.success || 0} successful events`}
                     >
                       {summary.events_by_severity.success || 0}
@@ -709,16 +751,19 @@ const AuditLogsPage: FC = () => {
 
           {/* Filters */}
           <div className="section-container-mb">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                <Filter className="w-5 h-5 mr-2" aria-hidden="true" />
+            <div className="px-6 py-4 border-b border-[var(--color-border)]">
+              <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] flex items-center">
+                <Filter className="icon-md mr-2" aria-hidden="true" />
                 Filters
               </h3>
             </div>
             <div className="px-6 py-4" role="search" aria-label="Filter audit logs">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="action" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="action"
+                    className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+                  >
                     Action
                   </label>
                   <input
@@ -727,13 +772,13 @@ const AuditLogsPage: FC = () => {
                     value={filters.action || ''}
                     onChange={(e) => handleFilterChange('action', e.target.value)}
                     placeholder="Filter by action"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="resource"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
                   >
                     Resource
                   </label>
@@ -743,13 +788,13 @@ const AuditLogsPage: FC = () => {
                     value={filters.resource || ''}
                     onChange={(e) => handleFilterChange('resource', e.target.value)}
                     placeholder="Filter by resource"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="severity"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
                   >
                     Severity
                   </label>
@@ -757,7 +802,7 @@ const AuditLogsPage: FC = () => {
                     id="severity"
                     value={filters.severity || ''}
                     onChange={(e) => handleFilterChange('severity', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
                     aria-label="Filter by severity level"
                   >
                     <option value="">All Severities</option>
@@ -768,7 +813,10 @@ const AuditLogsPage: FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="userId"
+                    className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1"
+                  >
                     User ID
                   </label>
                   <input
@@ -777,7 +825,7 @@ const AuditLogsPage: FC = () => {
                     value={filters.user_id || ''}
                     onChange={(e) => handleFilterChange('user_id', e.target.value)}
                     placeholder="Filter by user ID"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-[var(--color-primary)]"
                     aria-label="Filter by user ID"
                     aria-describedby="userId-help"
                   />
@@ -790,9 +838,9 @@ const AuditLogsPage: FC = () => {
           </div>
 
           {/* Logs Table */}
-          <div className="bg-white shadow-sm rounded-lg border overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">
+          <div className="bg-[var(--color-surface-primary)] shadow-sm rounded-lg border overflow-hidden">
+            <div className="px-6 py-4 border-b border-[var(--color-border)]">
+              <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
                 Audit Events ({logs.length} of {totalPages * filters.limit})
               </h3>
             </div>
@@ -802,48 +850,51 @@ const AuditLogsPage: FC = () => {
               aria-label="Audit logs table"
               aria-live="polite"
             >
-              <table className="min-w-full divide-y divide-gray-200" aria-label="Audit log entries">
-                <thead className="bg-gray-50">
+              <table
+                className="min-w-full divide-y divide-[var(--color-border)]"
+                aria-label="Audit log entries"
+              >
+                <thead className="bg-[var(--color-surface-secondary)]">
                   <tr>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                     >
                       Timestamp
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                     >
                       Severity
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                     >
                       Action
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                     >
                       Resource
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                     >
                       User
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-right text-xs font-medium text-[color:var(--color-text-secondary)] uppercase tracking-wider"
                     >
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-[var(--color-surface-primary)] divide-y divide-[var(--color-border)]">
                   {isLoading ? (
                     Array.from({ length: 10 }).map((_, i) => (
                       <tr key={i} aria-label="Loading audit log entry">
@@ -876,13 +927,13 @@ const AuditLogsPage: FC = () => {
                       <td colSpan={6} className="px-6 py-12 text-center">
                         <div role="status" aria-live="polite">
                           <Activity
-                            className="w-12 h-12 text-gray-400 mx-auto mb-4"
+                            className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
                             aria-hidden="true"
                           />
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
                             No audit logs found
                           </h3>
-                          <p className="text-gray-600">
+                          <p className="text-[var(--color-text-secondary)]">
                             No events match your current filter criteria.
                           </p>
                         </div>

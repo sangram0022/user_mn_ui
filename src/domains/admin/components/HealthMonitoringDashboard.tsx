@@ -100,13 +100,13 @@ export function HealthMonitoringDashboard() {
   const getStatusColor = (status: 'healthy' | 'degraded' | 'unhealthy') => {
     switch (status) {
       case 'healthy':
-        return 'text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400';
+        return 'text-[var(--color-success)] bg-[var(--color-success-light)] dark:bg-[var(--color-success)]/20 dark:text-[var(--color-success)]';
       case 'degraded':
-        return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400';
+        return 'text-[var(--color-warning)] bg-[var(--color-warning-light)] dark:bg-[var(--color-warning)]/20 dark:text-[var(--color-warning)]';
       case 'unhealthy':
-        return 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400';
+        return 'text-[var(--color-error)] bg-[var(--color-error-light)] dark:bg-[var(--color-error)]/20 dark:text-[var(--color-error)]';
       default:
-        return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20 dark:text-gray-400';
+        return 'text-[var(--color-text-secondary)] bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)]/20 dark:text-[var(--color-text-tertiary)]';
     }
   };
 
@@ -162,13 +162,13 @@ export function HealthMonitoringDashboard() {
 
   if (loading && !health) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)] rounded-lg shadow p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
-          <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="h-8 bg-[var(--color-border)] dark:bg-[var(--color-surface-primary)] rounded w-1/4" />
+          <div className="h-32 bg-[var(--color-border)] dark:bg-[var(--color-surface-primary)] rounded" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded" />
-            <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded" />
+            <div className="h-24 bg-[var(--color-border)] dark:bg-[var(--color-surface-primary)] rounded" />
+            <div className="h-24 bg-[var(--color-border)] dark:bg-[var(--color-surface-primary)] rounded" />
           </div>
         </div>
       </div>
@@ -177,11 +177,11 @@ export function HealthMonitoringDashboard() {
 
   if (error && !health) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
+      <div className="bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)] rounded-lg shadow p-6">
+        <div className="bg-[color:var(--color-error-50)] dark:bg-[var(--color-error)]/20 border border-[color:var(--color-error)] dark:border-[var(--color-error)] rounded-md p-4">
           <div className="flex">
             <svg
-              className="h-5 w-5 text-red-600 dark:text-red-400 mr-2"
+              className="h-5 w-5 text-[color:var(--color-error)] dark:text-[var(--color-error)] mr-2"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -192,17 +192,19 @@ export function HealthMonitoringDashboard() {
               />
             </svg>
             <div>
-              <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
+              <h3 className="text-sm font-medium text-[var(--color-error)] dark:text-[var(--color-error)]">
                 Health Check Failed
               </h3>
-              <p className="text-sm text-red-700 dark:text-red-400 mt-1">{error}</p>
+              <p className="text-sm text-[var(--color-error)] dark:text-[var(--color-error)] mt-1">
+                {error}
+              </p>
             </div>
           </div>
         </div>
         <button
           type="button"
           onClick={fetchHealth}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="mt-4 px-4 py-2 bg-[color:var(--color-primary)] text-[var(--color-text-primary)] rounded-md hover:bg-[color:var(--color-primary-700)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
         >
           Retry
         </button>
@@ -217,39 +219,39 @@ export function HealthMonitoringDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)] rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
             System Health Monitor
           </h2>
           <button
             type="button"
             onClick={fetchHealth}
             disabled={loading}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="px-3 py-1 text-sm bg-[color:var(--color-primary)] text-[var(--color-text-primary)] rounded-md hover:bg-[color:var(--color-primary-700)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50"
           >
             {loading ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
 
         {lastCheck && (
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-[var(--color-text-tertiary)] dark:text-[var(--color-text-tertiary)]">
             Last checked: {lastCheck.toLocaleTimeString()} • Auto-refresh every 30s
           </p>
         )}
       </div>
 
       {/* Overall Status */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)] rounded-lg shadow p-6">
         <div className="flex items-center space-x-4">
           <div className={`p-3 rounded-full ${getStatusColor(health.status)}`}>
             {getStatusIcon(health.status)}
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
               Overall Status: {health.status.charAt(0).toUpperCase() + health.status.slice(1)}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
               System version {health.version} • Uptime: {formatUptime(health.uptime)}
             </p>
           </div>
@@ -259,9 +261,11 @@ export function HealthMonitoringDashboard() {
       {/* Component Health */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Database Health */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div className="bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)] rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Database</h3>
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
+              Database
+            </h3>
             <span
               className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
                 health.database.status
@@ -272,26 +276,34 @@ export function HealthMonitoringDashboard() {
           </div>
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Response Time</span>
-              <span className="font-medium text-gray-900 dark:text-white">
+              <span className="text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+                Response Time
+              </span>
+              <span className="font-medium text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                 {health.database.responseTime}ms
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Active Connections</span>
-              <span className="font-medium text-gray-900 dark:text-white">
+              <span className="text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+                Active Connections
+              </span>
+              <span className="font-medium text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                 {health.database.connections.active}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Idle Connections</span>
-              <span className="font-medium text-gray-900 dark:text-white">
+              <span className="text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+                Idle Connections
+              </span>
+              <span className="font-medium text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                 {health.database.connections.idle}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Total Pool Size</span>
-              <span className="font-medium text-gray-900 dark:text-white">
+              <span className="text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+                Total Pool Size
+              </span>
+              <span className="font-medium text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                 {health.database.connections.total}
               </span>
             </div>
@@ -300,32 +312,34 @@ export function HealthMonitoringDashboard() {
 
         {/* System Resources */}
         {health.system && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <div className="bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)] rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-4">
               System Resources
             </h3>
             <div className="space-y-4">
               {health.system.memory && (
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600 dark:text-gray-400">Memory Usage</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+                      Memory Usage
+                    </span>
+                    <span className="font-medium text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                       {health.system.memory.percentage}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="w-full bg-[var(--color-border)] dark:bg-[var(--color-surface-primary)] rounded-full h-2">
                     <div
                       className={`h-2 rounded-full ${
                         health.system.memory.percentage > 80
-                          ? 'bg-red-500'
+                          ? 'bg-[var(--color-error)]'
                           : health.system.memory.percentage > 60
-                            ? 'bg-yellow-500'
-                            : 'bg-green-500'
+                            ? 'bg-[var(--color-warning)]'
+                            : 'bg-[var(--color-success)]'
                       }`}
                       style={{ width: `${health.system.memory.percentage}%` }}
                     />
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-xs text-[var(--color-text-tertiary)] dark:text-[var(--color-text-tertiary)] mt-1">
                     {health.system.memory.used} MB / {health.system.memory.total} MB
                   </p>
                 </div>
@@ -334,19 +348,21 @@ export function HealthMonitoringDashboard() {
               {health.system.cpu && (
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600 dark:text-gray-400">CPU Usage</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+                      CPU Usage
+                    </span>
+                    <span className="font-medium text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                       {health.system.cpu.usage}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="w-full bg-[var(--color-border)] dark:bg-[var(--color-surface-primary)] rounded-full h-2">
                     <div
                       className={`h-2 rounded-full ${
                         health.system.cpu.usage > 80
-                          ? 'bg-red-500'
+                          ? 'bg-[var(--color-error)]'
                           : health.system.cpu.usage > 60
-                            ? 'bg-yellow-500'
-                            : 'bg-green-500'
+                            ? 'bg-[var(--color-warning)]'
+                            : 'bg-[var(--color-success)]'
                       }`}
                       style={{ width: `${health.system.cpu.usage}%` }}
                     />

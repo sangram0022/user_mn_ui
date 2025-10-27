@@ -54,7 +54,7 @@ export const ThemeSelector: React.FC = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+        className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 shadow-hover-card"
         style={{
           background: 'var(--theme-surface)',
           border: `1px solid var(--theme-border)`,
@@ -62,7 +62,7 @@ export const ThemeSelector: React.FC = () => {
         }}
         aria-label="Change theme"
       >
-        <Palette className="w-4 h-4" />
+        <Palette className="icon-sm" />
         <span className="hidden sm:inline text-sm font-medium">{currentPalette.name}</span>
       </button>
 
@@ -78,7 +78,7 @@ export const ThemeSelector: React.FC = () => {
 
           {/* Dropdown */}
           <div
-            className="absolute right-0 mt-2 w-56 rounded-xl shadow-xl py-2 z-50 border"
+            className="absolute right-0 mt-2 w-56 rounded-xl shadow-xl py-2 z-50 border animate-slide-down"
             style={{
               background: 'var(--theme-surface)',
               borderColor: 'var(--theme-border)',
@@ -111,7 +111,7 @@ export const ThemeSelector: React.FC = () => {
                     }}
                   >
                     <div
-                      className="w-8 h-8 rounded-lg border-2 flex-shrink-0"
+                      className="size-8 rounded-lg border-2 flex-shrink-0"
                       style={{
                         background: palette.preview,
                         borderColor: isActive ? 'var(--theme-primary)' : 'var(--theme-border)',

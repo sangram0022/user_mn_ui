@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LocaleSelector Component
  *
  * Dropdown component to select and change the application locale.
@@ -79,8 +79,8 @@ export function LocaleSelector({
     return (
       <div className={`locale-selector loading ${className}`}>
         <div className="flex items-center gap-2">
-          <div className="animate-spin w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full" />
-          <span className="text-sm text-gray-600">{t('common.loading')}</span>
+          <div className="spinner spinner-sm" />
+          <span className="text-sm text-[var(--color-text-secondary)]">{t('common.loading')}</span>
         </div>
       </div>
     );
@@ -89,7 +89,7 @@ export function LocaleSelector({
   if (error) {
     return (
       <div className={`locale-selector error ${className}`}>
-        <div className="flex items-center gap-2 text-red-600">
+        <div className="flex items-center gap-2 text-[var(--color-error)]">
           <span className="text-xs" />
           <span className="text-sm">{t('errors.localization.loadFailed')}</span>
         </div>
@@ -103,7 +103,7 @@ export function LocaleSelector({
         {/* Current Locale Button */}
         <button
           type="button"
-          className="flex items-center gap-2 px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="flex items-center gap-2 px-3 py-2 text-sm bg-[var(--color-surface-primary)] border border-[var(--color-border)] rounded-md hover:bg-[var(--color-surface-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
           aria-label={t('common.changeLanguage')}
           title={t('common.changeLanguage')}
         >
@@ -118,7 +118,7 @@ export function LocaleSelector({
           {!showName && !showFlag && <span className="font-medium uppercase">{locale}</span>}
 
           <svg
-            className="w-4 h-4 text-gray-400"
+            className="w-4 h-4 text-[var(--color-text-secondary)]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -129,13 +129,15 @@ export function LocaleSelector({
         </button>
 
         {/* Dropdown Menu - This would need proper dropdown logic */}
-        <div className="hidden absolute z-50 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg">
+        <div className="hidden absolute z-50 mt-1 w-48 bg-[var(--color-surface-primary)] border border-[var(--color-border)] rounded-md shadow-lg">
           {LOCALE_OPTIONS.map((option) => (
             <button
               key={option.code}
               type="button"
-              className={`w-full flex items-center gap-3 px-4 py-2 text-sm text-left hover:bg-gray-50 ${
-                option.code === locale ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+              className={`w-full flex items-center gap-3 px-4 py-2 text-sm text-left hover:bg-[var(--color-surface-secondary)] ${
+                option.code === locale
+                  ? 'bg-[var(--color-primary)] text-[var(--color-primary)]'
+                  : 'text-[var(--color-text-secondary)]'
               }`}
               onClick={() => handleLocaleChange(option.code)}
             >
@@ -145,7 +147,7 @@ export function LocaleSelector({
               <span className="flex-1">{option.name}</span>
               {option.code === locale && (
                 <svg
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 text-[var(--color-primary)]"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   aria-hidden="true"
@@ -241,13 +243,13 @@ export function LocalizationDemo() {
           <h3 className="text-lg font-semibold">{t('errors.title')}</h3>
 
           <div className="space-y-2 text-sm">
-            <div className="p-3 bg-red-50 border border-red-200 rounded text-red-800">
+            <div className="p-3 bg-[var(--color-error)] border border-[var(--color-error)] rounded text-[var(--color-error)]">
               {t('errors.validation.required', { field: t('users.email') })}
             </div>
-            <div className="p-3 bg-green-50 border border-green-200 rounded text-green-800">
+            <div className="p-3 bg-[var(--color-success)] border border-[var(--color-success)] rounded text-[var(--color-success)]">
               {t('success.user.created')}
             </div>
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
+            <div className="p-3 bg-[var(--color-warning)] border border-[var(--color-warning)] rounded text-[var(--color-warning)]">
               {t('errors.network.timeout')}
             </div>
           </div>
@@ -266,8 +268,8 @@ export function LocalizationDemo() {
       </div>
 
       {/* Locale Selector */}
-      <div className="mt-6 pt-6 border-t border-gray-200">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
+        <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
           {t('common.changeLanguage')}:
         </label>
         <LocaleSelector />

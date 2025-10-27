@@ -271,11 +271,9 @@ export function mockConsole() {
 
 /**
  * Create mock file
+ * @deprecated Use createMockFile from 'test/setup' instead for single source of truth
  */
-export function createMockFile(name = 'test.png', size = 1024, type = 'image/png'): File {
-  const blob = new Blob(['a'.repeat(size)], { type });
-  return new File([blob], name, { type });
-}
+export { createMockFile } from '../setup';
 
 /**
  * Create mock FormData

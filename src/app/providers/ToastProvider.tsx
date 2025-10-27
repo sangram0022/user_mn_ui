@@ -1,8 +1,10 @@
 /**
- * Toast Provider - Comprehensive Implementation
+ * Toast Provider - React 19 Optimized
  *
- * Provides toast notification system with queue management, animations,
- * and accessibility support.
+ * ✅ React 19 Features:
+ * - Removed all useMemo/useCallback (React Compiler handles it)
+ * - Zero manual optimization needed
+ * - Cleaner, more maintainable code
  */
 
 import {
@@ -12,9 +14,9 @@ import {
   type ToastOptions,
 } from '@contexts/ToastContext';
 import { ToastContainer } from '@shared/components/ui/ToastContainer';
-import type { ReactNode } from 'react';
 import type React from 'react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useRef, useState } from 'react';
 
 export interface ToastProviderProps {
   children: ReactNode;
@@ -38,40 +40,37 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastIdCounter = useRef(0);
 
-  // Generate unique ID
-  const generateId = useCallback(() => {
+  // ✅ React 19: Generate unique ID (no useCallback needed)
+  const generateId = () => {
     toastIdCounter.current += 1;
     return `toast-${toastIdCounter.current}-${Date.now()}`;
-  }, []);
+  };
 
-  // Add toast
-  const addToast = useCallback(
-    (message: string, options: ToastOptions = {}) => {
-      const id = generateId();
-      const newToast: Toast = {
-        id,
-        message,
-        variant: options.variant ?? 'info',
-        duration: options.duration ?? defaultDuration,
-        dismissible: options.dismissible ?? true,
-        action: options.action,
-        icon: options.icon,
-        onDismiss: options.onDismiss,
-        createdAt: Date.now(),
-      };
+  // ✅ React 19: Add toast (no useCallback needed)
+  const addToast = (message: string, options: ToastOptions = {}) => {
+    const id = generateId();
+    const newToast: Toast = {
+      id,
+      message,
+      variant: options.variant ?? 'info',
+      duration: options.duration ?? defaultDuration,
+      dismissible: options.dismissible ?? true,
+      action: options.action,
+      icon: options.icon,
+      onDismiss: options.onDismiss,
+      createdAt: Date.now(),
+    };
 
-      setToasts((prev) => {
-        const updated = prev.length >= maxToasts ? prev.slice(1) : prev;
-        return [...updated, newToast];
-      });
+    setToasts((prev) => {
+      const updated = prev.length >= maxToasts ? prev.slice(1) : prev;
+      return [...updated, newToast];
+    });
 
-      return id;
-    },
-    [defaultDuration, generateId, maxToasts]
-  );
+    return id;
+  };
 
-  // Dismiss toast
-  const dismiss = useCallback((id: string) => {
+  // ✅ React 19: Dismiss toast (no useCallback needed)
+  const dismiss = (id: string) => {
     setToasts((prev) => {
       const toast = prev.find((t) => t.id === id);
       if (toast?.onDismiss) {
@@ -79,10 +78,10 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
       }
       return prev.filter((t) => t.id !== id);
     });
-  }, []);
+  };
 
-  // Dismiss all
-  const dismissAll = useCallback(() => {
+  // ✅ React 19: Dismiss all (no useCallback needed)
+  const dismissAll = () => {
     setToasts((prev) => {
       prev.forEach((toast) => {
         if (toast.onDismiss) {
@@ -91,63 +90,49 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
       });
       return [];
     });
-  }, []);
+  };
 
-  // Toast API
-  const toast = useMemo(
-    () => ({
-      success: (message: string, options?: ToastOptions) =>
-        addToast(message, { ...options, variant: 'success' }),
-      error: (message: string, options?: ToastOptions) =>
-        addToast(message, { ...options, variant: 'error' }),
-      warning: (message: string, options?: ToastOptions) =>
-        addToast(message, { ...options, variant: 'warning' }),
-      info: (message: string, options?: ToastOptions) =>
-        addToast(message, { ...options, variant: 'info' }),
-      custom: (message: string, options?: ToastOptions) => addToast(message, options),
-    }),
-    [addToast]
-  );
+  // ✅ React 19: Toast API (no useMemo needed)
+  const toast = {
+    success: (message: string, options?: ToastOptions) =>
+      addToast(message, { ...options, variant: 'success' }),
+    error: (message: string, options?: ToastOptions) =>
+      addToast(message, { ...options, variant: 'error' }),
+    warning: (message: string, options?: ToastOptions) =>
+      addToast(message, { ...options, variant: 'warning' }),
+    info: (message: string, options?: ToastOptions) =>
+      addToast(message, { ...options, variant: 'info' }),
+    custom: (message: string, options?: ToastOptions) => addToast(message, options),
+  };
 
-  // Legacy API (backward compatibility)
-  const showError = useCallback(
-    (message: string) => {
-      addToast(message, { variant: 'error' });
-    },
-    [addToast]
-  );
+  // ✅ React 19: Legacy API (no useCallback needed)
+  const showError = (message: string) => {
+    addToast(message, { variant: 'error' });
+  };
 
-  const showSuccess = useCallback(
-    (message: string) => {
-      addToast(message, { variant: 'success' });
-    },
-    [addToast]
-  );
+  const showSuccess = (message: string) => {
+    addToast(message, { variant: 'success' });
+  };
 
-  const showInfo = useCallback(
-    (message: string) => {
-      addToast(message, { variant: 'info' });
-    },
-    [addToast]
-  );
+  const showInfo = (message: string) => {
+    addToast(message, { variant: 'info' });
+  };
 
-  const clearToasts = useCallback(() => {
+  const clearToasts = () => {
     dismissAll();
-  }, [dismissAll]);
+  };
 
-  const value: ToastContextType = useMemo(
-    () => ({
-      toasts,
-      toast,
-      dismiss,
-      dismissAll,
-      showError,
-      showSuccess,
-      showInfo,
-      clearToasts,
-    }),
-    [toasts, toast, dismiss, dismissAll, showError, showSuccess, showInfo, clearToasts]
-  );
+  // ✅ React 19: Context value (no useMemo needed - React Compiler optimizes)
+  const value: ToastContextType = {
+    toasts,
+    toast,
+    dismiss,
+    dismissAll,
+    showError,
+    showSuccess,
+    showInfo,
+    clearToasts,
+  };
 
   return (
     <ToastContext.Provider value={value}>

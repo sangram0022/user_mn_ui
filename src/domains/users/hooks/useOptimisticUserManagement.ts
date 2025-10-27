@@ -25,12 +25,8 @@ export interface OptimisticUser extends OptimisticListItem {
   is_active: boolean;
   is_verified: boolean;
   is_approved: boolean;
-  role: {
-    id: number;
-    name: string;
-    description: string;
-    permissions: string[];
-  };
+  roles: string[];
+  role_name?: string;
   lifecycle_stage?: string | null;
   activity_score?: number | null;
   last_login_at?: string | null;
@@ -84,12 +80,8 @@ export function useOptimisticUserManagement(initialUsers: OptimisticUser[]) {
         is_active: userData.is_active ?? true,
         is_verified: false,
         is_approved: false,
-        role: {
-          id: 0,
-          name: userData.role || 'user',
-          description: 'User',
-          permissions: [],
-        },
+        roles: [userData.role || 'user'],
+        role_name: userData.role || 'user',
         created_at: new Date().toISOString(),
         isOptimistic: true,
       };
@@ -100,10 +92,8 @@ export function useOptimisticUserManagement(initialUsers: OptimisticUser[]) {
         return {
           ...created,
           id: String(created.id || created.user_id),
-          role:
-            typeof created.role === 'string'
-              ? { id: 0, name: created.role, description: created.role, permissions: [] }
-              : created.role,
+          roles: created.roles || ['user'],
+          role_name: created.role_name || created.roles?.[0] || 'user',
           isOptimistic: false,
         } as unknown as OptimisticUser;
       });
@@ -116,10 +106,8 @@ export function useOptimisticUserManagement(initialUsers: OptimisticUser[]) {
         return {
           ...updated,
           id: String(updated.id || updated.user_id),
-          role:
-            typeof updated.role === 'string'
-              ? { id: 0, name: updated.role, description: updated.role, permissions: [] }
-              : updated.role,
+          roles: updated.roles || ['user'],
+          role_name: updated.role_name || updated.roles?.[0] || 'user',
           isOptimistic: false,
         } as unknown as OptimisticUser;
       });
@@ -140,10 +128,8 @@ export function useOptimisticUserManagement(initialUsers: OptimisticUser[]) {
         return {
           ...updated,
           id: String(updated.id || updated.user_id),
-          role:
-            typeof updated.role === 'string'
-              ? { id: 0, name: updated.role, description: updated.role, permissions: [] }
-              : updated.role,
+          roles: updated.roles || ['user'],
+          role_name: updated.role_name || updated.roles?.[0] || 'user',
           isOptimistic: false,
         } as unknown as OptimisticUser;
       });

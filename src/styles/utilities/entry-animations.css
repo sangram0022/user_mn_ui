@@ -1,0 +1,412 @@
+/**
+ * 🎬 @starting-style - Entry Animations - Tailwind CSS v4 Compatible
+ * 
+ * Modern CSS for smooth entry animations when elements appear in the DOM
+ * Works with display: none → display: block transitions!
+ * 
+ * Browser Support:
+ * - Chrome 117+ ✅
+ * - Edge 117+ ✅
+ * - Safari 17.5+ ✅
+ * - Firefox: Not yet (falls back gracefully)
+ * 
+ * Why Better Than animation-delay?
+ * - Automatically triggers when element appears
+ * - Works with dynamic DOM insertions
+ * - No JavaScript timing required
+ * - Cleaner than opacity hacks
+ * 
+ * Tailwind v4:
+ * - Using @layer utilities for animation utilities
+ * - @starting-style is native CSS, no special handling needed
+ * - Works perfectly with Tailwind's transition utilities
+ * 
+ * Usage:
+ * <dialog open class="dialog-with-entry">
+ *   Content smoothly fades in + scales up
+ * </dialog>
+ */
+
+@layer utilities {
+  /* ========================================================================
+     MODAL/DIALOG ENTRY ANIMATIONS
+     ======================================================================== */
+
+  /**
+   * Smooth modal entrance
+   * Fades in + scales up from 95% to 100%
+   */
+  dialog,
+  .modal,
+  [role='dialog'] {
+    transition:
+      opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.3s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    &:not([open]) {
+      opacity: 0;
+      transform: scale(0.95);
+      pointer-events: none;
+    }
+  }
+
+  /* ========================================================================
+     POPOVER ENTRY ANIMATIONS
+     ======================================================================== */
+
+  /**
+   * Smooth popover entrance
+   * Slides down slightly + fades in
+   */
+  [popover],
+  .popover {
+    transition:
+      opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.2s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+
+    &:not(:popover-open) {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+      pointer-events: none;
+    }
+  }
+
+  /* ========================================================================
+     DROPDOWN ENTRY ANIMATIONS
+     ======================================================================== */
+
+  /**
+   * Smooth dropdown entrance
+   * Slides down + fades in
+   */
+  .dropdown-menu,
+  [role='menu'] {
+    transition:
+      opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.15s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-0.25rem);
+    }
+
+    &[hidden],
+    &:not([open]) {
+      opacity: 0;
+      transform: translateY(-0.25rem);
+      pointer-events: none;
+    }
+  }
+
+  /* ========================================================================
+     TOAST/NOTIFICATION ENTRY ANIMATIONS
+     ======================================================================== */
+
+  /**
+   * Smooth toast entrance
+   * Slides in from right + fades in
+   */
+  .toast,
+  [role='alert']:not([role='alertdialog']) {
+    transition:
+      opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.25s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+
+    &[hidden] {
+      opacity: 0;
+      transform: translateX(100%);
+      pointer-events: none;
+    }
+  }
+
+  /* ========================================================================
+     TOOLTIP ENTRY ANIMATIONS
+     ======================================================================== */
+
+  /**
+   * Smooth tooltip entrance
+   * Fades in quickly (no movement - less distracting)
+   */
+  .tooltip,
+  [role='tooltip'] {
+    transition:
+      opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.15s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+    }
+
+    &[hidden] {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  /* ========================================================================
+     SIDEBAR/DRAWER ENTRY ANIMATIONS
+     ======================================================================== */
+
+  /**
+   * Smooth sidebar entrance from left
+   */
+  .sidebar-left,
+  [data-sidebar='left'] {
+    transition:
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.3s allow-discrete;
+
+    @starting-style {
+      transform: translateX(-100%);
+    }
+
+    &[hidden],
+    &:not([open]) {
+      transform: translateX(-100%);
+      pointer-events: none;
+    }
+  }
+
+  /**
+   * Smooth sidebar entrance from right
+   */
+  .sidebar-right,
+  [data-sidebar='right'] {
+    transition:
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.3s allow-discrete;
+
+    @starting-style {
+      transform: translateX(100%);
+    }
+
+    &[hidden],
+    &:not([open]) {
+      transform: translateX(100%);
+      pointer-events: none;
+    }
+  }
+
+  /* ========================================================================
+     ACCORDION/COLLAPSIBLE ENTRY ANIMATIONS
+     ======================================================================== */
+
+  /**
+   * Smooth accordion panel expansion
+   * Uses grid-template-rows for smooth height animation
+   */
+  .accordion-content,
+  [data-state='open'] {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    @starting-style {
+      grid-template-rows: 0fr;
+    }
+
+    &[data-state='closed'],
+    &[hidden] {
+      grid-template-rows: 0fr;
+    }
+
+    /* Inner content wrapper for overflow handling */
+    > * {
+      overflow: hidden;
+    }
+  }
+
+  /* ========================================================================
+     ALERT/BANNER ENTRY ANIMATIONS
+     ======================================================================== */
+
+  /**
+   * Smooth alert entrance from top
+   * Slides down + fades in
+   */
+  .alert-banner,
+  [role='status'] {
+    transition:
+      opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.25s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+
+    &[hidden] {
+      opacity: 0;
+      transform: translateY(-100%);
+      pointer-events: none;
+    }
+  }
+
+  /* ========================================================================
+     BACKDROP/OVERLAY ENTRY ANIMATIONS
+     ======================================================================== */
+
+  /**
+   * Smooth backdrop fade-in
+   * Used behind modals, dialogs, etc.
+   */
+  ::backdrop,
+  .backdrop,
+  .overlay {
+    transition:
+      opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.25s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+    }
+  }
+
+  /* ========================================================================
+     UTILITY CLASSES - Entry animation variants
+     ======================================================================== */
+
+  /* Fade-only entrance (no movement) */
+  .entry-fade {
+    transition:
+      opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.25s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+    }
+
+    &[hidden] {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  /* Scale entrance (zoom in) */
+  .entry-scale {
+    transition:
+      opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.3s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    &[hidden] {
+      opacity: 0;
+      transform: scale(0.9);
+      pointer-events: none;
+    }
+  }
+
+  /* Slide-up entrance */
+  .entry-slide-up {
+    transition:
+      opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      display 0.25s allow-discrete;
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+
+    &[hidden] {
+      opacity: 0;
+      transform: translateY(1rem);
+      pointer-events: none;
+    }
+  }
+
+  /* ========================================================================
+     ACCESSIBILITY - Respect user preferences
+     ======================================================================== */
+
+  /**
+   * Disable all entry animations for users who prefer reduced motion
+   * Elements appear immediately - better than broken animations
+   */
+  @media (prefers-reduced-motion: reduce) {
+    dialog,
+    .modal,
+    [role='dialog'],
+    [popover],
+    .popover,
+    .dropdown-menu,
+    [role='menu'],
+    .toast,
+    .tooltip,
+    [role='tooltip'],
+    .sidebar-left,
+    .sidebar-right,
+    .accordion-content,
+    .alert-banner,
+    [role='status'],
+    ::backdrop,
+    .backdrop,
+    .overlay,
+    .entry-fade,
+    .entry-scale,
+    .entry-slide-up {
+      transition: none !important;
+
+      @starting-style {
+        opacity: 1;
+        transform: none;
+        grid-template-rows: 1fr;
+      }
+    }
+  }
+}
+
+/* ============================================================================
+   POLYFILL FALLBACK - For browsers without @starting-style support
+   ============================================================================ */
+
+/**
+ * Progressive enhancement fallback
+ * If @starting-style is not supported, transitions still work
+ * (but won't be smooth on initial appearance)
+ */
+@supports not (transition-behavior: allow-discrete) {
+  /* Fallback: Use opacity-only transitions (more compatible) */
+  dialog,
+  .modal,
+  [popover],
+  .dropdown-menu,
+  .toast,
+  .tooltip {
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  dialog:not([open]),
+  .modal:not([open]),
+  [popover]:not(:popover-open),
+  .dropdown-menu[hidden],
+  .toast[hidden],
+  .tooltip[hidden] {
+    display: none; /* Hard cut instead of smooth transition */
+  }
+}

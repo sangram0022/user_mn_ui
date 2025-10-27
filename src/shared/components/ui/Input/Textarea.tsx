@@ -51,20 +51,20 @@ export interface TextareaProps
 
 const variantStyles: Record<TextareaVariant, string> = {
   default: `
-    border border-gray-300 dark:border-gray-600
-    bg-white dark:bg-gray-800
-    focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+    border border-[var(--color-border)] dark:border-[var(--color-border)]
+    bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)]
+    focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20
   `,
   filled: `
-    border-0 border-b-2 border-gray-300 dark:border-gray-600
-    bg-gray-50 dark:bg-gray-800/50
+    border-0 border-b-2 border-[var(--color-border)] dark:border-[var(--color-border)]
+    bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)]/50
     rounded-t-lg rounded-b-none
-    focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800
+    focus:border-[var(--color-primary)] focus:bg-[var(--color-surface-primary)] dark:focus:bg-[var(--color-surface-primary)]
   `,
   outlined: `
-    border-2 border-gray-300 dark:border-gray-600
+    border-2 border-[var(--color-border)] dark:border-[var(--color-border)]
     bg-transparent
-    focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+    focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20
   `,
 };
 
@@ -128,20 +128,20 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const baseStyles = `
       w-full
       font-medium
-      text-gray-900 dark:text-gray-100
-      placeholder:text-gray-400 dark:placeholder:text-gray-500
+      text-[var(--color-text-primary)] dark:text-[var(--color-text-secondary)]
+      placeholder:text-[color:var(--color-text-tertiary)] dark:placeholder:text-[color:var(--color-text-secondary)]
       rounded-lg
       transition-all duration-200
       disabled:opacity-50 disabled:cursor-not-allowed
-      disabled:bg-gray-100 dark:disabled:bg-gray-900
+      disabled:bg-[var(--color-surface-secondary)] dark:disabled:bg-[var(--color-surface-primary)]
       focus:outline-none
       resize-none
     `;
 
     const errorStyles = hasError
       ? `
-        border-red-500 dark:border-red-500
-        focus:border-red-500 focus:ring-red-500/20
+        border-[var(--color-error)] dark:border-[var(--color-error)]
+        focus:border-[var(--color-error)] focus:ring-[var(--color-error)]/20
       `
       : '';
 
@@ -171,14 +171,14 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             htmlFor={inputId}
             className={cn(
               'block mb-2 text-sm font-medium',
-              'text-gray-700 dark:text-gray-300',
-              hasError && 'text-red-600 dark:text-red-400',
+              'text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]',
+              hasError && 'text-[color:var(--color-error)] dark:text-[color:var(--color-error)]',
               disabled && 'opacity-50',
               labelClassName
             )}
           >
             {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
+            {required && <span className="text-[color:var(--color-error)] ml-1">*</span>}
           </label>
         )}
 
@@ -202,7 +202,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
         {/* Character Counter */}
         {showCounter && maxLength && (
-          <div className="absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400 pointer-events-none">
+          <div className="absolute bottom-2 right-2 text-xs text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)] pointer-events-none">
             {charCount}/{maxLength}
           </div>
         )}
@@ -213,7 +213,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             id={error ? `${inputId}-error` : `${inputId}-helper`}
             className={cn(
               'mt-1.5 text-sm',
-              error ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'
+              error
+                ? 'text-[color:var(--color-error)] dark:text-[color:var(--color-error)]'
+                : 'text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)]'
             )}
             role={error ? 'alert' : undefined}
           >

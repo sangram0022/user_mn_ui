@@ -85,46 +85,44 @@ export const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
         aria-labelledby={headingId}
         aria-describedby={descriptionId}
         tabIndex={-1}
-        className="w-[90%] max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-2xl"
+        className="w-[90%] max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-primary)] p-8 shadow-2xl"
       >
         {/* Header */}
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-400">
-            <Clock className="h-8 w-8 text-white" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-warning)]">
+            <Clock className="h-8 w-8 text-[var(--color-text-primary)]" />
           </div>
-          <h2 id={headingId} className="mb-2 text-2xl font-bold text-gray-900">
+          <h2 id={headingId} className="mb-2 text-2xl font-bold text-[var(--color-text-primary)]">
             Session Expiring Soon
           </h2>
-          <p id={descriptionId} className="m-0 text-sm text-gray-500">
+          <p id={descriptionId} className="m-0 text-sm text-[var(--color-text-tertiary)]">
             Your session will expire in <strong>{formatTime(timeLeft)}</strong>
           </p>
         </div>
 
         {/* Content */}
-        <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4">
-          <p className="m-0 text-sm text-amber-800">
-            To continue your session, click "Stay Logged In" below. Otherwise, you'll be
-            automatically logged out for security.
+        <div className="mb-6 rounded-lg border border-[var(--color-warning)] bg-[var(--color-warning)] p-4">
+          <p className="m-0 text-sm text-[var(--color-warning)]">
+            To continue your session, click &quot;Stay Logged In&quot; below. Otherwise, you&apos;ll
+            be automatically logged out for security.
           </p>
         </div>
 
         {/* Actions */}
         <div className="flex flex-col gap-3">
           <button
-            ref={extendButtonRef}
             onClick={onExtend}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-none bg-gradient-to-br from-blue-500 to-purple-600 px-4 py-3 text-sm font-semibold text-white transition-all duration-200 hover:from-blue-600 hover:to-purple-700 hover:-translate-y-0.5 focus:from-blue-600 focus:to-purple-700 focus:-translate-y-0.5 active:translate-y-0"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-none bg-[color:var(--color-primary)] px-4 py-3 text-sm font-medium text-[var(--color-text-primary)] transition-all duration-200 hover:bg-[color:var(--color-primary-600)] hover:shadow-lg focus:bg-[color:var(--color-primary-600)] focus:shadow-lg active:shadow-md"
           >
-            <RefreshCcw className="h-4 w-4" />
-            Stay Logged In
+            <RefreshCcw className="icon-sm" />
+            Continue Session
           </button>
-
           <button
             onClick={onLogout}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-red-600 bg-white px-4 py-3 text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-50 hover:shadow-md focus:bg-red-50 focus:shadow-md active:shadow-sm"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-[var(--color-error)] bg-[var(--color-surface-primary)] px-4 py-3 text-sm font-medium text-[var(--color-error)] transition-all duration-200 hover:bg-[var(--color-error-light)] hover:shadow-md focus:bg-[var(--color-error-light)] focus:shadow-md active:shadow-sm"
           >
-            <LogOut className="h-4 w-4" />
-            Log Out Now
+            <LogOut className="icon-sm" />
+            Logout Now
           </button>
         </div>
       </div>

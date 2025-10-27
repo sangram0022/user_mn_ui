@@ -1,0 +1,301 @@
+/**
+ * ANIMATION UTILITIES
+ * 
+ * Consistent animation patterns for common UI interactions
+ * 
+ * Benefits:
+ * - Reusable animations across components
+ * - Performance optimized (GPU accelerated)
+ * - Consistent timing and easing
+ * - Accessibility friendly (respects prefers-reduced-motion)
+ */
+
+@layer utilities {
+  /* ========================================================================
+     FADE ANIMATIONS - Opacity transitions
+     ======================================================================== */
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-fade-out {
+    animation: fadeOut 150ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  /* ========================================================================
+     SLIDE ANIMATIONS - Directional movements
+     ======================================================================== */
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideLeft {
+    from {
+      transform: translateX(10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideRight {
+    from {
+      transform: translateX(-10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-slide-left {
+    animation: slideLeft 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-slide-right {
+    animation: slideRight 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  /* ========================================================================
+     SCALE ANIMATIONS - Size transitions
+     ======================================================================== */
+
+  @keyframes scaleIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleOut {
+    from {
+      transform: scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-scale-out {
+    animation: scaleOut 150ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  /* ========================================================================
+     BOUNCE ANIMATION - Attention grabbing
+     ======================================================================== */
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce 1s ease-in-out infinite;
+  }
+
+  /* ========================================================================
+     PULSE ANIMATION - Soft emphasis
+     ======================================================================== */
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .animate-pulse-soft {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* ========================================================================
+     SPIN ANIMATION - Loading indicators
+     ======================================================================== */
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin 2s linear infinite;
+  }
+
+  .animate-spin-fast {
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* ========================================================================
+     SHAKE ANIMATION - Error states
+     ======================================================================== */
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+      transform: translateX(-4px);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+
+  .animate-shake {
+    animation: shake 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ========================================================================
+     SHIMMER ANIMATION - Skeleton loading
+     ======================================================================== */
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-elevated) 25%,
+      var(--color-surface-hover) 50%,
+      var(--color-surface-elevated) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* ========================================================================
+     ENTRANCE ANIMATIONS - Staggered delays
+     ======================================================================== */
+
+  .animate-entrance-1 {
+    animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1) 50ms forwards;
+    opacity: 0;
+  }
+
+  .animate-entrance-2 {
+    animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1) 100ms forwards;
+    opacity: 0;
+  }
+
+  .animate-entrance-3 {
+    animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1) 150ms forwards;
+    opacity: 0;
+  }
+
+  .animate-entrance-4 {
+    animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1) 200ms forwards;
+    opacity: 0;
+  }
+
+  /* ========================================================================
+     ACCESSIBILITY - Respect user preferences
+     ======================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/**
+ * USAGE EXAMPLES
+ * ==============
+ * 
+ * Modal entrance:     animate-scale-in
+ * Toast notification: animate-slide-down
+ * Dropdown menu:      animate-fade-in
+ * Loading spinner:    animate-spin-slow
+ * Error input:        animate-shake
+ * Skeleton loader:    animate-shimmer
+ * Staggered list:     animate-entrance-1, animate-entrance-2, etc.
+ */

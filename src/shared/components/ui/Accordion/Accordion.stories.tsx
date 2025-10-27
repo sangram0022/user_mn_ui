@@ -121,7 +121,7 @@ export const Multiple: Story = {
           <AccordionContent>
             <div className="space-y-2">
               <p>Manage your account settings and preferences.</p>
-              <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+              <ul className="list-disc list-inside space-y-1 text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                 <li>Update profile information</li>
                 <li>Change password</li>
                 <li>Email preferences</li>
@@ -136,7 +136,7 @@ export const Multiple: Story = {
           <AccordionContent>
             <div className="space-y-2">
               <p>Configure how you receive notifications.</p>
-              <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+              <ul className="list-disc list-inside space-y-1 text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                 <li>Email notifications</li>
                 <li>Push notifications</li>
                 <li>SMS alerts</li>
@@ -151,7 +151,7 @@ export const Multiple: Story = {
           <AccordionContent>
             <div className="space-y-2">
               <p>Keep your account secure with these features.</p>
-              <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
+              <ul className="list-disc list-inside space-y-1 text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                 <li>Two-factor authentication</li>
                 <li>Active sessions</li>
                 <li>Login history</li>
@@ -215,25 +215,25 @@ export const Controlled: Story = {
 
       return (
         <div style={{ width: '600px' }} className="space-y-4">
-          <div className="flex gap-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+          <div className="flex gap-2 p-4 bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)] rounded-lg">
             <button
               type="button"
               onClick={() => setValue('item-1')}
-              className="px-3 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              className="px-3 py-1 text-sm rounded bg-[var(--color-primary)] text-[var(--color-text-primary)] hover:bg-[var(--color-primary-hover)] transition-colors"
             >
               Open Item 1
             </button>
             <button
               type="button"
               onClick={() => setValue('item-2')}
-              className="px-3 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              className="px-3 py-1 text-sm rounded bg-[var(--color-primary)] text-[var(--color-text-primary)] hover:bg-[var(--color-primary-hover)] transition-colors"
             >
               Open Item 2
             </button>
             <button
               type="button"
               onClick={() => setValue('item-3')}
-              className="px-3 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              className="px-3 py-1 text-sm rounded bg-[var(--color-primary)] text-[var(--color-text-primary)] hover:bg-[var(--color-primary-hover)] transition-colors"
             >
               Open Item 3
             </button>
@@ -244,8 +244,8 @@ export const Controlled: Story = {
               <AccordionTrigger>Controlled Item 1</AccordionTrigger>
               <AccordionContent>
                 <p>
-                  This accordion's state is controlled by the parent component. The buttons above
-                  can programmatically control which item is open.
+                  This accordion&apos;s state is controlled by the parent component. The buttons
+                  above can programmatically control which item is open.
                 </p>
               </AccordionContent>
             </AccordionItem>
@@ -366,19 +366,19 @@ export const WithIcons: Story = {
           <AccordionContent>
             <div className="space-y-3">
               <div className="flex items-start gap-2">
-                <User className="w-4 h-4 mt-0.5 text-gray-500" />
+                <User className="w-4 h-4 mt-0.5 text-[var(--color-text-tertiary)]" />
                 <div>
                   <p className="font-medium text-sm">Profile</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                     Manage your personal information
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
-                <Bell className="w-4 h-4 mt-0.5 text-gray-500" />
+                <Bell className="w-4 h-4 mt-0.5 text-[var(--color-text-tertiary)]" />
                 <div>
                   <p className="font-medium text-sm">Notifications</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                     Configure notification preferences
                   </p>
                 </div>
@@ -397,19 +397,19 @@ export const WithIcons: Story = {
           <AccordionContent>
             <div className="space-y-3">
               <div className="flex items-start gap-2">
-                <Lock className="w-4 h-4 mt-0.5 text-gray-500" />
+                <Lock className="w-4 h-4 mt-0.5 text-[var(--color-text-tertiary)]" />
                 <div>
                   <p className="font-medium text-sm">Authentication</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                     Two-factor authentication and password
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
-                <FileText className="w-4 h-4 mt-0.5 text-gray-500" />
+                <FileText className="w-4 h-4 mt-0.5 text-[var(--color-text-tertiary)]" />
                 <div>
                   <p className="font-medium text-sm">Privacy Policy</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                     View and manage your privacy settings
                   </p>
                 </div>
@@ -428,19 +428,19 @@ export const WithIcons: Story = {
           <AccordionContent>
             <div className="space-y-3">
               <div className="flex items-start gap-2">
-                <Mail className="w-4 h-4 mt-0.5 text-gray-500" />
+                <Mail className="w-4 h-4 mt-0.5 text-[var(--color-text-tertiary)]" />
                 <div>
                   <p className="font-medium text-sm">Export Data</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                     Download your data in various formats
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
-                <Database className="w-4 h-4 mt-0.5 text-gray-500" />
+                <Database className="w-4 h-4 mt-0.5 text-[var(--color-text-tertiary)]" />
                 <div>
                   <p className="font-medium text-sm">Data Retention</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                     Manage how long we keep your data
                   </p>
                 </div>
@@ -459,7 +459,7 @@ export const WithIcons: Story = {
 export const DarkMode: Story = {
   render: () => (
     <div style={{ width: '600px' }} className="dark">
-      <div className="p-8 bg-gray-900 rounded-lg">
+      <div className="p-8 bg-[var(--color-surface-primary)] rounded-lg">
         <Accordion type="single" defaultValue="item-2">
           <AccordionItem value="item-1">
             <AccordionTrigger>Dark Mode Support</AccordionTrigger>
@@ -514,15 +514,15 @@ export const RichContent: Story = {
               <ol className="list-decimal list-inside space-y-2 text-sm">
                 <li>
                   Install dependencies:{' '}
-                  <code className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+                  <code className="px-2 py-0.5 bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)] rounded text-xs">
                     npm install lucide-react
                   </code>
                 </li>
                 <li>Copy the Accordion component to your project</li>
                 <li>Import and use in your application</li>
               </ol>
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                <p className="text-sm text-blue-900 dark:text-blue-200">
+              <div className="p-3 bg-[var(--color-primary)] dark:bg-[var(--color-primary)]/20 rounded border border-[var(--color-primary)] dark:border-[var(--color-primary)]">
+                <p className="text-sm text-[var(--color-primary)] dark:text-[var(--color-primary)]">
                   <strong>Note:</strong> Make sure Tailwind CSS is configured in your project.
                 </p>
               </div>
@@ -537,20 +537,20 @@ export const RichContent: Story = {
               <div>
                 <h4 className="font-semibold text-sm mb-2">Accordion Props</h4>
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 dark:bg-gray-800">
+                  <thead className="bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)]">
                     <tr>
                       <th className="text-left p-2">Prop</th>
                       <th className="text-left p-2">Type</th>
                       <th className="text-left p-2">Default</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-[var(--color-border)] dark:divide-[var(--color-border)]">
                     <tr>
                       <td className="p-2">
                         <code>type</code>
                       </td>
-                      <td className="p-2">'single' | 'multiple'</td>
-                      <td className="p-2">'single'</td>
+                      <td className="p-2">&apos;single&apos; | &apos;multiple&apos;</td>
+                      <td className="p-2">&apos;single&apos;</td>
                     </tr>
                     <tr>
                       <td className="p-2">
@@ -577,8 +577,8 @@ export const RichContent: Story = {
           <AccordionTrigger>Examples</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-3">
-              <p>Here's a basic example:</p>
-              <pre className="p-3 bg-gray-900 text-gray-100 rounded text-xs overflow-x-auto">
+              <p>Here&apos;s a basic example:</p>
+              <pre className="p-3 bg-[var(--color-surface-primary)] text-[var(--color-text-secondary)] rounded text-xs overflow-x-auto">
                 {`<Accordion type="single" defaultValue="item-1">
   <AccordionItem value="item-1">
     <AccordionTrigger>Title</AccordionTrigger>

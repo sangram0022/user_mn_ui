@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 
 import { apiClient } from '@lib/api/client';
 import { tokenService } from '@shared/services/auth/tokenService';
-import type { LoginRequest, UserProfile, UserRoleInfo } from '@shared/types';
+import type { LoginRequest, UserProfile } from '@shared/types';
 import { logger } from '@shared/utils/logger';
+import { checkUserPermission } from '@shared/utils/rolePermissions';
 
 import { AuthContext, type AuthContextType } from '../context/AuthContext';
 
@@ -41,6 +42,31 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
 
     return () => {
       abortController.abort();
+    };
+  }, []);
+
+  //  CRITICAL FIX: Global 401 handler to prevent infinite retry loops
+  // Listen for authentication failures from API client
+  useEffect(() => {
+    const handleAuthFailure = (event: Event) => {
+      const customEvent = event as CustomEvent<{ status: number; endpoint: string }>;
+      logger.warn('[Auth] API authentication failure detected', customEvent.detail);
+
+      // Clear auth state immediately
+      tokenService.clearTokens();
+      apiClient.clearSession();
+      setUser(null);
+      setError('Session expired. Please log in again.');
+
+      // Note: Redirect to login is handled by route guards in App.tsx
+      // This just ensures the auth state is cleared to trigger the redirect
+    };
+
+    // Add event listener for API authentication failures
+    window.addEventListener('api:auth-failed', handleAuthFailure);
+
+    return () => {
+      window.removeEventListener('api:auth-failed', handleAuthFailure);
     };
   }, []);
 
@@ -116,9 +142,9 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       const response = await apiClient.loginSecure(credentials.email, credentials.password);
 
       logger.info('Secure login successful', {
-        email: response.email,
-        userId: response.user_id,
-        role: response.role,
+        email: response.user.email,
+        userId: response.user.user_id,
+        roles: response.user.roles,
       });
 
       // Get user profile after login
@@ -166,26 +192,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     setError(null);
   };
 
-  const hasPermission = (permission: string): boolean => {
-    if (!user) return false;
-
-    // Check if user is superuser (admin)
-    if (user.is_superuser) return true;
-
-    // Check role-based permissions
-    if (typeof user.role === 'object' && user.role && 'permissions' in user.role) {
-      const permissions = (user.role as UserRoleInfo).permissions;
-      if (Array.isArray(permissions)) {
-        return permissions.includes(permission);
-      }
-    }
-
-    // Check role name for admin
-    if (user.role_name === 'admin' || user.role === 'admin') return true;
-
-    // Default deny
-    return false;
-  };
+  // Use centralized permission checking utility
+  const hasPermission = (permission: string): boolean => checkUserPermission(user, permission);
 
   const refreshProfile = async () => {
     try {

@@ -1,181 +1,114 @@
 /**
- * CSS ARCHITECTURE - LAYER STRUCTURE
+ * 🚀 ULTRA-MODERN CSS ARCHITECTURE - 2024-2025
  * 
- * Modern CSS architecture using @layer for explicit cascade control.
- * Order matters: later layers have higher specificity
+ * Latest CSS Features:
+ * ✅ Tailwind CSS v4.1.14 (Oxide engine)
+ * ✅ OKLCH color space (perceptually uniform)
+ * ✅ CSS Nesting (native)
+ * ✅ @layer cascade layers
+ * ✅ @container queries
+ * ✅ :has(), :is(), :where() pseudo-classes
+ * ✅ color-mix() functions
+ * ✅ content-visibility optimization
+ * ✅ View Transitions API
+ * ✅ Relative color syntax
+ * ✅ CSS containment
+ * ✅ Fluid typography (clamp)
+ * ✅ backdrop-filter
  * 
- * Structure:
- * 1. base      - HTML element defaults
- * 2. tokens    - Design tokens (CSS custom properties)
- * 3. layouts   - Layout composition primitives
- * 4. components - Component-specific styles
- * 5. utilities - Utility classes (Tailwind)
- * 6. overrides - State-based overrides
- */
-
-/* 
- * Fonts are now self-hosted via @fontsource/inter in main.tsx
- * This eliminates render-blocking network requests to Google Fonts
+ * Performance Targets:
+ * - LCP < 2.5s ⚡
+ * - FID < 100ms ⚡
+ * - CLS < 0.1 ⚡
+ * - CSS Parse < 50ms ⚡
+ * - Bundle < 50KB (gzipped) 📦
+ * 
+ * Architecture: Single Source of Truth
+ * - unified-tokens.css: ALL design tokens (colors, spacing, typography)
+ * - critical-modern.css: Above-fold styles for fastest FCP
+ * - Components: Modular, reusable UI elements
+ * - Utilities: Helper classes for rapid development
  */
 
 /* ============================================================================
-   TAILWIND CSS - Must be first
+   TAILWIND CSS V4 - Modern utility-first framework
    ============================================================================ */
 
 @import 'tailwindcss';
 
 /* ============================================================================
-   UNIFIED DESIGN SYSTEM - Professional light theme (CORE SYSTEM)
+   UNIFIED TOKENS - SINGLE SOURCE OF TRUTH
+   All colors, spacing, typography, etc. defined once here
    ============================================================================ */
 
-@import './unified-theme.css';
+@import './unified-tokens.css';
+
+/* ============================================================================
+   COMPONENT SYSTEM - Unified, consistent UI elements
+   ============================================================================ */
+
 @import './components/unified-form.css';
 @import './components/unified-button.css';
 @import './components/unified-typography.css';
 @import './components/unified-container.css';
+@import './components/unified-utilities.css';
 
 /* ============================================================================
-   CUSTOM CSS IMPORTS - All imports must come before @layer definitions
+   ADDITIONAL COMPONENTS - Feature-specific UI
    ============================================================================ */
 
-@import './tokens/primitives.css';
-@import './tokens/semantic.css';
-@import './tokens/component-tokens.css';
 @import './compositions/layouts.css';
-@import './components/button.css';
 @import './components/alert.css';
 @import './components/card.css';
 @import './components/modal.css';
 @import './components/toast.css';
-@import './components/form.css';
 @import './components/skeleton.css';
 @import './components/virtual-table.css';
-@import './design-system/index.css';
+
+/* ============================================================================
+   UTILITIES & ENHANCEMENTS
+   ============================================================================ */
+
 @import './accessibility.css';
 @import './common-classes.css';
 @import './view-transitions.css';
+@import './container-queries.css';
+@import './responsive-final.css';
+@import './utilities/layout.css';
+@import './utilities/icon-sizes.css';
+@import './utilities/responsive-spacing.css';
+@import './utilities/animations.css';
+@import './utilities/shadows.css';
+@import './utilities/scroll-animations.css';
+@import './utilities/entry-animations.css';
 
 /* ============================================================================
-   BASE LAYER - Global element styles
+   FORM OVERRIDES - Must be imported LAST for proper cascade
    ============================================================================ */
 
-@layer base {
-  html {
-    font-family:
-      'Inter',
-      -apple-system,
-      BlinkMacSystemFont,
-      'Segoe UI',
-      'Roboto',
-      'Oxygen',
-      'Ubuntu',
-      'Cantarell',
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    font-feature-settings:
-      'liga' 1,
-      'calt' 1;
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    background-color: rgb(var(--color-background));
-    color: rgb(var(--color-text-primary));
-    transition:
-      background-color 0.3s ease,
-      color 0.3s ease;
-  }
-
-  #root {
-    min-height: 100vh;
-  }
-
-  /* Improve focus visibility for accessibility */
-  *:focus-visible {
-    outline: 2px solid rgb(var(--color-focus-ring));
-    outline-offset: 2px;
-  }
-
-  /* Smooth scrolling with reduced motion support */
-  @media (prefers-reduced-motion: no-preference) {
-    html {
-      scroll-behavior: smooth;
-    }
-  }
-}
+@import './form-overrides.css';
 
 /* ============================================================================
-   OVERRIDES LAYER - State-based overrides
+   OVERRIDES LAYER - High-priority state overrides
    ============================================================================ */
 
 @layer overrides {
-  /* High-priority state overrides */
+  /* Loading state */
   [data-loading='true'] {
     pointer-events: none;
     opacity: 0.6;
+    cursor: wait;
   }
 
+  /* Disabled state */
   [data-disabled='true'] {
     pointer-events: none;
     opacity: 0.5;
     cursor: not-allowed;
   }
-}
 
-/* ============================================================================
-   PERFORMANCE OPTIMIZATIONS
-   ============================================================================ */
-
-/* Optimize font loading */
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap; /* Prevent FOIT */
-  src: local('Inter'), local('Inter-Regular');
-}
-
-/* GPU acceleration for animations */
-@layer base {
-  .will-animate {
-    will-change: transform, opacity;
-  }
-
-  .gpu-accelerated {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
-  }
-}
-
-/* ============================================================================
-   PRINT STYLES
-   ============================================================================ */
-
-@media print {
-  * {
-    background: white !important;
-    color: black !important;
-    box-shadow: none !important;
-  }
-
-  @page {
-    margin: 1cm;
-  }
-
-  body {
-    font-size: 12pt;
-  }
-
-  a[href]::after {
-    content: ' (' attr(href) ')';
-  }
-
-  .no-print {
+  /* Hidden */
+  [hidden] {
     display: none !important;
   }
 }

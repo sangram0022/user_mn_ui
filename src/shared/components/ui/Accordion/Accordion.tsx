@@ -36,7 +36,6 @@ import { cn } from '@shared/utils';
 import { ChevronDown } from 'lucide-react';
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useId,
@@ -160,37 +159,32 @@ function AccordionRoot(props: AccordionProps) {
         ? props.value || []
         : multipleValues;
 
-  const toggleItem = useCallback(
-    (value: string) => {
-      if (type === 'single') {
-        const newValue = expandedValues.includes(value)
-          ? props.collapsible
-            ? undefined
-            : expandedValues[0]
-          : value;
+  // ✅ React 19: No useCallback needed - React Compiler optimizes
+  const toggleItem = (value: string) => {
+    if (type === 'single') {
+      const newValue = expandedValues.includes(value)
+        ? props.collapsible
+          ? undefined
+          : expandedValues[0]
+        : value;
 
-        if (!isSingleControlled) {
-          setSingleValue(newValue);
-        }
-        props.onValueChange?.(newValue);
-      } else {
-        const newValues = expandedValues.includes(value)
-          ? expandedValues.filter((v) => v !== value)
-          : [...expandedValues, value];
-
-        if (!isMultipleControlled) {
-          setMultipleValues(newValues);
-        }
-        props.onValueChange?.(newValues);
+      if (!isSingleControlled) {
+        setSingleValue(newValue);
       }
-    },
-    [type, expandedValues, isSingleControlled, isMultipleControlled, props]
-  );
+      props.onValueChange?.(newValue);
+    } else {
+      const newValues = expandedValues.includes(value)
+        ? expandedValues.filter((v) => v !== value)
+        : [...expandedValues, value];
 
-  const isExpanded = useCallback(
-    (value: string) => expandedValues.includes(value),
-    [expandedValues]
-  );
+      if (!isMultipleControlled) {
+        setMultipleValues(newValues);
+      }
+      props.onValueChange?.(newValues);
+    }
+  };
+
+  const isExpanded = (value: string) => expandedValues.includes(value);
 
   const contextValue: AccordionContextValue = {
     type,
@@ -237,8 +231,8 @@ function AccordionItem({ children, disabled = false, className = '' }: Accordion
     <div
       className={cn(
         'accordion-item',
-        'border border-gray-200 dark:border-gray-700 rounded-lg',
-        'bg-white dark:bg-gray-800',
+        'border border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)] rounded-lg',
+        'bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)]',
         isDisabled && 'opacity-50 cursor-not-allowed',
         className
       )}
@@ -300,10 +294,10 @@ function AccordionTrigger({ children, className = '', hideIcon = false }: Accord
           'accordion-trigger',
           'flex items-center justify-between w-full',
           'px-4 py-3 text-left',
-          'font-medium text-sm text-gray-900 dark:text-white',
+          'font-medium text-sm text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]',
           'transition-all duration-200',
-          'hover:bg-gray-50 dark:hover:bg-gray-700/50',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+          'hover:bg-[var(--color-surface-secondary)] dark:hover:bg-[var(--color-surface-primary)]/50',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
           'rounded-lg',
           className
@@ -313,7 +307,7 @@ function AccordionTrigger({ children, className = '', hideIcon = false }: Accord
         {!hideIcon && (
           <ChevronDown
             className={cn(
-              'w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200',
+              'icon-sm text-[var(--color-text-tertiary)] dark:text-[color:var(--color-text-tertiary)] transition-transform duration-200',
               expanded && 'rotate-180'
             )}
             aria-hidden="true"
@@ -388,7 +382,9 @@ function AccordionContent({ children, className = '' }: AccordionContentProps) {
       data-state={expanded ? 'open' : 'closed'}
     >
       <div ref={contentRef} className="px-4 pb-4 pt-2">
-        <div className="text-sm text-gray-600 dark:text-gray-400">{children}</div>
+        <div className="text-sm text-[color:var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+          {children}
+        </div>
       </div>
     </div>
   );

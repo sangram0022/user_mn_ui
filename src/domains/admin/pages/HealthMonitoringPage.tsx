@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Health Monitoring Page
  *
  * Dedicated system health dashboard with real-time metrics, service status,
@@ -29,7 +29,7 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 
 import { useAuth } from '@domains/auth/context/AuthContext';
 import { useErrorHandler } from '@hooks/errors/useErrorHandler';
@@ -110,15 +110,19 @@ const StatusIndicator: FC<{ status: string; size?: 'sm' | 'md' | 'lg' }> = ({
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'healthy':
-        return { color: 'bg-green-500', icon: CheckCircle, label: 'Healthy' };
+        return { color: 'bg-[var(--color-success)]', icon: CheckCircle, label: 'Healthy' };
       case 'degraded':
-        return { color: 'bg-yellow-500', icon: AlertTriangle, label: 'Degraded' };
+        return { color: 'bg-[var(--color-warning)]', icon: AlertTriangle, label: 'Degraded' };
       case 'down':
-        return { color: 'bg-red-500', icon: XCircle, label: 'Down' };
+        return { color: 'bg-[var(--color-error)]', icon: XCircle, label: 'Down' };
       case 'maintenance':
-        return { color: 'bg-blue-500', icon: Settings, label: 'In Maintenance' };
+        return { color: 'bg-[var(--color-primary)]', icon: Settings, label: 'In Maintenance' };
       default:
-        return { color: 'bg-gray-500', icon: Clock, label: 'Unknown Status' };
+        return {
+          color: 'bg-[var(--color-surface-secondary)]',
+          icon: Clock,
+          label: 'Unknown Status',
+        };
     }
   };
 
@@ -127,9 +131,9 @@ const StatusIndicator: FC<{ status: string; size?: 'sm' | 'md' | 'lg' }> = ({
       case 'sm':
         return 'w-2 h-2';
       case 'lg':
-        return 'w-4 h-4';
+        return 'icon-sm';
       default:
-        return 'w-3 h-3';
+        return 'icon-xs';
     }
   };
 
@@ -156,22 +160,22 @@ const MetricCard: FC<{
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'warning':
-        return 'border-yellow-200 bg-yellow-50';
+        return 'border-[var(--color-warning)] bg-[var(--color-warning-light)]';
       case 'critical':
-        return 'border-red-200 bg-red-50';
+        return 'border-[var(--color-error)] bg-[var(--color-error-light)]';
       default:
-        return 'border-gray-200 bg-white';
+        return 'border-[var(--color-border)] bg-[var(--color-surface-primary)]';
     }
   };
 
   const getTrendColor = (trend?: string) => {
     switch (trend) {
       case 'up':
-        return 'text-red-500';
+        return 'text-[var(--color-error)]';
       case 'down':
-        return 'text-green-500';
+        return 'text-[var(--color-success)]';
       default:
-        return 'text-gray-500';
+        return 'text-[var(--color-text-tertiary)]';
     }
   };
 
@@ -183,21 +187,28 @@ const MetricCard: FC<{
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <Icon className="w-8 h-8 text-gray-600 mr-3" aria-hidden="true" />
+          <Icon
+            className="w-8 h-8 text-[color:var(--color-text-secondary)] mr-3"
+            aria-hidden="true"
+          />
           <div>
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-sm font-medium text-[var(--color-text-secondary)]">{title}</p>
+            <p className="text-2xl font-bold text-[var(--color-text-primary)]">
               {value}
-              {unit && <span className="text-sm font-normal text-gray-500 ml-1">{unit}</span>}
+              {unit && (
+                <span className="text-sm font-normal text-[color:var(--color-text-secondary)] ml-1">
+                  {unit}
+                </span>
+              )}
             </p>
           </div>
         </div>
         {trend && trendValue && (
           <div className={`flex items-center text-sm ${getTrendColor(trend)}`}>
             {trend === 'up' ? (
-              <TrendingUp className="w-4 h-4 mr-1" aria-hidden="true" />
+              <TrendingUp className="icon-sm mr-1" aria-hidden="true" />
             ) : trend === 'down' ? (
-              <TrendingDown className="w-4 h-4 mr-1" aria-hidden="true" />
+              <TrendingDown className="icon-sm mr-1" aria-hidden="true" />
             ) : null}
             <span aria-label={`Trend: ${trend}, ${Math.abs(trendValue)}%`}>
               {Math.abs(trendValue)}%
@@ -248,21 +259,21 @@ const ServiceCard: FC<{
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'healthy':
-        return <CheckCircle className="w-3 h-3" />;
+        return <CheckCircle className="icon-xs" />;
       case 'degraded':
-        return <AlertTriangle className="w-3 h-3" />;
+        return <AlertTriangle className="icon-xs" />;
       case 'down':
-        return <XCircle className="w-3 h-3" />;
+        return <XCircle className="icon-xs" />;
       case 'maintenance':
-        return <Settings className="w-3 h-3" />;
+        return <Settings className="icon-xs" />;
       default:
-        return <Clock className="w-3 h-3" />;
+        return <Clock className="icon-xs" />;
     }
   };
 
   return (
     <div
-      className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow"
+      className="bg-[var(--color-surface-primary)] rounded-lg border border-[color:var(--color-border-primary)] p-6 hover:shadow-md transition-shadow"
       role="article"
       aria-label={`Service: ${service.service_name} - Status: ${getStatusLabel(service.status)}`}
     >
@@ -270,7 +281,9 @@ const ServiceCard: FC<{
         <div className="flex items-center space-x-3">
           <StatusIndicator status={service.status} size="md" />
           <div>
-            <h3 className="text-lg font-medium text-gray-900">{service.service_name}</h3>
+            <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
+              {service.service_name}
+            </h3>
             <Badge
               variant={getStatusVariant(service.status)}
               icon={getStatusIcon(service.status)}
@@ -282,47 +295,59 @@ const ServiceCard: FC<{
         </div>
         <button
           onClick={() => onViewDetails(service)}
-          className="text-gray-400 hover:text-gray-500"
+          className="text-[color:var(--color-text-tertiary)] hover:text-[var(--color-text-tertiary)]"
           aria-label={`View details for ${service.service_name}`}
         >
-          <Eye className="w-5 h-5" aria-hidden="true" />
+          <Eye className="icon-md" aria-hidden="true" />
         </button>
       </div>
 
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <p className="text-gray-500">Response Time</p>
-          <p className="font-medium text-gray-900">{service.response_time}ms</p>
+          <p className="text-[var(--color-text-tertiary)]">Response Time</p>
+          <p className="font-medium text-[var(--color-text-primary)]">{service.response_time}ms</p>
         </div>
         <div>
-          <p className="text-gray-500">Error Rate</p>
-          <p className="font-medium text-gray-900">{service.error_rate.toFixed(2)}%</p>
+          <p className="text-[var(--color-text-tertiary)]">Error Rate</p>
+          <p className="font-medium text-[var(--color-text-primary)]">
+            {service.error_rate.toFixed(2)}%
+          </p>
         </div>
         <div>
-          <p className="text-gray-500">Uptime</p>
-          <p className="font-medium text-gray-900">{service.uptime_percentage.toFixed(1)}%</p>
+          <p className="text-[var(--color-text-tertiary)]">Uptime</p>
+          <p className="font-medium text-[var(--color-text-primary)]">
+            {service.uptime_percentage.toFixed(1)}%
+          </p>
         </div>
         <div>
-          <p className="text-gray-500">Last Check</p>
-          <p className="font-medium text-gray-900">{formatTime(service.last_check)}</p>
+          <p className="text-[var(--color-text-tertiary)]">Last Check</p>
+          <p className="font-medium text-[var(--color-text-primary)]">
+            {formatTime(service.last_check)}
+          </p>
         </div>
       </div>
 
       {service.endpoints.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <p className="text-sm font-medium text-gray-700 mb-2">Endpoints</p>
+        <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
+          <p className="text-sm font-medium text-[color:var(--color-text-primary)] mb-2">
+            Endpoints
+          </p>
           <div className="space-y-1">
             {service.endpoints.slice(0, 3).map((endpoint, index) => (
               <div key={index} className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-2">
                   <StatusIndicator status={endpoint.status} size="sm" />
-                  <span className="text-gray-600">{endpoint.path}</span>
+                  <span className="text-[var(--color-text-secondary)]">{endpoint.path}</span>
                 </div>
-                <span className="text-gray-500">{endpoint.response_time}ms</span>
+                <span className="text-[var(--color-text-tertiary)]">
+                  {endpoint.response_time}ms
+                </span>
               </div>
             ))}
             {service.endpoints.length > 3 && (
-              <p className="text-xs text-gray-500">+{service.endpoints.length - 3} more</p>
+              <p className="text-xs text-[var(--color-text-tertiary)]">
+                +{service.endpoints.length - 3} more
+              </p>
             )}
           </div>
         </div>
@@ -340,29 +365,29 @@ const AlertCard: FC<{
     switch (severity) {
       case 'critical':
         return {
-          color: 'border-red-200 bg-red-50',
-          badge: 'bg-red-100 text-red-800',
+          color: 'border-[var(--color-error)] bg-[var(--color-error-light)]',
+          badge: 'bg-[var(--color-error-light)] text-[var(--color-error)]',
           icon: XCircle,
           label: 'Critical Alert',
         };
       case 'warning':
         return {
-          color: 'border-yellow-200 bg-yellow-50',
-          badge: 'bg-yellow-100 text-yellow-800',
+          color: 'border-[var(--color-warning)] bg-[var(--color-warning-light)]',
+          badge: 'bg-[var(--color-warning-light)] text-[var(--color-warning)]',
           icon: AlertTriangle,
           label: 'Warning Alert',
         };
       case 'info':
         return {
-          color: 'border-blue-200 bg-blue-50',
-          badge: 'bg-blue-100 text-blue-800',
+          color: 'border-[var(--color-primary)] bg-[var(--color-primary-light)]',
+          badge: 'bg-[var(--color-primary-light)] text-[var(--color-primary)]',
           icon: CheckCircle,
           label: 'Information Alert',
         };
       default:
         return {
-          color: 'border-gray-200 bg-gray-50',
-          badge: 'bg-gray-100 text-gray-800',
+          color: 'border-[var(--color-border)] bg-[var(--color-surface-secondary)]',
+          badge: 'bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)]',
           icon: Clock,
           label: 'System Alert',
         };
@@ -379,7 +404,7 @@ const AlertCard: FC<{
     >
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3">
-          <Icon className="w-5 h-5 mt-0.5 text-current" aria-hidden="true" />
+          <Icon className="icon-md mt-0.5 text-current" aria-hidden="true" />
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
               <span
@@ -389,11 +414,13 @@ const AlertCard: FC<{
               >
                 {alert.severity}
               </span>
-              <span className="text-sm text-gray-500">{alert.service}</span>
+              <span className="text-sm text-[var(--color-text-tertiary)]">{alert.service}</span>
             </div>
-            <h4 className="font-medium text-gray-900 mb-1">{alert.title}</h4>
-            <p className="text-sm text-gray-600 mb-2">{alert.message}</p>
-            <p className="text-xs text-gray-500">
+            <h4 className="font-medium text-[color:var(--color-text-primary)] mb-1">
+              {alert.title}
+            </h4>
+            <p className="text-sm text-[color:var(--color-text-secondary)] mb-2">{alert.message}</p>
+            <p className="text-xs text-[var(--color-text-tertiary)]">
               {formatDateTime(alert.timestamp)}
               {alert.acknowledged && alert.acknowledged_by && (
                 <span className="ml-2"> Acknowledged by {alert.acknowledged_by}</span>
@@ -405,7 +432,7 @@ const AlertCard: FC<{
           {!alert.acknowledged && (
             <button
               onClick={() => onAcknowledge(alert.alert_id)}
-              className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              className="text-xs px-2 py-1 bg-[color:var(--color-background-secondary)] text-[color:var(--color-text-primary)] rounded hover:bg-[var(--color-border)]"
               aria-label={`Acknowledge ${alert.severity} alert: ${alert.title}`}
             >
               Acknowledge
@@ -414,7 +441,7 @@ const AlertCard: FC<{
           {alert.acknowledged && !alert.resolved && (
             <button
               onClick={() => onResolve(alert.alert_id)}
-              className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+              className="text-xs px-2 py-1 bg-[color:var(--color-success-100)] text-[var(--color-success)] rounded hover:bg-[var(--color-success-light)]"
               aria-label={`Resolve alert: ${alert.title}`}
             >
               Resolve
@@ -450,10 +477,11 @@ const HealthMonitoringPage: FC = () => {
   // ============================================================================
   // Data Loading Functions
   // ============================================================================
-  // React 19 Compiler handles memoization
+  // ? FIXED: Wrapped with useCallback to prevent infinite re-renders
 
-  const loadHealthData = async () => {
-    if (!canViewHealth) return;
+  const loadHealthData = useCallback(async () => {
+    // Check permission inside function, not in dependencies
+    if (!hasPermission('admin') && !hasPermission('monitoring:read')) return;
 
     try {
       const [metricsData, servicesData, alertsData, performanceData] = await Promise.all([
@@ -473,7 +501,7 @@ const HealthMonitoringPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [hasPermission, handleError, toast]);
 
   // ============================================================================
   // Action Functions
@@ -516,16 +544,18 @@ const HealthMonitoringPage: FC = () => {
   // ============================================================================
 
   useEffect(() => {
-    loadHealthData();
-  }, [loadHealthData]);
+    if (canViewHealth) {
+      loadHealthData(); // ? Safe - loadHealthData is now memoized
+    }
+  }, [loadHealthData, canViewHealth]);
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
-    if (!autoRefresh) return;
+    if (!canViewHealth || !autoRefresh) return;
 
     const interval = setInterval(loadHealthData, 30000);
     return () => clearInterval(interval);
-  }, [autoRefresh, loadHealthData]);
+  }, [autoRefresh, loadHealthData, canViewHealth]); // ? Safe - loadHealthData is now memoized
 
   // ============================================================================
   // Helper Functions
@@ -543,12 +573,19 @@ const HealthMonitoringPage: FC = () => {
 
   if (!canViewHealth) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-wrapper">
+        <div className="container-narrow">
           <div className="text-center py-12">
-            <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
-            <p className="text-gray-600">You don't have permission to view health monitoring.</p>
+            <Activity
+              className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
+              aria-hidden="true"
+            />
+            <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+              Access Restricted
+            </h3>
+            <p className="text-[var(--color-text-secondary)]">
+              You don't have permission to view health monitoring.
+            </p>
           </div>
         </div>
       </div>
@@ -562,45 +599,47 @@ const HealthMonitoringPage: FC = () => {
         description="Track real-time service uptime, performance metrics, and alert thresholds across the user management platform."
         keywords="system health monitoring, performance metrics, uptime dashboard, admin observability"
       />
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="page-wrapper">
+        <div className="container-full">
           {/* Header */}
           <div className="mb-8">
             <Breadcrumb />
             <div className="mt-4 flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Health Monitoring</h1>
-                <p className="text-gray-600 mt-1">
+                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                  Health Monitoring
+                </h1>
+                <p className="text-[color:var(--color-text-secondary)] mt-1">
                   Real-time operational insights across platform services.
                 </p>
               </div>
               <div className="flex items-center space-x-3">
-                <label className="flex items-center">
+                <label className="flex items-center min-h-[24px] max-md:min-h-[44px] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={autoRefresh}
                     onChange={(e) => setAutoRefresh(e.target.checked)}
-                    className="mr-2 rounded border-gray-300"
+                    className="mr-3 w-6 h-6 max-md:w-11 max-md:h-11 rounded border-[color:var(--color-border-primary)] flex-shrink-0 cursor-pointer"
                     aria-label="Enable auto-refresh every 30 seconds"
                   />
-                  <span className="text-sm text-gray-700">Auto-refresh</span>
+                  <span className="text-sm text-[var(--color-text-secondary)]">Auto-refresh</span>
                 </label>
                 <button
                   onClick={handleExportReport}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                  className="inline-flex items-center px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[var(--color-surface-hover)]"
                   aria-label="Export health report"
                 >
-                  <Download className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <Download className="icon-sm mr-2" aria-hidden="true" />
                   Export Report
                 </button>
                 <button
                   onClick={loadHealthData}
                   disabled={isLoading}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                  className="inline-flex items-center px-4 py-2 border border-[color:var(--color-border-primary)] rounded-md shadow-sm text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] hover:bg-[color:var(--color-background-secondary)] disabled:opacity-50"
                   aria-label="Refresh health data"
                 >
                   <RefreshCw
-                    className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
+                    className={`icon-sm mr-2 ${isLoading ? 'animate-spin' : ''}`}
                     aria-hidden="true"
                   />
                   Refresh
@@ -618,11 +657,16 @@ const HealthMonitoringPage: FC = () => {
 
           {/* System Metrics */}
           <div className="mb-8" role="region" aria-label="System resource metrics">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">System Metrics</h2>
+            <h2 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-4">
+              System Metrics
+            </h2>
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="p-6 bg-white rounded-lg border border-gray-200">
+                  <div
+                    key={i}
+                    className="p-6 bg-[var(--color-surface-primary)] rounded-lg border border-[var(--color-border)]"
+                  >
                     <div className="flex items-center">
                       <Skeleton className="w-8 h-8 mr-3" />
                       <div>
@@ -676,7 +720,7 @@ const HealthMonitoringPage: FC = () => {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-500">No metrics data available</p>
+                <p className="text-[var(--color-text-tertiary)]">No metrics data available</p>
               </div>
             )}
           </div>
@@ -684,63 +728,69 @@ const HealthMonitoringPage: FC = () => {
           {/* Performance Metrics */}
           {performance && (
             <div className="mb-8" role="region" aria-label="Application performance metrics">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Performance Metrics</h2>
+              <h2 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-4">
+                Performance Metrics
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <div
-                  className="bg-white p-4 rounded-lg border"
+                  className="bg-[var(--color-surface-primary)] p-4 rounded-lg border"
                   role="status"
                   aria-label={`${performance.requests_per_minute} requests per minute`}
                 >
-                  <p className="text-sm text-gray-500">Requests/min</p>
-                  <p className="text-xl font-bold text-gray-900">
+                  <p className="text-sm text-[var(--color-text-tertiary)]">Requests/min</p>
+                  <p className="text-xl font-bold text-[var(--color-text-primary)]">
                     {performance.requests_per_minute}
                   </p>
                 </div>
                 <div
-                  className="bg-white p-4 rounded-lg border"
+                  className="bg-[var(--color-surface-primary)] p-4 rounded-lg border"
                   role="status"
                   aria-label={`Average response time: ${performance.average_response_time} milliseconds`}
                 >
-                  <p className="text-sm text-gray-500">Avg Response</p>
-                  <p className="text-xl font-bold text-gray-900">
+                  <p className="text-sm text-[var(--color-text-tertiary)]">Avg Response</p>
+                  <p className="text-xl font-bold text-[var(--color-text-primary)]">
                     {performance.average_response_time}ms
                   </p>
                 </div>
                 <div
-                  className="bg-white p-4 rounded-lg border"
+                  className="bg-[var(--color-surface-primary)] p-4 rounded-lg border"
                   role="status"
                   aria-label={`Error rate: ${performance.error_rate_percentage}%`}
                 >
-                  <p className="text-sm text-gray-500">Error Rate</p>
-                  <p className="text-xl font-bold text-gray-900">
+                  <p className="text-sm text-[var(--color-text-tertiary)]">Error Rate</p>
+                  <p className="text-xl font-bold text-[var(--color-text-primary)]">
                     {performance.error_rate_percentage}%
                   </p>
                 </div>
                 <div
-                  className="bg-white p-4 rounded-lg border"
+                  className="bg-[var(--color-surface-primary)] p-4 rounded-lg border"
                   role="status"
                   aria-label={`${performance.active_users} active users`}
                 >
-                  <p className="text-sm text-gray-500">Active Users</p>
-                  <p className="text-xl font-bold text-gray-900">{performance.active_users}</p>
+                  <p className="text-sm text-[var(--color-text-tertiary)]">Active Users</p>
+                  <p className="text-xl font-bold text-[var(--color-text-primary)]">
+                    {performance.active_users}
+                  </p>
                 </div>
                 <div
-                  className="bg-white p-4 rounded-lg border"
+                  className="bg-[var(--color-surface-primary)] p-4 rounded-lg border"
                   role="status"
                   aria-label={`${performance.database_queries_per_second} database queries per second`}
                 >
-                  <p className="text-sm text-gray-500">DB Queries/sec</p>
-                  <p className="text-xl font-bold text-gray-900">
+                  <p className="text-sm text-[var(--color-text-tertiary)]">DB Queries/sec</p>
+                  <p className="text-xl font-bold text-[var(--color-text-primary)]">
                     {performance.database_queries_per_second}
                   </p>
                 </div>
                 <div
-                  className="bg-white p-4 rounded-lg border"
+                  className="bg-[var(--color-surface-primary)] p-4 rounded-lg border"
                   role="status"
                   aria-label={`Cache hit ratio: ${performance.cache_hit_ratio}%`}
                 >
-                  <p className="text-sm text-gray-500">Cache Hit Ratio</p>
-                  <p className="text-xl font-bold text-gray-900">{performance.cache_hit_ratio}%</p>
+                  <p className="text-sm text-[var(--color-text-tertiary)]">Cache Hit Ratio</p>
+                  <p className="text-xl font-bold text-[var(--color-text-primary)]">
+                    {performance.cache_hit_ratio}%
+                  </p>
                 </div>
               </div>
             </div>
@@ -749,11 +799,16 @@ const HealthMonitoringPage: FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Services Health */}
             <div role="region" aria-label="Services health status">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Services Health</h2>
+              <h2 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-4">
+                Services Health
+              </h2>
               {isLoading ? (
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="bg-white rounded-lg border p-6">
+                    <div
+                      key={i}
+                      className="bg-[var(--color-surface-primary)] rounded-lg border p-6"
+                    >
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-3">
                           <Skeleton className="w-3 h-3 rounded-full" />
@@ -787,14 +842,16 @@ const HealthMonitoringPage: FC = () => {
             {/* System Alerts */}
             <div role="region" aria-label="System alerts and notifications">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-medium text-gray-900">System Alerts</h2>
+                <h2 className="text-lg font-medium text-[var(--color-text-primary)]">
+                  System Alerts
+                </h2>
                 {alerts.filter((a) => !a.resolved).length > 0 && (
                   <span
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[color:var(--color-error-100)] text-[var(--color-error)]"
                     role="status"
                     aria-label={`${alerts.filter((a) => !a.resolved).length} active alerts`}
                   >
-                    <Bell className="w-3 h-3 mr-1" aria-hidden="true" />
+                    <Bell className="icon-xs mr-1" aria-hidden="true" />
                     {alerts.filter((a) => !a.resolved).length} Active
                   </span>
                 )}
@@ -802,7 +859,10 @@ const HealthMonitoringPage: FC = () => {
               {isLoading ? (
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="p-4 bg-white rounded-lg border">
+                    <div
+                      key={i}
+                      className="p-4 bg-[var(--color-surface-primary)] rounded-lg border"
+                    >
                       <div className="flex items-start space-x-3">
                         <Skeleton className="w-5 h-5 mt-0.5" />
                         <div className="flex-1">
@@ -832,128 +892,162 @@ const HealthMonitoringPage: FC = () => {
                   {alerts.filter((a) => !a.resolved).length === 0 && (
                     <div className="text-center py-8">
                       <CheckCircle
-                        className="w-12 h-12 text-green-500 mx-auto mb-4"
+                        className="w-12 h-12 text-[color:var(--color-success)] mx-auto mb-4"
                         aria-hidden="true"
                       />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">All Clear!</h3>
-                      <p className="text-gray-600">No active alerts at this time.</p>
+                      <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+                        All Clear!
+                      </h3>
+                      <p className="text-[var(--color-text-secondary)]">
+                        No active alerts at this time.
+                      </p>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Alerts</h3>
-                  <p className="text-gray-600">System is running smoothly.</p>
+                  <Activity
+                    className="w-12 h-12 text-[color:var(--color-text-tertiary)] mx-auto mb-4"
+                    aria-hidden="true"
+                  />
+                  <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] mb-2">
+                    No Alerts
+                  </h3>
+                  <p className="text-[var(--color-text-secondary)]">System is running smoothly.</p>
                 </div>
               )}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Service Details Modal */}
-      {selectedService && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="service-modal-title"
-        >
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <StatusIndicator status={selectedService.status} />
-                  <h3 id="service-modal-title" className="text-lg font-medium text-gray-900">
-                    {selectedService.service_name}
-                  </h3>
+        {/* Service Details Modal */}
+        {selectedService && (
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="service-modal-title"
+          >
+            <div className="bg-[var(--color-surface-primary)] rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+              <div className="px-6 py-4 border-b border-[var(--color-border)]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <StatusIndicator status={selectedService.status} />
+                    <h3
+                      id="service-modal-title"
+                      className="text-lg font-medium text-[var(--color-text-primary)]"
+                    >
+                      {selectedService.service_name}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setSelectedService(null)}
+                    className="text-[color:var(--color-text-tertiary)] hover:text-[var(--color-text-tertiary)]"
+                    aria-label="Close service details modal"
+                  >
+                    <XCircle className="w-6 h-6" aria-hidden="true" />
+                  </button>
                 </div>
+              </div>
+              <div className="px-6 py-4 overflow-y-auto">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1">
+                        Status
+                      </h4>
+                      <p className="text-sm text-[var(--color-text-primary)]">
+                        {selectedService.status}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1">
+                        Response Time
+                      </h4>
+                      <p className="text-sm text-[var(--color-text-primary)]">
+                        {selectedService.response_time}ms
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1">
+                        Error Rate
+                      </h4>
+                      <p className="text-sm text-[var(--color-text-primary)]">
+                        {selectedService.error_rate}%
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-1">
+                        Uptime
+                      </h4>
+                      <p className="text-sm text-[var(--color-text-primary)]">
+                        {selectedService.uptime_percentage}%
+                      </p>
+                    </div>
+                  </div>
+
+                  {selectedService.dependencies.length > 0 && (
+                    <div>
+                      <h4 className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-2">
+                        Dependencies
+                      </h4>
+                      <div
+                        className="flex flex-wrap gap-2"
+                        role="list"
+                        aria-label="Service dependencies"
+                      >
+                        {selectedService.dependencies.map((dep, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[color:var(--color-background-secondary)] text-[var(--color-text-primary)]"
+                            role="listitem"
+                          >
+                            {dep}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedService.endpoints.length > 0 && (
+                    <div>
+                      <h4 className="block text-sm font-medium text-[color:var(--color-text-primary)] mb-2">
+                        Endpoints
+                      </h4>
+                      <div className="space-y-2" role="list" aria-label="Service endpoints">
+                        {selectedService.endpoints.map((endpoint, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 bg-[color:var(--color-background-secondary)] rounded-md"
+                            role="listitem"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <StatusIndicator status={endpoint.status} size="sm" />
+                              <span className="text-sm font-mono">{endpoint.path}</span>
+                            </div>
+                            <span className="text-sm text-[var(--color-text-tertiary)]">
+                              {endpoint.response_time}ms
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="px-6 py-4 border-t border-[color:var(--color-border-primary)] flex justify-end">
                 <button
                   onClick={() => setSelectedService(null)}
-                  className="text-gray-400 hover:text-gray-500"
-                  aria-label="Close service details modal"
+                  className="px-4 py-2 text-sm font-medium text-[color:var(--color-text-primary)] bg-[var(--color-surface-primary)] border border-[color:var(--color-border-primary)] rounded-md hover:bg-[var(--color-surface-hover)]"
+                  aria-label="Close modal"
                 >
-                  <XCircle className="w-6 h-6" aria-hidden="true" />
+                  Close
                 </button>
               </div>
             </div>
-            <div className="px-6 py-4 overflow-y-auto">
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="block text-sm font-medium text-gray-700 mb-1">Status</h4>
-                    <p className="text-sm text-gray-900">{selectedService.status}</p>
-                  </div>
-                  <div>
-                    <h4 className="block text-sm font-medium text-gray-700 mb-1">Response Time</h4>
-                    <p className="text-sm text-gray-900">{selectedService.response_time}ms</p>
-                  </div>
-                  <div>
-                    <h4 className="block text-sm font-medium text-gray-700 mb-1">Error Rate</h4>
-                    <p className="text-sm text-gray-900">{selectedService.error_rate}%</p>
-                  </div>
-                  <div>
-                    <h4 className="block text-sm font-medium text-gray-700 mb-1">Uptime</h4>
-                    <p className="text-sm text-gray-900">{selectedService.uptime_percentage}%</p>
-                  </div>
-                </div>
-
-                {selectedService.dependencies.length > 0 && (
-                  <div>
-                    <h4 className="block text-sm font-medium text-gray-700 mb-2">Dependencies</h4>
-                    <div
-                      className="flex flex-wrap gap-2"
-                      role="list"
-                      aria-label="Service dependencies"
-                    >
-                      {selectedService.dependencies.map((dep, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                          role="listitem"
-                        >
-                          {dep}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {selectedService.endpoints.length > 0 && (
-                  <div>
-                    <h4 className="block text-sm font-medium text-gray-700 mb-2">Endpoints</h4>
-                    <div className="space-y-2" role="list" aria-label="Service endpoints">
-                      {selectedService.endpoints.map((endpoint, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
-                          role="listitem"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <StatusIndicator status={endpoint.status} size="sm" />
-                            <span className="text-sm font-mono">{endpoint.path}</span>
-                          </div>
-                          <span className="text-sm text-gray-500">{endpoint.response_time}ms</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => setSelectedService(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                aria-label="Close modal"
-              >
-                Close
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 };

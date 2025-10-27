@@ -68,18 +68,20 @@ export function UserListFilters({
     filters.approved !== 'all';
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+    <div className="bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)] rounded-lg shadow p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filters</h3>
+        <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
+          Filters
+        </h3>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
             Showing {filteredCount} of {totalCount} users
           </span>
           {hasActiveFilters && (
             <button
               type="button"
               onClick={handleReset}
-              className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              className="text-sm text-[var(--color-primary)] hover:text-[color:var(--color-primary-700)] dark:text-[var(--color-primary)] dark:hover:text-[var(--color-primary)]"
             >
               Reset filters
             </button>
@@ -92,7 +94,7 @@ export function UserListFilters({
         <div className="lg:col-span-2">
           <label
             htmlFor="search-text"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)] mb-1"
           >
             Search
           </label>
@@ -102,7 +104,7 @@ export function UserListFilters({
             placeholder="Name or email..."
             value={filters.searchText}
             onChange={(e) => handleFilterChange({ searchText: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-3 py-2 border border-[var(--color-border)] dark:border-[var(--color-border)] rounded-md shadow-sm focus:ring-[color:var(--color-primary)] focus:border-[color:var(--color-primary)] dark:bg-[var(--color-surface-primary)] dark:text-[var(--color-text-primary)]"
           />
         </div>
 
@@ -110,7 +112,7 @@ export function UserListFilters({
         <div>
           <label
             htmlFor="role-filter"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)] mb-1"
           >
             Role
           </label>
@@ -118,7 +120,7 @@ export function UserListFilters({
             id="role-filter"
             value={filters.role}
             onChange={(e) => handleFilterChange({ role: e.target.value as UserFilters['role'] })}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-3 py-2 border border-[var(--color-border)] dark:border-[var(--color-border)] rounded-md shadow-sm focus:ring-[color:var(--color-primary)] focus:border-[color:var(--color-primary)] dark:bg-[var(--color-surface-primary)] dark:text-[var(--color-text-primary)]"
           >
             <option value="all">All roles</option>
             <option value="user">User</option>
@@ -131,7 +133,7 @@ export function UserListFilters({
         <div>
           <label
             htmlFor="status-filter"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)] mb-1"
           >
             Status
           </label>
@@ -141,7 +143,7 @@ export function UserListFilters({
             onChange={(e) =>
               handleFilterChange({ status: e.target.value as UserFilters['status'] })
             }
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-3 py-2 border border-[var(--color-border)] dark:border-[var(--color-border)] rounded-md shadow-sm focus:ring-[color:var(--color-primary)] focus:border-[color:var(--color-primary)] dark:bg-[var(--color-surface-primary)] dark:text-[var(--color-text-primary)]"
           >
             <option value="all">All statuses</option>
             <option value="active">Active</option>
@@ -153,7 +155,7 @@ export function UserListFilters({
         <div>
           <label
             htmlFor="verified-filter"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)] mb-1"
           >
             Verified
           </label>
@@ -163,7 +165,7 @@ export function UserListFilters({
             onChange={(e) =>
               handleFilterChange({ verified: e.target.value as UserFilters['verified'] })
             }
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-3 py-2 border border-[var(--color-border)] dark:border-[var(--color-border)] rounded-md shadow-sm focus:ring-[color:var(--color-primary)] focus:border-[color:var(--color-primary)] dark:bg-[var(--color-surface-primary)] dark:text-[var(--color-text-primary)]"
           >
             <option value="all">All</option>
             <option value="verified">Verified</option>
@@ -175,7 +177,7 @@ export function UserListFilters({
         <div>
           <label
             htmlFor="approved-filter"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)] mb-1"
           >
             Approval
           </label>
@@ -185,7 +187,7 @@ export function UserListFilters({
             onChange={(e) =>
               handleFilterChange({ approved: e.target.value as UserFilters['approved'] })
             }
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-3 py-2 border border-[var(--color-border)] dark:border-[var(--color-border)] rounded-md shadow-sm focus:ring-[color:var(--color-primary)] focus:border-[color:var(--color-primary)] dark:bg-[var(--color-surface-primary)] dark:text-[var(--color-text-primary)]"
           >
             <option value="all">All</option>
             <option value="approved">Approved</option>
@@ -195,16 +197,18 @@ export function UserListFilters({
       </div>
 
       {/* Sort Controls */}
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-4 pt-4 border-t border-[var(--color-border)] dark:border-[var(--color-border)]">
         <div className="flex items-center gap-4">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</span>
+          <span className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
+            Sort by:
+          </span>
           <select
             value={filters.sortBy}
             aria-label="Sort by column"
             onChange={(e) =>
               handleFilterChange({ sortBy: e.target.value as UserFilters['sortBy'] })
             }
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="px-3 py-2 border border-[var(--color-border)] dark:border-[var(--color-border)] rounded-md shadow-sm focus:ring-[color:var(--color-primary)] focus:border-[color:var(--color-primary)] dark:bg-[var(--color-surface-primary)] dark:text-[var(--color-text-primary)]"
           >
             <option value="email">Email</option>
             <option value="first_name">First Name</option>
@@ -219,7 +223,7 @@ export function UserListFilters({
                 sortOrder: filters.sortOrder === 'asc' ? 'desc' : 'asc',
               })
             }
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-[var(--color-border)] dark:border-[var(--color-border)] rounded-md shadow-sm text-sm font-medium text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)] hover:bg-[color:var(--color-background-secondary)] dark:hover:bg-[var(--color-surface-primary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]"
             aria-label={`Sort ${filters.sortOrder === 'asc' ? 'descending' : 'ascending'}`}
           >
             {filters.sortOrder === 'asc' ? '↑ Ascending' : '↓ Descending'}

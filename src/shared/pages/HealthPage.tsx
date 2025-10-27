@@ -37,9 +37,13 @@ export function HealthPage() {
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <h1>Health Check</h1>
-        <p>Loading...</p>
+      <div className="page-wrapper">
+        <div className="container-narrow">
+          <div className="card-base">
+            <h1>Health Check</h1>
+            <p>Loading...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -51,141 +55,97 @@ export function HealthPage() {
   };
 
   return (
-    <div style={styles.container}>
-      <h1>[HEALTH] Application Health</h1>
+    <div className="page-wrapper">
+      <div className="container-narrow">
+        <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-6">
+          [HEALTH] Application Health
+        </h1>
 
-      <div
-        style={{
-          ...styles.status,
-          borderLeft: `4px solid ${statusColor[health?.status || 'unhealthy']}`,
-        }}
-      >
-        <h2>
-          Status:{' '}
-          <span
+        <div className="stack-lg">
+          <div
+            className="card-base"
             style={{
-              color: statusColor[health?.status || 'unhealthy'],
-              textTransform: 'uppercase',
+              borderLeft: `4px solid ${statusColor[health?.status || 'unhealthy']}`,
             }}
           >
-            {health?.status || 'unknown'}
-          </span>
-        </h2>
-      </div>
-
-      <div style={styles.info}>
-        <p>
-          <strong>Service:</strong> {health?.service}
-        </p>
-        <p>
-          <strong>Version:</strong> {health?.version}
-        </p>
-        <p>
-          <strong>Environment:</strong> {health?.environment || 'unknown'}
-        </p>
-        <p>
-          <strong>Uptime:</strong> {Math.round((health?.uptime_ms || 0) / 1000)}s
-        </p>
-        <p>
-          <strong>Last Updated:</strong> {health?.timestamp}
-        </p>
-      </div>
-
-      {health?.dependencies && (
-        <div style={styles.dependencies}>
-          <h3>Dependencies</h3>
-          <div style={styles.dependencyGrid}>
-            {Object.entries(health.dependencies).map(([name, status]) => (
-              <div
-                key={name}
+            <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">
+              Status:{' '}
+              <span
                 style={{
-                  ...styles.dependency,
-                  backgroundColor: status === 'ok' ? '#f0fdf4' : '#fef2f2',
-                  borderColor: status === 'ok' ? '#86efac' : '#fca5a5',
+                  color: statusColor[health?.status || 'unhealthy'],
+                  textTransform: 'uppercase',
                 }}
               >
-                <div style={styles.dependencyName}>{name.replace(/([A-Z])/g, ' $1')}</div>
-                <div
-                  style={{
-                    ...styles.dependencyStatus,
-                    color: status === 'ok' ? '#16a34a' : '#dc2626',
-                  }}
-                >
-                  {status === 'ok' ? '[OK]' : '[ERROR]'}
-                </div>
+                {health?.status || 'unknown'}
+              </span>
+            </h2>
+          </div>
+
+          <div className="card-base bg-[#f0f9ff]">
+            <div className="stack-sm">
+              <p className="text-[var(--color-text-primary)]">
+                <strong>Service:</strong> {health?.service}
+              </p>
+              <p className="text-[var(--color-text-primary)]">
+                <strong>Version:</strong> {health?.version}
+              </p>
+              <p className="text-[var(--color-text-primary)]">
+                <strong>Environment:</strong> {health?.environment || 'unknown'}
+              </p>
+              <p className="text-[var(--color-text-primary)]">
+                <strong>Uptime:</strong> {Math.round((health?.uptime_ms || 0) / 1000)}s
+              </p>
+              <p className="text-[var(--color-text-primary)]">
+                <strong>Last Updated:</strong> {health?.timestamp}
+              </p>
+            </div>
+          </div>
+
+          {health?.dependencies && (
+            <div className="card-base">
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">
+                Dependencies
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(health.dependencies).map(([name, status]) => (
+                  <div
+                    key={name}
+                    className="p-4 rounded-lg border"
+                    style={{
+                      backgroundColor: status === 'ok' ? '#f0fdf4' : '#fef2f2',
+                      borderColor: status === 'ok' ? '#86efac' : '#fca5a5',
+                    }}
+                  >
+                    <div className="font-bold mb-2 capitalize text-[var(--color-text-primary)]">
+                      {name.replace(/([A-Z])/g, ' $1')}
+                    </div>
+                    <div
+                      className="text-sm font-bold"
+                      style={{
+                        color: status === 'ok' ? '#16a34a' : '#dc2626',
+                      }}
+                    >
+                      {status === 'ok' ? '[OK]' : '[ERROR]'}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          )}
+
+          {error && (
+            <div className="card-base bg-[#fef2f2] border-l-4 border-[#ef4444]">
+              <p className="text-[var(--color-text-primary)]">[WARNING] Warning: {error}</p>
+            </div>
+          )}
+
+          <div className="card-base bg-[#1e293b] text-[#e2e8f0]">
+            <pre className="overflow-auto text-sm">{JSON.stringify(health, null, 2)}</pre>
           </div>
         </div>
-      )}
-
-      {error && (
-        <div style={styles.error}>
-          <p>[WARNING] Warning: {error}</p>
-        </div>
-      )}
-
-      <pre style={styles.json}>{JSON.stringify(health, null, 2)}</pre>
+      </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: '2rem',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  },
-  status: {
-    padding: '1rem',
-    marginBottom: '1rem',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '0.5rem',
-  },
-  info: {
-    padding: '1rem',
-    backgroundColor: '#f0f9ff',
-    borderRadius: '0.5rem',
-    marginBottom: '1rem',
-  },
-  dependencies: {
-    marginBottom: '1rem',
-  },
-  dependencyGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '1rem',
-  },
-  dependency: {
-    padding: '1rem',
-    borderRadius: '0.5rem',
-    border: '1px solid',
-  },
-  dependencyName: {
-    fontWeight: 'bold',
-    marginBottom: '0.5rem',
-    textTransform: 'capitalize',
-  },
-  dependencyStatus: {
-    fontSize: '0.875rem',
-    fontWeight: 'bold',
-  },
-  error: {
-    padding: '1rem',
-    backgroundColor: '#fef2f2',
-    borderRadius: '0.5rem',
-    borderLeft: '4px solid #ef4444',
-    marginBottom: '1rem',
-  },
-  json: {
-    backgroundColor: '#1e293b',
-    color: '#e2e8f0',
-    padding: '1rem',
-    borderRadius: '0.5rem',
-    overflow: 'auto',
-    fontSize: '0.875rem',
-  },
-} as const;
 
 export default HealthPage;

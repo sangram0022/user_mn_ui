@@ -5,10 +5,14 @@
  * React 19: No memoization needed - React Compiler handles optimization
  */
 
+import type {
+  CreateUserRequest,
+  UpdateUserRequest,
+  AdminUsersQuery as UserListParams,
+} from '@shared/types';
 import { useState } from 'react';
 import { adminService } from '../services/api';
 import type { UserSummary } from '../shared/types';
-import type { CreateUserRequest, UpdateUserRequest, UserListParams } from '../types/api.types';
 
 export const useUsers = () => {
   const [users, setUsers] = useState<UserSummary[]>([]);

@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-10-25T12:51:58.776Z",
+  "scores": {
+    "css": 0,
+    "js": 0,
+    "total": 22.51806640625,
+    "overall": 8
+  },
+  "bundles": {
+    "css": {
+      "size": 215778,
+      "budget": 51200,
+      "count": 2
+    },
+    "js": {
+      "size": 1462619,
+      "budget": 307200,
+      "count": 20
+    },
+    "total": {
+      "size": 2088664,
+      "budget": 819200
+    }
+  },
+  "modernization": {
+    "react19": true,
+    "gpuAcceleration": true,
+    "oklchColors": true,
+    "tailwindV4": true,
+    "componentsModernized": 6
+  }
+}

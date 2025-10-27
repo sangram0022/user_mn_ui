@@ -17,7 +17,7 @@ export function mapUserToManagedUser(user: User): ManagedUser {
     email: user.email,
     firstName: user.first_name,
     lastName: user.last_name,
-    role: (user.role as 'admin' | 'user' | 'moderator') || 'user',
+    role: (user.roles?.[0] || 'user') as 'admin' | 'user' | 'moderator',
     status: user.is_active ? 'active' : 'inactive',
     createdAt: user.created_at,
     updatedAt: user.updated_at || user.created_at,

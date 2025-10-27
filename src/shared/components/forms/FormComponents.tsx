@@ -41,13 +41,23 @@ export interface SelectInputProps extends BaseInputProps {
   disabled?: boolean;
 }
 
-// Shared input styles
-const inputBaseStyles =
-  'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200';
-const errorInputStyles = 'border-red-300 focus:ring-red-500 focus:border-red-500';
-const labelStyles = 'block text-sm font-medium text-gray-700 mb-1';
-const errorStyles = 'mt-1 text-sm text-red-600';
-const containerStyles = 'mb-4';
+/**
+ * Shared input styles - Using unified-form.css classes
+ *
+ * ✅ CORRECT APPROACH: Use CSS classes from unified-form.css
+ * ❌ WRONG: Hardcoded Tailwind utilities that override our design system
+ *
+ * Classes from unified-form.css:
+ * - .form-input: Base input styling (replaces hardcoded Tailwind classes)
+ * - .form-label: Label styling
+ * - .form-error-message: Error message styling
+ * - .form-group: Container styling with proper spacing
+ */
+const inputBaseStyles = 'form-input';
+const errorInputStyles = ''; // Error styling handled via aria-invalid in CSS
+const labelStyles = 'form-label';
+const errorStyles = 'form-error-message';
+const containerStyles = 'form-group';
 
 // Text Input Component
 export const TextInput: React.FC<TextInputProps> = ({
@@ -66,7 +76,7 @@ export const TextInput: React.FC<TextInputProps> = ({
   <div className={`${containerStyles} ${containerClassName}`}>
     <label className={labelStyles}>
       {label}
-      {required && <span className="text-red-500 ml-1">*</span>}
+      {required && <span className="text-[var(--color-error)] ml-1">*</span>}
     </label>
     <input
       type={type}
@@ -106,14 +116,14 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
   <div className={`${containerStyles} ${containerClassName}`}>
     <label className={labelStyles}>
       {label}
-      {required && <span className="text-red-500 ml-1">*</span>}
+      {required && <span className="text-[var(--color-error)] ml-1">*</span>}
     </label>
     <div className="relative">
       <input
         type={showPassword ? 'text' : 'password'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${inputBaseStyles} ${error ? errorInputStyles : ''} pr-10 ${className}`}
+        className={`${inputBaseStyles} form-input-with-icon ${className}`}
         placeholder={placeholder}
         disabled={disabled}
         autoComplete={autoComplete}
@@ -124,7 +134,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
       <button
         type="button"
         onClick={onToggleVisibility}
-        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+        className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors duration-200"
         aria-label={showPassword ? 'Hide password' : 'Show password'}
       >
         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -154,12 +164,12 @@ export const SelectInput: React.FC<SelectInputProps> = ({
   <div className={`${containerStyles} ${containerClassName}`}>
     <label className={labelStyles}>
       {label}
-      {required && <span className="text-red-500 ml-1">*</span>}
+      {required && <span className="text-[var(--color-error)] ml-1">*</span>}
     </label>
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`${inputBaseStyles} ${error ? errorInputStyles : ''} ${className}`}
+      className={`${inputBaseStyles} form-select ${className}`}
       disabled={disabled}
       required={required}
       aria-invalid={error ? 'true' : 'false'}
@@ -200,9 +210,12 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
     'w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variantStyles = {
-    primary: 'text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'text-gray-700 bg-gray-200 hover:bg-gray-300 focus:ring-gray-500',
-    danger: 'text-white bg-red-600 hover:bg-red-700 focus:ring-red-500',
+    primary:
+      'text-[var(--color-text-primary)] bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] focus:ring-[var(--color-primary)]',
+    secondary:
+      'text-[var(--color-text-secondary)] bg-[var(--color-border)] hover:bg-[var(--color-border)] focus:ring-[var(--color-border)]',
+    danger:
+      'text-[var(--color-text-primary)] bg-[var(--color-error)] hover:bg-[var(--color-error)] focus:ring-[var(--color-error)]',
   };
 
   return (
@@ -214,7 +227,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       {isLoading ? (
         <>
           <svg
-            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            className="spinner spinner-sm -ml-1 mr-3"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -258,12 +271,18 @@ export const FormContainer: React.FC<FormContainerProps> = ({
   title,
   subtitle,
 }) => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface-secondary)] py-12 px-4 sm:px-6 lg:px-8">
     <div className="max-w-md w-full space-y-8">
       {title && (
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">{title}</h2>
-          {subtitle && <p className="mt-2 text-center text-sm text-gray-600">{subtitle}</p>}
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-[var(--color-text-primary)]">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="mt-2 text-center text-sm text-[var(--color-text-secondary)]">
+              {subtitle}
+            </p>
+          )}
         </div>
       )}
       <form className={`mt-8 space-y-6 ${className}`} onSubmit={onSubmit}>

@@ -1,10 +1,12 @@
 /**
  * Audit Logging API Service
- * Reference: API_DOCUMENTATION_COMPLETE.md - Audit Logging APIs
+ * Reference: API_COMPLETE_REFERENCE_PART2_CONTINUED.md - Audit Logging APIs (Endpoints 39-40)
+ * Comprehensive audit trail with severity filtering, IP tracking, and export functionality
  */
 
 import { apiClient } from '@lib/api/client';
 import type { AuditLog, AuditLogsQuery, AuditSummary } from '@shared/types';
+
 import { logger } from '@shared/utils/logger';
 
 /**

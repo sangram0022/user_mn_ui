@@ -17,13 +17,6 @@ interface ThemeOption {
 
 const THEME_OPTIONS: ThemeOption[] = [
   {
-    palette: 'ocean',
-    name: 'Ocean',
-    description: 'Cool blues and calming waters',
-    icon: '[OCEAN]',
-    gradient: 'bg-ocean-gradient',
-  },
-  {
     palette: 'forest',
     name: 'Forest',
     description: 'Rich greens and natural earth tones',
@@ -103,23 +96,23 @@ export function ThemeSwitcher({ className = '' }: ThemeSwitcherProps) {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
+        className="flex items-center gap-3 px-4 py-3 bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] border border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
         aria-label="Open theme switcher"
       >
         <div
-          className={`w-8 h-8 rounded-lg ${currentThemeOption?.gradient} flex items-center justify-center text-white text-sm font-bold shadow-inner`}
+          className={`w-8 h-8 rounded-lg ${currentThemeOption?.gradient} flex items-center justify-center text-[var(--color-text-primary)] text-sm font-bold shadow-inner`}
         >
           {currentThemeOption?.icon}
         </div>
         <div className="text-left">
-          <div className="font-semibold text-gray-900 dark:text-white text-sm">
+          <div className="font-semibold text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)] text-sm">
             {currentThemeOption?.name}
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
+          <div className="text-xs text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)]">
             {MODE_OPTIONS.find((m) => m.mode === theme.mode)?.name} Mode
           </div>
         </div>
-        <Palette className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+        <Palette className="icon-sm text-[color:var(--color-text-tertiary)] group-hover:text-[color:var(--color-text-secondary)] dark:group-hover:text-[color:var(--color-text-tertiary)] transition-colors" />
       </button>
 
       {/* Dropdown Panel */}
@@ -140,20 +133,20 @@ export function ThemeSwitcher({ className = '' }: ThemeSwitcherProps) {
           />
 
           {/* Panel */}
-          <div className="absolute top-full mt-2 right-0 w-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+          <div className="absolute top-full mt-2 right-0 w-96 bg-[var(--color-surface-primary)] dark:bg-[color:var(--color-background-elevated)] border border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)] rounded-2xl shadow-2xl z-50 overflow-hidden">
             {/* Header */}
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+            <div className="p-6 border-b border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)]">
+              <h3 className="text-lg font-bold text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2">
                 [PALETTE] Choose Your Theme
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)]">
                 Select a color palette and lighting mode that feels right for you
               </p>
             </div>
 
             {/* Mode Selector */}
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="p-6 border-b border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-secondary)]">
+              <h4 className="text-sm font-semibold text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-4">
                 Lighting Mode
               </h4>
               <div className="grid grid-cols-3 gap-3">
@@ -163,13 +156,15 @@ export function ThemeSwitcher({ className = '' }: ThemeSwitcherProps) {
                     onClick={() => setMode(mode)}
                     className={`p-3 rounded-xl border-2 transition-all duration-200 text-left ${
                       theme.mode === mode
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                        ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] dark:bg-[var(--color-primary)]/20'
+                        : 'border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-primary)] hover:border-[var(--color-border)] dark:hover:border-[var(--color-border)]'
                     }`}
                   >
-                    <Icon className="w-5 h-5 mb-2 text-gray-600 dark:text-gray-400" />
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">{name}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <Icon className="icon-md mb-2 text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)]" />
+                    <div className="text-sm font-medium text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
+                      {name}
+                    </div>
+                    <div className="text-xs text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)] mt-1">
                       {description}
                     </div>
                   </button>
@@ -179,7 +174,7 @@ export function ThemeSwitcher({ className = '' }: ThemeSwitcherProps) {
 
             {/* Theme Palette Selector */}
             <div className="p-6 max-h-96 overflow-y-auto">
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+              <h4 className="text-sm font-semibold text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-4">
                 Color Palette
               </h4>
               <div className="grid grid-cols-1 gap-3">
@@ -189,24 +184,26 @@ export function ThemeSwitcher({ className = '' }: ThemeSwitcherProps) {
                     onClick={() => setPalette(palette)}
                     className={`p-4 rounded-xl border-2 transition-all duration-200 text-left group hover:scale-[1.02] ${
                       theme.palette === palette
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md'
+                        ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] dark:bg-[var(--color-primary)]/20 shadow-lg'
+                        : 'border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-primary)] hover:border-[var(--color-border)] dark:hover:border-[var(--color-border)] hover:shadow-md'
                     }`}
                   >
                     <div className="flex items-center gap-4">
                       <div
-                        className={`w-12 h-12 rounded-xl ${gradient} flex items-center justify-center text-white text-lg shadow-lg group-hover:shadow-xl transition-shadow`}
+                        className={`w-12 h-12 rounded-xl ${gradient} flex items-center justify-center text-[var(--color-text-primary)] text-lg shadow-lg group-hover:shadow-xl transition-shadow`}
                       >
                         {icon}
                       </div>
                       <div className="flex-1">
-                        <div className="font-semibold text-gray-900 dark:text-white">{name}</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <div className="font-semibold text-[color:var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
+                          {name}
+                        </div>
+                        <div className="text-sm text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)]">
                           {description}
                         </div>
                       </div>
                       {theme.palette === palette && (
-                        <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                        <div className="icon-xs bg-[color:var(--color-primary)] rounded-full animate-pulse" />
                       )}
                     </div>
                   </button>
@@ -215,8 +212,8 @@ export function ThemeSwitcher({ className = '' }: ThemeSwitcherProps) {
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
-              <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            <div className="p-4 bg-[color:var(--color-background-secondary)] dark:bg-[color:var(--color-background-secondary)] border-t border-[color:var(--color-border-primary)] dark:border-[color:var(--color-border-primary)]">
+              <div className="text-xs text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)] text-center">
                 Current: <span className="font-medium">{currentThemeOption?.name}</span> in{' '}
                 <span className="font-medium">
                   {MODE_OPTIONS.find((m) => m.mode === theme.mode)?.name}

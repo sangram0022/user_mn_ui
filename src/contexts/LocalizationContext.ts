@@ -2,11 +2,12 @@
  * Localization Context Types and Creation
  *
  * Separate file for context creation to support React Fast Refresh
+ * React 19: Uses use() hook for consuming context
  *
  * @author GitHub Copilot
  */
 
-import { createContext } from 'react';
+import { createContext, use } from 'react';
 import type { LocaleCode, MessageBundle } from '../types/localization.types';
 
 // ============================================================================
@@ -36,20 +37,13 @@ export const LocalizationContext = createContext<LocalizationContextState>({
 });
 
 // ============================================================================
-// Hook for consuming context
+// Hook for consuming context - React 19: use() hook
 // ============================================================================
-
-import { useContext } from 'react';
 
 /**
  * Hook for consuming localization context
+ * React 19: Uses use() hook for cleaner API and can be called conditionally
  */
 export function useLocalizationContext(): LocalizationContextState {
-  const context = useContext(LocalizationContext);
-
-  if (!context) {
-    throw new Error('useLocalizationContext must be used within a LocalizationProvider');
-  }
-
-  return context;
+  return use(LocalizationContext);
 }

@@ -27,10 +27,10 @@ interface PageContainerProps {
 }
 
 const containerVariants = {
-  default: 'min-h-screen bg-gray-50',
-  auth: 'min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50',
-  centered: 'min-h-screen flex items-center justify-center bg-gray-50',
-  dashboard: 'min-h-screen bg-gray-50 px-4 py-8',
+  default: 'min-h-screen bg-[var(--color-surface-secondary)]',
+  auth: 'min-h-screen bg-gradient-to-br from-[var(--color-primary)] via-white to-[var(--color-primary)]',
+  centered: 'min-h-screen flex items-center justify-center bg-[var(--color-surface-secondary)]',
+  dashboard: 'min-h-screen bg-[var(--color-surface-secondary)] px-4 py-8',
 };
 
 /**

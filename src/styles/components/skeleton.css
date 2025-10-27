@@ -13,6 +13,10 @@
   border-radius: var(--border-radius-component);
   position: relative;
   overflow: hidden;
+
+  /* 🚀 CSS Containment - Optimize skeleton animation performance */
+  contain: layout style paint;
+  /* Prevents skeleton animations from affecting rest of page */
 }
 
 /* Pulse animation (default) */

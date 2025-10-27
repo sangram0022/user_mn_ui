@@ -641,8 +641,17 @@ export const SESSION_STORAGE_KEYS = {
   REFRESH_TOKEN: STORAGE_KEYS.REFRESH_TOKEN,
   USER_PROFILE: STORAGE_KEYS.USER_DATA,
   LAST_ACTIVITY: STORAGE_KEYS.LAST_ACTIVITY,
-  SESSION_ID: STORAGE_KEYS.SESSION_ID,
-  DEBUG_FLAG: STORAGE_KEYS.DEBUG_FLAG,
+  SESSION_ID: 'session_id', // Session tracking
+  DEBUG_FLAG: 'debug_mode', // Debug mode flag
+} as const;
+
+// ==================== ENVIRONMENT ====================
+
+export const ENVIRONMENT = {
+  PRODUCTION: 'production',
+  STAGING: 'staging',
+  DEVELOPMENT: 'development',
+  TEST: 'test',
 } as const;
 
 // @deprecated Use SESSION instead

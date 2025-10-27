@@ -57,7 +57,7 @@ export function useUserListFilters({
 
     // Role filter
     if (filters.role !== 'all') {
-      result = result.filter((user) => user.role === filters.role);
+      result = result.filter((user) => user.roles?.includes(filters.role));
     }
 
     // Status filter (active/inactive)
@@ -154,7 +154,7 @@ export function exportUsersToCSV(users: AdminUserListResponse[]): string {
     'Email',
     'First Name',
     'Last Name',
-    'Role',
+    'Roles',
     'Active',
     'Verified',
     'Approved',
@@ -167,7 +167,7 @@ export function exportUsersToCSV(users: AdminUserListResponse[]): string {
     user.email,
     user.first_name,
     user.last_name,
-    user.role,
+    user.roles?.join(', ') || 'N/A',
     user.is_active ? 'Yes' : 'No',
     user.is_verified ? 'Yes' : 'No',
     user.is_approved ? 'Yes' : 'No',

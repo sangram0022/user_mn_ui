@@ -28,11 +28,8 @@
     "baseUrl": ".",
     "paths": {
       "@domains/*": ["src/domains/*"],
-      "@infrastructure/*": ["src/infrastructure/*"],
       "@shared/*": ["src/shared/*"],
       "@app/*": ["src/app/*"],
-      "@features/*": ["src/features/*"],
-      "@widgets/*": ["src/widgets/*"],
       "@config/*": ["src/config/*"],
       "@contexts/*": ["src/contexts/*"],
       "@components/*": ["src/components/*"],
@@ -41,7 +38,6 @@
       "@styles/*": ["src/styles/*"],
       "@layouts/*": ["src/layouts/*"],
       "@routing/*": ["src/routing/*"],
-      "@assets/*": ["src/assets/*"],
       "@services/*": ["src/services/*"]
     }
   },

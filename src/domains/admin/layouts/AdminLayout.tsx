@@ -87,7 +87,7 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
   const { user, hasPermission } = useAuth();
 
   // Check if user has admin permissions
-  const canAccessAdmin = hasPermission('admin') || user?.role === 'admin';
+  const canAccessAdmin = hasPermission('admin') || user?.roles?.includes('admin');
 
   const isActive = (href: string) =>
     location.pathname === href ||
@@ -109,23 +109,27 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
 
   if (!canAccessAdmin) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--color-surface-secondary)] flex items-center justify-center">
         <div className="text-center">
-          <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
-          <p className="text-gray-600">You don't have permission to access the admin area.</p>
+          <Shield className="w-12 h-12 text-[var(--color-text-tertiary)] mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-2">
+            Access Restricted
+          </h3>
+          <p className="text-[var(--color-text-secondary)]">
+            You don&apos;t have permission to access the admin area.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--color-surface-secondary)]">
       {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-40 lg:hidden bg-gray-600 bg-opacity-75"
+          className="fixed inset-0 z-40 lg:hidden bg-[var(--color-surface-primary)] bg-opacity-75"
           onClick={() => setIsSidebarOpen(false)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') setIsSidebarOpen(false);
@@ -137,22 +141,24 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
       {/* Sidebar */}
       <div
         className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        fixed inset-y-0 left-0 z-50 w-64 bg-[var(--color-surface-primary)] shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-4 border-b border-[var(--color-border)]">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
-                <Settings className="h-4 w-4 text-white" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]">
+                <Settings className="h-4 w-4 text-[var(--color-text-primary)]" />
               </div>
-              <span className="text-lg font-semibold text-gray-900">Admin Panel</span>
+              <span className="text-lg font-semibold text-[var(--color-text-primary)]">
+                Admin Panel
+              </span>
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600"
+              className="lg:hidden p-1 rounded-md text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
             >
               <X className="w-5 h-5" />
             </button>
@@ -173,44 +179,48 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
                     group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors duration-200
                     ${
                       active
-                        ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                        ? 'bg-[var(--color-primary-light)] text-[var(--color-primary)] border-r-2 border-[var(--color-primary)]'
+                        : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-primary)]'
                     }
                   `}
                 >
                   <Icon
                     className={`
                     flex-shrink-0 w-5 h-5 mr-3 transition-colors duration-200
-                    ${active ? 'text-blue-700' : 'text-gray-400 group-hover:text-blue-600'}
+                    ${active ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-tertiary)] group-hover:text-[var(--color-primary)]'}
                   `}
                   />
                   <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-medium ${active ? 'text-blue-700' : ''}`}>
+                    <div
+                      className={`text-sm font-medium ${active ? 'text-[var(--color-primary)]' : ''}`}
+                    >
                       {item.name}
                     </div>
-                    <div className={`text-xs mt-0.5 ${active ? 'text-blue-600' : 'text-gray-500'}`}>
+                    <div
+                      className={`text-xs mt-0.5 ${active ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-tertiary)]'}`}
+                    >
                       {item.description}
                     </div>
                   </div>
-                  {active && <ChevronRight className="w-4 h-4 text-blue-700" />}
+                  {active && <ChevronRight className="w-4 h-4 text-[var(--color-primary)]" />}
                 </Link>
               );
             })}
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-[var(--color-border)]">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
-                <span className="text-xs font-medium text-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]">
+                <span className="text-xs font-medium text-[var(--color-text-primary)]">
                   {user?.full_name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || 'A'}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-gray-900 truncate">
+                <div className="text-sm font-medium text-[var(--color-text-primary)] truncate">
                   {user?.full_name || user?.username || 'Admin'}
                 </div>
-                <div className="text-xs text-gray-500">Administrator</div>
+                <div className="text-xs text-[var(--color-text-tertiary)]">Administrator</div>
               </div>
             </div>
           </div>
@@ -220,10 +230,10 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <div className="sticky top-0 z-30 flex h-16 bg-white shadow-sm border-b border-gray-200">
+        <div className="sticky top-0 z-30 flex h-16 bg-[var(--color-surface-primary)] shadow-sm border-b border-[var(--color-border)]">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
+            className="px-4 text-[var(--color-text-tertiary)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[color:var(--color-primary)] lg:hidden"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -234,13 +244,15 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
               <ol className="flex items-center space-x-2">
                 {generateBreadcrumbs().map((crumb, index) => (
                   <li key={crumb.href} className="flex items-center">
-                    {index > 0 && <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />}
+                    {index > 0 && (
+                      <ChevronRight className="w-4 h-4 text-[var(--color-text-tertiary)] mx-2" />
+                    )}
                     <Link
                       to={crumb.href}
                       className={`text-sm font-medium ${
                         index === generateBreadcrumbs().length - 1
-                          ? 'text-gray-900'
-                          : 'text-gray-500 hover:text-gray-700'
+                          ? 'text-[var(--color-text-primary)]'
+                          : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]'
                       }`}
                     >
                       {crumb.name}
@@ -252,7 +264,10 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
 
             {/* User info */}
             <div className="flex items-center gap-3">
-              <Link to="/" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+              <Link
+                to="/"
+                className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors"
+              >
                 Back to App
               </Link>
             </div>

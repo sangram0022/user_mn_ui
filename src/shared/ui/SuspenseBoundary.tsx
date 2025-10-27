@@ -37,7 +37,9 @@ export const SuspenseBoundary: FC<SuspenseBoundaryProps> = ({
     <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
       <LoadingSpinner size="lg" />
       {loadingText && (
-        <p className="text-gray-600 text-sm font-medium animate-pulse">{loadingText}</p>
+        <p className="text-[color:var(--color-text-secondary)] text-sm font-medium animate-pulse">
+          {loadingText}
+        </p>
       )}
     </div>
   );

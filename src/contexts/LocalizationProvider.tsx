@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useState, type FC, type ReactNode } from 'react';
+import { storageService } from '../shared/services/storage.service';
 import { logger } from '../shared/utils/logger';
 import type { LocaleCode, MessageBundle } from '../types/localization.types';
 import { LocalizationContext, type LocalizationContextState } from './LocalizationContext';
@@ -74,8 +75,9 @@ async function loadLocaleMessages(locale: LocaleCode): Promise<MessageBundle> {
 // ============================================================================
 
 function detectUserLocale(): LocaleCode {
-  // Try localStorage first
-  const storedLocale = localStorage.getItem('user-locale') as LocaleCode;
+  // ✅ Single source of truth: storageService
+  // Try centralized storage first
+  const storedLocale = storageService.getLocale() as LocaleCode;
   if (
     storedLocale &&
     ['en', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko', 'zh', 'hi', 'ar'].includes(storedLocale)
@@ -94,7 +96,8 @@ function detectUserLocale(): LocaleCode {
 }
 
 function saveUserLocale(locale: LocaleCode): void {
-  localStorage.setItem('user-locale', locale);
+  // ✅ Use centralized storage service
+  storageService.setLocale(locale);
 }
 
 // ============================================================================

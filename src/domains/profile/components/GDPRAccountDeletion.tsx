@@ -58,12 +58,12 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="border-l-4 border-red-500 pl-4 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+    <div className="bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)] rounded-lg shadow p-6">
+      <div className="border-l-4 border-[var(--color-error)] pl-4 mb-6">
+        <h2 className="text-xl font-semibold text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2">
           Delete Your Account
         </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
           Permanently delete your account and all associated data. This action cannot be undone.
         </p>
       </div>
@@ -71,10 +71,10 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
       {!showConfirmation ? (
         <div className="space-y-6">
           {/* Warning Box */}
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
+          <div className="bg-[var(--color-error-light)] dark:bg-[var(--color-error)]/20 border border-[var(--color-error)] dark:border-[var(--color-error)] rounded-md p-4">
             <div className="flex">
               <svg
-                className="h-5 w-5 text-red-600 dark:text-red-400 mr-2 flex-shrink-0"
+                className="h-5 w-5 text-[var(--color-error)] dark:text-[var(--color-error)] mr-2 flex-shrink-0"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -84,7 +84,7 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
                   clipRule="evenodd"
                 />
               </svg>
-              <div className="text-sm text-red-800 dark:text-red-300">
+              <div className="text-sm text-[var(--color-error)] dark:text-[var(--color-error)]">
                 <p className="font-medium mb-1">Warning: This action is permanent</p>
                 <ul className="list-disc list-inside space-y-1 text-xs">
                   <li>Your account will be permanently deleted</li>
@@ -99,13 +99,13 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
 
           {/* What Gets Deleted */}
           <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+            <h3 className="text-sm font-medium text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-3">
               What will be deleted:
             </h3>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <ul className="space-y-2 text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
               <li className="flex items-start">
                 <svg
-                  className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5"
+                  className="h-5 w-5 text-[var(--color-error)] mr-2 flex-shrink-0 mt-0.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -121,7 +121,7 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
               </li>
               <li className="flex items-start">
                 <svg
-                  className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5"
+                  className="h-5 w-5 text-[var(--color-error)] mr-2 flex-shrink-0 mt-0.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -137,7 +137,7 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
               </li>
               <li className="flex items-start">
                 <svg
-                  className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5"
+                  className="h-5 w-5 text-[var(--color-error)] mr-2 flex-shrink-0 mt-0.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -153,7 +153,7 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
               </li>
               <li className="flex items-start">
                 <svg
-                  className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5"
+                  className="h-5 w-5 text-[var(--color-error)] mr-2 flex-shrink-0 mt-0.5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -171,10 +171,10 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
           </div>
 
           {/* Alternative Options */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+          <div className="bg-[var(--color-primary-light)] dark:bg-[var(--color-primary)]/20 border border-[var(--color-primary)] dark:border-[var(--color-primary)] rounded-md p-4">
             <div className="flex">
               <svg
-                className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0"
+                className="h-5 w-5 text-[var(--color-primary)] dark:text-[var(--color-primary)] mr-2 flex-shrink-0"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -184,7 +184,7 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
                   clipRule="evenodd"
                 />
               </svg>
-              <div className="text-sm text-blue-800 dark:text-blue-300">
+              <div className="text-sm text-[var(--color-primary)] dark:text-[var(--color-primary)]">
                 <p className="font-medium mb-1">Consider these alternatives:</p>
                 <ul className="list-disc list-inside space-y-1 text-xs">
                   <li>Export your data before deleting (GDPR Data Export)</li>
@@ -197,11 +197,11 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
           </div>
 
           {/* Proceed Button */}
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="pt-4 border-t border-[var(--color-border)] dark:border-[var(--color-border)]">
             <button
               type="button"
               onClick={() => setShowConfirmation(true)}
-              className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="w-full sm:w-auto px-6 py-3 bg-[var(--color-error)] text-[var(--color-text-primary)] font-medium rounded-md hover:bg-[var(--color-error)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-error)]"
             >
               I Understand, Proceed to Delete
             </button>
@@ -213,9 +213,10 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
           <div>
             <label
               htmlFor="confirmation-text"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="block text-sm font-medium text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)] mb-2"
             >
-              Type <span className="font-bold text-red-600">DELETE MY ACCOUNT</span> to confirm:
+              Type <span className="font-bold text-[var(--color-error)]">DELETE MY ACCOUNT</span> to
+              confirm:
             </label>
             <input
               id="confirmation-text"
@@ -223,11 +224,11 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
               value={confirmationText}
               onChange={(e) => setConfirmationText(e.target.value)}
               placeholder="DELETE MY ACCOUNT"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 py-2 border border-[var(--color-border)] dark:border-[var(--color-border)] rounded-md shadow-sm focus:ring-[var(--color-error)] focus:border-[var(--color-error)] dark:bg-[var(--color-surface-primary)] dark:text-[var(--color-text-primary)]"
               disabled={loading}
             />
             {confirmationText && confirmationText !== REQUIRED_TEXT && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+              <p className="mt-1 text-sm text-[var(--color-error)] dark:text-[var(--color-error)]">
                 Please type exactly: {REQUIRED_TEXT}
               </p>
             )}
@@ -240,10 +241,10 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
                 type="checkbox"
                 checked={understood}
                 onChange={(e) => setUnderstood(e.target.checked)}
-                className="mt-1 mr-2 text-red-600 focus:ring-red-500 rounded"
+                className="mt-1 mr-2 text-[var(--color-error)] focus:ring-[var(--color-error)] rounded"
                 disabled={loading}
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
                 I understand that this action is permanent and cannot be undone. All my data will be
                 permanently deleted.
               </span>
@@ -252,13 +253,15 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
-              <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+            <div className="bg-[var(--color-error-light)] dark:bg-[var(--color-error)]/20 border border-[var(--color-error)] dark:border-[var(--color-error)] rounded-md p-3">
+              <p className="text-sm text-[var(--color-error)] dark:text-[var(--color-error)]">
+                {error}
+              </p>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex gap-3 pt-4 border-t border-[var(--color-border)] dark:border-[var(--color-border)]">
             <button
               type="button"
               onClick={() => {
@@ -267,7 +270,7 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
                 setUnderstood(false);
                 setError(null);
               }}
-              className="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-medium rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              className="flex-1 px-6 py-3 bg-[var(--color-border)] dark:bg-[var(--color-surface-primary)] text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] font-medium rounded-md hover:bg-[var(--color-border)] dark:hover:bg-[var(--color-surface-primary)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-border)]"
               disabled={loading}
             >
               Cancel
@@ -276,15 +279,15 @@ export function GDPRAccountDeletion({ onDeleteSuccess }: GDPRAccountDeletionProp
               type="button"
               onClick={handleDelete}
               disabled={!isConfirmationValid || loading}
-              className="flex-1 px-6 py-3 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 bg-[var(--color-error)] text-[var(--color-text-primary)] font-medium rounded-md hover:bg-[var(--color-error)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-error)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Deleting Account...' : 'Delete My Account Permanently'}
             </button>
           </div>
 
           {/* GDPR Notice */}
-          <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-md p-3">
-            <p className="text-xs text-gray-600 dark:text-gray-400">
+          <div className="bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)]/50 border border-[var(--color-border)] dark:border-[var(--color-border)] rounded-md p-3">
+            <p className="text-xs text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]">
               <strong>GDPR Article 17 (Right to Erasure):</strong> You have the right to request
               deletion of your personal data. Upon deletion, we will erase all your personal
               information from our systems within 30 days, except where retention is required by

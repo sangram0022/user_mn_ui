@@ -314,7 +314,7 @@ export const preloadImage = (
  * @example
  * ```tsx
  * useEffect(() => {
- *   preloadStylesheet('/styles/critical.css');
+ *   preloadStylesheet('/styles/main.css');
  * }, []);
  * ```
  */

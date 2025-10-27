@@ -27,7 +27,7 @@ export interface LoginResponse {
     email: string;
     first_name: string;
     last_name: string;
-    role: UserRoleType;
+    roles: string[];
     is_verified: boolean;
     is_active: boolean;
   };
@@ -40,7 +40,7 @@ export interface SecureLoginResponse {
   user: {
     user_id: string;
     email: string;
-    role: UserRoleType;
+    roles: string[];
     last_login_at: string | null;
     first_name?: string;
     last_name?: string;
@@ -153,7 +153,7 @@ export interface AdminUserListResponse {
   email: string;
   first_name: string;
   last_name: string;
-  role: UserRoleType;
+  roles: string[];
   is_active: boolean;
   is_verified: boolean;
   is_approved: boolean;

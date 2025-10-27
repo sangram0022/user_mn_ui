@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Infinite Scroll Integration Examples
  *
  * This file demonstrates various ways to integrate infinite scrolling
@@ -100,11 +100,13 @@ export function InfiniteUserList() {
   return (
     <div className="space-y-4">
       {/* User list */}
-      <div className="divide-y divide-gray-200">
+      <div className="divide-y divide-[var(--color-border)]">
         {users.map((user) => (
           <div key={user.id} className="py-4">
-            <h3 className="font-medium text-gray-900">{user.full_name || user.email}</h3>
-            <p className="text-sm text-gray-600">{user.email}</p>
+            <h3 className="font-medium text-[var(--color-text-primary)]">
+              {user.full_name || user.email}
+            </h3>
+            <p className="text-sm text-[var(--color-text-secondary)]">{user.email}</p>
           </div>
         ))}
       </div>
@@ -115,18 +117,20 @@ export function InfiniteUserList() {
           {isLoading ? (
             <SkeletonList items={3} />
           ) : (
-            <div className="text-center text-gray-500">Scroll to load more...</div>
+            <div className="text-center text-[var(--color-text-tertiary)]">
+              Scroll to load more...
+            </div>
           )}
         </div>
       )}
 
       {/* Error state with retry */}
       {error && (
-        <div className="rounded-lg bg-red-50 p-4">
-          <p className="text-sm text-red-800">{error}</p>
+        <div className="rounded-lg bg-[var(--color-error-light)] p-4">
+          <p className="text-sm text-[var(--color-error)]">{error}</p>
           <button
             onClick={triggerLoad}
-            className="mt-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+            className="mt-2 rounded bg-[var(--color-error)] px-4 py-2 text-[var(--color-text-primary)] hover:bg-[var(--color-error)]"
           >
             Retry
           </button>
@@ -135,7 +139,9 @@ export function InfiniteUserList() {
 
       {/* End of list */}
       {!hasMore && users.length > 0 && (
-        <div className="py-4 text-center text-gray-500">You've reached the end of the list</div>
+        <div className="py-4 text-center text-[var(--color-text-tertiary)]">
+          You&apos;ve reached the end of the list
+        </div>
       )}
     </div>
   );
@@ -358,7 +364,7 @@ const { sentinelRef } = useInfiniteScroll({
 // REMOVE pagination buttons at the bottom
 
 // ADD sentinel div after the table
-<div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+<div className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-primary)] shadow-sm">
   <table className="w-full">
     <thead>{/* ...existing header... */}</thead>
     <tbody>
@@ -374,7 +380,7 @@ const { sentinelRef } = useInfiniteScroll({
       {isLoading ? (
         <SkeletonTable rows={3} columns={5} />
       ) : (
-        <div className="text-center text-gray-500">Loading more...</div>
+        <div className="text-center text-[var(--color-text-tertiary)]">Loading more...</div>
       )}
     </div>
   )}
@@ -573,7 +579,7 @@ export function OptimisticInfiniteUserList() {
           <span>{user.email}</span>
           <button
             onClick={() => deleteUser(user.id)}
-            className="rounded bg-red-500 px-3 py-1 text-white"
+            className="rounded bg-[var(--color-error)] px-3 py-1 text-[var(--color-text-primary)]"
           >
             Delete
           </button>

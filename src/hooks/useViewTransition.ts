@@ -1,7 +1,9 @@
-import { useCallback, useTransition } from 'react';
+import { useTransition } from 'react';
 
 /**
  * Custom hook for View Transitions API with React 19 useTransition
+ *
+ * ✅ React 19 Optimized - No useCallback needed
  *
  * Provides smooth page transitions using the browser's View Transitions API
  * with fallback to React's useTransition for unsupported browsers.
@@ -22,23 +24,21 @@ import { useCallback, useTransition } from 'react';
 export function useViewTransition() {
   const [isPending, startTransition] = useTransition();
 
-  const transition = useCallback(
-    (callback: () => void) => {
-      // Check if browser supports View Transitions API
+  // ✅ React 19: No useCallback needed - startTransition is stable
+  const transition = (callback: () => void) => {
+    // Check if browser supports View Transitions API
+    // @ts-expect-error - View Transitions API is not yet in TypeScript lib
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      // Use native View Transitions API for smooth animations
       // @ts-expect-error - View Transitions API is not yet in TypeScript lib
-      if (typeof document !== 'undefined' && 'startViewTransition' in document) {
-        // Use native View Transitions API for smooth animations
-        // @ts-expect-error - View Transitions API is not yet in TypeScript lib
-        document.startViewTransition(() => {
-          startTransition(callback);
-        });
-      } else {
-        // Fallback to React's useTransition for unsupported browsers
+      document.startViewTransition(() => {
         startTransition(callback);
-      }
-    },
-    [startTransition]
-  );
+      });
+    } else {
+      // Fallback to React's useTransition for unsupported browsers
+      startTransition(callback);
+    }
+  };
 
   return {
     /**

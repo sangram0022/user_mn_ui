@@ -6,7 +6,7 @@
  * React 19: No memoization needed - React Compiler handles optimization
  */
 
-import type { ErrorInfo, ReactNode, ComponentType } from 'react';
+import type { ComponentType, ErrorInfo, ReactNode } from 'react';
 import { Component } from 'react';
 import { logger } from './../utils/logger';
 import { categorizeError, ErrorReportingService, type ErrorDetails } from './errorUtils';
@@ -48,12 +48,12 @@ function generateErrorId(): string {
 
 // Default fallback component
 const DefaultFallback: React.FC<FallbackProps> = ({ error, resetError, retryCount, canRetry }) => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-    <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 m-4">
+  <div className="min-h-screen flex items-center justify-center bg-[color:var(--color-background)] dark:bg-[color:var(--color-background)]">
+    <div className="max-w-md w-full bg-white dark:bg-[color:var(--color-background-elevated)] rounded-lg shadow-lg p-6 m-4">
       <div className="flex items-center mb-4">
         <div className="flex-shrink-0">
           <svg
-            className="h-8 w-8 text-red-500"
+            className="icon-xl text-[color:var(--color-error)]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -68,23 +68,23 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error, resetError, retryCoun
           </svg>
         </div>
         <div className="ml-3">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          <h3 className="text-lg font-medium text-[color:var(--color-text-primary)] dark:text-[color:var(--color-text-inverse)]">
             Something went wrong
           </h3>
         </div>
       </div>
 
       <div className="mb-4">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-[color:var(--color-text-secondary)] dark:text-[color:var(--color-text-tertiary)]">
           We apologize for the inconvenience. The application encountered an unexpected error.
         </p>
 
         {import.meta.env.DEV && (
           <details className="mt-3">
-            <summary className="text-sm text-gray-500 cursor-pointer hover:text-gray-700">
+            <summary className="text-sm text-[color:var(--color-text-secondary)] cursor-pointer hover:text-[color:var(--color-text-primary)]">
               Error Details (Development)
             </summary>
-            <pre className="mt-2 text-xs bg-gray-100 dark:bg-gray-700 p-2 rounded overflow-auto max-h-32">
+            <pre className="mt-2 text-xs bg-[color:var(--color-background-secondary)] dark:bg-[color:var(--color-background-secondary)] p-2 rounded overflow-auto max-h-32">
               {error.message}
               {error.stack && `\n\nStack trace:\n${error.stack}`}
             </pre>
@@ -97,7 +97,7 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error, resetError, retryCoun
           <button
             onClick={resetError}
             className="flex-1 font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
-            style={{ background: 'var(--theme-primary)', color: 'var(--theme-onPrimary)' }}
+            style={{ background: 'var(--color-primary)', color: 'var(--color-text-inverse)' }}
             type="button"
           >
             Try Again {retryCount > 0 && `(${retryCount + 1})`}
@@ -108,9 +108,9 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error, resetError, retryCoun
           onClick={() => window.location.reload()}
           className="flex-1 font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
           style={{
-            background: 'var(--theme-surface)',
-            color: 'var(--theme-text)',
-            border: '1px solid var(--theme-border)',
+            background: 'var(--color-background-elevated)',
+            color: 'var(--color-text-primary)',
+            border: '1px solid var(--color-border-primary)',
           }}
           type="button"
         >
@@ -119,7 +119,7 @@ const DefaultFallback: React.FC<FallbackProps> = ({ error, resetError, retryCoun
       </div>
 
       <div className="mt-4 text-center">
-        <a href="/" className="text-sm transition-colors" style={{ color: 'var(--theme-primary)' }}>
+        <a href="/" className="text-sm transition-colors" style={{ color: 'var(--color-primary)' }}>
           Return to Home
         </a>
       </div>

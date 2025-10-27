@@ -48,7 +48,7 @@ export function SubmitButtonWithStatus({
     >
       {pending ? (
         <>
-          <span className="animate-spin mr-2" aria-hidden="true">
+          <span className="spinner spinner-sm mr-2" aria-hidden="true">
             [LOADING]
           </span>
           {loadingText}
@@ -81,11 +81,11 @@ export function FormStatusIndicator() {
 
   return (
     <div
-      className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400"
+      className="flex items-center gap-2 text-sm text-[color:var(--color-primary)] dark:text-[var(--color-primary)]"
       role="status"
       aria-live="polite"
     >
-      <span className="animate-spin" aria-hidden="true">
+      <span className="spinner spinner-sm" aria-hidden="true">
         [LOADING]
       </span>
       <span>Submitting form...</span>

@@ -27,7 +27,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { useEffect, useState, type FC } from 'react';
+import { useCallback, useEffect, useState, type FC } from 'react';
 import {
   Area,
   AreaChart,
@@ -87,14 +87,14 @@ const ENGAGEMENT_COLORS = {
 // ============================================================================
 
 const ChartCard: FC<ChartCardProps> = ({ title, description, icon, children, loading = false }) => (
-  <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+  <div className="bg-[var(--color-surface-primary)] rounded-lg shadow-md border border-[var(--color-border)] p-6">
     <div className="flex items-start justify-between mb-4">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <div className="text-blue-600">{icon}</div>
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <div className="text-[var(--color-primary)]">{icon}</div>
+          <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">{title}</h3>
         </div>
-        {description && <p className="text-sm text-gray-600">{description}</p>}
+        {description && <p className="text-sm text-[var(--color-text-secondary)]">{description}</p>}
       </div>
     </div>
 
@@ -121,16 +121,20 @@ const StatCard: FC<{
   subtitle?: string;
   loading?: boolean;
 }> = ({ title, value, icon, color, subtitle, loading = false }) => (
-  <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+  <div className="bg-[var(--color-surface-primary)] rounded-lg shadow-md border border-[var(--color-border)] p-6">
     <div className="flex items-start justify-between">
       <div className="flex-1">
-        <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
+        <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-1">{title}</p>
         {loading ? (
           <Skeleton width={80} height={32} />
         ) : (
-          <p className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-[var(--color-text-primary)]">
+            {value.toLocaleString()}
+          </p>
         )}
-        {subtitle && !loading && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+        {subtitle && !loading && (
+          <p className="text-xs text-[var(--color-text-tertiary)] mt-1">{subtitle}</p>
+        )}
       </div>
       <div className={`p-3 rounded-lg ${color}`}>{icon}</div>
     </div>
@@ -157,9 +161,11 @@ export const AdminAnalyticsDashboardPage: FC = () => {
   // ============================================================================
   // Data Loading
   // ============================================================================
+  // ✅ FIXED: Wrapped with useCallback to prevent infinite re-renders
 
-  const loadAnalytics = async () => {
-    if (!canViewAnalytics) {
+  const loadAnalytics = useCallback(async () => {
+    // Check permission inside function, not in dependencies
+    if (!hasPermission('analytics:read') && !hasPermission('admin')) {
       toast.toast.error('You do not have permission to view analytics');
       return;
     }
@@ -174,7 +180,7 @@ export const AdminAnalyticsDashboardPage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [hasPermission, toast, clearError, handleError]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -198,8 +204,10 @@ export const AdminAnalyticsDashboardPage: FC = () => {
 
   // Load analytics on mount
   useEffect(() => {
-    loadAnalytics();
-  }, []);
+    if (canViewAnalytics) {
+      loadAnalytics(); // ✅ Safe - loadAnalytics is now memoized
+    }
+  }, [loadAnalytics, canViewAnalytics]);
 
   // ============================================================================
   // Data Transformations
@@ -246,11 +254,13 @@ export const AdminAnalyticsDashboardPage: FC = () => {
           description="You do not have permission to view this page"
           keywords="access denied, unauthorized"
         />
-        <div className="container mx-auto px-4 py-8">
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-            <p className="text-sm text-red-800">
-              You do not have permission to view analytics. Contact your administrator for access.
-            </p>
+        <div className="page-wrapper">
+          <div className="container-narrow">
+            <div className="rounded-lg border border-[var(--color-error)] bg-[var(--color-error-light)] p-4">
+              <p className="text-sm text-[var(--color-error)]">
+                You do not have permission to view analytics. Contact your administrator for access.
+              </p>
+            </div>
           </div>
         </div>
       </>
@@ -265,244 +275,257 @@ export const AdminAnalyticsDashboardPage: FC = () => {
         keywords="admin analytics, user metrics, dashboard, user growth, engagement, lifecycle"
       />
 
-      <div className="container mx-auto px-4 py-8 space-y-6">
-        {/* Breadcrumb Navigation - auto-generated from route */}
-        <Breadcrumb />
+      <div className="page-wrapper">
+        <div className="container-full">
+          {/* Breadcrumb Navigation - auto-generated from route */}
+          <Breadcrumb />
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
-            <p className="text-gray-600">
-              Real-time insights into user behavior, growth, and engagement
-            </p>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">
+                Analytics Dashboard
+              </h1>
+              <p className="text-[var(--color-text-secondary)]">
+                Real-time insights into user behavior, growth, and engagement
+              </p>
+            </div>
+
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing || isLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-[var(--color-text-primary)] rounded-lg
+                     hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed
+                     transition-colors focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)]
+                     focus:ring-offset-2"
+              aria-label="Refresh analytics data"
+            >
+              <RefreshCw
+                className={`icon-sm ${isRefreshing ? 'animate-spin' : ''}`}
+                aria-hidden="true"
+              />
+              Refresh
+            </button>
           </div>
 
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing || isLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg
-                     hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
-                     transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:ring-offset-2"
-            aria-label="Refresh analytics data"
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
-              aria-hidden="true"
+          {/* Error Display */}
+          {error && (
+            <ErrorAlert error={error} onRetry={loadAnalytics} showDetails className="mb-6" />
+          )}
+
+          {/* Summary Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard
+              title="Total Users"
+              value={analytics?.total_users || 0}
+              icon={<Users className="w-6 h-6 text-[var(--color-primary)]" />}
+              color="bg-[var(--color-primary-light)]"
+              subtitle="All registered users"
+              loading={isLoading}
             />
-            Refresh
-          </button>
-        </div>
 
-        {/* Error Display */}
-        {error && <ErrorAlert error={error} onRetry={loadAnalytics} showDetails className="mb-6" />}
+            <StatCard
+              title="Active Users"
+              value={analytics?.active_users || 0}
+              icon={<Activity className="w-6 h-6 text-[var(--color-success)]" />}
+              color="bg-[var(--color-success-light)]"
+              subtitle="Currently active"
+              loading={isLoading}
+            />
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Total Users"
-            value={analytics?.total_users || 0}
-            icon={<Users className="w-6 h-6 text-blue-600" />}
-            color="bg-blue-50"
-            subtitle="All registered users"
-            loading={isLoading}
-          />
+            <StatCard
+              title="New Today"
+              value={analytics?.new_users_today || 0}
+              icon={<TrendingUp className="w-6 h-6 text-[var(--color-primary)]" />}
+              color="bg-[var(--color-primary)]"
+              subtitle="Registered today"
+              loading={isLoading}
+            />
 
-          <StatCard
-            title="Active Users"
-            value={analytics?.active_users || 0}
-            icon={<Activity className="w-6 h-6 text-green-600" />}
-            color="bg-green-50"
-            subtitle="Currently active"
-            loading={isLoading}
-          />
+            <StatCard
+              title="Growth Rate"
+              value={growthRate}
+              icon={<LineChartIcon className="w-6 h-6 text-[var(--color-warning)]" />}
+              color="bg-[var(--color-warning)]"
+              subtitle="30-day trend"
+              loading={isLoading}
+            />
+          </div>
 
-          <StatCard
-            title="New Today"
-            value={analytics?.new_users_today || 0}
-            icon={<TrendingUp className="w-6 h-6 text-purple-600" />}
-            color="bg-purple-50"
-            subtitle="Registered today"
-            loading={isLoading}
-          />
+          {/* Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Activity Trends */}
+            <ChartCard
+              title="Active Users Trend"
+              description="Daily active user count over the last 30 days"
+              icon={<LineChartIcon className="icon-md" />}
+              loading={isLoading}
+            >
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={activityTrends}>
+                  <defs>
+                    <linearGradient id="colorActiveUsers" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 12 }}
+                    stroke="#6b7280"
+                    aria-label="Date"
+                  />
+                  <YAxis tick={{ fontSize: 12 }} stroke="#6b7280" aria-label="Active users count" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.5rem',
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="active_users"
+                    stroke={COLORS.primary}
+                    fillOpacity={1}
+                    fill="url(#colorActiveUsers)"
+                    name="Active Users"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartCard>
 
-          <StatCard
-            title="Growth Rate"
-            value={growthRate}
-            icon={<LineChartIcon className="w-6 h-6 text-orange-600" />}
-            color="bg-orange-50"
-            subtitle="30-day trend"
-            loading={isLoading}
-          />
-        </div>
+            {/* Engagement Distribution */}
+            <ChartCard
+              title="User Engagement"
+              description="Distribution of users by engagement level"
+              icon={<BarChart3 className="icon-md" />}
+              loading={isLoading}
+            >
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={engagementData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="level" tick={{ fontSize: 12 }} stroke="#6b7280" />
+                  <YAxis tick={{ fontSize: 12 }} stroke="#6b7280" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.5rem',
+                    }}
+                  />
+                  <Legend />
+                  <Bar dataKey="count" name="Users" radius={[8, 8, 0, 0]}>
+                    {engagementData.map((entry) => (
+                      <Cell
+                        key={`engagement-${entry.level}`}
+                        fill={
+                          entry.level === 'High'
+                            ? ENGAGEMENT_COLORS.high
+                            : entry.level === 'Medium'
+                              ? ENGAGEMENT_COLORS.medium
+                              : ENGAGEMENT_COLORS.low
+                        }
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartCard>
 
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Activity Trends */}
-          <ChartCard
-            title="Active Users Trend"
-            description="Daily active user count over the last 30 days"
-            icon={<LineChartIcon className="w-5 h-5" />}
-            loading={isLoading}
-          >
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={activityTrends}>
-                <defs>
-                  <linearGradient id="colorActiveUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8} />
-                    <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#6b7280" aria-label="Date" />
-                <YAxis tick={{ fontSize: 12 }} stroke="#6b7280" aria-label="Active users count" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="active_users"
-                  stroke={COLORS.primary}
-                  fillOpacity={1}
-                  fill="url(#colorActiveUsers)"
-                  name="Active Users"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </ChartCard>
+            {/* Lifecycle Distribution */}
+            <ChartCard
+              title="User Lifecycle Stages"
+              description="Breakdown of users across lifecycle stages"
+              icon={<PieChartIcon className="icon-md" />}
+              loading={isLoading}
+            >
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={lifecycleData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={(props: unknown) => {
+                      const p = props as { name: string; percent: number };
+                      return `${p.name} ${(p.percent * 100).toFixed(0)}%`;
+                    }}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {lifecycleData.map((_entry, index) => (
+                      <Cell
+                        key={`lifecycle-${lifecycleData[index]?.name || index}`}
+                        fill={Object.values(COLORS)[index % Object.values(COLORS).length] as string}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.5rem',
+                    }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartCard>
 
-          {/* Engagement Distribution */}
-          <ChartCard
-            title="User Engagement"
-            description="Distribution of users by engagement level"
-            icon={<BarChart3 className="w-5 h-5" />}
-            loading={isLoading}
-          >
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={engagementData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="level" tick={{ fontSize: 12 }} stroke="#6b7280" />
-                <YAxis tick={{ fontSize: 12 }} stroke="#6b7280" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="count" name="Users" radius={[8, 8, 0, 0]}>
-                  {engagementData.map((entry) => (
-                    <Cell
-                      key={`engagement-${entry.level}`}
-                      fill={
-                        entry.level === 'High'
-                          ? ENGAGEMENT_COLORS.high
-                          : entry.level === 'Medium'
-                            ? ENGAGEMENT_COLORS.medium
-                            : ENGAGEMENT_COLORS.low
-                      }
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-
-          {/* Lifecycle Distribution */}
-          <ChartCard
-            title="User Lifecycle Stages"
-            description="Breakdown of users across lifecycle stages"
-            icon={<PieChartIcon className="w-5 h-5" />}
-            loading={isLoading}
-          >
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={lifecycleData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={(props: unknown) => {
-                    const p = props as { name: string; percent: number };
-                    return `${p.name} ${(p.percent * 100).toFixed(0)}%`;
-                  }}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {lifecycleData.map((_entry, index) => (
-                    <Cell
-                      key={`lifecycle-${lifecycleData[index]?.name || index}`}
-                      fill={Object.values(COLORS)[index % Object.values(COLORS).length] as string}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                  }}
-                />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartCard>
-
-          {/* Retention Metrics */}
-          <ChartCard
-            title="Key Metrics"
-            description="Important performance indicators"
-            icon={<Activity className="w-5 h-5" />}
-            loading={isLoading}
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm text-gray-600">Retention Rate</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {analytics?.retention_rate?.toFixed(1) || 0}%
-                  </p>
+            {/* Retention Metrics */}
+            <ChartCard
+              title="Key Metrics"
+              description="Important performance indicators"
+              icon={<Activity className="icon-md" />}
+              loading={isLoading}
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-[var(--color-surface-secondary)] rounded-lg">
+                  <div>
+                    <p className="text-sm text-[var(--color-text-secondary)]">Retention Rate</p>
+                    <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                      {analytics?.retention_rate?.toFixed(1) || 0}%
+                    </p>
+                  </div>
+                  <TrendingUp className="icon-xl text-[var(--color-success)]" />
                 </div>
-                <TrendingUp className="w-8 h-8 text-green-600" />
-              </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm text-gray-600">Engagement Score</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {analytics?.engagement_score?.toFixed(1) || 0}
-                  </p>
+                <div className="flex items-center justify-between p-4 bg-[var(--color-surface-secondary)] rounded-lg">
+                  <div>
+                    <p className="text-sm text-[var(--color-text-secondary)]">Engagement Score</p>
+                    <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                      {analytics?.engagement_score?.toFixed(1) || 0}
+                    </p>
+                  </div>
+                  <Activity className="icon-xl text-[var(--color-primary)]" />
                 </div>
-                <Activity className="w-8 h-8 text-blue-600" />
-              </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm text-gray-600">New Users (30 days)</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {analytics?.new_users_last_30_days?.toLocaleString() || 0}
-                  </p>
+                <div className="flex items-center justify-between p-4 bg-[var(--color-surface-secondary)] rounded-lg">
+                  <div>
+                    <p className="text-sm text-[var(--color-text-secondary)]">
+                      New Users (30 days)
+                    </p>
+                    <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                      {analytics?.new_users_last_30_days?.toLocaleString() || 0}
+                    </p>
+                  </div>
+                  <Users className="icon-xl text-[var(--color-primary)]" />
                 </div>
-                <Users className="w-8 h-8 text-purple-600" />
               </div>
-            </div>
-          </ChartCard>
-        </div>
+            </ChartCard>
+          </div>
 
-        {/* Footer Note */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-900">
-            <strong>Note:</strong> Analytics data is updated in real-time. Click the refresh button
-            to fetch the latest metrics. All data is retrieved from the backend API with automatic
-            retry logic for improved reliability.
-          </p>
+          {/* Footer Note */}
+          <div className="bg-[var(--color-primary-light)] border border-[var(--color-primary)] rounded-lg p-4">
+            <p className="text-sm text-[var(--color-primary)]">
+              <strong>Note:</strong> Analytics data is updated in real-time. Click the refresh
+              button to fetch the latest metrics. All data is retrieved from the backend API with
+              automatic retry logic for improved reliability.
+            </p>
+          </div>
         </div>
       </div>
     </>

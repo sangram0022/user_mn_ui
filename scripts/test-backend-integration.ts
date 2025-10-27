@@ -21,7 +21,7 @@ interface TestResult {
 
 const results: TestResult[] = [];
 let authToken: string | null = null;
-let testUserId: string | null = null;
+let _testUserId: string | null = null;
 
 // Test credentials (CORRECTED)
 const TEST_ADMIN = {
@@ -177,7 +177,7 @@ async function testProfileEndpoints() {
     const { status, data, responseTime } = await makeRequest('/profile/me', 'GET', undefined, true);
 
     if (status === 200 && data?.user_id) {
-      testUserId = data.user_id;
+      _testUserId = data.user_id;
       addResult({
         category: 'Profile',
         endpoint: '/profile/me',

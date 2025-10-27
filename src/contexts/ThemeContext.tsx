@@ -10,10 +10,19 @@
  */
 
 /* eslint-disable react-refresh/only-export-components */
+/**
+ * SIMPLIFIED LIGHT THEME CONTEXT - React 19 Optimized
+ *
+ * ✅ React 19 Features:
+ * - Removed all useMemo/useCallback (React Compiler handles it)
+ * - Uses use() hook for context consumption
+ * - Single source of truth: storageService
+ * - Zero manual optimization needed
+ */
 
-import { safeLocalStorage } from '@shared/utils/safeLocalStorage';
+import { storageService } from '@shared/services/storage.service';
 import type React from 'react';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, use, useEffect, useState } from 'react';
 
 //  LIGHT THEME ONLY - Single professional palette
 export type ThemePalette = 'professional'; // Simplified to single theme
@@ -68,7 +77,6 @@ export type PaletteColors = Record<'light' | 'dark', ThemeColors>;
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-const THEME_STORAGE_KEY = 'app-theme-config';
 const THEME_ATTRIBUTE = 'data-theme';
 const PALETTE_ATTRIBUTE = 'data-palette';
 
@@ -112,46 +120,33 @@ const THEME_PALETTES: Record<ThemePalette, PaletteColors> = {
 interface ThemeProviderProps {
   children: React.ReactNode;
   defaultTheme?: ThemeConfig;
-  storageKey?: string;
 }
 
-export function ThemeProvider({
-  children,
-  defaultTheme = DEFAULT_THEME,
-  storageKey = THEME_STORAGE_KEY,
-}: ThemeProviderProps) {
-  // Get initial theme from localStorage or use default
+export function ThemeProvider({ children, defaultTheme = DEFAULT_THEME }: ThemeProviderProps) {
+  // ✅ Single source of truth: storageService
+  // Get initial theme from centralized storage or use default
   const [theme, setThemeState] = useState<ThemeConfig>(() => {
     if (typeof window === 'undefined') return defaultTheme;
 
-    const stored = safeLocalStorage.getItem(storageKey);
+    // Use centralized storage service
+    const stored = storageService.getTheme();
     if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as ThemeConfig;
-        // Validate the stored theme
-        if (
-          parsed &&
-          typeof parsed === 'object' &&
-          'palette' in parsed &&
-          'mode' in parsed &&
-          [
-            'professional',
-            'ocean',
-            'forest',
-            'sunset',
-            'midnight',
-            'aurora',
-            'crimson',
-            'lavender',
-            'amber',
-            'slate',
-          ].includes(parsed.palette) &&
-          parsed.mode === 'light'
-        ) {
-          return parsed;
-        }
-      } catch {
-        // Invalid stored theme, use default
+      // Validate the stored theme
+      if (
+        [
+          'professional',
+          'forest',
+          'sunset',
+          'midnight',
+          'aurora',
+          'crimson',
+          'lavender',
+          'amber',
+          'slate',
+        ].includes(stored.palette) &&
+        stored.mode === 'light'
+      ) {
+        return stored;
       }
     }
     return defaultTheme;
@@ -159,11 +154,11 @@ export function ThemeProvider({
 
   const [effectiveTheme, setEffectiveTheme] = useState<EffectiveTheme>('light');
 
-  // Get effective theme - always light in this configuration
-  const getEffectiveTheme = useCallback((): EffectiveTheme => 'light', []);
+  // ✅ React 19: Get effective theme - always light (no useCallback needed)
+  const getEffectiveTheme = (): EffectiveTheme => 'light';
 
-  // Apply theme to document
-  const applyTheme = useCallback((config: ThemeConfig, effective: EffectiveTheme) => {
+  // ✅ React 19: Apply theme to document (no useCallback needed)
+  const applyTheme = (config: ThemeConfig, effective: EffectiveTheme) => {
     const root = document.documentElement;
 
     // Validate config and effective theme
@@ -182,7 +177,6 @@ export function ThemeProvider({
       'light',
       'dark',
       'professional',
-      'ocean',
       'forest',
       'sunset',
       'midnight',
@@ -208,7 +202,7 @@ export function ThemeProvider({
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', colors.primary);
     }
-  }, []);
+  };
 
   // Update effective theme when theme or system preference changes
   useEffect(() => {
@@ -225,43 +219,38 @@ export function ThemeProvider({
     return undefined;
   }, [theme, getEffectiveTheme, applyTheme]);
 
-  // Set theme palette
-  const setPalette = useCallback(
-    (palette: ThemePalette) => {
-      const newTheme = { ...theme, palette };
-      setThemeState(newTheme);
-      safeLocalStorage.setItem(storageKey, JSON.stringify(newTheme));
-    },
-    [theme, storageKey]
-  );
+  // ✅ React 19: Set theme palette (no useCallback needed)
+  const setPalette = (palette: ThemePalette) => {
+    const newTheme = { ...theme, palette };
+    setThemeState(newTheme);
+    // ✅ Use centralized storage service
+    storageService.setTheme(newTheme);
+  };
 
-  // Set theme mode - NO-OP since mode is always 'light'
-  const setMode = useCallback((): void => {
+  // ✅ React 19: Set theme mode - NO-OP since mode is always 'light'
+  const setMode = (): void => {
     // Mode is fixed to 'light' - this is a no-op for light theme only
-  }, []);
+  };
 
-  // Set complete theme configuration
-  const setTheme = useCallback(
-    (config: ThemeConfig) => {
-      // Ensure mode is always 'light'
-      const lightConfig = { ...config, mode: 'light' as const };
-      setThemeState(lightConfig);
-      safeLocalStorage.setItem(storageKey, JSON.stringify(lightConfig));
-    },
-    [storageKey]
-  );
+  // ✅ React 19: Set complete theme configuration (no useCallback needed)
+  const setTheme = (config: ThemeConfig) => {
+    // Ensure mode is always 'light'
+    const lightConfig = { ...config, mode: 'light' as const };
+    setThemeState(lightConfig);
+    // ✅ Use centralized storage service
+    storageService.setTheme(lightConfig);
+  };
 
-  // Toggle theme - NO-OP since we're light theme only
-  const toggleTheme = useCallback(() => {
+  // ✅ React 19: Toggle theme - NO-OP since we're light theme only
+  const toggleTheme = () => {
     // No-op: light theme only
-  }, []);
+  };
 
-  // Get theme-aware colors
-  const getThemeColors = useCallback(
-    (): ThemeColors => THEME_PALETTES[theme.palette]?.light || THEME_PALETTES.professional.light,
-    [theme.palette]
-  );
+  // ✅ React 19: Get theme-aware colors (no useCallback needed)
+  const getThemeColors = (): ThemeColors =>
+    THEME_PALETTES[theme.palette]?.light || THEME_PALETTES.professional.light;
 
+  // ✅ React 19: Context value (no useMemo needed - React Compiler optimizes)
   const value: ThemeContextValue = {
     theme,
     effectiveTheme,
@@ -278,10 +267,11 @@ export function ThemeProvider({
 
 /**
  * Hook to access theme context
+ * React 19: Uses use() hook for cleaner API
  * @throws {Error} if used outside of ThemeProvider
  */
 export function useTheme(): ThemeContextValue {
-  const context = useContext(ThemeContext);
+  const context = use(ThemeContext);
 
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');

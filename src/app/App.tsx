@@ -12,7 +12,6 @@ import RouteRenderer from '@routing/RouteRenderer';
 import { initializePreloading, preloadPredictedRoutes } from '@routing/useNavigationPreload';
 import { ToastProvider } from '@shared/components/ui/Toast';
 import { PageErrorBoundary as ErrorBoundary } from '@shared/errors/ErrorBoundary';
-import '@styles/theme-components.css';
 import type { ComponentProps, FC } from 'react';
 import { useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';

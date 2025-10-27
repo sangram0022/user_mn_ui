@@ -1,4 +1,4 @@
-﻿import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ContainerQueriesDemo } from './ContainerQueriesDemo';
 
 const meta = {
@@ -166,11 +166,11 @@ export const LargeContainer: Story = {
 export const SideBySideComparison: Story = {
   render: () => (
     <div className="flex gap-4 p-4">
-      <div className="w-96 border-2 border-blue-500 rounded-lg p-4">
+      <div className="w-96 border-2 border-[var(--color-primary)] rounded-lg p-4">
         <h3 className="text-lg font-bold mb-4 text-center">Small (384px)</h3>
         <ContainerQueriesDemo />
       </div>
-      <div className="flex-1 border-2 border-green-500 rounded-lg p-4">
+      <div className="flex-1 border-2 border-[var(--color-success)] rounded-lg p-4">
         <h3 className="text-lg font-bold mb-4 text-center">Large (auto)</h3>
         <ContainerQueriesDemo />
       </div>
@@ -216,25 +216,25 @@ export const BrowserSupport: Story = {
           <div
             className={`inline-block px-6 py-3 rounded-lg text-xl font-semibold ${
               hasSupport
-                ? 'bg-green-100 text-green-800 border-2 border-green-500'
-                : 'bg-red-100 text-red-800 border-2 border-red-500'
+                ? 'bg-[var(--color-success-light)] text-[var(--color-success)] border-2 border-[var(--color-success)]'
+                : 'bg-[var(--color-error-light)] text-[var(--color-error)] border-2 border-[var(--color-error)]'
             }`}
           >
             {hasSupport ? ' Supported' : ' Not Supported'}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8">
+        <div className="bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)] rounded-xl shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-bold mb-4">Browser Compatibility</h2>
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+            <thead className="bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)]">
               <tr>
                 <th className="px-4 py-2 text-left">Browser</th>
                 <th className="px-4 py-2 text-left">Version</th>
                 <th className="px-4 py-2 text-left">Release Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-[var(--color-border)] dark:divide-[var(--color-border)]">
               <tr>
                 <td className="px-4 py-2">Chrome/Edge</td>
                 <td className="px-4 py-2">105+</td>
@@ -254,9 +254,9 @@ export const BrowserSupport: Story = {
           </table>
         </div>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+        <div className="bg-[var(--color-primary)] dark:bg-[var(--color-primary)]/20 border border-[var(--color-primary)] dark:border-[var(--color-primary)] rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-3">Detection Code</h3>
-          <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+          <pre className="bg-[var(--color-surface-primary)] text-[var(--color-text-secondary)] p-4 rounded-lg overflow-x-auto">
             <code>{`// Check container query support
 const hasSupport = CSS.supports('container-type: inline-size');
 

@@ -49,6 +49,7 @@
     <!-- Additional SEO Meta Tags -->
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index, follow" />
+    <!-- 🎨 Modern theme-color with media queries -->
     <meta name="theme-color" content="#3b82f6" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1e40af" media="(prefers-color-scheme: dark)" />
     <meta name="application-name" content="User Management System" />
@@ -56,6 +57,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="format-detection" content="telephone=no" />
+    <!-- 🚀 Modern color-scheme CSS property support -->
+    <meta name="color-scheme" content="light" />
 
     <!-- Security Headers -->
     <!--
@@ -85,78 +88,130 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials" />
 
     <!-- CSRF Token (populated by backend on page load) -->
     <meta name="csrf-token" content="" />
 
     <!-- 
-      Preconnect to API origin for faster requests
+      🚀 Modern Resource Hints - Optimize critical resource loading
       PRODUCTION: Update with actual API domain before deployment
       DEVELOPMENT: Using localhost for local development
     -->
     <link rel="preconnect" href="https://api.yourdomain.com" crossorigin />
     <link rel="dns-prefetch" href="https://api.yourdomain.com" />
+    <!-- 🔥 Preload critical resources with fetchpriority -->
+    <link rel="preload" as="style" href="/src/styles/index-new.css" fetchpriority="high" />
+    <link rel="modulepreload" href="/src/main.tsx" fetchpriority="high" />
+    <link rel="modulepreload" href="/src/app/App.tsx" />
 
-    <!-- Critical CSS inline (reduces render-blocking) -->
+    <!-- ⚡ Critical CSS inline (reduces render-blocking for instant FCP) -->
     <style>
-      /* Immediate paint styles to prevent FOUC */
-      #root {
-        display: flex;
-        min-height: 100vh;
-        flex-direction: column;
+      /* Modern CSS Reset */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
+
+      /* Root and body - Prevent layout shift */
+      html {
+        /* Modern color scheme */
+        color-scheme: light;
+        /* Smooth scroll with motion preference */
+        scroll-behavior: smooth;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+
       body {
         margin: 0;
+        /* System font stack for instant render */
         font-family:
           system-ui,
           -apple-system,
+          'Segoe UI',
           sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        /* Prevent layout shift */
+        min-height: 100vh;
+        min-height: 100dvh; /* Modern dynamic viewport */
       }
-      /* Loading spinner for instant feedback */
+
+      /* Root container - Flexbox for sticky footer */
+      #root {
+        display: flex;
+        min-height: 100vh;
+        min-height: 100dvh;
+        flex-direction: column;
+        /* Modern CSS containment for performance */
+        contain: layout style paint;
+      }
+
+      /* ⚡ Loading spinner - Instant feedback (CSS-only animation) */
       .initial-loader {
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        inset: 0; /* Modern shorthand for top/right/bottom/left: 0 */
+        display: grid;
+        place-items: center; /* Modern centering */
         z-index: 9999;
+        background-color: rgb(255 255 255 / 0.9);
+        backdrop-filter: blur(4px); /* Modern blur effect */
       }
+
       .spinner {
         width: 40px;
         height: 40px;
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #3b82f6;
+        border: 3px solid rgb(243 244 246); /* Modern RGB syntax */
+        border-block-start-color: rgb(59 130 246); /* Logical property */
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
+        /* Performance hint */
+        will-change: transform;
       }
+
       @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
+        to {
           transform: rotate(360deg);
         }
       }
-      /* Skip link for accessibility */
+
+      /* ♿ Skip link for keyboard accessibility (WCAG AAA) */
       .skip-link {
         position: absolute;
-        left: -9999px;
-        z-index: 999;
-        padding: 1rem;
-        background: #3b82f6;
-        color: white;
+        inset-block-start: -999px; /* Logical property */
+        inset-inline-start: 0;
+        z-index: 9999;
+        padding-block: 1rem; /* Logical properties */
+        padding-inline: 1.5rem;
+        background-color: rgb(59 130 246);
+        color: rgb(255 255 255);
         text-decoration: none;
         font-weight: 600;
+        border-radius: 0 0 0.375rem 0;
+        /* Modern focus-visible support */
+        &:focus-visible {
+          inset-block-start: 0;
+        }
       }
-      .skip-link:focus {
-        left: 0;
-        top: 0;
+
+      /* Hide skip link when not focused */
+      .skip-link:not(:focus-visible) {
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        overflow: hidden;
+        white-space: nowrap;
       }
     </style>
 
-    <!-- Structured Data for SEO -->
+    <!-- 📊 Structured Data for SEO -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -177,22 +232,20 @@
         }
       }
     </script>
-
-    <!-- Resource hints for critical assets -->
-    <link rel="preload" as="style" href="/src/styles/index-new.css" />
-    <link rel="modulepreload" href="/src/main.tsx" />
-    <link rel="modulepreload" href="/src/app/App.tsx" />
-
-    <!-- Skip to main content link for accessibility -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
   </head>
   <body>
+    <!-- ♿ Skip to main content link (WCAG AAA) -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <div id="root">
-      <!-- Instant loading indicator -->
-      <div class="initial-loader">
-        <div class="spinner"></div>
+      <!-- ⚡ Instant loading indicator (removed after first paint) -->
+      <div class="initial-loader" role="status" aria-live="polite" aria-label="Loading application">
+        <div class="spinner" aria-hidden="true"></div>
+        <span class="sr-only">Loading...</span>
       </div>
     </div>
+
+    <!-- 🚀 Modern module script with high priority -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -61,17 +61,27 @@ export function VirtualUserTable({
   });
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-white shadow-sm">
       {/* Table Header (fixed) */}
-      <div className="border-b-2 border-gray-200 bg-gray-50">
+      <div className="border-b-2 border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
         <table className="w-full">
           <thead>
             <tr>
-              <th className="p-4 text-left font-semibold text-gray-700">User</th>
-              <th className="p-4 text-left font-semibold text-gray-700">Role</th>
-              <th className="p-4 text-left font-semibold text-gray-700">Status</th>
-              <th className="p-4 text-left font-semibold text-gray-700">Created</th>
-              <th className="p-4 text-left font-semibold text-gray-700">Actions</th>
+              <th className="p-4 text-left font-semibold text-[var(--color-text-secondary)]">
+                User
+              </th>
+              <th className="p-4 text-left font-semibold text-[var(--color-text-secondary)]">
+                Role
+              </th>
+              <th className="p-4 text-left font-semibold text-[var(--color-text-secondary)]">
+                Status
+              </th>
+              <th className="p-4 text-left font-semibold text-[var(--color-text-secondary)]">
+                Created
+              </th>
+              <th className="p-4 text-left font-semibold text-[var(--color-text-secondary)]">
+                Actions
+              </th>
             </tr>
           </thead>
         </table>
@@ -101,61 +111,69 @@ export function VirtualUserTable({
               <table className="w-full">
                 <tbody>
                   <tr
-                    className={`border-b border-gray-200 ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                    className={`border-b border-[var(--color-border)] ${
+                      index % 2 === 0 ? 'bg-white' : 'bg-[var(--color-surface-secondary)]'
                     } ${isOptimistic(user) ? 'opacity-60 transition-opacity' : ''}`}
                   >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={selectedUsers.has(user.id)}
-                          onChange={(e) => onSelectUser(user.id, e.target.checked)}
-                          disabled={isOptimistic(user)}
-                        />
+                        <label className="flex items-center cursor-pointer min-h-[24px] max-md:min-h-[44px]">
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.has(user.id)}
+                            onChange={(e) => onSelectUser(user.id, e.target.checked)}
+                            disabled={isOptimistic(user)}
+                            className="w-6 h-6 max-md:w-11 max-md:h-11 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)] flex-shrink-0 cursor-pointer"
+                            aria-label={`Select ${user.full_name || user.email}`}
+                          />
+                        </label>
                         <div>
-                          <div className="font-medium text-gray-900 flex items-center gap-2">
+                          <div className="font-medium text-[var(--color-text-primary)] flex items-center gap-2">
                             {user.full_name || user.username || user.email}
                             {isOptimistic(user) && (
-                              <span className="text-xs text-amber-600 font-normal animate-pulse">
+                              <span className="text-xs text-[var(--color-warning)] font-normal animate-pulse">
                                 Saving...
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-gray-600">{user.email}</div>
+                          <div className="text-sm text-[var(--color-text-secondary)]">
+                            {user.email}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="p-4">
                       <span
                         className={`rounded-2xl px-3 py-1 text-sm font-medium ${
-                          user.role.name === 'admin'
-                            ? 'bg-sky-100 text-sky-700'
-                            : 'bg-blue-50 text-sky-600'
+                          user.roles?.includes('admin')
+                            ? 'bg-[var(--color-primary)] text-[var(--color-primary)]'
+                            : 'bg-[var(--color-primary-light)] text-[var(--color-primary)]'
                         }`}
                       >
-                        {user.role.name}
+                        {user.roles?.[0] || user.role_name || 'user'}
                       </span>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         <span
                           className={`font-medium ${
-                            user.is_active ? 'text-green-600' : 'text-red-600'
+                            user.is_active
+                              ? 'text-[var(--color-success)]'
+                              : 'text-[var(--color-error)]'
                           }`}
                         >
                           {user.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </div>
                     </td>
-                    <td className="p-4 text-gray-600">
+                    <td className="p-4 text-[var(--color-text-secondary)]">
                       {new Date(user.created_at).toLocaleDateString()}
                     </td>
                     <td className="p-4">
                       <div className="flex gap-2">
                         <button
                           onClick={() => onViewUser(user)}
-                          className="flex cursor-pointer items-center gap-1 rounded border-none bg-blue-500 p-2 text-white hover:bg-blue-600"
+                          className="flex cursor-pointer items-center gap-1 rounded border-none bg-[var(--color-primary)] p-2 text-white hover:bg-[var(--color-primary)]"
                           title="View/Edit User"
                         >
                           View
@@ -167,14 +185,14 @@ export function VirtualUserTable({
                                 onUserAction(user.is_active ? 'deactivate' : 'activate', user.id)
                               }
                               disabled={actionLoading?.includes(user.id)}
-                              className="flex cursor-pointer items-center gap-1 rounded border-none p-2 text-white disabled:cursor-not-allowed disabled:opacity-50 bg-amber-500 hover:bg-amber-600"
+                              className="flex cursor-pointer items-center gap-1 rounded border-none p-2 text-white disabled:cursor-not-allowed disabled:opacity-50 bg-[var(--color-warning)] hover:bg-[var(--color-warning)]"
                             >
                               Toggle
                             </button>
                             <button
                               onClick={() => onUserAction('delete', user.id)}
                               disabled={actionLoading?.includes(user.id)}
-                              className="flex cursor-pointer items-center gap-1 rounded border-none bg-red-500 p-2 text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                              className="flex cursor-pointer items-center gap-1 rounded border-none bg-[var(--color-error)] p-2 text-white hover:bg-[var(--color-error)] disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Delete
                             </button>
@@ -191,14 +209,14 @@ export function VirtualUserTable({
       </div>
 
       {/* Footer with scroll to top button */}
-      <div className="border-t border-gray-200 bg-gray-50 px-8 py-4">
+      <div className="border-t border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-8 py-4">
         <div className="flex items-center justify-between">
-          <div className="text-gray-600">
+          <div className="text-[var(--color-text-secondary)]">
             Showing {virtualItems.length} of {users.length} users
           </div>
           <button
             onClick={() => scrollToIndex(0)}
-            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            className="rounded bg-[var(--color-primary)] px-4 py-2 text-white hover:bg-[var(--color-primary)]"
           >
             Scroll to Top
           </button>
@@ -270,11 +288,11 @@ const { virtualItems, totalHeight, containerRef } = useVirtualScroll({
 });
 
 // Then in the JSX, replace the existing table with:
-<div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+<div className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-white shadow-sm">
   {/* Fixed header */}
   <table className="w-full">
     <thead>
-      <tr className="border-b-2 border-gray-200 bg-gray-50">
+      <tr className="border-b-2 border-[var(--color-border)] bg-[var(--color-surface-secondary)]">
         {/* ...existing header cells... */}
       </tr>
     </thead>

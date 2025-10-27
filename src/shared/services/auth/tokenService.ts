@@ -24,7 +24,7 @@ const COOKIE_CONFIG = {
   REFRESH_EXPIRY: 'refresh_expiry',
   USER_ID: 'user_id',
   USER_EMAIL: 'user_email',
-  USER_ROLE: 'user_role',
+  USER_ROLES: 'user_roles', // Stores all roles as JSON array
   // Cookie attributes
   PATH: '/',
   SECURE: import.meta.env.PROD, // HTTPS only in production
@@ -41,7 +41,7 @@ const STORAGE_KEYS = {
   REFRESH_EXPIRY: 'refresh_expiry',
   USER_ID: 'user_id',
   USER_EMAIL: 'user_email',
-  USER_ROLE: 'user_role',
+  USER_ROLES: 'user_roles', // Stores all roles as JSON array
   LAST_LOGIN: 'last_login_at',
   ISSUED_AT: 'token_issued_at',
 } as const;
@@ -53,7 +53,7 @@ interface TokenData {
   refreshExpiresIn: number;
   userId: string;
   email: string;
-  role: string;
+  roles: string[]; // ✅ Changed from "role: string" to "roles: string[]"
   issuedAt: string;
   lastLogin?: string;
 }
@@ -137,7 +137,7 @@ class CookieManager {
     this.deleteCookie(COOKIE_CONFIG.REFRESH_EXPIRY);
     this.deleteCookie(COOKIE_CONFIG.USER_ID);
     this.deleteCookie(COOKIE_CONFIG.USER_EMAIL);
-    this.deleteCookie(COOKIE_CONFIG.USER_ROLE);
+    this.deleteCookie(COOKIE_CONFIG.USER_ROLES);
   }
 }
 
@@ -175,7 +175,7 @@ export class TokenService {
         refreshExpiresIn: loginResponse.refresh_expires_in,
         userId: loginResponse.user_id,
         email: loginResponse.email,
-        role: loginResponse.role,
+        roles: loginResponse.roles, // ✅ Now using roles array
         issuedAt: loginResponse.issued_at,
         lastLogin: loginResponse.last_login_at,
       };
@@ -217,9 +217,10 @@ export class TokenService {
         COOKIE_CONFIG.MAX_AGE_REFRESH
       );
 
+      // Store roles array as JSON
       CookieManager.setCookie(
-        COOKIE_CONFIG.USER_ROLE,
-        tokenData.role,
+        COOKIE_CONFIG.USER_ROLES,
+        JSON.stringify(tokenData.roles),
         COOKIE_CONFIG.MAX_AGE_REFRESH
       );
 
@@ -231,7 +232,10 @@ export class TokenService {
         localStorage.setItem(STORAGE_KEYS.REFRESH_EXPIRY, refreshExpiry.toString());
         localStorage.setItem(STORAGE_KEYS.USER_ID, tokenData.userId);
         localStorage.setItem(STORAGE_KEYS.USER_EMAIL, tokenData.email);
-        localStorage.setItem(STORAGE_KEYS.USER_ROLE, tokenData.role);
+
+        // Store roles array as JSON
+        localStorage.setItem(STORAGE_KEYS.USER_ROLES, JSON.stringify(tokenData.roles));
+
         localStorage.setItem(STORAGE_KEYS.ISSUED_AT, tokenData.issuedAt);
 
         if (tokenData.lastLogin) {
@@ -245,7 +249,7 @@ export class TokenService {
       logger.info('Tokens stored successfully', {
         userId: tokenData.userId,
         email: tokenData.email,
-        role: tokenData.role,
+        roles: tokenData.roles, // ✅ Log roles array
         expiresIn: tokenData.expiresIn,
         refreshExpiresIn: tokenData.refreshExpiresIn,
       });
@@ -360,7 +364,7 @@ export class TokenService {
   /**
    * Get user info from storage
    */
-  getUserInfo(): { userId: string; email: string; role: string } | null {
+  getUserInfo(): { userId: string; email: string; roles: string[] } | null {
     const userId =
       CookieManager.getCookie(COOKIE_CONFIG.USER_ID) ??
       (typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.USER_ID) : null);
@@ -369,15 +373,33 @@ export class TokenService {
       CookieManager.getCookie(COOKIE_CONFIG.USER_EMAIL) ??
       (typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.USER_EMAIL) : null);
 
-    const role =
-      CookieManager.getCookie(COOKIE_CONFIG.USER_ROLE) ??
-      (typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.USER_ROLE) : null);
+    const rolesJson =
+      CookieManager.getCookie(COOKIE_CONFIG.USER_ROLES) ??
+      (typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.USER_ROLES) : null);
 
-    if (!userId || !email || !role) {
+    if (!userId || !email) {
       return null;
     }
 
-    return { userId, email, role };
+    let roles: string[] = [];
+
+    // Parse roles from JSON
+    if (rolesJson) {
+      try {
+        roles = JSON.parse(rolesJson);
+        if (!Array.isArray(roles)) {
+          roles = [];
+        }
+      } catch {
+        roles = [];
+      }
+    }
+
+    return {
+      userId,
+      email,
+      roles,
+    };
   }
 
   /**

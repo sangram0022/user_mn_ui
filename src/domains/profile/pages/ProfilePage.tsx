@@ -1,5 +1,5 @@
-﻿import type { FC } from 'react';
-import { startTransition, useActionState, useEffect, useId, useState } from 'react';
+import type { FC } from 'react';
+import { startTransition, useActionState, useCallback, useEffect, useId, useState } from 'react';
 
 import { useNavigate } from '@hooks/useNavigate';
 import { useToast } from '@hooks/useToast';
@@ -195,9 +195,8 @@ const ProfilePage: FC = () => {
   });
 
   // Load profile data
-  // React 19 Compiler handles memoization
-
-  const loadProfile = async () => {
+  // ? FIXED: Wrapped with useCallback to prevent infinite re-renders
+  const loadProfile = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -229,7 +228,7 @@ const ProfilePage: FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]); // Only depends on stable toast reference
 
   // Prefetch likely next routes for improved navigation performance
   useEffect(() => {
@@ -239,7 +238,7 @@ const ProfilePage: FC = () => {
 
   useEffect(() => {
     loadProfile();
-  }, []);
+  }, [loadProfile]); // ? Now safe - loadProfile is memoized
 
   // Handle successful profile update
   useEffect(() => {
@@ -247,7 +246,7 @@ const ProfilePage: FC = () => {
       setSuccess('Profile updated successfully!');
       toast.success('Profile updated successfully!');
       setIsEditing(false);
-      loadProfile();
+      loadProfile(); // ? Safe to call - loadProfile is now memoized
       refreshProfile();
       setTimeout(() => setSuccess(''), 3000);
     } else if (profileState.error) {
@@ -328,29 +327,27 @@ const ProfilePage: FC = () => {
     return (
       <div className="p-6">
         {/* Profile Header */}
-        <div className="mb-8 flex items-center gap-6 border-b border-gray-200 pb-6">
+        <div className="mb-8 flex items-center gap-6 border-b border-[var(--color-border)] pb-6">
           {/* Avatar */}
-          <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-blue-500">
-            <UserIcon className="h-10 w-10 text-white" aria-hidden="true" />
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-primary)]">
+            <UserIcon className="h-10 w-10 text-[var(--color-text-primary)]" aria-hidden="true" />
             <button
-              className="absolute bottom-0 right-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-green-500"
+              className="absolute bottom-0 right-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-[var(--color-border)] bg-[var(--color-success)]"
               aria-label="Change profile picture"
             >
-              <Camera className="h-3 w-3 text-white" aria-hidden="true" />
+              <Camera className="h-3 w-3 text-[var(--color-text-primary)]" aria-hidden="true" />
             </button>
           </div>
 
           {/* Profile Info */}
           <div className="flex-1">
-            <h2 className="mb-1 text-2xl font-bold text-gray-900">
+            <h2 className="mb-1 text-2xl font-bold text-[var(--color-text-primary)]">
               {profile?.full_name || profile?.username || 'User'}
             </h2>
-            <p className="mb-2 text-sm text-gray-500">{profile?.email}</p>
+            <p className="mb-2 text-sm text-[var(--color-text-tertiary)]">{profile?.email}</p>
             <div className="flex items-center gap-4">
-              <span className="rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-600">
-                Verified
-              </span>
-              <span className="text-xs text-gray-500">
+              <span className="badge badge-verified animate-bounce-subtle">Verified</span>
+              <span className="text-xs text-[var(--color-text-tertiary)]">
                 Member since {formatDate(profile?.created_at || '')}
               </span>
             </div>
@@ -361,19 +358,19 @@ const ProfilePage: FC = () => {
             onClick={() => setIsEditing(!isEditing)}
             className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
               isEditing
-                ? 'border-red-600 bg-white text-red-600 hover:bg-red-50'
-                : 'border-blue-500 bg-white text-blue-500 hover:bg-blue-50'
+                ? 'border-[var(--color-error)] bg-[var(--color-surface-primary)] text-[var(--color-error)] hover:bg-[var(--color-error-light)]'
+                : 'border-[var(--color-primary)] bg-[var(--color-surface-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary-light)]'
             }`}
             aria-label={isEditing ? 'Cancel editing profile' : 'Edit profile'}
           >
             {isEditing ? (
               <>
-                <X className="h-4 w-4" aria-hidden="true" />
+                <X className="icon-sm" aria-hidden="true" />
                 Cancel
               </>
             ) : (
               <>
-                <Edit3 className="h-4 w-4" aria-hidden="true" />
+                <Edit3 className="icon-sm" aria-hidden="true" />
                 Edit Profile
               </>
             )}
@@ -388,7 +385,7 @@ const ProfilePage: FC = () => {
               <>
                 <label
                   htmlFor={fullNameInputId}
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
                 >
                   Full Name
                 </label>
@@ -397,7 +394,7 @@ const ProfilePage: FC = () => {
                   type="text"
                   value={editForm.full_name}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, full_name: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-[color:var(--color-border-primary)] px-3 py-2 text-sm text-[color:var(--color-text-primary)] outline-none focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                   placeholder="Enter your full name"
                 />
               </>
@@ -405,11 +402,11 @@ const ProfilePage: FC = () => {
               <div role="group" aria-labelledby={`${fullNameInputId}-label`}>
                 <p
                   id={`${fullNameInputId}-label`}
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
                 >
                   Full Name
                 </p>
-                <p className="m-0 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+                <p className="m-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-2 text-sm text-[var(--color-text-primary)]">
                   {profile?.full_name || 'Not specified'}
                 </p>
               </div>
@@ -422,7 +419,7 @@ const ProfilePage: FC = () => {
               <>
                 <label
                   htmlFor={usernameInputId}
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
                 >
                   Username
                 </label>
@@ -431,7 +428,7 @@ const ProfilePage: FC = () => {
                   type="text"
                   value={editForm.username}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, username: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-[color:var(--color-border-primary)] px-3 py-2 text-sm text-[color:var(--color-text-primary)] outline-none focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                   placeholder="Enter your username"
                 />
               </>
@@ -439,11 +436,11 @@ const ProfilePage: FC = () => {
               <div role="group" aria-labelledby={`${usernameInputId}-label`}>
                 <p
                   id={`${usernameInputId}-label`}
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
                 >
                   Username
                 </p>
-                <p className="m-0 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+                <p className="m-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-2 text-sm text-[var(--color-text-primary)]">
                   {profile?.username || 'Not specified'}
                 </p>
               </div>
@@ -456,7 +453,7 @@ const ProfilePage: FC = () => {
               <>
                 <label
                   htmlFor={bioInputId}
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
                 >
                   Bio
                 </label>
@@ -465,7 +462,7 @@ const ProfilePage: FC = () => {
                   value={editForm.bio}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, bio: e.target.value }))}
                   rows={3}
-                  className="w-full resize-vertical rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full resize-vertical rounded-lg border border-[color:var(--color-border-primary)] px-3 py-2 text-sm text-[color:var(--color-text-primary)] outline-none focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                   placeholder="Tell us about yourself..."
                 />
               </>
@@ -473,11 +470,11 @@ const ProfilePage: FC = () => {
               <div role="group" aria-labelledby={`${bioInputId}-label`}>
                 <p
                   id={`${bioInputId}-label`}
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
                 >
                   Bio
                 </p>
-                <p className="m-0 min-h-16 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+                <p className="m-0 min-h-16 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-2 text-sm text-[var(--color-text-primary)]">
                   {profile?.bio || 'No bio provided'}
                 </p>
               </div>
@@ -490,9 +487,9 @@ const ProfilePage: FC = () => {
               <>
                 <label
                   htmlFor={locationInputId}
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
                 >
-                  <MapPin className="mr-2 inline h-4 w-4" />
+                  <MapPin className="mr-2 inline icon-sm" />
                   Location
                 </label>
                 <input
@@ -500,7 +497,7 @@ const ProfilePage: FC = () => {
                   type="text"
                   value={editForm.location}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, location: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-[color:var(--color-border-primary)] px-3 py-2 text-sm text-[color:var(--color-text-primary)] outline-none focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                   placeholder="Your location"
                 />
               </>
@@ -508,12 +505,12 @@ const ProfilePage: FC = () => {
               <div role="group" aria-labelledby={`${locationInputId}-label`}>
                 <p
                   id={`${locationInputId}-label`}
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
                 >
-                  <MapPin className="mr-2 inline h-4 w-4" />
+                  <MapPin className="mr-2 inline icon-sm" />
                   Location
                 </p>
-                <p className="m-0 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+                <p className="m-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-2 text-sm text-[var(--color-text-primary)]">
                   {profile?.location || 'Not specified'}
                 </p>
               </div>
@@ -526,9 +523,9 @@ const ProfilePage: FC = () => {
               <>
                 <label
                   htmlFor={websiteInputId}
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
                 >
-                  <Globe className="mr-2 inline h-4 w-4" />
+                  <Globe className="mr-2 inline icon-sm" />
                   Website
                 </label>
                 <input
@@ -536,7 +533,7 @@ const ProfilePage: FC = () => {
                   type="url"
                   value={editForm.website}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, website: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-[color:var(--color-border-primary)] px-3 py-2 text-sm text-[color:var(--color-text-primary)] outline-none focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                   placeholder="https://your-website.com"
                 />
               </>
@@ -544,18 +541,18 @@ const ProfilePage: FC = () => {
               <div role="group" aria-labelledby={`${websiteInputId}-label`}>
                 <p
                   id={`${websiteInputId}-label`}
-                  className="mb-2 block text-sm font-medium text-gray-700"
+                  className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
                 >
-                  <Globe className="mr-2 inline h-4 w-4" />
+                  <Globe className="mr-2 inline icon-sm" />
                   Website
                 </p>
-                <p className="m-0 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900">
+                <p className="m-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary)] px-3 py-2 text-sm text-[var(--color-text-primary)]">
                   {profile?.website ? (
                     <a
                       href={profile.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500"
+                      className="text-[var(--color-primary)]"
                     >
                       {profile.website}
                     </a>
@@ -572,11 +569,11 @@ const ProfilePage: FC = () => {
         {isEditing && (
           <form
             onSubmit={handleSaveProfile}
-            className="mt-8 flex justify-end border-t border-gray-200 pt-6"
+            className="mt-8 flex justify-end border-t border-[var(--color-border)] pt-6"
           >
             {/* Inline error display */}
             {profileState.error && (
-              <div className="mr-4 flex-1 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+              <div className="mr-4 flex-1 rounded-lg border border-[var(--color-error)] bg-[var(--color-error-light)] px-4 py-2 text-sm text-[var(--color-error)]">
                 {profileState.error}
               </div>
             )}
@@ -584,13 +581,13 @@ const ProfilePage: FC = () => {
             <button
               type="submit"
               disabled={isProfilePending}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border-none bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
+              className="flex cursor-pointer items-center gap-2 rounded-lg border-none bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] px-6 py-3 text-sm font-semibold text-[var(--color-text-primary)] transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[var(--color-primary)]/40 disabled:cursor-not-allowed disabled:bg-[var(--color-surface-secondary)] disabled:hover:translate-y-0 disabled:hover:shadow-sm"
               aria-label="Save profile changes"
             >
               {isProfilePending ? (
-                <Loader className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <Loader className="spinner spinner-sm spinner-white" aria-hidden="true" />
               ) : (
-                <Save className="h-4 w-4" aria-hidden="true" />
+                <Save className="icon-sm" aria-hidden="true" />
               )}
               {isProfilePending ? 'Saving...' : 'Save Changes'}
             </button>
@@ -604,24 +601,26 @@ const ProfilePage: FC = () => {
     return (
       <div className="p-6">
         {/* Security Overview */}
-        <div className="mb-8 rounded-lg border border-sky-200 bg-sky-50 p-4">
-          <h3 className="mb-2 m-0 text-base font-semibold text-sky-700">Security Status</h3>
+        <div className="mb-8 rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] p-4">
+          <h3 className="mb-2 m-0 text-base font-semibold text-[var(--color-primary)]">
+            Security Status
+          </h3>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-sky-700">
+              <div className="text-2xl font-bold text-[var(--color-primary)]">
                 {securitySettings?.two_factor_enabled ? '' : ''}
               </div>
-              <p className="m-0 text-xs text-sky-700">Two-Factor Auth</p>
+              <p className="m-0 text-xs text-[var(--color-primary)]">Two-Factor Auth</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-sky-700">
+              <div className="text-2xl font-bold text-[var(--color-primary)]">
                 {securitySettings?.active_sessions || 0}
               </div>
-              <p className="m-0 text-xs text-sky-700">Active Sessions</p>
+              <p className="m-0 text-xs text-[var(--color-primary)]">Active Sessions</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-sky-700" />
-              <p className="m-0 text-xs text-sky-700">Email Verified</p>
+              <div className="text-2xl font-bold text-[var(--color-primary)]" />
+              <p className="m-0 text-xs text-[var(--color-primary)]">Email Verified</p>
             </div>
           </div>
         </div>
@@ -629,13 +628,15 @@ const ProfilePage: FC = () => {
         {/* Change Password */}
         <form
           onSubmit={handleChangePassword}
-          className="mb-6 rounded-lg border border-gray-200 bg-white p-6"
+          className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-primary)] p-6"
         >
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">Change Password</h3>
+          <h3 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)]">
+            Change Password
+          </h3>
 
           {/* Inline error display */}
           {passwordState.error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+            <div className="mb-4 rounded-lg border border-[var(--color-error)] bg-[var(--color-error-light)] px-4 py-2 text-sm text-[var(--color-error)]">
               {passwordState.error}
             </div>
           )}
@@ -645,7 +646,7 @@ const ProfilePage: FC = () => {
             <div>
               <label
                 htmlFor={currentPasswordInputId}
-                className="mb-2 block text-sm font-medium text-gray-700"
+                className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
               >
                 Current Password
               </label>
@@ -658,22 +659,22 @@ const ProfilePage: FC = () => {
                   onChange={(e) =>
                     setPasswordForm((prev) => ({ ...prev, current_password: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 pr-10 text-sm text-[color:var(--color-text-primary)] outline-none focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                   placeholder="Enter current password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasswords((prev) => ({ ...prev, current: !prev.current }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
                   aria-label={
                     showPasswords.current ? 'Hide current password' : 'Show current password'
                   }
                 >
                   {showPasswords.current ? (
-                    <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    <EyeOff className="icon-sm" aria-hidden="true" />
                   ) : (
-                    <Eye className="h-4 w-4" aria-hidden="true" />
+                    <Eye className="icon-sm" aria-hidden="true" />
                   )}
                 </button>
               </div>
@@ -683,7 +684,7 @@ const ProfilePage: FC = () => {
             <div>
               <label
                 htmlFor={newPasswordInputId}
-                className="mb-2 block text-sm font-medium text-gray-700"
+                className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
               >
                 New Password
               </label>
@@ -696,7 +697,7 @@ const ProfilePage: FC = () => {
                   onChange={(e) =>
                     setPasswordForm((prev) => ({ ...prev, new_password: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 pr-10 text-sm text-[color:var(--color-text-primary)] outline-none focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                   placeholder="Enter new password"
                   required
                   minLength={8}
@@ -704,13 +705,13 @@ const ProfilePage: FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPasswords((prev) => ({ ...prev, new: !prev.new }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
                   aria-label={showPasswords.new ? 'Hide new password' : 'Show new password'}
                 >
                   {showPasswords.new ? (
-                    <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    <EyeOff className="icon-sm" aria-hidden="true" />
                   ) : (
-                    <Eye className="h-4 w-4" aria-hidden="true" />
+                    <Eye className="icon-sm" aria-hidden="true" />
                   )}
                 </button>
               </div>
@@ -720,7 +721,7 @@ const ProfilePage: FC = () => {
             <div>
               <label
                 htmlFor={confirmPasswordInputId}
-                className="mb-2 block text-sm font-medium text-gray-700"
+                className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
               >
                 Confirm New Password
               </label>
@@ -733,22 +734,22 @@ const ProfilePage: FC = () => {
                   onChange={(e) =>
                     setPasswordForm((prev) => ({ ...prev, confirm_password: e.target.value }))
                   }
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-[color:var(--color-border-primary)] bg-[var(--color-surface-primary)] px-3 py-2 pr-10 text-sm text-[color:var(--color-text-primary)] outline-none focus:border-[color:var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)]/20"
                   placeholder="Confirm new password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasswords((prev) => ({ ...prev, confirm: !prev.confirm }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
                   aria-label={
                     showPasswords.confirm ? 'Hide confirm password' : 'Show confirm password'
                   }
                 >
                   {showPasswords.confirm ? (
-                    <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    <EyeOff className="icon-sm" aria-hidden="true" />
                   ) : (
-                    <Eye className="h-4 w-4" aria-hidden="true" />
+                    <Eye className="icon-sm" aria-hidden="true" />
                   )}
                 </button>
               </div>
@@ -763,19 +764,19 @@ const ProfilePage: FC = () => {
                 !passwordForm.new_password ||
                 !passwordForm.confirm_password
               }
-              className={`justify-self-start flex items-center gap-2 rounded-lg border-none px-4 py-3 text-sm font-semibold text-white transition-all duration-200 ${
+              className={`justify-self-start flex items-center gap-2 rounded-lg border-none px-4 py-3 text-sm font-semibold text-[var(--color-text-primary)] transition-all duration-200 ${
                 isPasswordPending ||
                 !passwordForm.current_password ||
                 !passwordForm.new_password ||
                 !passwordForm.confirm_password
-                  ? 'cursor-not-allowed bg-gray-400'
-                  : 'cursor-pointer bg-gradient-to-br from-red-600 to-red-800 hover:from-red-700 hover:to-red-900'
+                  ? 'cursor-not-allowed bg-[var(--color-surface-secondary)]'
+                  : 'cursor-pointer bg-gradient-to-br from-[var(--color-error)] to-[var(--color-error)] hover:from-[var(--color-error)] hover:to-[var(--color-error)]'
               }`}
             >
               {isPasswordPending ? (
-                <Loader className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <Loader className="spinner spinner-sm spinner-white" aria-hidden="true" />
               ) : (
-                <Shield className="h-4 w-4" aria-hidden="true" />
+                <Shield className="icon-sm" aria-hidden="true" />
               )}
               {isPasswordPending ? 'Changing...' : 'Change Password'}
             </button>
@@ -789,9 +790,9 @@ const ProfilePage: FC = () => {
     return (
       <div className="p-6">
         {/* Notification Settings */}
-        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
-          <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
-            <Bell className="h-5 w-5" />
+        <div className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-primary)] p-6">
+          <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-[var(--color-text-primary)]">
+            <Bell className="icon-md" />
             Notification Preferences
           </h3>
 
@@ -813,10 +814,15 @@ const ProfilePage: FC = () => {
                 description: 'Receive product updates and newsletters',
               },
             ].map(({ id, label, description }) => (
-              <div key={id} className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
+              <div
+                key={id}
+                className="flex items-center justify-between rounded-lg bg-[var(--color-surface-secondary)] p-4"
+              >
                 <div>
-                  <h4 className="mb-1 text-sm font-medium text-gray-900">{label}</h4>
-                  <p className="m-0 text-xs text-gray-600">{description}</p>
+                  <h4 className="mb-1 text-sm font-medium text-[var(--color-text-primary)]">
+                    {label}
+                  </h4>
+                  <p className="m-0 text-xs text-[var(--color-text-secondary)]">{description}</p>
                 </div>
                 <label aria-label={label} className="relative inline-block h-6 w-12">
                   <input
@@ -826,11 +832,13 @@ const ProfilePage: FC = () => {
                   />
                   <span
                     className={`absolute bottom-0 left-0 right-0 top-0 cursor-pointer rounded-3xl transition-all duration-400 ${
-                      id === 'email_notifications' ? 'bg-blue-500' : 'bg-gray-300'
+                      id === 'email_notifications'
+                        ? 'bg-[var(--color-primary)]'
+                        : 'bg-[var(--color-border)]'
                     }`}
                   >
                     <span
-                      className={`absolute bottom-0.5 h-[1.125rem] w-[1.125rem] rounded-full bg-white transition-all duration-400 ${
+                      className={`absolute bottom-0.5 h-[1.125rem] w-[1.125rem] rounded-full bg-[var(--color-surface-primary)] transition-all duration-400 ${
                         id === 'email_notifications' ? 'left-7' : 'left-0.5'
                       }`}
                     />
@@ -846,10 +854,10 @@ const ProfilePage: FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-surface-secondary)]">
         <div className="text-center" role="status" aria-live="polite">
-          <Loader className="mx-auto mb-4 h-8 w-8 animate-spin" aria-hidden="true" />
-          <p className="text-gray-600">Loading profile...</p>
+          <Loader className="spinner spinner-xl spinner-primary mx-auto mb-4" aria-hidden="true" />
+          <p className="text-[var(--color-text-secondary)]">Loading profile...</p>
         </div>
       </div>
     );
@@ -864,15 +872,17 @@ const ProfilePage: FC = () => {
         ogTitle="Profile Settings - User Management System"
         ogDescription="Update your profile, manage security settings, and customize your experience."
       />
-      <div className="min-h-screen bg-gray-50 px-4 py-8">
-        <div className="mx-auto max-w-4xl">
+      <div className="page-wrapper">
+        <div className="container-narrow">
           {/* Breadcrumb Navigation */}
           <Breadcrumb />
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="mb-2 text-3xl font-bold text-gray-900">Profile Settings</h1>
-            <p className="m-0 text-sm text-gray-600">
+            <h1 className="mb-2 text-3xl font-bold text-[var(--color-text-primary)]">
+              Profile Settings
+            </h1>
+            <p className="m-0 text-sm text-[var(--color-text-secondary)]">
               Manage your account settings and preferences
             </p>
           </div>
@@ -880,19 +890,19 @@ const ProfilePage: FC = () => {
           {/* Alerts */}
           {success && (
             <div
-              className="mb-6 flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4"
+              className="mb-6 flex items-center gap-3 rounded-lg border border-[var(--color-success)] bg-[var(--color-success-light)] p-4"
               role="status"
               aria-live="polite"
             >
-              <CheckCircle className="h-5 w-5 text-green-500" aria-hidden="true" />
-              <p className="m-0 text-sm text-green-800">{success}</p>
+              <CheckCircle className="h-5 w-5 text-[var(--color-success)]" aria-hidden="true" />
+              <p className="m-0 text-sm text-[var(--color-success)]">{success}</p>
             </div>
           )}
 
           {/* Tab Navigation */}
-          <div className="overflow-hidden rounded-lg bg-white shadow-sm">
+          <div className="card-base">
             <div
-              className="flex border-b border-gray-200"
+              className="flex border-b border-[var(--color-border)]"
               role="tablist"
               aria-label="Profile settings sections"
             >
@@ -909,8 +919,8 @@ const ProfilePage: FC = () => {
                   }
                   className={`flex flex-1 items-center justify-center gap-2 border-b-2 border-none p-4 text-sm font-medium transition-all duration-200 ${
                     activeTab === id
-                      ? 'border-b-blue-500 bg-slate-50 text-blue-500'
-                      : 'border-transparent bg-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'border-b-[color:var(--color-primary)] bg-[color:var(--color-background-secondary)] text-[var(--color-primary)]'
+                      : 'border-transparent bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[color:var(--color-text-primary)]'
                   }`}
                   role="tab"
                   aria-selected={activeTab === id}

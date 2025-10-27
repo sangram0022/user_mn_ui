@@ -1,8 +1,12 @@
 /**
- * MODAL COMPONENT STYLES
+ * 🎯 MODAL COMPONENT STYLES - Tailwind CSS v4 Compatible
+ * 
+ * Tailwind v4:
+ * - Using @layer base for component classes (correct pattern)
+ * - Modal is a UI component, belongs in base layer
  */
 
-@layer components {
+@layer base {
   .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -30,6 +34,9 @@
     border-radius: var(--modal-radius);
     box-shadow: var(--modal-shadow);
     animation: modal-slide-up var(--transition-modal);
+
+    /* 🚀 CSS Containment - Isolate modal for better performance */
+    contain: layout style paint;
   }
 
   @keyframes modal-slide-up {

@@ -113,32 +113,11 @@ export const AuthButton: React.FC<AuthButtonProps> = ({
   children,
   fullWidth = true,
 }) => {
-  const baseClasses = `
-    ${fullWidth ? 'w-full' : 'w-auto'} 
-    flex justify-center items-center gap-2 
-    px-4 py-3 
-    border-none rounded-lg 
-    text-sm font-medium 
-    transition-all duration-200 
-    cursor-pointer
-    focus:outline-none focus:ring-2 focus:ring-offset-2
-  `;
+  const baseClasses = `btn ${fullWidth ? 'btn-block' : ''}`;
 
   const variantClasses = {
-    primary: `
-      text-white bg-gradient-primary
-      shadow-sm
-      hover:shadow-md hover:-translate-y-0.5
-      focus:ring-blue-500
-      ${isLoading || disabled ? 'opacity-50 cursor-not-allowed bg-gray-400 bg-none' : ''}
-    `,
-    secondary: `
-      text-gray-700 bg-white border border-gray-300
-      shadow-sm
-      hover:bg-gray-50 hover:shadow-md hover:-translate-y-0.5
-      focus:ring-gray-500
-      ${isLoading || disabled ? 'opacity-50 cursor-not-allowed' : ''}
-    `,
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
   };
 
   return (
@@ -150,7 +129,7 @@ export const AuthButton: React.FC<AuthButtonProps> = ({
     >
       {isLoading ? (
         <>
-          <Loader className="w-5 h-5 animate-spin" />
+          <Loader className="spinner spinner-sm" />
           <span>Please wait...</span>
         </>
       ) : (

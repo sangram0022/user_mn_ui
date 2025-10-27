@@ -153,33 +153,6 @@ export interface ServiceStatus {
   version?: string;
 }
 
-// Workflow types
-export interface Workflow {
-  id: string;
-  name: string;
-  description: string;
-  status: 'active' | 'inactive' | 'draft';
-  steps: WorkflowStep[];
-  triggers: WorkflowTrigger[];
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface WorkflowStep {
-  id: string;
-  name: string;
-  type: 'action' | 'condition' | 'delay';
-  config: Record<string, unknown>;
-  order: number;
-}
-
-export interface WorkflowTrigger {
-  id: string;
-  type: 'manual' | 'scheduled' | 'event';
-  config: Record<string, unknown>;
-}
-
 // Report types
 export interface Report {
   id: string;

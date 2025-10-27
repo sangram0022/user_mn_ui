@@ -4,8 +4,8 @@
 // Export error types
 export * from './error';
 
-// Export utility types
-export * from './utilities';
+// Export comprehensive utility types
+export * from './UtilityTypes';
 
 // Export comprehensive backend API types (100% matching backend documentation)
 export * from './api-backend.types';
@@ -52,7 +52,7 @@ export interface User {
   last_name: string;
   username?: string | null;
   full_name?: string | null;
-  role: string | UserRoleInfo;
+  roles: string[]; // Array of role names
   status?: string;
   is_active: boolean;
   is_verified: boolean;
@@ -85,7 +85,7 @@ export interface UserSummary {
   last_name: string;
   username?: string | null;
   full_name?: string | null;
-  role: string;
+  roles: string[];
   is_active: boolean;
   is_verified: boolean;
   is_approved: boolean;
@@ -142,7 +142,7 @@ export interface LoginResponse {
   refresh_expires_in: number;
   user_id: string;
   email: string;
-  role: string;
+  roles: string[]; // ✅ Changed from "role: string" to "roles: string[]"
   last_login_at?: string;
   issued_at: string;
 }
@@ -370,37 +370,6 @@ export interface CohortAnalysis {
 }
 
 // ============================================================================
-// Workflow Types
-// ============================================================================
-
-export interface WorkflowRequest {
-  id: string;
-  type: string;
-  user_id: number;
-  status: 'pending' | 'approved' | 'rejected';
-  data: Record<string, unknown>;
-  created_at: string;
-  updated_at?: string;
-  reviewed_by?: number;
-  reviewed_at?: string;
-}
-
-export interface PendingWorkflow {
-  id: string;
-  type: string;
-  description: string;
-  priority: 'low' | 'medium' | 'high';
-  created_at: string;
-  user: {
-    id: number;
-    email: string;
-    full_name?: string;
-  };
-  request_id?: string;
-  workflow_type?: string;
-  requester_name?: string;
-}
-
 // ============================================================================
 // Form Types
 // ============================================================================
@@ -486,7 +455,6 @@ export interface UserEvent {
 export interface DashboardStats {
   total_users: number;
   active_users: number;
-  pending_workflows: number;
   system_health: 'healthy' | 'warning' | 'critical';
 }
 

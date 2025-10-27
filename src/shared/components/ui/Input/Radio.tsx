@@ -37,17 +37,17 @@ export interface RadioProps
 
 const sizeStyles: Record<RadioSize, { box: string; dot: string; text: string }> = {
   sm: {
-    box: 'w-4 h-4',
-    dot: 'w-2 h-2',
+    box: 'size-4',
+    dot: 'size-2',
     text: 'text-sm',
   },
   md: {
-    box: 'w-4 h-4',
-    dot: 'w-2 h-2',
+    box: 'size-4',
+    dot: 'size-2',
     text: 'text-base',
   },
   lg: {
-    box: 'w-5 h-5',
+    box: 'size-5',
     dot: 'w-2.5 h-2.5',
     text: 'text-lg',
   },
@@ -80,14 +80,14 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
       border-2 rounded-full
       transition-all duration-200
       cursor-pointer
-      ${hasError ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'}
-      ${checked ? 'border-blue-500 dark:border-blue-600' : 'bg-white dark:bg-gray-800'}
+      ${hasError ? 'border-[var(--color-error)] dark:border-[var(--color-error)]' : 'border-[var(--color-border)] dark:border-[var(--color-border)]'}
+      ${checked ? 'border-[var(--color-primary)] dark:border-[var(--color-primary)]' : 'bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)]'}
       ${
         disabled
           ? 'opacity-50 cursor-not-allowed'
-          : 'hover:border-blue-400 dark:hover:border-blue-500'
+          : 'hover:border-[var(--color-primary)] dark:hover:border-[var(--color-primary)]'
       }
-      focus-within:ring-2 focus-within:ring-blue-500/20
+      focus-within:ring-2 focus-within:ring-[var(--color-primary)]/20
     `;
 
     return (
@@ -112,7 +112,10 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
             {/* Inner Dot */}
             {checked && (
               <span
-                className={cn('rounded-full bg-blue-500 dark:bg-blue-600', sizeStyles[size].dot)}
+                className={cn(
+                  'rounded-full bg-[var(--color-primary)] dark:bg-[var(--color-primary)]',
+                  sizeStyles[size].dot
+                )}
               />
             )}
           </label>
@@ -127,8 +130,8 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
                     'font-medium cursor-pointer',
                     sizeStyles[size].text,
                     hasError
-                      ? 'text-red-600 dark:text-red-400'
-                      : 'text-gray-700 dark:text-gray-300',
+                      ? 'text-[color:var(--color-error)] dark:text-[color:var(--color-error)]'
+                      : 'text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]',
                     disabled && 'opacity-50 cursor-not-allowed',
                     labelClassName
                   )}
@@ -139,7 +142,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
               {helperText && !error && (
                 <p
                   id={`${radioId}-helper`}
-                  className="mt-0.5 text-sm text-gray-500 dark:text-gray-400"
+                  className="mt-0.5 text-sm text-[color:var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]"
                 >
                   {helperText}
                 </p>
@@ -152,7 +155,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
         {error && (
           <p
             id={`${radioId}-error`}
-            className="mt-1.5 text-sm text-red-600 dark:text-red-400"
+            className="mt-1.5 text-sm text-[color:var(--color-error)] dark:text-[var(--color-error)]"
             role="alert"
           >
             {error}

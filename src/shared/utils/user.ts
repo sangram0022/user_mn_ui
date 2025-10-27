@@ -8,7 +8,7 @@
  * @created [Current Date]
  */
 
-import type { User, UserProfile } from '../../types/api.types';
+import type { User, UserProfile } from '../types';
 
 /**
  * Role display name mapping
@@ -36,23 +36,14 @@ const ROLE_DISPLAY_NAMES: Record<string, string> = {
  * ```
  */
 export function getUserRoleName(
-  user: { role?: string | { name: string } } | User | UserProfile | null | undefined
+  user: { roles?: string[] } | User | UserProfile | null | undefined
 ): string {
-  if (!user) {
+  if (!user || !user.roles || user.roles.length === 0) {
     return 'Guest';
   }
 
-  // Handle role as either string or UserRoleInfo object
-  let role: string | undefined;
-  if (typeof user.role === 'string') {
-    role = user.role;
-  } else if (user.role && typeof user.role === 'object' && 'name' in user.role) {
-    role = (user.role as { name: string }).name;
-  }
-
-  if (!role) {
-    return 'Guest';
-  }
+  // Use the first role for display
+  const role = user.roles[0];
 
   // Return mapped name or capitalize the role
   return (
@@ -95,26 +86,22 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
  * ```
  */
 export function getUserPermissions(
-  user: { role?: string | { name: string } } | User | UserProfile | null | undefined
+  user: { roles?: string[] } | User | UserProfile | null | undefined
 ): string[] {
-  if (!user) {
+  if (!user || !user.roles || user.roles.length === 0) {
     return ROLE_PERMISSIONS.guest || [];
   }
 
-  // Handle role as either string or UserRoleInfo object
-  let role: string | undefined;
-  if (typeof user.role === 'string') {
-    role = user.role;
-  } else if (user.role && typeof user.role === 'object' && 'name' in user.role) {
-    role = (user.role as { name: string }).name;
+  // Collect all permissions from all roles
+  const allPermissions = new Set<string>();
+
+  for (const role of user.roles) {
+    const roleKey = role.toLowerCase();
+    const permissions = ROLE_PERMISSIONS[roleKey] || [];
+    permissions.forEach((permission) => allPermissions.add(permission));
   }
 
-  if (!role) {
-    return ROLE_PERMISSIONS.guest || [];
-  }
-
-  const roleKey = role.toLowerCase();
-  return ROLE_PERMISSIONS[roleKey] || ROLE_PERMISSIONS.guest || [];
+  return Array.from(allPermissions);
 }
 
 /**

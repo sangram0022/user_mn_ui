@@ -99,158 +99,173 @@ const ResetPasswordPage: React.FC = () => {
   if (!token && !error) {
     return (
       <div
-        className="flex min-h-screen items-center justify-center bg-gray-50"
+        className="flex min-h-screen items-center justify-center bg-[var(--color-surface-secondary)]"
         role="status"
         aria-live="polite"
       >
-        <Loader className="h-8 w-8 animate-spin" aria-hidden="true" />
+        <Loader className="spinner spinner-lg spinner-primary" aria-hidden="true" />
       </div>
     );
   }
 
   if (isSuccess) {
     return (
-      <div className="flex min-h-screen flex-col justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-6 py-12">
-        <div className="mx-auto w-full max-w-md text-center" role="status" aria-live="polite">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-500">
-            <CheckCircle className="h-8 w-8 text-white" aria-hidden="true" />
+      <div className="page-wrapper">
+        <div className="auth-layout">
+          <div className="container-form text-center" role="status" aria-live="polite">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-success)]">
+              <CheckCircle
+                className="icon-xl text-[var(--color-text-primary)]"
+                aria-hidden="true"
+              />
+            </div>
+
+            <h1 className="mb-2 text-3xl font-bold text-[var(--color-text-primary)]">
+              Password Reset Successful!
+            </h1>
+
+            <p className="mb-6 text-sm text-[var(--color-text-tertiary)]">
+              Your password has been successfully reset. Redirecting to login...
+            </p>
+
+            <div className="spinner spinner-lg spinner-primary mx-auto" />
           </div>
-
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">Password Reset Successful!</h1>
-
-          <p className="mb-6 text-sm text-gray-500">
-            Your password has been successfully reset. Redirecting to login...
-          </p>
-
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-md">
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-500">
-          <Lock className="h-8 w-8 text-white" aria-hidden="true" />
-        </div>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">Reset Your Password</h1>
-        <p className="text-sm text-gray-500">Enter your new password below</p>
-      </div>
-
-      <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-2xl">
-        {error && (
-          <div className="mb-6" role="alert" aria-live="assertive">
-            <ErrorAlert error={error} />
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} aria-label="Password reset form">
-          <div className="mb-6">
-            <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
-              New Password
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pl-10 pr-10 text-sm text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                placeholder="Enter your new password"
-              />
-              <Lock
-                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                aria-hidden="true"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" aria-hidden="true" />
-                ) : (
-                  <Eye className="h-4 w-4" aria-hidden="true" />
-                )}
-              </button>
+    <div className="page-wrapper">
+      <div className="auth-layout">
+        <div className="container-form">
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary)]">
+              <Lock className="icon-xl text-[var(--color-text-primary)]" aria-hidden="true" />
             </div>
-            <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters long</p>
+            <h1 className="mb-2 text-3xl font-bold text-[var(--color-text-primary)]">
+              Reset Your Password
+            </h1>
+            <p className="text-sm text-[var(--color-text-tertiary)]">
+              Enter your new password below
+            </p>
           </div>
 
-          <div className="mb-6">
-            <label
-              htmlFor="confirmPassword"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Confirm New Password
-            </label>
-            <div className="relative">
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pl-10 pr-10 text-sm text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                placeholder="Confirm your new password"
-              />
-              <Lock
-                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                aria-hidden="true"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-0 text-gray-400 hover:text-gray-600"
-                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4" aria-hidden="true" />
-                ) : (
-                  <Eye className="h-4 w-4" aria-hidden="true" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading || !formData.password || !formData.confirmPassword}
-            className={`flex w-full items-center justify-center gap-2 rounded-lg border-none px-4 py-3 text-sm font-semibold text-white transition-all ${
-              isLoading || !formData.password || !formData.confirmPassword
-                ? 'cursor-not-allowed bg-gray-400'
-                : 'cursor-pointer bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
-            }`}
-            aria-label={isLoading ? 'Resetting password' : 'Reset password'}
-          >
-            {isLoading ? (
-              <>
-                <Loader className="h-4 w-4 animate-spin" aria-hidden="true" />
-                Resetting Password...
-              </>
-            ) : (
-              'Reset Password'
+          <div className="card-base card-form">
+            {error && (
+              <div className="mb-6" role="alert" aria-live="assertive">
+                <ErrorAlert error={error} />
+              </div>
             )}
-          </button>
-        </form>
 
-        <div className="mt-6 flex justify-between text-sm">
-          <Link to="/login" className="font-medium text-blue-500 no-underline hover:text-blue-600">
-            Back to login
-          </Link>
-          <Link
-            to="/forgot-password"
-            className="font-medium text-blue-500 no-underline hover:text-blue-600"
-          >
-            Request new link
-          </Link>
+            <form onSubmit={handleSubmit} aria-label="Password reset form" className="stack-md">
+              <div>
+                <label htmlFor="password" className="form-label">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="form-input pl-10 pr-10"
+                    placeholder="Enter your new password"
+                  />
+                  <Lock
+                    className="absolute left-3 top-1/2 icon-sm -translate-y-1/2 text-[var(--color-text-tertiary)]"
+                    aria-hidden="true"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-0 text-[color:var(--color-text-primary)] hover:text-[var(--color-text-secondary)]"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="icon-sm" aria-hidden="true" />
+                    ) : (
+                      <Eye className="icon-sm" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+                <p className="form-hint">Must be at least 8 characters long</p>
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="form-label">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="form-input pl-10 pr-10"
+                    placeholder="Confirm your new password"
+                  />
+                  <Lock
+                    className="absolute left-3 top-1/2 icon-sm -translate-y-1/2 text-[var(--color-text-tertiary)]"
+                    aria-hidden="true"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-0 text-[color:var(--color-text-primary)] hover:text-[var(--color-text-secondary)]"
+                    aria-label={
+                      showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'
+                    }
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="icon-sm" aria-hidden="true" />
+                    ) : (
+                      <Eye className="icon-sm" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading || !formData.password || !formData.confirmPassword}
+                className={`btn-base ${isLoading || !formData.password || !formData.confirmPassword ? 'opacity-50 cursor-not-allowed' : 'btn-primary'}`}
+                aria-label={isLoading ? 'Resetting password' : 'Reset password'}
+              >
+                {isLoading ? (
+                  <>
+                    <span>
+                      <Loader className="spinner spinner-sm spinner-white" aria-hidden="true" />
+                    </span>
+                    Resetting Password...
+                  </>
+                ) : (
+                  'Reset Password'
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 flex justify-between text-sm">
+              <Link
+                to="/login"
+                className="font-medium text-[color:var(--color-primary)] no-underline hover:text-[var(--color-primary)]"
+              >
+                Back to login
+              </Link>
+              <Link
+                to="/forgot-password"
+                className="font-medium text-[color:var(--color-primary)] no-underline hover:text-[var(--color-primary)]"
+              >
+                Request new link
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

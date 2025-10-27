@@ -66,30 +66,6 @@ export const mockUsers = [
   },
 ];
 
-/**
- * Mock workflows
- */
-export const mockWorkflows = [
-  {
-    id: 'wf-1',
-    name: 'User Onboarding',
-    description: 'Onboard new users',
-    status: 'active',
-    steps: 5,
-    completedSteps: 3,
-    createdAt: '2024-01-01T00:00:00.000Z',
-  },
-  {
-    id: 'wf-2',
-    name: 'Document Approval',
-    description: 'Approve documents',
-    status: 'pending',
-    steps: 3,
-    completedSteps: 1,
-    createdAt: '2024-01-02T00:00:00.000Z',
-  },
-];
-
 // ============================================================================
 // Authentication Handlers
 // ============================================================================
@@ -393,111 +369,6 @@ export const userHandlers = [
 ];
 
 // ============================================================================
-// Workflow Handlers
-// ============================================================================
-
-export const workflowHandlers = [
-  /**
-   * GET /workflows - Get all workflows
-   */
-  http.get(`${API_BASE_URL}/workflows`, () =>
-    HttpResponse.json(
-      {
-        success: true,
-        data: mockWorkflows,
-      },
-      { status: 200 }
-    )
-  ),
-
-  /**
-   * GET /workflows/:id - Get workflow by ID
-   */
-  http.get(`${API_BASE_URL}/workflows/:id`, ({ params }) => {
-    const { id } = params;
-    const workflow = mockWorkflows.find((w) => w.id === id);
-
-    if (!workflow) {
-      return HttpResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'WORKFLOW_NOT_FOUND',
-            message: 'Workflow not found',
-          },
-        },
-        { status: 404 }
-      );
-    }
-
-    return HttpResponse.json(
-      {
-        success: true,
-        data: workflow,
-      },
-      { status: 200 }
-    );
-  }),
-
-  /**
-   * POST /workflows - Create workflow
-   */
-  http.post(`${API_BASE_URL}/workflows`, async ({ request }) => {
-    const body = (await request.json()) as Partial<(typeof mockWorkflows)[0]>;
-
-    const newWorkflow = {
-      ...mockWorkflows[0],
-      ...body,
-      id: `wf-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-
-    return HttpResponse.json(
-      {
-        success: true,
-        data: newWorkflow,
-      },
-      { status: 201 }
-    );
-  }),
-
-  /**
-   * PUT /workflows/:id - Update workflow
-   */
-  http.put(`${API_BASE_URL}/workflows/:id`, async ({ params, request }) => {
-    const { id } = params;
-    const body = (await request.json()) as Partial<(typeof mockWorkflows)[0]>;
-    const workflow = mockWorkflows.find((w) => w.id === id);
-
-    if (!workflow) {
-      return HttpResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'WORKFLOW_NOT_FOUND',
-            message: 'Workflow not found',
-          },
-        },
-        { status: 404 }
-      );
-    }
-
-    const updatedWorkflow = {
-      ...workflow,
-      ...body,
-    };
-
-    return HttpResponse.json(
-      {
-        success: true,
-        data: updatedWorkflow,
-      },
-      { status: 200 }
-    );
-  }),
-];
-
-// ============================================================================
 // Analytics Handlers
 // ============================================================================
 
@@ -512,8 +383,6 @@ export const analyticsHandlers = [
         data: {
           totalUsers: 1234,
           activeUsers: 567,
-          totalWorkflows: 89,
-          completedWorkflows: 45,
           metrics: [
             { date: '2024-01-01', value: 100 },
             { date: '2024-01-02', value: 150 },
@@ -553,10 +422,4 @@ export const systemHandlers = [
 /**
  * All API handlers for MSW
  */
-export const handlers = [
-  ...authHandlers,
-  ...userHandlers,
-  ...workflowHandlers,
-  ...analyticsHandlers,
-  ...systemHandlers,
-];
+export const handlers = [...authHandlers, ...userHandlers, ...analyticsHandlers, ...systemHandlers];

@@ -172,6 +172,23 @@
     color: var(--color-text-tertiary);
   }
 
+  /* Semantic text colors with common aliases */
+  .text-heading {
+    color: var(--color-text-primary);
+  }
+
+  .text-body {
+    color: var(--color-text-secondary);
+  }
+
+  .text-muted {
+    color: var(--color-text-tertiary);
+  }
+
+  .text-link {
+    color: var(--color-primary);
+  }
+
   .text-inverse {
     color: var(--color-text-inverse);
   }
@@ -470,7 +487,12 @@
   }
 }
 
-@layer components {
+/* ============================================================================
+   TYPOGRAPHY COMPONENTS - Tailwind CSS v4 Compatible
+   Using @layer base for typography component classes
+   ============================================================================ */
+
+@layer base {
   /* ========================================================================
      DISPLAY TEXT - Large headline styles
      ======================================================================== */

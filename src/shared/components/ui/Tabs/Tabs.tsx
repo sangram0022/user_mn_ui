@@ -31,7 +31,6 @@
 import { cn } from '@shared/utils';
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useId,
@@ -116,23 +115,21 @@ function TabsRoot({
   const isControlled = controlledValue !== undefined;
   const selectedValue = isControlled ? controlledValue : uncontrolledValue;
 
-  const setSelectedValue = useCallback(
-    (newValue: string) => {
-      if (!isControlled) {
-        setUncontrolledValue(newValue);
-      }
-      onChange?.(newValue);
-    },
-    [isControlled, onChange]
-  );
+  // ✅ React 19: No useCallback needed - React Compiler optimizes
+  const setSelectedValue = (newValue: string) => {
+    if (!isControlled) {
+      setUncontrolledValue(newValue);
+    }
+    onChange?.(newValue);
+  };
 
-  const registerTab = useCallback((value: string, element: HTMLButtonElement) => {
+  const registerTab = (value: string, element: HTMLButtonElement) => {
     tabsRef.current.set(value, element);
-  }, []);
+  };
 
-  const unregisterTab = useCallback((value: string) => {
+  const unregisterTab = (value: string) => {
     tabsRef.current.delete(value);
-  }, []);
+  };
 
   const contextValue: TabsContextValue = {
     selectedValue,
@@ -211,14 +208,14 @@ function TabsList({ children, className = '', 'aria-label': ariaLabel }: TabsLis
 
   const variantStyles = {
     line: `
-      border-b border-gray-200 dark:border-gray-700
+      border-b border-[var(--color-border)] dark:border-[var(--color-border)]
     `,
     enclosed: `
-      border border-gray-200 dark:border-gray-700
-      rounded-lg p-1 bg-gray-50 dark:bg-gray-800/50
+      border border-[var(--color-border)] dark:border-[var(--color-border)]
+      rounded-lg p-1 bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)]/50
     `,
     pills: `
-      bg-gray-100 dark:bg-gray-800 rounded-lg p-1
+      bg-[var(--color-surface-secondary)] dark:bg-[var(--color-surface-primary)] rounded-lg p-1
     `,
   };
 
@@ -291,47 +288,47 @@ function Tab({ value, children, disabled = false, className = '' }: TabProps) {
     px-4 py-2.5
     font-medium text-sm
     transition-all duration-200
-    focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2
     disabled:opacity-50 disabled:cursor-not-allowed
   `;
 
   const variantStyles = {
     line: isSelected
       ? `
-        text-blue-600 dark:text-blue-400
-        border-b-2 border-blue-600 dark:border-blue-400
+        text-[var(--color-primary)] dark:text-[var(--color-primary)]
+        border-b-2 border-[var(--color-primary)] dark:border-[var(--color-primary)]
         -mb-px
       `
       : `
-        text-gray-600 dark:text-gray-400
+        text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]
         border-b-2 border-transparent
-        hover:text-gray-900 dark:hover:text-gray-200
-        hover:border-gray-300 dark:hover:border-gray-600
+        hover:text-[var(--color-text-primary)] dark:hover:text-[var(--color-text-secondary)]
+        hover:border-[var(--color-border)] dark:hover:border-[var(--color-border)]
         -mb-px
       `,
     enclosed: isSelected
       ? `
-        bg-white dark:bg-gray-900
-        text-blue-600 dark:text-blue-400
-        border border-gray-200 dark:border-gray-700
+        bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)]
+        text-[var(--color-primary)] dark:text-[var(--color-primary)]
+        border border-[var(--color-border)] dark:border-[var(--color-border)]
         rounded-lg shadow-sm
       `
       : `
-        text-gray-600 dark:text-gray-400
-        hover:text-gray-900 dark:hover:text-gray-200
-        hover:bg-gray-100 dark:hover:bg-gray-700/50
+        text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]
+        hover:text-[var(--color-text-primary)] dark:hover:text-[var(--color-text-secondary)]
+        hover:bg-[var(--color-surface-secondary)] dark:hover:bg-[var(--color-surface-primary)]/50
         rounded-lg
       `,
     pills: isSelected
       ? `
-        bg-white dark:bg-gray-900
-        text-blue-600 dark:text-blue-400
+        bg-[var(--color-surface-primary)] dark:bg-[var(--color-surface-primary)]
+        text-[var(--color-primary)] dark:text-[var(--color-primary)]
         rounded-md shadow-sm
       `
       : `
-        text-gray-600 dark:text-gray-400
-        hover:text-gray-900 dark:hover:text-gray-200
-        hover:bg-gray-200 dark:hover:bg-gray-700
+        text-[var(--color-text-secondary)] dark:text-[var(--color-text-tertiary)]
+        hover:text-[var(--color-text-primary)] dark:hover:text-[var(--color-text-secondary)]
+        hover:bg-[var(--color-border)] dark:hover:bg-[var(--color-surface-primary)]
         rounded-md
       `,
   };
@@ -389,7 +386,7 @@ function TabPanel({ value, children, className = '', keepMounted = false }: TabP
       tabIndex={0}
       className={cn(
         'tabs-panel',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-lg',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2 rounded-lg',
         !isSelected && keepMounted && 'hidden',
         className
       )}

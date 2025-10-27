@@ -18,5 +18,5 @@ export { useFormState, useLoadingState, usePasswordVisibility } from './hooks/us
 export { ToastContainer } from './components/ui/ToastContainer';
 export { default as ErrorAlert } from './ui/ErrorAlert';
 
-// Utils
-export * from './utils/formValidation';
+// Utils - Backend-spec validators (single source of truth)
+export * from './utils/validation';

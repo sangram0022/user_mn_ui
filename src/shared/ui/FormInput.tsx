@@ -1,5 +1,19 @@
+/**
+ * FormInput Component - Modern React 19 Implementation
+ *
+ * Features:
+ * - React 19 memo optimization for re-render prevention
+ * - Modern CSS classes with GPU acceleration
+ * - OKLCH color space for accessibility
+ * - Smooth focus transitions
+ * - Enhanced hover states with lift effect
+ *
+ * @since 2024-2025 Modernization Phase 2
+ */
+
 import type { LucideIcon } from 'lucide-react';
 import type React from 'react';
+import { memo } from 'react';
 
 /**
  * Form input component props
@@ -136,7 +150,7 @@ interface FormInputProps {
  *   helperTextContent="Must be at least 8 characters"
  * />
  */
-export const FormInput: React.FC<FormInputProps> = ({
+const FormInputComponent: React.FC<FormInputProps> = ({
   id,
   name,
   type,
@@ -154,15 +168,14 @@ export const FormInput: React.FC<FormInputProps> = ({
   <div className="w-full">
     <label
       htmlFor={id}
-      className="block text-sm font-semibold mb-2"
-      style={{ color: 'var(--theme-text)' }}
+      className="block text-sm font-semibold mb-2 text-text-primary transition-colors"
     >
-      {label} {required && <span style={{ color: 'var(--theme-error)' }}>*</span>}
+      {label} {required && <span className="text-error">*</span>}
     </label>
-    <div className="relative">
+    <div className="relative group">
       {Icon && (
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon className="h-5 w-5" style={{ color: 'var(--theme-textSecondary)' }} />
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors duration-200 group-focus-within:text-primary-600 dark:group-focus-within:text-primary-400">
+          <Icon className="icon-md text-text-secondary" />
         </div>
       )}
       <input
@@ -174,35 +187,43 @@ export const FormInput: React.FC<FormInputProps> = ({
         value={value}
         onChange={onChange}
         className={`
+            form-input-modern
             block w-full rounded-lg border-2
             ${Icon ? 'pl-10' : 'pl-4'} 
             ${ToggleIcon ? 'pr-12' : 'pr-4'} 
             py-3 text-base font-normal
+            bg-background-elevated border-border-primary text-text-primary
             shadow-sm transition-all duration-200
-            focus:outline-none
+            focus:outline-none focus-ring
+            hover:border-primary-400 hover:shadow-md
+            gpu-accelerated
+            placeholder:text-text-tertiary
           `}
-        style={{
-          background: 'var(--theme-input-bg)',
-          borderColor: 'var(--theme-input-border)',
-          color: 'var(--theme-input-text)',
-        }}
         placeholder={placeholder}
       />
       {ToggleIcon && onToggle && (
         <button
           type="button"
           onClick={onToggle}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
-          style={{ color: 'var(--theme-textSecondary)' }}
+          className="absolute inset-y-0 right-0 pr-3 flex items-center bg-transparent border-none cursor-pointer text-text-secondary hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 gpu-accelerated"
+          aria-label="Toggle visibility"
         >
           {ToggleIcon}
         </button>
       )}
     </div>
     {helperTextContent && (
-      <p className="mt-2 text-sm" style={{ color: 'var(--theme-textSecondary)' }}>
+      <p className="mt-2 text-sm text-text-secondary transition-colors animate-fade-in">
         {helperTextContent}
       </p>
     )}
   </div>
 );
+
+FormInputComponent.displayName = 'FormInput';
+
+/**
+ * Memoized FormInput component to prevent unnecessary re-renders
+ * Uses React 19 memo for optimal performance
+ */
+export const FormInput = memo(FormInputComponent);
