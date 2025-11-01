@@ -1,0 +1,579 @@
+/* =========================================
+   VIEW TRANSITIONS API - Modern Page Transitions
+   Smooth page transitions with native browser support
+   Compatible with Tailwind 4.1.16 & Latest Browsers
+   ========================================= */
+
+@layer utilities {
+  /* ========================================= 
+     VIEW TRANSITION UTILITIES
+     ========================================= */
+  
+  /* Basic View Transition Names */
+  .view-transition-slide {
+    view-transition-name: slide;
+  }
+  
+  .view-transition-fade {
+    view-transition-name: fade;
+  }
+  
+  .view-transition-scale {
+    view-transition-name: scale;
+  }
+  
+  .view-transition-flip {
+    view-transition-name: flip;
+  }
+  
+  .view-transition-hero {
+    view-transition-name: hero;
+  }
+  
+  .view-transition-sidebar {
+    view-transition-name: sidebar;
+  }
+  
+  .view-transition-header {
+    view-transition-name: header;
+  }
+  
+  .view-transition-footer {
+    view-transition-name: footer;
+  }
+  
+  .view-transition-main {
+    view-transition-name: main-content;
+  }
+  
+  /* Component-specific transitions */
+  .view-transition-card {
+    view-transition-name: card;
+  }
+  
+  .view-transition-modal {
+    view-transition-name: modal;
+  }
+  
+  .view-transition-nav {
+    view-transition-name: navigation;
+  }
+  
+  .view-transition-avatar {
+    view-transition-name: avatar;
+  }
+  
+  .view-transition-image {
+    view-transition-name: image;
+  }
+  
+  /* Auto-generated unique transition names */
+  .view-transition-auto {
+    view-transition-name: auto;
+  }
+}
+
+/* ========================================= 
+   VIEW TRANSITION ANIMATIONS
+   ========================================= */
+
+/* Default fade transition */
+::view-transition-old(fade),
+::view-transition-new(fade) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(fade) {
+  animation-name: fade-out;
+}
+
+::view-transition-new(fade) {
+  animation-name: fade-in;
+}
+
+/* Slide transition */
+::view-transition-old(slide),
+::view-transition-new(slide) {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(slide) {
+  animation-name: slide-out-left;
+}
+
+::view-transition-new(slide) {
+  animation-name: slide-in-right;
+}
+
+/* Scale transition */
+::view-transition-old(scale),
+::view-transition-new(scale) {
+  animation-duration: 350ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(scale) {
+  animation-name: scale-out;
+}
+
+::view-transition-new(scale) {
+  animation-name: scale-in;
+}
+
+/* Flip transition */
+::view-transition-old(flip),
+::view-transition-new(flip) {
+  animation-duration: 500ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+::view-transition-old(flip) {
+  animation-name: flip-out;
+}
+
+::view-transition-new(flip) {
+  animation-name: flip-in;
+}
+
+/* Hero element transition (for images, cards, etc.) */
+::view-transition-old(hero),
+::view-transition-new(hero) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+::view-transition-old(hero) {
+  animation-name: hero-shrink;
+}
+
+::view-transition-new(hero) {
+  animation-name: hero-expand;
+}
+
+/* Modal transition */
+::view-transition-old(modal),
+::view-transition-new(modal) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(modal) {
+  animation-name: modal-out;
+}
+
+::view-transition-new(modal) {
+  animation-name: modal-in;
+}
+
+/* Card transition */
+::view-transition-old(card),
+::view-transition-new(card) {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(card) {
+  animation-name: card-lift-out;
+}
+
+::view-transition-new(card) {
+  animation-name: card-lift-in;
+}
+
+/* Navigation transition */
+::view-transition-old(navigation),
+::view-transition-new(navigation) {
+  animation-duration: 250ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(navigation) {
+  animation-name: nav-slide-out;
+}
+
+::view-transition-new(navigation) {
+  animation-name: nav-slide-in;
+}
+
+/* ========================================= 
+   VIEW TRANSITION KEYFRAMES
+   ========================================= */
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(1.05);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes flip-out {
+  from {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: rotateY(-90deg);
+    opacity: 0;
+  }
+}
+
+@keyframes flip-in {
+  from {
+    transform: rotateY(90deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes hero-shrink {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+}
+
+@keyframes hero-expand {
+  from {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes modal-out {
+  from {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes card-lift-out {
+  from {
+    transform: translateY(0) scale(1);
+    box-shadow: var(--shadow-md);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-8px) scale(0.98);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+  }
+}
+
+@keyframes card-lift-in {
+  from {
+    transform: translateY(8px) scale(1.02);
+    box-shadow: var(--shadow-sm);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    box-shadow: var(--shadow-md);
+    opacity: 1;
+  }
+}
+
+@keyframes nav-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+}
+
+@keyframes nav-slide-in {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ========================================= 
+   DIRECTIONAL TRANSITIONS
+   ========================================= */
+
+/* Slide transitions with direction support */
+.view-transition-slide-up {
+  view-transition-name: slide-up;
+}
+
+.view-transition-slide-down {
+  view-transition-name: slide-down;
+}
+
+.view-transition-slide-left {
+  view-transition-name: slide-left;
+}
+
+.view-transition-slide-right {
+  view-transition-name: slide-right;
+}
+
+::view-transition-old(slide-up) {
+  animation-name: slide-out-up;
+}
+
+::view-transition-new(slide-up) {
+  animation-name: slide-in-down;
+}
+
+::view-transition-old(slide-down) {
+  animation-name: slide-out-down;
+}
+
+::view-transition-new(slide-down) {
+  animation-name: slide-in-up;
+}
+
+::view-transition-old(slide-left) {
+  animation-name: slide-out-left;
+}
+
+::view-transition-new(slide-left) {
+  animation-name: slide-in-right;
+}
+
+::view-transition-old(slide-right) {
+  animation-name: slide-out-right;
+}
+
+::view-transition-new(slide-right) {
+  animation-name: slide-in-left;
+}
+
+@keyframes slide-out-up {
+  to { transform: translateY(-30px); opacity: 0; }
+}
+
+@keyframes slide-in-down {
+  from { transform: translateY(30px); opacity: 0; }
+}
+
+@keyframes slide-out-down {
+  to { transform: translateY(30px); opacity: 0; }
+}
+
+@keyframes slide-in-up {
+  from { transform: translateY(-30px); opacity: 0; }
+}
+
+@keyframes slide-out-right {
+  to { transform: translateX(30px); opacity: 0; }
+}
+
+@keyframes slide-in-left {
+  from { transform: translateX(-30px); opacity: 0; }
+}
+
+/* ========================================= 
+   CONDITIONAL TRANSITIONS
+   ========================================= */
+
+/* Disable transitions for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.01ms !important;
+    animation-timing-function: linear !important;
+  }
+}
+
+/* Enhanced transitions for users who prefer more motion */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 400ms;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* ========================================= 
+   FALLBACK TRANSITIONS
+   For browsers without View Transitions API support
+   ========================================= */
+
+@supports not (view-transition-name: slide) {
+  /* Fallback CSS transitions for unsupported browsers */
+  .view-transition-slide,
+  .view-transition-fade,
+  .view-transition-scale,
+  .view-transition-flip,
+  .view-transition-hero,
+  .view-transition-card,
+  .view-transition-modal,
+  .view-transition-nav {
+    transition: all var(--duration-normal) cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  /* Page transition fallback */
+  .page-transition-enter {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  
+  .page-transition-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 300ms ease, transform 300ms ease;
+  }
+  
+  .page-transition-exit {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  .page-transition-exit-active {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 300ms ease, transform 300ms ease;
+  }
+}
+
+/* ========================================= 
+   UTILITY CLASSES FOR TRANSITION CONTROL
+   ========================================= */
+
+/* Smooth transition opt-in */
+.smooth-transitions * {
+  transition: all var(--duration-normal) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Disable transitions */
+.no-transitions,
+.no-transitions * {
+  transition: none !important;
+  animation: none !important;
+  view-transition-name: none !important;
+}
+
+/* GPU acceleration for better performance */
+.hardware-accelerated {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/* Transition group for coordinated animations */
+.transition-group {
+  position: relative;
+  
+  & > * {
+    transition: all var(--duration-normal) cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  &.stagger > *:nth-child(1) { transition-delay: 0ms; }
+  &.stagger > *:nth-child(2) { transition-delay: 50ms; }
+  &.stagger > *:nth-child(3) { transition-delay: 100ms; }
+  &.stagger > *:nth-child(4) { transition-delay: 150ms; }
+  &.stagger > *:nth-child(5) { transition-delay: 200ms; }
+  &.stagger > *:nth-child(6) { transition-delay: 250ms; }
+}
+
+/* Debug mode for development */
+.debug-transitions {
+  &::before {
+    content: 'VT: ' attr(data-view-transition-name);
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 2px 6px;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    font-size: 10px;
+    font-family: monospace;
+    z-index: 10000;
+    pointer-events: none;
+  }
+}

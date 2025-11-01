@@ -1,5 +1,23 @@
-/**
- * Hook to use toast notifications
- * Re-exports from the Toast component for backward compatibility
- */
-export { useToast } from '@shared/components/ui/Toast';
+// Toast notification hook
+import { useNotificationStore } from '../store/notificationStore';
+
+export function useToast() {
+  const { addToast, removeToast, clearToasts } = useNotificationStore();
+  
+  return {
+    success: (message: string, duration?: number) => {
+      addToast({ type: 'success', message, duration });
+    },
+    error: (message: string, duration?: number) => {
+      addToast({ type: 'error', message, duration });
+    },
+    info: (message: string, duration?: number) => {
+      addToast({ type: 'info', message, duration });
+    },
+    warning: (message: string, duration?: number) => {
+      addToast({ type: 'warning', message, duration });
+    },
+    remove: removeToast,
+    clear: clearToasts,
+  };
+}

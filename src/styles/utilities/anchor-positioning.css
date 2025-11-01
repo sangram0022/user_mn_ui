@@ -1,0 +1,621 @@
+/* =========================================
+   CSS ANCHOR POSITIONING - Modern Tooltip & Popover System
+   Native CSS anchor positioning for floating elements
+   Compatible with Latest Browsers & Tailwind 4.1.16
+   ========================================= */
+
+@layer utilities {
+  /* ========================================= 
+     ANCHOR POSITIONING UTILITIES
+     ========================================= */
+  
+  /* Anchor Elements - Define positioning anchors */
+  .anchor-element {
+    anchor-name: --anchor-element;
+  }
+  
+  .anchor-button {
+    anchor-name: --anchor-button;
+  }
+  
+  .anchor-trigger {
+    anchor-name: --anchor-trigger;
+  }
+  
+  .anchor-target {
+    anchor-name: --anchor-target;
+  }
+  
+  .anchor-tooltip {
+    anchor-name: --anchor-tooltip;
+  }
+  
+  .anchor-menu {
+    anchor-name: --anchor-menu;
+  }
+  
+  .anchor-dropdown {
+    anchor-name: --anchor-dropdown;
+  }
+  
+  /* Positioned Elements - Anchor to defined anchors */
+  .anchored-tooltip {
+    position: absolute;
+    position-anchor: --anchor-element;
+    top: anchor(bottom);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-top: var(--space-xs);
+  }
+  
+  .anchored-popover {
+    position: absolute;
+    position-anchor: --anchor-button;
+    top: anchor(bottom);
+    left: anchor(left);
+    margin-top: var(--space-sm);
+  }
+  
+  .anchored-dropdown {
+    position: absolute;
+    position-anchor: --anchor-trigger;
+    top: anchor(bottom);
+    right: anchor(right);
+    margin-top: var(--space-xs);
+  }
+  
+  .anchored-context-menu {
+    position: absolute;
+    position-anchor: --anchor-target;
+    top: anchor(top);
+    left: anchor(right);
+    margin-left: var(--space-sm);
+  }
+  
+  /* ========================================= 
+     DIRECTIONAL ANCHOR POSITIONING
+     ========================================= */
+  
+  /* Top Positioning */
+  .anchor-top {
+    position: absolute;
+    bottom: anchor(top);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-bottom: var(--space-xs);
+  }
+  
+  .anchor-top-start {
+    position: absolute;
+    bottom: anchor(top);
+    left: anchor(left);
+    margin-bottom: var(--space-xs);
+  }
+  
+  .anchor-top-end {
+    position: absolute;
+    bottom: anchor(top);
+    right: anchor(right);
+    margin-bottom: var(--space-xs);
+  }
+  
+  /* Bottom Positioning */
+  .anchor-bottom {
+    position: absolute;
+    top: anchor(bottom);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-top: var(--space-xs);
+  }
+  
+  .anchor-bottom-start {
+    position: absolute;
+    top: anchor(bottom);
+    left: anchor(left);
+    margin-top: var(--space-xs);
+  }
+  
+  .anchor-bottom-end {
+    position: absolute;
+    top: anchor(bottom);
+    right: anchor(right);
+    margin-top: var(--space-xs);
+  }
+  
+  /* Left Positioning */
+  .anchor-left {
+    position: absolute;
+    top: anchor(center);
+    right: anchor(left);
+    transform: translateY(-50%);
+    margin-right: var(--space-xs);
+  }
+  
+  .anchor-left-start {
+    position: absolute;
+    top: anchor(top);
+    right: anchor(left);
+    margin-right: var(--space-xs);
+  }
+  
+  .anchor-left-end {
+    position: absolute;
+    bottom: anchor(bottom);
+    right: anchor(left);
+    margin-right: var(--space-xs);
+  }
+  
+  /* Right Positioning */
+  .anchor-right {
+    position: absolute;
+    top: anchor(center);
+    left: anchor(right);
+    transform: translateY(-50%);
+    margin-left: var(--space-xs);
+  }
+  
+  .anchor-right-start {
+    position: absolute;
+    top: anchor(top);
+    left: anchor(right);
+    margin-left: var(--space-xs);
+  }
+  
+  .anchor-right-end {
+    position: absolute;
+    bottom: anchor(bottom);
+    left: anchor(right);
+    margin-left: var(--space-xs);
+  }
+  
+  /* ========================================= 
+     ANCHOR SIZE MATCHING
+     ========================================= */
+  
+  .anchor-size-width {
+    width: anchor-size(width);
+  }
+  
+  .anchor-size-height {
+    height: anchor-size(height);
+  }
+  
+  .anchor-size-both {
+    width: anchor-size(width);
+    height: anchor-size(height);
+  }
+  
+  .anchor-min-width {
+    min-width: anchor-size(width);
+  }
+  
+  .anchor-max-width {
+    max-width: anchor-size(width);
+  }
+  
+  /* ========================================= 
+     ANCHOR FALLBACK POSITIONING
+     ========================================= */
+  
+  .anchor-fallback-flip {
+    position-fallback: --flip-vertical;
+  }
+  
+  .anchor-fallback-slide {
+    position-fallback: --slide-horizontal;
+  }
+  
+  .anchor-fallback-auto {
+    position-fallback: --auto-position;
+  }
+}
+
+/* ========================================= 
+   POSITION FALLBACK DEFINITIONS
+   ========================================= */
+
+@position-fallback --flip-vertical {
+  @try {
+    top: anchor(bottom);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-top: var(--space-xs);
+  }
+  
+  @try {
+    bottom: anchor(top);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-bottom: var(--space-xs);
+  }
+  
+  @try {
+    top: anchor(center);
+    left: anchor(right);
+    transform: translateY(-50%);
+    margin-left: var(--space-xs);
+  }
+  
+  @try {
+    top: anchor(center);
+    right: anchor(left);
+    transform: translateY(-50%);
+    margin-right: var(--space-xs);
+  }
+}
+
+@position-fallback --flip-horizontal {
+  @try {
+    top: anchor(center);
+    left: anchor(right);
+    transform: translateY(-50%);
+    margin-left: var(--space-xs);
+  }
+  
+  @try {
+    top: anchor(center);
+    right: anchor(left);
+    transform: translateY(-50%);
+    margin-right: var(--space-xs);
+  }
+  
+  @try {
+    top: anchor(bottom);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-top: var(--space-xs);
+  }
+  
+  @try {
+    bottom: anchor(top);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-bottom: var(--space-xs);
+  }
+}
+
+@position-fallback --slide-horizontal {
+  @try {
+    top: anchor(bottom);
+    left: anchor(left);
+    margin-top: var(--space-xs);
+  }
+  
+  @try {
+    top: anchor(bottom);
+    right: anchor(right);
+    margin-top: var(--space-xs);
+  }
+  
+  @try {
+    top: anchor(bottom);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-top: var(--space-xs);
+  }
+}
+
+@position-fallback --auto-position {
+  @try {
+    top: anchor(bottom);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-top: var(--space-xs);
+  }
+  
+  @try {
+    bottom: anchor(top);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-bottom: var(--space-xs);
+  }
+  
+  @try {
+    top: anchor(center);
+    left: anchor(right);
+    transform: translateY(-50%);
+    margin-left: var(--space-xs);
+  }
+  
+  @try {
+    top: anchor(center);
+    right: anchor(left);
+    transform: translateY(-50%);
+    margin-right: var(--space-xs);
+  }
+  
+  @try {
+    top: anchor(top);
+    left: anchor(left);
+    margin: var(--space-xs);
+  }
+}
+
+/* ========================================= 
+   COMPONENT IMPLEMENTATIONS
+   ========================================= */
+
+/* Tooltip Component */
+.tooltip-anchor {
+  anchor-name: --tooltip-anchor;
+  position: relative;
+}
+
+.tooltip {
+  position: absolute;
+  position-anchor: --tooltip-anchor;
+  position-fallback: --flip-vertical;
+  
+  /* Default positioning (bottom) */
+  top: anchor(bottom);
+  left: anchor(center);
+  transform: translateX(-50%);
+  margin-top: var(--space-xs);
+  
+  /* Styling */
+  background: var(--color-text-primary);
+  color: var(--color-text-inverse);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  z-index: var(--z-tooltip);
+  
+  /* Pointer/Arrow */
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-bottom-color: var(--color-text-primary);
+  }
+}
+
+/* Dropdown Menu Component */
+.dropdown-anchor {
+  anchor-name: --dropdown-anchor;
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  position-anchor: --dropdown-anchor;
+  position-fallback: --flip-vertical;
+  
+  /* Default positioning (bottom-start) */
+  top: anchor(bottom);
+  left: anchor(left);
+  margin-top: var(--space-xs);
+  
+  /* Styling */
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-sm);
+  min-width: 200px;
+  z-index: var(--z-dropdown);
+  
+  /* Menu items */
+  & .menu-item {
+    display: block;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: all var(--duration-fast) ease;
+    
+    &:hover {
+      background: var(--color-surface-hover);
+      color: var(--color-brand-primary);
+    }
+    
+    &:active {
+      background: var(--color-surface-active);
+    }
+    
+    &.disabled {
+      color: var(--color-text-disabled);
+      pointer-events: none;
+    }
+  }
+  
+  & .menu-separator {
+    height: 1px;
+    background: var(--color-border-primary);
+    margin: var(--space-sm) 0;
+  }
+}
+
+/* Popover Component */
+.popover-anchor {
+  anchor-name: --popover-anchor;
+  position: relative;
+}
+
+.popover {
+  position: absolute;
+  position-anchor: --popover-anchor;
+  position-fallback: --auto-position;
+  
+  /* Default positioning (bottom) */
+  top: anchor(bottom);
+  left: anchor(center);
+  transform: translateX(-50%);
+  margin-top: var(--space-sm);
+  
+  /* Sizing */
+  width: max(300px, anchor-size(width));
+  max-width: 400px;
+  
+  /* Styling */
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-lg);
+  z-index: var(--z-popover);
+  
+  /* Arrow pointer */
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: anchor(center);
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border: 8px solid transparent;
+    border-bottom-color: var(--color-surface-primary);
+    filter: drop-shadow(0 -1px 1px var(--color-border-primary));
+  }
+}
+
+/* Context Menu Component */
+.context-menu-anchor {
+  anchor-name: --context-menu-anchor;
+}
+
+.context-menu {
+  position: absolute;
+  position-anchor: --context-menu-anchor;
+  position-fallback: --slide-horizontal;
+  
+  /* Position at click/touch point */
+  top: anchor(top);
+  left: anchor(right);
+  margin-left: var(--space-xs);
+  
+  /* Styling similar to dropdown but more compact */
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2xl);
+  padding: var(--space-xs);
+  min-width: 160px;
+  z-index: var(--z-popover);
+  
+  & .context-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) ease;
+    
+    &:hover {
+      background: var(--color-surface-hover);
+    }
+    
+    &.danger {
+      color: var(--color-error);
+      
+      &:hover {
+        background: var(--color-error-light);
+      }
+    }
+  }
+}
+
+/* ========================================= 
+   FALLBACK FOR UNSUPPORTED BROWSERS
+   ========================================= */
+
+@supports not (position-anchor: --anchor-element) {
+  /* Fallback positioning using JavaScript-calculated positions */
+  .tooltip,
+  .dropdown-menu,
+  .popover,
+  .context-menu {
+    position: absolute;
+    z-index: 1000;
+    
+    /* Will be positioned via JavaScript */
+    &[data-position="top"] {
+      transform: translateY(-100%) translateX(-50%);
+      margin-bottom: var(--space-xs);
+    }
+    
+    &[data-position="bottom"] {
+      margin-top: var(--space-xs);
+    }
+    
+    &[data-position="left"] {
+      transform: translateX(-100%) translateY(-50%);
+      margin-right: var(--space-xs);
+    }
+    
+    &[data-position="right"] {
+      margin-left: var(--space-xs);
+    }
+  }
+  
+  /* Hide elements until positioned by JavaScript */
+  .tooltip:not([data-positioned]),
+  .dropdown-menu:not([data-positioned]),
+  .popover:not([data-positioned]),
+  .context-menu:not([data-positioned]) {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* ========================================= 
+   ANIMATION & INTERACTION STATES
+   ========================================= */
+
+.tooltip,
+.dropdown-menu,
+.popover,
+.context-menu {
+  /* Entry animation */
+  opacity: 0;
+  scale: 0.95;
+  transition: opacity var(--duration-fast) ease,
+              scale var(--duration-fast) ease;
+  
+  &.show,
+  &[data-state="open"] {
+    opacity: 1;
+    scale: 1;
+  }
+  
+  /* Exit animation */
+  &.hide,
+  &[data-state="closed"] {
+    opacity: 0;
+    scale: 0.95;
+    pointer-events: none;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip,
+  .dropdown-menu,
+  .popover,
+  .context-menu {
+    transition: opacity var(--duration-fast) ease;
+    scale: 1 !important;
+  }
+}
+
+/* ========================================= 
+   UTILITY CLASSES FOR MANUAL POSITIONING
+   ========================================= */
+
+.manual-anchor-top { top: anchor(top); }
+.manual-anchor-bottom { top: anchor(bottom); }
+.manual-anchor-left { left: anchor(left); }
+.manual-anchor-right { left: anchor(right); }
+.manual-anchor-center-x { left: anchor(center); }
+.manual-anchor-center-y { top: anchor(center); }
+
+/* Transform utilities for fine-tuning */
+.anchor-translate-center-x { transform: translateX(-50%); }
+.anchor-translate-center-y { transform: translateY(-50%); }
+.anchor-translate-center { transform: translate(-50%, -50%); }

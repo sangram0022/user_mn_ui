@@ -1,275 +1,272 @@
-import { CheckCircle, Eye, EyeOff, Loader, Lock } from 'lucide-react';
-import type React from 'react';
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { logger } from './../../../shared/utils/logger';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { useResetPassword } from '../hooks/useResetPassword';
+import { useToast } from '../../../hooks/useToast';
+import { ValidationBuilder, calculatePasswordStrength } from '../../../core/validation';
+import { parseAuthError } from '../utils/authErrorMapping';
+import Badge from '../../../shared/components/ui/Badge';
+import { Button, Input } from '../../../components';
+import { ROUTE_PATHS } from '../../../core/routing/routes';
 
-import { useErrorHandler } from '@hooks/errors/useErrorHandler';
-import { useToast } from '@hooks/useToast';
-import { apiClient } from '@lib/api/client';
-import ErrorAlert from '@shared/ui/ErrorAlert';
+export default function ResetPasswordPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { token } = useParams<{ token: string }>();
+  const toast = useToast();
+  const { mutate: resetPassword, isPending } = useResetPassword();
 
-const ResetPasswordPage: React.FC = () => {
-  const { toast } = useToast();
-  const [searchParams] = useSearchParams();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<'weak' | 'fair' | 'good' | 'strong' | 'very_strong'>('weak');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const { error, handleError, clearError } = useErrorHandler();
-  const [token, setToken] = useState<string | null>(null);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const tokenParam = searchParams.get('token');
-    if (!tokenParam) {
-      handleError(new Error('Invalid or missing reset token'));
-    } else {
-      setToken(tokenParam);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Update password strength for new password
+    if (name === 'password' && value) {
+      const strength = calculatePasswordStrength(value);
+      setPasswordStrength(strength.strength);
     }
-  }, [searchParams, handleError]);
+  };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // Helper function for password strength badge color
+  const getPasswordStrengthColor = (): 'success' | 'warning' | 'danger' => {
+    switch (passwordStrength) {
+      case 'very_strong':
+      case 'strong':
+        return 'success';
+      case 'good':
+      case 'fair':
+        return 'warning';
+      case 'weak':
+      default:
+        return 'danger';
+    }
+  };
+
+  // Helper function for password strength badge label
+  const getPasswordStrengthLabel = () => {
+    return passwordStrength.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
     if (!token) {
-      handleError(new Error('Invalid reset token'));
+      toast.error(t('errors.RESET_TOKEN_INVALID'));
       return;
     }
 
+    // Client-side validation using core validation system
+    const validation = new ValidationBuilder()
+      .validateField('password', formData.password, (b) => b.required().password())
+      .result();
+
+    if (!validation.isValid) {
+      const errors: Record<string, string> = {};
+      
+      if (validation.fields) {
+        Object.entries(validation.fields).forEach(([fieldName, fieldResult]) => {
+          if (!fieldResult.isValid && fieldResult.errors.length > 0) {
+            errors[fieldName] = fieldResult.errors[0];
+          }
+        });
+      }
+      
+      setFieldErrors(errors);
+      toast.error(t('auth.validation.validationFailed'));
+      return;
+    }
+
+    // Password confirmation check
     if (formData.password !== formData.confirmPassword) {
-      const errorMsg = 'Passwords do not match';
-      handleError(new Error(errorMsg));
-      toast.error(errorMsg);
+      setFieldErrors({ confirmPassword: t('errors.PASSWORD_MISMATCH') });
+      toast.error(t('errors.PASSWORD_MISMATCH'));
       return;
     }
 
-    if (formData.password.length < 8) {
-      const errorMsg = 'Password must be at least 8 characters long';
-      handleError(new Error(errorMsg));
-      toast.error(errorMsg);
+    // Check password strength
+    const strength = calculatePasswordStrength(formData.password);
+    if (strength.score < 40) {
+      setFieldErrors({ password: t('validation.password.tooWeak') });
+      toast.error(t('validation.password.tooWeak'));
       return;
     }
 
-    setIsLoading(true);
-    clearError();
+    // Clear errors
+    setFieldErrors({});
 
-    try {
-      const response = await apiClient.resetPassword({
+    resetPassword(
+      {
         token,
         new_password: formData.password,
-        confirm_password: formData.confirmPassword,
-      });
-
-      if (!response.message) {
-        logger.warn('Password reset response missing message payload');
+      },
+      {
+        onSuccess: () => {
+          setIsSuccess(true);
+          toast.success(t('auth.resetPassword.successMessage'));
+          setTimeout(() => {
+            navigate(ROUTE_PATHS.LOGIN, {
+              state: { message: t('auth.resetPassword.successMessage') },
+            });
+          }, 3000);
+        },
+        onError: (error: Error) => {
+          const errorMapping = parseAuthError(error);
+          toast.error(errorMapping.message || t('auth.resetPassword.error'));
+        },
       }
-
-      setIsSuccess(true);
-      toast.success('Password reset successful! Redirecting to login...');
-      window.setTimeout(() => {
-        navigate('/login', {
-          state: {
-            message:
-              response.message ??
-              'Password reset successful! Please log in with your new password.',
-          },
-        });
-      }, 3000);
-    } catch (err: unknown) {
-      handleError(err);
-      toast.error('Failed to reset password. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) {
-      clearError();
-    }
-  };
-
-  if (!token && !error) {
-    return (
-      <div
-        className="flex min-h-screen items-center justify-center bg-[var(--color-surface-secondary)]"
-        role="status"
-        aria-live="polite"
-      >
-        <Loader className="spinner spinner-lg spinner-primary" aria-hidden="true" />
-      </div>
     );
-  }
+  };
 
   if (isSuccess) {
     return (
-      <div className="page-wrapper">
-        <div className="auth-layout">
-          <div className="container-form text-center" role="status" aria-live="polite">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-success)]">
-              <CheckCircle
-                className="icon-xl text-[var(--color-text-primary)]"
-                aria-hidden="true"
-              />
-            </div>
-
-            <h1 className="mb-2 text-3xl font-bold text-[var(--color-text-primary)]">
-              Password Reset Successful!
-            </h1>
-
-            <p className="mb-6 text-sm text-[var(--color-text-tertiary)]">
-              Your password has been successfully reset. Redirecting to login...
-            </p>
-
-            <div className="spinner spinner-lg spinner-primary mx-auto" />
+      <div className="min-h-screen flex items-center justify-center bg-surface-secondary px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-success">
+            <CheckCircle className="h-8 w-8 text-white" />
           </div>
+          <h1 className="text-3xl font-bold text-text-primary mb-2">
+            {t('auth.resetPassword.successMessage')}
+          </h1>
+          <p className="text-text-tertiary mb-6">
+            {t('common.status.redirecting')}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="page-wrapper">
-      <div className="auth-layout">
-        <div className="container-form">
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary)]">
-              <Lock className="icon-xl text-[var(--color-text-primary)]" aria-hidden="true" />
-            </div>
-            <h1 className="mb-2 text-3xl font-bold text-[var(--color-text-primary)]">
-              Reset Your Password
-            </h1>
-            <p className="text-sm text-[var(--color-text-tertiary)]">
-              Enter your new password below
-            </p>
+    <div className="min-h-screen flex items-center justify-center bg-surface-secondary px-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
+            <Lock className="h-8 w-8 text-white" />
           </div>
+          <h1 className="text-3xl font-bold text-text-primary mb-2">
+            {t('auth.resetPassword.title')}
+          </h1>
+          <p className="text-text-tertiary">
+            {t('auth.resetPassword.subtitle')}
+          </p>
+        </div>
 
-          <div className="card-base card-form">
-            {error && (
-              <div className="mb-6" role="alert" aria-live="assertive">
-                <ErrorAlert error={error} />
+        <div className="card-base p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="password" className="form-label">
+                {t('auth.resetPassword.passwordLabel')}
+              </label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  autoComplete="new-password"
+                  placeholder={t('auth.resetPassword.passwordPlaceholder')}
+                  className="pl-10 pr-10"
+                  error={fieldErrors.password}
+                />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-tertiary" />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
-            )}
-
-            <form onSubmit={handleSubmit} aria-label="Password reset form" className="stack-md">
-              <div>
-                <label htmlFor="password" className="form-label">
-                  New Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="new-password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="form-input pl-10 pr-10"
-                    placeholder="Enter your new password"
-                  />
-                  <Lock
-                    className="absolute left-3 top-1/2 icon-sm -translate-y-1/2 text-[var(--color-text-tertiary)]"
-                    aria-hidden="true"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-0 text-[color:var(--color-text-primary)] hover:text-[var(--color-text-secondary)]"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="icon-sm" aria-hidden="true" />
-                    ) : (
-                      <Eye className="icon-sm" aria-hidden="true" />
-                    )}
-                  </button>
+              
+              {/* Password Strength Indicator */}
+              {formData.password && (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm text-text-tertiary">
+                    Password Strength:
+                  </span>
+                  <Badge variant={getPasswordStrengthColor()}>
+                    {getPasswordStrengthLabel()}
+                  </Badge>
                 </div>
-                <p className="form-hint">Must be at least 8 characters long</p>
-              </div>
-
-              <div>
-                <label htmlFor="confirmPassword" className="form-label">
-                  Confirm New Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    autoComplete="new-password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="form-input pl-10 pr-10"
-                    placeholder="Confirm your new password"
-                  />
-                  <Lock
-                    className="absolute left-3 top-1/2 icon-sm -translate-y-1/2 text-[var(--color-text-tertiary)]"
-                    aria-hidden="true"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-0 text-[color:var(--color-text-primary)] hover:text-[var(--color-text-secondary)]"
-                    aria-label={
-                      showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'
-                    }
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="icon-sm" aria-hidden="true" />
-                    ) : (
-                      <Eye className="icon-sm" aria-hidden="true" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || !formData.password || !formData.confirmPassword}
-                className={`btn-base ${isLoading || !formData.password || !formData.confirmPassword ? 'opacity-50 cursor-not-allowed' : 'btn-primary'}`}
-                aria-label={isLoading ? 'Resetting password' : 'Reset password'}
-              >
-                {isLoading ? (
-                  <>
-                    <span>
-                      <Loader className="spinner spinner-sm spinner-white" aria-hidden="true" />
-                    </span>
-                    Resetting Password...
-                  </>
-                ) : (
-                  'Reset Password'
-                )}
-              </button>
-            </form>
-
-            <div className="mt-6 flex justify-between text-sm">
-              <Link
-                to="/login"
-                className="font-medium text-[color:var(--color-primary)] no-underline hover:text-[var(--color-primary)]"
-              >
-                Back to login
-              </Link>
-              <Link
-                to="/forgot-password"
-                className="font-medium text-[color:var(--color-primary)] no-underline hover:text-[var(--color-primary)]"
-              >
-                Request new link
-              </Link>
+              )}
+              
+              <p className="form-hint">{t('validation.password.minLength')}</p>
             </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="form-label">
+                {t('auth.resetPassword.confirmPasswordLabel')}
+              </label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  autoComplete="new-password"
+                  placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
+                  className="pl-10 pr-10"
+                  error={fieldErrors.confirmPassword}
+                />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-tertiary" />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isPending || !formData.password || !formData.confirmPassword}
+              className="w-full"
+            >
+              {isPending ? t('auth.resetPassword.submitting') : t('auth.resetPassword.submitButton')}
+            </Button>
+          </form>
+
+          <div className="mt-6 flex justify-between text-sm">
+            <Link
+              to={ROUTE_PATHS.LOGIN}
+              className="text-primary hover:text-primary-dark font-medium"
+            >
+              {t('auth.resetPassword.backToLogin')}
+            </Link>
+            <Link
+              to={ROUTE_PATHS.FORGOT_PASSWORD}
+              className="text-primary hover:text-primary-dark font-medium"
+            >
+              {t('common.actions.requestNew')}
+            </Link>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default ResetPasswordPage;
+}

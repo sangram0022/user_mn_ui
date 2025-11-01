@@ -1,0 +1,214 @@
+{
+  "app": {
+    "name": "User Management",
+    "tagline": "Manage your team efficiently"
+  },
+  
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "error": "Error",
+    "status": {
+      "redirecting": "Redirecting..."
+    },
+    "actions": {
+      "requestNew": "Request New Link"
+    },
+    "success": {
+      "default": "Success",
+      "saved": "Saved successfully!",
+      "emailSent": "Email sent successfully!"
+    }
+  },
+  
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to your account to continue",
+      "email": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "forgotPasswordLink": "Forgot your password?",
+      "submit": "Sign In",
+      "signIn": "Sign In",
+      "submitting": "Signing in...",
+      "signingIn": "Signing in...",
+      "success": "Login successful! Redirecting...",
+      "divider": "Or continue with",
+      "orContinueWith": "Or continue with",
+      "google": "Google",
+      "github": "GitHub",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up for free",
+      "signUpLink": "Sign up"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join thousands of users managing teams efficiently",
+      "firstName": "First Name",
+      "firstNameLabel": "First Name",
+      "firstNamePlaceholder": "John",
+      "lastName": "Last Name",
+      "lastNameLabel": "Last Name",
+      "lastNamePlaceholder": "Doe",
+      "username": "Username",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "Choose a username",
+      "email": "Email Address",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Minimum 8 characters",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "terms": "I agree to the",
+      "termsPrefix": "I agree to the",
+      "termsLink": "Terms of Service",
+      "termsAnd": "and",
+      "and": "and",
+      "privacyLink": "Privacy Policy",
+      "submit": "Create Account",
+      "submitButton": "Create Account",
+      "submitting": "Creating Account...",
+      "divider": "Or sign up with",
+      "socialDivider": "Or sign up with",
+      "google": "Google",
+      "socialGoogle": "Google",
+      "github": "GitHub",
+      "socialGitHub": "GitHub",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "signInLink": "Sign in",
+      "passwordStrength": "Strength:",
+      "passwordStrengthLabel": "Password Strength"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email and we'll send you a reset link",
+      "email": "Email Address",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Send Reset Link",
+      "submitButton": "Send Reset Link",
+      "submitting": "Sending...",
+      "backTo": "Back to",
+      "backToLogin": "Back to",
+      "signIn": "Sign in",
+      "loginLink": "Sign in",
+      "success": "Password reset link sent! Check your email.",
+      "successMessage": "Password reset link sent! Check your email."
+    },
+    "resetPassword": {
+      "title": "Create New Password",
+      "subtitle": "Enter your new password below",
+      "password": "New Password",
+      "passwordLabel": "New Password",
+      "passwordPlaceholder": "Enter new password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "submit": "Reset Password",
+      "submitButton": "Reset Password",
+      "submitting": "Resetting...",
+      "success": "Password reset successful! You can now sign in.",
+      "successMessage": "Password reset successful! You can now sign in.",
+      "backToSignIn": "Back to sign in",
+      "backToLogin": "Back to sign in",
+      "error": "Failed to reset password. Please try again."
+    },
+    "verifyEmail": {
+      "title": "Verify Your Email",
+      "verifying": "Verifying...",
+      "success": "Email verified successfully!",
+      "continue": "Continue to Dashboard"
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Change Password",
+      "submitting": "Changing...",
+      "success": "Password changed successfully!"
+    },
+    "passwordStrength": {
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong",
+      "veryStrong": "Very Strong",
+      "requirements": "Password must contain:",
+      "minLength": "At least 8 characters",
+      "uppercase": "One uppercase letter",
+      "lowercase": "One lowercase letter",
+      "number": "One number",
+      "special": "One special character"
+    }
+  },
+  
+  "changePassword": {
+    "title": "Change Password",
+    "subtitle": "Update your account password",
+    "success": "Password changed successfully!",
+    "error": "Failed to change password",
+    "securityNote": "For your security, never share your password with anyone.",
+    "validation": {
+      "validationFailed": "Please check your input",
+      "passwordsNotMatch": "Passwords do not match",
+      "passwordSameAsCurrent": "New password must be different from current password",
+      "passwordTooWeak": "Password is too weak. Please choose a stronger password."
+    },
+    "form": {
+      "currentPassword": {
+        "label": "Current Password",
+        "placeholder": "Enter your current password"
+      },
+      "newPassword": {
+        "label": "New Password",
+        "placeholder": "Enter your new password",
+        "hint": "Password must be at least 8 characters with uppercase, lowercase, number, and special character"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "placeholder": "Re-enter your new password"
+      },
+      "cancel": "Cancel",
+      "submit": "Change Password",
+      "submitting": "Changing..."
+    }
+  },
+  
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordTooLong": "Password must be less than 128 characters",
+    "passwordMismatch": "Passwords do not match",
+    "invalidUsername": "Username can only contain letters, numbers, and underscores",
+    "usernameTooShort": "Username must be at least 3 characters",
+    "usernameTooLong": "Username must be less than 30 characters"
+  },
+  
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "notFound": "The requested resource was not found.",
+    "serverError": "Server error. Please try again later.",
+    "validationFailed": "Please check your input and try again.",
+    "PASSWORD_MISMATCH": "Passwords do not match",
+    "TERMS_NOT_ACCEPTED": "You must accept the terms and conditions",
+    "RESET_TOKEN_INVALID": "Invalid or expired reset token"
+  }
+}

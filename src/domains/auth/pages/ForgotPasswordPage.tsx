@@ -1,101 +1,87 @@
-import { ArrowLeft, CheckCircle, Loader, Mail } from 'lucide-react';
-import type React from 'react';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { ROUTE_PATHS } from '../../../core/routing/routes';
+import { useToast } from '../../../hooks/useToast';
+import { ValidationBuilder } from '../../../core/validation';
+import { parseAuthError } from '../utils/authErrorMapping';
+import { useForgotPassword } from '../hooks/useForgotPassword';
+import Button from '../../../shared/components/ui/Button';
+import Input from '../../../shared/components/ui/Input';
 
-import { useErrorHandler } from '@hooks/errors/useErrorHandler';
-import { useToast } from '@hooks/useToast';
-import { apiClient } from '@lib/api/client';
-import { Button } from '@shared/components/ui/Button/Button';
-import ErrorAlert from '@shared/ui/ErrorAlert';
-
-const ForgotPasswordPage: React.FC = () => {
-  const { toast } = useToast();
+export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
+  const toast = useToast();
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const { error, handleError, clearError } = useErrorHandler();
-  const navigate = useNavigate();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    clearError();
+  const { mutate: forgotPassword, isPending } = useForgotPassword();
 
-    try {
-      const response = await apiClient.forgotPassword(email);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-      if (response.success === false) {
-        const errorMsg = response.message || 'Failed to send reset email. Please try again.';
-        handleError(new Error(errorMsg));
-        toast.error(errorMsg);
-        return;
+    // Client-side validation using core validation system
+    const validation = new ValidationBuilder()
+      .validateField('email', email, (b) => b.required().email())
+      .result();
+
+    if (!validation.isValid) {
+      const errors: Record<string, string> = {};
+      
+      if (validation.fields) {
+        Object.entries(validation.fields).forEach(([fieldName, fieldResult]) => {
+          if (!fieldResult.isValid && fieldResult.errors.length > 0) {
+            errors[fieldName] = fieldResult.errors[0];
+          }
+        });
       }
-
-      setIsSuccess(true);
-      toast.success(`Password reset link sent to ${email}`);
-    } catch (err: unknown) {
-      handleError(err);
-      toast.error('Failed to send reset email. Please try again.');
-    } finally {
-      setIsLoading(false);
+      
+      setFieldErrors(errors);
+      toast.error(t('auth.validation.validationFailed'));
+      return;
     }
+
+    // Clear errors
+    setFieldErrors({});
+
+    // Security pattern: Always show success message
+    forgotPassword(
+      { email },
+      {
+        onSuccess: () => {
+          toast.success(t('auth.forgotPassword.successMessage'));
+          setIsSubmitted(true);
+        },
+        onError: (error: Error) => {
+          const errorMapping = parseAuthError(error);
+          // Security: Still show success to prevent email enumeration
+          toast.success(t('auth.forgotPassword.successMessage'));
+          setIsSubmitted(true);
+          // Log error for debugging (remove in production)
+          console.error('Forgot password error:', errorMapping);
+        },
+      }
+    );
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
-    if (error) {
-      clearError();
-    }
-  };
-
-  if (isSuccess) {
+  if (isSubmitted) {
     return (
-      <div className="page-wrapper">
-        <div className="auth-layout">
-          <div className="container-form text-center">
-            <div
-              className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-success)]"
-              role="status"
-              aria-live="polite"
-            >
-              <CheckCircle
-                className="icon-xl text-[var(--color-text-primary)]"
-                aria-hidden="true"
-              />
-            </div>
-
-            <h1 className="mb-2 text-3xl font-bold text-[var(--color-text-primary)]">
-              Check Your Email
-            </h1>
-
-            <p className="mb-6 text-sm text-[var(--color-text-tertiary)]">
-              We&apos;ve sent a password reset link to <strong>{email}</strong>
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 animate-fade-in">
+        <div className="max-w-md w-full">
+          <div className="glass p-12 rounded-2xl shadow-xl border border-white/20 text-center animate-scale-in">
+            <div className="text-6xl mb-6 animate-bounce">✉️</div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              {t('common.success.emailSent')}
+            </h2>
+            <p className="text-gray-700 mb-8 leading-relaxed">
+              {t('auth.forgotPassword.successMessage')}
             </p>
-
-            <div className="mb-6 rounded-lg border border-[var(--color-primary)] bg-[var(--color-primary)] p-4">
-              <p className="m-0 text-sm text-[var(--color-primary)]">
-                The reset link will expire in 1 hour. If you don&apos;t see the email, check your
-                spam folder.
-              </p>
-            </div>
-
-            <div className="stack-md">
-              <Button onClick={() => navigate('/login')} fullWidth size="lg">
-                Back to Login
+            <Link to={ROUTE_PATHS.LOGIN}>
+              <Button variant="primary" size="lg" className="w-full">
+                {t('auth.forgotPassword.backToLogin')} {t('auth.forgotPassword.loginLink')}
               </Button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSuccess(false);
-                  setEmail('');
-                }}
-                className="btn-base btn-secondary"
-              >
-                Send Another Email
-              </button>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
@@ -103,95 +89,66 @@ const ForgotPasswordPage: React.FC = () => {
   }
 
   return (
-    <div className="page-wrapper">
-      <div className="auth-layout">
-        <div className="container-form">
-          <div className="mb-6">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 animate-fade-in">
+      <div className="max-w-md w-full">
+        {/* Header */}
+        <div className="text-center mb-8 animate-slide-down">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-blue-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold mb-2">{t('auth.forgotPassword.title')}</h1>
+          <p className="text-gray-600">{t('auth.forgotPassword.subtitle')}</p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl shadow-xl border border-white/20 space-y-6 animate-scale-in">
+          <Input
+            type="email"
+            label={t('auth.forgotPassword.emailLabel')}
+            placeholder={t('auth.forgotPassword.emailPlaceholder')}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            error={fieldErrors.email}
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+              </svg>
+            }
+          />
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            disabled={isPending}
+            className="w-full"
+          >
+            {isPending ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {t('auth.forgotPassword.submitting')}
+              </>
+            ) : (
+              t('auth.forgotPassword.submitButton')
+            )}
+          </Button>
+
+          <div className="text-center pt-4">
             <Link
-              to="/login"
-              className="inline-flex items-center gap-2 text-sm font-medium text-[color:var(--color-text-primary)] no-underline transition-colors duration-200 hover:text-[var(--color-text-secondary)]"
+              to={ROUTE_PATHS.LOGIN}
+              className="text-sm text-gray-700 hover:text-gray-900 font-medium transition-colors"
             >
-              <ArrowLeft className="icon-sm" aria-hidden="true" />
-              Back to Login
+              ← {t('auth.forgotPassword.backToLogin')} {t('auth.forgotPassword.loginLink')}
             </Link>
           </div>
-
-          <header className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-primary)]">
-              <Mail className="icon-xl text-[var(--color-text-primary)]" aria-hidden="true" />
-            </div>
-            <h1 className="mb-2 text-3xl font-bold text-[var(--color-text-primary)]">
-              Reset Password
-            </h1>
-            <p className="text-sm text-[var(--color-text-tertiary)]">
-              Enter your email address and we&apos;ll send you a link to reset your password
-            </p>
-          </header>
-
-          <div className="card-base card-form">
-            {error && (
-              <div className="mb-6" role="alert" aria-live="assertive">
-                <ErrorAlert error={error} />
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} aria-label="Password reset form" className="stack-md">
-              <div>
-                <label htmlFor="email" className="form-label">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={handleChange}
-                    className="form-input pl-10"
-                    placeholder="Enter your email address"
-                  />
-                  <Mail
-                    className="absolute left-3 top-1/2 icon-sm -translate-y-1/2 text-[var(--color-text-tertiary)]"
-                    aria-hidden="true"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || !email.trim()}
-                className={`btn-base ${isLoading || !email.trim() ? 'opacity-50 cursor-not-allowed' : 'btn-primary'}`}
-                aria-label={isLoading ? 'Sending password reset link' : 'Send password reset link'}
-              >
-                {isLoading ? (
-                  <>
-                    <span>
-                      <Loader className="spinner spinner-sm spinner-white" aria-hidden="true" />
-                    </span>
-                    Sending Reset Link...
-                  </>
-                ) : (
-                  'Send Reset Link'
-                )}
-              </button>
-            </form>
-
-            <div className="mt-6 text-center text-sm text-[var(--color-text-tertiary)]">
-              Remember your password?{' '}
-              <Link
-                to="/login"
-                className="font-medium text-[color:var(--color-primary)] no-underline hover:text-[var(--color-primary)]"
-              >
-                Sign in
-              </Link>
-            </div>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   );
-};
-
-export default ForgotPasswordPage;
+}

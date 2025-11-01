@@ -1,0 +1,118 @@
+/* =========================================
+   COLOR UTILITIES - Tailwind Compatible
+   Single Source of Truth for Color Classes
+   ========================================= */
+
+/* Brand Color Utilities */
+.text-brand-primary { color: var(--color-brand-primary); }
+.text-brand-secondary { color: var(--color-brand-secondary); }
+.text-brand-accent { color: var(--color-brand-accent); }
+
+.bg-brand-primary { background-color: var(--color-brand-primary); }
+.bg-brand-secondary { background-color: var(--color-brand-secondary); }
+.bg-brand-accent { background-color: var(--color-brand-accent); }
+
+.border-brand-primary { border-color: var(--color-brand-primary); }
+.border-brand-secondary { border-color: var(--color-brand-secondary); }
+.border-brand-accent { border-color: var(--color-brand-accent); }
+
+/* Semantic Color Utilities */
+.text-semantic-success { color: var(--color-success); }
+.text-semantic-warning { color: var(--color-warning); }
+.text-semantic-error { color: var(--color-error); }
+.text-semantic-info { color: var(--color-info); }
+
+.bg-semantic-success { background-color: var(--color-success); }
+.bg-semantic-warning { background-color: var(--color-warning); }
+.bg-semantic-error { background-color: var(--color-error); }
+.bg-semantic-info { background-color: var(--color-info); }
+
+.border-semantic-success { border-color: var(--color-success); }
+.border-semantic-warning { border-color: var(--color-warning); }
+.border-semantic-error { border-color: var(--color-error); }
+.border-semantic-info { border-color: var(--color-info); }
+
+/* Surface Color Utilities */
+.bg-surface-primary { background-color: var(--color-surface-primary); }
+.bg-surface-secondary { background-color: var(--color-surface-secondary); }
+.bg-surface-tertiary { background-color: var(--color-surface-tertiary); }
+.bg-surface-elevated { background-color: var(--color-surface-elevated); }
+
+/* Text Color Utilities */
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-tertiary { color: var(--color-text-tertiary); }
+.text-inverse { color: var(--color-text-inverse); }
+
+/* Focus Ring Utilities - Theme Consistent */
+.focus-ring-brand:focus { 
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+  border-color: transparent;
+}
+
+.focus-ring-success:focus { 
+  outline: 2px solid var(--color-success);
+  outline-offset: 2px;
+  border-color: transparent;
+}
+
+.focus-ring-error:focus { 
+  outline: 2px solid var(--color-error);
+  outline-offset: 2px;
+  border-color: transparent;
+}
+
+/* Hover Utilities - Theme Consistent */
+.hover-bg-brand-light:hover { 
+  background-color: color-mix(in oklch, var(--color-brand-primary) 10%, var(--color-surface-primary)); 
+}
+
+.hover-bg-success-light:hover { 
+  background-color: color-mix(in oklch, var(--color-success) 10%, var(--color-surface-primary)); 
+}
+
+.hover-bg-warning-light:hover { 
+  background-color: color-mix(in oklch, var(--color-warning) 10%, var(--color-surface-primary)); 
+}
+
+.hover-bg-error-light:hover { 
+  background-color: color-mix(in oklch, var(--color-error) 10%, var(--color-surface-primary)); 
+}
+
+/* Gradient Text */
+.text-gradient {
+  background: linear-gradient(
+    135deg, 
+    var(--color-brand-primary), 
+    var(--color-brand-secondary), 
+    var(--color-brand-accent)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Glass Morphism Effects */
+.glass {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-xl);
+}
+
+.glass-dark {
+  background-color: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
