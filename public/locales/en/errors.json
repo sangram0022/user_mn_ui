@@ -1,0 +1,42 @@
+{
+  "title": "An Error Occurred",
+  "subtitle": "Something went wrong",
+  "validationFailed": "Validation failed. Please check your input.",
+  "RESET_TOKEN_INVALID": "Invalid or expired reset link. Please request a new one.",
+  "PASSWORD_MISMATCH": "Passwords do not match",
+  "TERMS_NOT_ACCEPTED": "You must agree to the terms and conditions",
+  "404": {
+    "title": "Page Not Found",
+    "message": "The page you're looking for doesn't exist.",
+    "action": "Go to Home"
+  },
+  "500": {
+    "title": "Server Error",
+    "message": "An internal server error occurred.",
+    "action": "Try Again"
+  },
+  "network": {
+    "title": "Network Error",
+    "message": "Unable to connect to the server. Please check your internet connection.",
+    "action": "Retry",
+    "timeout": "Request timed out. Please try again."
+  },
+  "generic": {
+    "title": "Oops!",
+    "message": "Something went wrong. Please try again.",
+    "action": "Go Back"
+  },
+  "boundary": {
+    "title": "Application Error",
+    "message": "An unexpected error occurred.",
+    "details": "Error details (shown in development only)",
+    "reload": "Reload Page",
+    "tryAgain": "Try Again"
+  },
+  "validation": {
+    "required": "{{field}} is required"
+  },
+  "localization": {
+    "loadFailed": "Failed to load translations"
+  }
+}

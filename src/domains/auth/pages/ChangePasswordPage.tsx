@@ -11,7 +11,7 @@ import { parseAuthError } from '../utils/authErrorMapping';
 import Badge from '../../../shared/components/ui/Badge';
 
 export default function ChangePasswordPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const toast = useToast();
   const { mutate: changePassword, isPending } = useChangePassword();

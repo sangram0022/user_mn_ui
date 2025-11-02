@@ -12,21 +12,29 @@ import type { FC } from 'react';
 import { Suspense } from 'react';
 import type { RouteConfig } from './config';
 import { ProtectedRoute, PublicRoute, AdminRoute, NoGuard } from './RouteGuards';
+import Layout from '../layout/Layout'; // Import the actual Layout component
 
-// Import layouts (to be created)
-// For now, we'll use simple wrappers
-const DefaultLayout: FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="min-h-screen bg-gray-50">{children}</div>
-);
-
+// Auth Layout - Special layout for login/register pages (no header/footer)
 const AuthLayout: FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="min-h-screen bg-linear-to-br from-brand-primary/10 to-brand-secondary/10 flex items-center justify-center p-4">
-    {children}
+    <main id="main-content" tabIndex={-1}>
+      {children}
+    </main>
   </div>
 );
 
+// Admin Layout - Uses full Layout with Header/Footer
 const AdminLayout: FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="min-h-screen bg-gray-100">{children}</div>
+  <Layout>
+    {children}
+  </Layout>
+);
+
+// Default Layout - Uses full Layout with Header/Footer
+const DefaultLayout: FC<{ children: React.ReactNode }> = ({ children }) => (
+  <Layout>
+    {children}
+  </Layout>
 );
 
 const NoLayout: FC<{ children: React.ReactNode }> = ({ children }) => <>{children}</>;

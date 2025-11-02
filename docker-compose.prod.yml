@@ -1,0 +1,260 @@
+version: '3.8'
+
+services:
+  # React Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        BUILD_DATE: ${BUILD_DATE:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}
+        VCS_REF: ${VCS_REF:-$(git rev-parse --short HEAD)}
+        VERSION: ${APP_VERSION:-1.0.0}
+    image: ${DOCKER_REGISTRY:-localhost}/usermn:${IMAGE_TAG:-latest}
+    container_name: usermn-app
+    restart: unless-stopped
+    
+    # Security settings
+    read_only: true
+    user: "1001:1001"
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE_URL=${API_BASE_URL:-https://api.example.com}
+      - VITE_APP_ENV=production
+    
+    # Volumes
+    volumes:
+      - /tmp:/tmp:rw,noexec,nosuid,size=100m
+      - /var/cache/nginx:/var/cache/nginx:rw,noexec,nosuid,size=100m
+      - /var/log/nginx:/var/log/nginx:rw,noexec,nosuid,size=100m
+    
+    # Port mapping
+    ports:
+      - "8080:8080"
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=usermn-app"
+    
+    # Networks
+    networks:
+      - app-network
+    
+    # Labels
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.usermn.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.usermn.tls=true"
+      - "traefik.http.routers.usermn.tls.certresolver=letsencrypt"
+      - "traefik.http.services.usermn.loadbalancer.server.port=8080"
+
+  # Reverse Proxy (Traefik)
+  traefik:
+    image: traefik:v3.0
+    container_name: usermn-traefik
+    restart: unless-stopped
+    
+    # Security settings
+    read_only: true
+    user: "1001:1001"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    
+    # Ports
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8081:8080"  # Traefik dashboard
+    
+    # Volumes
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./certs:/certs:ro
+      - /tmp:/tmp:rw,noexec,nosuid,size=100m
+    
+    # Environment
+    environment:
+      - TRAEFIK_API_DASHBOARD=true
+      - TRAEFIK_API_INSECURE=false
+      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL=${ACME_EMAIL:-admin@example.com}
+    
+    # Networks
+    networks:
+      - app-network
+    
+    # Labels
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH:-admin:$$2y$$10$$hash}"
+      - "traefik.http.routers.traefik.middlewares=auth"
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: usermn-prometheus
+    restart: unless-stopped
+    
+    # Security settings
+    read_only: true
+    user: "1001:1001"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    
+    # Volumes
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus:rw,noexec,nosuid
+      - /tmp:/tmp:rw,noexec,nosuid,size=100m
+    
+    # Ports
+    ports:
+      - "9090:9090"
+    
+    # Command
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    
+    # Networks
+    networks:
+      - app-network
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: usermn-grafana
+    restart: unless-stopped
+    
+    # Security settings
+    read_only: true
+    user: "1001:1001"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    
+    # Environment
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    
+    # Volumes
+    volumes:
+      - grafana-data:/var/lib/grafana:rw,noexec,nosuid
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboardfiles:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - /tmp:/tmp:rw,noexec,nosuid,size=100m
+    
+    # Ports
+    ports:
+      - "3001:3000"
+    
+    # Networks
+    networks:
+      - app-network
+
+  # Log Management - Loki
+  loki:
+    image: grafana/loki:latest
+    container_name: usermn-loki
+    restart: unless-stopped
+    
+    # Security settings
+    read_only: true
+    user: "1001:1001"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    
+    # Volumes
+    volumes:
+      - ./monitoring/loki.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/tmp/loki:rw,noexec,nosuid
+    
+    # Ports
+    ports:
+      - "3100:3100"
+    
+    # Networks
+    networks:
+      - app-network
+
+# Networks
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volumes
+volumes:
+  prometheus-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/prometheus
+  
+  grafana-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/grafana
+  
+  loki-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/loki

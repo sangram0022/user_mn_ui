@@ -1,0 +1,16 @@
+{
+  "title": "Admin Dashboard",
+  "users": {
+    "title": "User Management",
+    "total": "Total Users",
+    "active": "Active Users",
+    "pending": "Pending Users"
+  },
+  "auditLogs": {
+    "title": "Audit Logs",
+    "viewAll": "View All Logs"
+  },
+  "settings": {
+    "title": "System Settings"
+  }
+}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Health Check</title>
+</head>
+<body>
+    <script>
+        // Simple health check endpoint for container orchestration
+        window.healthCheck = {
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            version: '1.0.0',
+            uptime: performance.now()
+        };
+        
+        // Return health status as JSON if accessed programmatically
+        if (window.location.pathname === '/health') {
+            document.body.innerHTML = JSON.stringify(window.healthCheck);
+            document.body.style.fontFamily = 'monospace';
+            document.body.style.whiteSpace = 'pre';
+        }
+    </script>
+    
+    <h1>Application Health Check</h1>
+    <div id="health-status">
+        <p><strong>Status:</strong> <span style="color: green;">Healthy</span></p>
+        <p><strong>Timestamp:</strong> <span id="timestamp"></span></p>
+        <p><strong>Version:</strong> 1.0.0</p>
+    </div>
+    
+    <script>
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+    </script>
+</body>
+</html>

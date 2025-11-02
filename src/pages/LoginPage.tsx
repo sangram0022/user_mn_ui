@@ -5,10 +5,13 @@
 
 import { Link } from 'react-router-dom';
 import { LoginForm, OAuthButtons } from '../domains/auth/components';
+import { SEO, SEO_CONFIG } from '../shared/components/seo';
 
 export default function LoginPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 animate-fade-in">
+    <>
+      <SEO {...SEO_CONFIG.login} />
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 animate-fade-in">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8 animate-slide-down">
@@ -46,5 +49,6 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+    </>
   );
 }

@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { visualizer } from 'rollup-plugin-visualizer'
+import compression from 'vite-plugin-compression'
 import path from 'path'
 
 // https://vite.dev/config/
@@ -9,6 +11,34 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    
+    // Bundle analysis - generates interactive bundle map
+    visualizer({
+      filename: 'dist/bundle-analysis.html',
+      open: false, // Don't auto-open in CI
+      gzipSize: true,
+      brotliSize: true,
+      template: 'treemap', // Options: treemap, sunburst, network
+    }),
+
+    // Compression plugins - Brotli and Gzip
+    compression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      threshold: 1024, // Only compress files larger than 1KB
+      compressionOptions: {
+        level: 11, // Maximum compression
+      },
+    }),
+    compression({
+      algorithm: 'gzip',
+      ext: '.gz',
+      threshold: 1024,
+      compressionOptions: {
+        level: 9, // Maximum compression
+      },
+    }),
+    
     // Progressive Web App plugin - enables offline support and caching
     VitePWA({
       registerType: 'autoUpdate',
@@ -103,6 +133,80 @@ export default defineConfig({
       },
     }),
   ],
+  
+  // Build optimizations
+  build: {
+    // Manual chunks for better caching and parallel loading
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Core React libraries - ~140KB
+          'vendor-react': [
+            'react',
+            'react-dom',
+            'react-router-dom',
+          ],
+          
+          // Form handling libraries - ~40KB
+          'vendor-forms': [
+            'react-hook-form',
+            '@hookform/resolvers',
+            'zod',
+          ],
+          
+          // Data fetching and state management - ~80KB
+          'vendor-data': [
+            '@tanstack/react-query',
+            '@tanstack/react-query-devtools',
+            'zustand',
+          ],
+          
+          // Internationalization - ~30KB
+          'vendor-i18n': [
+            'i18next',
+            'react-i18next',
+            'i18next-browser-languagedetector',
+            'i18next-http-backend',
+          ],
+          
+          // Utility libraries - ~20KB
+          'vendor-utils': [
+            'axios',
+            'date-fns',
+            'dompurify',
+          ],
+          
+          // Icons - if large
+          'vendor-icons': [
+            'lucide-react',
+          ],
+        },
+      },
+    },
+    
+    // Advanced minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.logs in production
+        drop_debugger: true, // Remove debugger statements
+        pure_funcs: ['console.log', 'console.info', 'console.debug'], // Remove specific console methods
+      },
+      mangle: {
+        safari10: true, // Support Safari 10+
+      },
+    },
+    
+    // CSS code splitting for better caching
+    cssCodeSplit: true,
+    
+    // Disable source maps in production (reduces bundle size)
+    sourcemap: false,
+    
+    // Chunk size warnings
+    chunkSizeWarningLimit: 500, // Warn if chunk > 500KB
+  },
+  
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

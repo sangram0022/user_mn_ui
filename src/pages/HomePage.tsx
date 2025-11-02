@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { animationUtils } from '../design-system/variants';
+import { SEO, SEO_CONFIG } from '../shared/components/seo';
 
 const features = [
   { icon: '🚀', title: 'Lightning Fast', description: 'Optimized performance with React 19 and Vite' },
@@ -21,7 +22,9 @@ const stats = [
 
 export default function HomePage() {
   return (
-    <div className="animate-fade-in">
+    <>
+      <SEO {...SEO_CONFIG.home} />
+      <div className="animate-fade-in">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-linear-to-br from-blue-600 via-purple-600 to-pink-600 text-white">
         {/* Pattern Overlay */}
@@ -126,5 +129,6 @@ export default function HomePage() {
         </div>
       </section>
     </div>
+    </>
   );
 }

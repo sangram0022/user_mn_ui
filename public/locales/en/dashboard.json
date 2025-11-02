@@ -1,0 +1,14 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome back, {{name}}!",
+  "stats": {
+    "users": "Total Users",
+    "active": "Active Users",
+    "revenue": "Revenue",
+    "growth": "Growth"
+  },
+  "actions": {
+    "viewDetails": "View Details",
+    "refresh": "Refresh Data"
+  }
+}

@@ -11,6 +11,7 @@
 import { useTranslation } from 'react-i18next';
 import { use } from 'react';
 import { AuthContext } from '../../auth/context/AuthContext';
+import { SEO, SEO_CONFIG } from '../../../shared/components/seo';
 
 // ========================================
 // User Dashboard Component
@@ -21,7 +22,9 @@ export default function UserDashboard() {
   const { user } = use(AuthContext);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SEO {...SEO_CONFIG.dashboard} />
+      <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -177,6 +180,7 @@ export default function UserDashboard() {
         </div>
       </main>
     </div>
+    </>
   );
 }
 

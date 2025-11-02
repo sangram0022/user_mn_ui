@@ -28,3 +28,9 @@ export {
   SkeletonAvatar, 
   SkeletonButton 
 } from '../shared/components/SkeletonLoader';
+
+// New Skeleton components (Week 4)
+export { default as Skeleton, SkeletonTable } from '../shared/components/ui/Skeleton';
+
+// Accessibility components (Week 4 - WCAG 2.1 AA)
+export { SkipLink, Announcement } from '../shared/components/accessibility';

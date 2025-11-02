@@ -16,10 +16,47 @@
     <link rel="dns-prefetch" href="https://api.example.com">
     
     <!-- ============================================
-         SECURITY HEADERS
+         SECURITY HEADERS (Task 19)
          ============================================ -->
+    <!-- Prevent MIME type sniffing -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    
+    <!-- Control referrer information -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <!-- Content Security Policy (CSP) -->
+    <!-- Note: For production, move to server headers for better enforcement -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: blob: https:;
+      font-src 'self' data:;
+      connect-src 'self' http://localhost:* ws://localhost:*;
+      frame-ancestors 'none';
+      base-uri 'self';
+      form-action 'self';
+    ">
+    
+    <!-- Prevent clickjacking -->
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    
+    <!-- Force HTTPS in production (browser compatibility) -->
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+    
+    <!-- XSS Protection (legacy browsers) -->
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    
+    <!-- Permissions Policy -->
+    <meta http-equiv="Permissions-Policy" content="
+      geolocation=(),
+      microphone=(),
+      camera=(),
+      payment=(),
+      usb=(),
+      magnetometer=(),
+      gyroscope=()
+    ">
     
     <title>User Management System</title>
   </head>

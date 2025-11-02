@@ -42,7 +42,7 @@ export const LANGUAGE_NAMES: Record<SupportedLanguage, string> = {
   // Add more: es: 'Español', fr: 'Français', etc.
 };
 
-// Initialize i18next
+// Initialize i18next with lazy loading (Task 12: i18n Optimization)
 i18n
   .use(HttpBackend) // Load translations from /public/locales
   .use(LanguageDetector) // Detect user language
@@ -56,11 +56,15 @@ i18n
     // Load translations from public folder
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
+      // Add lazy loading configuration
+      requestOptions: {
+        cache: 'no-store', // Disable cache in development
+      },
     },
     
-    // Single namespace for simplicity
-    ns: ['translation'],
-    defaultNS: 'translation',
+    // Multiple namespaces for code splitting (Task 12)
+    ns: ['common', 'auth', 'dashboard', 'admin', 'errors'],
+    defaultNS: 'common',
     
     // Language detection
     detection: {
@@ -74,10 +78,17 @@ i18n
       escapeValue: false, // React already escapes
     },
     
-    // React options
+    // React options - Enable Suspense for lazy loading
     react: {
-      useSuspense: false, // Load synchronously for simplicity
+      useSuspense: true, // Enable Suspense for lazy loading (Task 12)
     },
+    
+    // Lazy loading options (Task 12)
+    load: 'languageOnly', // Load only language, not region
+    preload: ['en'], // Preload default language
+    
+    // Partition translations - load on demand
+    partialBundledLanguages: true,
     
     // Development
     debug: false, // Set to true for debugging

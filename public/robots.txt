@@ -1,0 +1,29 @@
+# robots.txt for User Management System
+
+# Allow all robots to crawl public pages
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /forgot-password
+
+# Disallow crawling of authenticated/private areas
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /auditor
+Disallow: /user
+Disallow: /profile
+Disallow: /settings
+Disallow: /api
+Disallow: /*.json$
+
+# Disallow showcase/development pages (if in production)
+Disallow: /showcase
+Disallow: /products
+Disallow: /services
+
+# Sitemap location
+Sitemap: https://example.com/sitemap.xml
+
+# Crawl-delay (optional, adjust as needed)
+Crawl-delay: 1

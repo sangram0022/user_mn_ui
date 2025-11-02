@@ -16,6 +16,7 @@ import { routes, notFoundRoute } from './core/routing/config';
 import { RouteRenderer } from './core/routing/RouteRenderer';
 import { ErrorBoundary } from './core/error';
 import { initializeGlobalErrorHandlers } from './core/error';
+import { SkipLink } from './shared/components/accessibility';
 
 // ========================================
 // App Component
@@ -30,6 +31,9 @@ export default function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
+        {/* Skip link for keyboard accessibility (WCAG 2.4.1) */}
+        <SkipLink href="#main-content">Skip to main content</SkipLink>
+        
         {/* Auth Provider wraps entire app for authentication state */}
         <AuthProvider>
           <Routes>

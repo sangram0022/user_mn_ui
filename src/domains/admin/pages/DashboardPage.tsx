@@ -6,6 +6,7 @@ import Card from '../../../shared/components/ui/Card';
 import Badge from '../../../shared/components/ui/Badge';
 import { animationUtils } from '../../../design-system/variants';
 import { VirtualTable } from '../../../shared/components/VirtualTable';
+import { SEO, SEO_CONFIG } from '../../../shared/components/seo';
 
 // Dummy data - Single source of truth
 const userData = [
@@ -45,7 +46,9 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
+    <>
+      <SEO {...SEO_CONFIG.adminDashboard} />
+      <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -194,5 +197,6 @@ export default function AdminDashboard() {
         </div>
       </Card>
     </div>
+    </>
   );
 }
