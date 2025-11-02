@@ -1,12 +1,19 @@
 /**
  * Users Management Page
- * Beautiful admin page with table, filters, pagination, and export features
- * Following React 19 best practices, WCAG accessibility, and modern UX design
+ * Admin page following SOLID principles and clean code practices
+ * - Single Responsibility: Page focuses on UI and user interactions
+ * - Open/Closed: Extensible through utility functions
+ * - DRY: Reusable export utilities
  */
 
 import { useState, useMemo, useCallback } from 'react';
 import Button from '../../../shared/components/ui/Button';
 import Badge from '../../../shared/components/ui/Badge';
+import { 
+  exportData, 
+  generateFilename, 
+  type ExportFormat 
+} from '../../../shared/utils/exportUtils';
 
 // Types
 interface User {
@@ -20,9 +27,55 @@ interface User {
   department?: string;
 }
 
-type ExportFormat = 'csv' | 'json' | 'excel';
+// ============================================================================
+// Data Preparation Functions (Clean Code - Separate Concerns)
+// ============================================================================
 
-// Dummy Data
+/**
+ * Prepare user data for export
+ * Transforms internal data structure to export-friendly format
+ */
+function prepareUsersForExport(users: User[]): Record<string, unknown>[] {
+  return users.map(user => ({
+    'ID': user.id,
+    'Name': user.name,
+    'Email': user.email,
+    'Role': formatRole(user.role),
+    'Status': formatStatus(user.status),
+    'Department': user.department || 'N/A',
+    'Last Login': formatDate(user.lastLogin),
+    'Created At': formatDate(user.createdAt),
+  }));
+}
+
+/**
+ * Format role for display
+ */
+function formatRole(role: User['role']): string {
+  return role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+/**
+ * Format status for display
+ */
+function formatStatus(status: User['status']): string {
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+/**
+ * Format date for display
+ */
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+// ============================================================================
+// Dummy Data Generator (Separated for Maintainability)
+// ============================================================================
 const generateDummyUsers = (): User[] => {
   const roles: User['role'][] = ['admin', 'user', 'auditor', 'super_admin'];
   const statuses: User['status'][] = ['active', 'inactive', 'suspended'];
@@ -116,93 +169,41 @@ export default function UsersPage() {
     }
   };
 
-  // Export functionality - Convert data to downloadable file
+  /**
+   * Export handler - Clean, maintainable, following SOLID principles
+   * Single Responsibility: Delegates to utility functions
+   * Error handling with user feedback
+   */
   const handleExport = useCallback((format: ExportFormat) => {
     setIsExporting(true);
     
     try {
-      const dataToExport = filteredAndSortedUsers;
-      const timestamp = new Date().toISOString().split('T')[0];
-      const filename = `users-export-${timestamp}`;
-
-      switch (format) {
-        case 'csv': {
-          // CSV Export
-          const headers = ['ID', 'Name', 'Email', 'Role', 'Status', 'Department', 'Last Login', 'Created At'];
-          const csvRows = [
-            headers.join(','),
-            ...dataToExport.map(user => [
-              user.id,
-              `"${user.name}"`,
-              user.email,
-              user.role,
-              user.status,
-              user.department || 'N/A',
-              new Date(user.lastLogin).toLocaleDateString(),
-              new Date(user.createdAt).toLocaleDateString(),
-            ].join(','))
-          ];
-          
-          const csvContent = csvRows.join('\n');
-          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-          downloadFile(blob, `${filename}.csv`);
-          break;
-        }
-
-        case 'json': {
-          // JSON Export
-          const jsonContent = JSON.stringify(dataToExport, null, 2);
-          const blob = new Blob([jsonContent], { type: 'application/json' });
-          downloadFile(blob, `${filename}.json`);
-          break;
-        }
-
-        case 'excel': {
-          // Excel-compatible CSV (with UTF-8 BOM for proper encoding)
-          const headers = ['ID', 'Name', 'Email', 'Role', 'Status', 'Department', 'Last Login', 'Created At'];
-          const csvRows = [
-            headers.join('\t'), // Use tab delimiter for Excel
-            ...dataToExport.map(user => [
-              user.id,
-              user.name,
-              user.email,
-              user.role,
-              user.status,
-              user.department || 'N/A',
-              new Date(user.lastLogin).toLocaleDateString(),
-              new Date(user.createdAt).toLocaleDateString(),
-            ].join('\t'))
-          ];
-          
-          const csvContent = '\uFEFF' + csvRows.join('\n'); // UTF-8 BOM
-          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-          downloadFile(blob, `${filename}.xls`);
-          break;
-        }
-      }
-
-      // Show success message (you can replace with toast notification)
-      console.log(`Successfully exported ${dataToExport.length} users as ${format.toUpperCase()}`);
+      // Prepare data for export (transform to user-friendly format)
+      const exportableData = prepareUsersForExport(filteredAndSortedUsers);
+      
+      // Generate filename with timestamp
+      const filename = generateFilename('users-export');
+      
+      // Use utility function for export (DRY principle)
+      exportData({
+        data: exportableData,
+        format,
+        filename,
+      });
+      
+      // Success feedback (could be replaced with toast notification)
+      console.log(`✓ Successfully exported ${exportableData.length} users as ${format.toUpperCase()}`);
+      
     } catch (error) {
+      // Error handling with user feedback
       console.error('Export failed:', error);
-      alert('Export failed. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Export failed: ${errorMessage}\nPlease try again.`);
     } finally {
+      // Always reset loading state
       setIsExporting(false);
     }
   }, [filteredAndSortedUsers]);
-
-  // Helper function to trigger file download
-  const downloadFile = (blob: Blob, filename: string) => {
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  };
 
   // Select/Deselect all users on current page
   const handleSelectAll = (checked: boolean) => {
