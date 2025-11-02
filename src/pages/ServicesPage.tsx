@@ -1,9 +1,10 @@
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import Card from '../components/Card';
+import { OptimizedImage } from '../shared/components/OptimizedImage';
 import { typographyVariants, animationUtils } from '../design-system/variants';
 import type { BadgeVariant } from '../design-system/variants';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 
 // Services data - Single source of truth
 const servicesData = {
@@ -231,79 +232,6 @@ const getCategoryColor = (category: string): BadgeVariant => {
     default: return 'gray';
   }
 };
-
-// Modern Performance Hook - Intersection Observer for scroll animations
-function useIntersectionObserver(options = {}) {
-  const [isIntersecting, setIsIntersecting] = useState(false);
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsIntersecting(entry.isIntersecting);
-    }, {
-      threshold: 0.1,
-      rootMargin: '50px',
-      ...options,
-    });
-
-    const element = ref.current;
-    if (element) {
-      observer.observe(element);
-    }
-
-    return () => {
-      if (element) {
-        observer.unobserve(element);
-      }
-    };
-  }, [options]);
-
-  return [ref, isIntersecting] as const;
-}
-
-// Modern Image Component with WebP support and lazy loading
-interface OptimizedImageProps {
-  src: string;
-  alt: string;
-  className?: string;
-  width?: number;
-  height?: number;
-}
-
-function OptimizedImage({ src, alt, className = '', width, height }: OptimizedImageProps) {
-  const [imageRef, isVisible] = useIntersectionObserver();
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
-  // Convert to WebP if browser supports it
-  const webpSrc = src.replace(/\.(jpg|jpeg|png)(\?.*)?$/, '.webp$2');
-  
-  return (
-    <figure ref={imageRef} className={`relative overflow-hidden ${className}`}>
-      {isVisible && (
-        <picture className="block w-full h-full">
-          <source srcSet={webpSrc} type="image/webp" />
-          <img
-            src={src}
-            alt={alt}
-            width={width}
-            height={height}
-            loading="lazy"
-            decoding="async"
-            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            } ${imageError ? 'bg-gray-200' : ''}`}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
-          />
-        </picture>
-      )}
-      {!imageLoaded && !imageError && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse" aria-hidden="true" />
-      )}
-    </figure>
-  );
-}
 
 export default function ServicesPage() {
   // Skip to main content for accessibility

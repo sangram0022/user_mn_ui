@@ -1,6 +1,7 @@
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import Card from '../components/Card';
+import { OptimizedImage } from '../shared/components/OptimizedImage';
 import { typographyVariants, animationUtils } from '../design-system/variants';
 
 // Products data - Single source of truth
@@ -209,10 +210,14 @@ export default function ProductsPage() {
 
               {/* Product Image */}
               <div className="relative overflow-hidden rounded-xl mb-4">
-                <img
+                <OptimizedImage
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                  width={400}
+                  height={300}
+                  priority={false}
+                  quality={85}
+                  className="transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
               </div>

@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from '../domains/auth/context/AuthContext';
+import { RbacWrapper } from './RbacWrapper';
 import { queryClient } from '../services/api/queryClient';
 
 interface ProvidersProps {
@@ -15,8 +16,10 @@ export function Providers({ children }: ProvidersProps) {
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          {children}
-          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+          <RbacWrapper>
+            {children}
+            {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+          </RbacWrapper>
         </AuthProvider>
       </QueryClientProvider>
     </BrowserRouter>

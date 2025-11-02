@@ -12,6 +12,8 @@ import type { FC, ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { use } from 'react';
 import { AuthContext } from '../../domains/auth/context/AuthContext';
+import { usePermissions } from '../../domains/rbac/hooks/usePermissions';
+import type { UserRole } from '../../domains/rbac/types/rbac.types';
 import { ROUTES } from './config';
 
 // ========================================
@@ -20,7 +22,7 @@ import { ROUTES } from './config';
 
 interface RouteGuardProps {
   children: ReactNode;
-  requiredRoles?: string[];
+  requiredRoles?: UserRole[];
 }
 
 // ========================================
@@ -90,7 +92,8 @@ export const PublicRoute: FC<RouteGuardProps> = ({ children }) => {
 
 export const AdminRoute: FC<RouteGuardProps> = ({ children, requiredRoles = ['admin', 'super_admin'] }) => {
   const location = useLocation();
-  const { user, isAuthenticated, isLoading } = use(AuthContext);
+  const { isAuthenticated, isLoading } = use(AuthContext);
+  const { hasRole } = usePermissions();
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -101,13 +104,8 @@ export const AdminRoute: FC<RouteGuardProps> = ({ children, requiredRoles = ['ad
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;
   }
 
-  // Check if user has required role
-  const userRoles = user?.roles || [];
-  const hasRequiredRole = requiredRoles.some(role => 
-    userRoles.includes(role)
-  );
-
-  if (!hasRequiredRole) {
+  // Check if user has required role using centralized permission hook
+  if (!hasRole(requiredRoles)) {
     // Authenticated but not authorized
     // Redirect to home page
     return <Navigate to={ROUTES.HOME} replace />;

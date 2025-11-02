@@ -5,6 +5,8 @@
 
 import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 import tokenService from '../../domains/auth/services/tokenService';
+import { logger } from '@/core/logging';
+import { APIError } from '@/core/error';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -105,7 +107,27 @@ apiClient.interceptors.request.use(
 // ========================================
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful API calls (debug level in production, info in development)
+    const method = response.config?.method?.toUpperCase() || 'UNKNOWN';
+    const url = response.config?.url || 'unknown';
+    const status = response.status;
+    const duration = response.config?.headers?.['X-Request-Start']
+      ? performance.now() - parseInt(response.config.headers['X-Request-Start'] as string, 10)
+      : undefined;
+
+    if (import.meta.env.MODE === 'development' || status >= 400) {
+      logger().debug(`API Success: ${method} ${url}`, {
+        status,
+        duration,
+        url,
+        method,
+        context: 'apiClient.success',
+      });
+    }
+
+    return response;
+  },
   async (error) => {
     const originalRequest: AxiosRequestConfig & { _retry?: boolean } = error.config;
 
@@ -188,7 +210,13 @@ apiClient.interceptors.response.use(
       if (retryCount < maxRetries) {
         const delayMs = getRetryDelay(retryCount);
         
-        console.log(`Retrying request (attempt ${retryCount + 1}/${maxRetries}) after ${delayMs}ms`);
+        logger().info(`Retrying request (attempt ${retryCount + 1}/${maxRetries}) after ${delayMs}ms`, {
+          method: originalRequest.method,
+          url: originalRequest.url,
+          retryCount,
+          delayMs,
+          context: 'apiClient.networkError.retry',
+        });
         
         await delay(delayMs);
         
@@ -202,7 +230,7 @@ apiClient.interceptors.response.use(
     }
 
     // ========================================
-    // Enhanced Error Formatting
+    // Enhanced Error Handling with Logging
     // ========================================
 
     const errorMessage = 
@@ -212,14 +240,37 @@ apiClient.interceptors.response.use(
       'An unexpected error occurred';
     
     const errorCode = error.response?.data?.code;
+    const status = error.response?.status || 0;
+    const method = originalRequest?.method?.toUpperCase() || 'UNKNOWN';
+    const url = originalRequest?.url || 'unknown';
+    const duration = error.config?.headers?.['X-Request-Start'] 
+      ? performance.now() - parseInt(error.config.headers['X-Request-Start'] as string, 10)
+      : undefined;
 
-    return Promise.reject({
-      message: errorMessage,
-      code: errorCode,
-      status: error.response?.status,
-      data: error.response?.data,
-      originalError: error,
-    });
+    // Log the error
+    logger().error(
+      `API Error: ${method} ${url}`,
+      error instanceof Error ? error : new Error(errorMessage),
+      {
+        status,
+        errorCode,
+        method,
+        url,
+        duration,
+        responseData: error.response?.data,
+        context: 'apiClient.error',
+      }
+    );
+
+    // Throw structured error
+    throw new APIError(
+      errorMessage,
+      status,
+      method,
+      url,
+      error.response?.data,
+      duration
+    );
   }
 );
 

@@ -6,7 +6,11 @@
 import { createContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import authService from '../services/authService';
 import tokenService from '../services/tokenService';
+import { logger } from '@/core/logging';
+import { authStorage } from '../utils/authStorage';
+import { getEffectivePermissionsForRoles } from '@/domains/rbac/utils/rolePermissionMap';
 import type { User } from '../types/auth.types';
+import type { Permission, UserRole } from '@/domains/rbac/types/rbac.types';
 
 // ========================================
 // Types
@@ -23,6 +27,7 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  permissions: Permission[];
 }
 
 interface AuthActions {
@@ -43,83 +48,13 @@ export const AuthContext = createContext<AuthContextValue>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
+  permissions: [],
   login: () => {},
   logout: async () => {},
   checkAuth: async () => {},
   refreshSession: async () => {},
   updateUser: () => {},
 });
-
-// ========================================
-// Storage Keys
-// ========================================
-
-const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'access_token',
-  REFRESH_TOKEN: 'refresh_token',
-  USER: 'user',
-  REMEMBER_ME: 'remember_me',
-  REMEMBER_ME_EMAIL: 'remember_me_email',
-} as const;
-
-// ========================================
-// Storage Helpers (Centralized localStorage access)
-// ========================================
-
-const storage = {
-  getAccessToken: (): string | null => {
-    return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-  },
-  
-  getRefreshToken: (): string | null => {
-    return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-  },
-  
-  getUser: (): User | null => {
-    const userJson = localStorage.getItem(STORAGE_KEYS.USER);
-    if (!userJson) return null;
-    try {
-      return JSON.parse(userJson);
-    } catch {
-      return null;
-    }
-  },
-
-  isRememberMeEnabled: (): boolean => {
-    return localStorage.getItem(STORAGE_KEYS.REMEMBER_ME) === 'true';
-  },
-
-  getRememberMeEmail: (): string | null => {
-    return localStorage.getItem(STORAGE_KEYS.REMEMBER_ME_EMAIL);
-  },
-  
-  setTokens: (tokens: AuthTokens, rememberMe: boolean = false): void => {
-    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.access_token);
-    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refresh_token);
-    localStorage.setItem(STORAGE_KEYS.REMEMBER_ME, rememberMe ? 'true' : 'false');
-  },
-  
-  setUser: (user: User): void => {
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-  },
-
-  setRememberMeEmail: (email: string): void => {
-    localStorage.setItem(STORAGE_KEYS.REMEMBER_ME_EMAIL, email);
-  },
-  
-  clear: (): void => {
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    localStorage.removeItem(STORAGE_KEYS.REMEMBER_ME);
-    // Note: We keep remember_me_email so user can see it on login page next time
-  },
-
-  clearRememberMe: (): void => {
-    localStorage.removeItem(STORAGE_KEYS.REMEMBER_ME_EMAIL);
-    localStorage.removeItem(STORAGE_KEYS.REMEMBER_ME);
-  },
-};
 
 // ========================================
 // Auth Provider Component
@@ -131,11 +66,18 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   // State (Single source of truth)
-  const [state, setState] = useState<AuthState>(() => ({
-    user: storage.getUser(),
-    isAuthenticated: !!storage.getAccessToken(),
-    isLoading: true,
-  }));
+  const [state, setState] = useState<AuthState>(() => {
+    const user = authStorage.getUser();
+    return {
+      user,
+      isAuthenticated: !!authStorage.getAccessToken(),
+      isLoading: true,
+      // Compute permissions from user roles if user exists
+      permissions: user?.roles
+        ? getEffectivePermissionsForRoles(user.roles as UserRole[])
+        : [],
+    };
+  });
 
   // ========================================
   // Actions
@@ -145,13 +87,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Login - Set tokens and user in state & storage
    */
   const login = useCallback((tokens: AuthTokens, user: User) => {
-    storage.setTokens(tokens);
-    storage.setUser(user);
+    authStorage.setTokens(tokens);
+    authStorage.setUser(user);
+    
+    // Compute permissions from user roles
+    const permissions = getEffectivePermissionsForRoles(user.roles as UserRole[]);
     
     setState({
       user,
       isAuthenticated: true,
       isLoading: false,
+      permissions,
     });
   }, []);
 
@@ -163,14 +109,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Call logout API (optional - even if it fails, we clear locally)
       await authService.logout();
     } catch (error) {
-      console.error('Logout API error:', error);
+      logger().error('Logout API error', error as Error, {
+        context: 'AuthContext.logout',
+      });
     } finally {
       // Always clear local state
-      storage.clear();
+      authStorage.clear();
       setState({
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        permissions: [],
       });
       
       // Redirect to login - use window.location to avoid router dependency
@@ -182,10 +131,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Check Auth - Validate current session
    */
   const checkAuth = useCallback(async () => {
-    const accessToken = storage.getAccessToken();
+    const accessToken = authStorage.getAccessToken();
     
     if (!accessToken) {
-      setState(prev => ({ ...prev, isAuthenticated: false, isLoading: false }));
+      setState(prev => ({ ...prev, isAuthenticated: false, isLoading: false, permissions: [] }));
       return;
     }
 
@@ -193,30 +142,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Verify token by fetching current user profile
       // Note: You'll need to add this endpoint or use an existing one
       // For now, we'll just trust the token exists
-      const storedUser = storage.getUser();
+      const storedUser = authStorage.getUser();
       if (storedUser) {
+        // Compute permissions from user roles
+        const permissions = getEffectivePermissionsForRoles(storedUser.roles as UserRole[]);
+        
         setState({
           user: storedUser,
           isAuthenticated: true,
           isLoading: false,
+          permissions,
         });
       } else {
         // Token exists but no user data - invalid state
-        storage.clear();
+        logger().warn('Token exists but no user data found', {
+          context: 'AuthContext.checkAuth',
+        });
+        authStorage.clear();
         setState({
           user: null,
           isAuthenticated: false,
           isLoading: false,
+          permissions: [],
         });
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      logger().error('Auth check failed', error as Error, {
+        context: 'AuthContext.checkAuth',
+      });
       // Token is invalid, clear everything
-      storage.clear();
+      authStorage.clear();
       setState({
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        permissions: [],
       });
     }
   }, []);
@@ -225,7 +185,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Refresh Session - Get new access token using refresh token
    */
   const refreshSession = useCallback(async () => {
-    const refreshToken = storage.getRefreshToken();
+    const refreshToken = authStorage.getRefreshToken();
     
     if (!refreshToken) {
       await logout();
@@ -236,15 +196,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await tokenService.refreshToken(refreshToken);
       
       // Update tokens in storage
-      storage.setTokens({
+      authStorage.setTokens({
         access_token: response.access_token,
         refresh_token: response.refresh_token,
       });
       
+      logger().debug('Session refreshed successfully', {
+        context: 'AuthContext.refreshSession',
+      });
       // Note: RefreshTokenResponse doesn't include user data
       // User data remains unchanged
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      logger().error('Token refresh failed', error as Error, {
+        context: 'AuthContext.refreshSession',
+      });
       await logout();
     }
   }, [logout]);
@@ -253,7 +218,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Update User - Update user data in state & storage
    */
   const updateUser = useCallback((user: User) => {
-    storage.setUser(user);
+    authStorage.setUser(user);
     setState(prev => ({
       ...prev,
       user,
@@ -277,6 +242,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user: state.user,
     isAuthenticated: state.isAuthenticated,
     isLoading: state.isLoading,
+    permissions: state.permissions,
     
     // Actions
     login,
@@ -288,9 +254,3 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
-// ========================================
-// Export for easy access
-// ========================================
-
-export { storage as authStorage };

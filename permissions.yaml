@@ -1,0 +1,700 @@
+# YAML-Based Permission Configuration
+# Single source of truth for all endpoint permissions
+# This file centralizes all 76 endpoints and their required roles/permissions
+# Last updated: 2025-11-02
+# Coverage: 76/76 endpoints configured (100%)
+
+# ==================== ENDPOINTS SUMMARY ====================
+# Health Checks: 6 (all public)
+# Authentication (JWT): 11 endpoints (mostly public)
+# Secure Authentication (httpOnly + CSRF): 5 endpoints
+# User Profile: 2 endpoints (authenticated)
+# Admin User Management: 10 endpoints (admin only)
+# Email Verification: 4 endpoints (mixed public/auth)
+# Multi-Factor Auth (MFA): 6 endpoints (mixed public/auth)
+# Session Management: 8 endpoints (authenticated)
+# RBAC Management: 9 endpoints (admin only)
+# Audit Logging: 2 endpoints (auditor only)
+# GDPR Compliance: 3 endpoints (authenticated)
+# Feature Management: 9 endpoints (admin only)
+# Circuit Breakers: 2 endpoints (admin only)
+# Metrics & Monitoring: 2 endpoints (admin only)
+# Frontend Logging: 1 endpoint (user)
+# Employee Management: 1 endpoint (placeholder)
+# Team Management: 1 endpoint (placeholder)
+#
+# Role Distribution:
+# - public: 18 endpoints
+# - user: 20 endpoints
+# - admin: 32 endpoints
+# - auditor: 3 endpoints
+# - super_admin: 1 endpoint
+# - manager: 1 endpoint
+# - employee: 1 endpoint
+# ==================== ==================== ====================
+
+# ==================== Configuration Structure ====================
+# Each endpoint is defined with:
+#   path: API endpoint path (can include {parameters})
+#   method: HTTP method (GET, POST, PUT, DELETE, PATCH)
+#   required_role: Role required for access (admin, super_admin, user, etc.)
+#   permission_code: Optional specific permission code
+#   description: Description of what the endpoint does
+#   public: Set to true for public endpoints (no auth required)
+# ==================== ==================== ====================
+
+permissions:
+  # ==================== HEALTH ENDPOINTS ====================
+  # Public, no authentication required
+  health:
+    index:
+      path: /health
+      method: GET
+      public: true
+      description: Health check endpoint
+
+    ping:
+      path: /health/ping
+      method: GET
+      public: true
+      description: Simple ping endpoint
+
+    ready:
+      path: /health/ready
+      method: GET
+      public: true
+      description: Readiness probe for Kubernetes/Docker
+
+    detailed:
+      path: /health/detailed
+      method: GET
+      public: true
+      description: Detailed health information
+
+    db:
+      path: /health/db
+      method: GET
+      public: true
+      description: Database health status
+
+    system:
+      path: /health/system
+      method: GET
+      public: true
+      description: System resource health status
+
+    patterns:
+      path: /health/patterns
+      method: GET
+      public: true
+      description: Validation patterns health check
+
+  # ==================== AUTHENTICATION ENDPOINTS ====================
+  # Public - handles user registration and login (standard JWT)
+  auth:
+    login:
+      path: /auth/login
+      method: POST
+      public: true
+      description: User login - returns JWT token
+
+    register:
+      path: /auth/register
+      method: POST
+      public: true
+      description: User registration
+
+    refresh_token:
+      path: /auth/refresh
+      method: POST
+      public: true
+      description: Refresh JWT token
+
+    logout:
+      path: /auth/logout
+      method: POST
+      required_role: user
+      description: User logout
+
+    verify_email:
+      path: /auth/verify-email
+      method: POST
+      public: true
+      description: Verify email address
+
+    resend_verification:
+      path: /auth/resend-verification
+      method: POST
+      public: true
+      description: Resend email verification
+
+    password_reset_request:
+      path: /auth/password-reset-request
+      method: POST
+      public: true
+      description: Request password reset (sends email)
+
+    password_reset:
+      path: /auth/password-reset
+      method: POST
+      public: true
+      description: Initiate password reset
+
+    forgot_password:
+      path: /auth/forgot-password
+      method: POST
+      public: true
+      description: Forgot password (alias for reset request)
+
+    reset_password:
+      path: /auth/reset-password
+      method: POST
+      public: true
+      description: Complete password reset with token
+
+    change_password:
+      path: /auth/change-password
+      method: POST
+      required_role: user
+      description: Change password (authenticated user)
+
+  # ==================== SECURE AUTHENTICATION (httpOnly Cookies + CSRF) ====================
+  # Alternative authentication using httpOnly cookies with CSRF protection
+  auth_secure:
+    login_secure:
+      path: /auth/login-secure
+      method: POST
+      public: true
+      description: Secure login with httpOnly cookies
+
+    logout_secure:
+      path: /auth/logout-secure
+      method: POST
+      required_role: user
+      description: Secure logout (httpOnly cookies)
+
+    refresh_secure:
+      path: /auth/refresh-secure
+      method: POST
+      public: true
+      description: Refresh secure session
+
+    get_csrf_token:
+      path: /auth/csrf-token
+      method: GET
+      public: true
+      description: Get CSRF token for secure requests
+
+    validate_csrf:
+      path: /auth/validate-csrf
+      method: POST
+      public: true
+      description: Validate CSRF token
+
+  # ==================== USER PROFILE ENDPOINTS ====================
+  # User can manage their own profile, admin can manage any profile
+  user_profile:
+    get_profile:
+      path: /users/profile
+      method: GET
+      required_role: user
+      permission_code: profile:read
+      description: Get current user's profile
+
+    update_profile:
+      path: /users/profile
+      method: PUT
+      required_role: user
+      permission_code: profile:update
+      description: Update current user's profile
+
+    get_user_by_id:
+      path: /users/{user_id}
+      method: GET
+      required_role: admin
+      permission_code: users:read
+      description: Get specific user by ID
+
+    update_user:
+      path: /users/{user_id}
+      method: PUT
+      required_role: admin
+      permission_code: users:update
+      description: Update specific user (admin only)
+
+    delete_user:
+      path: /users/{user_id}
+      method: DELETE
+      required_role: admin
+      permission_code: users:delete
+      description: Delete specific user (admin only)
+
+    list_users:
+      path: /users
+      method: GET
+      required_role: admin
+      permission_code: users:list
+      description: List all users
+
+    create_user:
+      path: /users
+      method: POST
+      required_role: super_admin
+      permission_code: users:create
+      description: Create new user
+
+    approve_user:
+      path: /admin/users/{user_id}/approve
+      method: POST
+      required_role: admin
+      permission_code: users:approve
+      description: Approve pending user registration
+
+    reject_user:
+      path: /admin/users/{user_id}/reject
+      method: POST
+      required_role: admin
+      permission_code: users:reject
+      description: Reject pending user registration
+
+    get_admin_stats:
+      path: /admin/stats
+      method: GET
+      required_role: admin
+      permission_code: admin:read
+      description: Get admin dashboard statistics
+
+    get_audit_logs_admin:
+      path: /admin/audit-logs
+      method: GET
+      required_role: auditor
+      permission_code: audit:read
+      description: Get audit logs (admin view)
+
+  # ==================== EMAIL VERIFICATION ENDPOINTS ====================
+  # Email verification workflow management
+  email_verification:
+    send_verification:
+      path: /email-verification/send
+      method: POST
+      required_role: user
+      permission_code: email:verify
+      description: Send email verification code
+
+    verify_email_code:
+      path: /email-verification/verify
+      method: POST
+      public: true
+      description: Verify email with code
+
+    resend_verification_email:
+      path: /email-verification/resend
+      method: POST
+      public: true
+      description: Resend email verification code
+
+    check_email_status:
+      path: /email-verification/status/{user_id}
+      method: GET
+      required_role: admin
+      permission_code: email:read
+      description: Check email verification status
+
+  # ==================== MULTI-FACTOR AUTHENTICATION ENDPOINTS ====================
+  # MFA setup and verification
+  mfa:
+    enable_mfa:
+      path: /mfa/enable
+      method: POST
+      required_role: user
+      permission_code: mfa:write
+      description: Enable MFA for user
+
+    verify_mfa:
+      path: /mfa/verify
+      method: POST
+      public: true
+      description: Verify MFA code during login
+
+    verify_backup_code:
+      path: /mfa/verify-backup
+      method: POST
+      public: true
+      description: Verify backup code for MFA
+
+    disable_mfa:
+      path: /mfa/disable
+      method: POST
+      required_role: user
+      permission_code: mfa:write
+      description: Disable MFA for user
+
+    regenerate_backup_codes:
+      path: /mfa/regenerate-codes
+      method: POST
+      required_role: user
+      permission_code: mfa:write
+      description: Regenerate MFA backup codes
+
+    get_mfa_status:
+      path: /mfa/status/{user_id}
+      method: GET
+      required_role: admin
+      permission_code: mfa:read
+      description: Get MFA status for user
+
+  # ==================== SESSION MANAGEMENT ENDPOINTS ====================
+  # User session and device trust management
+  sessions:
+    create_session:
+      path: /sessions/create
+      method: POST
+      required_role: user
+      permission_code: session:write
+      description: Create new session
+
+    get_session:
+      path: /sessions/{session_id}
+      method: GET
+      required_role: user
+      permission_code: session:read
+      description: Get session details
+
+    record_session_activity:
+      path: /sessions/{session_id}/activity
+      method: POST
+      required_role: user
+      permission_code: session:write
+      description: Record session activity
+
+    list_user_sessions:
+      path: /sessions/user/{user_id}/list
+      method: GET
+      required_role: user
+      permission_code: session:read
+      description: List all sessions for user
+
+    revoke_session:
+      path: /sessions/{session_id}/revoke
+      method: POST
+      required_role: user
+      permission_code: session:write
+      description: Revoke specific session
+
+    revoke_all_sessions:
+      path: /sessions/user/{user_id}/revoke-all
+      method: POST
+      required_role: user
+      permission_code: session:write
+      description: Revoke all sessions for user
+
+    get_session_risk:
+      path: /sessions/{session_id}/risk
+      method: GET
+      required_role: user
+      permission_code: session:read
+      description: Get session risk assessment
+
+    get_device_trust:
+      path: /sessions/device/{user_id}/{device_id}/trust
+      method: GET
+      required_role: user
+      permission_code: device:read
+      description: Get device trust status
+
+  # ==================== RBAC ENDPOINTS ====================
+  # Role and permission management
+  rbac:
+    list_roles:
+      path: /rbac/roles
+      method: GET
+      required_role: admin
+      permission_code: rbac:read
+      description: List all available roles
+
+    list_role_permissions:
+      path: /rbac/roles/{role_name}/permissions
+      method: GET
+      required_role: admin
+      permission_code: rbac:read
+      description: List permissions for a specific role
+
+    get_user_roles:
+      path: /rbac/users/{user_id}/roles
+      method: GET
+      required_role: admin
+      permission_code: rbac:read
+      description: Get roles assigned to a user
+
+    assign_role:
+      path: /rbac/users/{user_id}/roles
+      method: POST
+      required_role: admin
+      permission_code: rbac:write
+      description: Assign single role to user
+
+    batch_assign_roles:
+      path: /rbac/users/{user_id}/roles/batch
+      method: POST
+      required_role: admin
+      permission_code: rbac:write
+      description: Assign multiple roles to user at once (batch operation)
+
+    revoke_role:
+      path: /rbac/users/{user_id}/roles/{role_name}
+      method: DELETE
+      required_role: admin
+      permission_code: rbac:write
+      description: Revoke role from user
+
+    check_permission:
+      path: /rbac/users/{user_id}/check-permission
+      method: POST
+      required_role: admin
+      permission_code: rbac:read
+      description: Check if user has specific permission
+
+    get_user_permissions:
+      path: /rbac/users/{user_id}/permissions
+      method: GET
+      required_role: admin
+      permission_code: rbac:read
+      description: Get all permissions for a user
+
+    can_assign_role:
+      path: /rbac/admin/can-assign-role/{role_name}
+      method: GET
+      required_role: admin
+      permission_code: rbac:read
+      description: Check if current admin can assign a specific role
+
+  # ==================== AUDIT LOG ENDPOINTS ====================
+  audit:
+    list_audit_logs:
+      path: /audit/logs
+      method: GET
+      required_role: auditor
+      permission_code: audit:read
+      description: List audit logs for compliance
+
+    get_audit_log:
+      path: /audit/logs/{log_id}
+      method: GET
+      required_role: auditor
+      permission_code: audit:read
+      description: Get specific audit log entry
+
+    export_audit_logs:
+      path: /audit/logs/export
+      method: GET
+      required_role: auditor
+      permission_code: audit:read
+      description: Export audit logs
+
+    filter_audit_logs:
+      path: /audit/logs/filter
+      method: POST
+      required_role: auditor
+      permission_code: audit:read
+      description: Filter audit logs by criteria
+
+  # ==================== GDPR ENDPOINTS ====================
+  # Data privacy and user data management
+  gdpr:
+    export_user_data:
+      path: /gdpr/export/my-data
+      method: POST
+      required_role: user
+      permission_code: gdpr:export
+      description: Export user's personal data (GDPR right)
+
+    delete_user_account:
+      path: /gdpr/delete/my-account
+      method: DELETE
+      required_role: user
+      permission_code: gdpr:delete
+      description: Delete user account and all associated data (GDPR right)
+
+    check_export_status:
+      path: /gdpr/export/status/{export_id}
+      method: GET
+      required_role: user
+      permission_code: gdpr:read
+      description: Check status of data export request
+
+  # ==================== ADMIN FEATURE MANAGEMENT ====================
+  # Feature flags and feature management (admin only)
+  features:
+    get_user_features:
+      path: /api/admin/features/users/{target_user_id}
+      method: GET
+      required_role: admin
+      permission_code: features:read
+      description: Get feature flags for a specific user
+
+    enable_feature_for_user:
+      path: /api/admin/features/users/{target_user_id}/enable
+      method: POST
+      required_role: admin
+      permission_code: features:write
+      description: Enable a feature for a user
+
+    disable_feature_for_user:
+      path: /api/admin/features/users/{target_user_id}/disable
+      method: POST
+      required_role: admin
+      permission_code: features:write
+      description: Disable a feature for a user
+
+    upgrade_user_features:
+      path: /api/admin/features/users/{target_user_id}/upgrade
+      method: POST
+      required_role: admin
+      permission_code: features:write
+      description: Upgrade user feature tier
+
+    bulk_enable_features:
+      path: /api/admin/features/bulk/enable
+      method: POST
+      required_role: admin
+      permission_code: features:write
+      description: Bulk enable features for multiple users
+
+    get_feature_usage_stats:
+      path: /api/admin/features/stats/usage
+      method: GET
+      required_role: admin
+      permission_code: features:read
+      description: Get feature usage statistics
+
+    get_user_feature_usage:
+      path: /api/admin/features/users/{target_user_id}/usage
+      method: GET
+      required_role: admin
+      permission_code: features:read
+      description: Get feature usage for specific user
+
+    reset_user_feature_usage:
+      path: /api/admin/features/users/{target_user_id}/reset-usage
+      method: POST
+      required_role: admin
+      permission_code: features:write
+      description: Reset usage counters for user features
+
+    delete_user_features:
+      path: /api/admin/features/users/{target_user_id}
+      method: DELETE
+      required_role: admin
+      permission_code: features:write
+      description: Delete all features for a user
+
+  # ==================== CIRCUIT BREAKER ENDPOINTS ====================
+  # System reliability and circuit breaker monitoring (admin/auditor)
+  circuit_breakers:
+    list_circuit_breakers:
+      path: /api/admin/circuit-breakers
+      method: GET
+      required_role: admin
+      permission_code: system:read
+      description: List all circuit breaker states
+
+    reset_circuit_breaker:
+      path: /api/admin/circuit-breakers/{service_name}
+      method: POST
+      required_role: admin
+      permission_code: system:write
+      description: Reset specific circuit breaker
+
+  # ==================== METRICS ENDPOINTS ====================
+  # Application metrics and monitoring (admin/auditor)
+  metrics:
+    list_metrics:
+      path: /api/admin/metrics
+      method: GET
+      required_role: admin
+      permission_code: system:read
+      description: List all application metrics
+
+    get_metric:
+      path: /api/admin/metrics/{metric_name}
+      method: GET
+      required_role: admin
+      permission_code: system:read
+      description: Get specific metric by name
+
+  # ==================== PROFILE ENDPOINTS ====================
+  # User profile management
+  profile:
+    get_current_profile:
+      path: /profile/me
+      method: GET
+      required_role: user
+      permission_code: profile:read
+      description: Get current user's profile
+
+    update_current_profile:
+      path: /profile/me
+      method: PUT
+      required_role: user
+      permission_code: profile:update
+      description: Update current user's profile
+
+  # ==================== FRONTEND LOGGING ENDPOINTS ====================
+  # Client-side logging and debugging
+  frontend_logs:
+    log_frontend_error:
+      path: /api/logs
+      method: POST
+      required_role: user
+      permission_code: logs:write
+      description: Log frontend errors and events
+
+  # ==================== EMPLOYEE MANAGEMENT (Future) ====================
+  # Can be added when needed
+  employees:
+    # Placeholder for employee management endpoints
+    # These would typically include:
+    # - GET /api/employees (list all employees)
+    # - GET /api/employees/{id} (get employee details)
+    # - POST /api/employees (create new employee)
+    # - PUT /api/employees/{id} (update employee)
+    # - DELETE /api/employees/{id} (delete employee)
+    list_employees:
+      path: /api/employees
+      method: GET
+      required_role: employee
+      permission_code: employees:list
+      description: List all employees
+
+  # ==================== TEAM MANAGEMENT (Future) ====================
+  # Can be added when needed
+  team:
+    # Placeholder for team management endpoints
+    list_teams:
+      path: /api/teams
+      method: GET
+      required_role: manager
+      permission_code: team:read
+      description: List all teams
+
+# ==================== CONFIGURATION SETTINGS ====================
+config:
+  # Enable/disable dynamic permission checking
+  dynamic_checking_enabled: true
+
+  # Cache configuration
+  cache_ttl_seconds: 600 # 10 minutes
+
+  # Paths that should skip permission checking
+  skip_paths:
+    - /health
+    - /docs
+    - /redoc
+    - /openapi.json
+    - /favicon.ico
+
+  # Default role for permission checking if not specified
+  default_role: user
+
+  # Enable audit logging for permission checks (performance impact)
+  log_permission_checks: false

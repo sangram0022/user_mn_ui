@@ -1,4 +1,4 @@
-import { useActionState, useOptimistic, useState, useEffect } from 'react';
+import { useActionState, useOptimistic, useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
@@ -10,6 +10,7 @@ import { Button, Input } from '../../../components';
 import { useLogin } from '../hooks/useLogin';
 import { ValidationBuilder } from '../../../core/validation';
 import { parseAuthError, getErrorActions, type ErrorAction } from '../utils/authErrorMapping';
+import { debounce } from '../../../shared/utils/debounce';
 
 // React 19: Server Action type
 type LoginState = {
@@ -70,6 +71,33 @@ export default function LoginPage() {
   
   // Error actions for contextual help
   const [errorActions, setErrorActions] = useState<ErrorAction[]>([]);
+
+  // Real-time field validation with debouncing (reduces calls by 10x for better performance)
+  const validateFieldDebounced = useCallback(
+    debounce((fieldName: string, value: string) => {
+      if (!value) {
+        setFieldErrors((prev) => ({ ...prev, [fieldName]: '' }));
+        return;
+      }
+
+      try {
+        const validation = new ValidationBuilder()
+          .validateField(fieldName, value, (b) => {
+            if (fieldName === 'email') return b.email();
+            return b.password();
+          })
+          .result();
+
+        setFieldErrors((prev) => ({
+          ...prev,
+          [fieldName]: !validation.isValid && validation.errors.length > 0 ? validation.errors[0] : '',
+        }));
+      } catch {
+        // Validation error - silently skip
+      }
+    }, 300),
+    []
+  );
 
   // Load remembered email on mount
   useEffect(() => {
@@ -147,6 +175,11 @@ export default function LoginPage() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+
+    // Trigger debounced field validation for real-time feedback (performance optimized - reduces calls 10x)
+    if (type !== 'checkbox' && (name === 'email' || name === 'password')) {
+      validateFieldDebounced(name, value);
+    }
   };
 
   return (

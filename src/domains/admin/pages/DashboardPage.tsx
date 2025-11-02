@@ -5,6 +5,7 @@ import Button from '../../../shared/components/ui/Button';
 import Card from '../../../shared/components/ui/Card';
 import Badge from '../../../shared/components/ui/Badge';
 import { animationUtils } from '../../../design-system/variants';
+import { VirtualTable } from '../../../shared/components/VirtualTable';
 
 // Dummy data - Single source of truth
 const userData = [
@@ -98,7 +99,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* User Management Table */}
+      {/* User Management Table - Virtual Scrolling for Performance */}
       <Card className="animate-slide-up">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">{t('dashboard.userManagement.title')}</h2>
@@ -118,60 +119,70 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('dashboard.userManagement.table.headers.user')}</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('dashboard.userManagement.table.headers.email')}</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('dashboard.userManagement.table.headers.role')}</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('dashboard.userManagement.table.headers.status')}</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('dashboard.userManagement.table.headers.joined')}</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('dashboard.userManagement.table.headers.actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {userData.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 bg-linear-to-br ${user.color} rounded-full flex items-center justify-center text-white font-semibold`}>
-                        {user.initials}
-                      </div>
-                      <span className="font-medium text-gray-900">{user.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{user.email}</td>
-                  <td className="px-6 py-4">
-                    <Badge variant={roleVariant[user.role]}>{user.role}</Badge>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge variant={statusVariant[user.status]}>{user.status}</Badge>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{user.joined}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button className="p-2 text-brand-primary hover:bg-blue-50 rounded-lg transition-colors" aria-label={t('dashboard.userManagement.table.actions.edit')}>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button className="p-2 text-semantic-error hover:bg-red-50 rounded-lg transition-colors" aria-label={t('dashboard.userManagement.table.actions.delete')}>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* Virtual Table with high performance - renders only visible rows */}
+        <VirtualTable
+          columns={['User', 'Email', 'Role', 'Status', 'Joined', 'Actions']}
+          data={userData}
+          rowHeight={60}
+          maxHeight={600}
+          renderCell={(value, key, rowIndex) => {
+            const user = userData[rowIndex ?? 0];
 
-        {/* Pagination */}
+            // Custom rendering for User column (with avatar and name)
+            if (key === 'User') {
+              return (
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 bg-linear-to-br ${user.color} rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0`}>
+                    {user.initials}
+                  </div>
+                  <span className="font-medium text-gray-900">{user.name}</span>
+                </div>
+              );
+            }
+
+            // Custom rendering for Role column
+            if (key === 'Role') {
+              return <Badge variant={roleVariant[user.role]}>{user.role}</Badge>;
+            }
+
+            // Custom rendering for Status column
+            if (key === 'Status') {
+              return <Badge variant={statusVariant[user.status]}>{user.status}</Badge>;
+            }
+
+            // Custom rendering for Actions column
+            if (key === 'Actions') {
+              return (
+                <div className="flex gap-2">
+                  <button
+                    className="p-2 text-brand-primary hover:bg-blue-50 rounded-lg transition-colors"
+                    aria-label={t('dashboard.userManagement.table.actions.edit')}
+                    type="button"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button
+                    className="p-2 text-semantic-error hover:bg-red-50 rounded-lg transition-colors"
+                    aria-label={t('dashboard.userManagement.table.actions.delete')}
+                    type="button"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              );
+            }
+
+            return value;
+          }}
+        />
+
+        {/* Pagination Info */}
         <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-200">
-          <p className="text-sm text-gray-600">{t('dashboard.userManagement.pagination.showing', { from: 1, to: 5, total: 1234 })}</p>
+          <p className="text-sm text-gray-600">{t('dashboard.userManagement.pagination.showing', { from: 1, to: userData.length, total: 1234 })}</p>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled>
               {t('dashboard.userManagement.pagination.previous')}

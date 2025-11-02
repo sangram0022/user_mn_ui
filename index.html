@@ -5,7 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     
-    <!-- Security: Additional Headers (for development - configure via HTTP headers in production) -->
+    <!-- ============================================
+         PERFORMANCE: Font Loading Optimization
+         ============================================ -->
+    <!-- System fonts: instant loading without FOIT/FOUT -->
+    <!-- No external font requests = faster FCP -->
+    
+    <!-- Preconnect to common external resources (if needed in future) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" as="style">
+    <link rel="dns-prefetch" href="https://api.example.com">
+    
+    <!-- ============================================
+         SECURITY HEADERS
+         ============================================ -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     

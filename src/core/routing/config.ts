@@ -10,6 +10,7 @@
 
 import type { ComponentType, LazyExoticComponent } from 'react';
 import { lazy } from 'react';
+import type { UserRole } from '../../domains/rbac/types/rbac.types';
 
 // ========================================
 // Types
@@ -30,7 +31,7 @@ export interface RouteConfig {
    * Empty array = any authenticated user
    * ['admin'] = only admin users
    */
-  requiredRoles?: string[];
+  requiredRoles?: UserRole[];
 }
 
 // ========================================

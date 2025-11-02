@@ -4,12 +4,17 @@ import { QueryClient } from '@tanstack/react-query';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      staleTime: 5 * 60 * 1000, // 5 minutes - reduces duplicate requests
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime) - keeps data in memory
       retry: 3,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: 'always', // Refetch when window regains focus for freshness
       refetchOnReconnect: true,
+      // ✅ CRITICAL: React Query automatically deduplicates identical requests
+      // When multiple components request the same queryKey simultaneously,
+      // only ONE request is made and all components share the result.
+      // This is built-in behavior - no additional config needed,
+      // but staleTime ensures we don't request again too quickly.
     },
     mutations: {
       retry: 1,
