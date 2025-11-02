@@ -32,7 +32,45 @@ const API_PREFIX = '/api/v1/auth';
  */
 export const login = async (data: LoginRequest): Promise<LoginResponse> => {
   const response = await apiClient.post<LoginResponse>(`${API_PREFIX}/login`, data);
-  return response.data;
+  // Some backend APIs wrap the useful payload under `data` (e.g. { success, message, data: { ... } }).
+  // Unwrap when present so the hook callers receive the expected flat LoginResponse shape.
+  // If the API already returns the flat shape, just return it.
+  // This makes the service resilient to both backend styles.
+  const respData = (response.data as unknown) as Record<string, unknown>;
+  if (respData && 'data' in respData && respData['data']) {
+    const payload = respData['data'] as Record<string, unknown>;
+
+    // If backend returned user fields at the top-level of payload (legacy style),
+    // adapt it into the expected LoginResponse shape with a `user` object.
+    if (payload && !('user' in payload) && ('user_id' in payload || 'email' in payload)) {
+      const access_token = (payload['access_token'] as string) || '';
+      const refresh_token = (payload['refresh_token'] as string) || '';
+  const token_type = (payload['token_type'] as string) ?? 'bearer';
+      const expires_in = (payload['expires_in'] as number) || 0;
+
+      const user = {
+        user_id: (payload['user_id'] as string) || (payload['userId'] as string) || '',
+        email: (payload['email'] as string) || '',
+        first_name: (payload['first_name'] as string) || '',
+        last_name: (payload['last_name'] as string) || '',
+        roles: (payload['roles'] as string[]) || [],
+        is_active: !!payload['is_active'],
+        is_verified: !!payload['is_verified'],
+      } as Partial<import('../types/auth.types').User>;
+
+      return {
+        access_token,
+        refresh_token,
+        token_type,
+        expires_in,
+        user,
+      } as LoginResponse;
+    }
+
+  return payload as unknown as LoginResponse;
+  }
+
+  return response.data as LoginResponse;
 };
 
 /**

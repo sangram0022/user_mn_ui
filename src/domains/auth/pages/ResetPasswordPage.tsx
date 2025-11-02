@@ -11,7 +11,7 @@ import { Button, Input } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 
 export default function ResetPasswordPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['auth', 'common', 'errors', 'validation']);
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
   const toast = useToast();
@@ -63,7 +63,7 @@ export default function ResetPasswordPage() {
     e.preventDefault();
 
     if (!token) {
-      toast.error(t('errors.RESET_TOKEN_INVALID'));
+      toast.error(t('errors:RESET_TOKEN_INVALID'));
       return;
     }
 
@@ -84,22 +84,22 @@ export default function ResetPasswordPage() {
       }
       
       setFieldErrors(errors);
-      toast.error(t('auth.validation.validationFailed'));
+      toast.error(t('validation:validationFailed'));
       return;
     }
 
     // Password confirmation check
     if (formData.password !== formData.confirmPassword) {
-      setFieldErrors({ confirmPassword: t('errors.PASSWORD_MISMATCH') });
-      toast.error(t('errors.PASSWORD_MISMATCH'));
+      setFieldErrors({ confirmPassword: t('errors:PASSWORD_MISMATCH') });
+      toast.error(t('errors:PASSWORD_MISMATCH'));
       return;
     }
 
     // Check password strength
     const strength = calculatePasswordStrength(formData.password);
     if (strength.score < 40) {
-      setFieldErrors({ password: t('validation.password.tooWeak') });
-      toast.error(t('validation.password.tooWeak'));
+      setFieldErrors({ password: t('validation:password.tooWeak') });
+      toast.error(t('validation:password.tooWeak'));
       return;
     }
 
@@ -113,17 +113,17 @@ export default function ResetPasswordPage() {
       },
       {
         onSuccess: () => {
-          setIsSuccess(true);
-          toast.success(t('auth.resetPassword.successMessage'));
+              setIsSuccess(true);
+              toast.success(t('resetPassword.successMessage'));
           setTimeout(() => {
             navigate(ROUTE_PATHS.LOGIN, {
-              state: { message: t('auth.resetPassword.successMessage') },
+                  state: { message: t('resetPassword.successMessage') },
             });
           }, 3000);
         },
         onError: (error: Error) => {
           const errorMapping = parseAuthError(error);
-          toast.error(errorMapping.message || t('auth.resetPassword.error'));
+          toast.error(errorMapping.message || t('resetPassword.error'));
         },
       }
     );
@@ -137,10 +137,10 @@ export default function ResetPasswordPage() {
             <CheckCircle className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-text-primary mb-2">
-            {t('auth.resetPassword.successMessage')}
+            {t('resetPassword.successMessage')}
           </h1>
           <p className="text-text-tertiary mb-6">
-            {t('common.status.redirecting')}
+            {t('common:status.redirecting')}
           </p>
         </div>
       </div>
@@ -155,10 +155,10 @@ export default function ResetPasswordPage() {
             <Lock className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-text-primary mb-2">
-            {t('auth.resetPassword.title')}
+            {t('resetPassword.title')}
           </h1>
           <p className="text-text-tertiary">
-            {t('auth.resetPassword.subtitle')}
+            {t('resetPassword.subtitle')}
           </p>
         </div>
 
@@ -166,7 +166,7 @@ export default function ResetPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="password" className="form-label">
-                {t('auth.resetPassword.passwordLabel')}
+                {t('resetPassword.passwordLabel')}
               </label>
               <div className="relative">
                 <Input
@@ -177,7 +177,7 @@ export default function ResetPasswordPage() {
                   onChange={handleChange}
                   required
                   autoComplete="new-password"
-                  placeholder={t('auth.resetPassword.passwordPlaceholder')}
+                  placeholder={t('resetPassword.passwordPlaceholder')}
                   className="pl-10 pr-10"
                   error={fieldErrors.password}
                 />
@@ -207,12 +207,12 @@ export default function ResetPasswordPage() {
                 </div>
               )}
               
-              <p className="form-hint">{t('validation.password.minLength')}</p>
+              <p className="form-hint">{t('validation:password.minLength')}</p>
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="form-label">
-                {t('auth.resetPassword.confirmPasswordLabel')}
+                {t('resetPassword.confirmPasswordLabel')}
               </label>
               <div className="relative">
                 <Input
@@ -223,7 +223,7 @@ export default function ResetPasswordPage() {
                   onChange={handleChange}
                   required
                   autoComplete="new-password"
-                  placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
+                  placeholder={t('resetPassword.confirmPasswordPlaceholder')}
                   className="pl-10 pr-10"
                   error={fieldErrors.confirmPassword}
                 />
@@ -247,7 +247,7 @@ export default function ResetPasswordPage() {
               disabled={isPending || !formData.password || !formData.confirmPassword}
               className="w-full"
             >
-              {isPending ? t('auth.resetPassword.submitting') : t('auth.resetPassword.submitButton')}
+              {isPending ? t('resetPassword.submitting') : t('resetPassword.submitButton')}
             </Button>
           </form>
 
@@ -256,13 +256,13 @@ export default function ResetPasswordPage() {
               to={ROUTE_PATHS.LOGIN}
               className="text-primary hover:text-primary-dark font-medium"
             >
-              {t('auth.resetPassword.backToLogin')}
+              {t('resetPassword.backToLogin')}
             </Link>
             <Link
               to={ROUTE_PATHS.FORGOT_PASSWORD}
               className="text-primary hover:text-primary-dark font-medium"
             >
-              {t('common.actions.requestNew')}
+              {t('common:actions.requestNew')}
             </Link>
           </div>
         </div>
