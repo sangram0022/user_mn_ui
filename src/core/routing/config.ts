@@ -48,6 +48,7 @@ const LazyChangePasswordPage = lazy(() => import('../../domains/auth/pages/Chang
 // Admin Pages
 const LazyAdminDashboardPage = lazy(() => import('../../domains/admin/pages/DashboardPage'));
 const LazyAdminAuditLogsPage = lazy(() => import('../../domains/admin/pages/AuditLogsPage'));
+const LazyAdminUsersPage = lazy(() => import('../../domains/admin/pages/UsersPage'));
 
 // Auditor Pages
 const LazyAuditorDashboardPage = lazy(() => import('../../domains/auditor/pages/DashboardPage'));
@@ -208,6 +209,15 @@ export const routes: RouteConfig[] = [
     guard: 'admin',
     title: 'Audit Logs',
     description: 'Manage and review audit logs',
+    requiredRoles: ['admin', 'super_admin'],
+  },
+  {
+    path: '/users',
+    component: LazyAdminUsersPage,
+    layout: 'admin',
+    guard: 'admin',
+    title: 'Users Management',
+    description: 'Manage all users in the system',
     requiredRoles: ['admin', 'super_admin'],
   },
 

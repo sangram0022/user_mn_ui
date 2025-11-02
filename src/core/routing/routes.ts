@@ -28,6 +28,7 @@ export const ROUTE_PATHS = {
   ADMIN_DASHBOARD: '/admin',
   ROLES_LIST: '/admin/roles',
   AUDIT_LOGS: '/admin/audit-logs',
+  REPORTS: '/admin/reports',
   MONITORING_HEALTH: '/admin/monitoring',
 
   // Reference UI pages (development only - delete before production)
