@@ -1,7 +1,7 @@
 # ============================================================================
 # GitLab CI/CD Pipeline for React TypeScript Application
 # ============================================================================
-# 
+#
 # Pipeline Structure:
 # 1. PR Pipeline: Runs on every PR and commit push (automatic)
 #    - Validation, Testing, Security, Build
@@ -14,19 +14,19 @@ variables:
   # Node.js Configuration
   NODE_VERSION: "20"
   NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
-  
+
   # Application Configuration
   APP_NAME: "usermn1"
   REACT_VERSION: "19"
-  
+
   # Build Configuration
   NODE_ENV: "production"
   CI: "true"
-  
+
   # Quality Thresholds
   COVERAGE_THRESHOLD: "80"
   PERFORMANCE_SCORE_MIN: "90"
-  
+
   # AWS Configuration (set these in GitLab CI/CD Variables)
   # AWS_ACCESS_KEY_ID: (secret)
   # AWS_SECRET_ACCESS_KEY: (secret)
@@ -40,14 +40,13 @@ variables:
 # Pipeline Stages
 # ============================================================================
 stages:
-  - install        # Install dependencies (caching)
-  - validate       # Code quality checks
-  - test           # Run all tests
-  - security       # Security scans
-  - build          # Build application
+  - install # Install dependencies (caching)
+  - validate # Code quality checks
+  - test # Run all tests
+  - security # Security scans
+  - build # Build application
   - deploy-staging # Auto deploy to staging (on merge only)
-  - deploy-prod    # Manual deploy to production (on merge only)
-
+  - deploy-prod # Manual deploy to production (on merge only)
 
 # ============================================================================
 # Cache Configuration
@@ -101,7 +100,7 @@ stages:
 # ============================================================================
 install:
   stage: install
-  extends: 
+  extends:
     - .node_base
     - .cache_dependencies
   script:
@@ -284,7 +283,7 @@ deploy_staging:
         echo "Please set AWS credentials and S3 bucket in GitLab CI/CD settings"
         exit 1
       fi
-    
+
     - echo "Uploading static assets to S3: $S3_BUCKET_STAGING"
     - |
       aws s3 sync dist/ s3://$S3_BUCKET_STAGING/ \
@@ -293,7 +292,7 @@ deploy_staging:
         --exclude "index.html" \
         --exclude "*.html" \
         --exclude "manifest.webmanifest"
-    
+
     - echo "Uploading HTML files with no-cache policy..."
     - |
       aws s3 sync dist/ s3://$S3_BUCKET_STAGING/ \
@@ -301,7 +300,7 @@ deploy_staging:
         --exclude "*" \
         --include "*.html" \
         --include "manifest.webmanifest"
-    
+
     - |
       if [ -n "$CLOUDFRONT_DISTRIBUTION_ID_STAGING" ]; then
         echo "🔄 Invalidating CloudFront cache..."
@@ -314,7 +313,7 @@ deploy_staging:
       else
         echo "⚠️  CloudFront distribution ID not set, skipping cache invalidation"
       fi
-    
+
     - echo "✅ Staging deployment completed!"
     - echo "🌐 Staging URL: https://$S3_BUCKET_STAGING/"
   environment:
@@ -343,13 +342,13 @@ deploy_production:
         echo "❌ S3_BUCKET_PRODUCTION not configured in CI/CD variables"
         exit 1
       fi
-    
+
     - echo "📦 Creating backup of current production..."
     - |
       BACKUP_BUCKET="${S3_BUCKET_PRODUCTION}-backup-$(date +%Y%m%d-%H%M%S)"
       aws s3 sync s3://$S3_BUCKET_PRODUCTION/ s3://$BACKUP_BUCKET/ || echo "No existing deployment to backup"
       echo "Backup created: $BACKUP_BUCKET"
-    
+
     - echo "📤 Uploading static assets to production..."
     - |
       aws s3 sync dist/ s3://$S3_BUCKET_PRODUCTION/ \
@@ -358,7 +357,7 @@ deploy_production:
         --exclude "index.html" \
         --exclude "*.html" \
         --exclude "manifest.webmanifest"
-    
+
     - echo "📤 Uploading HTML files..."
     - |
       aws s3 sync dist/ s3://$S3_BUCKET_PRODUCTION/ \
@@ -366,7 +365,7 @@ deploy_production:
         --exclude "*" \
         --include "*.html" \
         --include "manifest.webmanifest"
-    
+
     - |
       if [ -n "$CLOUDFRONT_DISTRIBUTION_ID_PRODUCTION" ]; then
         echo "🔄 Invalidating CloudFront cache..."
@@ -382,7 +381,7 @@ deploy_production:
           --distribution-id $CLOUDFRONT_DISTRIBUTION_ID_PRODUCTION \
           --id $INVALIDATION_ID || echo "Invalidation in progress..."
       fi
-    
+
     - echo "✅ PRODUCTION DEPLOYMENT COMPLETED SUCCESSFULLY!"
     - echo "🌐 Production URL: https://$S3_BUCKET_PRODUCTION/"
   environment:
@@ -408,19 +407,19 @@ rollback_production:
         echo "❌ S3_BUCKET_PRODUCTION not configured"
         exit 1
       fi
-    
+
     - echo "🔍 Finding latest backup..."
     - |
       LATEST_BACKUP=$(aws s3 ls | grep "${S3_BUCKET_PRODUCTION}-backup-" | tail -1 | awk '{print $3}')
-      
+
       if [ -z "$LATEST_BACKUP" ]; then
         echo "❌ No backup found for rollback"
         exit 1
       fi
-      
+
       echo "📦 Restoring from backup: $LATEST_BACKUP"
       aws s3 sync s3://$LATEST_BACKUP/ s3://$S3_BUCKET_PRODUCTION/ --delete
-    
+
     - |
       if [ -n "$CLOUDFRONT_DISTRIBUTION_ID_PRODUCTION" ]; then
         echo "🔄 Invalidating CloudFront cache after rollback..."
@@ -428,7 +427,7 @@ rollback_production:
           --distribution-id $CLOUDFRONT_DISTRIBUTION_ID_PRODUCTION \
           --paths "/*"
       fi
-    
+
     - echo "✅ Rollback completed successfully!"
   environment:
     name: production
@@ -454,22 +453,22 @@ notify_deployment:
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       🎉 DEPLOYMENT SUMMARY
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-      
+
       📦 Application: $APP_NAME
       🌿 Branch: $CI_COMMIT_BRANCH
       📝 Commit: $CI_COMMIT_SHORT_SHA
       👤 Author: $CI_COMMIT_AUTHOR
       🏷️  Message: $CI_COMMIT_TITLE
-      
+
       🔗 Pipeline: $CI_PIPELINE_URL
       ⏱️  Duration: $CI_PIPELINE_DURATION seconds
-      
+
       🌐 Staging: https://$S3_BUCKET_STAGING/
       🌐 Production: https://$S3_BUCKET_PRODUCTION/
-      
+
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       EOF
-    
+
     # Add your notification webhook here (Slack, Discord, Email, etc.)
     # Example Slack webhook:
     # - |
