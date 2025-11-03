@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
@@ -6,46 +6,17 @@ import { useToast } from '../../../hooks/useToast';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
 import Badge from '../../../shared/components/ui/Badge';
-import { useRegister } from '../hooks/useRegister';
-import { ValidationBuilder, calculatePasswordStrength } from '../../../core/validation';
-import { parseAuthError } from '../utils/authErrorMapping';
-import { debounce } from '../../../shared/utils/debounce';
+import { useRegister } from '../hooks/useAuth.hooks';
+import { calculatePasswordStrength } from '../../../core/validation';
+import { getErrorMessage } from '../utils/error.utils';
 
 export default function RegisterPage() {
-  const { t } = useTranslation(['auth', 'common', 'errors', 'validation']);
+  const { t } = useTranslation(['auth', 'common', 'errors']);
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [passwordStrength, setPasswordStrength] = useState<'weak' | 'fair' | 'good' | 'strong' | 'very_strong'>('weak');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  // Real-time field validation with debouncing (reduces calls by 10x for better performance)
-  const validateFieldDebounced = useCallback(
-    debounce((fieldName: string, value: string) => {
-      if (!value) {
-        setFieldErrors((prev) => ({ ...prev, [fieldName]: '' }));
-        return;
-      }
-
-      try {
-        const validation = new ValidationBuilder()
-          .validateField(fieldName, value, (b) => {
-            if (fieldName === 'email') return b.email();
-            if (fieldName === 'password') return b.password();
-            return b.name();
-          })
-          .result();
-
-        setFieldErrors((prev) => ({
-          ...prev,
-          [fieldName]: !validation.isValid && validation.errors.length > 0 ? validation.errors[0] : '',
-        }));
-      } catch {
-        // Validation error - silently skip
-      }
-    }, 300),
-    []
-  );
+  // Use new centralized register hook
+  const { register, loading, fieldErrors: apiFieldErrors } = useRegister();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -56,50 +27,23 @@ export default function RegisterPage() {
     terms: false,
   });
 
-  // Use proper register mutation hook
-  const registerMutation = useRegister({
-    onSuccess: (data) => {
-      toast.success(data.message || t('common.success.saved'));
-      navigate(ROUTE_PATHS.LOGIN);
-    },
-    onError: (error) => {
-      // Parse error using error mapping for better messages
-      const errorMapping = parseAuthError(error);
-      toast.error(errorMapping.message);
-    },
-  });
+  const [passwordStrength, setPasswordStrength] = useState<'weak' | 'fair' | 'good' | 'strong' | 'very_strong'>('weak');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // Merge API field errors with local errors
+  useEffect(() => {
+    if (apiFieldErrors) {
+      setFieldErrors((prev) => ({ ...prev, ...apiFieldErrors }));
+    }
+  }, [apiFieldErrors]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Client-side validation using core validation system
-    const validation = new ValidationBuilder()
-      .validateField('first_name', formData.firstName, (b) => b.required().name())
-      .validateField('last_name', formData.lastName, (b) => b.required().name())
-      .validateField('email', formData.email, (b) => b.required().email())
-      .validateField('password', formData.password, (b) => b.required().password())
-      .result();
-
-  if (!validation.isValid) {
-      const errors: Record<string, string> = {};
-      
-      if (validation.fields) {
-        Object.entries(validation.fields).forEach(([fieldName, fieldResult]) => {
-          if (!fieldResult.isValid && fieldResult.errors.length > 0) {
-            errors[fieldName] = fieldResult.errors[0];
-          }
-        });
-      }
-      
-      setFieldErrors(errors);
-      toast.error(t('errors:validationFailed'));
-      return;
-    }
-
-    // Clear field errors on successful validation
     setFieldErrors({});
 
+    // Client-side validation
     if (formData.password !== formData.confirmPassword) {
+      setFieldErrors({ confirmPassword: t('errors:PASSWORD_MISMATCH') });
       toast.error(t('errors:PASSWORD_MISMATCH'));
       return;
     }
@@ -110,34 +54,35 @@ export default function RegisterPage() {
     }
 
     try {
-      await registerMutation.mutateAsync({
-        first_name: formData.firstName,
-        last_name: formData.lastName,
+      const result = await register({
         email: formData.email,
         password: formData.password,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
       });
+      
+      if (result.success && result.data) {
+        toast.success(result.data.message || t('common.success.saved'));
+        navigate(ROUTE_PATHS.LOGIN);
+      } else if (result.error) {
+        const errorMessage = result.error.code 
+          ? getErrorMessage(result.error.code) 
+          : result.error.message;
+        toast.error(errorMessage);
+      }
     } catch (error) {
-      // Error is already handled by onError callback
-      console.error('Registration error:', error);
+      const errorMessage = error instanceof Error ? error.message : t('errors:REGISTRATION_FAILED');
+      toast.error(errorMessage);
     }
   };
 
   const handleChange = (field: string, value: string | boolean) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
-    // Trigger debounced field validation for real-time feedback (performance optimized - reduces calls 10x)
-    if (typeof value === 'string' && ['firstName', 'lastName', 'email', 'password'].includes(field)) {
-      validateFieldDebounced(field, value);
-    }
-
-    // Password strength check using core validation system
+    // Password strength check
     if (field === 'password' && typeof value === 'string') {
       const strength = calculatePasswordStrength(value);
       setPasswordStrength(strength.strength);
-      // Note: feedback available in strength.feedback for future UI enhancement
     }
   };
 
@@ -166,6 +111,7 @@ export default function RegisterPage() {
               onChange={(e) => handleChange('firstName', e.target.value)}
               error={fieldErrors.first_name}
               required
+              disabled={loading}
               icon={
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -180,6 +126,7 @@ export default function RegisterPage() {
               onChange={(e) => handleChange('lastName', e.target.value)}
               error={fieldErrors.last_name}
               required
+              disabled={loading}
               icon={
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -196,6 +143,7 @@ export default function RegisterPage() {
             onChange={(e) => handleChange('email', e.target.value)}
             error={fieldErrors.email}
             required
+            disabled={loading}
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -212,6 +160,7 @@ export default function RegisterPage() {
               onChange={(e) => handleChange('password', e.target.value)}
               error={fieldErrors.password}
               required
+              disabled={loading}
               icon={
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -236,13 +185,15 @@ export default function RegisterPage() {
             )}
           </div>
 
-            <Input
+          <Input
             type="password"
             label={t('register.confirmPasswordLabel')}
             placeholder={t('register.confirmPasswordPlaceholder')}
             value={formData.confirmPassword}
             onChange={(e) => handleChange('confirmPassword', e.target.value)}
+            error={fieldErrors.confirmPassword}
             required
+            disabled={loading}
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -269,8 +220,14 @@ export default function RegisterPage() {
             </span>
           </label>
 
-          <Button type="submit" variant="secondary" size="lg" disabled={registerMutation.isPending} className="w-full">
-            {registerMutation.isPending ? (
+          <Button 
+            type="submit" 
+            variant="secondary" 
+            size="lg" 
+            disabled={loading} 
+            className="w-full"
+          >
+            {loading ? (
               <>
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -305,7 +262,7 @@ export default function RegisterPage() {
             </Button>
             <Button type="button" variant="outline" size="md" className="flex items-center justify-center gap-2">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.840 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
               </svg>
               {t('register.socialGitHub')}
             </Button>
@@ -313,9 +270,9 @@ export default function RegisterPage() {
         </form>
 
         {/* Sign In Link */}
-        <p className="text-center mt-6 text-white/90 animate-slide-up">
+        <p className="text-center mt-6 text-gray-600 animate-slide-up">
           {t('register.haveAccount')}{' '}
-          <Link to={ROUTE_PATHS.LOGIN} className="text-yellow-300 hover:text-yellow-200 font-semibold">
+          <Link to={ROUTE_PATHS.LOGIN} className="text-brand-primary hover:opacity-80 font-semibold transition-opacity">
             {t('register.signInLink')}
           </Link>
         </p>

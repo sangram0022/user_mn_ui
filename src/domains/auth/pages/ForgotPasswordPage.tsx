@@ -3,66 +3,40 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { useToast } from '../../../hooks/useToast';
-import { ValidationBuilder } from '../../../core/validation';
-import { parseAuthError } from '../utils/authErrorMapping';
-import { useForgotPassword } from '../hooks/useForgotPassword';
+import { useForgotPassword } from '../hooks/useAuth.hooks';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
 
 export default function ForgotPasswordPage() {
-  const { t } = useTranslation(['auth', 'common', 'errors', 'validation']);
+  const { t } = useTranslation(['auth', 'common']);
   const toast = useToast();
+  
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const { mutate: forgotPassword, isPending } = useForgotPassword();
+  // Use new centralized forgot password hook
+  const { forgotPassword, loading } = useForgotPassword();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side validation using core validation system
-    const validation = new ValidationBuilder()
-      .validateField('email', email, (b) => b.required().email())
-      .result();
-
-    if (!validation.isValid) {
-      const errors: Record<string, string> = {};
+    try {
+      const result = await forgotPassword({ email });
       
-      if (validation.fields) {
-        Object.entries(validation.fields).forEach(([fieldName, fieldResult]) => {
-          if (!fieldResult.isValid && fieldResult.errors.length > 0) {
-            errors[fieldName] = fieldResult.errors[0];
-          }
-        });
+      // Security pattern: Always show success message to prevent email enumeration
+      toast.success(t('forgotPassword.successMessage'));
+      setIsSubmitted(true);
+      
+      // Log result for debugging (remove in production or make conditional)
+      if (!result.success && result.error) {
+        console.debug('Forgot password error:', result.error);
       }
-      
-      setFieldErrors(errors);
-  toast.error(t('validation.validationFailed'));
-      return;
+    } catch (error) {
+      // Still show success to prevent email enumeration
+      toast.success(t('forgotPassword.successMessage'));
+      setIsSubmitted(true);
+      console.error('Forgot password error:', error);
     }
-
-    // Clear errors
-    setFieldErrors({});
-
-    // Security pattern: Always show success message
-    forgotPassword(
-      { email },
-      {
-        onSuccess: () => {
-          toast.success(t('forgotPassword.successMessage'));
-          setIsSubmitted(true);
-        },
-        onError: (error: Error) => {
-          const errorMapping = parseAuthError(error);
-          // Security: Still show success to prevent email enumeration
-          toast.success(t('forgotPassword.successMessage'));
-          setIsSubmitted(true);
-          // Log error for debugging (remove in production)
-          console.error('Forgot password error:', errorMapping);
-        },
-      }
-    );
   };
 
   if (isSubmitted) {
@@ -78,8 +52,8 @@ export default function ForgotPasswordPage() {
               {t('forgotPassword.successMessage')}
             </p>
             <Link to={ROUTE_PATHS.LOGIN}>
-                <Button variant="primary" size="lg" className="w-full">
-                {t('forgotPassword.backToLogin')} {t('forgotPassword.loginLink')}
+              <Button variant="primary" size="lg" className="w-full">
+                {t('forgotPassword.backToLogin')}
               </Button>
             </Link>
           </div>
@@ -111,7 +85,7 @@ export default function ForgotPasswordPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            error={fieldErrors.email}
+            disabled={loading}
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -123,10 +97,10 @@ export default function ForgotPasswordPage() {
             type="submit"
             variant="primary"
             size="lg"
-            disabled={isPending}
+            disabled={loading}
             className="w-full"
           >
-            {isPending ? (
+            {loading ? (
               <>
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -144,7 +118,7 @@ export default function ForgotPasswordPage() {
               to={ROUTE_PATHS.LOGIN}
               className="text-sm text-gray-700 hover:text-gray-900 font-medium transition-colors"
             >
-              ← {t('forgotPassword.backToLogin')} {t('forgotPassword.loginLink')}
+              ← {t('forgotPassword.backToLogin')}
             </Link>
           </div>
         </form>

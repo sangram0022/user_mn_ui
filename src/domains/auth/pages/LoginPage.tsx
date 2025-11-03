@@ -1,64 +1,22 @@
-import { useActionState, useOptimistic, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { getPostLoginRedirect } from '../../../core/routing/config';
 import { useAuth } from '../../../hooks/useAuth';
 import { useToast } from '../../../hooks/useToast';
-import { useErrorMessage } from '../../../core/localization/hooks/useErrorMessage';
 import { Button, Input } from '../../../components';
-import { useLogin } from '../hooks/useLogin';
-import { ValidationBuilder } from '../../../core/validation';
-import { parseAuthError, getErrorActions, type ErrorAction } from '../utils/authErrorMapping';
-import { debounce } from '../../../shared/utils/debounce';
-
-// React 19: Server Action type
-type LoginState = {
-  error?: string;
-  success?: boolean;
-};
+import { useLogin } from '../hooks/useAuth.hooks';
+import { getErrorMessage } from '../utils/error.utils';
 
 export default function LoginPage() {
-  const { t } = useTranslation(['auth', 'common', 'errors', 'validation']);
+  const { t } = useTranslation(['auth', 'common', 'errors']);
   const navigate = useNavigate();
   const { login: setAuthState } = useAuth();
   const toast = useToast();
-  const { parseError } = useErrorMessage();
   
-  // Use proper login mutation hook
-  const loginMutation = useLogin({
-    onSuccess: (data) => {
-      // Update auth context with user data
-      setAuthState(
-        {
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
-          token_type: data.token_type,
-          expires_in: data.expires_in,
-        },
-        data.user
-      );
-      
-      // Success message
-  toast.success(t('login.success'));
-      
-      // Navigate to appropriate page based on user role
-      const userRole = data.user.roles[0]; // Get first role (super_admin, admin, user, etc.)
-      const redirectPath = getPostLoginRedirect(userRole);
-      navigate(redirectPath, { replace: true });
-    },
-    onError: (error) => {
-      // Parse error using error mapping for better messages
-      const errorMapping = parseAuthError(error);
-      const actions = getErrorActions(error);
-      
-      setErrorActions(actions);
-      toast.error(errorMapping.message);
-    },
-  });
-
-  // React 19: useOptimistic for instant UI feedback
-  const [optimisticLoading, setOptimisticLoading] = useOptimistic(false);
+  // Use new centralized login hook
+  const { login, loading, fieldErrors: apiFieldErrors } = useLogin();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -66,38 +24,14 @@ export default function LoginPage() {
     rememberMe: false,
   });
 
-  // Field-level errors
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  
-  // Error actions for contextual help
-  const [errorActions, setErrorActions] = useState<ErrorAction[]>([]);
 
-  // Real-time field validation with debouncing (reduces calls by 10x for better performance)
-  const validateFieldDebounced = useCallback(
-    debounce((fieldName: string, value: string) => {
-      if (!value) {
-        setFieldErrors((prev) => ({ ...prev, [fieldName]: '' }));
-        return;
-      }
-
-      try {
-        const validation = new ValidationBuilder()
-          .validateField(fieldName, value, (b) => {
-            if (fieldName === 'email') return b.email();
-            return b.password();
-          })
-          .result();
-
-        setFieldErrors((prev) => ({
-          ...prev,
-          [fieldName]: !validation.isValid && validation.errors.length > 0 ? validation.errors[0] : '',
-        }));
-      } catch {
-        // Validation error - silently skip
-      }
-    }, 300),
-    []
-  );
+  // Merge API field errors with local errors
+  useEffect(() => {
+    if (apiFieldErrors) {
+      setFieldErrors((prev) => ({ ...prev, ...apiFieldErrors }));
+    }
+  }, [apiFieldErrors]);
 
   // Load remembered email on mount
   useEffect(() => {
@@ -105,69 +39,75 @@ export default function LoginPage() {
     const isRememberMeEnabled = localStorage.getItem('remember_me') === 'true';
     
     if (rememberMeEmail) {
-      setFormData((prev) => ({
-        ...prev,
+      setFormData({
         email: rememberMeEmail,
+        password: '',
         rememberMe: isRememberMeEnabled,
-      }));
+      });
     }
   }, []);
 
-  // React 19: useActionState for form handling
-  async function loginAction(_prevState: LoginState, formData: FormData): Promise<LoginState> {
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const rememberMe = formData.get('rememberMe') === 'on';
-
-    // Client-side validation using core validation system
-    const validation = new ValidationBuilder()
-      .validateField('email', email, (b) => b.required().email())
-      .validateField('password', password, (b) => b.required().password())
-      .result();
-
-    if (!validation.isValid) {
-      // Set field-level errors
-      const errors: Record<string, string> = {};
-      
-      if (validation.fields) {
-        Object.entries(validation.fields).forEach(([fieldName, fieldResult]) => {
-          if (!fieldResult.isValid && fieldResult.errors.length > 0) {
-            errors[fieldName] = fieldResult.errors[0];
-          }
-        });
-      }
-      
-      setFieldErrors(errors);
-      return { error: validation.errors[0] || t('errors.validationFailed') };
-    }
-
-    // Clear field errors on successful validation
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setFieldErrors({});
 
     try {
-      setOptimisticLoading(true);
-      await loginMutation.mutateAsync({ email, password });
+      const result = await login({
+        email: formData.email,
+        password: formData.password,
+      });
       
-      // Handle remember me
-      if (rememberMe) {
-        localStorage.setItem('remember_me_email', email);
-        localStorage.setItem('remember_me', 'true');
-      } else {
-        localStorage.removeItem('remember_me_email');
-        localStorage.setItem('remember_me', 'false');
-      }
-      
-      return { success: true };
-    } catch (error) {
-      // Error is already handled by onError callback
-      const errorMessage = parseError(error);
-      return { error: errorMessage };
-    } finally {
-      setOptimisticLoading(false);
-    }
-  }
+      if (result.success && result.data) {
+        // Build user object from login response
+        const user = {
+          user_id: result.data.user_id,
+          email: result.data.email,
+          first_name: '', // Backend doesn't return these in login
+          last_name: '',
+          roles: result.data.roles,
+          is_active: true,
+          is_verified: true,
+          last_login: result.data.last_login_at,
+        };
 
-  const [state, formAction, isPending] = useActionState(loginAction, {});
+        // Update auth context
+        setAuthState(
+          {
+            access_token: result.data.access_token,
+            refresh_token: result.data.refresh_token,
+            token_type: result.data.token_type,
+            expires_in: result.data.expires_in,
+          },
+          user
+        );
+        
+        // Handle remember me
+        if (formData.rememberMe) {
+          localStorage.setItem('remember_me_email', formData.email);
+          localStorage.setItem('remember_me', 'true');
+        } else {
+          localStorage.removeItem('remember_me_email');
+          localStorage.setItem('remember_me', 'false');
+        }
+        
+        // Success message
+        toast.success(t('login.success'));
+        
+        // Navigate based on role
+        const userRole = result.data.roles[0];
+        const redirectPath = getPostLoginRedirect(userRole);
+        navigate(redirectPath, { replace: true });
+      } else if (result.error) {
+        const errorMessage = result.error.code 
+          ? getErrorMessage(result.error.code) 
+          : result.error.message;
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : t('errors:AUTH_FAILED');
+      toast.error(errorMessage);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -175,11 +115,6 @@ export default function LoginPage() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
-
-    // Trigger debounced field validation for real-time feedback (performance optimized - reduces calls 10x)
-    if (type !== 'checkbox' && (name === 'email' || name === 'password')) {
-      validateFieldDebounced(name, value);
-    }
   };
 
   return (
@@ -196,45 +131,8 @@ export default function LoginPage() {
           <p className="text-gray-600">{t('login.subtitle')}</p>
         </div>
 
-        {/* Form - React 19: action prop instead of onSubmit */}
-        <form action={formAction} className="glass p-8 rounded-2xl shadow-xl border border-white/20 space-y-6 animate-scale-in">
-          {state.error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg space-y-3">
-              <p className="text-red-700 text-sm font-medium">{state.error}</p>
-              
-              {/* Contextual Error Actions */}
-              {errorActions.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-2 border-t border-red-200">
-                  {errorActions.map((action, index) => (
-                    action.type === 'link' ? (
-                      <Link
-                        key={index}
-                        to={action.action}
-                        className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
-                          action.variant === 'primary'
-                            ? 'bg-red-600 text-white hover:bg-red-700'
-                            : 'bg-white text-red-700 border border-red-300 hover:bg-red-50'
-                        }`}
-                      >
-                        {action.label}
-                      </Link>
-                    ) : action.type === 'external' ? (
-                      <a
-                        key={index}
-                        href={action.action}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-medium px-3 py-1.5 rounded-lg bg-white text-red-700 border border-red-300 hover:bg-red-50 transition-colors"
-                      >
-                        {action.label}
-                      </a>
-                    ) : null
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl shadow-xl border border-white/20 space-y-6 animate-scale-in">
           {/* Email Input */}
           <Input
             type="email"
@@ -246,7 +144,7 @@ export default function LoginPage() {
             error={fieldErrors.email}
             required
             autoComplete="email"
-            disabled={isPending || optimisticLoading}
+            disabled={loading}
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -265,7 +163,7 @@ export default function LoginPage() {
             error={fieldErrors.password}
             required
             autoComplete="current-password"
-            disabled={isPending || optimisticLoading}
+            disabled={loading}
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -290,15 +188,15 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          {/* Submit Button - React 19: Shows pending state automatically */}
+          {/* Submit Button */}
           <Button
             type="submit"
             variant="primary"
             size="lg"
             fullWidth
-            disabled={isPending || optimisticLoading || loginMutation.isPending}
+            disabled={loading}
           >
-            {isPending || optimisticLoading || loginMutation.isPending ? (
+            {loading ? (
               <span className="flex items-center gap-2">
                 <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
