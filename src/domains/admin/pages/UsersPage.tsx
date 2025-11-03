@@ -14,6 +14,8 @@ import {
   generateFilename, 
   type ExportFormat 
 } from '../../../shared/utils/exportUtils';
+import { formatShortDate } from '../../../shared/utils/dateFormatters';
+import { formatUserRole, formatUserStatus } from '../../../shared/utils/textFormatters';
 
 // Types
 interface User {
@@ -40,38 +42,22 @@ function prepareUsersForExport(users: User[]): Record<string, unknown>[] {
     'ID': user.id,
     'Name': user.name,
     'Email': user.email,
-    'Role': formatRole(user.role),
-    'Status': formatStatus(user.status),
+    'Role': formatUserRole(user.role),
+    'Status': formatUserStatus(user.status),
     'Department': user.department || 'N/A',
-    'Last Login': formatDate(user.lastLogin),
-    'Created At': formatDate(user.createdAt),
+    'Last Login': formatShortDate(user.lastLogin),
+    'Created At': formatShortDate(user.createdAt),
   }));
 }
 
-/**
- * Format role for display
- */
-function formatRole(role: User['role']): string {
-  return role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-}
+// ============================================================================
+// Constants (Clean Code - Extract Magic Numbers)
+// ============================================================================
 
-/**
- * Format status for display
- */
-function formatStatus(status: User['status']): string {
-  return status.charAt(0).toUpperCase() + status.slice(1);
-}
-
-/**
- * Format date for display
- */
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
+const DUMMY_USER_COUNT = 150;
+const DAYS_IN_MS = 24 * 60 * 60 * 1000;
+const MAX_LAST_LOGIN_DAYS = 30;
+const MAX_CREATED_AT_DAYS = 365;
 
 // ============================================================================
 // Dummy Data Generator (Separated for Maintainability)
@@ -93,14 +79,14 @@ const generateDummyUsers = (): User[] => {
     'Deborah Cook', 'Timothy Morgan', 'Stephanie Bell', 'Jason Murphy', 'Rebecca Bailey',
   ];
 
-  return Array.from({ length: 150 }, (_, i) => ({
+  return Array.from({ length: DUMMY_USER_COUNT }, (_, i) => ({
     id: `USR-${String(i + 1).padStart(4, '0')}`,
     name: names[i % names.length],
     email: `${names[i % names.length].toLowerCase().replace(' ', '.')}@company.com`,
     role: roles[Math.floor(Math.random() * roles.length)],
     status: statuses[Math.floor(Math.random() * statuses.length)],
-    lastLogin: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+    lastLogin: new Date(Date.now() - Math.random() * MAX_LAST_LOGIN_DAYS * DAYS_IN_MS).toISOString(),
+    createdAt: new Date(Date.now() - Math.random() * MAX_CREATED_AT_DAYS * DAYS_IN_MS).toISOString(),
     department: departments[Math.floor(Math.random() * departments.length)],
   }));
 };
@@ -717,7 +703,7 @@ export default function UsersPage() {
                       {user.department}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(user.lastLogin).toLocaleDateString()}
+                      {formatShortDate(user.lastLogin)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex gap-2">
