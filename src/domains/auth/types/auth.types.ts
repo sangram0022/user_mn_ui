@@ -1,9 +1,36 @@
 // ========================================
 // Authentication Types
+// Complete type definitions matching backend API v1.0.0
 // ========================================
 
 /**
+ * Base API Response Wrapper
+ * All responses follow this standard format
+ */
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  message: string;
+  message_code: string;
+  timestamp: string;
+  data?: T;
+  errors?: FieldError[];
+  field_errors?: Record<string, string[]>;
+  request_id: string;
+  api_version: string;
+}
+
+/**
+ * Field Error Structure
+ */
+export interface FieldError {
+  field: string;
+  code: string;
+  message: string;
+}
+
+/**
  * User object returned from authentication endpoints
+ * Matches backend User schema exactly
  */
 export interface User {
   user_id: string;
@@ -14,8 +41,12 @@ export interface User {
   is_active: boolean;
   is_verified: boolean;
   created_at?: string;
-  last_login?: string;
+  last_login?: string | null;
+  updated_at?: string | null;
   status?: 'active' | 'inactive' | 'suspended';
+  phone_number?: string | null;
+  avatar_url?: string | null;
+  username?: string;
 }
 
 // ========================================
@@ -31,14 +62,26 @@ export interface LoginRequest {
 }
 
 /**
- * POST /api/v1/auth/login - Login response
+ * Login Response Data (unwrapped from ApiResponse)
  */
-export interface LoginResponse {
+export interface LoginResponseData {
   access_token: string;
   refresh_token: string;
   token_type: 'bearer';
   expires_in: number;
-  user: User;
+  refresh_expires_in: number;
+  user_id: string;
+  email: string;
+  roles: string[];
+  last_login_at: string | null;
+}
+
+/**
+ * POST /api/v1/auth/login - Complete login response
+ */
+export interface LoginResponse extends ApiResponse<LoginResponseData> {
+  success: true;
+  message_code: 'AUTH_LOGIN_SUCCESS';
 }
 
 // ========================================
@@ -47,25 +90,36 @@ export interface LoginResponse {
 
 /**
  * POST /api/v1/auth/register - Register request payload
+ * Note: Must provide either (first_name AND last_name) OR full_name
  */
 export interface RegisterRequest {
   email: string;
   password: string;
-  first_name: string;
-  last_name: string;
+  confirm_password?: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
+  username?: string;
+  terms_accepted?: boolean;
 }
 
 /**
- * POST /api/v1/auth/register - Register response
+ * Register Response Data (unwrapped from ApiResponse)
  */
-export interface RegisterResponse {
+export interface RegisterResponseData {
   user_id: string;
   email: string;
-  first_name: string;
-  last_name: string;
-  message: string;
-  verification_sent: boolean;
+  verification_required: boolean;
+  approval_required: boolean;
   created_at: string;
+}
+
+/**
+ * POST /api/v1/auth/register - Complete register response
+ */
+export interface RegisterResponse extends ApiResponse<RegisterResponseData> {
+  success: true;
+  message_code: 'AUTH_REGISTER_SUCCESS';
 }
 
 // ========================================
@@ -77,44 +131,33 @@ export interface RegisterResponse {
  */
 export interface LogoutResponse {
   message: string;
-  user_id: string;
-  logged_out_at: string;
 }
 
 // ========================================
-// Password Reset
+// Refresh Token
 // ========================================
 
 /**
- * POST /api/v1/auth/password-reset - Password reset request
+ * Refresh Token Response Data (unwrapped from ApiResponse)
  */
-export interface PasswordResetRequest {
-  email: string;
-}
-
-/**
- * POST /api/v1/auth/password-reset - Password reset response
- */
-export interface PasswordResetResponse {
-  message: string;
-  email: string;
-  reset_token_sent: boolean;
-}
-
-/**
- * POST /api/v1/auth/reset-password - Reset password with token request
- */
-export interface ResetPasswordRequest {
-  token: string;
-  new_password: string;
-}
-
-/**
- * POST /api/v1/auth/reset-password - Reset password with token response
- */
-export interface ResetPasswordResponse {
-  message: string;
+export interface RefreshTokenResponseData {
+  access_token: string;
+  refresh_token: string;
+  token_type: 'bearer';
+  expires_in: number;
+  refresh_expires_in: number;
   user_id: string;
+  email: string;
+  roles: string[];
+  last_login_at: string | null;
+}
+
+/**
+ * POST /api/v1/auth/refresh - Complete refresh token response
+ */
+export interface RefreshTokenResponse extends ApiResponse<RefreshTokenResponseData> {
+  success: true;
+  message_code: 'AUTH_TOKEN_REFRESHED';
 }
 
 // ========================================
@@ -130,10 +173,35 @@ export interface ForgotPasswordRequest {
 
 /**
  * POST /api/v1/auth/forgot-password - Forgot password response
+ * Note: Always returns success to prevent email enumeration
  */
 export interface ForgotPasswordResponse {
+  success: true;
   message: string;
   email: string;
+  requested_at: string;
+}
+
+// ========================================
+// Reset Password
+// ========================================
+
+/**
+ * POST /api/v1/auth/reset-password - Reset password with token request
+ */
+export interface ResetPasswordRequest {
+  token: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+/**
+ * POST /api/v1/auth/reset-password - Reset password response
+ */
+export interface ResetPasswordResponse {
+  success: true;
+  message: string;
+  reset_at: string;
 }
 
 // ========================================
@@ -146,13 +214,16 @@ export interface ForgotPasswordResponse {
 export interface ChangePasswordRequest {
   current_password: string;
   new_password: string;
+  confirm_password: string;
 }
 
 /**
  * POST /api/v1/auth/change-password - Change password response
  */
 export interface ChangePasswordResponse {
+  success: true;
   message: string;
+  changed_at: string;
 }
 
 // ========================================
@@ -170,10 +241,11 @@ export interface VerifyEmailRequest {
  * POST /api/v1/auth/verify-email - Verify email response
  */
 export interface VerifyEmailResponse {
+  success: true;
   message: string;
-  user_id: string;
-  email: string;
-  verified_at: string;
+  verified_at: string | null;
+  approval_required: boolean;
+  user_id: string | null;
 }
 
 /**
@@ -187,8 +259,10 @@ export interface ResendVerificationRequest {
  * POST /api/v1/auth/resend-verification - Resend verification response
  */
 export interface ResendVerificationResponse {
+  success: true;
   message: string;
   email: string;
+  resent_at: string;
 }
 
 // ========================================
@@ -220,3 +294,63 @@ export interface SecureRefreshResponse {
   message: string;
 }
 
+// ========================================
+// Common Error Message Codes
+// For frontend i18n localization
+// ========================================
+
+export const AUTH_ERROR_CODES = {
+  // Authentication
+  AUTH_INVALID_CREDENTIALS: 'AUTH_INVALID_CREDENTIALS',
+  AUTH_EMAIL_NOT_VERIFIED: 'AUTH_EMAIL_NOT_VERIFIED',
+  AUTH_ACCOUNT_INACTIVE: 'AUTH_ACCOUNT_INACTIVE',
+  AUTH_EMAIL_ALREADY_EXISTS: 'AUTH_EMAIL_ALREADY_EXISTS',
+  AUTH_INVALID_TOKEN: 'AUTH_INVALID_TOKEN',
+  AUTH_TOKEN_EXPIRED: 'AUTH_TOKEN_EXPIRED',
+  
+  // Validation
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  
+  // System
+  SYSTEM_ERROR: 'SYSTEM_ERROR',
+  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
+} as const;
+
+export type AuthErrorCode = typeof AUTH_ERROR_CODES[keyof typeof AUTH_ERROR_CODES];
+
+// ========================================
+// Validation Rules (matching backend)
+// ========================================
+
+export const VALIDATION_RULES = {
+  EMAIL: {
+    MAX_LENGTH: 255,
+    PATTERN: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+  },
+  PASSWORD: {
+    MIN_LENGTH: 8,
+    MAX_LENGTH: 128,
+    PATTERN: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-={}:;"'`~<>,.?/])[A-Za-z\d!@#$%^&*()_+\-={}:;"'`~<>,.?/]{8,128}$/,
+    REQUIREMENTS: {
+      UPPERCASE: /[A-Z]/,
+      LOWERCASE: /[a-z]/,
+      DIGIT: /\d/,
+      SPECIAL: /[!@#$%^&*()_+\-={}:;"'`~<>,.?/]/,
+    },
+  },
+  NAME: {
+    MIN_LENGTH: 2,
+    MAX_LENGTH: 50,
+    PATTERN: /^[a-zA-Z\s'-]+$/,
+  },
+  USERNAME: {
+    MIN_LENGTH: 3,
+    MAX_LENGTH: 30,
+    PATTERN: /^[a-zA-Z0-9_]+$/,
+  },
+  PHONE: {
+    MIN_LENGTH: 10,
+    MAX_LENGTH: 15,
+    PATTERN: /^\+?[1-9]\d{9,14}$/,
+  },
+} as const;

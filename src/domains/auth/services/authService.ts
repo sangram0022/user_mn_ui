@@ -1,17 +1,17 @@
 // ========================================
 // Authentication Service
 // All API calls for authentication domain
+// Implements SOLID principles with response adapters
 // ========================================
 
 import { apiClient } from '../../../services/api/apiClient';
 import type {
   LoginRequest,
   LoginResponse,
+  LoginResponseData,
   RegisterRequest,
   RegisterResponse,
   LogoutResponse,
-  PasswordResetRequest,
-  PasswordResetResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
   ForgotPasswordRequest,
@@ -22,69 +22,52 @@ import type {
   VerifyEmailResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
+  RefreshTokenResponse,
+  RefreshTokenResponseData,
 } from '../types/auth.types';
 
 const API_PREFIX = '/api/v1/auth';
+
+// ========================================
+// Response Adapters (DRY Principle)
+// Handle both wrapped and unwrapped responses
+// ========================================
+
+/**
+ * Unwrap ApiResponse<T> format to just T
+ * Backend may return { success, message, data: {...} } or just {...}
+ */
+function unwrapResponse<T>(response: unknown): T {
+  if (response && typeof response === 'object' && 'data' in response) {
+    return (response as { data: T }).data;
+  }
+  return response as T;
+}
 
 /**
  * POST /api/v1/auth/login
  * Authenticate user with email and password
  */
-export const login = async (data: LoginRequest): Promise<LoginResponse> => {
+export const login = async (data: LoginRequest): Promise<LoginResponseData> => {
   const response = await apiClient.post<LoginResponse>(`${API_PREFIX}/login`, data);
-  // Some backend APIs wrap the useful payload under `data` (e.g. { success, message, data: { ... } }).
-  // Unwrap when present so the hook callers receive the expected flat LoginResponse shape.
-  // If the API already returns the flat shape, just return it.
-  // This makes the service resilient to both backend styles.
-  const respData = (response.data as unknown) as Record<string, unknown>;
-  if (respData && 'data' in respData && respData['data']) {
-    const payload = respData['data'] as Record<string, unknown>;
-
-    // If backend returned user fields at the top-level of payload (legacy style),
-    // adapt it into the expected LoginResponse shape with a `user` object.
-    if (payload && !('user' in payload) && ('user_id' in payload || 'email' in payload)) {
-      const access_token = (payload['access_token'] as string) || '';
-      const refresh_token = (payload['refresh_token'] as string) || '';
-  const token_type = (payload['token_type'] as string) ?? 'bearer';
-      const expires_in = (payload['expires_in'] as number) || 0;
-
-      const user = {
-        user_id: (payload['user_id'] as string) || (payload['userId'] as string) || '',
-        email: (payload['email'] as string) || '',
-        first_name: (payload['first_name'] as string) || '',
-        last_name: (payload['last_name'] as string) || '',
-        roles: (payload['roles'] as string[]) || [],
-        is_active: !!payload['is_active'],
-        is_verified: !!payload['is_verified'],
-      } as Partial<import('../types/auth.types').User>;
-
-      return {
-        access_token,
-        refresh_token,
-        token_type,
-        expires_in,
-        user,
-      } as LoginResponse;
-    }
-
-  return payload as unknown as LoginResponse;
-  }
-
-  return response.data as LoginResponse;
+  return unwrapResponse<LoginResponseData>(response.data);
 };
 
 /**
  * POST /api/v1/auth/register
  * Register a new user account
+ * 
+ * @param data - Must include email, password, and either (first_name + last_name) OR full_name
  */
-export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
+export const register = async (data: RegisterRequest): Promise<RegisterResponse['data']> => {
   const response = await apiClient.post<RegisterResponse>(`${API_PREFIX}/register`, data);
-  return response.data;
+  return unwrapResponse(response.data);
 };
 
 /**
  * POST /api/v1/auth/logout
  * Logout the current user
+ * Works with or without auth token
  */
 export const logout = async (): Promise<LogoutResponse> => {
   const response = await apiClient.post<LogoutResponse>(`${API_PREFIX}/logout`);
@@ -92,26 +75,27 @@ export const logout = async (): Promise<LogoutResponse> => {
 };
 
 /**
- * POST /api/v1/auth/password-reset
- * Request a password reset link
+ * POST /api/v1/auth/refresh
+ * Refresh access token using refresh token
+ * Must include refresh token in Authorization header
  */
-export const passwordReset = async (data: PasswordResetRequest): Promise<PasswordResetResponse> => {
-  const response = await apiClient.post<PasswordResetResponse>(`${API_PREFIX}/password-reset`, data);
-  return response.data;
-};
-
-/**
- * POST /api/v1/auth/reset-password
- * Reset password using token from email
- */
-export const resetPassword = async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
-  const response = await apiClient.post<ResetPasswordResponse>(`${API_PREFIX}/reset-password`, data);
-  return response.data;
+export const refreshToken = async (refreshTokenValue: string): Promise<RefreshTokenResponseData> => {
+  const response = await apiClient.post<RefreshTokenResponse>(
+    `${API_PREFIX}/refresh`,
+    null,
+    {
+      headers: {
+        Authorization: `Bearer ${refreshTokenValue}`,
+      },
+    }
+  );
+  return unwrapResponse<RefreshTokenResponseData>(response.data);
 };
 
 /**
  * POST /api/v1/auth/forgot-password
- * Initiate forgot password flow
+ * Request password reset link
+ * Always returns success to prevent email enumeration
  */
 export const forgotPassword = async (data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> => {
   const response = await apiClient.post<ForgotPasswordResponse>(`${API_PREFIX}/forgot-password`, data);
@@ -119,8 +103,22 @@ export const forgotPassword = async (data: ForgotPasswordRequest): Promise<Forgo
 };
 
 /**
+ * POST /api/v1/auth/reset-password
+ * Reset password using token from email
+ * 
+ * @param data - Includes token, new_password, and confirm_password
+ */
+export const resetPassword = async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+  const response = await apiClient.post<ResetPasswordResponse>(`${API_PREFIX}/reset-password`, data);
+  return response.data;
+};
+
+/**
  * POST /api/v1/auth/change-password
  * Change password for authenticated user
+ * Requires current password for security
+ * 
+ * @param data - Includes current_password, new_password, and confirm_password
  */
 export const changePassword = async (data: ChangePasswordRequest): Promise<ChangePasswordResponse> => {
   const response = await apiClient.post<ChangePasswordResponse>(`${API_PREFIX}/change-password`, data);
@@ -130,6 +128,7 @@ export const changePassword = async (data: ChangePasswordRequest): Promise<Chang
 /**
  * POST /api/v1/auth/verify-email
  * Verify email using token from email
+ * Token expires in 24 hours
  */
 export const verifyEmail = async (data: VerifyEmailRequest): Promise<VerifyEmailResponse> => {
   const response = await apiClient.post<VerifyEmailResponse>(`${API_PREFIX}/verify-email`, data);
@@ -150,13 +149,12 @@ const authService = {
   login,
   register,
   logout,
-  passwordReset,
-  resetPassword,
+  refreshToken,
   forgotPassword,
+  resetPassword,
   changePassword,
   verifyEmail,
   resendVerification,
 };
 
 export default authService;
-
