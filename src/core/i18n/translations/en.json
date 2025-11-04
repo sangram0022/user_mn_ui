@@ -17,7 +17,9 @@
     "roles": "Roles",
     "permissions": "Permissions",
     "admin": "Admin",
-    "audit": "Audit Logs",
+    "adminDashboard": "Dashboard",
+    "userApprovals": "User Approvals",
+    "auditLogs": "Audit Logs",
     "monitoring": "Monitoring",
     "logout": "Logout"
   },

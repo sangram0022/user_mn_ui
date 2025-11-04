@@ -33,13 +33,9 @@
       img-src 'self' data: blob: https:;
       font-src 'self' data:;
       connect-src 'self' http://localhost:* ws://localhost:*;
-      frame-ancestors 'none';
       base-uri 'self';
       form-action 'self';
     ">
-    
-    <!-- Prevent clickjacking -->
-    <meta http-equiv="X-Frame-Options" content="DENY">
     
     <!-- Force HTTPS in production (browser compatibility) -->
     <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">

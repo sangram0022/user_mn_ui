@@ -34,3 +34,6 @@ export { default as Skeleton, SkeletonTable } from '../shared/components/ui/Skel
 
 // Accessibility components (Week 4 - WCAG 2.1 AA)
 export { SkipLink, Announcement } from '../shared/components/accessibility';
+
+// Error display components
+export { default as ErrorAlert } from '../shared/components/ui/ErrorAlert';

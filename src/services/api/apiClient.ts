@@ -165,21 +165,27 @@ apiClient.interceptors.response.use(
         // Call refresh token endpoint
         const response = await tokenService.refreshToken(refreshToken);
         
+        // Extract token data from response
+        const tokenData = response.data;
+        if (!tokenData) {
+          throw new Error('Invalid refresh token response');
+        }
+        
         // Store new tokens
         tokenService.storeTokens({
-          access_token: response.access_token,
-          refresh_token: response.refresh_token,
-          token_type: response.token_type,
-          expires_in: response.expires_in,
+          access_token: tokenData.access_token,
+          refresh_token: tokenData.refresh_token,
+          token_type: tokenData.token_type,
+          expires_in: tokenData.expires_in,
         });
 
         // Update original request with new token
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${response.access_token}`;
+          originalRequest.headers.Authorization = `Bearer ${tokenData.access_token}`;
         }
 
         // Process queued requests
-        processQueue(null, response.access_token);
+        processQueue(null, tokenData.access_token);
 
         // Retry original request
         return apiClient(originalRequest);
@@ -233,13 +239,30 @@ apiClient.interceptors.response.use(
     // Enhanced Error Handling with Logging
     // ========================================
 
-    const errorMessage = 
-      error.response?.data?.detail ||
-      error.response?.data?.message || 
-      error.message || 
-      'An unexpected error occurred';
+    // Extract error message from various response formats
+    let errorMessage = 'An unexpected error occurred';
+    const responseData = error.response?.data;
     
-    const errorCode = error.response?.data?.code;
+    if (responseData) {
+      // Check for field_errors first (backend validation errors)
+      if (responseData.field_errors && typeof responseData.field_errors === 'object') {
+        const fieldErrors = responseData.field_errors as Record<string, string[]>;
+        const allErrors = Object.values(fieldErrors).flat();
+        if (allErrors.length > 0) {
+          errorMessage = allErrors[0]; // Use first error as primary message
+        }
+      }
+      // Fallback to message, detail, or generic error
+      else if (responseData.message) {
+        errorMessage = responseData.message;
+      } else if (responseData.detail) {
+        errorMessage = responseData.detail;
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    const errorCode = responseData?.message_code || responseData?.code;
     const status = error.response?.status || 0;
     const method = originalRequest?.method?.toUpperCase() || 'UNKNOWN';
     const url = originalRequest?.url || 'unknown';
@@ -262,8 +285,8 @@ apiClient.interceptors.response.use(
       }
     );
 
-    // Throw structured error
-    throw new APIError(
+    // Throw structured error with enhanced message and full response data
+    const apiError = new APIError(
       errorMessage,
       status,
       method,
@@ -271,6 +294,13 @@ apiClient.interceptors.response.use(
       error.response?.data,
       duration
     );
+    
+    // Attach field_errors to the error object for component-level handling
+    if (responseData?.field_errors) {
+      (apiError as unknown as { field_errors: Record<string, string[]> }).field_errors = responseData.field_errors;
+    }
+    
+    throw apiError;
   }
 );
 

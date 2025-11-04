@@ -51,7 +51,7 @@ export function OptimisticFormExample() {
       // Add to real state
       setComments((prev) => [...prev, newComment]);
       return { success: true };
-    } catch (error) {
+    } catch {
       return { error: 'Failed to post comment' };
     }
   }

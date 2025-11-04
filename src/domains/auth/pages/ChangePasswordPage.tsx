@@ -6,16 +6,16 @@ import { useToast } from '../../../hooks/useToast';
 import { Button, Input } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { calculatePasswordStrength } from '../../../core/validation';
-import { getErrorMessage } from '../utils/error.utils';
 import Badge from '../../../shared/components/ui/Badge';
 
-export default function ChangePasswordPage() {
+export function ChangePasswordPage() {
   const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const toast = useToast();
   
-  // Use new centralized change password hook
-  const { changePassword, loading } = useChangePassword();
+  // Use new centralized change password hook with React Query
+  const changePasswordMutation = useChangePassword();
+  const loading = changePasswordMutation.isPending;
 
   const [formData, setFormData] = useState({
     currentPassword: '',
@@ -51,21 +51,14 @@ export default function ChangePasswordPage() {
     }
 
     try {
-      const result = await changePassword({
+      await changePasswordMutation.mutateAsync({
         current_password: formData.currentPassword,
         new_password: formData.newPassword,
         confirm_password: formData.confirmPassword,
       });
 
-      if (result.success) {
-        toast.success(t('changePassword.success'));
-        navigate(ROUTE_PATHS.PROFILE);
-      } else if (result.error) {
-        const errorMessage = result.error.code 
-          ? getErrorMessage(result.error.code) 
-          : result.error.message;
-        toast.error(errorMessage);
-      }
+      toast.success(t('changePassword.success'));
+      navigate(ROUTE_PATHS.PROFILE);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('changePassword.failed');
       toast.error(errorMessage);
@@ -81,11 +74,11 @@ export default function ChangePasswordPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold mb-2">{t('changePassword.title')}</h1>
+          <h1 className="text-3xl font-bold mb-2" data-testid="change-password-heading">{t('changePassword.title')}</h1>
           <p className="text-gray-600">{t('changePassword.subtitle')}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl shadow-xl border border-white/20 space-y-6 animate-scale-in">
+        <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl shadow-xl border border-white/20 space-y-6 animate-scale-in" data-testid="change-password-form">
           <Input
             type="password"
             name="currentPassword"
@@ -95,6 +88,7 @@ export default function ChangePasswordPage() {
             onChange={handleChange}
             required
             disabled={loading}
+            data-testid="current-password-input"
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -112,6 +106,7 @@ export default function ChangePasswordPage() {
               onChange={handleChange}
               required
               disabled={loading}
+              data-testid="new-password-input"
               icon={
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -145,6 +140,7 @@ export default function ChangePasswordPage() {
             onChange={handleChange}
             required
             disabled={loading}
+            data-testid="confirm-password-input"
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -158,6 +154,7 @@ export default function ChangePasswordPage() {
             size="lg"
             disabled={loading}
             className="w-full"
+            data-testid="change-submit-button"
           >
             {loading ? (
               <>
@@ -176,3 +173,5 @@ export default function ChangePasswordPage() {
     </div>
   );
 }
+
+export default ChangePasswordPage;

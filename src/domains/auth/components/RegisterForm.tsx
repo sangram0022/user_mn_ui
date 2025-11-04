@@ -4,7 +4,7 @@
 // ========================================
 
 import { useState } from 'react';
-import { useRegister } from '../hooks/useRegister';
+import { useRegister } from '../hooks/useAuth.hooks';
 import Input from '../../../components/Input';
 import Button from '../../../components/Button';
 import PasswordStrength from './PasswordStrength';
@@ -32,17 +32,7 @@ export function RegisterForm({ onSuccess, onError, redirectTo = '/auth/verify' }
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const registerMutation = useRegister({
-    onSuccess: () => {
-      onSuccess?.();
-      if (redirectTo) {
-        window.location.href = redirectTo;
-      }
-    },
-    onError: (error) => {
-      onError?.(error);
-    },
-  });
+  const registerMutation = useRegister();
 
   const handleChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
@@ -108,7 +98,17 @@ export function RegisterForm({ onSuccess, onError, redirectTo = '/auth/verify' }
       password: formData.password,
     };
 
-    registerMutation.mutate(registrationData);
+    registerMutation.mutate(registrationData, {
+      onSuccess: () => {
+        onSuccess?.();
+        if (redirectTo) {
+          window.location.href = redirectTo;
+        }
+      },
+      onError: (error: Error) => {
+        onError?.(error);
+      },
+    });
   };
 
   const isDisabled =

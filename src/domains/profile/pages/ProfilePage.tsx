@@ -112,7 +112,7 @@ export default function ProfilePage() {
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="profile-heading">
           {t('profilePage.title')}
         </h1>
         {!isEditing && (
@@ -150,7 +150,7 @@ export default function ProfilePage() {
 
         {isEditing ? (
           /* Edit Form */
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" data-testid="profile-form">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
                 type="text"
@@ -161,6 +161,7 @@ export default function ProfilePage() {
                 error={fieldErrors.first_name}
                 required
                 disabled={updating}
+                data-testid="firstname-input"
               />
               <Input
                 type="text"
@@ -171,6 +172,7 @@ export default function ProfilePage() {
                 error={fieldErrors.last_name}
                 required
                 disabled={updating}
+                data-testid="lastname-input"
               />
             </div>
 
@@ -183,6 +185,7 @@ export default function ProfilePage() {
               error={fieldErrors.phone_number}
               placeholder="+1234567890"
               disabled={updating}
+              data-testid="phone-input"
             />
 
             <Input
@@ -202,6 +205,7 @@ export default function ProfilePage() {
                 variant="primary"
                 size="md"
                 disabled={updating}
+                data-testid="save-button"
               >
                 {updating ? (
                   <>

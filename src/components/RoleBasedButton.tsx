@@ -61,7 +61,7 @@ export function RoleBasedButton({
       <Button
         disabled={isDisabled}
         className={className}
-        {...(props as any)}
+        {...(props as React.ComponentPropsWithoutRef<typeof Button>)}
       >
         {children}
       </Button>

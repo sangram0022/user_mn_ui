@@ -1,542 +1,784 @@
-/**
- * Admin Audit Logs Page
- * Displays comprehensive audit logs for administrators - REFACTORED for DRY
- * Features:
- * - View all audit logs with filtering
- * - Filter by date, user, action, and status
- * - Export audit logs to CSV
- * - Archive audit logs by date (admin-only)
- * - Admin-specific statistics and insights
- */
+import { useState, useEffect } from 'react';
+import { useAuditLogs, useExportAuditLogs } from '../hooks';
+import type {
+  AuditLogFilters,
+  AuditSeverity,
+  ExportFormat,
+  AuditLog,
+} from '../types';
+import Button from '../../../shared/components/ui/Button';
+import Badge from '../../../shared/components/ui/Badge';
+import ErrorAlert from '../../../shared/components/ui/ErrorAlert';
 
-import { useState } from 'react';
-import Button from '../../../components/Button';
-import { logger } from '@/core/logging';
-import { AuditStatCard } from '@/shared/components/audit-logs/AuditStatCard';
-import { VirtualTable } from '@/shared/components/VirtualTable';
-import type { AuditLog, AuditFilters } from '@/domains/audit-logs/types/auditLog.types';
-import {
-  filterAuditLogs,
-  getUniqueUsers,
-  getUniqueActions,
-  sortByTimestamp,
-} from '@/shared/utils/audit-logs/auditLogFilters';
-import {
-  calculateAuditStatistics,
-  // TODO: Use in admin insights: getActionFrequency, getUserActivityCount
-} from '@/shared/utils/audit-logs/auditLogCalculations';
-import { exportAuditLogsToCSV, getTimestampForFilename } from '@/shared/utils/csv/csvExporter';
-import { ACTION_NAMES } from '@/shared/constants/auditLogConstants';
-import { hasPermission } from '@/core/permissions/permissionChecker';
+const SEVERITY_OPTIONS: AuditSeverity[] = ['low', 'medium', 'high', 'critical'];
+const EXPORT_FORMATS: ExportFormat[] = ['csv', 'json', 'xlsx', 'pdf'];
 
-// Mock Data
-const MOCK_AUDIT_LOGS: AuditLog[] = [
-  {
-    id: '1',
-    timestamp: '2025-01-09 14:30:45',
-    user: 'john.doe@example.com',
-    action: 'USER_LOGIN',
-    resource: 'Authentication',
-    status: 'success',
-    ipAddress: '192.168.1.100',
-    details: 'User successfully logged in',
-    userId: 'user_1',
-  },
-  {
-    id: '2',
-    timestamp: '2025-01-09 13:45:22',
-    user: 'admin@example.com',
-    action: 'USER_CREATED',
-    resource: 'User Management',
-    status: 'success',
-    ipAddress: '192.168.1.50',
-    details: 'New user account created for jane.smith@example.com',
-    userId: 'admin_1',
-  },
-  {
-    id: '3',
-    timestamp: '2025-01-09 12:15:10',
-    user: 'jane.smith@example.com',
-    action: 'DATA_EXPORT',
-    resource: 'Data Management',
-    status: 'success',
-    ipAddress: '192.168.1.75',
-    details: 'User data exported to CSV format',
-    userId: 'user_2',
-  },
-  {
-    id: '4',
-    timestamp: '2025-01-09 11:30:00',
-    user: 'unauthorized@example.com',
-    action: 'UNAUTHORIZED_ACCESS',
-    resource: 'Admin Panel',
-    status: 'failed',
-    ipAddress: '192.168.1.200',
-    details: 'Attempted access to restricted resource',
-    userId: 'user_3',
-  },
-  {
-    id: '5',
-    timestamp: '2025-01-09 10:20:35',
-    user: 'admin@example.com',
-    action: 'ROLE_CHANGED',
-    resource: 'User Management',
-    status: 'success',
-    ipAddress: '192.168.1.50',
-    details: 'User role updated from user to auditor',
-    userId: 'admin_1',
-  },
-  {
-    id: '6',
-    timestamp: '2025-01-09 09:15:00',
-    user: 'admin@example.com',
-    action: 'SYSTEM_CONFIG_CHANGED',
-    resource: 'System Settings',
-    status: 'success',
-    ipAddress: '192.168.1.50',
-    details: 'System configuration updated',
-    userId: 'admin_1',
-  },
+const ACTION_OPTIONS = [
+  'user.create',
+  'user.update',
+  'user.delete',
+  'user.approve',
+  'user.reject',
+  'role.create',
+  'role.update',
+  'role.delete',
+  'login.success',
+  'login.failed',
+  'logout',
 ];
 
-export default function AdminAuditLogsPage() {
-  const [filters, setFilters] = useState<AuditFilters>({
-    dateFrom: '',
-    dateTo: '',
-    user: '',
-    action: '',
-    status: 'all',
+const RESOURCE_OPTIONS = [
+  'users',
+  'roles',
+  'analytics',
+  'audit_logs',
+  'settings',
+  'reports',
+  'notifications',
+];
+
+const PAGE_SIZE = 10;
+const REAL_TIME_REFRESH_INTERVAL = 5000; // 5 seconds
+
+export default function AuditLogsPage() {
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE);
+
+  // Filter states
+  const [filters, setFilters] = useState<AuditLogFilters>({});
+  
+  // Search state - separate input from applied search
+  const [searchInput, setSearchInput] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
+
+  // Modal states
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('csv');
+
+  // Real-time monitoring
+  const [realTimeMode, setRealTimeMode] = useState(false);
+
+  // Fetch audit logs - use appliedSearch instead of direct searchTerm
+  const {
+    data: logsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useAuditLogs({
+    ...filters,
+    search: appliedSearch || undefined,
+    page,
+    page_size: pageSize,
   });
 
-  const [auditLogs] = useState<AuditLog[]>(MOCK_AUDIT_LOGS);
-  const [isExporting, setIsExporting] = useState(false);
-  const [archiveModal, setArchiveModal] = useState<{ isOpen: boolean; beforeDate: string }>({
-    isOpen: false,
-    beforeDate: '',
-  });
-  const [isArchiving, setIsArchiving] = useState(false);
+  const { mutate: exportLogs, isPending: isExporting } = useExportAuditLogs();
 
-  // User role (mock - replace with actual user role from auth context)
-  const userRole = 'admin';
+  // Real-time monitoring effect
+  useEffect(() => {
+    if (!realTimeMode) return;
 
-  // Filter and sort audit logs
-  const filteredLogs = sortByTimestamp(filterAuditLogs(auditLogs, filters));
-  const stats = calculateAuditStatistics(filteredLogs);
-  // TODO: Use actionFrequency and userActivity in admin insights panel
-  // const actionFrequency = getActionFrequency(filteredLogs);
-  // const userActivity = getUserActivityCount(filteredLogs);
+    const interval = setInterval(() => {
+      refetch();
+    }, REAL_TIME_REFRESH_INTERVAL);
 
-  // Handle filter changes
-  const handleFilterChange = (key: keyof AuditFilters, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+    return () => clearInterval(interval);
+  }, [realTimeMode, refetch]);
 
-  // Handle reset filters
-  const handleResetFilters = () => {
-    setFilters({
-      dateFrom: '',
-      dateTo: '',
-      user: '',
-      action: '',
-      status: 'all',
-    });
-  };
-
-  // Handle export
-  const handleExport = async () => {
-    setIsExporting(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const filename = `audit-logs-admin-${getTimestampForFilename()}.csv`;
-      exportAuditLogsToCSV(filteredLogs, filename, filters.dateFrom, filters.dateTo);
-    } finally {
-      setIsExporting(false);
+  // Helper functions
+  const getSeverityBadge = (
+    severity: AuditSeverity
+  ): 'success' | 'info' | 'warning' | 'danger' => {
+    switch (severity) {
+      case 'critical':
+        return 'danger';
+      case 'high':
+        return 'warning';
+      case 'medium':
+        return 'info';
+      case 'low':
+        return 'success';
+      default:
+        return 'info';
     }
   };
 
-  // Handle archive logs
-  const handleArchiveLogs = async () => {
-    if (!hasPermission(userRole, 'ARCHIVE_AUDIT_LOGS')) {
-      logger().warn('User attempted to archive logs without permission', {
-        context: 'AdminAuditLogsPage.handleArchiveLogs',
+  const getActionIcon = (action: string): string => {
+    if (action.includes('create')) return '➕';
+    if (action.includes('update')) return '✏️';
+    if (action.includes('delete')) return '🗑️';
+    if (action.includes('approve')) return '✅';
+    if (action.includes('reject')) return '❌';
+    if (action.includes('login')) return '🔐';
+    if (action.includes('logout')) return '🚪';
+    return '📝';
+  };
+
+  // Handlers
+  const handleFilterChange = (
+    key: keyof AuditLogFilters,
+    value: string | undefined
+  ) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setPage(1); // Reset to first page when filter changes
+  };
+
+  const handleSearch = () => {
+    setAppliedSearch(searchInput);
+    setPage(1); // Reset to first page when searching
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    setSearchInput('');
+    setAppliedSearch('');
+    setPage(1);
+  };
+
+  const handleQuickFilter = (type: 'today' | 'critical' | 'failed_logins') => {
+    if (type === 'today') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      handleFilterChange('start_date', today.toISOString());
+    } else if (type === 'critical') {
+      handleFilterChange('severity', 'critical');
+    } else if (type === 'failed_logins') {
+      setFilters({
+        action: 'login.failed',
       });
-      return;
-    }
-
-    setIsArchiving(true);
-    try {
-      logger().info('Archiving audit logs', {
-        beforeDate: archiveModal.beforeDate,
-        context: 'AdminAuditLogsPage.handleArchiveLogs',
-      });
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      logger().info('Audit logs archived successfully', {
-        beforeDate: archiveModal.beforeDate,
-        context: 'AdminAuditLogsPage.handleArchiveLogs',
-      });
-
-      setArchiveModal({ isOpen: false, beforeDate: '' });
-    } finally {
-      setIsArchiving(false);
+      setPage(1);
     }
   };
 
-  const uniqueUsers = getUniqueUsers(auditLogs);
-  const uniqueActions = getUniqueActions(auditLogs);
-  const canArchive = hasPermission(userRole, 'ARCHIVE_AUDIT_LOGS');
+  const handleExport = () => {
+    exportLogs(
+      { 
+        format: exportFormat, 
+        filters: {
+          ...filters,
+          search: appliedSearch || undefined,
+        }
+      },
+      {
+        onSuccess: (data) => {
+          if (data.download_url) {
+            window.open(data.download_url, '_blank');
+          }
+          setShowExportModal(false);
+        },
+      }
+    );
+  };
+
+  const handleViewDetails = (log: AuditLog) => {
+    setSelectedLog(log);
+    setShowDetailModal(true);
+  };
+
+  const formatTimestamp = (timestamp: string): string => {
+    return new Date(timestamp).toLocaleString();
+  };
+
+  // Calculate pagination info
+  const totalPages = logsData?.pagination?.total_pages || 1;
+  const totalLogs = logsData?.pagination?.total_items || 0;
+  const startIndex = ((logsData?.pagination?.page || 1) - 1) * (logsData?.pagination?.page_size || pageSize);
+  const endIndex = startIndex + (logsData?.logs?.length || 0);
+
+  // Count active filters - include appliedSearch
+  const activeFiltersCount = Object.keys(filters).length + (appliedSearch ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 animate-fade-in">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="animate-slide-down">
-          <h1 className="text-3xl font-bold text-gray-900">Audit Logs Management</h1>
-          <p className="text-gray-600 mt-2">Complete system audit trail for administrators</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Monitor and review system activity
+          </p>
         </div>
-
-        {/* Statistics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-scale-in">
-          <AuditStatCard label="Total Logs" value={stats.totalLogs} color="#08f" icon="📋" />
-          <AuditStatCard
-            label="Successful"
-            value={stats.successCount}
-            color="#4a9eff"
-            icon="✅"
-          />
-          <AuditStatCard label="Failed" value={stats.failedCount} color="#ff6b6b" icon="❌" />
-          <AuditStatCard label="Warnings" value={stats.warningCount} color="#ffa500" icon="⚠️" />
-        </div>
-
-        {/* Admin Actions */}
-        {canArchive && (
-          <div
-            style={{
-              backgroundColor: '#fffbf0',
-              borderRadius: '8px',
-              padding: '16px',
-              border: '1px solid #ffe8cc',
-            }}
-          >
-            <p style={{ fontSize: '14px', color: '#8b4513', marginBottom: '12px' }}>
-              ⚙️ Admin Actions
-            </p>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={() => setArchiveModal({ isOpen: true, beforeDate: '' })}
-            >
-              📦 Archive Logs
-            </Button>
-          </div>
-        )}
-
-        {/* Filters Section */}
-        <div
-          style={{
-            backgroundColor: '#fff',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            padding: '24px',
-            border: '1px solid #e0e0e0',
-          }}
-          className="animate-slide-up"
-        >
-          <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>
-            Filter Audit Logs
-          </h2>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '16px',
-              marginBottom: '16px',
-            }}
-          >
-            {/* Date From */}
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                From Date
-              </label>
-              <input
-                type="date"
-                value={filters.dateFrom}
-                onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d0d0d0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                }}
-              />
-            </div>
-
-            {/* Date To */}
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                To Date
-              </label>
-              <input
-                type="date"
-                value={filters.dateTo}
-                onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d0d0d0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                }}
-              />
-            </div>
-
-            {/* User Filter */}
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                User
-              </label>
-              <select
-                value={filters.user}
-                onChange={(e) => handleFilterChange('user', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d0d0d0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                }}
-              >
-                <option value="">All Users</option>
-                {uniqueUsers.map((user) => (
-                  <option key={user} value={user}>
-                    {user}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Action Filter */}
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                Action
-              </label>
-              <select
-                value={filters.action}
-                onChange={(e) => handleFilterChange('action', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d0d0d0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                }}
-              >
-                <option value="">All Actions</option>
-                {uniqueActions.map((action) => (
-                  <option key={action} value={action}>
-                    {ACTION_NAMES[action] || action}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status Filter */}
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                Status
-              </label>
-              <select
-                value={filters.status}
-                onChange={(e) =>
-                  handleFilterChange('status', e.target.value as 'all' | 'success' | 'failed' | 'warning')
-                }
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d0d0d0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                }}
-              >
-                <option value="all">All Status</option>
-                <option value="success">Success</option>
-                <option value="failed">Failed</option>
-                <option value="warning">Warning</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Filter Buttons */}
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <Button type="button" variant="outline" size="md" onClick={handleResetFilters}>
-              Reset Filters
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={handleExport}
-              disabled={isExporting}
-            >
-              {isExporting ? 'Exporting...' : '📥 Export to CSV'}
-            </Button>
-          </div>
-        </div>
-
-        {/* Audit Logs Table - Virtual Scrolling for Performance */}
-        <div
-          style={{
-            backgroundColor: '#fff',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            border: '1px solid #e0e0e0',
-            overflow: 'hidden',
-          }}
-          className="animate-slide-up"
-        >
-          <div style={{ padding: '24px', borderBottom: '1px solid #e0e0e0' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: '600' }}>
-              Audit Logs ({filteredLogs.length})
-            </h2>
-          </div>
-
-          {/* Virtual Table - Renders only visible rows for better performance */}
-          {filteredLogs.length > 0 ? (
-            <VirtualTable
-              columns={['Timestamp', 'User', 'Action', 'Resource', 'Status', 'IP Address', 'Details']}
-              data={filteredLogs.map((log) => ({
-                timestamp: log.timestamp,
-                user: log.user,
-                action: log.action,
-                resource: log.resource,
-                status: log.status,
-                ipAddress: log.ipAddress,
-                details: log.details,
-                id: log.id,
-                userId: log.userId,
-              }))}
-              rowHeight={60}
-              maxHeight={700}
-              renderCell={(value, key) => {
-                // Custom rendering for status badge
-                if (key === 'status') {
-                  const statusStyles = {
-                    success: 'bg-green-100 text-green-800',
-                    failed: 'bg-red-100 text-red-800',
-                    warning: 'bg-yellow-100 text-yellow-800',
-                  };
-                  const statusValue = String(value);
-                  return (
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[statusValue as keyof typeof statusStyles] || 'bg-gray-100 text-gray-800'}`}
-                    >
-                      {statusValue}
-                    </span>
-                  );
-                }
-
-                // Custom rendering for action
-                if (key === 'action') {
-                  const actionValue = String(value);
-                  return ACTION_NAMES[actionValue] || actionValue;
-                }
-
-                return String(value);
-              }}
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={realTimeMode}
+              onChange={(e) => setRealTimeMode(e.target.checked)}
+              className="rounded border-gray-300"
             />
-          ) : (
-            <div style={{ padding: '32px', textAlign: 'center', color: '#999' }}>
-              No audit logs found matching your filters
-            </div>
-          )}
-        </div>
-
-        {/* Archive Modal */}
-        {archiveModal.isOpen && (
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000,
-            }}
-            onClick={() => !isArchiving && setArchiveModal({ isOpen: false, beforeDate: '' })}
+            <span className="text-sm text-gray-700">
+              Real-time monitoring {realTimeMode && '(5s refresh)'}
+            </span>
+          </label>
+          <Button
+            variant="secondary"
+            onClick={() => setShowExportModal(true)}
+            disabled={isExporting}
           >
-            <div
-              style={{
-                backgroundColor: '#fff',
-                borderRadius: '8px',
-                padding: '32px',
-                maxWidth: '400px',
-                width: '90%',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>
-                📦 Archive Audit Logs
-              </h3>
-              <p style={{ color: '#666', marginBottom: '20px', fontSize: '14px' }}>
-                Archive logs before a specific date. This action cannot be undone.
-              </p>
+            Export Logs
+          </Button>
+          <Button variant="secondary" onClick={() => refetch()}>
+            🔄 Refresh
+          </Button>
+        </div>
+      </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                  Archive logs before:
-                </label>
-                <input
-                  type="date"
-                  value={archiveModal.beforeDate}
-                  onChange={(e) => setArchiveModal({ ...archiveModal, beforeDate: e.target.value })}
-                  disabled={isArchiving}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #d0d0d0',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="md"
-                  onClick={() => setArchiveModal({ isOpen: false, beforeDate: '' })}
-                  disabled={isArchiving}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="md"
-                  onClick={handleArchiveLogs}
-                  disabled={isArchiving || !archiveModal.beforeDate}
-                >
-                  {isArchiving ? 'Archiving...' : 'Archive'}
-                </Button>
-              </div>
-            </div>
-          </div>
+      {/* Quick Filters */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleQuickFilter('today')}
+        >
+          Today's Logs
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleQuickFilter('critical')}
+        >
+          Critical Only
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleQuickFilter('failed_logins')}
+        >
+          Failed Logins
+        </Button>
+        {activeFiltersCount > 0 && (
+          <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+            Clear All Filters ({activeFiltersCount})
+          </Button>
         )}
       </div>
+
+      {/* Advanced Filters */}
+      <div className="bg-white p-4 rounded-lg border border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">
+          Advanced Filters
+        </h3>
+        <div className="grid grid-cols-4 gap-4">
+          {/* Date Range */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Start Date
+            </label>
+            <input
+              type="datetime-local"
+              value={filters.start_date?.slice(0, 16) || ''}
+              onChange={(e) =>
+                handleFilterChange(
+                  'start_date',
+                  e.target.value ? new Date(e.target.value).toISOString() : undefined
+                )
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              End Date
+            </label>
+            <input
+              type="datetime-local"
+              value={filters.end_date?.slice(0, 16) || ''}
+              onChange={(e) =>
+                handleFilterChange(
+                  'end_date',
+                  e.target.value ? new Date(e.target.value).toISOString() : undefined
+                )
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          {/* Action */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Action
+            </label>
+            <select
+              value={filters.action || ''}
+              onChange={(e) =>
+                handleFilterChange('action', e.target.value || undefined)
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">All Actions</option>
+              {ACTION_OPTIONS.map((action) => (
+                <option key={action} value={action}>
+                  {action}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Resource */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Resource
+            </label>
+            <select
+              value={filters.resource || ''}
+              onChange={(e) =>
+                handleFilterChange('resource', e.target.value || undefined)
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">All Resources</option>
+              {RESOURCE_OPTIONS.map((resource) => (
+                <option key={resource} value={resource}>
+                  {resource}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Severity */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Severity
+            </label>
+            <select
+              value={filters.severity || ''}
+              onChange={(e) =>
+                handleFilterChange(
+                  'severity',
+                  e.target.value ? (e.target.value as AuditSeverity) : undefined
+                )
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">All Severities</option>
+              {SEVERITY_OPTIONS.map((severity) => (
+                <option key={severity} value={severity}>
+                  {severity.toUpperCase()}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Result - REMOVED (not in AuditLogFilters) */}
+
+          {/* Actor ID */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Actor ID
+            </label>
+            <input
+              type="text"
+              value={filters.actor_id || ''}
+              onChange={(e) =>
+                handleFilterChange('actor_id', e.target.value || undefined)
+              }
+              placeholder="Actor ID..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          {/* Search */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Search Logs
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                placeholder="Search logs..."
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <Button 
+                size="sm" 
+                onClick={handleSearch}
+                disabled={isLoading}
+              >
+                🔍 Search
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-2 text-sm text-gray-600">Loading logs...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {isError && (
+        <ErrorAlert
+          message={error?.message || 'Failed to load audit logs. Please try again.'}
+          title="Error Loading Logs"
+          variant="danger"
+          action={{
+            label: 'Retry',
+            onClick: () => refetch(),
+          }}
+        />
+      )}
+
+      {/* Stats Cards */}
+      {!isLoading && !isError && logsData?.logs && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-sm text-gray-600 mb-1">Total Logs</div>
+            <div className="text-3xl font-bold text-gray-900">{totalLogs}</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-sm text-gray-600 mb-1">Critical</div>
+            <div className="text-3xl font-bold text-red-600">
+              {logsData.logs.filter(log => log.severity === 'critical').length}
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-sm text-gray-600 mb-1">High</div>
+            <div className="text-3xl font-bold text-orange-600">
+              {logsData.logs.filter(log => log.severity === 'high').length}
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-sm text-gray-600 mb-1">Failed Logins</div>
+            <div className="text-3xl font-bold text-yellow-600">
+              {logsData.logs.filter(log => log.action === 'login.failed').length}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logs Table */}
+      {!isLoading && !isError && (
+        <>
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Timestamp
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Action
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      User ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Resource Type
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Resource ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Severity
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Outcome
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {logsData?.logs?.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="px-4 py-8 text-center">
+                        <p className="text-sm text-gray-500">
+                          No audit logs found
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    logsData?.logs?.map((log) => (
+                      <tr key={log.audit_id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                          {formatTimestamp(log.timestamp)}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm">
+                          <span className="flex items-center gap-2">
+                            <span>{getActionIcon(log.action)}</span>
+                            <span className="text-gray-900">{log.action}</span>
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <div className="text-gray-900">{log.user_id}</div>
+                          <div className="text-gray-500 text-xs">
+                            {log.ip_address}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                          {log.resource_type}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                          {log.resource_id || 'N/A'}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm">
+                          <Badge variant={getSeverityBadge(log.severity)}>
+                            {log.severity.toUpperCase()}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm">
+                          <Badge variant={log.outcome === null ? 'secondary' : 'primary'}>
+                            {log.outcome || 'N/A'}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewDetails(log)}
+                          >
+                            View
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between bg-white px-4 py-3 border border-gray-200 rounded-lg">
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-700">
+                Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
+                <span className="font-medium">{endIndex}</span> of{' '}
+                <span className="font-medium">{totalLogs}</span> logs
+              </span>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+              >
+                <option value="10">10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(1)}
+                disabled={page === 1}
+              >
+                First
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={!logsData?.pagination?.has_prev}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-gray-700">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => p + 1)}
+                disabled={!logsData?.pagination?.has_next}
+              >
+                Next
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(totalPages)}
+                disabled={page === totalPages}
+              >
+                Last
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Detail Modal */}
+      {showDetailModal && selectedLog && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4 animate-scale-in">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Audit Log Details
+              </h2>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <span className="text-2xl">×</span>
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Summary */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  Summary
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Audit ID</p>
+                    <p className="text-sm text-gray-900 font-mono">
+                      {selectedLog.audit_id}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Timestamp</p>
+                    <p className="text-sm text-gray-900">
+                      {formatTimestamp(selectedLog.timestamp)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Action</p>
+                    <p className="text-sm text-gray-900">
+                      {getActionIcon(selectedLog.action)} {selectedLog.action}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Resource Type</p>
+                    <p className="text-sm text-gray-900">
+                      {selectedLog.resource_type}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Resource ID</p>
+                    <p className="text-sm text-gray-900 font-mono">
+                      {selectedLog.resource_id}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Severity</p>
+                    <Badge variant={getSeverityBadge(selectedLog.severity)}>
+                      {selectedLog.severity.toUpperCase()}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Outcome</p>
+                    <Badge variant={selectedLog.outcome === null ? 'secondary' : 'primary'}>
+                      {selectedLog.outcome || 'N/A'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* User Information */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  User Information
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500">User ID</p>
+                    <p className="text-sm text-gray-900 font-mono">
+                      {selectedLog.user_id}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">IP Address</p>
+                    <p className="text-sm text-gray-900 font-mono">
+                      {selectedLog.ip_address}
+                    </p>
+                  </div>
+                  {selectedLog.user_agent && (
+                    <div className="col-span-2">
+                      <p className="text-xs text-gray-500">User Agent</p>
+                      <p className="text-sm text-gray-900 break-all">
+                        {selectedLog.user_agent}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Metadata JSON */}
+              {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Metadata
+                  </h3>
+                  <pre className="bg-gray-50 border border-gray-200 rounded p-4 overflow-auto text-xs">
+                    {JSON.stringify(selectedLog.metadata, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end">
+              <Button onClick={() => setShowDetailModal(false)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full m-4 animate-scale-in">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Export Audit Logs
+              </h2>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Export Format
+                </label>
+                <select
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  {EXPORT_FORMATS.map((format) => (
+                    <option key={format} value={format}>
+                      {format.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {activeFiltersCount > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                  <p className="text-sm text-blue-800">
+                    <strong>Note:</strong> Export will include {activeFiltersCount}{' '}
+                    active filter(s)
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowExportModal(false)}
+                disabled={isExporting}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleExport} disabled={isExporting}>
+                {isExporting ? 'Exporting...' : 'Export'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

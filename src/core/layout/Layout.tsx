@@ -4,6 +4,7 @@ import { useAppStore } from '../../store/appStore';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
 import Sidebar from '../../shared/components/layout/Sidebar';
+import Breadcrumb from '../../shared/components/layout/Breadcrumb';
 import Toast from '../../shared/components/ui/Toast';
 import SkipLinks from '../../shared/components/accessibility/SkipLinks';
 
@@ -26,11 +27,12 @@ export default function Layout({ children }: LayoutProps) {
           
           <main 
             id="main-content" 
-            className="flex-1"
+            className="flex-1 p-6"
             role="main"
             aria-label="Main content"
             tabIndex={-1}
           >
+            {isAuthenticated && <Breadcrumb />}
             {children}
           </main>
         </div>

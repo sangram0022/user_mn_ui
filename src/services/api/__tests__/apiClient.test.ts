@@ -118,10 +118,23 @@ describe('apiClient', () => {
 
     it('should call tokenService.refreshToken for token renewal', () => {
       vi.mocked(tokenService.refreshToken).mockResolvedValue({
-        access_token: 'new-token',
-        refresh_token: 'new-refresh',
-        token_type: 'bearer',
-        expires_in: 3600,
+        success: true,
+        message_code: 'AUTH_TOKEN_REFRESHED',
+        message: 'Token refreshed successfully',
+        timestamp: new Date().toISOString(),
+        request_id: 'test-request-id',
+        api_version: '1.0.0',
+        data: {
+          access_token: 'new-token',
+          refresh_token: 'new-refresh',
+          token_type: 'bearer',
+          expires_in: 3600,
+          refresh_expires_in: 7200,
+          user_id: 'user-123',
+          email: 'test@example.com',
+          roles: ['user'],
+          last_login_at: '2024-01-15T10:00:00Z',
+        },
       });
       
       // Verify tokenService is mocked

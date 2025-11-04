@@ -3,6 +3,7 @@
  * Provides application health status for monitoring and container orchestration
  */
 
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 
 export interface HealthStatus {
@@ -74,7 +75,7 @@ export function useHealthCheck() {
 
       setHealthStatus(status);
       return status;
-    } catch (error) {
+    } catch {
       const errorStatus: HealthStatus = {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
@@ -131,8 +132,8 @@ export function useHealthCheck() {
 
   // Check memory usage (if available)
   const checkMemoryUsage = (): number | undefined => {
-    if ('memory' in performance && (performance as any).memory) {
-      const memory = (performance as any).memory;
+    if ('memory' in performance && (performance as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory) {
+      const memory = (performance as { memory: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory;
       return Math.round((memory.usedJSHeapSize / memory.totalJSHeapSize) * 100);
     }
     return undefined;
@@ -148,7 +149,10 @@ export function useHealthCheck() {
 
   // Expose health check endpoint globally for container health checks
   useEffect(() => {
-    (window as any).getHealthStatus = () => healthStatus;
+    interface WindowWithHealthCheck extends Window {
+      getHealthStatus?: () => HealthStatus | null;
+    }
+    (window as WindowWithHealthCheck).getHealthStatus = () => healthStatus;
     
     // Create a global health check endpoint
     const originalFetch = window.fetch;

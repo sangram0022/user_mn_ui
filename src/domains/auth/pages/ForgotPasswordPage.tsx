@@ -14,23 +14,19 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Use new centralized forgot password hook
-  const { forgotPassword, loading } = useForgotPassword();
+  // Use new centralized forgot password hook with React Query
+  const forgotPasswordMutation = useForgotPassword();
+  const loading = forgotPasswordMutation.isPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const result = await forgotPassword({ email });
+      await forgotPasswordMutation.mutateAsync({ email });
       
       // Security pattern: Always show success message to prevent email enumeration
       toast.success(t('forgotPassword.successMessage'));
       setIsSubmitted(true);
-      
-      // Log result for debugging (remove in production or make conditional)
-      if (!result.success && result.error) {
-        console.debug('Forgot password error:', result.error);
-      }
     } catch (error) {
       // Still show success to prevent email enumeration
       toast.success(t('forgotPassword.successMessage'));
@@ -43,7 +39,7 @@ export default function ForgotPasswordPage() {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 animate-fade-in">
         <div className="max-w-md w-full">
-          <div className="glass p-12 rounded-2xl shadow-xl border border-white/20 text-center animate-scale-in">
+          <div className="glass p-12 rounded-2xl shadow-xl border border-white/20 text-center animate-scale-in" data-testid="success-message">
             <div className="text-6xl mb-6 animate-bounce">✉️</div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               {t('common:success.emailSent')}
@@ -72,12 +68,12 @@ export default function ForgotPasswordPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold mb-2">{t('forgotPassword.title')}</h1>
+          <h1 className="text-3xl font-bold mb-2" data-testid="forgot-password-heading">{t('forgotPassword.title')}</h1>
           <p className="text-gray-600">{t('forgotPassword.subtitle')}</p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl shadow-xl border border-white/20 space-y-6 animate-scale-in">
+        <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl shadow-xl border border-white/20 space-y-6 animate-scale-in" data-testid="forgot-password-form">
           <Input
             type="email"
             label={t('forgotPassword.emailLabel')}
@@ -86,6 +82,7 @@ export default function ForgotPasswordPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={loading}
+            data-testid="email-input"
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -99,6 +96,7 @@ export default function ForgotPasswordPage() {
             size="lg"
             disabled={loading}
             className="w-full"
+            data-testid="submit-button"
           >
             {loading ? (
               <>
@@ -117,6 +115,7 @@ export default function ForgotPasswordPage() {
             <Link
               to={ROUTE_PATHS.LOGIN}
               className="text-sm text-gray-700 hover:text-gray-900 font-medium transition-colors"
+              data-testid="login-link"
             >
               ← {t('forgotPassword.backToLogin')}
             </Link>

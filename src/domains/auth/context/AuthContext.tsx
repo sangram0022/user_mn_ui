@@ -3,6 +3,7 @@
 // Uses React 19's use() hook for context consumption
 // ========================================
 
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import authService from '../services/authService';
 import tokenService from '../services/tokenService';
@@ -196,10 +197,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await tokenService.refreshToken(refreshToken);
       
       // Update tokens in storage
-      authStorage.setTokens({
-        access_token: response.access_token,
-        refresh_token: response.refresh_token,
-      });
+      if (response.data) {
+        authStorage.setTokens({
+          access_token: response.data.access_token,
+          refresh_token: response.data.refresh_token,
+        });
+      }
       
       logger().debug('Session refreshed successfully', {
         context: 'AuthContext.refreshSession',

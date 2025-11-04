@@ -14,7 +14,6 @@ import {
 } from '@/core/monitoring/hooks';
 import {
   ErrorStatsOverview,
-  ErrorTrendsChart,
   ErrorListWithFilters,
   RecoveryMetricsCard,
   PerformanceMetricsCard,
@@ -27,7 +26,7 @@ import styles from './ErrorDashboard.module.css';
  * Main monitoring page for error statistics and analytics
  */
 export function ErrorDashboard() {
-  const { stats, trends, isLoading, error, refresh } = useErrorStatistics(5000);
+  const { stats, isLoading, error, refresh } = useErrorStatistics(5000);
   const recovery = useErrorRecovery();
   useErrorTrends(); // Called for side effects
   const metrics = useErrorMetrics();
@@ -36,9 +35,24 @@ export function ErrorDashboard() {
   const [selectedErrorLevel, setSelectedErrorLevel] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  interface ErrorEntry {
+    id: string;
+    timestamp: string | number;
+    type: string;
+    message: string;
+    stack?: string;
+    source: string;
+    level: string;
+  }
+
+  interface TopErrorEntry {
+    type: string;
+    count: number;
+  }
+
   // Filter recent errors based on selections
   const filteredErrors = (stats?.recentErrors || []).filter(
-    (err: any) => {
+    (err: ErrorEntry) => {
       const matchesType = !selectedErrorType || err.type === selectedErrorType;
       const matchesLevel = !selectedErrorLevel || err.level === selectedErrorLevel;
       const matchesSearch =
@@ -50,10 +64,10 @@ export function ErrorDashboard() {
 
   // Get available types and levels
   const availableTypes = Array.from(
-    new Set((stats?.recentErrors || []).map((e: any) => (e.type ? String(e.type) : ''))),
+    new Set((stats?.recentErrors || []).map((e: ErrorEntry) => (e.type ? String(e.type) : ''))),
   ).filter(Boolean) as string[];
   const availableLevels = Array.from(
-    new Set((stats?.recentErrors || []).map((e: any) => (e.level ? String(e.level) : ''))),
+    new Set((stats?.recentErrors || []).map((e: ErrorEntry) => (e.level ? String(e.level) : ''))),
   ).filter(Boolean) as string[];
 
   return (
@@ -87,10 +101,6 @@ export function ErrorDashboard() {
 
       {/* Charts Grid */}
       <div className={styles.chartsGrid}>
-        <ErrorTrendsChart
-          trends={trends?.map((t: any) => ({ ...t, timestamp: typeof t.timestamp === 'string' ? Date.parse(t.timestamp) : t.timestamp })) || []}
-          isLoading={isLoading}
-        />
         <RecoveryMetricsCard
           recoveryRate={recovery?.recoveryRate || 0}
           recoveredErrors={Math.round((recovery?.totalErrors || 0) * ((recovery?.recoveryRate || 0) / 100))}
@@ -105,7 +115,7 @@ export function ErrorDashboard() {
           isLoading={isLoading}
         />
         <TopErrorsCard
-          topErrors={(metrics?.topErrors || []).map((t: any, i: number) => ({
+          topErrors={(metrics?.topErrors || []).map((t: TopErrorEntry, i: number) => ({
             id: `${i}`,
             type: t.type,
             message: t.type,
@@ -159,9 +169,10 @@ export function ErrorDashboard() {
 
       {/* Error List */}
       <ErrorListWithFilters
-        errors={(filteredErrors || []).map((e: any) => ({
+        errors={(filteredErrors || []).map((e: ErrorEntry) => ({
           ...e,
-          id: e.id || Math.random().toString(),
+          id: Math.random().toString(),
+          timestamp: typeof e.timestamp === 'string' ? Date.parse(e.timestamp) : e.timestamp,
           level: (e.level === 'debug' ? 'info' : e.level) as 'error' | 'info' | 'warning' | 'fatal',
         }))}
         selectedErrorType={selectedErrorType}

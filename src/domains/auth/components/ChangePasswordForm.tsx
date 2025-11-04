@@ -94,6 +94,7 @@ export function ChangePasswordForm({ onSuccess, onError }: ChangePasswordFormPro
     changePasswordMutation.mutate({
       current_password: formData.currentPassword,
       new_password: formData.newPassword,
+      confirm_password: formData.confirmPassword,
     });
   };
 

@@ -1,0 +1,128 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic:
+    - link "Skip to main content" [ref=e3] [cursor=pointer]:
+      - /url: "#main-content"
+    - link "Skip to navigation" [ref=e4] [cursor=pointer]:
+      - /url: "#navigation"
+    - link "Skip to footer" [ref=e5] [cursor=pointer]:
+      - /url: "#footer"
+  - generic [ref=e6]:
+    - banner [ref=e7]:
+      - generic [ref=e9]:
+        - link "UserMN Home" [ref=e10] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e12]
+          - generic [ref=e14]: UserMN
+        - button "Open navigation menu" [ref=e16]:
+          - img [ref=e17]
+    - generic [ref=e19]:
+      - navigation "Sidebar navigation" [ref=e20]:
+        - navigation "Main navigation menu" [ref=e21]:
+          - link "Navigate to nav.home" [ref=e22] [cursor=pointer]:
+            - /url: /
+            - img [ref=e23]
+            - generic [ref=e26]: nav.home
+          - link "Navigate to nav.profile" [ref=e27] [cursor=pointer]:
+            - /url: /profile
+            - img [ref=e28]
+            - generic [ref=e31]: nav.profile
+      - main "Main content" [ref=e32]:
+        - generic [ref=e34]:
+          - img [ref=e36]
+          - heading "404" [level=1] [ref=e38]
+          - heading "Page Not Found" [level=2] [ref=e39]
+          - paragraph [ref=e40]: Sorry, we couldn't find the page you're looking for. The page may have been moved or deleted.
+          - generic [ref=e41]:
+            - button "Go to Homepage" [ref=e42]:
+              - img [ref=e43]
+              - text: Go to Homepage
+            - button "Go Back" [ref=e46]:
+              - img [ref=e47]
+              - text: Go Back
+          - paragraph [ref=e49]: If you believe this is an error, please contact support.
+    - contentinfo "Site footer" [ref=e50]:
+      - generic [ref=e51]:
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - img [ref=e56]
+              - generic [ref=e58]: UserMN
+            - paragraph [ref=e59]: Modern user management with React 19, Vite & Tailwind v4.1.16
+          - navigation "Product links" [ref=e60]:
+            - heading "Product" [level=3] [ref=e61]
+            - list [ref=e62]:
+              - listitem [ref=e63]:
+                - link "View Features" [ref=e64] [cursor=pointer]:
+                  - /url: "#"
+                  - text: Features
+              - listitem [ref=e65]:
+                - link "View Pricing" [ref=e66] [cursor=pointer]:
+                  - /url: "#"
+                  - text: Pricing
+              - listitem [ref=e67]:
+                - link "View Security" [ref=e68] [cursor=pointer]:
+                  - /url: "#"
+                  - text: Security
+              - listitem [ref=e69]:
+                - link "View Roadmap" [ref=e70] [cursor=pointer]:
+                  - /url: "#"
+                  - text: Roadmap
+          - navigation "Company links" [ref=e71]:
+            - heading "Company" [level=3] [ref=e72]
+            - list [ref=e73]:
+              - listitem [ref=e74]:
+                - link "View About" [ref=e75] [cursor=pointer]:
+                  - /url: "#"
+                  - text: About
+              - listitem [ref=e76]:
+                - link "View Blog" [ref=e77] [cursor=pointer]:
+                  - /url: "#"
+                  - text: Blog
+              - listitem [ref=e78]:
+                - link "View Careers" [ref=e79] [cursor=pointer]:
+                  - /url: "#"
+                  - text: Careers
+              - listitem [ref=e80]:
+                - link "View Contact" [ref=e81] [cursor=pointer]:
+                  - /url: "#"
+                  - text: Contact
+          - navigation "Legal links" [ref=e82]:
+            - heading "Legal" [level=3] [ref=e83]
+            - list [ref=e84]:
+              - listitem [ref=e85]:
+                - link "View Privacy" [ref=e86] [cursor=pointer]:
+                  - /url: "#"
+                  - text: Privacy
+              - listitem [ref=e87]:
+                - link "View Terms" [ref=e88] [cursor=pointer]:
+                  - /url: "#"
+                  - text: Terms
+              - listitem [ref=e89]:
+                - link "View License" [ref=e90] [cursor=pointer]:
+                  - /url: "#"
+                  - text: License
+              - listitem [ref=e91]:
+                - link "View Cookies" [ref=e92] [cursor=pointer]:
+                  - /url: "#"
+                  - text: Cookies
+        - generic [ref=e93]:
+          - paragraph [ref=e94]:
+            - generic "Copyright 2025 UserMN" [ref=e95]: © 2025 UserMN. All rights reserved.
+          - navigation "Social media links" [ref=e96]:
+            - link "Follow us on Facebook" [ref=e97] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e98]
+            - link "Follow us on Twitter" [ref=e100] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e101]
+            - link "Follow us on GitHub" [ref=e103] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e104]
+  - generic [ref=e106]:
+    - img [ref=e108]
+    - button "Open Tanstack query devtools" [ref=e156] [cursor=pointer]:
+      - img [ref=e157]
+```

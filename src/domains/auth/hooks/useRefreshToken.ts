@@ -5,7 +5,7 @@
 
 import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import tokenService from '../services/tokenService';
-import type { RefreshTokenResponse } from '../types/token.types';
+import type { RefreshTokenResponse } from '../types/auth.types';
 
 interface UseRefreshTokenOptions {
   onSuccess?: (data: RefreshTokenResponse) => void;
@@ -21,17 +21,19 @@ export const useRefreshToken = (
 ): UseMutationResult<RefreshTokenResponse, Error, string> => {
   return useMutation({
     mutationFn: tokenService.refreshToken,
-    onSuccess: (data: RefreshTokenResponse) => {
+    onSuccess: (response: RefreshTokenResponse) => {
       // Store new tokens
-      tokenService.storeTokens({
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-        token_type: data.token_type,
-        expires_in: data.expires_in,
-      });
+      if (response.data) {
+        tokenService.storeTokens({
+          access_token: response.data.access_token,
+          refresh_token: response.data.refresh_token,
+          token_type: response.data.token_type,
+          expires_in: response.data.expires_in,
+        });
+      }
 
       // Call custom success handler
-      options?.onSuccess?.(data);
+      options?.onSuccess?.(response);
     },
     onError: options?.onError,
   });

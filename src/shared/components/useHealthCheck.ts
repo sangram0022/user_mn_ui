@@ -48,7 +48,7 @@ export const useHealthCheck = () => {
             errorRate: 0.1,
           },
         });
-      } catch (_error) {
+      } catch {
         setHealthStatus({
           status: 'error',
           message: 'Health check failed',

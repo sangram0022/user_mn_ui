@@ -429,13 +429,22 @@ export function getErrorMappingByStatus(statusCode: number): ErrorMapping | null
  * @param error - Axios error object or error response
  * @returns Mapped error configuration
  */
-export function parseAuthError(error: any): ErrorMapping {
+export function parseAuthError(error: unknown): ErrorMapping {
+  const err = error as { 
+    response?: { 
+      data?: { code?: string; error?: { code?: string }; error_code?: string };
+      status?: number;
+    };
+    code?: string;
+    status?: number;
+  };
+  
   // Extract error code from various response formats
   const errorCode = 
-    error?.response?.data?.code ||
-    error?.response?.data?.error?.code ||
-    error?.response?.data?.error_code ||
-    error?.code ||
+    err?.response?.data?.code ||
+    err?.response?.data?.error?.code ||
+    err?.response?.data?.error_code ||
+    err?.code ||
     null;
   
   // Try to get mapping by error code first
@@ -445,7 +454,7 @@ export function parseAuthError(error: any): ErrorMapping {
   }
   
   // Fall back to HTTP status code
-  const statusCode = error?.response?.status || error?.status;
+  const statusCode = err?.response?.status || err?.status;
   if (statusCode) {
     const mapping = getErrorMappingByStatus(statusCode);
     if (mapping) return mapping;
@@ -460,14 +469,15 @@ export function parseAuthError(error: any): ErrorMapping {
  * @param error - Axios error or error response
  * @returns Formatted error message
  */
-export function formatAuthErrorMessage(error: any): string {
+export function formatAuthErrorMessage(error: unknown): string {
   const mapping = parseAuthError(error);
+  const err = error as { response?: { data?: { message?: string; detail?: string } }; message?: string };
   
   // If backend provides a custom message, use it
   const backendMessage = 
-    error?.response?.data?.message ||
-    error?.response?.data?.detail ||
-    error?.message;
+    err?.response?.data?.message ||
+    err?.response?.data?.detail ||
+    err?.message;
   
   // Use backend message if it's specific, otherwise use our mapping
   if (backendMessage && backendMessage !== 'Internal Server Error') {
@@ -482,7 +492,7 @@ export function formatAuthErrorMessage(error: any): string {
  * @param error - Axios error or error response
  * @returns True if error has actions
  */
-export function hasErrorActions(error: any): boolean {
+export function hasErrorActions(error: unknown): boolean {
   const mapping = parseAuthError(error);
   return (mapping.actions?.length || 0) > 0;
 }
@@ -492,7 +502,7 @@ export function hasErrorActions(error: any): boolean {
  * @param error - Axios error or error response
  * @returns Array of actions
  */
-export function getErrorActions(error: any): ErrorAction[] {
+export function getErrorActions(error: unknown): ErrorAction[] {
   const mapping = parseAuthError(error);
   return mapping.actions || [];
 }

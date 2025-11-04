@@ -70,6 +70,7 @@ export function ResetPasswordForm({ token, onSuccess, onError, redirectTo = '/au
     resetPasswordMutation.mutate({
       token,
       new_password: password,
+      confirm_password: confirmPassword,
     });
   };
 

@@ -11,6 +11,7 @@ import type {
   LoginResponseData,
   RegisterRequest,
   RegisterResponse,
+  RegisterResponseData,
   LogoutResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
@@ -57,11 +58,11 @@ export const login = async (data: LoginRequest): Promise<LoginResponseData> => {
  * POST /api/v1/auth/register
  * Register a new user account
  * 
- * @param data - Must include email, password, and either (first_name + last_name) OR full_name
+ * @param data - Must include email, password, first_name, and last_name
  */
-export const register = async (data: RegisterRequest): Promise<RegisterResponse['data']> => {
+export const register = async (data: RegisterRequest): Promise<RegisterResponseData> => {
   const response = await apiClient.post<RegisterResponse>(`${API_PREFIX}/register`, data);
-  return unwrapResponse(response.data);
+  return unwrapResponse<RegisterResponseData>(response.data);
 };
 
 /**

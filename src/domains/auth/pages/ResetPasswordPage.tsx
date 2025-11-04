@@ -1,27 +1,25 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { useResetPassword } from '../hooks/useResetPassword';
+import { useResetPassword } from '../hooks/useAuth.hooks';
 import { useToast } from '../../../hooks/useToast';
-import { ValidationBuilder, calculatePasswordStrength } from '../../../core/validation';
-import { parseAuthError } from '../utils/authErrorMapping';
+import { calculatePasswordStrength } from '../../../core/validation';
 import Badge from '../../../shared/components/ui/Badge';
 import { Button, Input } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 
-export default function ResetPasswordPage() {
-  const { t } = useTranslation(['auth', 'common', 'errors', 'validation']);
+export function ResetPasswordPage() {
+  const { t } = useTranslation(['auth', 'common', 'errors']);
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
   const toast = useToast();
-  const { mutate: resetPassword, isPending } = useResetPassword();
+  
+  // Use new centralized reset password hook
+  const resetPasswordMutation = useResetPassword();
+  const loading = resetPasswordMutation.isPending;
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<'weak' | 'fair' | 'good' | 'strong' | 'very_strong'>('weak');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     password: '',
@@ -32,31 +30,10 @@ export default function ResetPasswordPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Update password strength for new password
     if (name === 'password' && value) {
       const strength = calculatePasswordStrength(value);
       setPasswordStrength(strength.strength);
     }
-  };
-
-  // Helper function for password strength badge color
-  const getPasswordStrengthColor = (): 'success' | 'warning' | 'danger' => {
-    switch (passwordStrength) {
-      case 'very_strong':
-      case 'strong':
-        return 'success';
-      case 'good':
-      case 'fair':
-        return 'warning';
-      case 'weak':
-      default:
-        return 'danger';
-    }
-  };
-
-  // Helper function for password strength badge label
-  const getPasswordStrengthLabel = () => {
-    return passwordStrength.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,30 +44,8 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    // Client-side validation using core validation system
-    const validation = new ValidationBuilder()
-      .validateField('password', formData.password, (b) => b.required().password())
-      .result();
-
-    if (!validation.isValid) {
-      const errors: Record<string, string> = {};
-      
-      if (validation.fields) {
-        Object.entries(validation.fields).forEach(([fieldName, fieldResult]) => {
-          if (!fieldResult.isValid && fieldResult.errors.length > 0) {
-            errors[fieldName] = fieldResult.errors[0];
-          }
-        });
-      }
-      
-      setFieldErrors(errors);
-      toast.error(t('validation:validationFailed'));
-      return;
-    }
-
     // Password confirmation check
     if (formData.password !== formData.confirmPassword) {
-      setFieldErrors({ confirmPassword: t('errors:PASSWORD_MISMATCH') });
       toast.error(t('errors:PASSWORD_MISMATCH'));
       return;
     }
@@ -98,175 +53,156 @@ export default function ResetPasswordPage() {
     // Check password strength
     const strength = calculatePasswordStrength(formData.password);
     if (strength.score < 40) {
-      setFieldErrors({ password: t('validation:password.tooWeak') });
-      toast.error(t('validation:password.tooWeak'));
+      toast.error(t('errors:PASSWORD_TOO_WEAK'));
       return;
     }
 
-    // Clear errors
-    setFieldErrors({});
-
-    resetPassword(
-      {
+    try {
+      await resetPasswordMutation.mutateAsync({
         token,
         new_password: formData.password,
-      },
-      {
-        onSuccess: () => {
-              setIsSuccess(true);
-              toast.success(t('resetPassword.successMessage'));
-          setTimeout(() => {
-            navigate(ROUTE_PATHS.LOGIN, {
-                  state: { message: t('resetPassword.successMessage') },
-            });
-          }, 3000);
-        },
-        onError: (error: Error) => {
-          const errorMapping = parseAuthError(error);
-          toast.error(errorMapping.message || t('resetPassword.error'));
-        },
-      }
-    );
+        confirm_password: formData.confirmPassword,
+      });
+
+      setIsSuccess(true);
+      toast.success(t('resetPassword.successMessage'));
+      setTimeout(() => {
+        navigate(ROUTE_PATHS.LOGIN, {
+          state: { message: t('resetPassword.successMessage') },
+        });
+      }, 3000);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : t('errors:RESET_PASSWORD_FAILED');
+      toast.error(errorMessage);
+    }
   };
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-secondary px-4">
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 animate-fade-in">
         <div className="max-w-md w-full text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-success">
-            <CheckCircle className="h-8 w-8 text-white" />
+          <div className="glass p-12 rounded-2xl shadow-xl border border-white/20 animate-scale-in">
+            <div className="text-6xl mb-6 animate-bounce">✅</div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {t('resetPassword.successMessage')}
+            </h1>
+            <p className="text-gray-700 mb-8">
+              {t('common:status.redirecting')}
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-text-primary mb-2">
-            {t('resetPassword.successMessage')}
-          </h1>
-          <p className="text-text-tertiary mb-6">
-            {t('common:status.redirecting')}
-          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-secondary px-4">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 animate-fade-in">
       <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
-            <Lock className="h-8 w-8 text-white" />
+        <div className="text-center mb-8 animate-slide-down">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-blue-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
           </div>
-          <h1 className="text-3xl font-bold text-text-primary mb-2">
-            {t('resetPassword.title')}
-          </h1>
-          <p className="text-text-tertiary">
-            {t('resetPassword.subtitle')}
-          </p>
+          <h1 className="text-3xl font-bold mb-2" data-testid="reset-password-heading">{t('resetPassword.title')}</h1>
+          <p className="text-gray-600">{t('resetPassword.subtitle')}</p>
         </div>
 
-        <div className="card-base p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="password" className="form-label">
-                {t('resetPassword.passwordLabel')}
-              </label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  autoComplete="new-password"
-                  placeholder={t('resetPassword.passwordPlaceholder')}
-                  className="pl-10 pr-10"
-                  error={fieldErrors.password}
-                />
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-tertiary" />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary"
+        <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl shadow-xl border border-white/20 space-y-6 animate-scale-in" data-testid="reset-password-form">
+          <div>
+            <Input
+              type="password"
+              name="password"
+              label={t('resetPassword.passwordLabel')}
+              placeholder={t('resetPassword.passwordPlaceholder')}
+              value={formData.password}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              autoComplete="new-password"
+              data-testid="new-password-input"
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              }
+            />
+            
+            {formData.password && (
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-sm text-gray-600">{t('resetPassword.passwordStrength')}</span>
+                <Badge 
+                  variant={
+                    passwordStrength === 'weak' ? 'danger' : 
+                    passwordStrength === 'fair' ? 'warning' : 
+                    passwordStrength === 'good' ? 'info' :
+                    'success'
+                  }
+                  className="text-xs"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
+                  {passwordStrength.toUpperCase()}
+                </Badge>
               </div>
-              
-              {/* Password Strength Indicator */}
-              {formData.password && (
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-sm text-text-tertiary">
-                    Password Strength:
-                  </span>
-                  <Badge variant={getPasswordStrengthColor()}>
-                    {getPasswordStrengthLabel()}
-                  </Badge>
-                </div>
-              )}
-              
-              <p className="form-hint">{t('validation:password.minLength')}</p>
-            </div>
+            )}
+          </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="form-label">
-                {t('resetPassword.confirmPasswordLabel')}
-              </label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  autoComplete="new-password"
-                  placeholder={t('resetPassword.confirmPasswordPlaceholder')}
-                  className="pl-10 pr-10"
-                  error={fieldErrors.confirmPassword}
-                />
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-tertiary" />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            </div>
+          <Input
+            type="password"
+            name="confirmPassword"
+            label={t('resetPassword.confirmPasswordLabel')}
+            placeholder={t('resetPassword.confirmPasswordPlaceholder')}
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+            disabled={loading}
+            autoComplete="new-password"
+            data-testid="confirm-password-input"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+          />
 
-            <Button
-              type="submit"
-              disabled={isPending || !formData.password || !formData.confirmPassword}
-              className="w-full"
-            >
-              {isPending ? t('resetPassword.submitting') : t('resetPassword.submitButton')}
-            </Button>
-          </form>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            disabled={loading || !formData.password || !formData.confirmPassword}
+            className="w-full"
+            data-testid="reset-submit-button"
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                {t('resetPassword.submitting')}
+              </>
+            ) : (
+              t('resetPassword.submitButton')
+            )}
+          </Button>
 
-          <div className="mt-6 flex justify-between text-sm">
+          <div className="flex justify-between text-sm pt-4">
             <Link
               to={ROUTE_PATHS.LOGIN}
-              className="text-primary hover:text-primary-dark font-medium"
+              className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
             >
-              {t('resetPassword.backToLogin')}
+              ← {t('resetPassword.backToLogin')}
             </Link>
             <Link
               to={ROUTE_PATHS.FORGOT_PASSWORD}
-              className="text-primary hover:text-primary-dark font-medium"
+              className="text-brand-primary hover:opacity-80 font-medium transition-opacity"
             >
               {t('common:actions.requestNew')}
             </Link>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
 }
+
+export default ResetPasswordPage;

@@ -6,6 +6,8 @@
 import { apiClient } from '../../../services/api/apiClient';
 import type {
   RefreshTokenResponse,
+} from '../types/auth.types';
+import type {
   CsrfTokenResponse,
   ValidateCsrfRequest,
   ValidateCsrfResponse,
@@ -13,10 +15,11 @@ import type {
 } from '../types/token.types';
 
 const API_PREFIX = '/api/v1/auth';
-const TOKEN_STORAGE_KEY = 'auth_token';
+// Updated to match authStorage keys (single source of truth)
+const TOKEN_STORAGE_KEY = 'access_token';
 const REFRESH_TOKEN_STORAGE_KEY = 'refresh_token';
 const TOKEN_EXPIRY_KEY = 'token_expires_at';
-const USER_STORAGE_KEY = 'auth_user';
+const USER_STORAGE_KEY = 'user';
 const CSRF_TOKEN_STORAGE_KEY = 'csrf_token';
 
 /**

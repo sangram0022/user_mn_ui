@@ -2,420 +2,115 @@
 // Authentication Hooks
 // Production-ready React hooks for all auth operations
 // Follows SOLID principles and Clean Code practices
+// Uses React Query for consistent API with admin hooks
 // ========================================
 
-import { useState } from 'react';
+import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import authService from '../services/authService';
 import type {
   LoginRequest,
+  LoginResponseData,
   RegisterRequest,
+  RegisterResponseData,
   ForgotPasswordRequest,
+  ForgotPasswordResponse,
   ResetPasswordRequest,
+  ResetPasswordResponse,
   ChangePasswordRequest,
+  ChangePasswordResponse,
   VerifyEmailRequest,
+  VerifyEmailResponse,
   ResendVerificationRequest,
+  ResendVerificationResponse,
 } from '../types/auth.types';
-import { extractErrorDetails, type ErrorDetails } from '../utils/error.utils';
-import {
-  validateEmail,
-  validatePassword,
-  validateName,
-  validatePasswordConfirmation,
-  validateForm,
-  type ValidationResult,
-} from '../utils/validation.utils';
-
-// ========================================
-// Base Hook State
-// ========================================
-
-interface BaseHookState {
-  loading: boolean;
-  error: ErrorDetails | null;
-  fieldErrors: Record<string, string> | null;
-}
 
 // ========================================
 // useLogin Hook
 // ========================================
 
-export function useLogin() {
-  const [state, setState] = useState<BaseHookState>({
-    loading: false,
-    error: null,
-    fieldErrors: null,
-  });
-
-  const login = async (credentials: LoginRequest) => {
-    setState({ loading: true, error: null, fieldErrors: null });
-
-    try {
-      // Client-side validation
-      const validationResult = validateForm({
-        email: validateEmail(credentials.email),
-        password: { isValid: !!credentials.password, errors: credentials.password ? [] : ['Password is required'] },
-      });
-
-      if (!validationResult.isValid) {
-        const fieldErrors: Record<string, string> = {};
-        Object.entries(validationResult.fieldErrors).forEach(([field, errors]) => {
-          fieldErrors[field] = errors.join('\n');
-        });
-        
-        setState({
-          loading: false,
-          error: { message: 'Please check your input' },
-          fieldErrors,
-        });
-        return { success: false, fieldErrors };
-      }
-
-      // Call API
+export function useLogin(): UseMutationResult<LoginResponseData, Error, LoginRequest> {
+  return useMutation<LoginResponseData, Error, LoginRequest>({
+    mutationFn: async (credentials: LoginRequest) => {
       const response = await authService.login(credentials);
-      
-      setState({ loading: false, error: null, fieldErrors: null });
-      return { success: true, data: response };
-    } catch (error) {
-      const errorDetails = extractErrorDetails(error);
-      setState({
-        loading: false,
-        error: errorDetails,
-        fieldErrors: errorDetails.fieldErrors || null,
-      });
-      return { success: false, error: errorDetails };
-    }
-  };
-
-  return {
-    ...state,
-    login,
-  };
+      return response;
+    },
+  });
 }
 
 // ========================================
 // useRegister Hook
 // ========================================
 
-export function useRegister() {
-  const [state, setState] = useState<BaseHookState>({
-    loading: false,
-    error: null,
-    fieldErrors: null,
-  });
-
-  const register = async (data: RegisterRequest) => {
-    setState({ loading: true, error: null, fieldErrors: null });
-
-    try {
-      // Client-side validation
-      const validations: Record<string, ValidationResult> = {
-        email: validateEmail(data.email),
-        password: validatePassword(data.password),
-      };
-
-      // Validate password confirmation if provided
-      if (data.confirm_password) {
-        validations.confirm_password = validatePasswordConfirmation(data.password, data.confirm_password);
-      }
-
-      // Validate names
-      if (data.first_name && data.last_name) {
-        validations.first_name = validateName(data.first_name, 'First name');
-        validations.last_name = validateName(data.last_name, 'Last name');
-      } else if (data.full_name) {
-        validations.full_name = validateName(data.full_name, 'Full name');
-      } else {
-        setState({
-          loading: false,
-          error: { message: 'Either provide first_name and last_name, or full_name' },
-          fieldErrors: null,
-        });
-        return { success: false };
-      }
-
-      const validationResult = validateForm(validations);
-
-      if (!validationResult.isValid) {
-        const fieldErrors: Record<string, string> = {};
-        Object.entries(validationResult.fieldErrors).forEach(([field, errors]) => {
-          fieldErrors[field] = errors.join('\n');
-        });
-        
-        setState({
-          loading: false,
-          error: { message: 'Please check your input' },
-          fieldErrors,
-        });
-        return { success: false, fieldErrors };
-      }
-
-      // Call API
+export function useRegister(): UseMutationResult<RegisterResponseData, Error, RegisterRequest> {
+  return useMutation<RegisterResponseData, Error, RegisterRequest>({
+    mutationFn: async (data: RegisterRequest) => {
       const response = await authService.register(data);
-      
-      setState({ loading: false, error: null, fieldErrors: null });
-      return { success: true, data: response };
-    } catch (error) {
-      const errorDetails = extractErrorDetails(error);
-      setState({
-        loading: false,
-        error: errorDetails,
-        fieldErrors: errorDetails.fieldErrors || null,
-      });
-      return { success: false, error: errorDetails };
-    }
-  };
-
-  return {
-    ...state,
-    register,
-  };
+      return response;
+    },
+  });
 }
 
 // ========================================
 // useForgotPassword Hook
 // ========================================
 
-export function useForgotPassword() {
-  const [state, setState] = useState<BaseHookState>({
-    loading: false,
-    error: null,
-    fieldErrors: null,
-  });
-
-  const forgotPassword = async (data: ForgotPasswordRequest) => {
-    setState({ loading: true, error: null, fieldErrors: null });
-
-    try {
-      // Client-side validation
-      const emailValidation = validateEmail(data.email);
-      if (!emailValidation.isValid) {
-        setState({
-          loading: false,
-          error: { message: emailValidation.errors.join('\n') },
-          fieldErrors: { email: emailValidation.errors.join('\n') },
-        });
-        return { success: false };
-      }
-
-      // Call API
+export function useForgotPassword(): UseMutationResult<ForgotPasswordResponse, Error, ForgotPasswordRequest> {
+  return useMutation<ForgotPasswordResponse, Error, ForgotPasswordRequest>({
+    mutationFn: async (data: ForgotPasswordRequest) => {
       const response = await authService.forgotPassword(data);
-      
-      setState({ loading: false, error: null, fieldErrors: null });
-      return { success: true, data: response };
-    } catch (error) {
-      const errorDetails = extractErrorDetails(error);
-      setState({
-        loading: false,
-        error: errorDetails,
-        fieldErrors: errorDetails.fieldErrors || null,
-      });
-      return { success: false, error: errorDetails };
-    }
-  };
-
-  return {
-    ...state,
-    forgotPassword,
-  };
+      return response;
+    },
+  });
 }
 
 // ========================================
 // useResetPassword Hook
 // ========================================
 
-export function useResetPassword() {
-  const [state, setState] = useState<BaseHookState>({
-    loading: false,
-    error: null,
-    fieldErrors: null,
-  });
-
-  const resetPassword = async (data: ResetPasswordRequest) => {
-    setState({ loading: true, error: null, fieldErrors: null });
-
-    try {
-      // Client-side validation
-      const validationResult = validateForm({
-        new_password: validatePassword(data.new_password),
-        confirm_password: validatePasswordConfirmation(data.new_password, data.confirm_password),
-      });
-
-      if (!validationResult.isValid) {
-        const fieldErrors: Record<string, string> = {};
-        Object.entries(validationResult.fieldErrors).forEach(([field, errors]) => {
-          fieldErrors[field] = errors.join('\n');
-        });
-        
-        setState({
-          loading: false,
-          error: { message: 'Please check your input' },
-          fieldErrors,
-        });
-        return { success: false, fieldErrors };
-      }
-
-      // Call API
+export function useResetPassword(): UseMutationResult<ResetPasswordResponse, Error, ResetPasswordRequest> {
+  return useMutation<ResetPasswordResponse, Error, ResetPasswordRequest>({
+    mutationFn: async (data: ResetPasswordRequest) => {
       const response = await authService.resetPassword(data);
-      
-      setState({ loading: false, error: null, fieldErrors: null });
-      return { success: true, data: response };
-    } catch (error) {
-      const errorDetails = extractErrorDetails(error);
-      setState({
-        loading: false,
-        error: errorDetails,
-        fieldErrors: errorDetails.fieldErrors || null,
-      });
-      return { success: false, error: errorDetails };
-    }
-  };
-
-  return {
-    ...state,
-    resetPassword,
-  };
+      return response;
+    },
+  });
 }
 
 // ========================================
 // useChangePassword Hook
 // ========================================
 
-export function useChangePassword() {
-  const [state, setState] = useState<BaseHookState>({
-    loading: false,
-    error: null,
-    fieldErrors: null,
-  });
-
-  const changePassword = async (data: ChangePasswordRequest) => {
-    setState({ loading: true, error: null, fieldErrors: null });
-
-    try {
-      // Client-side validation
-      const validationResult = validateForm({
-        current_password: { 
-          isValid: !!data.current_password, 
-          errors: data.current_password ? [] : ['Current password is required'] 
-        },
-        new_password: validatePassword(data.new_password),
-        confirm_password: validatePasswordConfirmation(data.new_password, data.confirm_password),
-      });
-
-      if (!validationResult.isValid) {
-        const fieldErrors: Record<string, string> = {};
-        Object.entries(validationResult.fieldErrors).forEach(([field, errors]) => {
-          fieldErrors[field] = errors.join('\n');
-        });
-        
-        setState({
-          loading: false,
-          error: { message: 'Please check your input' },
-          fieldErrors,
-        });
-        return { success: false, fieldErrors };
-      }
-
-      // Call API
+export function useChangePassword(): UseMutationResult<ChangePasswordResponse, Error, ChangePasswordRequest> {
+  return useMutation<ChangePasswordResponse, Error, ChangePasswordRequest>({
+    mutationFn: async (data: ChangePasswordRequest) => {
       const response = await authService.changePassword(data);
-      
-      setState({ loading: false, error: null, fieldErrors: null });
-      return { success: true, data: response };
-    } catch (error) {
-      const errorDetails = extractErrorDetails(error);
-      setState({
-        loading: false,
-        error: errorDetails,
-        fieldErrors: errorDetails.fieldErrors || null,
-      });
-      return { success: false, error: errorDetails };
-    }
-  };
-
-  return {
-    ...state,
-    changePassword,
-  };
+      return response;
+    },
+  });
 }
 
 // ========================================
 // useVerifyEmail Hook
 // ========================================
 
-export function useVerifyEmail() {
-  const [state, setState] = useState<BaseHookState>({
-    loading: false,
-    error: null,
-    fieldErrors: null,
-  });
-
-  const verifyEmail = async (data: VerifyEmailRequest) => {
-    setState({ loading: true, error: null, fieldErrors: null });
-
-    try {
+export function useVerifyEmail(): UseMutationResult<VerifyEmailResponse, Error, VerifyEmailRequest> {
+  return useMutation<VerifyEmailResponse, Error, VerifyEmailRequest>({
+    mutationFn: async (data: VerifyEmailRequest) => {
       const response = await authService.verifyEmail(data);
-      
-      setState({ loading: false, error: null, fieldErrors: null });
-      return { success: true, data: response };
-    } catch (error) {
-      const errorDetails = extractErrorDetails(error);
-      setState({
-        loading: false,
-        error: errorDetails,
-        fieldErrors: errorDetails.fieldErrors || null,
-      });
-      return { success: false, error: errorDetails };
-    }
-  };
-
-  return {
-    ...state,
-    verifyEmail,
-  };
+      return response;
+    },
+  });
 }
 
 // ========================================
 // useResendVerification Hook
 // ========================================
 
-export function useResendVerification() {
-  const [state, setState] = useState<BaseHookState>({
-    loading: false,
-    error: null,
-    fieldErrors: null,
-  });
-
-  const resendVerification = async (data: ResendVerificationRequest) => {
-    setState({ loading: true, error: null, fieldErrors: null });
-
-    try {
-      // Client-side validation
-      const emailValidation = validateEmail(data.email);
-      if (!emailValidation.isValid) {
-        setState({
-          loading: false,
-          error: { message: emailValidation.errors.join('\n') },
-          fieldErrors: { email: emailValidation.errors.join('\n') },
-        });
-        return { success: false };
-      }
-
+export function useResendVerification(): UseMutationResult<ResendVerificationResponse, Error, ResendVerificationRequest> {
+  return useMutation<ResendVerificationResponse, Error, ResendVerificationRequest>({
+    mutationFn: async (data: ResendVerificationRequest) => {
       const response = await authService.resendVerification(data);
-      
-      setState({ loading: false, error: null, fieldErrors: null });
-      return { success: true, data: response };
-    } catch (error) {
-      const errorDetails = extractErrorDetails(error);
-      setState({
-        loading: false,
-        error: errorDetails,
-        fieldErrors: errorDetails.fieldErrors || null,
-      });
-      return { success: false, error: errorDetails };
-    }
-  };
-
-  return {
-    ...state,
-    resendVerification,
-  };
+      return response;
+    },
+  });
 }
