@@ -147,12 +147,7 @@ export default defineConfig({
             'react-router-dom',
           ],
           
-          // Form handling libraries - ~40KB
-          'vendor-forms': [
-            'react-hook-form',
-            '@hookform/resolvers',
-            'zod',
-          ],
+          // Form handling libraries removed - no longer used
           
           // Data fetching and state management - ~80KB
           'vendor-data': [
@@ -169,10 +164,9 @@ export default defineConfig({
             'i18next-http-backend',
           ],
           
-          // Utility libraries - ~20KB
+          // Utility libraries - ~15KB
           'vendor-utils': [
             'axios',
-            'date-fns',
             'dompurify',
           ],
           
