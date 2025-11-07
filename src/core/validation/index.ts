@@ -6,6 +6,12 @@
 // Main builder
 export { ValidationBuilder, createValidator, quickValidate } from './ValidationBuilder';
 
+// Zod schemas for React Hook Form integration
+export * from './schemas';
+
+// React Hook Form integration hooks
+export * from './useValidatedForm';
+
 // Status
 export { ValidationStatus, booleanToStatus, isValidationStatus, type ValidationStatusType } from './ValidationStatus';
 

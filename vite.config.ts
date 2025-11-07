@@ -147,7 +147,12 @@ export default defineConfig({
             'react-router-dom',
           ],
           
-          // Form handling libraries removed - no longer used
+          // Form handling libraries - ~40KB (Performance optimized)
+          'vendor-forms': [
+            'react-hook-form',
+            '@hookform/resolvers',
+            'zod',
+          ],
           
           // Data fetching and state management - ~80KB
           'vendor-data': [
