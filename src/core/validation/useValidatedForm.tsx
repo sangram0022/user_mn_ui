@@ -164,3 +164,39 @@ export function useUserEditForm(options?: FormHookOptions<UserEditFormData>) {
     hasErrors: Object.keys(form.formState.errors).length > 0,
   };
 }
+
+/**
+ * Hook for forgot password forms
+ */
+export function useForgotPasswordForm(options?: FormHookOptions<{ email: string }>) {
+  const toast = useToast();
+  
+  const form = useForm<{ email: string }>({
+    resolver: zodResolver(z.object({
+      email: z.string().email('Please enter a valid email address'),
+    })),
+    mode: 'onChange',
+  });
+
+  const handleSubmit = form.handleSubmit(async (data) => {
+    try {
+      await options?.onSuccess?.(data);
+      if (options?.successMessage) {
+        toast.success(options.successMessage);
+      }
+    } catch (error) {
+      console.error('Forgot password form error:', error);
+      options?.onError?.(error);
+      if (options?.errorMessage) {
+        toast.error(options.errorMessage);
+      }
+    }
+  });
+
+  return {
+    ...form,
+    handleSubmit,
+    isDisabled: form.formState.isSubmitting || !form.formState.isValid,
+    hasErrors: Object.keys(form.formState.errors).length > 0,
+  };
+}

@@ -7,11 +7,12 @@
 import { z } from 'zod';
 import { 
   EMAIL_REGEX, 
-  PASSWORD_RULES, 
   USERNAME_REGEX, 
   PHONE_REGEX, 
   NAME_REGEX 
 } from './index';
+
+import { PASSWORD_RULES } from './validators/PasswordValidator';
 
 // ============================================================================
 // Password Regex Patterns
@@ -75,6 +76,7 @@ export const registerSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
   email: emailSchema,
+  username: usernameSchema,
   password: passwordSchema,
   confirmPassword: z.string(),
   terms: z.boolean().refine(val => val === true, 'You must accept the terms and conditions'),
@@ -145,7 +147,7 @@ export const contactFormSchema = z.object({
   department: z.string().optional(),
   subject: z.string().min(1, 'Subject is required').max(200, 'Subject must be less than 200 characters'),
   message: z.string().min(1, 'Message is required').max(2000, 'Message must be less than 2000 characters'),
-  priority: z.enum(['low', 'normal', 'high']).optional(),
+  priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
   newsletter: z.boolean().optional(),
 });
 

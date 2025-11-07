@@ -109,7 +109,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/login',
     component: LazyLoginPage,
-    layout: 'auth',
+    layout: 'default',
     guard: 'public',
     title: 'Login',
     description: 'Sign in to your account',
@@ -117,7 +117,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/auth/login',
     component: LazyLoginPage,
-    layout: 'auth',
+    layout: 'default',
     guard: 'public',
     title: 'Login',
     description: 'Sign in to your account',
@@ -125,7 +125,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/register',
     component: LazyRegisterPage,
-    layout: 'auth',
+    layout: 'default',
     guard: 'public',
     title: 'Register',
     description: 'Create a new account',
@@ -133,7 +133,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/auth/register',
     component: LazyRegisterPage,
-    layout: 'auth',
+    layout: 'default',
     guard: 'public',
     title: 'Register',
     description: 'Create a new account',

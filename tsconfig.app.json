@@ -31,5 +31,5 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"],
-  "exclude": ["src/_reference_backup_ui"]
+  "exclude": ["src/_reference_backup_ui", "src/deprecated"]
 }
