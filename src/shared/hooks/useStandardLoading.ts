@@ -1,0 +1,120 @@
+/**
+ * Standardized Loading State Hook
+ * Provides consistent loading state management across components
+ */
+
+import { useMemo, useState, useCallback } from 'react';
+
+export interface LoadingState {
+  isLoading: boolean;
+  error: unknown | null;
+  isSuccess: boolean;
+  isError: boolean;
+}
+
+/**
+ * Hook for managing standardized loading states
+ * Accepts multiple loading states and combines them
+ */
+export const useStandardLoading = (
+  states: (LoadingState | boolean | undefined)[]
+): {
+  isLoading: boolean;
+  hasError: boolean;
+  hasSuccess: boolean;
+  errors: unknown[];
+  firstError: unknown | null;
+} => {
+  return useMemo(() => {
+    const normalizedStates = states.map(state => {
+      if (typeof state === 'boolean') {
+        return { isLoading: state, error: null, isSuccess: !state, isError: false };
+      }
+      if (state === undefined) {
+        return { isLoading: false, error: null, isSuccess: true, isError: false };
+      }
+      return state;
+    });
+
+    const isLoading = normalizedStates.some(state => state.isLoading);
+    const hasError = normalizedStates.some(state => state.isError);
+    const hasSuccess = normalizedStates.every(state => state.isSuccess);
+    const errors = normalizedStates
+      .filter(state => state.error)
+      .map(state => state.error);
+
+    return {
+      isLoading,
+      hasError,
+      hasSuccess,
+      errors,
+      firstError: errors[0] || null,
+    };
+  }, [states]);
+};
+
+/**
+ * Hook for managing async operations with loading states
+ */
+export const useAsyncOperation = <T,>(
+  operation: () => Promise<T>,
+  options?: {
+    onSuccess?: (result: T) => void;
+    onError?: (error: unknown) => void;
+    successMessage?: string;
+    errorMessage?: string;
+  }
+) => {
+  const [state, setState] = useState<{
+    isLoading: boolean;
+    result: T | null;
+    error: unknown | null;
+  }>({
+    isLoading: false,
+    result: null,
+    error: null,
+  });
+
+  const execute = useCallback(async () => {
+    setState({ isLoading: true, result: null, error: null });
+
+    try {
+      const result = await operation();
+      setState({ isLoading: false, result, error: null });
+
+      if (options?.onSuccess) {
+        options.onSuccess(result);
+      }
+
+      if (options?.successMessage) {
+        // TODO: Integrate with toast notification system
+        // console.log(options.successMessage);
+      }
+
+      return result;
+    } catch (error) {
+      setState({ isLoading: false, result: null, error });
+
+      if (options?.onError) {
+        options.onError(error);
+      }
+
+      if (options?.errorMessage) {
+        // TODO: Integrate with toast notification system  
+        // console.error(options.errorMessage, error);
+      }
+
+      throw error;
+    }
+  }, [operation, options]);
+
+  const reset = useCallback(() => {
+    setState({ isLoading: false, result: null, error: null });
+  }, []);
+
+  return {
+    ...state,
+    execute,
+    reset,
+  };
+};

@@ -3,7 +3,7 @@
  * Shows application health status for debugging and monitoring
  */
 
-import { useHealthCheck } from './useHealthCheck';
+import { useHealthCheck } from '../hooks/useHealthCheck';
 
 export const HealthCheckDisplay = () => {
   const { healthStatus } = useHealthCheck();

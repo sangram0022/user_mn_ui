@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type JSX } from 'react';
 import { 
   RbacTestDataGenerator, 
   RbacMockProvider, 
@@ -21,7 +21,7 @@ interface TestResult {
   details?: Record<string, unknown>;
 }
 
-export function RbacTestInterface(): React.JSX.Element {
+export function RbacTestInterface(): JSX.Element {
   const [activeTab, setActiveTab] = useState<'permissions' | 'performance' | 'security' | 'suite'>('permissions');
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [isRunning, setIsRunning] = useState(false);

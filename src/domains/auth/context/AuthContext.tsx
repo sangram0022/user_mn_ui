@@ -8,7 +8,6 @@ import { createContext, useState, useEffect, useCallback, type ReactNode } from 
 import authService from '../services/authService';
 import tokenService from '../services/tokenService';
 import { logger } from '@/core/logging';
-import { authStorage } from '../utils/authStorage';
 import { getEffectivePermissionsForRoles } from '@/domains/rbac/utils/rolePermissionMap';
 import type { User } from '../types/auth.types';
 import type { Permission, UserRole } from '@/domains/rbac/types/rbac.types';
@@ -32,7 +31,7 @@ interface AuthState {
 }
 
 interface AuthActions {
-  login: (tokens: AuthTokens, user: User) => void;
+  login: (tokens: AuthTokens, user: User, rememberMe?: boolean) => void;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   refreshSession: () => Promise<void>;
@@ -68,10 +67,10 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   // State (Single source of truth)
   const [state, setState] = useState<AuthState>(() => {
-    const user = authStorage.getUser();
+    const user = tokenService.getUser() as User | null;
     return {
       user,
-      isAuthenticated: !!authStorage.getAccessToken(),
+      isAuthenticated: !!tokenService.getAccessToken(),
       isLoading: true,
       // Compute permissions from user roles if user exists
       permissions: user?.roles
@@ -87,9 +86,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   /**
    * Login - Set tokens and user in state & storage
    */
-  const login = useCallback((tokens: AuthTokens, user: User) => {
-    authStorage.setTokens(tokens);
-    authStorage.setUser(user);
+  const login = useCallback((tokens: AuthTokens, user: User, rememberMe: boolean = false) => {
+    // Store tokens with expiry time calculation
+    tokenService.storeTokens({
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      token_type: tokens.token_type || 'bearer',
+      expires_in: tokens.expires_in || 3600, // Default 1 hour if not provided
+    }, rememberMe);
+    
+    tokenService.storeUser(user);
     
     // Compute permissions from user roles
     const permissions = getEffectivePermissionsForRoles(user.roles as UserRole[]);
@@ -115,7 +121,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
     } finally {
       // Always clear local state
-      authStorage.clear();
+      tokenService.clearTokens();
       setState({
         user: null,
         isAuthenticated: false,
@@ -132,7 +138,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Check Auth - Validate current session
    */
   const checkAuth = useCallback(async () => {
-    const accessToken = authStorage.getAccessToken();
+    const accessToken = tokenService.getAccessToken();
     
     if (!accessToken) {
       setState(prev => ({ ...prev, isAuthenticated: false, isLoading: false, permissions: [] }));
@@ -143,7 +149,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Verify token by fetching current user profile
       // Note: You'll need to add this endpoint or use an existing one
       // For now, we'll just trust the token exists
-      const storedUser = authStorage.getUser();
+      const storedUser = tokenService.getUser() as User | null;
       if (storedUser) {
         // Compute permissions from user roles
         const permissions = getEffectivePermissionsForRoles(storedUser.roles as UserRole[]);
@@ -159,7 +165,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         logger().warn('Token exists but no user data found', {
           context: 'AuthContext.checkAuth',
         });
-        authStorage.clear();
+        tokenService.clearTokens();
         setState({
           user: null,
           isAuthenticated: false,
@@ -172,7 +178,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         context: 'AuthContext.checkAuth',
       });
       // Token is invalid, clear everything
-      authStorage.clear();
+      tokenService.clearTokens();
       setState({
         user: null,
         isAuthenticated: false,
@@ -186,7 +192,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Refresh Session - Get new access token using refresh token
    */
   const refreshSession = useCallback(async () => {
-    const refreshToken = authStorage.getRefreshToken();
+    const refreshToken = tokenService.getRefreshToken();
     
     if (!refreshToken) {
       await logout();
@@ -196,11 +202,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await tokenService.refreshToken(refreshToken);
       
-      // Update tokens in storage
+      // Update tokens in storage with expiry time
       if (response.data) {
-        authStorage.setTokens({
+        tokenService.storeTokens({
           access_token: response.data.access_token,
           refresh_token: response.data.refresh_token,
+          token_type: response.data.token_type || 'bearer',
+          expires_in: response.data.expires_in || 3600,
         });
       }
       
@@ -221,7 +229,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Update User - Update user data in state & storage
    */
   const updateUser = useCallback((user: User) => {
-    authStorage.setUser(user);
+    tokenService.storeUser(user);
     setState(prev => ({
       ...prev,
       user,

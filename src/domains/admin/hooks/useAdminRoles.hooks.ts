@@ -4,6 +4,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../../services/api/queryClient';
 import { adminRoleService } from '../services';
 import type {
   ListRolesParams,
@@ -19,18 +20,6 @@ import type {
 } from '../types';
 
 // ============================================================================
-// Query Keys
-// ============================================================================
-
-export const adminRoleKeys = {
-  all: ['admin', 'roles'] as const,
-  lists: () => [...adminRoleKeys.all, 'list'] as const,
-  list: (params?: ListRolesParams) => [...adminRoleKeys.lists(), params] as const,
-  details: () => [...adminRoleKeys.all, 'detail'] as const,
-  detail: (name: string, params?: GetRoleParams) => [...adminRoleKeys.details(), name, params] as const,
-};
-
-// ============================================================================
 // Query Hooks
 // ============================================================================
 
@@ -39,7 +28,7 @@ export const adminRoleKeys = {
  */
 export const useRoleList = (params?: ListRolesParams) => {
   return useQuery({
-    queryKey: adminRoleKeys.list(params),
+    queryKey: queryKeys.rbac.roles.list(params),
     queryFn: () => adminRoleService.listRoles(params),
     staleTime: 60000, // 1 minute - roles don't change often
   });
@@ -50,7 +39,7 @@ export const useRoleList = (params?: ListRolesParams) => {
  */
 export const useRole = (roleName: string | undefined, params?: GetRoleParams) => {
   return useQuery({
-    queryKey: adminRoleKeys.detail(roleName ?? '', params),
+    queryKey: queryKeys.rbac.roles.detail(roleName ?? ''),
     queryFn: () => adminRoleService.getRole(roleName!, params),
     enabled: !!roleName,
     staleTime: 60000, // 1 minute
@@ -62,7 +51,7 @@ export const useRole = (roleName: string | undefined, params?: GetRoleParams) =>
  */
 export const useRolesByLevel = (minLevel?: number, maxLevel?: number) => {
   return useQuery({
-    queryKey: [...adminRoleKeys.all, 'byLevel', minLevel, maxLevel] as const,
+    queryKey: [...queryKeys.rbac.roles.all, 'byLevel', minLevel, maxLevel] as const,
     queryFn: () => adminRoleService.getRolesByLevel(minLevel, maxLevel),
     staleTime: 60000,
   });
@@ -73,7 +62,7 @@ export const useRolesByLevel = (minLevel?: number, maxLevel?: number) => {
  */
 export const useCheckUserRole = (userId: string | undefined, roleName: string | undefined) => {
   return useQuery({
-    queryKey: ['admin', 'roles', 'check', userId, roleName] as const,
+    queryKey: queryKeys.rbac.roles.check(userId || '', roleName || ''),
     queryFn: () => adminRoleService.checkUserRole(userId!, roleName!),
     enabled: !!userId && !!roleName,
     staleTime: 30000, // 30 seconds
@@ -94,11 +83,11 @@ export const useCreateRole = () => {
     mutationFn: (data: CreateRoleRequest) => adminRoleService.createRole(data),
     onSuccess: (role: AdminRole) => {
       // Invalidate role lists
-      queryClient.invalidateQueries({ queryKey: adminRoleKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles.lists() });
       
       // Add to cache
       queryClient.setQueryData(
-        adminRoleKeys.detail(role.role_name),
+        queryKeys.rbac.roles.detail(role.role_name),
         role
       );
     },
@@ -116,17 +105,17 @@ export const useUpdateRole = () => {
       adminRoleService.updateRole(roleName, data),
     onMutate: async ({ roleName, data }) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: adminRoleKeys.detail(roleName) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.rbac.roles.detail(roleName) });
 
       // Snapshot previous value
       const previousRole = queryClient.getQueryData<AdminRole>(
-        adminRoleKeys.detail(roleName)
+        queryKeys.rbac.roles.detail(roleName)
       );
 
       // Optimistically update
       if (previousRole) {
         queryClient.setQueryData<AdminRole>(
-          adminRoleKeys.detail(roleName),
+          queryKeys.rbac.roles.detail(roleName),
           { ...previousRole, ...data }
         );
       }
@@ -137,17 +126,17 @@ export const useUpdateRole = () => {
       // Rollback on error
       if (context?.previousRole) {
         queryClient.setQueryData(
-          adminRoleKeys.detail(roleName),
+          queryKeys.rbac.roles.detail(roleName),
           context.previousRole
         );
       }
     },
     onSuccess: (_response: UpdateRoleResponse, { roleName }) => {
       // Invalidate to refetch
-      queryClient.invalidateQueries({ queryKey: adminRoleKeys.detail(roleName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles.detail(roleName) });
       
       // Invalidate lists
-      queryClient.invalidateQueries({ queryKey: adminRoleKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles.lists() });
     },
   });
 };
@@ -163,10 +152,10 @@ export const useDeleteRole = () => {
       adminRoleService.deleteRole(roleName, options),
     onSuccess: (_response: DeleteRoleResponse, { roleName }) => {
       // Remove from cache
-      queryClient.removeQueries({ queryKey: adminRoleKeys.detail(roleName) });
+      queryClient.removeQueries({ queryKey: queryKeys.rbac.roles.detail(roleName) });
       
       // Invalidate lists
-      queryClient.invalidateQueries({ queryKey: adminRoleKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles.lists() });
     },
   });
 };
@@ -181,8 +170,8 @@ export const useSafeDeleteRole = () => {
     mutationFn: ({ roleName, options }: { roleName: string; options?: DeleteRoleOptions }) =>
       adminRoleService.safeDeleteRole(roleName, options),
     onSuccess: (_response: DeleteRoleResponse, { roleName }) => {
-      queryClient.removeQueries({ queryKey: adminRoleKeys.detail(roleName) });
-      queryClient.invalidateQueries({ queryKey: adminRoleKeys.lists() });
+      queryClient.removeQueries({ queryKey: queryKeys.rbac.roles.detail(roleName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles.lists() });
     },
   });
 };
@@ -198,10 +187,10 @@ export const useAssignRoles = () => {
       adminRoleService.assignRolesToUser(userId, data),
     onSuccess: (_response: AssignRolesResponse, { userId }) => {
       // Invalidate user queries to reflect new roles
-      queryClient.invalidateQueries({ queryKey: ['admin', 'users', 'detail', userId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(userId) });
       
       // Invalidate role queries if include_users was set
-      queryClient.invalidateQueries({ queryKey: adminRoleKeys.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles.all });
     },
   });
 };

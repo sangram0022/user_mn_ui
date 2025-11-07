@@ -270,7 +270,8 @@ class WebVitalsMonitor {
     this.metrics.set(name, metric);
     
     if (this.config.debug) {
-      console.log('Custom metric measured:', metric);
+      // TODO: Replace with proper logging service
+      // console.log('Custom metric measured:', metric);
     }
   }
 

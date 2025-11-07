@@ -4,6 +4,7 @@
 // ========================================
 
 import { apiClient } from '../../../services/api/apiClient';
+import { API_PREFIXES } from '../../../services/api/common';
 import type {
   RefreshTokenResponse,
 } from '../types/auth.types';
@@ -14,13 +15,15 @@ import type {
   TokenStorage,
 } from '../types/token.types';
 
-const API_PREFIX = '/api/v1/auth';
-// Storage keys MUST match authStorage.ts (single source of truth)
+const API_PREFIX = API_PREFIXES.AUTH;
+// Storage keys - Single Source of Truth for token storage
 const TOKEN_STORAGE_KEY = 'access_token';
 const REFRESH_TOKEN_STORAGE_KEY = 'refresh_token';
 const TOKEN_EXPIRY_KEY = 'token_expires_at';
 const USER_STORAGE_KEY = 'user';
 const CSRF_TOKEN_STORAGE_KEY = 'csrf_token';
+const REMEMBER_ME_KEY = 'remember_me';
+const REMEMBER_ME_EMAIL_KEY = 'remember_me_email';
 
 /**
  * POST /api/v1/auth/refresh
@@ -56,14 +59,18 @@ export const validateCsrfToken = async (data: ValidateCsrfRequest): Promise<Vali
 // ========================================
 
 /**
- * Store tokens in localStorage
+ * Store tokens in localStorage with expiry time and optional remember_me flag
  */
-export const storeTokens = (tokens: Omit<TokenStorage, 'expires_at'>): void => {
+export const storeTokens = (
+  tokens: Omit<TokenStorage, 'expires_at'>,
+  rememberMe: boolean = false
+): void => {
   const expiresAt = Date.now() + tokens.expires_in * 1000;
   
   localStorage.setItem(TOKEN_STORAGE_KEY, tokens.access_token);
   localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, tokens.refresh_token);
   localStorage.setItem(TOKEN_EXPIRY_KEY, expiresAt.toString());
+  localStorage.setItem(REMEMBER_ME_KEY, rememberMe ? 'true' : 'false');
 };
 
 /**
@@ -99,6 +106,37 @@ export const clearTokens = (): void => {
   localStorage.removeItem(TOKEN_EXPIRY_KEY);
   localStorage.removeItem(USER_STORAGE_KEY);
   localStorage.removeItem(CSRF_TOKEN_STORAGE_KEY);
+  localStorage.removeItem(REMEMBER_ME_KEY);
+  // Note: We keep REMEMBER_ME_EMAIL_KEY so user can see it on login page next time
+};
+
+/**
+ * Check if remember me is enabled
+ */
+export const isRememberMeEnabled = (): boolean => {
+  return localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+};
+
+/**
+ * Get remember me email
+ */
+export const getRememberMeEmail = (): string | null => {
+  return localStorage.getItem(REMEMBER_ME_EMAIL_KEY);
+};
+
+/**
+ * Set remember me email
+ */
+export const setRememberMeEmail = (email: string): void => {
+  localStorage.setItem(REMEMBER_ME_EMAIL_KEY, email);
+};
+
+/**
+ * Clear remember me data
+ */
+export const clearRememberMe = (): void => {
+  localStorage.removeItem(REMEMBER_ME_EMAIL_KEY);
+  localStorage.removeItem(REMEMBER_ME_KEY);
 };
 
 /**
@@ -178,6 +216,10 @@ const tokenService = {
   storeCsrfToken,
   getStoredCsrfToken,
   removeCsrfToken,
+  isRememberMeEnabled,
+  getRememberMeEmail,
+  setRememberMeEmail,
+  clearRememberMe,
 };
 
 export default tokenService;

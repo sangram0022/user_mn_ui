@@ -4,21 +4,12 @@
  */
 
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { queryKeys } from '../../../services/api/queryClient';
 import { adminAuditService } from '../services';
 import type {
   AuditLogFilters,
   ExportAuditLogsRequest,
 } from '../types';
-
-// ============================================================================
-// Query Keys
-// ============================================================================
-
-export const adminAuditKeys = {
-  all: ['admin', 'audit-logs'] as const,
-  lists: () => [...adminAuditKeys.all, 'list'] as const,
-  list: (filters?: AuditLogFilters) => [...adminAuditKeys.lists(), filters] as const,
-};
 
 // ============================================================================
 // Query Hooks
@@ -29,7 +20,7 @@ export const adminAuditKeys = {
  */
 export const useAuditLogs = (filters?: AuditLogFilters) => {
   return useQuery({
-    queryKey: adminAuditKeys.list(filters),
+    queryKey: queryKeys.admin.auditLogs(filters),
     queryFn: () => adminAuditService.getAuditLogs(filters),
     staleTime: 30000, // 30 seconds
     refetchInterval: 60000, // Refetch every minute for real-time monitoring
@@ -41,7 +32,7 @@ export const useAuditLogs = (filters?: AuditLogFilters) => {
  */
 export const useTodaysLogs = () => {
   return useQuery({
-    queryKey: [...adminAuditKeys.all, 'today'] as const,
+    queryKey: [...queryKeys.admin.all, 'audit-logs', 'today'] as const,
     queryFn: () => adminAuditService.getTodaysLogs(),
     staleTime: 30000,
     refetchInterval: 60000,
@@ -53,7 +44,7 @@ export const useTodaysLogs = () => {
  */
 export const useCriticalLogs = (days: number = 7) => {
   return useQuery({
-    queryKey: [...adminAuditKeys.all, 'critical', days] as const,
+    queryKey: [...queryKeys.admin.all, 'audit-logs', 'critical', days] as const,
     queryFn: () => adminAuditService.getCriticalLogs(days),
     staleTime: 60000, // 1 minute
   });
@@ -64,7 +55,7 @@ export const useCriticalLogs = (days: number = 7) => {
  */
 export const useFailedLoginAttempts = (hours: number = 24) => {
   return useQuery({
-    queryKey: [...adminAuditKeys.all, 'failed-logins', hours] as const,
+    queryKey: [...queryKeys.admin.all, 'audit-logs', 'failed-logins', hours] as const,
     queryFn: () => adminAuditService.getFailedLoginAttempts(hours),
     staleTime: 30000,
     refetchInterval: 60000, // Monitor failed logins closely
@@ -76,7 +67,7 @@ export const useFailedLoginAttempts = (hours: number = 24) => {
  */
 export const useUserActionHistory = (userId: string | undefined, days: number = 30) => {
   return useQuery({
-    queryKey: [...adminAuditKeys.all, 'user-history', userId, days] as const,
+    queryKey: [...queryKeys.admin.all, 'audit-logs', 'user-history', userId, days] as const,
     queryFn: () => adminAuditService.getUserActionHistory(userId!, days),
     enabled: !!userId,
     staleTime: 60000,
@@ -88,7 +79,7 @@ export const useUserActionHistory = (userId: string | undefined, days: number = 
  */
 export const useSearchAuditLogs = (searchTerm: string | undefined) => {
   return useQuery({
-    queryKey: [...adminAuditKeys.all, 'search', searchTerm] as const,
+    queryKey: [...queryKeys.admin.all, 'audit-logs', 'search', searchTerm] as const,
     queryFn: () => adminAuditService.searchAuditLogs(searchTerm!),
     enabled: !!searchTerm && searchTerm.length >= 3, // Only search if 3+ chars
     staleTime: 30000,
@@ -178,7 +169,7 @@ export const useSecurityMonitoring = () => {
  */
 export const useRealTimeAuditLogs = (filters?: AuditLogFilters, refreshInterval: number = 5000) => {
   return useQuery({
-    queryKey: [...adminAuditKeys.all, 'realtime', filters] as const,
+    queryKey: [...queryKeys.admin.all, 'audit-logs', 'realtime', filters] as const,
     queryFn: () => adminAuditService.getAuditLogs(filters),
     staleTime: 0, // Always consider stale for real-time
     refetchInterval: refreshInterval, // Default 5 seconds

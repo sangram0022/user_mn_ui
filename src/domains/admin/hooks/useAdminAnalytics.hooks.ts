@@ -6,20 +6,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { adminAnalyticsService } from '../services';
+import { queryKeys } from '@/services/api/queryClient';
 import type {
   AdminStatsParams,
   GrowthAnalyticsParams,
 } from '../types';
-
-// ============================================================================
-// Query Keys
-// ============================================================================
-
-export const adminAnalyticsKeys = {
-  all: ['admin', 'analytics'] as const,
-  stats: (params?: AdminStatsParams) => [...adminAnalyticsKeys.all, 'stats', params] as const,
-  growth: (params?: GrowthAnalyticsParams) => [...adminAnalyticsKeys.all, 'growth', params] as const,
-};
 
 // ============================================================================
 // Query Hooks
@@ -30,7 +21,7 @@ export const adminAnalyticsKeys = {
  */
 export const useAdminStats = (params?: AdminStatsParams) => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.stats(params),
+    queryKey: queryKeys.admin.analytics.stats(params),
     queryFn: () => adminAnalyticsService.getAdminStats(params),
     staleTime: 60000, // 1 minute
     refetchInterval: 300000, // Refetch every 5 minutes
@@ -42,7 +33,7 @@ export const useAdminStats = (params?: AdminStatsParams) => {
  */
 export const useGrowthAnalytics = (params?: GrowthAnalyticsParams) => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.growth(params),
+    queryKey: queryKeys.admin.analytics.growth(params),
     queryFn: () => adminAnalyticsService.getGrowthAnalytics(params),
     staleTime: 300000, // 5 minutes - predictions don't change frequently
     retry: false, // Don't retry if endpoint doesn't exist (404)
@@ -58,7 +49,7 @@ export const useGrowthAnalytics = (params?: GrowthAnalyticsParams) => {
  */
 export const useWeeklyStats = () => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.stats({ period: '7d', include_charts: true }),
+    queryKey: queryKeys.admin.analytics.weekly(),
     queryFn: () => adminAnalyticsService.getWeeklyStats(),
     staleTime: 60000,
   });
@@ -69,7 +60,7 @@ export const useWeeklyStats = () => {
  */
 export const useMonthlyStats = () => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.stats({ period: '30d', include_charts: true }),
+    queryKey: queryKeys.admin.analytics.monthly(),
     queryFn: () => adminAnalyticsService.getMonthlyStats(),
     staleTime: 120000, // 2 minutes
   });
@@ -80,7 +71,7 @@ export const useMonthlyStats = () => {
  */
 export const useQuarterlyStats = () => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.stats({ period: '90d', include_charts: true }),
+    queryKey: queryKeys.admin.analytics.quarterly(),
     queryFn: () => adminAnalyticsService.getQuarterlyStats(),
     staleTime: 300000, // 5 minutes
   });
@@ -91,7 +82,7 @@ export const useQuarterlyStats = () => {
  */
 export const useYearlyStats = () => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.stats({ period: '1y', include_charts: true }),
+    queryKey: queryKeys.admin.analytics.stats({ period: '1y', include_charts: true }),
     queryFn: () => adminAnalyticsService.getYearlyStats(),
     staleTime: 600000, // 10 minutes
   });
@@ -106,7 +97,7 @@ export const useYearlyStats = () => {
  */
 export const useUserMetrics = () => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.stats({ metrics: ['users', 'registrations', 'activity'] }),
+    queryKey: queryKeys.admin.analytics.stats({ metrics: ['users', 'registrations', 'activity'] }),
     queryFn: () => adminAnalyticsService.getUserMetrics(),
     staleTime: 60000,
   });
@@ -117,7 +108,7 @@ export const useUserMetrics = () => {
  */
 export const usePerformanceMetrics = () => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.stats({ metrics: ['performance'] }),
+    queryKey: queryKeys.admin.analytics.stats({ metrics: ['performance'] }),
     queryFn: () => adminAnalyticsService.getPerformanceMetrics(),
     staleTime: 120000, // 2 minutes
   });
@@ -132,7 +123,7 @@ export const usePerformanceMetrics = () => {
  */
 export const useGrowthWithPredictions = () => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.growth({
+    queryKey: queryKeys.admin.analytics.growth({
       period: '90d',
       granularity: 'daily',
       include_predictions: true,
@@ -147,7 +138,7 @@ export const useGrowthWithPredictions = () => {
  */
 export const useDailyGrowth = (days: 30 | 60 | 90 = 30) => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.growth({
+    queryKey: queryKeys.admin.analytics.growth({
       period: `${days}d` as '30d' | '90d',
       granularity: 'daily',
     }),
@@ -164,7 +155,7 @@ export const useDailyGrowth = (days: 30 | 60 | 90 = 30) => {
  */
 export const useWeeklyGrowth = (period: '30d' | '90d' | '1y' = '90d') => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.growth({ period, granularity: 'weekly' }),
+    queryKey: queryKeys.admin.analytics.growth({ period, granularity: 'weekly' }),
     queryFn: () => adminAnalyticsService.getGrowthAnalytics({
       period,
       granularity: 'weekly',
@@ -178,7 +169,7 @@ export const useWeeklyGrowth = (period: '30d' | '90d' | '1y' = '90d') => {
  */
 export const useMonthlyGrowth = (period: '90d' | '1y' = '1y') => {
   return useQuery({
-    queryKey: adminAnalyticsKeys.growth({ period, granularity: 'monthly' }),
+    queryKey: queryKeys.admin.analytics.growth({ period, granularity: 'monthly' }),
     queryFn: () => adminAnalyticsService.getGrowthAnalytics({
       period,
       granularity: 'monthly',

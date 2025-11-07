@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, type JSX } from 'react';
 import { auditLogger, type AuditEvent, type AuditSummary } from '../security/auditLogger';
 import { rbacPerformanceMonitor } from '../analytics/performanceMonitor';
 import { RbacContext } from '../context/RbacContext';
@@ -41,7 +41,7 @@ interface SystemHealth {
 // ADMIN DASHBOARD COMPONENT
 // ============================================================================
 
-export function AdminDashboard(): React.JSX.Element {
+export function AdminDashboard(): JSX.Element {
   const rbacContext = useContext(RbacContext);
   const userRole = rbacContext.userRoles[0] || 'user'; // Get first role
   const hasPermission = rbacContext.hasPermission;

@@ -9,8 +9,9 @@
  */
 
 import { apiClient } from '../../../services/api/apiClient';
+import { API_PREFIXES } from '../../../services/api/common';
 
-const API_PREFIX = '/api/v1/admin/export';
+const API_PREFIX = API_PREFIXES.ADMIN_EXPORT;
 
 export type ExportFormat = 'csv' | 'excel' | 'json';
 

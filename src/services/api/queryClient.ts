@@ -54,6 +54,7 @@ export const queryKeys = {
       list: (filters?: unknown) => [...queryKeys.rbac.roles.lists(), filters] as const,
       details: () => [...queryKeys.rbac.roles.all, 'detail'] as const,
       detail: (id: string) => [...queryKeys.rbac.roles.details(), id] as const,
+      check: (userId: string, roleName: string) => [...queryKeys.rbac.roles.all, 'check', userId, roleName] as const,
     },
     permissions: {
       all: ['rbac', 'permissions'] as const,
@@ -68,7 +69,17 @@ export const queryKeys = {
   // Admin domain
   admin: {
     all: ['admin'] as const,
-    stats: () => [...queryKeys.admin.all, 'stats'] as const,
+    stats: {
+      all: ['admin', 'stats'] as const,
+    },
+    analytics: {
+      all: ['admin', 'analytics'] as const,
+      stats: (params?: unknown) => [...queryKeys.admin.analytics.all, 'stats', params] as const,
+      growth: (params?: unknown) => [...queryKeys.admin.analytics.all, 'growth', params] as const,
+      weekly: () => [...queryKeys.admin.analytics.stats({ period: '7d', include_charts: true })] as const,
+      monthly: () => [...queryKeys.admin.analytics.stats({ period: '30d', include_charts: true })] as const,
+      quarterly: () => [...queryKeys.admin.analytics.stats({ period: '90d', include_charts: true })] as const,
+    },
     auditLogs: (filters?: unknown) => [...queryKeys.admin.all, 'audit-logs', filters] as const,
   },
   

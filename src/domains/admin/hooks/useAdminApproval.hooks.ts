@@ -4,6 +4,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../../services/api/queryClient';
 import { adminApprovalService } from '../services';
 import type {
   ApproveUserRequest,
@@ -15,7 +16,6 @@ import type {
   BulkRejectionRequest,
   BulkRejectionResult,
 } from '../types';
-import { adminUserKeys } from './useAdminUsers.hooks';
 
 // ============================================================================
 // Mutation Hooks
@@ -32,11 +32,11 @@ export const useApproveUser = () => {
       adminApprovalService.approveUser(userId, data),
     onSuccess: (_response: ApproveUserResponse, { userId }) => {
       // Invalidate user lists (pending count will change)
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.detail(userId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(userId) });
       
       // Invalidate analytics (user counts change)
-      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.stats.all });
     },
   });
 };
@@ -52,11 +52,11 @@ export const useRejectUser = () => {
       adminApprovalService.rejectUser(userId, data),
     onSuccess: (_response: RejectUserResponse, { userId }) => {
       // Invalidate user lists
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.detail(userId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(userId) });
       
       // Invalidate analytics
-      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.stats.all });
     },
   });
 };
@@ -76,8 +76,8 @@ export const useBulkApproveUsers = () => {
       adminApprovalService.bulkApproveUsers(request),
     onSuccess: (result: BulkApprovalResult) => {
       // Invalidate all user-related queries
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.stats.all });
       
       // Log results for debugging
       console.log(`Bulk approval: ${result.approved}/${result.total} succeeded`);
@@ -99,8 +99,8 @@ export const useBulkRejectUsers = () => {
       adminApprovalService.bulkRejectUsers(request),
     onSuccess: (result: BulkRejectionResult) => {
       // Invalidate all user-related queries
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.stats.all });
       
       // Log results
       console.log(`Bulk rejection: ${result.rejected}/${result.total} succeeded`);

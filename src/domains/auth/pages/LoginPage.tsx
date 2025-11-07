@@ -7,6 +7,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { useToast } from '../../../hooks/useToast';
 import { Button, Input, ErrorAlert } from '../../../components';
 import { useLogin } from '../hooks/useAuth.hooks';
+import tokenService from '../services/tokenService';
 
 export function LoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -29,8 +30,8 @@ export function LoginPage() {
 
   // Load remembered email on mount
   useEffect(() => {
-    const rememberMeEmail = localStorage.getItem('remember_me_email');
-    const isRememberMeEnabled = localStorage.getItem('remember_me') === 'true';
+    const rememberMeEmail = tokenService.getRememberMeEmail();
+    const isRememberMeEnabled = tokenService.isRememberMeEnabled();
     
     if (rememberMeEmail) {
       setFormData({
@@ -65,7 +66,7 @@ export function LoginPage() {
           last_login: result.last_login_at,
         };
 
-        // Update auth context
+        // Update auth context with rememberMe flag
         setAuthState(
           {
             access_token: result.access_token,
@@ -73,16 +74,15 @@ export function LoginPage() {
             token_type: result.token_type,
             expires_in: result.expires_in,
           },
-          user
+          user,
+          formData.rememberMe  // Pass rememberMe to auth context
         );
         
-        // Handle remember me
+        // Handle remember me email storage
         if (formData.rememberMe) {
-          localStorage.setItem('remember_me_email', formData.email);
-          localStorage.setItem('remember_me', 'true');
+          tokenService.setRememberMeEmail(formData.email);
         } else {
-          localStorage.removeItem('remember_me_email');
-          localStorage.setItem('remember_me', 'false');
+          tokenService.clearRememberMe();
         }
         
         // Success message

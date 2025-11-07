@@ -4,6 +4,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../../services/api/queryClient';
 import { adminService } from '../services';
 import type {
   ListUsersFilters,
@@ -16,18 +17,6 @@ import type {
 } from '../types';
 
 // ============================================================================
-// Query Keys
-// ============================================================================
-
-export const adminUserKeys = {
-  all: ['admin', 'users'] as const,
-  lists: () => [...adminUserKeys.all, 'list'] as const,
-  list: (filters?: ListUsersFilters) => [...adminUserKeys.lists(), filters] as const,
-  details: () => [...adminUserKeys.all, 'detail'] as const,
-  detail: (id: string) => [...adminUserKeys.details(), id] as const,
-};
-
-// ============================================================================
 // Query Hooks
 // ============================================================================
 
@@ -36,7 +25,7 @@ export const adminUserKeys = {
  */
 export const useUserList = (filters?: ListUsersFilters) => {
   return useQuery({
-    queryKey: adminUserKeys.list(filters),
+    queryKey: queryKeys.users.list(filters),
     queryFn: () => adminService.listUsers(filters),
     staleTime: 30000, // 30 seconds
   });
@@ -47,7 +36,7 @@ export const useUserList = (filters?: ListUsersFilters) => {
  */
 export const useUser = (userId: string | undefined) => {
   return useQuery({
-    queryKey: adminUserKeys.detail(userId ?? ''),
+    queryKey: queryKeys.users.detail(userId ?? ''),
     queryFn: () => adminService.getUser(userId!),
     enabled: !!userId,
     staleTime: 60000, // 1 minute
@@ -71,11 +60,11 @@ export const useCreateUser = () => {
     },
     onSuccess: (user: AdminUser) => {
       // Invalidate user lists to refetch with new user
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
       
       // Optimistically add to cache
       queryClient.setQueryData(
-        adminUserKeys.detail(user.user_id),
+        queryKeys.users.detail(user.user_id),
         user
       );
     },
@@ -95,17 +84,17 @@ export const useUpdateUser = () => {
     },
     onMutate: async ({ userId, data }) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: adminUserKeys.detail(userId) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.users.detail(userId) });
 
       // Snapshot previous value
       const previousUser = queryClient.getQueryData<AdminUser>(
-        adminUserKeys.detail(userId)
+        queryKeys.users.detail(userId)
       );
 
       // Optimistically update
       if (previousUser) {
         queryClient.setQueryData<AdminUser>(
-          adminUserKeys.detail(userId),
+          queryKeys.users.detail(userId),
           { ...previousUser, ...data }
         );
       }
@@ -117,7 +106,7 @@ export const useUpdateUser = () => {
       const typedContext = context as { previousUser?: AdminUser } | undefined;
       if (typedContext?.previousUser) {
         queryClient.setQueryData(
-          adminUserKeys.detail(userId),
+          queryKeys.users.detail(userId),
           typedContext.previousUser
         );
       }
@@ -125,12 +114,12 @@ export const useUpdateUser = () => {
     onSuccess: (user: AdminUser, { userId }) => {
       // Update cache with server response
       queryClient.setQueryData(
-        adminUserKeys.detail(userId),
+        queryKeys.users.detail(userId),
         user
       );
       
       // Invalidate lists to reflect changes
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
     },
   });
 };
@@ -146,10 +135,10 @@ export const useDeleteUser = () => {
       adminService.deleteUser(userId, options),
     onSuccess: (_response, { userId }) => {
       // Remove from cache
-      queryClient.removeQueries({ queryKey: adminUserKeys.detail(userId) });
+      queryClient.removeQueries({ queryKey: queryKeys.users.detail(userId) });
       
       // Invalidate lists
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
     },
   });
 };
@@ -164,8 +153,8 @@ export const useSafeDeleteUser = (currentUserId: string) => {
     mutationFn: ({ userId, options }: { userId: string; options?: DeleteUserOptions }) =>
       adminService.safeDeleteUser(userId, currentUserId, options),
     onSuccess: (_response, { userId }) => {
-      queryClient.removeQueries({ queryKey: adminUserKeys.detail(userId) });
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.lists() });
+      queryClient.removeQueries({ queryKey: queryKeys.users.detail(userId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
     },
   });
 };
@@ -185,7 +174,7 @@ export const useBulkUserAction = () => {
       adminService.bulkUserAction(request),
     onSuccess: () => {
       // Invalidate all user queries after bulk action
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
     },
   });
 };
@@ -200,7 +189,7 @@ export const useBulkDeleteUsers = () => {
     mutationFn: ({ userIds, options }: { userIds: string[]; options?: DeleteUserOptions }) =>
       adminService.bulkDeleteUsers(userIds, options),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminUserKeys.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
     },
   });
 };

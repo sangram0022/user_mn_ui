@@ -4,6 +4,7 @@
 // ========================================
 
 import { apiClient } from '../../../services/api/apiClient';
+import { API_PREFIXES } from '../../../services/api/common';
 import type {
   LoginRequest,
   SecureLoginResponse,
@@ -11,7 +12,7 @@ import type {
   SecureRefreshResponse,
 } from '../types/auth.types';
 
-const API_PREFIX = '/api/v1/auth';
+const API_PREFIX = API_PREFIXES.AUTH;
 
 /**
  * POST /api/v1/auth/login-secure

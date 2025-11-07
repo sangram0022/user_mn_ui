@@ -8,6 +8,7 @@
  */
 
 import { apiClient } from '../../../services/api/apiClient';
+import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
 import type {
   ApproveUserRequest,
   ApproveUserResponse,
@@ -19,18 +20,7 @@ import type {
   BulkRejectionResult,
 } from '../types';
 
-const API_PREFIX = '/api/v1/admin/users';
-
-// ============================================================================
-// Response Adapter
-// ============================================================================
-
-function unwrapResponse<T>(response: unknown): T {
-  if (response && typeof response === 'object' && 'data' in response) {
-    return (response as { data: T }).data;
-  }
-  return response as T;
-}
+const API_PREFIX = API_PREFIXES.ADMIN_USERS;
 
 // ============================================================================
 // Approval Endpoints

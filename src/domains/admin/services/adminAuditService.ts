@@ -8,6 +8,7 @@
  */
 
 import { apiClient } from '../../../services/api/apiClient';
+import { API_PREFIXES } from '../../../services/api/common';
 import type {
   AuditLog,
   AuditLogFilters,
@@ -15,7 +16,7 @@ import type {
   ExportAuditLogsRequest,
 } from '../types';
 
-const API_PREFIX = '/api/v1/admin/audit-logs';
+const API_PREFIX = API_PREFIXES.ADMIN_AUDIT;
 
 /**
  * Backend returns array with different field names (audit_id, user_id, etc.)

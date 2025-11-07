@@ -3,8 +3,7 @@
  * Latest optimization techniques for React applications
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import React from 'react';
+import { useCallback, useEffect, useRef, useState, lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 // Type definitions for modern web APIs
 interface PerformanceEntryWithValue extends PerformanceEntry {
@@ -487,13 +486,13 @@ export async function dynamicImport<T>(
 /**
  * Code splitting utilities
  */
-export const lazyWithPreload = <T extends React.ComponentType<Record<string, unknown>>>(
+export const lazyWithPreload = <T extends ComponentType<Record<string, unknown>>>(
   importFn: () => Promise<{ default: T }>
 ) => {
-  const LazyComponent = React.lazy(importFn);
+  const LazyComponent = lazy(importFn);
   
   // Add preload method
-  (LazyComponent as React.LazyExoticComponent<T> & { preload: () => Promise<{ default: T }> }).preload = importFn;
+  (LazyComponent as LazyExoticComponent<T> & { preload: () => Promise<{ default: T }> }).preload = importFn;
   
   return LazyComponent;
 };

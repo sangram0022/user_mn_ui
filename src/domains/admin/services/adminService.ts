@@ -19,6 +19,7 @@
  */
 
 import { apiClient } from '../../../services/api/apiClient';
+import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
 import type {
   ListUsersFilters,
   ListUsersResponse,
@@ -36,23 +37,7 @@ import type {
   ExportUsersRequest,
 } from '../types';
 
-const API_PREFIX = '/api/v1/admin';
-
-// ============================================================================
-// Response Adapter (DRY Principle)
-// Handle both wrapped and unwrapped responses
-// ============================================================================
-
-/**
- * Unwrap ApiResponse<T> format to just T
- * Backend may return { success, message, data: {...} } or just {...}
- */
-function unwrapResponse<T>(response: unknown): T {
-  if (response && typeof response === 'object' && 'data' in response) {
-    return (response as { data: T }).data;
-  }
-  return response as T;
-}
+const API_PREFIX = API_PREFIXES.ADMIN;
 
 // ============================================================================
 // User Management Endpoints

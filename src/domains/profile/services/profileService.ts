@@ -5,13 +5,14 @@
 // ========================================
 
 import { apiClient } from '../../../services/api/apiClient';
+import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
 import type {
   GetProfileResponse,
   UpdateProfileRequest,
   UpdateProfileResponse,
 } from '../types/profile.types';
 
-const API_PREFIX = '/api/v1/users/profile';
+const API_PREFIX = API_PREFIXES.PROFILE;
 
 /**
  * GET /api/v1/users/profile/me
@@ -35,7 +36,7 @@ export const updateProfile = async (
   data: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> => {
   const response = await apiClient.put<UpdateProfileResponse>(`${API_PREFIX}/me`, data);
-  return response.data;
+  return unwrapResponse<UpdateProfileResponse>(response.data);
 };
 
 // Export all as default object
