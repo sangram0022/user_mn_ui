@@ -213,7 +213,9 @@ The tool will show you exactly why role API returns 401!
 
 // Export for use
 if (typeof window !== 'undefined') {
-  (window as any).diagnoseAPI = diagnoseAPI;
+    // Make available globally for easy access in browser console
+  // Type-safe global assignment
+  window.diagnoseAPI = diagnoseAPI;
 }
 
 export default diagnoseAPI;
