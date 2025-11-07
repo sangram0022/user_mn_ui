@@ -205,3 +205,38 @@ export const useAssignRoles = () => {
     },
   });
 };
+
+// ============================================================================
+// Export Hooks
+// ============================================================================
+
+/**
+ * Export roles in various formats
+ */
+export const useExportRoles = () => {
+  return useMutation({
+    mutationFn: async (request: {
+      format: 'csv' | 'json' | 'xlsx';
+      filters?: { include_permissions?: boolean; include_users_count?: boolean };
+    }) => {
+      const blob = await adminRoleService.exportRoles(request.format, request.filters);
+      
+      // Generate filename
+      const timestamp = new Date().toISOString().split('T')[0];
+      const extension = request.format === 'xlsx' ? 'xlsx' : request.format;
+      const filename = `roles-export-${timestamp}.${extension}`;
+      
+      // Download blob
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      return { success: true, filename };
+    },
+  });
+};

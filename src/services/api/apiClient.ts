@@ -69,8 +69,26 @@ apiClient.interceptors.request.use(
     // Get access token from storage
     const accessToken = tokenService.getAccessToken();
     
+    // Debug logging
+    if (import.meta.env.MODE === 'development') {
+      console.log('[apiClient] Request interceptor:', {
+        url: config.url,
+        method: config.method,
+        hasToken: !!accessToken,
+        tokenPreview: accessToken ? `${accessToken.substring(0, 20)}...` : 'none',
+        headers: config.headers ? Object.keys(config.headers) : [],
+      });
+    }
+    
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+      
+      // Log that we SET the Authorization header
+      if (import.meta.env.MODE === 'development') {
+        console.log('[apiClient] ✅ Authorization header SET for:', config.url);
+      }
+    } else {
+      console.warn('[apiClient] ❌ No access token found for request:', config.url);
     }
 
     // Add CSRF token for mutations (POST, PUT, PATCH, DELETE)

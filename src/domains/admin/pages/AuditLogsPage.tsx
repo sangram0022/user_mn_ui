@@ -164,10 +164,10 @@ export default function AuditLogsPage() {
       },
       {
         onSuccess: (data) => {
-          if (data.download_url) {
-            window.open(data.download_url, '_blank');
+          // File download is handled automatically by the hook
+          if (data.success) {
+            setShowExportModal(false);
           }
-          setShowExportModal(false);
         },
       }
     );

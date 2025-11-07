@@ -214,7 +214,25 @@ export const useBulkDeleteUsers = () => {
  */
 export const useExportUsers = () => {
   return useMutation({
-    mutationFn: (request: ExportUsersRequest) =>
-      adminService.exportUsers(request),
+    mutationFn: async (request: ExportUsersRequest) => {
+      const blob = await adminService.exportUsers(request);
+      
+      // Generate filename
+      const timestamp = new Date().toISOString().split('T')[0];
+      const extension = request.format === 'xlsx' ? 'xlsx' : request.format;
+      const filename = `users-export-${timestamp}.${extension}`;
+      
+      // Download blob
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      return { success: true, filename };
+    },
   });
 };

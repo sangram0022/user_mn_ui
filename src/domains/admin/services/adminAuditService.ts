@@ -4,7 +4,7 @@
  * 
  * Endpoints implemented:
  * - GET  /api/v1/admin/audit-logs (list audit logs)
- * - POST /api/v1/admin/audit-logs/export (export audit logs)
+ * - GET  /api/v1/admin/export/audit-logs (export audit logs)
  */
 
 import { apiClient } from '../../../services/api/apiClient';
@@ -13,21 +13,9 @@ import type {
   AuditLogFilters,
   AuditLogsResponse,
   ExportAuditLogsRequest,
-  ExportAuditLogsResponse,
 } from '../types';
 
 const API_PREFIX = '/api/v1/admin/audit-logs';
-
-// ============================================================================
-// Response Adapter
-// ============================================================================
-
-function unwrapResponse<T>(response: unknown): T {
-  if (response && typeof response === 'object' && 'data' in response) {
-    return (response as { data: T }).data;
-  }
-  return response as T;
-}
 
 /**
  * Backend returns array with different field names (audit_id, user_id, etc.)
@@ -126,17 +114,32 @@ export const getAuditLogs = async (filters?: AuditLogFilters): Promise<AuditLogs
 };
 
 /**
- * POST /api/v1/admin/audit-logs/export
+ * GET /api/v1/admin/export/audit-logs?format=csv
  * Export audit logs in various formats (CSV, JSON, PDF, XLSX)
  */
 export const exportAuditLogs = async (
   request: ExportAuditLogsRequest
-): Promise<ExportAuditLogsResponse> => {
-  const response = await apiClient.post<ExportAuditLogsResponse>(
-    `${API_PREFIX}/export`,
-    request
+): Promise<Blob> => {
+  const params = new URLSearchParams();
+  params.append('format', request.format);
+  
+  // Add filters to query params
+  if (request.filters) {
+    Object.entries(request.filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, String(value));
+      }
+    });
+  }
+  
+  const response = await apiClient.get(
+    `/api/v1/admin/export/audit-logs?${params.toString()}`,
+    {
+      responseType: 'blob',
+    }
   );
-  return unwrapResponse<ExportAuditLogsResponse>(response.data);
+  
+  return response.data;
 };
 
 // ============================================================================

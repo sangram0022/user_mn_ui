@@ -67,8 +67,17 @@ export const listRoles = async (params?: ListRolesParams): Promise<ListRolesResp
   const queryString = queryParams.toString();
   const url = queryString ? `${API_PREFIX}/roles?${queryString}` : `${API_PREFIX}/roles`;
   
+  console.log('[adminRoleService.listRoles] About to call apiClient.get:', url);
+  
   const response = await apiClient.get<ListRolesResponse>(url);
-  return unwrapResponse<ListRolesResponse>(response.data);
+  
+  console.log('[adminRoleService.listRoles] Response received:', {
+    status: response.status,
+    hasData: !!response.data,
+    dataKeys: response.data ? Object.keys(response.data) : [],
+  });
+  
+  return response.data;
 };
 
 /**
@@ -96,7 +105,8 @@ export const getRole = async (
     : `${API_PREFIX}/roles/${roleName}`;
   
   const response = await apiClient.get<GetRoleResponse>(url);
-  const data = unwrapResponse<GetRoleResponse>(response.data);
+  // Extract role from response
+  const data = response.data as GetRoleResponse;
   return data.role;
 };
 
@@ -209,6 +219,36 @@ export const checkUserRole = async (userId: string, roleName: string): Promise<b
   }
 };
 
+/**
+ * Export roles to file (CSV, JSON, or XLSX)
+ * GET /api/v1/admin/export/roles?format=csv
+ */
+export const exportRoles = async (
+  format: 'csv' | 'json' | 'xlsx' = 'csv',
+  filters?: { include_permissions?: boolean; include_users_count?: boolean }
+): Promise<Blob> => {
+  const params = new URLSearchParams();
+  params.append('format', format);
+  
+  // Add filters to query params
+  if (filters) {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+  
+  const response = await apiClient.get(
+    `/api/v1/admin/export/roles?${params.toString()}`,
+    {
+      responseType: 'blob',
+    }
+  );
+  
+  return response.data;
+};
+
 // Export all as default object
 const adminRoleService = {
   listRoles,
@@ -220,6 +260,7 @@ const adminRoleService = {
   safeDeleteRole,
   getRolesByLevel,
   checkUserRole,
+  exportRoles,
 };
 
 export default adminRoleService;

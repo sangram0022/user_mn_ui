@@ -15,7 +15,7 @@ import type {
 } from '../types/token.types';
 
 const API_PREFIX = '/api/v1/auth';
-// Updated to match authStorage keys (single source of truth)
+// Storage keys MUST match authStorage.ts (single source of truth)
 const TOKEN_STORAGE_KEY = 'access_token';
 const REFRESH_TOKEN_STORAGE_KEY = 'refresh_token';
 const TOKEN_EXPIRY_KEY = 'token_expires_at';

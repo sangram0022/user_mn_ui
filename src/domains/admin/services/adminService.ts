@@ -9,6 +9,7 @@
  * - PUT    /api/v1/admin/users/:id (update user)
  * - DELETE /api/v1/admin/users/:id (delete user)
  * - POST   /api/v1/admin/users/:id/approve (approve user)
+ * - GET    /api/v1/admin/export/users (export users)
  * 
  * Following patterns from authService.ts:
  * - Uses apiClient for HTTP requests
@@ -33,7 +34,6 @@ import type {
   BulkUserAction,
   BulkOperationResult,
   ExportUsersRequest,
-  ExportUsersResponse,
 } from '../types';
 
 const API_PREFIX = '/api/v1/admin';
@@ -206,13 +206,29 @@ export const bulkDeleteUsers = async (
 
 /**
  * Export users to file (CSV, JSON, or XLSX)
+ * GET /api/v1/admin/export/users?format=csv
  */
-export const exportUsers = async (request: ExportUsersRequest): Promise<ExportUsersResponse> => {
-  const response = await apiClient.post<ExportUsersResponse>(
-    `${API_PREFIX}/users/export`,
-    request
+export const exportUsers = async (request: ExportUsersRequest): Promise<Blob> => {
+  const params = new URLSearchParams();
+  params.append('format', request.format);
+  
+  // Add filters to query params
+  if (request.filters) {
+    Object.entries(request.filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, String(value));
+      }
+    });
+  }
+  
+  const response = await apiClient.get(
+    `/api/v1/admin/export/users?${params.toString()}`,
+    {
+      responseType: 'blob',
+    }
   );
-  return unwrapResponse<ExportUsersResponse>(response.data);
+  
+  return response.data;
 };
 
 // ============================================================================

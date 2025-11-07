@@ -104,8 +104,26 @@ export const useSearchAuditLogs = (searchTerm: string | undefined) => {
  */
 export const useExportAuditLogs = () => {
   return useMutation({
-    mutationFn: (request: ExportAuditLogsRequest) =>
-      adminAuditService.exportAuditLogs(request),
+    mutationFn: async (request: ExportAuditLogsRequest) => {
+      const blob = await adminAuditService.exportAuditLogs(request);
+      
+      // Generate filename
+      const timestamp = new Date().toISOString().split('T')[0];
+      const extension = request.format === 'xlsx' ? 'xlsx' : request.format;
+      const filename = `audit-logs-export-${timestamp}.${extension}`;
+      
+      // Download blob
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      return { success: true, filename };
+    },
   });
 };
 

@@ -3,20 +3,14 @@
  * Central export point for all admin API services
  */
 
-// Service exports
+// Service exports (default exports only to avoid conflicts)
 export { default as adminService } from './adminService';
 export { default as adminRoleService } from './adminRoleService';
 export { default as adminApprovalService } from './adminApprovalService';
 export { default as adminAnalyticsService } from './adminAnalyticsService';
 export { default as adminAuditService } from './adminAuditService';
 
-// Named exports for convenience
-export * from './adminService';
-export * from './adminRoleService';
-export * from './adminAnalyticsService';
-export * from './adminAuditService';
-
-// Approval service exports (avoid conflict with adminService)
+// Approval service exports (specific named exports that don't conflict)
 export {
   rejectUser,
   bulkRejectUsers,
