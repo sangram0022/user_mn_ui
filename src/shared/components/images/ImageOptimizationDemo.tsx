@@ -133,9 +133,8 @@ export function ImageOptimizationDemo() {
             columns={4}
             gap={16}
             lazy={true}
-            onImageClick={(image, index) => {
+            onImageClick={(image, _index) => {
               setSelectedImage(image);
-              console.log(`Clicked image ${index + 1}:`, image);
             }}
           />
         </div>

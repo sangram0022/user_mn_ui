@@ -296,9 +296,9 @@ variable "enable_logging" {
 }
 
 variable "log_retention_days" {
-  description = "Number of days to retain logs (3 months for cost optimization)"
+  description = "Number of days to retain logs (optimized for cost: 7 days default, most debugging happens within 48 hours)"
   type        = number
-  default     = 90
+  default     = 7  # Optimized for cost: CloudWatch Logs $0.50/GB ingested + $0.03/GB stored. Use S3 for longer retention.
   
   validation {
     condition     = var.log_retention_days >= 1 && var.log_retention_days <= 3650
@@ -386,9 +386,9 @@ variable "s3_bucket_size_threshold_gb" {
 }
 
 variable "enable_cloudwatch_alarms" {
-  description = "Enable CloudWatch alarms for CloudFront metrics"
+  description = "Enable CloudWatch alarms for CloudFront metrics (disable for cost optimization when using external monitoring tools like DataDog/New Relic)"
   type        = bool
-  default     = true
+  default     = false  # Disabled by default: saves $15-25/month. Use external APM tools for production monitoring.
 }
 
 variable "cloudfront_4xx_error_threshold" {

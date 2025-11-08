@@ -20,8 +20,9 @@ export {
   createAdminError,
   isAdminError,
   AdminError,
-  ERROR_MESSAGES,
-  SUCCESS_MESSAGES,
   type SuccessMessageKey,
   type ToastType,
 } from './errorHandler';
+
+// Re-export error/success messages from core
+export { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/core/error';

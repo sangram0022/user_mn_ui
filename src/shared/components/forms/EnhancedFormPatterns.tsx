@@ -13,6 +13,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDebouncedCallback } from 'use-debounce';
 import { z } from 'zod';
+import { logger } from '@/core/logging';
+import { useToast } from '@/hooks/useToast';
 
 // ========================================
 // Form Persistence Utility
@@ -30,7 +32,7 @@ class FormStateManager {
       };
       localStorage.setItem(`${this.PREFIX}${key}`, JSON.stringify(payload));
     } catch (error) {
-      console.warn('Form state persistence failed:', error);
+      logger().warn('Form state persistence failed', { key, error });
     }
   }
 
@@ -46,7 +48,7 @@ class FormStateManager {
       }
       return data;
     } catch (error) {
-      console.warn('Form state loading failed:', error);
+      logger().warn('Form state loading failed', { key, error });
       return null;
     }
   }
@@ -55,7 +57,7 @@ class FormStateManager {
     try {
       localStorage.removeItem(`${this.PREFIX}${key}`);
     } catch (error) {
-      console.warn('Form state clearing failed:', error);
+      logger().warn('Form state clearing failed', { key, error });
     }
   }
 }
@@ -82,6 +84,8 @@ export function EnhancedContactForm() {
     subject: 0,
     message: 0,
   });
+
+  const toast = useToast();
 
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
@@ -139,7 +143,8 @@ export function EnhancedContactForm() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      console.log('Form submitted:', data);
+      logger().info('Contact form submitted', { name: data.name, email: data.email });
+      toast.success('Message sent successfully!');
       setSubmitSuccess(true);
       
       // Clear persisted state on successful submission
@@ -151,7 +156,8 @@ export function EnhancedContactForm() {
         setSubmitSuccess(false);
       }, 3000);
     } catch (error) {
-      console.error('Submission error:', error);
+      logger().error('Contact form submission failed', error instanceof Error ? error : undefined);
+      toast.error('Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -395,6 +401,8 @@ type UserFormData = z.infer<typeof userSchema>;
 export function EnhancedRegistrationForm() {
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, feedback: '' });
   const [showPassword, setShowPassword] = useState(false);
+  
+  const toast = useToast();
 
   const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
@@ -445,7 +453,8 @@ export function EnhancedRegistrationForm() {
   }, [password]);
 
   const onSubmit = async (data: UserFormData) => {
-    console.log('Registration data:', data);
+    logger().info('User registration submitted', { email: data.email, name: `${data.firstName} ${data.lastName}` });
+    toast.success('Registration successful! Welcome aboard.');
     // Handle registration
   };
 

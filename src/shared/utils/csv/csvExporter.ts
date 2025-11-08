@@ -4,6 +4,7 @@
  */
 
 import type { AuditLog } from '@/domains/audit-logs/types/auditLog.types';
+import { logger } from '@/core/logging';
 
 /**
  * Escape CSV field values
@@ -85,7 +86,7 @@ export function exportAuditLogsToCSV(
   const csvContent = auditLogsToCSV(logs);
 
   if (!csvContent) {
-    console.warn('No audit logs to export');
+    logger().warn('No audit logs to export', { logsCount: logs.length });
     return;
   }
 

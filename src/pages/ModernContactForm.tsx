@@ -12,6 +12,7 @@ import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { useToast } from '../hooks/useToast';
 import { contactFormSchema, type ContactFormData } from '../core/validation/schemas';
+import { logger } from '@/core/logging';
 
 const DEPARTMENT_OPTIONS = [
   { value: '', label: 'Select Department' },
@@ -61,10 +62,11 @@ export function ModernContactForm() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      console.log('Form submitted:', data);
+      logger().info('Modern contact form submitted', { name: data.name, email: data.email, department: data.department });
       toast.success('Message sent successfully! We\'ll get back to you soon.');
       reset(); // Reset form after successful submission
     } catch (error) {
+      logger().error('Modern contact form submission failed', error instanceof Error ? error : new Error(String(error)));
       toast.error('Failed to send message. Please try again.');
     }
   };

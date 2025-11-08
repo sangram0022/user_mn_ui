@@ -315,8 +315,8 @@ export function ProgressiveImage({
           onLoad={() => {
             // Additional load handling if needed
           }}
-          onError={(e) => {
-            console.warn('Image load error:', e);
+          onError={() => {
+            // Image load errors are handled by error state
           }}
         />
       )}

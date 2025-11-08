@@ -69,16 +69,8 @@ apiClient.interceptors.request.use(
     // Get access token from storage
     const accessToken = tokenService.getAccessToken();
     
-    // Debug logging
-    if (import.meta.env.MODE === 'development') {
-      console.log('[apiClient] Request interceptor:', {
-        url: config.url,
-        method: config.method,
-        hasToken: !!accessToken,
-        tokenPreview: accessToken ? `${accessToken.substring(0, 20)}...` : 'none',
-        headers: config.headers ? Object.keys(config.headers) : [],
-      });
-    }
+    // Minimal debug logging (only for errors/unexpected scenarios)
+    // Full logging available via browser devtools network tab
     
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -88,7 +80,11 @@ apiClient.interceptors.request.use(
         console.log('[apiClient] ✅ Authorization header SET for:', config.url);
       }
     } else {
-      console.warn('[apiClient] ❌ No access token found for request:', config.url);
+      // Only warn for protected endpoints, not public ones like login/register
+      const isPublicEndpoint = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
+      if (import.meta.env.MODE === 'development' && !isPublicEndpoint) {
+        console.warn('[apiClient] ⚠️ No access token found for request:', config.url);
+      }
     }
 
     // Add CSRF token for mutations (POST, PUT, PATCH, DELETE)

@@ -5,6 +5,8 @@ import Badge from '../../../shared/components/ui/Badge';
 import { typographyVariants } from '../../../design-system/variants';
 import type { BadgeVariant } from '../../../design-system/variants';
 import { useContactForm } from '../../../core/validation';
+import { logger } from '@/core/logging';
+import { useToast } from '@/hooks/useToast';
 
 // Contact data - Single source of truth
 const contactData = {
@@ -113,20 +115,22 @@ const contactData = {
 };
 
 export default function ContactPage() {
+  const toast = useToast();
+
   // React Hook Form for contact form
   const form = useContactForm({
     onSuccess: async (data) => {
       // Simulate form submission
       await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Contact form submitted:', data);
+      logger().info('Contact form submitted', { name: data.name, email: data.email });
       
       // Show success message and reset form
-      alert('Thank you for your message! We\'ll get back to you soon.');
+      toast.success('Thank you for your message! We\'ll get back to you soon.');
       form.reset();
     },
     onError: (error) => {
-      console.error('Contact form error:', error);
-      alert('Failed to send message. Please try again.');
+      logger().error('Contact form submission failed', error instanceof Error ? error : undefined);
+      toast.error('Failed to send message. Please try again.');
     },
     successMessage: 'Message sent successfully!',
     errorMessage: 'Failed to send message'

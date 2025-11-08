@@ -349,7 +349,7 @@ resource "aws_cloudwatch_log_group" "waf" {
   count = var.enable_waf && var.enable_waf_logging ? 1 : 0
 
   name              = "/aws/wafv2/${var.project_name}"
-  retention_in_days = 30
+  retention_in_days = 7  # Reduced from 30 to 7 days for cost optimization
 
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-waf-logs"

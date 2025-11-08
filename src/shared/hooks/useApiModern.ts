@@ -14,6 +14,7 @@ import { useOptimistic, useActionState } from 'react';
 import { apiClient } from '@/services/api/apiClient';
 import { APIError } from '@/core/error';
 import { logger } from '@/core/logging';
+import { useToast } from '@/hooks/useToast';
 
 // ========================================
 // Enhanced Query Hook with Error Handling
@@ -42,6 +43,8 @@ export function useApiQuery<TData = unknown>(
     onError,
   } = options || {};
 
+  const toast = useToast();
+
   return useQuery({
     queryKey,
     queryFn: async () => {
@@ -50,7 +53,7 @@ export function useApiQuery<TData = unknown>(
         const result = await queryFn();
         
         if (successMessage) {
-          console.log(successMessage); // TODO: Integrate with toast system
+          toast.success(successMessage);
         }
         
         onSuccess?.(result);
@@ -67,7 +70,7 @@ export function useApiQuery<TData = unknown>(
         logger().error(`API Query Error: ${queryKey.join('/')}`, apiError);
         
         if (errorToast) {
-          console.error(apiError.message); // TODO: Integrate with toast system
+          toast.error(apiError.message);
         }
         
         onError?.(apiError);
@@ -106,6 +109,8 @@ export function useApiMutation<TData = unknown, TVariables = unknown>(
     onError,
   } = options || {};
 
+  const toast = useToast();
+
   return useMutation({
     mutationFn: async (variables: TVariables) => {
       try {
@@ -113,7 +118,7 @@ export function useApiMutation<TData = unknown, TVariables = unknown>(
         const result = await mutationFn(variables);
         
         if (successMessage) {
-          console.log(successMessage); // TODO: Integrate with toast system
+          toast.success(successMessage);
         }
         
         return result;
@@ -129,7 +134,7 @@ export function useApiMutation<TData = unknown, TVariables = unknown>(
         logger().error('API Mutation Error', apiError);
         
         if (errorToast) {
-          console.error(apiError.message); // TODO: Integrate with toast system
+          toast.error(apiError.message);
         }
         
         throw apiError;

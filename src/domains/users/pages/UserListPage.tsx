@@ -4,6 +4,8 @@ import { VirtualTable } from '@/shared/components/VirtualTable';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { useApiQuery } from '@/shared/hooks/useApiModern';
+import { logger } from '@/core/logging';
+import { useToast } from '@/hooks/useToast';
 
 interface User {
   id: string;
@@ -18,6 +20,7 @@ interface User {
 
 export default function UserListPage() {
   const { t } = useTranslation();
+  const toast = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('');
@@ -168,13 +171,19 @@ export default function UserListPage() {
           <div className="flex gap-2">
             <button 
               className="text-blue-600 hover:text-blue-900 text-sm font-medium"
-              onClick={() => console.log('Edit user:', user.id)}
+              onClick={() => {
+                logger().info('Edit user action', { userId: user.id });
+                toast.info('Edit user functionality coming soon');
+              }}
             >
               Edit
             </button>
             <button 
               className="text-green-600 hover:text-green-900 text-sm font-medium"
-              onClick={() => console.log('View user:', user.id)}
+              onClick={() => {
+                logger().info('View user action', { userId: user.id });
+                toast.info('View user functionality coming soon');
+              }}
             >
               View
             </button>
@@ -184,7 +193,11 @@ export default function UserListPage() {
                   ? 'text-green-600 hover:text-green-900' 
                   : 'text-red-600 hover:text-red-900'
               }`}
-              onClick={() => console.log('Toggle status:', user.id)}
+              onClick={() => {
+                const action = user.status === 'suspended' ? 'activate' : 'suspend';
+                logger().info(`Toggle user status: ${action}`, { userId: user.id });
+                toast.info(`Toggle status functionality coming soon`);
+              }}
             >
               {user.status === 'suspended' ? 'Activate' : 'Suspend'}
             </button>
@@ -214,7 +227,10 @@ export default function UserListPage() {
           </div>
           <button 
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            onClick={() => console.log('Create new user')}
+            onClick={() => {
+              logger().info('Create new user action');
+              toast.info('Create user functionality coming soon');
+            }}
           >
             {t('common.create')} User
           </button>

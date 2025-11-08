@@ -5,6 +5,8 @@ import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { typographyVariants, animationUtils } from '../design-system/variants';
 import type { BadgeVariant } from '../design-system/variants';
+import { logger } from '@/core/logging';
+import { useToast } from '@/hooks/useToast';
 
 // Contact data - Single source of truth
 const contactData = {
@@ -113,6 +115,7 @@ const contactData = {
 };
 
 export default function ContactPage() {
+  const toast = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -133,7 +136,7 @@ export default function ContactPage() {
     // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    console.log('Contact form submitted:', formData);
+    logger().info('Contact form submitted', { name: formData.name, email: formData.email, department: formData.department });
     setIsSubmitting(false);
     
     // Reset form
@@ -148,7 +151,7 @@ export default function ContactPage() {
       newsletter: false,
     });
     
-    alert('Thank you for your message! We\'ll get back to you soon.');
+    toast.success('Thank you for your message! We\'ll get back to you soon.');
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {

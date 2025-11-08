@@ -17,6 +17,7 @@
 
 import type { UserRole } from '../types/rbac.types';
 import type { ApiEndpointConfig } from '../types/rbac.types';
+import { logger } from '@/core/logging';
 
 // ========================================
 // Types
@@ -429,14 +430,14 @@ class RbacPersistentCache {
       localStorage.setItem(key, JSON.stringify(entry));
     } catch {
       // Handle localStorage quota exceeded
-      console.warn('RBAC Cache: LocalStorage quota exceeded, clearing old entries');
+      logger().warn('RBAC Cache: LocalStorage quota exceeded, clearing old entries', { key });
       this.clearOldestEntries();
       
       // Try again
       try {
         localStorage.setItem(key, JSON.stringify(entry));
       } catch {
-        console.warn('RBAC Cache: Unable to store entry in localStorage');
+        logger().warn('RBAC Cache: Unable to store entry in localStorage', { key });
       }
     }
   }

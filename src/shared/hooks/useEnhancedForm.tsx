@@ -14,6 +14,7 @@ import { useForm, type FieldValues, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDebouncedCallback } from 'use-debounce';
 import type { z } from 'zod';
+import { logger } from '@/core/logging';
 
 // ========================================
 // Types and Interfaces
@@ -66,7 +67,7 @@ class FormPersistenceManager {
         JSON.stringify(storageData)
       );
     } catch (error) {
-      console.warn('Failed to persist form state:', error);
+      logger().warn('Failed to persist form state', { key, error });
     }
   }
 
@@ -88,7 +89,7 @@ class FormPersistenceManager {
 
       return data;
     } catch (error) {
-      console.warn('Failed to load form state:', error);
+      logger().warn('Failed to load form state', { key, error });
       return null;
     }
   }
@@ -100,7 +101,7 @@ class FormPersistenceManager {
     try {
       localStorage.removeItem(`${this.PREFIX}${key}`);
     } catch (error) {
-      console.warn('Failed to clear form state:', error);
+      logger().warn('Failed to clear form state', { key, error });
     }
   }
 
@@ -128,7 +129,7 @@ class FormPersistenceManager {
         }
       });
     } catch (error) {
-      console.warn('Failed to cleanup expired form states:', error);
+      logger().warn('Failed to cleanup expired form states', { error });
     }
   }
 }

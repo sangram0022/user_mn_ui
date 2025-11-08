@@ -1,76 +1,56 @@
 // ========================================
 // Profile Hooks
 // Production-ready React hooks for profile operations
+// Migrated to TanStack Query for consistency
 // Follows SOLID principles and Clean Code practices
 // ========================================
 
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
 import profileService from '../services/profileService';
 import type {
   UserProfile,
   UpdateProfileRequest,
 } from '../types/profile.types';
-import { extractErrorDetails, type ErrorDetails } from '../../auth/utils/error.utils';
+import { APIError } from '@/core/error';
 import { ValidationBuilder } from '@/core/validation';
 
 // ========================================
-// useProfile Hook
-// Fetches and manages user profile state
+// Query Keys
 // ========================================
 
-export function useProfile(autoLoad: boolean = true) {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorDetails | null>(null);
+const profileKeys = {
+  all: ['profile'] as const,
+  detail: () => [...profileKeys.all, 'detail'] as const,
+};
 
-  const getProfile = async () => {
-    setLoading(true);
-    setError(null);
+// ========================================
+// useProfile Hook
+// Fetches and manages user profile state with TanStack Query
+// ========================================
 
-    try {
+export function useProfile(options?: { enabled?: boolean }): UseQueryResult<UserProfile, APIError> {
+  return useQuery({
+    queryKey: profileKeys.detail(),
+    queryFn: async () => {
       const response = await profileService.getProfile();
-      setProfile(response);
-      return { success: true, data: response };
-    } catch (err) {
-      const errorDetails = extractErrorDetails(err);
-      setError(errorDetails);
-      return { success: false, error: errorDetails };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (autoLoad) {
-      getProfile();
-    }
-  }, [autoLoad]);
-
-  return {
-    profile,
-    loading,
-    error,
-    getProfile,
-    refetch: getProfile,
-  };
+      return response;
+    },
+    enabled: options?.enabled !== false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
 }
 
 // ========================================
 // useUpdateProfile Hook
-// Handles profile updates with validation
+// Handles profile updates with validation and TanStack Query
 // ========================================
 
-export function useUpdateProfile() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorDetails | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string> | null>(null);
+export function useUpdateProfile(): UseMutationResult<UserProfile, APIError, UpdateProfileRequest> {
+  const queryClient = useQueryClient();
 
-  const updateProfile = async (data: UpdateProfileRequest) => {
-    setLoading(true);
-    setError(null);
-    setFieldErrors(null);
-
-    try {
+  return useMutation({
+    mutationFn: async (data: UpdateProfileRequest) => {
       // Client-side validation using centralized ValidationBuilder
       const builder = new ValidationBuilder();
 
@@ -92,86 +72,65 @@ export function useUpdateProfile() {
         );
       }
 
-      // Avatar URL is optional - backend will validate format
-
       const validationResult = builder.result();
 
       if (!validationResult.isValid) {
-        // Convert ValidationResult to Record<string, string> for fieldErrors
-        const errors: Record<string, string> = {};
+        // Convert ValidationResult to error message
+        const errors: string[] = [];
         if (validationResult.fields) {
           Object.entries(validationResult.fields).forEach(([field, result]) => {
             if (!result.isValid) {
-              errors[field] = result.errors.join('. ');
+              errors.push(`${field}: ${result.errors.join('. ')}`);
             }
           });
         }
         
-        setFieldErrors(errors);
-        setError({ message: 'Please check your input' });
-        return { success: false, fieldErrors: errors };
+        throw new APIError(
+          errors.join('; ') || 'Validation failed',
+          400,
+          'PUT',
+          '/profile',
+          { validationErrors: validationResult.fields }
+        );
       }
 
       // Call API
       const response = await profileService.updateProfile(data);
+      return response;
+    },
+    onSuccess: (updatedProfile) => {
+      // Update cache with new profile data
+      queryClient.setQueryData(profileKeys.detail(), updatedProfile);
       
-      setLoading(false);
-      return { success: true, data: response };
-    } catch (err) {
-      const errorDetails = extractErrorDetails(err);
-      setError(errorDetails);
-      setFieldErrors(errorDetails.fieldErrors || null);
-      setLoading(false);
-      return { success: false, error: errorDetails };
-    }
-  };
-
-  return {
-    loading,
-    error,
-    fieldErrors,
-    updateProfile,
-  };
+      // Invalidate to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: profileKeys.all });
+    },
+  });
 }
 
 // ========================================
 // useProfileWithUpdate Hook
 // Combined hook for fetching and updating profile
+// Now uses TanStack Query for both operations
 // ========================================
 
-export function useProfileWithUpdate(autoLoad: boolean = true) {
-  const {
-    profile,
-    loading: fetchLoading,
-    error: fetchError,
-    getProfile,
-  } = useProfile(autoLoad);
-
-  const {
-    loading: updateLoading,
-    error: updateError,
-    fieldErrors,
-    updateProfile: updateProfileFn,
-  } = useUpdateProfile();
-
-  const updateProfile = async (data: UpdateProfileRequest) => {
-    const result = await updateProfileFn(data);
-    
-    if (result.success) {
-      // Refresh profile after successful update
-      await getProfile();
-    }
-    
-    return result;
-  };
+export function useProfileWithUpdate(options?: { enabled?: boolean }) {
+  const profileQuery = useProfile(options);
+  const updateMutation = useUpdateProfile();
 
   return {
-    profile,
-    loading: fetchLoading || updateLoading,
-    error: updateError || fetchError,
-    fieldErrors,
-    getProfile,
-    updateProfile,
-    refetch: getProfile,
+    // Query data
+    profile: profileQuery.data,
+    isLoading: profileQuery.isLoading || updateMutation.isPending,
+    error: updateMutation.error || profileQuery.error,
+    
+    // Query methods
+    refetch: profileQuery.refetch,
+    
+    // Mutation methods
+    updateProfile: updateMutation.mutate,
+    updateProfileAsync: updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
+    updateError: updateMutation.error,
   };
 }

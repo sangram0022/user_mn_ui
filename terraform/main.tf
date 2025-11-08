@@ -1069,10 +1069,10 @@ resource "aws_cloudwatch_metric_alarm" "s3_requests_high" {
 
   alarm_name          = "${var.project_name}-${var.environment}-s3-high-requests"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2"
+  evaluation_periods  = "3"  # Increased from 2 to 3 for fewer false positives (cost optimization)
   metric_name         = "AllRequests"
   namespace           = "AWS/S3"
-  period              = "300"
+  period              = "600"  # 10 minutes (increased from 5) - reduces metric evaluations by 50%
   statistic           = "Sum"
   threshold           = var.s3_request_threshold
   alarm_description   = "S3 request rate is too high - potential cost impact"
@@ -1115,10 +1115,10 @@ resource "aws_cloudwatch_metric_alarm" "cloudfront_4xx_errors" {
 
   alarm_name          = "${var.project_name}-${var.environment}-cloudfront-4xx-errors"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2"
+  evaluation_periods  = "3"  # Increased from 2 to 3 for fewer false positives (cost optimization)
   metric_name         = "4xxErrorRate"
   namespace           = "AWS/CloudFront"
-  period              = "300"
+  period              = "600"  # 10 minutes (increased from 5) - reduces metric evaluations by 50%
   statistic           = "Average"
   threshold           = var.cloudfront_4xx_error_threshold
   alarm_description   = "This metric monitors CloudFront 4xx errors"
@@ -1136,10 +1136,10 @@ resource "aws_cloudwatch_metric_alarm" "cloudfront_5xx_errors" {
 
   alarm_name          = "${var.project_name}-${var.environment}-cloudfront-5xx-errors"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2"
+  evaluation_periods  = "3"  # Increased from 2 to 3 for fewer false positives (cost optimization)
   metric_name         = "5xxErrorRate"
   namespace           = "AWS/CloudFront"
-  period              = "300"
+  period              = "600"  # 10 minutes (increased from 5) - reduces metric evaluations by 50%
   statistic           = "Average"
   threshold           = var.cloudfront_5xx_error_threshold
   alarm_description   = "This metric monitors CloudFront 5xx errors"

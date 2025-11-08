@@ -6,8 +6,12 @@
 import { Link } from 'react-router-dom';
 import { ForgotPasswordForm } from '../domains/auth/components';
 import { SEO, SEO_CONFIG } from '../shared/components/seo';
+import { logger } from '@/core/logging';
+import { useToast } from '@/hooks/useToast';
 
 export default function ForgotPasswordPage() {
+  const toast = useToast();
+
   return (
     <>
       <SEO {...SEO_CONFIG.forgotPassword} />
@@ -28,10 +32,12 @@ export default function ForgotPasswordPage() {
         <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 animate-scale-in">
           <ForgotPasswordForm
             onSuccess={() => {
-              console.log('Reset email sent successfully!');
+              logger().info('Password reset email sent');
+              toast.success('Reset email sent! Check your inbox.');
             }}
             onError={(error) => {
-              console.error('Failed to send reset email:', error);
+              logger().error('Password reset request failed', error instanceof Error ? error : undefined);
+              toast.error('Failed to send reset email. Please try again.');
             }}
           />
         </div>

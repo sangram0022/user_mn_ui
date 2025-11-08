@@ -5,16 +5,15 @@ import { useToast } from '../../../hooks/useToast';
 import { useProfile, useUpdateProfile } from '../hooks/useProfile.hooks';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
-import { getErrorMessage } from '../../auth/utils/error.utils';
 
 export default function ProfilePage() {
   const { t } = useTranslation(['profile', 'common', 'errors']);
   const { user: authUser } = useAuth();
   const toast = useToast();
 
-  // Use new centralized profile hooks
-  const { profile, loading: profileLoading, getProfile } = useProfile(true);
-  const { updateProfile, loading: updating, fieldErrors: apiFieldErrors } = useUpdateProfile();
+  // Use TanStack Query hooks
+  const profileQuery = useProfile({ enabled: true });
+  const updateMutation = useUpdateProfile();
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -27,47 +26,31 @@ export default function ProfilePage() {
 
   // Load profile data into form
   useEffect(() => {
-    if (profile) {
+    if (profileQuery.data) {
       setFormData({
-        firstName: profile.first_name || '',
-        lastName: profile.last_name || '',
-        phoneNumber: profile.phone_number || '',
-        avatarUrl: profile.avatar_url || '',
+        firstName: profileQuery.data.first_name || '',
+        lastName: profileQuery.data.last_name || '',
+        phoneNumber: profileQuery.data.phone_number || '',
+        avatarUrl: profileQuery.data.avatar_url || '',
       });
     }
-  }, [profile]);
-
-  // Merge API field errors
-  useEffect(() => {
-    if (apiFieldErrors) {
-      setFieldErrors((prev) => ({ ...prev, ...apiFieldErrors }));
-    }
-  }, [apiFieldErrors]);
+  }, [profileQuery.data]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFieldErrors({});
 
     try {
-      const result = await updateProfile({
+      await updateMutation.mutateAsync({
         first_name: formData.firstName,
         last_name: formData.lastName,
         phone_number: formData.phoneNumber || undefined,
         avatar_url: formData.avatarUrl || undefined,
       });
 
-      if (result.success && result.data) {
-        toast.success(t('common:success.updated'));
-        setIsEditing(false);
-        
-        // Refresh profile
-        await getProfile();
-      } else if (result.error) {
-        const errorMessage = result.error.code 
-          ? getErrorMessage(result.error.code) 
-          : result.error.message;
-        toast.error(errorMessage);
-      }
+      toast.success(t('common:success.updated'));
+      setIsEditing(false);
+      // TanStack Query auto-invalidates cache, no manual refetch needed
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('errors:UPDATE_FAILED');
       toast.error(errorMessage);
@@ -76,12 +59,12 @@ export default function ProfilePage() {
 
   const handleCancel = () => {
     // Reset form to profile data
-    if (profile) {
+    if (profileQuery.data) {
       setFormData({
-        firstName: profile.first_name || '',
-        lastName: profile.last_name || '',
-        phoneNumber: profile.phone_number || '',
-        avatarUrl: profile.avatar_url || '',
+        firstName: profileQuery.data.first_name || '',
+        lastName: profileQuery.data.last_name || '',
+        phoneNumber: profileQuery.data.phone_number || '',
+        avatarUrl: profileQuery.data.avatar_url || '',
       });
     }
     setIsEditing(false);
@@ -93,7 +76,7 @@ export default function ProfilePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  if (profileLoading && !profile) {
+  if (profileQuery.isLoading && !profileQuery.data) {
     return (
       <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
         <div className="flex items-center justify-center h-64">
@@ -107,7 +90,7 @@ export default function ProfilePage() {
   }
 
   // Use profile data or fallback to auth user
-  const displayProfile = profile || authUser;
+  const displayProfile = profileQuery.data || authUser;
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
@@ -160,7 +143,7 @@ export default function ProfilePage() {
                 onChange={handleChange}
                 error={fieldErrors.first_name}
                 required
-                disabled={updating}
+                disabled={updateMutation.isPending}
                 data-testid="firstname-input"
               />
               <Input
@@ -171,7 +154,7 @@ export default function ProfilePage() {
                 onChange={handleChange}
                 error={fieldErrors.last_name}
                 required
-                disabled={updating}
+                disabled={updateMutation.isPending}
                 data-testid="lastname-input"
               />
             </div>
@@ -184,7 +167,7 @@ export default function ProfilePage() {
               onChange={handleChange}
               error={fieldErrors.phone_number}
               placeholder="+1234567890"
-              disabled={updating}
+              disabled={updateMutation.isPending}
               data-testid="phone-input"
             />
 
@@ -196,7 +179,7 @@ export default function ProfilePage() {
               onChange={handleChange}
               error={fieldErrors.avatar_url}
               placeholder="https://example.com/avatar.jpg"
-              disabled={updating}
+              disabled={updateMutation.isPending}
             />
 
             <div className="flex gap-4 pt-4">
@@ -204,10 +187,10 @@ export default function ProfilePage() {
                 type="submit"
                 variant="primary"
                 size="md"
-                disabled={updating}
+                disabled={updateMutation.isPending}
                 data-testid="save-button"
               >
-                {updating ? (
+                {updateMutation.isPending ? (
                   <>
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -224,7 +207,7 @@ export default function ProfilePage() {
                 variant="outline"
                 size="md"
                 onClick={handleCancel}
-                disabled={updating}
+                disabled={updateMutation.isPending}
               >
                 {t('common:cancel')}
               </Button>
@@ -275,7 +258,7 @@ export default function ProfilePage() {
                 {t('profilePage.fields.role')}
               </label>
               <div className="flex gap-2">
-                {displayProfile?.roles?.map((role) => (
+                {displayProfile?.roles?.map((role: string) => (
                   <span
                     key={role}
                     className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium"
