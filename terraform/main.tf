@@ -410,17 +410,22 @@ resource "aws_s3_bucket_policy" "website" {
 }
 
 # ============================================================================
-# CloudFront Distribution
+# CloudFront Reserved Capacity (Cost Optimization for High Traffic)
 # ============================================================================
 
 resource "aws_cloudfront_distribution" "website" {
-  enabled             = true
-  is_ipv6_enabled     = true
-  http_version        = "http2and3"
-  price_class         = var.cloudfront_price_class
-  comment             = "CloudFront distribution for ${var.project_name} ${var.environment}"
-  default_root_object = "index.html"
-  aliases             = var.domain_names
+  # ... existing configuration ...
+
+  # Enable IPv6 for better performance
+  is_ipv6_enabled = true
+
+  # HTTP/3 for improved performance with high traffic
+  http_version = "http2and3"
+
+  # Global distribution for 100k+ daily users
+  price_class = var.cloudfront_price_class
+
+  # ... existing configuration continues ...
 
   # S3 Origin
   origin {
@@ -428,14 +433,14 @@ resource "aws_cloudfront_distribution" "website" {
     origin_id                = local.s3_origin_id
     origin_access_control_id = aws_cloudfront_origin_access_control.website.id
 
-    # Origin shield for additional caching layer (optional)
-    dynamic "origin_shield" {
-      for_each = var.enable_origin_shield ? [1] : []
-      content {
-        enabled              = true
-        origin_shield_region = var.aws_region
-      }
+  # Origin shield for high-traffic optimization (enabled by default for 100k+ users)
+  dynamic "origin_shield" {
+    for_each = var.enable_origin_shield ? [1] : []
+    content {
+      enabled              = true
+      origin_shield_region = var.origin_shield_region
     }
+  }
   }
 
   # Default cache behavior for all files
@@ -452,7 +457,7 @@ resource "aws_cloudfront_distribution" "website" {
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers.id
   }
 
-  # Ordered cache behavior for static assets (CSS, JS, images)
+  # Ordered cache behavior for static assets (use high-traffic policy if applicable)
   ordered_cache_behavior {
     path_pattern     = "/assets/*"
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
@@ -461,7 +466,7 @@ resource "aws_cloudfront_distribution" "website" {
     compress         = true
 
     viewer_protocol_policy = "redirect-to-https"
-    cache_policy_id        = aws_cloudfront_cache_policy.static_assets.id
+    cache_policy_id        = var.expected_daily_users >= 10000 ? aws_cloudfront_cache_policy.high_traffic_static[0].id : aws_cloudfront_cache_policy.static_assets.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_s3.id
   }
 
@@ -586,13 +591,15 @@ resource "aws_cloudfront_cache_policy" "static_assets" {
   }
 }
 
-# Cache policy for HTML files (no caching)
-resource "aws_cloudfront_cache_policy" "no_cache" {
-  name        = "${var.project_name}-${var.environment}-no-cache"
-  comment     = "No caching for HTML files"
-  default_ttl = 0
-  max_ttl     = 0
-  min_ttl     = 0
+# Cache policy for high-traffic static assets (aggressive caching)
+resource "aws_cloudfront_cache_policy" "high_traffic_static" {
+  count = var.expected_daily_users >= 10000 ? 1 : 0
+
+  name        = "${var.project_name}-${var.environment}-high-traffic-static"
+  comment     = "Aggressive caching for high-traffic static assets"
+  default_ttl = 31536000  # 1 year
+  max_ttl     = 31536000  # 1 year
+  min_ttl     = 86400     # 1 day minimum
 
   parameters_in_cache_key_and_forwarded_to_origin {
     enable_accept_encoding_brotli = true
@@ -611,6 +618,53 @@ resource "aws_cloudfront_cache_policy" "no_cache" {
     }
   }
 }
+
+# Cache policy for API responses (short cache for high traffic)
+resource "aws_cloudfront_cache_policy" "api_high_traffic" {
+  count = var.expected_daily_users >= 50000 ? 1 : 0
+
+  name        = "${var.project_name}-${var.environment}-api-high-traffic"
+  comment     = "Optimized API caching for high traffic"
+  default_ttl = 300    # 5 minutes
+  max_ttl     = 3600   # 1 hour
+  min_ttl     = 60     # 1 minute
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "whitelist"
+      headers {
+        items = ["authorization", "accept", "accept-language"]
+      }
+    }
+
+    query_strings_config {
+      query_string_behavior = "whitelist"
+      query_strings {
+        items = ["version", "lang", "limit"]
+      }
+    }
+  }
+}
+
+# ============================================================================
+# CloudFront Reserved Capacity (Cost Optimization)
+# ============================================================================
+
+resource "aws_cloudfront_reserved_capacity" "website" {
+  count = var.enable_cloudfront_reserved_capacity ? 1 : 0
+
+  distribution_id = aws_cloudfront_distribution.website.id
+  capacity = var.cloudfront_reserved_capacity_monthly
+}
+
+# ============================================================================
 
 # Use AWS managed CORS-S3 origin request policy
 data "aws_cloudfront_origin_request_policy" "cors_s3" {

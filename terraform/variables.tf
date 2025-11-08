@@ -159,10 +159,21 @@ variable "acm_certificate_arn" {
   default     = ""
 }
 
+variable "expected_daily_users" {
+  description = "Expected daily active users for capacity planning"
+  type        = number
+  default     = 1000
+  
+  validation {
+    condition     = var.expected_daily_users >= 100 && var.expected_daily_users <= 1000000
+    error_message = "Expected daily users must be between 100 and 1,000,000."
+  }
+}
+
 variable "cloudfront_price_class" {
-  description = "CloudFront price class"
+  description = "CloudFront price class - optimize for global traffic"
   type        = string
-  default     = "PriceClass_100"  # Use only North America and Europe
+  default     = "PriceClass_All"  # All edge locations for global traffic
   
   validation {
     condition     = contains(["PriceClass_100", "PriceClass_200", "PriceClass_All"], var.cloudfront_price_class)
@@ -171,9 +182,32 @@ variable "cloudfront_price_class" {
 }
 
 variable "enable_origin_shield" {
-  description = "Enable CloudFront Origin Shield for additional caching layer"
+  description = "Enable CloudFront Origin Shield for high-traffic optimization"
   type        = bool
-  default     = false
+  default     = true  # Enable for high traffic
+}
+
+variable "origin_shield_region" {
+  description = "Origin Shield region for optimal performance"
+  type        = string
+  default     = "us-east-1"  # Optimal for global traffic
+}
+
+variable "enable_cloudfront_reserved_capacity" {
+  description = "Enable CloudFront reserved capacity for cost optimization"
+  type        = bool
+  default     = false  # Set to true for production with predictable traffic
+}
+
+variable "cloudfront_reserved_capacity_monthly" {
+  description = "Monthly CloudFront requests for reserved capacity (millions)"
+  type        = number
+  default     = 1000  # 1 billion requests/month
+  
+  validation {
+    condition     = var.cloudfront_reserved_capacity_monthly >= 100 && var.cloudfront_reserved_capacity_monthly <= 100000
+    error_message = "Reserved capacity must be between 100M and 100B requests per month."
+  }
 }
 
 variable "cache_policy_id" {
