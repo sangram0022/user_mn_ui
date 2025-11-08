@@ -115,7 +115,7 @@ resource "aws_s3_bucket" "website" {
   }
 }
 
-# Enable versioning for backup and rollback capability
+# Enable versioning for backup and rollback capability (disabled since code is managed via git)
 resource "aws_s3_bucket_versioning" "website" {
   bucket = aws_s3_bucket.website.id
 
@@ -267,7 +267,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     status = "Enabled"
 
     expiration {
-      days = var.log_retention_days
+      days = var.log_retention_days  # 3 months retention for cost optimization
     }
   }
 }

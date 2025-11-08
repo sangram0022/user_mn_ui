@@ -123,6 +123,23 @@ variable "expected_daily_users" {
 - Monitoring thresholds scale with user count
 - Cost alerts trigger at appropriate levels
 
+### 6. Storage Optimization
+
+**Versioning Disabled**:
+```hcl
+enable_versioning = false  # Code managed via git, no versioning needed
+```
+
+**Log Retention (3 Months)**:
+```hcl
+log_retention_days = 90  # 3 months for cost optimization
+```
+
+**Benefits**:
+- **Zero versioning costs** since code is git-managed
+- **Reduced storage costs** with 3-month log retention
+- **Automatic cleanup** of old logs and temporary files
+
 ---
 
 ## 📊 COST ANALYSIS FOR DIFFERENT USER VOLUMES

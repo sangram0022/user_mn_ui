@@ -241,9 +241,10 @@ function printResults(results) {
   console.log(`CloudFront Requests: ${formatCurrency(results.costs.cloudFront.requests)}`);
   console.log(`CloudFront Data Transfer: ${formatCurrency(results.costs.cloudFront.dataTransfer)}`);
   console.log(`Origin Shield: ${formatCurrency(results.costs.cloudFront.originShield)}`);
-  console.log(`S3 Storage: ${formatCurrency(results.costs.s3.storage)}`);
-  console.log(`S3 Logs: ${formatCurrency(results.costs.s3.logs)}`);
+  console.log(`S3 Storage: ${formatCurrency(results.costs.s3.storage)} (Intelligent Tiering enabled)`);
+  console.log(`S3 Logs: ${formatCurrency(results.costs.s3.logs)} (3 months retention)`);
   console.log(`S3 Requests: ${formatCurrency(results.costs.s3.requests)}`);
+  console.log(`S3 Versioning: $0.00 (disabled - code managed via git)`);
   console.log(`WAF Protection: ${formatCurrency(results.costs.waf)}`);
 
   console.log('\n🎯 TOTAL MONTHLY COST');

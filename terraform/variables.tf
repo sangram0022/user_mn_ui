@@ -104,9 +104,9 @@ variable "s3_bucket_name" {
 }
 
 variable "enable_versioning" {
-  description = "Enable versioning for S3 bucket (recommended for production)"
+  description = "Enable versioning for S3 bucket (disabled since code is managed via git)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "enable_storage_lens" {
@@ -296,7 +296,7 @@ variable "enable_logging" {
 }
 
 variable "log_retention_days" {
-  description = "Number of days to retain logs"
+  description = "Number of days to retain logs (3 months for cost optimization)"
   type        = number
   default     = 90
   
