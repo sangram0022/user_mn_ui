@@ -14,10 +14,10 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isAuthenticated = !!user && !!token;
+  // Single source of truth: tokenService in localStorage
+  const isAuthenticated = !!user && !!tokenService.getAccessToken();
 
   // Initialize auth from tokenService
   useEffect(() => {
@@ -26,18 +26,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (storedToken) {
         try {
-          setToken(storedToken);
-          // Keep existing localStorage pattern for user data
-          const storedUser = localStorage.getItem('auth_user');
+          // Use tokenService for centralized storage access
+          const storedUser = tokenService.getUser();
           if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            setUser(storedUser as User);
           }
         } catch (error) {
           logger().error('Failed to parse stored user', error instanceof Error ? error : new Error(String(error)), {
             context: 'AuthContext.initAuth',
           });
           tokenService.clearTokens();
-          localStorage.removeItem('auth_user');
         }
       } else {
         tokenService.clearTokens();
@@ -80,10 +78,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         updatedAt: new Date().toISOString(),
       };
       
-      setToken(data.access_token);
       setUser(userData);
       
-      localStorage.setItem('auth_user', JSON.stringify(userData));
+      // Use tokenService for centralized storage
+      tokenService.storeUser(userData);
     } catch (error) {
       logger().error('Login error', error instanceof Error ? error : new Error(String(error)), {
         context: 'AuthContext.login',
@@ -127,11 +125,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   function logout() {
-    // Clear all auth data
+    // Clear all auth data using tokenService
     tokenService.clearTokens();
-    localStorage.removeItem('auth_user');
     setUser(null);
-    setToken(null);
     
     // Call logout service (fire and forget)
     authService.logout().catch((error) => {
@@ -158,8 +154,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         expires_in: data.expires_in,
       });
       
-      setToken(data.access_token);
-      
       // Update user data if needed
       if (user && data.email !== user.email) {
         const updatedUser: User = {
@@ -168,7 +162,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           roles: data.roles as Role[], // Backend sends string[], frontend expects Role[] (same thing)
         };
         setUser(updatedUser);
-        localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+        // Use tokenService for centralized storage
+        tokenService.storeUser(updatedUser);
       }
     } catch (error) {
       logger().error('Token refresh failed', error instanceof Error ? error : new Error(String(error)), {
@@ -181,7 +176,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value: AuthContextType = {
     user,
-    token,
     isAuthenticated,
     isLoading,
     login,

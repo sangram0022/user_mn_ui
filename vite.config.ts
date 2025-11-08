@@ -24,6 +24,19 @@ export default defineConfig({
     tailwindcss(),
   ],
   
+  // Development server configuration
+  server: {
+    headers: {
+      // Content Security Policy - XSS protection
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:8000 ws://localhost:*; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+      // Additional security headers
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+    },
+  },
+  
   // AWS CloudFront-Optimized Build Configuration
   build: {
     target: 'esnext', // Modern browsers - CloudFront handles legacy support via transforms
