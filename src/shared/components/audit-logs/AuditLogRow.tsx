@@ -5,6 +5,7 @@
 
 import type { AuditLog } from '@/domains/audit-logs/types/auditLog.types';
 import { STATUS_COLORS, ACTION_ICONS } from '@/shared/constants/auditLogConstants';
+import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 interface AuditLogRowProps {
   log: AuditLog;
@@ -68,3 +69,13 @@ export function AuditLogRow({ log, onArchive, showArchiveButton = false }: Audit
     </tr>
   );
 }
+
+function AuditLogRowWithErrorBoundary(props: AuditLogRowProps) {
+  return (
+    <ComponentErrorBoundary>
+      <AuditLogRow {...props} />
+    </ComponentErrorBoundary>
+  );
+}
+
+export default AuditLogRowWithErrorBoundary;

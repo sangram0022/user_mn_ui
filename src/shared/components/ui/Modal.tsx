@@ -7,6 +7,7 @@ import { useEffect, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useKeyboardShortcut, SHORTCUTS } from '../../hooks/useKeyboardShortcut';
+import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,7 +20,7 @@ interface ModalProps {
   closeOnEscape?: boolean;
 }
 
-export default function Modal({
+function Modal({
   isOpen,
   onClose,
   title,
@@ -129,3 +130,15 @@ export function ModalFooter({ children, align = 'right' }: ModalFooterProps) {
     </div>
   );
 }
+
+// Wrap Modal with ComponentErrorBoundary
+function ModalWithErrorBoundary(props: ModalProps) {
+  return (
+    <ComponentErrorBoundary>
+      <Modal {...props} />
+    </ComponentErrorBoundary>
+  );
+}
+
+// Override default export
+export default ModalWithErrorBoundary;

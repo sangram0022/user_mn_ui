@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { List as VirtualList } from 'react-window';
+import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 interface VirtualTableProps {
   columns: string[];
@@ -99,4 +100,12 @@ export function VirtualTable({
   );
 }
 
-export default VirtualTable;
+function VirtualTableWithErrorBoundary(props: VirtualTableProps) {
+  return (
+    <ComponentErrorBoundary>
+      <VirtualTable {...props} />
+    </ComponentErrorBoundary>
+  );
+}
+
+export default VirtualTableWithErrorBoundary;

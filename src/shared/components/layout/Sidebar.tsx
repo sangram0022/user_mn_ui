@@ -13,8 +13,9 @@ import {
 import { ROUTES } from '../../../core/routing/config';
 import { useAuth } from '../../../hooks/useAuth';
 import { ROLES } from '../../../core/auth/roles';
+import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
-export default function Sidebar() {
+function Sidebar() {
   const { t } = useTranslation();
   const location = useLocation();
   const { user } = useAuth();
@@ -111,3 +112,13 @@ export default function Sidebar() {
     </aside>
   );
 }
+
+function SidebarWithErrorBoundary() {
+  return (
+    <ComponentErrorBoundary>
+      <Sidebar />
+    </ComponentErrorBoundary>
+  );
+}
+
+export default SidebarWithErrorBoundary;

@@ -4,6 +4,7 @@
  */
 
 import { useHealthCheck } from '../hooks/useHealthCheck';
+import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 export const HealthCheckDisplay = () => {
   const { healthStatus } = useHealthCheck();
@@ -76,3 +77,13 @@ export const HealthCheckDisplay = () => {
     </div>
   );
 };
+
+export function HealthCheckDisplayWithErrorBoundary() {
+  return (
+    <ComponentErrorBoundary>
+      <HealthCheckDisplay />
+    </ComponentErrorBoundary>
+  );
+}
+
+export default HealthCheckDisplayWithErrorBoundary;
