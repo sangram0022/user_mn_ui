@@ -2,10 +2,18 @@
  * Admin Export Service
  * Handle exports for users, audit logs, and roles
  * 
+ * Response Format:
+ * Export endpoints return Blob (binary file data) directly.
+ * Other endpoints follow ApiResponse<T> format.
+ * 
+ * Supported formats: CSV, Excel, JSON
+ * 
  * Endpoints implemented:
  * - GET /api/v1/admin/export/users (export users to CSV/Excel/JSON)
  * - GET /api/v1/admin/export/audit-logs (export audit logs to CSV/Excel/JSON)
  * - GET /api/v1/admin/export/roles (export roles to CSV/Excel/JSON)
+ * 
+ * @see {ApiResponse} @/core/api/types
  */
 
 import { apiClient } from '../../../services/api/apiClient';

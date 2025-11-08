@@ -2,9 +2,19 @@
  * Admin Audit Logs Service
  * API calls for audit log management and export
  * 
+ * Response Format:
+ * Functions interact with backend ApiResponse<T> format:
+ * - Success: { success: true, data: T, message?, timestamp? }
+ * - Error: { success: false, error: string, message_code?, timestamp? }
+ * 
+ * Includes response adapter for field name normalization.
+ * 
  * Endpoints implemented:
- * - GET  /api/v1/admin/audit-logs (list audit logs)
- * - GET  /api/v1/admin/export/audit-logs (export audit logs)
+ * - GET  /api/v1/admin/audit-logs (list audit logs with pagination)
+ * - GET  /api/v1/admin/export/audit-logs (export audit logs to file)
+ * 
+ * @see {ApiResponse} @/core/api/types
+ * @see {PaginatedApiResponse} @/core/api/types
  */
 
 import { apiClient } from '../../../services/api/apiClient';

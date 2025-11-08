@@ -2,9 +2,22 @@
  * Admin User Approval Service
  * API calls for approving and rejecting pending user registrations
  * 
+ * Response Format:
+ * All functions interact with backend ApiResponse<T> format:
+ * - Success: { success: true, data: T, message?, timestamp? }
+ * - Error: { success: false, error: string, field_errors?, message_code?, timestamp? }
+ * 
+ * Functions use unwrapResponse() to return unwrapped data (T).
+ * Supports both single and bulk approval/rejection operations.
+ * 
  * Endpoints implemented:
- * - POST /api/v1/admin/users/:id/approve (approve user)
- * - POST /api/v1/admin/users/:id/reject (reject user)
+ * - POST /api/v1/admin/users/:id/approve (approve single user)
+ * - POST /api/v1/admin/users/:id/reject (reject single user)
+ * - POST /api/v1/admin/users/bulk-approve (approve multiple users)
+ * - POST /api/v1/admin/users/bulk-reject (reject multiple users)
+ * 
+ * @see {ApiResponse} @/core/api/types
+ * @see {ValidationErrorResponse} @/core/api/types
  */
 
 import { apiClient } from '../../../services/api/apiClient';

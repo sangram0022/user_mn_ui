@@ -2,6 +2,13 @@
  * Admin Role Management Service (RBAC)
  * All API calls for role and permission management
  * 
+ * Response Format:
+ * All functions interact with backend ApiResponse<T> format:
+ * - Success: { success: true, data: T, message?, timestamp? }
+ * - Error: { success: false, error: string, field_errors?, message_code?, timestamp? }
+ * 
+ * Functions use unwrapResponse() to return unwrapped data (T).
+ * 
  * Endpoints implemented:
  * - GET    /api/v1/admin/rbac/roles (list all roles)
  * - GET    /api/v1/admin/rbac/roles/:name (get role details)
@@ -9,6 +16,9 @@
  * - PUT    /api/v1/admin/rbac/roles/:name (update role)
  * - DELETE /api/v1/admin/rbac/roles/:name (delete role)
  * - POST   /api/v1/admin/users/:id/roles (assign roles to user)
+ * 
+ * @see {ApiResponse} @/core/api/types
+ * @see {ValidationErrorResponse} @/core/api/types
  */
 
 import { apiClient } from '../../../services/api/apiClient';

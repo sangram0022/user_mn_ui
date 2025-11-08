@@ -2,6 +2,14 @@
  * Admin User Management Service
  * All API calls for admin user management operations
  * 
+ * Response Format:
+ * All functions interact with backend ApiResponse<T> format:
+ * - Success: { success: true, data: T, message?, timestamp? }
+ * - Error: { success: false, error: string, field_errors?, message_code?, timestamp? }
+ * 
+ * Most functions use unwrapResponse() to return unwrapped data (T).
+ * List operations may return full response for pagination metadata.
+ * 
  * Endpoints implemented:
  * - GET    /api/v1/admin/users (list with pagination/filters)
  * - POST   /api/v1/admin/users (create user)
@@ -9,13 +17,12 @@
  * - PUT    /api/v1/admin/users/:id (update user)
  * - DELETE /api/v1/admin/users/:id (delete user)
  * - POST   /api/v1/admin/users/:id/approve (approve user)
- * - GET    /api/v1/admin/export/users (export users)
+ * - POST   /api/v1/admin/users/bulk-action (bulk operations)
+ * - GET    /api/v1/admin/export/users (export users to CSV/Excel)
  * 
- * Following patterns from authService.ts:
- * - Uses apiClient for HTTP requests
- * - Implements unwrapResponse for consistent response handling
- * - Comprehensive error handling
- * - Type-safe with TypeScript
+ * @see {ApiResponse} @/core/api/types
+ * @see {ValidationErrorResponse} @/core/api/types
+ * @see {PaginatedApiResponse} @/core/api/types
  */
 
 import { apiClient } from '../../../services/api/apiClient';

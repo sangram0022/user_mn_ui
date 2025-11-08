@@ -2,9 +2,18 @@
  * Admin Analytics Service
  * API calls for dashboard statistics and growth analytics
  * 
+ * Response Format:
+ * All functions interact with backend ApiResponse<T> format:
+ * - Success: { success: true, data: T, message?, timestamp? }
+ * - Error: { success: false, error: string, message_code?, timestamp? }
+ * 
+ * Functions use unwrapResponse() to return unwrapped data (T).
+ * 
  * Endpoints implemented:
- * - GET /api/v1/admin/stats (dashboard statistics)
- * - GET /api/v1/admin/analytics/growth (user growth analytics)
+ * - GET /api/v1/admin/stats (dashboard statistics - user counts, activity metrics)
+ * - GET /api/v1/admin/analytics/growth (user growth analytics - time series data)
+ * 
+ * @see {ApiResponse} @/core/api/types
  */
 
 import { apiClient } from '../../../services/api/apiClient';
