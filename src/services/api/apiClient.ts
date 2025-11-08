@@ -2,11 +2,49 @@
 // API Client - Enhanced with Auth Interceptors
 // SINGLE SOURCE OF TRUTH for API configuration
 // ========================================
+//
+// This client expects backend responses to follow standardized formats:
+//
+// SUCCESS RESPONSE (ApiResponse<T>):
+// {
+//   success: true,
+//   data: T,
+//   message?: string,
+//   timestamp?: string
+// }
+//
+// VALIDATION ERROR (422 - ValidationErrorResponse):
+// {
+//   success: false,
+//   error: "Validation failed",
+//   field_errors: {
+//     email: ["Email is required", "Invalid format"],
+//     password: ["Too short"]
+//   },
+//   message_code?: "VALIDATION_ERROR",
+//   timestamp?: string
+// }
+//
+// GENERIC ERROR (ErrorResponse):
+// {
+//   success: false,
+//   error: "Error message",
+//   detail?: "Additional details",
+//   message_code?: "ERROR_CODE",
+//   status?: 500,
+//   timestamp?: string
+// }
+//
+// @see {ApiResponse} @/core/api/types
+// @see {ValidationErrorResponse} @/core/api/types
+// @see {ErrorResponse} @/core/api/types
+// ========================================
 
 import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 import tokenService from '../../domains/auth/services/tokenService';
 import { logger } from '@/core/logging';
 import { APIError } from '@/core/error';
+import type { ValidationErrorResponse, FieldErrors } from '@/core/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -48,6 +86,26 @@ const getRetryDelay = (retryCount: number): number => {
 // Create Axios Instance
 // ========================================
 
+/**
+ * Axios instance configured for API communication
+ * 
+ * Features:
+ * - Automatic JWT token injection
+ * - Token refresh on 401 errors
+ * - CSRF protection for mutations
+ * - Exponential backoff retry for network errors
+ * - Structured error handling with APIError
+ * 
+ * Response Types:
+ * - Success responses follow ApiResponse<T> structure
+ * - Validation errors follow ValidationErrorResponse structure (422)
+ * - Generic errors follow ErrorResponse structure
+ * 
+ * @see {ApiResponse} @/core/api/types
+ * @see {ValidationErrorResponse} @/core/api/types
+ * @see {ErrorResponse} @/core/api/types
+ * @see {APIError} @/core/error
+ */
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
@@ -138,6 +196,15 @@ apiClient.interceptors.request.use(
 // - Queue requests during refresh
 // - Exponential backoff for retries
 // - Enhanced error handling
+// 
+// Expected Response Types:
+// - Success: ApiResponse<T> with { success: true, data: T }
+// - Validation Error: ValidationErrorResponse with field_errors
+// - Generic Error: ErrorResponse with error message
+// 
+// @see {ApiResponse} @/core/api/types
+// @see {ValidationErrorResponse} @/core/api/types
+// @see {ErrorResponse} @/core/api/types
 // ========================================
 
 apiClient.interceptors.response.use(
@@ -271,16 +338,19 @@ apiClient.interceptors.response.use(
 
     // ========================================
     // Enhanced Error Handling with Logging
+    // Handles ValidationErrorResponse and ErrorResponse types
     // ========================================
 
     // Extract error message from various response formats
     let errorMessage = 'An unexpected error occurred';
-    const responseData = error.response?.data;
+    // Response data can be ValidationErrorResponse or a generic error object
+    const responseData = error.response?.data as (ValidationErrorResponse & { message?: string; detail?: string; code?: string }) | undefined;
     
     if (responseData) {
       // Check for field_errors first (backend validation errors)
+      // Corresponds to ValidationErrorResponse type
       if (responseData.field_errors && typeof responseData.field_errors === 'object') {
-        const fieldErrors = responseData.field_errors as Record<string, string[]>;
+        const fieldErrors = responseData.field_errors as FieldErrors;
         const allErrors = Object.values(fieldErrors).flat();
         if (allErrors.length > 0) {
           errorMessage = allErrors[0]; // Use first error as primary message
@@ -330,8 +400,9 @@ apiClient.interceptors.response.use(
     );
     
     // Attach field_errors to the error object for component-level handling
+    // This preserves the ValidationErrorResponse structure for consumers
     if (responseData?.field_errors) {
-      (apiError as unknown as { field_errors: Record<string, string[]> }).field_errors = responseData.field_errors;
+      (apiError as unknown as { field_errors: FieldErrors }).field_errors = responseData.field_errors;
     }
     
     throw apiError;
