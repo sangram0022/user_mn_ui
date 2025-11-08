@@ -14,7 +14,7 @@ import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { getPostLoginRedirect } from '../../../core/routing/config';
 import { useAuth } from '../../../hooks/useAuth';
 import { useToast } from '../../../hooks/useToast';
-import { handleError } from '@/core/error/errorHandler';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { Button, Input, ErrorAlert } from '../../../components';
 import { useLogin } from '../hooks/useAuth.hooks';
 import tokenService from '../services/tokenService';
@@ -25,6 +25,7 @@ export function ModernLoginPage() {
   const navigate = useNavigate();
   const { login: setAuthState } = useAuth();
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
   
   // Use centralized login hook with React Query
   const loginMutation = useLogin();
@@ -105,9 +106,8 @@ export function ModernLoginPage() {
         const redirectTo = getPostLoginRedirect(user.roles[0]);
         navigate(redirectTo, { replace: true });
       }
-    } catch (err) {
-      const result = handleError(err);
-      toast.error(result.userMessage);
+    } catch (error) {
+      handleError(error, { context: { operation: 'login' } });
     }
   };
 
