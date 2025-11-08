@@ -1,4 +1,191 @@
-# API Helpers - Developer Guide
+````markdown
+# Core API Module - Developer Guide
+
+**SINGLE SOURCE OF TRUTH** for all API-related types, utilities, and constants.
+
+---
+
+# Part 1: API Type System (NEW - Phase 2.1)
+
+## 📋 Overview
+
+This module provides standardized types and utilities for API communication, ensuring consistency across all service layers.
+
+## 🎯 Core Principles
+
+1. **Single Source of Truth**: All API types defined once in `types.ts`
+2. **Type Safety**: Full TypeScript support with generics
+3. **Backend Alignment**: Types match backend response structure exactly
+4. **Backward Compatible**: Re-exports ensure existing code continues to work
+
+## 📦 Type Definitions (`types.ts`)
+
+### Core Types
+
+- **`ApiResponse<T>`**: Standard success response wrapper
+- **`ErrorResponse`**: Generic error response structure  
+- **`ValidationErrorResponse`**: Field validation error response (422)
+- **`FieldErrors`**: Field-level validation errors map
+- **`PaginatedResponse<T>`**: Paginated list response
+- **`PaginationMeta`**: Pagination metadata
+- **Query parameter types**: `PaginationParams`, `SortParams`, `FilterParams`, `ListQueryParams`
+
+### Type Guards
+
+- **`isSuccessResponse()`**: Check if response is successful
+- **`isValidationError()`**: Check if response has field errors
+- **`isErrorResponse()`**: Check if response is generic error
+
+### Constants (`index.ts`)
+
+- **`API_PREFIXES`**: Centralized API endpoint prefixes (AUTH, ADMIN, PROFILE, etc.)
+
+## 🚀 Usage Examples
+
+### Basic API Response
+
+```typescript
+import type { ApiResponse } from '@/core/api';
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
+// Service function
+async function getUser(id: string): Promise<User> {
+  const response = await apiClient.get<ApiResponse<User>>(`/users/${id}`);
+  return unwrapResponse(response.data);
+}
+```
+
+### Paginated Response
+
+```typescript
+import type { PaginatedApiResponse, PaginationParams } from '@/core/api';
+
+interface User {
+  id: string;
+  email: string;
+}
+
+async function getUsers(params: PaginationParams): Promise<PaginatedResponse<User>> {
+  const response = await apiClient.get<PaginatedApiResponse<User>>('/users', { params });
+  return unwrapResponse(response.data);
+}
+```
+
+### Error Handling with Type Guards
+
+```typescript
+import { isValidationError, isErrorResponse } from '@/core/api';
+
+try {
+  const response = await apiClient.post('/users', userData);
+  // Handle success
+} catch (error) {
+  if (isValidationError(error.response?.data)) {
+    // Handle field validation errors
+    const fieldErrors = error.response.data.field_errors;
+    console.error('Validation failed:', fieldErrors);
+  } else if (isErrorResponse(error.response?.data)) {
+    // Handle generic errors
+    console.error('API error:', error.response.data.error);
+  }
+}
+```
+
+### Using API Prefixes
+
+```typescript
+import { API_PREFIXES } from '@/core/api';
+
+// ✅ CORRECT: Use constant
+const response = await apiClient.get(`${API_PREFIXES.ADMIN_USERS}/list`);
+
+// ❌ WRONG: Hardcoded string
+const response = await apiClient.get('/api/v1/admin/users/list');
+```
+
+## 📐 Type Reference
+
+### ApiResponse<T>
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;      // Always true for success
+  data: T;               // Response payload
+  message?: string;      // Optional success message
+  error?: string;        // Error message (only on failure)
+  timestamp?: string;    // Server timestamp
+}
+```
+
+### ValidationErrorResponse
+
+```typescript
+interface ValidationErrorResponse {
+  success: false;                       // Always false for errors
+  error: string;                        // General error message
+  field_errors?: FieldErrors;           // Field-specific errors
+  message_code?: string;                // Error code
+  timestamp?: string;                   // Server timestamp
+}
+
+type FieldErrors = Record<string, string[]>;  // { field: ['error1', 'error2'] }
+```
+
+### PaginatedResponse<T>
+
+```typescript
+interface PaginatedResponse<T> {
+  items: T[];                           // Current page items
+  pagination: PaginationMeta;           // Pagination info
+}
+
+interface PaginationMeta {
+  page: number;                         // Current page (1-indexed)
+  page_size: number;                    // Items per page
+  total: number;                        // Total items
+  total_pages: number;                  // Total pages
+  has_next: boolean;                    // Has next page
+  has_prev: boolean;                    // Has previous page
+}
+```
+
+## 🔄 Migration Path
+
+### For New Code
+
+```typescript
+// ✅ CORRECT: Import from @/core/api
+import { ApiResponse, API_PREFIXES, unwrapResponse } from '@/core/api';
+```
+
+### For Existing Code
+
+Existing imports continue to work via re-exports:
+
+```typescript
+// Still works (backward compatible):
+import { ApiResponse } from '@/services/api/common';
+import { ApiResponse } from '@/types/api.types';
+
+// But prefer new import:
+import { ApiResponse } from '@/core/api';
+```
+
+## ⚠️ Important Notes
+
+1. **Import from `@/core/api`**: This is the SSOT for all API types
+2. **Match backend exactly**: All types mirror backend response structure
+3. **Use type guards**: Leverage `isSuccessResponse()`, `isValidationError()`, etc.
+4. **Don't hardcode endpoints**: Always use `API_PREFIXES` constants
+
+---
+
+# Part 2: API Helpers (Existing Utilities)
 
 ## 📚 Overview
 

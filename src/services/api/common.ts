@@ -1,42 +1,16 @@
 /**
  * Common API utilities and constants
- * Single Source of Truth for API prefixes, response unwrapping, and error handling
+ * Response unwrapping and helper functions
+ * 
+ * @deprecated Import from '@/core/api' instead for types and constants
+ * This file will be removed in future cleanup
  */
 
 import { logger } from '@/core/logging';
+import type { ApiResponse } from '@/core/api';
 
-// Re-export APIError from core for centralized import
-export { APIError } from '@/core/error';
-
-/**
- * Centralized API prefixes - Single Source of Truth
- * All service files MUST import from here instead of hardcoding strings
- */
-export const API_PREFIXES = {
-  AUTH: '/api/v1/auth',
-  ADMIN: '/api/v1/admin',
-  ADMIN_USERS: '/api/v1/admin/users',
-  ADMIN_RBAC: '/api/v1/admin/rbac',
-  ADMIN_AUDIT: '/api/v1/admin/audit-logs',
-  ADMIN_EXPORT: '/api/v1/admin/export',
-  PROFILE: '/api/v1/users/profile',
-} as const;
-
-/**
- * Type-safe API prefix keys
- */
-export type ApiPrefixKey = keyof typeof API_PREFIXES;
-
-/**
- * Standard API response wrapper from backend
- */
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  error?: string;
-  timestamp?: string;
-}
+// Re-export from core API module for backward compatibility
+export { APIError, API_PREFIXES, type ApiPrefixKey, type ApiResponse } from '@/core/api';
 
 /**
  * Unwraps the standard API response format
