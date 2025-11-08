@@ -2,19 +2,24 @@
  * User Management Service
  * API calls for user operations (non-admin)
  * 
+ * Response Format:
+ * All functions interact with backend ApiResponse<T> format:
+ * - Success: { success: true, data: T, message?, timestamp? }
+ * - Error: { success: false, error: string, field_errors?, message_code?, timestamp? }
+ * 
+ * Functions use unwrapResponse() to return the unwrapped data (T).
+ * 
  * Endpoints implemented:
  * - GET    /api/v1/users/me (get current user profile)
  * - PUT    /api/v1/users/me (update current user profile)
  * - DELETE /api/v1/users/me (delete current user account)
  * - GET    /api/v1/users/:id (get user by ID - if permitted)
- * - PUT    /api/v1/users/:id/profile-picture (upload profile picture)
+ * - POST   /api/v1/users/:id/profile-picture (upload profile picture)
  * - PUT    /api/v1/users/:id/password (change password)
+ * - DELETE /api/v1/users/:id/profile-picture (delete profile picture)
  * 
- * Following patterns from authService.ts and adminService.ts:
- * - Uses apiClient for HTTP requests
- * - Implements unwrapResponse for consistent response handling
- * - Comprehensive error handling
- * - Type-safe with TypeScript
+ * @see {ApiResponse} @/core/api/types
+ * @see {ValidationErrorResponse} @/core/api/types
  */
 
 import { apiClient } from '@/services/api/apiClient';
@@ -98,6 +103,12 @@ export interface UploadProfilePictureResponse {
 /**
  * GET /api/v1/users/me
  * Get current user's profile
+ * 
+ * @returns Unwrapped user profile data
+ * @throws {APIError} On authentication failure (401) or server error
+ * 
+ * Backend returns: ApiResponse<UserProfile>
+ * This function returns: UserProfile (unwrapped)
  */
 export const getCurrentUser = async (): Promise<UserProfile> => {
   const response = await apiClient.get<{ success: boolean; data: UserProfile }>(
@@ -109,6 +120,13 @@ export const getCurrentUser = async (): Promise<UserProfile> => {
 /**
  * PUT /api/v1/users/me
  * Update current user's profile
+ * 
+ * @param data - Profile fields to update (all optional)
+ * @returns Unwrapped updated user profile
+ * @throws {APIError} On validation failure (422) or server error
+ * 
+ * Backend returns: ApiResponse<UserProfile>
+ * This function returns: UserProfile (unwrapped)
  */
 export const updateCurrentUserProfile = async (
   data: UpdateProfileRequest
@@ -120,6 +138,13 @@ export const updateCurrentUserProfile = async (
 /**
  * DELETE /api/v1/users/me
  * Delete current user's account (soft delete)
+ * 
+ * @param data - Deletion confirmation (password, reason, confirm flag)
+ * @returns Unwrapped deletion confirmation with deleted_at timestamp
+ * @throws {APIError} On incorrect password or validation failure
+ * 
+ * Backend returns: ApiResponse<DeleteAccountResponse>
+ * This function returns: DeleteAccountResponse (unwrapped)
  */
 export const deleteCurrentUserAccount = async (
   data: DeleteAccountRequest
@@ -137,6 +162,14 @@ export const deleteCurrentUserAccount = async (
 /**
  * GET /api/v1/users/:id
  * Get user profile by ID (if permitted)
+ * Requires appropriate permissions to view other users
+ * 
+ * @param userId - The user ID to retrieve
+ * @returns Unwrapped user profile data
+ * @throws {APIError} On permission denied (403), not found (404), or server error
+ * 
+ * Backend returns: ApiResponse<UserProfile>
+ * This function returns: UserProfile (unwrapped)
  */
 export const getUserById = async (userId: string): Promise<UserProfile> => {
   const response = await apiClient.get<{ success: boolean; data: UserProfile }>(
@@ -147,7 +180,15 @@ export const getUserById = async (userId: string): Promise<UserProfile> => {
 
 /**
  * PUT /api/v1/users/:id/password
- * Change user password
+ * Change user password (admin or self)
+ * 
+ * @param userId - The user ID whose password to change
+ * @param data - Current password, new password, and confirmation
+ * @returns Unwrapped password change confirmation
+ * @throws {APIError} On incorrect current password (401), validation failure (422), or permission denied
+ * 
+ * Backend returns: ApiResponse<ChangePasswordResponse>
+ * This function returns: ChangePasswordResponse (unwrapped)
  */
 export const changePassword = async (
   userId: string,
@@ -163,6 +204,13 @@ export const changePassword = async (
 /**
  * PUT /api/v1/users/me/password
  * Change current user's password (convenience method)
+ * 
+ * @param data - Current password, new password, and confirmation
+ * @returns Unwrapped password change confirmation
+ * @throws {APIError} On incorrect current password (401) or validation failure (422)
+ * 
+ * Backend returns: ApiResponse<ChangePasswordResponse>
+ * This function returns: ChangePasswordResponse (unwrapped)
  */
 export const changeCurrentUserPassword = async (
   data: ChangePasswordRequest
@@ -177,6 +225,15 @@ export const changeCurrentUserPassword = async (
 /**
  * POST /api/v1/users/:id/profile-picture
  * Upload profile picture
+ * Uses multipart/form-data for file upload
+ * 
+ * @param userId - The user ID whose profile picture to upload
+ * @param file - The image file (JPEG, PNG, GIF, WebP supported)
+ * @returns Unwrapped upload response with new profile_picture_url
+ * @throws {APIError} On invalid file type, size limit exceeded, or permission denied
+ * 
+ * Backend returns: ApiResponse<UploadProfilePictureResponse>
+ * This function returns: UploadProfilePictureResponse (unwrapped)
  */
 export const uploadProfilePicture = async (
   userId: string,
@@ -200,6 +257,14 @@ export const uploadProfilePicture = async (
 /**
  * POST /api/v1/users/me/profile-picture
  * Upload current user's profile picture (convenience method)
+ * Uses multipart/form-data for file upload
+ * 
+ * @param file - The image file (JPEG, PNG, GIF, WebP supported)
+ * @returns Unwrapped upload response with new profile_picture_url
+ * @throws {APIError} On invalid file type or size limit exceeded
+ * 
+ * Backend returns: ApiResponse<UploadProfilePictureResponse>
+ * This function returns: UploadProfilePictureResponse (unwrapped)
  */
 export const uploadCurrentUserProfilePicture = async (
   file: File
@@ -222,6 +287,14 @@ export const uploadCurrentUserProfilePicture = async (
 /**
  * DELETE /api/v1/users/:id/profile-picture
  * Delete profile picture
+ * Removes the profile picture and reverts to default avatar
+ * 
+ * @param userId - The user ID whose profile picture to delete
+ * @returns Unwrapped deletion confirmation
+ * @throws {APIError} On permission denied or server error
+ * 
+ * Backend returns: ApiResponse<{ success: boolean; message: string }>
+ * This function returns: { success: boolean; message: string } (unwrapped)
  */
 export const deleteProfilePicture = async (userId: string): Promise<{ success: boolean; message: string }> => {
   const response = await apiClient.delete<{ success: boolean; message: string }>(
