@@ -10,6 +10,7 @@ import { useRegister } from '../hooks/useAuth.hooks';
 import { useRegisterForm } from '../../../core/validation';
 import { calculatePasswordStrength } from '../../../core/validation';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
+import { logger } from '@/core/logging';
 
 export default function RegisterPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -47,7 +48,10 @@ export default function RegisterPage() {
           });
         }
       } catch (error) {
-        console.error('Registration error:', error);
+        logger().error('Registration error', error instanceof Error ? error : new Error(String(error)), {
+          context: 'RegisterPage.onSubmit',
+          email: data.email,
+        });
         
         // Extract specific error messages for better UX
         let errorMessage = t('errors:REGISTER_FAILED');
@@ -80,7 +84,9 @@ export default function RegisterPage() {
       }
     },
     onError: (error) => {
-      console.error('Registration form error:', error);
+      logger().error('Registration form validation error', error instanceof Error ? error : new Error(String(error)), {
+        context: 'RegisterPage.formValidation',
+      });
     }
   });
 

@@ -7,6 +7,7 @@ import { useForgotPassword } from '../hooks/useAuth.hooks';
 import { useForgotPasswordForm } from '../../../core/validation/useValidatedForm';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
+import { logger } from '../../../core/logging';
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation(['auth', 'common']);
@@ -30,11 +31,11 @@ export default function ForgotPasswordPage() {
         // Still show success to prevent email enumeration
         toast.success(t('forgotPassword.successMessage'));
         setIsSubmitted(true);
-        console.error('Forgot password error:', error);
+        logger().error('Forgot password error', error instanceof Error ? error : new Error(String(error)));
       }
     },
     onError: (error) => {
-      console.error('Forgot password form error:', error);
+      logger().error('Forgot password form error', error instanceof Error ? error : new Error(String(error)));
     }
   });
 

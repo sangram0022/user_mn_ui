@@ -1,9 +1,10 @@
-// React 19 + Modern Auth Context with proper type alignment
-import React, { createContext, useContext, useState, useEffect } from 'react';
+// React 19 + Modern Auth Context with use() hook
+import React, { createContext, use, useState, useEffect } from 'react';
 import type { AuthContextType, User, LoginCredentials, RegisterData } from './types';
 import type { Role } from './roles';
 import authService from '../../domains/auth/services/authService';
 import tokenService from '../../domains/auth/services/tokenService';
+import { logger } from '@/core/logging';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -32,7 +33,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setUser(JSON.parse(storedUser));
           }
         } catch (error) {
-          console.error('Failed to parse stored user:', error);
+          logger().error('Failed to parse stored user', error instanceof Error ? error : new Error(String(error)), {
+            context: 'AuthContext.initAuth',
+          });
           tokenService.clearTokens();
           localStorage.removeItem('auth_user');
         }
@@ -82,7 +85,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       localStorage.setItem('auth_user', JSON.stringify(userData));
     } catch (error) {
-      console.error('Login error:', error);
+      logger().error('Login error', error instanceof Error ? error : new Error(String(error)), {
+        context: 'AuthContext.login',
+        email: credentials.email,
+      });
       throw error;
     } finally {
       setIsLoading(false);
@@ -103,10 +109,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // RegisterResponseData doesn't include tokens - user needs to verify email first
       // Just return success, user will need to verify and then login
-      console.log('Registration successful:', responseData);
+      logger().info('Registration successful', {
+        context: 'AuthContext.register',
+        userId: responseData.user_id,
+        email: responseData.email,
+      });
       
     } catch (error) {
-      console.error('Registration error:', error);
+      logger().error('Registration error', error instanceof Error ? error : new Error(String(error)), {
+        context: 'AuthContext.register',
+        email: data.email,
+      });
       throw error;
     } finally {
       setIsLoading(false);
@@ -121,7 +134,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setToken(null);
     
     // Call logout service (fire and forget)
-    authService.logout().catch(console.error);
+    authService.logout().catch((error) => {
+      logger().error('Logout service call failed', error instanceof Error ? error : new Error(String(error)), {
+        context: 'AuthContext.logout',
+      });
+    });
   }
 
   async function refreshAuth() {
@@ -154,7 +171,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.setItem('auth_user', JSON.stringify(updatedUser));
       }
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      logger().error('Token refresh failed', error instanceof Error ? error : new Error(String(error)), {
+        context: 'AuthContext.refreshAuth',
+      });
       logout(); // Clear everything on refresh failure
       throw error;
     }
@@ -178,8 +197,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
+/**
+ * React 19 use() hook for consuming AuthContext
+ * Automatically throws error if used outside provider (built-in behavior)
+ */
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = use(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

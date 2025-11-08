@@ -9,6 +9,7 @@ import { useUser, useUpdateUser } from '../hooks';
 import Button from '../../../shared/components/ui/Button';
 import Badge from '../../../shared/components/ui/Badge';
 import type { UpdateUserRequest, Gender } from '../types';
+import { logger } from '../../../core/logging';
 
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: 'male', label: 'Male' },
@@ -69,7 +70,7 @@ export default function UserEditPage() {
         state: { message: 'User updated successfully!' } 
       });
     } catch (err) {
-      console.error('Failed to update user:', err);
+      logger().error('Failed to update user', err instanceof Error ? err : new Error(String(err)), { userId });
       // Error handling is done by the mutation
     }
   };

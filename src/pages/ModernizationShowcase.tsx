@@ -11,6 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { logger } from '../core/logging';
 
 // Modern Components
 import { EnhancedContactForm, EnhancedRegistrationForm } from '../shared/components/forms/EnhancedFormPatterns';
@@ -109,8 +110,8 @@ function ModernNavigationDemo() {
 function PerformanceMetricsDemo() {
   // AWS CloudWatch monitors performance automatically - development mock state
   const isMonitoring = false;
-  const startMonitoring = () => console.log('AWS CloudWatch: Performance monitoring active');
-  const stopMonitoring = () => console.log('AWS CloudWatch: Performance monitoring paused');
+  const startMonitoring = () => logger().debug('AWS CloudWatch: Performance monitoring active');
+  const stopMonitoring = () => logger().debug('AWS CloudWatch: Performance monitoring paused');
 
   const formatTime = (time?: number) => {
     if (!time) return 'N/A';

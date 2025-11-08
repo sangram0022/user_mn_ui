@@ -17,6 +17,7 @@ import {
 // import { zodResolver } from '@hookform/resolvers/zod';
 import { type ZodSchema } from 'zod';
 import { useApiActionState } from '@/shared/hooks/useApiModern';
+import { logger } from '@/core/logging';
 
 // ========================================
 // Form Field Components
@@ -327,10 +328,10 @@ export function ModernForm<TFieldValues extends FieldValues = FieldValues>({
 }: ModernFormProps<TFieldValues>) {
   
   // Remove unused parameter warning
-  console.debug('Optimistic updates enabled:', optimisticUpdates);
+  logger().debug('Optimistic updates enabled', { optimisticUpdates });
   
   // Suppress unused parameter warnings
-  if (schema) console.debug('Schema validation temporarily disabled');
+  if (schema) logger().debug('Schema validation temporarily disabled');
   
   // React Hook Form setup with type assertions to bypass conflicts
   const form = useForm({

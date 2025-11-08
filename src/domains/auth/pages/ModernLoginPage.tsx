@@ -18,6 +18,7 @@ import { Button, Input, ErrorAlert } from '../../../components';
 import { useLogin } from '../hooks/useAuth.hooks';
 import tokenService from '../services/tokenService';
 import { loginSchema, type LoginFormData } from '../../../core/validation/schemas';
+import { logger } from '../../../core/logging';
 
 export function ModernLoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -106,7 +107,7 @@ export function ModernLoginPage() {
       }
     } catch (err) {
       // Error handling is managed by React Query mutation
-      console.error('Login failed:', err);
+      logger().error('Login failed', err instanceof Error ? err : new Error(String(err)));
     }
   };
 

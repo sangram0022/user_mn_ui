@@ -13,7 +13,7 @@ import { Routes, Route } from 'react-router-dom';
 import { routes, notFoundRoute } from '../core/routing/config';
 import { RouteRenderer } from '../core/routing/RouteRenderer';
 import { Providers } from './providers';
-import { ErrorBoundary } from './ErrorBoundary';
+import { AppErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 // ========================================
 // App Component
@@ -21,7 +21,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 
 function App() {
   return (
-    <ErrorBoundary>
+    <AppErrorBoundary>
       <Providers>
         {/* BrowserRouter and AuthProvider are in Providers component */}
         <Routes>
@@ -41,7 +41,7 @@ function App() {
           />
         </Routes>
       </Providers>
-    </ErrorBoundary>
+    </AppErrorBoundary>
   );
 }
 

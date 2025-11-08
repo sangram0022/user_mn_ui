@@ -13,6 +13,7 @@
 
 import { apiClient } from '../../../services/api/apiClient';
 import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
+import { logger } from '../../../core/logging';
 import type {
   AdminRole,
   ListRolesParams,
@@ -57,11 +58,12 @@ export const listRoles = async (params?: ListRolesParams): Promise<ListRolesResp
   const queryString = queryParams.toString();
   const url = queryString ? `${API_PREFIX}/roles?${queryString}` : `${API_PREFIX}/roles`;
   
-  console.log('[adminRoleService.listRoles] About to call apiClient.get:', url);
+  logger().debug('About to call apiClient.get', { service: 'adminRoleService.listRoles', url });
   
   const response = await apiClient.get<ListRolesResponse>(url);
   
-  console.log('[adminRoleService.listRoles] Response received:', {
+  logger().debug('Response received', {
+    service: 'adminRoleService.listRoles',
     status: response.status,
     hasData: !!response.data,
     dataKeys: response.data ? Object.keys(response.data) : [],

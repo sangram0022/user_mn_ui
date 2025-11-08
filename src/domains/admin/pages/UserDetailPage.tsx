@@ -13,6 +13,7 @@ import Input from '../../../shared/components/ui/Input';
 import Badge from '../../../shared/components/ui/Badge';
 import { useUserEditForm } from '../../../core/validation';
 import { formatShortDate } from '../../../shared/utils/dateFormatters';
+import { logger } from '../../../core/logging';
 
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: 'male', label: 'Male' },
@@ -56,11 +57,11 @@ export default function UserDetailPage() {
         });
         setIsEditing(false);
       } catch (err) {
-        console.error('Failed to update user:', err);
+        logger().error('Failed to update user', err instanceof Error ? err : new Error(String(err)), { userId });
       }
     },
     onError: (error) => {
-      console.error('User edit form error:', error);
+      logger().error('User edit form error', error instanceof Error ? error : new Error(String(error)));
     }
   });
 
@@ -121,7 +122,7 @@ export default function UserDetailPage() {
         }
       });
     } catch (err) {
-      console.error('Failed to assign roles:', err);
+      logger().error('Failed to assign roles', err instanceof Error ? err : new Error(String(err)), { userId, roles: selectedRoles });
     }
   };
 
@@ -139,7 +140,7 @@ export default function UserDetailPage() {
       setShowApprovalModal(false);
       setApprovalMessage('');
     } catch (err) {
-      console.error('Failed to approve user:', err);
+      logger().error('Failed to approve user', err instanceof Error ? err : new Error(String(err)), { userId });
     }
   };
 
@@ -157,7 +158,7 @@ export default function UserDetailPage() {
       setShowRejectionModal(false);
       setRejectionReason('');
     } catch (err) {
-      console.error('Failed to reject user:', err);
+      logger().error('Failed to reject user', err instanceof Error ? err : new Error(String(err)), { userId });
     }
   };
 

@@ -9,6 +9,7 @@ import { useApiMutation } from '@/shared/hooks/useApiModern';
 import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 import authService from '../services/authService';
 import type { LoginRequest } from '../types/auth.types';
+import { logger } from '../../../core/logging';
 
 // ========================================
 // Validation Schema with Zod
@@ -67,7 +68,7 @@ export function ModernLoginForm({
         }, 1000);
       },
       onError: (error) => {
-        console.error('Login failed:', error.message);
+        logger().error('Login failed', new Error(error.message));
         onError?.(error);
       },
     }

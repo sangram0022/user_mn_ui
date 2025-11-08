@@ -12,6 +12,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveRegion, useKeyboardNavigation } from '../../../shared/components/accessibility/AccessibilityEnhancements';
+import { logger } from '../../../core/logging';
 // AWS CloudWatch handles performance monitoring
 
 // ========================================
@@ -492,15 +493,15 @@ export default function UsersManagementPage() {
     switch (action) {
       case 'view':
         // Navigate to user profile
-        console.log('View user:', userId);
+        logger().debug('View user', { userId });
         break;
       case 'edit':
         // Navigate to edit form
-        console.log('Edit user:', userId);
+        logger().debug('Edit user', { userId });
         break;
       case 'delete':
         // Show confirmation dialog
-        console.log('Delete user:', userId);
+        logger().debug('Delete user', { userId });
         break;
     }
   };

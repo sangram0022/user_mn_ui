@@ -19,5 +19,9 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Enforce structured logging instead of console.*
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+    },
   },
 ])

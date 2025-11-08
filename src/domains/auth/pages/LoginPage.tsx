@@ -10,6 +10,7 @@ import { useLogin } from '../hooks/useAuth.hooks';
 import { useLoginForm } from '../../../core/validation';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 import tokenService from '../services/tokenService';
+import { logger } from '../../../core/logging';
 
 export default function LoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -71,7 +72,7 @@ export default function LoginPage() {
         }
       } catch (error) {
         // Error handling is done by the form hook
-        console.error('Login error:', error);
+        logger().error('Login error', error instanceof Error ? error : new Error(String(error)));
         
         // Extract specific error messages for better UX
         let errorMessage = t('errors:AUTH_FAILED');
@@ -97,7 +98,7 @@ export default function LoginPage() {
       }
     },
     onError: (error) => {
-      console.error('Login form error:', error);
+      logger().error('Login form error', error instanceof Error ? error : new Error(String(error)));
     }
   });
 

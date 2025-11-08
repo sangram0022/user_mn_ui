@@ -12,6 +12,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveRegion } from '../shared/components/accessibility/AccessibilityEnhancements';
+import { CardSkeleton } from '../shared/components/loading/Skeletons';
 
 // ========================================
 // Dashboard Metrics Types
@@ -418,7 +419,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <QuickActions />
-              <Suspense fallback={<div className="animate-pulse bg-gray-200 rounded-lg h-64"></div>}>
+              <Suspense fallback={<CardSkeleton count={1} />}>
                 <RecentActivity />
               </Suspense>
             </div>

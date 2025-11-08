@@ -12,6 +12,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveRegion } from '../../../shared/components/accessibility/AccessibilityEnhancements';
+import { logger } from '../../../core/logging';
 // AWS CloudWatch handles performance monitoring
 
 // ========================================
@@ -365,22 +366,22 @@ export default function RolesManagementPage() {
   }, [roles, searchTerm, sortBy]); // AWS CloudWatch monitors performance automatically
 
   const handleRoleEdit = (role: Role) => {
-    console.log(`AWS: Editing role ${role.name}`);
+    logger().debug('Editing role', { roleName: role.name });
     announce(`Editing role: ${role.name}`);
   };
 
   const handleRoleDelete = (role: Role) => {
-    console.log(`AWS: Delete role ${role.name}`);
+    logger().debug('Delete role', { roleName: role.name, isDefault: role.isDefault });
     announce(role.isDefault ? 'Cannot delete default role' : `Role "${role.name}" queued for deletion`);
   };
 
   const handleViewUsers = (role: Role) => {
-    console.log(`AWS: View users for role ${role.name}`);
+    logger().debug('View users for role', { roleName: role.name });
     announce(`Viewing users with role: ${role.name}`);
   };
 
   const handlePermissionToggle = (role: Role, permission: Permission, granted: boolean) => {
-    console.log(`AWS: Toggle permission ${permission.name} for ${role.name}: ${granted}`);
+    logger().debug('Toggle permission', { permissionName: permission.name, roleName: role.name, granted });
     announce(`Permission ${permission.name} ${granted ? 'granted to' : 'removed from'} ${role.name}`);
   };
 
@@ -431,7 +432,7 @@ export default function RolesManagementPage() {
                 type="text"
                 placeholder="Search roles..."
                 value={searchTerm}
-                onChange={() => console.log('AWS handles search')}
+                onChange={() => logger().debug('AWS handles search')}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -439,7 +440,7 @@ export default function RolesManagementPage() {
             <div>
               <select
                 value={sortBy}
-                onChange={() => console.log('AWS handles sorting')}
+                onChange={() => logger().debug('AWS handles sorting')}
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="level">Sort by Level</option>

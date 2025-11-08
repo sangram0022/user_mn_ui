@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '../../hooks/useToast';
 import { validationSchemas } from './schemas';
+import { logger } from '../logging';
 
 // ============================================================================
 // Type Definitions (imported from schemas to avoid duplication)
@@ -47,7 +48,7 @@ export function useLoginForm(options?: FormHookOptions<LoginFormData>) {
         toast.success(options.successMessage);
       }
     } catch (error) {
-      console.error('Login form error:', error);
+      logger().error('Login form error', error instanceof Error ? error : new Error(String(error)));
       options?.onError?.(error);
       if (options?.errorMessage) {
         toast.error(options.errorMessage);
@@ -81,7 +82,7 @@ export function useRegisterForm(options?: FormHookOptions<RegisterFormData>) {
         toast.success(options.successMessage);
       }
     } catch (error) {
-      console.error('Register form error:', error);
+      logger().error('Register form error', error instanceof Error ? error : new Error(String(error)));
       options?.onError?.(error);
       if (options?.errorMessage) {
         toast.error(options.errorMessage);
@@ -115,7 +116,7 @@ export function useContactForm(options?: FormHookOptions<ContactFormData>) {
         toast.success(options.successMessage);
       }
     } catch (error) {
-      console.error('Contact form error:', error);
+      logger().error('Contact form error', error instanceof Error ? error : new Error(String(error)));
       options?.onError?.(error);
       if (options?.errorMessage) {
         toast.error(options.errorMessage);
@@ -149,7 +150,7 @@ export function useUserEditForm(options?: FormHookOptions<UserEditFormData>) {
         toast.success(options.successMessage);
       }
     } catch (error) {
-      console.error('User edit form error:', error);
+      logger().error('User edit form error', error instanceof Error ? error : new Error(String(error)));
       options?.onError?.(error);
       if (options?.errorMessage) {
         toast.error(options.errorMessage);
@@ -185,7 +186,7 @@ export function useForgotPasswordForm(options?: FormHookOptions<{ email: string 
         toast.success(options.successMessage);
       }
     } catch (error) {
-      console.error('Forgot password form error:', error);
+      logger().error('Forgot password form error', error instanceof Error ? error : new Error(String(error)));
       options?.onError?.(error);
       if (options?.errorMessage) {
         toast.error(options.errorMessage);

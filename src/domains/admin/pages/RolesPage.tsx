@@ -8,6 +8,7 @@ import {
 import type { UpdateRoleRequest } from '../types';
 import Button from '../../../shared/components/ui/Button';
 import Badge from '../../../shared/components/ui/Badge';
+import { logger } from '../../../core/logging';
 
 const SYSTEM_ROLES = ['admin', 'user'];
 
@@ -167,7 +168,7 @@ export default function RolesPage() {
       setShowCreateModal(false);
       resetForm();
     } catch (err) {
-      console.error('Failed to create role:', err);
+      logger().error('Failed to create role', err instanceof Error ? err : new Error(String(err)), { roleName: formData.role_name });
     }
   };
 
@@ -204,7 +205,7 @@ export default function RolesPage() {
       setShowEditModal(false);
       resetForm();
     } catch (err) {
-      console.error('Failed to update role:', err);
+      logger().error('Failed to update role', err instanceof Error ? err : new Error(String(err)), { roleName: selectedRole });
     }
   };
 
@@ -216,7 +217,7 @@ export default function RolesPage() {
       setShowDeleteModal(false);
       setSelectedRole(null);
     } catch (err) {
-      console.error('Failed to delete role:', err);
+      logger().error('Failed to delete role', err instanceof Error ? err : new Error(String(err)), { roleName: selectedRole });
     }
   };
 

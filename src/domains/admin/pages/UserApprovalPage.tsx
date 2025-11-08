@@ -9,6 +9,7 @@ import {
 import type { ListUsersFilters } from '../types';
 import Button from '../../../shared/components/ui/Button';
 import { formatShortDate } from '../../../shared/utils/dateFormatters';
+import { logger } from '../../../core/logging';
 
 const TRIAL_DAYS_OPTIONS = [7, 14, 30, 60, 90];
 
@@ -120,7 +121,7 @@ export default function UserApprovalPage() {
       setShowIndividualApprovalModal(false);
       resetApprovalForm();
     } catch (err) {
-      console.error('Failed to approve user:', err);
+      logger().error('Failed to approve user', err instanceof Error ? err : new Error(String(err)), { userId: selectedUserId });
     }
   };
 
@@ -143,7 +144,7 @@ export default function UserApprovalPage() {
       setShowIndividualRejectionModal(false);
       resetRejectionForm();
     } catch (err) {
-      console.error('Failed to reject user:', err);
+      logger().error('Failed to reject user', err instanceof Error ? err : new Error(String(err)), { userId: selectedUserId });
     }
   };
 
@@ -164,7 +165,7 @@ export default function UserApprovalPage() {
       setSelectedUsers(new Set());
       resetApprovalForm();
     } catch (err) {
-      console.error('Failed to bulk approve users:', err);
+      logger().error('Failed to bulk approve users', err instanceof Error ? err : new Error(String(err)), { userCount: selectedUsers.size });
     }
   };
 
@@ -188,7 +189,7 @@ export default function UserApprovalPage() {
       setSelectedUsers(new Set());
       resetRejectionForm();
     } catch (err) {
-      console.error('Failed to bulk reject users:', err);
+      logger().error('Failed to bulk reject users', err instanceof Error ? err : new Error(String(err)), { userCount: selectedUsers.size });
     }
   };
 

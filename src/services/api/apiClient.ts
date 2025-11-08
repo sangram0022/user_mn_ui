@@ -77,13 +77,19 @@ apiClient.interceptors.request.use(
       
       // Log that we SET the Authorization header
       if (import.meta.env.MODE === 'development') {
-        console.log('[apiClient] ✅ Authorization header SET for:', config.url);
+        logger().debug('Authorization header SET for request', {
+          url: config.url,
+          context: 'apiClient.requestInterceptor',
+        });
       }
     } else {
       // Only warn for protected endpoints, not public ones like login/register
       const isPublicEndpoint = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
       if (import.meta.env.MODE === 'development' && !isPublicEndpoint) {
-        console.warn('[apiClient] ⚠️ No access token found for request:', config.url);
+        logger().warn('No access token found for request', {
+          url: config.url,
+          context: 'apiClient.requestInterceptor',
+        });
       }
     }
 

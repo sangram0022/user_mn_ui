@@ -6,6 +6,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../../services/api/queryClient';
 import { adminApprovalService } from '../services';
+import { logger } from '../../../core/logging';
 import type {
   ApproveUserRequest,
   ApproveUserResponse,
@@ -80,9 +81,9 @@ export const useBulkApproveUsers = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.stats.all });
       
       // Log results for debugging
-      console.log(`Bulk approval: ${result.approved}/${result.total} succeeded`);
+      logger().debug('Bulk approval results', { approved: result.approved, total: result.total, failed: result.failed });
       if (result.failed > 0) {
-        console.warn('Bulk approval errors:', result.errors);
+        logger().warn('Bulk approval errors', { errors: result.errors });
       }
     },
   });
@@ -103,9 +104,9 @@ export const useBulkRejectUsers = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.stats.all });
       
       // Log results
-      console.log(`Bulk rejection: ${result.rejected}/${result.total} succeeded`);
+      logger().debug('Bulk rejection results', { rejected: result.rejected, total: result.total, failed: result.failed });
       if (result.failed > 0) {
-        console.warn('Bulk rejection errors:', result.errors);
+        logger().warn('Bulk rejection errors', { errors: result.errors });
       }
     },
   });

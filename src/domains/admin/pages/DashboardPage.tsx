@@ -1,22 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStats, useGrowthAnalytics, useAuditLogs } from '../hooks';
 import type { TimePeriod } from '../types';
 import Button from '../../../shared/components/ui/Button';
 import Badge from '../../../shared/components/ui/Badge';
-import {
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { ChartSkeleton } from '../../../shared/components/loading/Skeletons';
+import UserStatusChart from '../components/UserStatusChart';
+import RegistrationTrendsChart from '../components/RegistrationTrendsChart';
 
 const PERIOD_OPTIONS: { value: TimePeriod; label: string }[] = [
   { value: '24h', label: 'Last 24 Hours' },
@@ -25,14 +15,6 @@ const PERIOD_OPTIONS: { value: TimePeriod; label: string }[] = [
   { value: '90d', label: 'Last 90 Days' },
   { value: '1y', label: 'Last Year' },
 ];
-
-const STATUS_COLORS = {
-  active: '#10b981',
-  inactive: '#6b7280',
-  pending: '#f59e0b',
-  suspended: '#ef4444',
-  deleted: '#991b1b',
-};
 
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
@@ -74,24 +56,6 @@ export default function DashboardPage() {
   const recentLogs = auditData?.logs || [];
 
   const isLoading = statsLoading || growthLoading || auditLoading;
-
-  // Prepare pie chart data for user status breakdown
-  const statusData = stats?.users?.by_status
-    ? [
-        { name: 'Active', value: stats.users.by_status.active || 0, color: STATUS_COLORS.active },
-        { name: 'Inactive', value: stats.users.by_status.inactive || 0, color: STATUS_COLORS.inactive },
-        { name: 'Pending', value: stats.users.by_status.pending_approval || 0, color: STATUS_COLORS.pending },
-        { name: 'Suspended', value: stats.users.by_status.suspended || 0, color: STATUS_COLORS.suspended },
-      ].filter((item) => item.value > 0)
-    : [];
-
-  // Prepare line chart data for registration trends
-  const trendData =
-    growth?.time_series?.map((trend) => ({
-      date: new Date(trend.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      registrations: trend.new_users,
-      activations: 0, // Not in API response
-    })) || [];
 
   // Prepare role distribution data
   const roleData = stats
@@ -234,71 +198,21 @@ export default function DashboardPage() {
         {/* User Status Breakdown */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">User Status Breakdown</h2>
-          {statusData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine
-                  label
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                  nameKey="name"
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[300px] flex items-center justify-center text-gray-500">
-              No data available
-            </div>
-          )}
+          <Suspense fallback={<ChartSkeleton />}>
+            <UserStatusChart stats={stats} />
+          </Suspense>
         </div>
 
         {/* Registration Trends */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Registration Trends</h2>
-          {trendData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="registrations"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  name="Registrations"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="activations"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                  name="Activations"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[300px] flex items-center justify-center text-gray-500">
-              No data available
-            </div>
-          )}
+          <Suspense fallback={<ChartSkeleton />}>
+            <RegistrationTrendsChart growth={growth} />
+          </Suspense>
         </div>
       </div>
 
-      {/* Additional Stats Row */}
+      {/* Additional Stats Row (with Suspense for individual sections) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Top Roles */}
         <div className="bg-white rounded-lg shadow p-6">

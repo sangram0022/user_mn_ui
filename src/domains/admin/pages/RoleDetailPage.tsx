@@ -4,6 +4,7 @@ import { useRole, useUpdateRole } from '../hooks';
 import type { UpdateRoleRequest } from '../types';
 import Button from '../../../shared/components/ui/Button';
 import Badge from '../../../shared/components/ui/Badge';
+import { logger } from '../../../core/logging';
 
 const SYSTEM_ROLES = ['admin', 'user'];
 
@@ -95,7 +96,7 @@ export default function RoleDetailPage() {
       });
       setIsEditing(false);
     } catch (err) {
-      console.error('Failed to update role:', err);
+      logger().error('Failed to update role', err instanceof Error ? err : new Error(String(err)), { roleName });
     }
   };
 

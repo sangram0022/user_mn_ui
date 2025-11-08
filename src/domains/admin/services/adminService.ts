@@ -46,7 +46,7 @@ const API_PREFIX = API_PREFIXES.ADMIN;
 /**
  * GET /api/v1/admin/users
  * List users with pagination, filtering, sorting, and search
- * Backend returns properly wrapped response with users array, pagination, filters, and summary
+ * Backend returns wrapped response with users array, pagination, filters, and summary
  */
 export const listUsers = async (filters?: ListUsersFilters): Promise<ListUsersResponse> => {
   const queryParams = new URLSearchParams();
@@ -66,8 +66,8 @@ export const listUsers = async (filters?: ListUsersFilters): Promise<ListUsersRe
   const queryString = queryParams.toString();
   const url = queryString ? `${API_PREFIX}/users?${queryString}` : `${API_PREFIX}/users`;
   
-  const response = await apiClient.get<ListUsersResponse>(url);
-  return response.data;
+  const response = await apiClient.get<{ success: boolean; data: ListUsersResponse }>(url);
+  return unwrapResponse<ListUsersResponse>(response.data);
 };
 
 /**
