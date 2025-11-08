@@ -9,8 +9,18 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [
-    // React 19 with built-in optimizations
-    react(),
+    // React 19 with React Compiler for automatic memoization
+    react({
+      babel: {
+        plugins: [
+          ['babel-plugin-react-compiler', {
+            // React Compiler configuration
+            // Automatically optimizes components without manual useMemo/useCallback
+            runtimeModule: 'react/compiler-runtime'
+          }]
+        ]
+      }
+    }),
     tailwindcss(),
   ],
   

@@ -5,6 +5,7 @@ import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { getPostLoginRedirect } from '../../../core/routing/config';
 import { useAuth } from '../../../hooks/useAuth';
 import { useToast } from '../../../hooks/useToast';
+import { handleError } from '@/core/error/errorHandler';
 import { Button, Input, ErrorAlert } from '../../../components';
 import { useLogin } from '../hooks/useAuth.hooks';
 import tokenService from '../services/tokenService';
@@ -94,59 +95,17 @@ export function LoginPage() {
         navigate(redirectPath, { replace: true });
       }
     } catch (error: unknown) {
-      // Extract error message and field errors
-      let errorMessage = t('errors:AUTH_FAILED');
-      const fieldErrs: Record<string, string> = {};
+      const result = handleError(error);
+      setGeneralError(result.userMessage);
       
-      if (error && typeof error === 'object') {
-        // Check for APIError with field_errors
-        if ('field_errors' in error && error.field_errors) {
-          const fieldErrors = error.field_errors as Record<string, string[]>;
-          
-          // Extract field-specific errors
-          Object.entries(fieldErrors).forEach(([field, messages]) => {
-            if (field === 'general') {
-              // General errors display at the top
-              errorMessage = messages[0] || errorMessage;
-            } else {
-              // Field-specific errors
-              fieldErrs[field] = messages[0];
-            }
-          });
-        }
-        
-        // Fallback to error message
-        if ('message' in error && typeof error.message === 'string') {
-          errorMessage = error.message;
-        }
-        
-        // Check for specific error codes to provide better messages
-        if ('responseData' in error && error.responseData) {
-          const data = error.responseData as { message_code?: string; message?: string };
-          if (data.message_code === 'SYSTEM_ERROR') {
-            errorMessage = t('errors:SYSTEM_TEMPORARILY_UNAVAILABLE', {
-              defaultValue: 'System temporarily unavailable. Please try again in a few moments.',
-            });
-          } else if (data.message_code === 'INVALID_CREDENTIALS') {
-            errorMessage = t('errors:INVALID_CREDENTIALS', {
-              defaultValue: 'Invalid email or password. Please check your credentials and try again.',
-            });
-          } else if (data.message_code === 'ACCOUNT_LOCKED') {
-            errorMessage = t('errors:ACCOUNT_LOCKED', {
-              defaultValue: 'Your account has been locked. Please contact support for assistance.',
-            });
-          } else if (data.message) {
-            errorMessage = data.message;
-          }
-        }
+      // Extract field errors from context if present
+      if (result.context?.errors) {
+        setFieldErrors(result.context.errors as Record<string, string>);
+      } else {
+        setFieldErrors({});
       }
       
-      // Set errors in state
-      setGeneralError(errorMessage);
-      setFieldErrors(fieldErrs);
-      
-      // Show toast notification
-      toast.error(errorMessage);
+      toast.error(result.userMessage);
     }
   };
 

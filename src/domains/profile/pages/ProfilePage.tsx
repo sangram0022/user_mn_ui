@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { useToast } from '../../../hooks/useToast';
+import { handleError } from '@/core/error/errorHandler';
 import { useProfile, useUpdateProfile } from '../hooks/useProfile.hooks';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
@@ -52,8 +53,14 @@ export default function ProfilePage() {
       setIsEditing(false);
       // TanStack Query auto-invalidates cache, no manual refetch needed
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('errors:UPDATE_FAILED');
-      toast.error(errorMessage);
+      const result = handleError(error);
+      
+      // Extract field errors from context if present
+      if (result.context?.errors) {
+        setFieldErrors(result.context.errors as Record<string, string>);
+      }
+      
+      toast.error(result.userMessage);
     }
   };
 

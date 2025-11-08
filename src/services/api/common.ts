@@ -3,6 +3,8 @@
  * Single Source of Truth for API prefixes, response unwrapping, and error handling
  */
 
+import { logger } from '@/core/logging';
+
 // Re-export APIError from core for centralized import
 export { APIError } from '@/core/error';
 
@@ -52,14 +54,39 @@ export interface ApiResponse<T> {
  * ```
  */
 export function unwrapResponse<T>(response: unknown): T {
+  // Debug logging in development
+  if (import.meta.env.DEV) {
+    logger().debug('[unwrapResponse] Processing response', {
+      hasResponse: !!response,
+      responseType: typeof response,
+      keys: response && typeof response === 'object' ? Object.keys(response) : [],
+    });
+  }
+
   if (!response || typeof response !== 'object') {
+    logger().error('[unwrapResponse] Invalid response format', new Error('Invalid response'), { response });
     throw new Error('Invalid response format');
   }
 
   const apiResponse = response as ApiResponse<T>;
 
-  if (!apiResponse.success || apiResponse.error) {
+  // Check success field explicitly
+  if (apiResponse.success === false || apiResponse.error) {
+    logger().error('[unwrapResponse] API returned error', new Error(apiResponse.error || 'Request failed'), { apiResponse });
     throw new Error(apiResponse.error || 'Request failed');
+  }
+
+  // If success is true or undefined, check if data exists
+  if (!apiResponse.data) {
+    logger().error('[unwrapResponse] Response missing data field', new Error('No data field'), { apiResponse });
+    throw new Error('Response missing data field');
+  }
+
+  if (import.meta.env.DEV) {
+    logger().debug('[unwrapResponse] Successfully unwrapped response', {
+      hasData: !!apiResponse.data,
+      dataType: typeof apiResponse.data,
+    });
   }
 
   return apiResponse.data;

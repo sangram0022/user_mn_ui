@@ -8,6 +8,7 @@
 import { useState, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useLogin } from '../hooks/useAuth.hooks';
+import { handleError } from '@/core/error/errorHandler';
 import Input from '../../../components/Input';
 import { Button } from '../../../components';
 import type { LoginRequest } from '../types/auth.types';
@@ -87,9 +88,9 @@ export function LoginForm({ onSuccess, onError, redirectTo = '/dashboard' }: Log
         }
         return { success: true };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Login failed';
+        const result = handleError(error);
         onError?.(error as Error);
-        return { error: errorMessage };
+        return { error: result.userMessage };
       }
     },
     { success: false }

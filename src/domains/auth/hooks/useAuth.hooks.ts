@@ -2,11 +2,12 @@
 // Authentication Hooks
 // Production-ready React hooks for all auth operations
 // Follows SOLID principles and Clean Code practices
-// Uses React Query for consistent API with admin hooks
+// Migrated to useApiModern for consistency
 // ========================================
 
-import { useMutation, type UseMutationResult } from '@tanstack/react-query';
-import authService from '../services/authService';
+import { useApiMutation } from '@/shared/hooks/useApiModern';
+import { apiPost } from '@/core/api/apiHelpers';
+import { API_PREFIXES } from '@/services/api/common';
 import type {
   LoginRequest,
   LoginResponseData,
@@ -22,95 +23,195 @@ import type {
   VerifyEmailResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
+  RefreshTokenResponseData,
+  LogoutResponse,
 } from '../types/auth.types';
+
+const API_PREFIX = API_PREFIXES.AUTH;
 
 // ========================================
 // useLogin Hook
+// POST /api/v1/auth/login
 // ========================================
 
-export function useLogin(): UseMutationResult<LoginResponseData, Error, LoginRequest> {
-  return useMutation<LoginResponseData, Error, LoginRequest>({
-    mutationFn: async (credentials: LoginRequest) => {
-      const response = await authService.login(credentials);
+export function useLogin() {
+  return useApiMutation(
+    async (credentials: LoginRequest): Promise<LoginResponseData> => {
+      // apiPost already unwraps the response, no need to unwrap again
+      const response = await apiPost<LoginResponseData>(`${API_PREFIX}/login`, credentials);
       return response;
     },
-  });
+    {
+      successMessage: 'Login successful',
+      errorToast: true,
+    }
+  );
 }
 
 // ========================================
 // useRegister Hook
+// POST /api/v1/auth/register
 // ========================================
 
-export function useRegister(): UseMutationResult<RegisterResponseData, Error, RegisterRequest> {
-  return useMutation<RegisterResponseData, Error, RegisterRequest>({
-    mutationFn: async (data: RegisterRequest) => {
-      const response = await authService.register(data);
+export function useRegister() {
+  return useApiMutation(
+    async (data: RegisterRequest): Promise<RegisterResponseData> => {
+      // apiPost already unwraps the response, no need to unwrap again
+      const response = await apiPost<RegisterResponseData>(`${API_PREFIX}/register`, data);
       return response;
     },
-  });
+    {
+      successMessage: 'Registration successful! Please check your email.',
+      errorToast: true,
+    }
+  );
 }
 
 // ========================================
 // useForgotPassword Hook
+// POST /api/v1/auth/forgot-password
 // ========================================
 
-export function useForgotPassword(): UseMutationResult<ForgotPasswordResponse, Error, ForgotPasswordRequest> {
-  return useMutation<ForgotPasswordResponse, Error, ForgotPasswordRequest>({
-    mutationFn: async (data: ForgotPasswordRequest) => {
-      const response = await authService.forgotPassword(data);
+export function useForgotPassword() {
+  return useApiMutation(
+    async (data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> => {
+      const response = await apiPost<ForgotPasswordResponse>(
+        `${API_PREFIX}/forgot-password`,
+        data
+      );
       return response;
     },
-  });
+    {
+      successMessage: 'Password reset link sent! Check your email.',
+      errorToast: true,
+    }
+  );
 }
 
 // ========================================
 // useResetPassword Hook
+// POST /api/v1/auth/reset-password
 // ========================================
 
-export function useResetPassword(): UseMutationResult<ResetPasswordResponse, Error, ResetPasswordRequest> {
-  return useMutation<ResetPasswordResponse, Error, ResetPasswordRequest>({
-    mutationFn: async (data: ResetPasswordRequest) => {
-      const response = await authService.resetPassword(data);
+export function useResetPassword() {
+  return useApiMutation(
+    async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+      const response = await apiPost<ResetPasswordResponse>(
+        `${API_PREFIX}/reset-password`,
+        data
+      );
       return response;
     },
-  });
+    {
+      successMessage: 'Password reset successful! You can now login.',
+      errorToast: true,
+    }
+  );
 }
 
 // ========================================
 // useChangePassword Hook
+// POST /api/v1/auth/change-password
 // ========================================
 
-export function useChangePassword(): UseMutationResult<ChangePasswordResponse, Error, ChangePasswordRequest> {
-  return useMutation<ChangePasswordResponse, Error, ChangePasswordRequest>({
-    mutationFn: async (data: ChangePasswordRequest) => {
-      const response = await authService.changePassword(data);
+export function useChangePassword() {
+  return useApiMutation(
+    async (data: ChangePasswordRequest): Promise<ChangePasswordResponse> => {
+      const response = await apiPost<ChangePasswordResponse>(
+        `${API_PREFIX}/change-password`,
+        data
+      );
       return response;
     },
-  });
+    {
+      successMessage: 'Password changed successfully!',
+      errorToast: true,
+    }
+  );
 }
 
 // ========================================
 // useVerifyEmail Hook
+// POST /api/v1/auth/verify-email
 // ========================================
 
-export function useVerifyEmail(): UseMutationResult<VerifyEmailResponse, Error, VerifyEmailRequest> {
-  return useMutation<VerifyEmailResponse, Error, VerifyEmailRequest>({
-    mutationFn: async (data: VerifyEmailRequest) => {
-      const response = await authService.verifyEmail(data);
+export function useVerifyEmail() {
+  return useApiMutation(
+    async (data: VerifyEmailRequest): Promise<VerifyEmailResponse> => {
+      const response = await apiPost<VerifyEmailResponse>(
+        `${API_PREFIX}/verify-email`,
+        data
+      );
       return response;
     },
-  });
+    {
+      successMessage: 'Email verified successfully!',
+      errorToast: true,
+    }
+  );
 }
 
 // ========================================
 // useResendVerification Hook
+// POST /api/v1/auth/resend-verification
 // ========================================
 
-export function useResendVerification(): UseMutationResult<ResendVerificationResponse, Error, ResendVerificationRequest> {
-  return useMutation<ResendVerificationResponse, Error, ResendVerificationRequest>({
-    mutationFn: async (data: ResendVerificationRequest) => {
-      const response = await authService.resendVerification(data);
+export function useResendVerification() {
+  return useApiMutation(
+    async (data: ResendVerificationRequest): Promise<ResendVerificationResponse> => {
+      const response = await apiPost<ResendVerificationResponse>(
+        `${API_PREFIX}/resend-verification`,
+        data
+      );
       return response;
     },
-  });
+    {
+      successMessage: 'Verification email sent! Check your inbox.',
+      errorToast: true,
+    }
+  );
+}
+
+// ========================================
+// useLogout Hook
+// POST /api/v1/auth/logout
+// ========================================
+
+export function useLogout() {
+  return useApiMutation(
+    async (): Promise<LogoutResponse> => {
+      const response = await apiPost<LogoutResponse>(`${API_PREFIX}/logout`, null);
+      return response;
+    },
+    {
+      successMessage: 'Logged out successfully',
+      errorToast: false, // Logout errors shouldn't block UI
+    }
+  );
+}
+
+// ========================================
+// useRefreshToken Hook
+// POST /api/v1/auth/refresh
+// ========================================
+
+export function useRefreshToken() {
+  return useApiMutation(
+    async (refreshTokenValue: string): Promise<RefreshTokenResponseData> => {
+      // apiPost already unwraps the response, no need to unwrap again
+      const response = await apiPost<RefreshTokenResponseData>(
+        `${API_PREFIX}/refresh`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${refreshTokenValue}`,
+          },
+        }
+      );
+      return response;
+    },
+    {
+      errorToast: false, // Silent refresh failures
+    }
+  );
 }

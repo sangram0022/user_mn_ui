@@ -1,9 +1,11 @@
 /**
  * Standardized Loading State Hook
  * Provides consistent loading state management across components
+ * 
+ * React Compiler automatically optimizes this - no manual useMemo needed
  */
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 export interface LoadingState {
   isLoading: boolean;
@@ -25,32 +27,31 @@ export const useStandardLoading = (
   errors: unknown[];
   firstError: unknown | null;
 } => {
-  return useMemo(() => {
-    const normalizedStates = states.map(state => {
-      if (typeof state === 'boolean') {
-        return { isLoading: state, error: null, isSuccess: !state, isError: false };
-      }
-      if (state === undefined) {
-        return { isLoading: false, error: null, isSuccess: true, isError: false };
-      }
-      return state;
-    });
+  // React Compiler automatically memoizes this calculation
+  const normalizedStates = states.map(state => {
+    if (typeof state === 'boolean') {
+      return { isLoading: state, error: null, isSuccess: !state, isError: false };
+    }
+    if (state === undefined) {
+      return { isLoading: false, error: null, isSuccess: true, isError: false };
+    }
+    return state;
+  });
 
-    const isLoading = normalizedStates.some(state => state.isLoading);
-    const hasError = normalizedStates.some(state => state.isError);
-    const hasSuccess = normalizedStates.every(state => state.isSuccess);
-    const errors = normalizedStates
-      .filter(state => state.error)
-      .map(state => state.error);
+  const isLoading = normalizedStates.some(state => state.isLoading);
+  const hasError = normalizedStates.some(state => state.isError);
+  const hasSuccess = normalizedStates.every(state => state.isSuccess);
+  const errors = normalizedStates
+    .filter(state => state.error)
+    .map(state => state.error);
 
-    return {
-      isLoading,
-      hasError,
-      hasSuccess,
-      errors,
-      firstError: errors[0] || null,
-    };
-  }, [states]);
+  return {
+    isLoading,
+    hasError,
+    hasSuccess,
+    errors,
+    firstError: errors[0] || null,
+  };
 };
 
 /**

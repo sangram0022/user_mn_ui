@@ -10,7 +10,7 @@ import { useLogin } from '../hooks/useAuth.hooks';
 import { useLoginForm } from '../../../core/validation';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 import tokenService from '../services/tokenService';
-import { logger } from '../../../core/logging';
+import { handleError } from '@/core/error/errorHandler';
 
 export default function LoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -71,34 +71,19 @@ export default function LoginPage() {
           navigate(redirectPath, { replace: true });
         }
       } catch (error) {
-        // Error handling is done by the form hook
-        logger().error('Login error', error instanceof Error ? error : new Error(String(error)));
+        // Use centralized error handler
+        const result = handleError(error);
+        toast.error(result.userMessage);
         
-        // Extract specific error messages for better UX
-        let errorMessage = t('errors:AUTH_FAILED');
-        
-        if (error && typeof error === 'object') {
-          if ('responseData' in error && error.responseData) {
-            const data = error.responseData as { message_code?: string; message?: string };
-            if (data.message_code === 'INVALID_CREDENTIALS') {
-              errorMessage = t('errors:INVALID_CREDENTIALS', {
-                defaultValue: 'Invalid email or password. Please check your credentials and try again.',
-              });
-            } else if (data.message_code === 'ACCOUNT_LOCKED') {
-              errorMessage = t('errors:ACCOUNT_LOCKED', {
-                defaultValue: 'Your account has been locked. Please contact support for assistance.',
-              });
-            } else if (data.message) {
-              errorMessage = data.message;
-            }
-          }
+        // Handle redirect if needed
+        if (result.redirectToLogin) {
+          navigate(ROUTE_PATHS.LOGIN, { replace: true });
         }
-        
-        toast.error(errorMessage);
       }
     },
     onError: (error) => {
-      logger().error('Login form error', error instanceof Error ? error : new Error(String(error)));
+      const result = handleError(error);
+      toast.error(result.userMessage);
     }
   });
 

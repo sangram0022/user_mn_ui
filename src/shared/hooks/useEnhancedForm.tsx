@@ -9,7 +9,7 @@
 // - Progressive enhancement patterns
 // ========================================
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm, type FieldValues, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDebouncedCallback } from 'use-debounce';
@@ -302,72 +302,64 @@ export function useEnhancedForm<T extends FieldValues>(
 
   // ========================================
   // Optimized Field Change Handler
+  // React Compiler auto-memoizes this function
   // ========================================
 
-  const handleFieldChange = useCallback(
-    (fieldName: keyof T, value: unknown) => {
-      // @ts-ignore - Path<T> type compatibility
-      setValue(fieldName, value);
+  const handleFieldChange = (fieldName: keyof T, value: unknown) => {
+    // @ts-expect-error - Path<T> type compatibility
+    setValue(fieldName, value);
 
-      // Trigger validation if enabled
-      if (validation.validateOnChange) {
-        debouncedValidation(fieldName);
-      }
-    },
-    [setValue, validation.validateOnChange, debouncedValidation]
-  );
+    // Trigger validation if enabled
+    if (validation.validateOnChange) {
+      debouncedValidation(fieldName);
+    }
+  };
 
   // ========================================
   // Enhanced Submit Handler
+  // React Compiler auto-memoizes this function
   // ========================================
 
-  const handleSubmit = useCallback(
-    async (data: T) => {
-      if (isSubmitting) return;
+  const handleSubmit = async (data: T) => {
+    if (isSubmitting) return;
 
-      setIsSubmitting(true);
-      setSubmitCount(prev => prev + 1);
+    setIsSubmitting(true);
+    setSubmitCount(prev => prev + 1);
 
-      try {
-        await onSubmit(data);
-        
-        // Clear persisted state on successful submit
-        if (persistence?.clearOnSubmit && persistence.storageKey) {
-          FormPersistenceManager.clearState(persistence.storageKey);
-        }
-      } catch (error) {
-        onError?.(error as Error);
-        throw error;
-      } finally {
-        setIsSubmitting(false);
+    try {
+      await onSubmit(data);
+      
+      // Clear persisted state on successful submit
+      if (persistence?.clearOnSubmit && persistence.storageKey) {
+        FormPersistenceManager.clearState(persistence.storageKey);
       }
-    },
-    [isSubmitting, onSubmit, onError, persistence]
-  );
+    } catch (error) {
+      onError?.(error as Error);
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // ========================================
   // Field Dependency Management
+  // React Compiler auto-memoizes these functions
   // ========================================
 
-  const addFieldDependency = useCallback(
-    (field: keyof T, dependsOn: (keyof T)[]) => {
-      dependencyManager.current.addDependency(field, dependsOn);
-    },
-    []
-  );
+  const addFieldDependency = (field: keyof T, dependsOn: (keyof T)[]) => {
+    dependencyManager.current.addDependency(field, dependsOn);
+  };
 
-  const addComputedField = useCallback(
-    (field: keyof T, computeFn: (values: T) => unknown) => {
-      dependencyManager.current.addComputedField(field, computeFn);
-    },
-    []
-  );
+  const addComputedField = (field: keyof T, computeFn: (values: T) => unknown) => {
+    dependencyManager.current.addComputedField(field, computeFn);
+  };
 
   // ========================================
   // Form State Analysis
+  // React Compiler auto-memoizes this calculation
   // ========================================
 
-  const formAnalytics = useMemo(() => ({
+  const formAnalytics = {
     hasChanges: Object.keys(formState.dirtyFields).length > 0,
     totalErrors: Object.keys(formState.errors).length,
     touchedFields: Object.keys(formState.touchedFields).length,
@@ -377,7 +369,7 @@ export function useEnhancedForm<T extends FieldValues>(
     validationLatency: lastValidationTime.current > 0 
       ? Date.now() - lastValidationTime.current 
       : 0,
-  }), [formState, submitCount, persistedState]);
+  };
 
   // ========================================
   // Cleanup
@@ -397,7 +389,7 @@ export function useEnhancedForm<T extends FieldValues>(
     
     // Enhanced handlers
     handleFieldChange,
-    // @ts-ignore - SubmitHandler type compatibility
+    // @ts-expect-error - SubmitHandler type compatibility
     handleSubmit: form.handleSubmit(handleSubmit),
     
     // State management

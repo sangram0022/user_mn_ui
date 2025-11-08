@@ -3,11 +3,13 @@
  * Provides optimistic UI updates with automatic rollback on error
  * Uses React 19 useOptimistic hook for instant feedback
  * 
+ * React Compiler automatically optimizes these functions - no manual useCallback needed
+ * 
  * Note: Some TypeScript definitions for useOptimistic are still stabilizing.
  * This implementation uses type assertions where needed.
  */
 
-import { useOptimistic, useCallback } from 'react';
+import { useOptimistic } from 'react';
 import { logger } from '@/core/logging';
 
 /**
@@ -25,23 +27,21 @@ export function useOptimisticUpdate<T>(
     (_currentState, newData: T) => newData
   );
 
-  const update = useCallback(
-    async (newData: T) => {
-      // Immediately update UI
-      setOptimisticData(newData);
+  // React Compiler auto-memoizes this function
+  const update = async (newData: T) => {
+    // Immediately update UI
+    setOptimisticData(newData);
 
-      try {
-        // Perform actual update
-        const result = await updateFn(newData);
-        return { success: true, data: result };
-      } catch (error) {
-        // Rollback handled automatically by useOptimistic
-        logger().error('Optimistic update failed, rolling back', error instanceof Error ? error : new Error(String(error)));
-        return { success: false, error };
-      }
-    },
-    [setOptimisticData, updateFn]
-  );
+    try {
+      // Perform actual update
+      const result = await updateFn(newData);
+      return { success: true, data: result };
+    } catch (error) {
+      // Rollback handled automatically by useOptimistic
+      logger().error('Optimistic update failed, rolling back', error instanceof Error ? error : new Error(String(error)));
+      return { success: false, error };
+    }
+  };
 
   return {
     data: optimisticData,
@@ -63,7 +63,8 @@ export function useOptimisticToggle(
     (_currentState, newValue: boolean) => newValue
   );
 
-  const toggle = useCallback(async () => {
+  // React Compiler auto-memoizes this function
+  const toggle = async () => {
     const newValue = !optimisticValue;
     setOptimisticValue(newValue);
 
@@ -74,7 +75,7 @@ export function useOptimisticToggle(
       logger().error('Toggle failed, rolling back', error instanceof Error ? error : new Error(String(error)));
       return { success: false, error };
     }
-  }, [optimisticValue, setOptimisticValue, toggleFn]);
+  };
 
   return {
     value: optimisticValue,
@@ -116,58 +117,50 @@ export function useOptimisticList<T extends { id: string | number }>(
     }
   );
 
-  const add = useCallback(
-    async (item: T) => {
-      updateOptimisticList({ type: 'add', payload: item });
+  // React Compiler auto-memoizes these functions
+  const add = async (item: T) => {
+    updateOptimisticList({ type: 'add', payload: item });
 
-      try {
-        if (onAdd) {
-          const result = await onAdd(item);
-          return { success: true, data: result };
-        }
-        return { success: true, data: item };
-      } catch (error) {
-        logger().error('Failed to add item', error instanceof Error ? error : new Error(String(error)));
-        return { success: false, error };
+    try {
+      if (onAdd) {
+        const result = await onAdd(item);
+        return { success: true, data: result };
       }
-    },
-    [updateOptimisticList, onAdd]
-  );
+      return { success: true, data: item };
+    } catch (error) {
+      logger().error('Failed to add item', error instanceof Error ? error : new Error(String(error)));
+      return { success: false, error };
+    }
+  };
 
-  const remove = useCallback(
-    async (id: string | number) => {
-      updateOptimisticList({ type: 'remove', payload: id });
+  const remove = async (id: string | number) => {
+    updateOptimisticList({ type: 'remove', payload: id });
 
-      try {
-        if (onRemove) {
-          await onRemove(id);
-        }
-        return { success: true };
-      } catch (error) {
-        logger().error('Failed to remove item', error instanceof Error ? error : new Error(String(error)));
-        return { success: false, error };
+    try {
+      if (onRemove) {
+        await onRemove(id);
       }
-    },
-    [updateOptimisticList, onRemove]
-  );
+      return { success: true };
+    } catch (error) {
+      logger().error('Failed to remove item', error instanceof Error ? error : new Error(String(error)));
+      return { success: false, error };
+    }
+  };
 
-  const update = useCallback(
-    async (id: string | number, updates: Partial<T>) => {
-      updateOptimisticList({ type: 'update', payload: { id, updates } });
+  const update = async (id: string | number, updates: Partial<T>) => {
+    updateOptimisticList({ type: 'update', payload: { id, updates } });
 
-      try {
-        if (onUpdate) {
-          const result = await onUpdate(id, updates);
-          return { success: true, data: result };
-        }
-        return { success: true };
-      } catch (error) {
-        logger().error('Failed to update item', error instanceof Error ? error : new Error(String(error)));
-        return { success: false, error };
+    try {
+      if (onUpdate) {
+        const result = await onUpdate(id, updates);
+        return { success: true, data: result };
       }
-    },
-    [updateOptimisticList, onUpdate]
-  );
+      return { success: true };
+    } catch (error) {
+      logger().error('Failed to update item', error instanceof Error ? error : new Error(String(error)));
+      return { success: false, error };
+    }
+  };
 
   return {
     list: optimisticList,
@@ -190,21 +183,19 @@ export function useOptimisticUserStatus(
     (_currentState, newStatus: typeof currentStatus) => newStatus
   );
 
-  const updateStatus = useCallback(
-    async (newStatus: typeof currentStatus) => {
-      setOptimisticStatus(newStatus);
+  // React Compiler auto-memoizes this function
+  const updateStatus = async (newStatus: typeof currentStatus) => {
+    setOptimisticStatus(newStatus);
 
-      try {
-        await updateStatusFn(userId, newStatus);
-        logger().info('User status updated', { userId, status: newStatus });
-        return { success: true };
-      } catch (error) {
-        logger().error('Failed to update user status', error instanceof Error ? error : new Error(String(error)), { userId });
-        return { success: false, error };
-      }
-    },
-    [userId, setOptimisticStatus, updateStatusFn]
-  );
+    try {
+      await updateStatusFn(userId, newStatus);
+      logger().info('User status updated', { userId, status: newStatus });
+      return { success: true };
+    } catch (error) {
+      logger().error('Failed to update user status', error instanceof Error ? error : new Error(String(error)), { userId });
+      return { success: false, error };
+    }
+  };
 
   return {
     status: optimisticStatus,
@@ -227,28 +218,26 @@ export function useOptimisticFormSubmission<T>(
     (_currentState: SubmissionState, newState: SubmissionState) => newState
   ) as [SubmissionState, (action: SubmissionState) => void];
 
-  const submit = useCallback(
-    async (data: T) => {
-      setSubmissionState({ status: 'submitting' });
+  // React Compiler auto-memoizes these functions
+  const submit = async (data: T) => {
+    setSubmissionState({ status: 'submitting' });
 
-      // Show success immediately for better UX
-      setSubmissionState({ status: 'success' });
+    // Show success immediately for better UX
+    setSubmissionState({ status: 'success' });
 
-      try {
-        await submitFn(data);
-        return { success: true };
-      } catch (error) {
-        setSubmissionState({ status: 'error', error });
-        logger().error('Form submission failed', error instanceof Error ? error : new Error(String(error)));
-        return { success: false, error };
-      }
-    },
-    [setSubmissionState, submitFn]
-  );
+    try {
+      await submitFn(data);
+      return { success: true };
+    } catch (error) {
+      setSubmissionState({ status: 'error', error });
+      logger().error('Form submission failed', error instanceof Error ? error : new Error(String(error)));
+      return { success: false, error };
+    }
+  };
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setSubmissionState({ status: 'idle' });
-  }, [setSubmissionState]);
+  };
 
   return {
     state: submissionState,
@@ -270,27 +259,25 @@ export function useOptimisticComment<T extends { id: string; content: string; ti
     (state, newComment: T) => [...state, newComment]
   );
 
-  const addComment = useCallback(
-    async (content: string) => {
-      // Create optimistic comment
-      const tempComment = {
-        id: `temp-${Date.now()}`,
-        content,
-        timestamp: new Date(),
-      } as T;
+  // React Compiler auto-memoizes this function
+  const addComment = async (content: string) => {
+    // Create optimistic comment
+    const tempComment = {
+      id: `temp-${Date.now()}`,
+      content,
+      timestamp: new Date(),
+    } as T;
 
-      addOptimisticComment(tempComment);
+    addOptimisticComment(tempComment);
 
-      try {
-        const result = await submitCommentFn(content);
-        return { success: true, data: result };
-      } catch (error) {
-        logger().error('Failed to submit comment', error instanceof Error ? error : new Error(String(error)));
-        return { success: false, error };
-      }
-    },
-    [addOptimisticComment, submitCommentFn]
-  );
+    try {
+      const result = await submitCommentFn(content);
+      return { success: true, data: result };
+    } catch (error) {
+      logger().error('Failed to submit comment', error instanceof Error ? error : new Error(String(error)));
+      return { success: false, error };
+    }
+  };
 
   return {
     comments: optimisticComments,

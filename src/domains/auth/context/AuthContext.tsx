@@ -87,6 +87,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Login - Set tokens and user in state & storage
    */
   const login = useCallback((tokens: AuthTokens, user: User, rememberMe: boolean = false) => {
+    logger().info('🔐 Login: Storing tokens and user data', {
+      userId: user.user_id,
+      email: user.email,
+      roles: user.roles,
+      rememberMe,
+      tokenPreview: tokens.access_token.substring(0, 20) + '...',
+      expiresIn: tokens.expires_in || 3600,
+      context: 'AuthContext.login',
+    });
+    
     // Store tokens with expiry time calculation
     tokenService.storeTokens({
       access_token: tokens.access_token,
@@ -97,6 +107,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     tokenService.storeUser(user);
     
+    // Verify tokens were stored
+    const storedToken = tokenService.getAccessToken();
+    logger().info('✓ Tokens stored in localStorage', {
+      hasStoredToken: !!storedToken,
+      storedTokenPreview: storedToken ? storedToken.substring(0, 20) + '...' : 'none',
+      context: 'AuthContext.login',
+    });
+    
     // Compute permissions from user roles
     const permissions = getEffectivePermissionsForRoles(user.roles as UserRole[]);
     
@@ -105,6 +123,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isAuthenticated: true,
       isLoading: false,
       permissions,
+    });
+    
+    logger().info('✓ Auth state updated', {
+      isAuthenticated: true,
+      permissionCount: permissions.length,
+      context: 'AuthContext.login',
     });
   }, []);
 

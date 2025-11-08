@@ -1,18 +1,21 @@
 // ========================================
 // Profile Hooks
 // Production-ready React hooks for profile operations
-// Migrated to TanStack Query for consistency
+// Migrated to useApiModern pattern for consistency
 // Follows SOLID principles and Clean Code practices
 // ========================================
 
-import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
-import profileService from '../services/profileService';
+import { useApiQuery, useApiMutation } from '@/shared/hooks/useApiModern';
+import { apiGet, apiPut } from '@/core/api/apiHelpers';
+import { API_PREFIXES } from '@/services/api/common';
 import type {
   UserProfile,
   UpdateProfileRequest,
 } from '../types/profile.types';
 import { APIError } from '@/core/error';
 import { ValidationBuilder } from '@/core/validation';
+
+const API_PREFIX = API_PREFIXES.PROFILE;
 
 // ========================================
 // Query Keys
@@ -25,32 +28,32 @@ const profileKeys = {
 
 // ========================================
 // useProfile Hook
-// Fetches and manages user profile state with TanStack Query
+// GET /api/v1/users/profile/me
+// Fetches and manages user profile state
 // ========================================
 
-export function useProfile(options?: { enabled?: boolean }): UseQueryResult<UserProfile, APIError> {
-  return useQuery({
-    queryKey: profileKeys.detail(),
-    queryFn: async () => {
-      const response = await profileService.getProfile();
-      return response;
-    },
-    enabled: options?.enabled !== false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  });
+export function useProfile(options?: { enabled?: boolean }) {
+  return useApiQuery(
+    profileKeys.detail(),
+    () => apiGet<UserProfile>(`${API_PREFIX}/me`),
+    {
+      enabled: options?.enabled !== false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      errorToast: true,
+    }
+  );
 }
 
 // ========================================
 // useUpdateProfile Hook
-// Handles profile updates with validation and TanStack Query
+// PUT /api/v1/users/profile/me
+// Handles profile updates with validation
 // ========================================
 
-export function useUpdateProfile(): UseMutationResult<UserProfile, APIError, UpdateProfileRequest> {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: UpdateProfileRequest) => {
+export function useUpdateProfile() {
+  return useApiMutation(
+    async (data: UpdateProfileRequest): Promise<UserProfile> => {
       // Client-side validation using centralized ValidationBuilder
       const builder = new ValidationBuilder();
 
@@ -95,23 +98,21 @@ export function useUpdateProfile(): UseMutationResult<UserProfile, APIError, Upd
       }
 
       // Call API
-      const response = await profileService.updateProfile(data);
+      const response = await apiPut<UserProfile>(`${API_PREFIX}/me`, data);
       return response;
     },
-    onSuccess: (updatedProfile) => {
-      // Update cache with new profile data
-      queryClient.setQueryData(profileKeys.detail(), updatedProfile);
-      
-      // Invalidate to ensure fresh data
-      queryClient.invalidateQueries({ queryKey: profileKeys.all });
-    },
-  });
+    {
+      successMessage: 'Profile updated successfully',
+      errorToast: true,
+      queryKeyToUpdate: profileKeys.all,
+    }
+  );
 }
 
 // ========================================
 // useProfileWithUpdate Hook
 // Combined hook for fetching and updating profile
-// Now uses TanStack Query for both operations
+// Uses useApiModern pattern for consistency
 // ========================================
 
 export function useProfileWithUpdate(options?: { enabled?: boolean }) {

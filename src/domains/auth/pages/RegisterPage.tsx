@@ -10,7 +10,7 @@ import { useRegister } from '../hooks/useAuth.hooks';
 import { useRegisterForm } from '../../../core/validation';
 import { calculatePasswordStrength } from '../../../core/validation';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
-import { logger } from '@/core/logging';
+import { handleError } from '@/core/error/errorHandler';
 
 export default function RegisterPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -48,45 +48,14 @@ export default function RegisterPage() {
           });
         }
       } catch (error) {
-        logger().error('Registration error', error instanceof Error ? error : new Error(String(error)), {
-          context: 'RegisterPage.onSubmit',
-          email: data.email,
-        });
-        
-        // Extract specific error messages for better UX
-        let errorMessage = t('errors:REGISTER_FAILED');
-        
-        if (error && typeof error === 'object') {
-          if ('responseData' in error && error.responseData) {
-            const errorData = error.responseData as { message_code?: string; message?: string; field_errors?: Record<string, string[]> };
-            
-            if (errorData.message_code === 'EMAIL_ALREADY_EXISTS') {
-              errorMessage = t('errors:EMAIL_ALREADY_EXISTS', {
-                defaultValue: 'An account with this email already exists. Please use a different email or try logging in.',
-              });
-            } else if (errorData.message_code === 'USERNAME_ALREADY_EXISTS') {
-              errorMessage = t('errors:USERNAME_ALREADY_EXISTS', {
-                defaultValue: 'This username is already taken. Please choose a different username.',
-              });
-            } else if (errorData.field_errors) {
-              // Handle field-specific errors
-              const firstFieldError = Object.values(errorData.field_errors)[0];
-              if (firstFieldError && firstFieldError.length > 0) {
-                errorMessage = firstFieldError[0];
-              }
-            } else if (errorData.message) {
-              errorMessage = errorData.message;
-            }
-          }
-        }
-        
-        toast.error(errorMessage);
+        // Use centralized error handler
+        const result = handleError(error);
+        toast.error(result.userMessage);
       }
     },
     onError: (error) => {
-      logger().error('Registration form validation error', error instanceof Error ? error : new Error(String(error)), {
-        context: 'RegisterPage.formValidation',
-      });
+      const result = handleError(error);
+      toast.error(result.userMessage);
     }
   });
 

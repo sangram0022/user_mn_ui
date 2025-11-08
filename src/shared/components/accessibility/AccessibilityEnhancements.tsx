@@ -9,7 +9,7 @@
 // - Skip links and landmarks
 // ========================================
 
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 // ========================================
@@ -139,7 +139,8 @@ export function SkipLinks() {
 export function useLiveRegion() {
   const [messages, setMessages] = useState<Array<{ id: string; text: string; priority: 'polite' | 'assertive' }>>([]);
 
-  const announce = useCallback((text: string, priority: 'polite' | 'assertive' = 'polite') => {
+  // React Compiler auto-memoizes this function
+  const announce = (text: string, priority: 'polite' | 'assertive' = 'polite') => {
     const id = `announcement-${Date.now()}`;
     setMessages(prev => [...prev, { id, text, priority }]);
 
@@ -147,7 +148,7 @@ export function useLiveRegion() {
     setTimeout(() => {
       setMessages(prev => prev.filter(msg => msg.id !== id));
     }, 1000);
-  }, []);
+  };
 
   const LiveRegion = () => (
     <>
@@ -233,11 +234,12 @@ export function AccessibleModal({
     }
   };
 
-  const handleEscape = useCallback(() => {
+  // React Compiler auto-memoizes this function
+  const handleEscape = () => {
     if (closeOnEscape) {
       onClose();
     }
-  }, [closeOnEscape, onClose]);
+  };
 
   // Handle escape key from focus trap
   useEffect(() => {
@@ -250,7 +252,7 @@ export function AccessibleModal({
     return () => {
       container.removeEventListener('escapeFocusTrap', handleEscapeEvent);
     };
-  }, [handleEscape]);
+  }, [closeOnEscape, onClose]);
 
   if (!isOpen) return null;
 

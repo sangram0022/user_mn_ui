@@ -1,7 +1,11 @@
 /**
  * API Diagnostic Tool
  * Run this in browser console to diagnose the 401 error
+ * 
+ * Note: console.log is intentional for diagnostic output
  */
+
+/* eslint-disable no-console */
 
 // ============================================================================
 // Diagnostic Functions

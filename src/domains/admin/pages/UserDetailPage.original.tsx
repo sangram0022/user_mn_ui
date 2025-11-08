@@ -11,6 +11,9 @@ import type { Gender, UpdateUserRequest } from '../types';
 import Button from '../../../shared/components/ui/Button';
 import Badge from '../../../shared/components/ui/Badge';
 import { formatShortDate } from '../../../shared/utils/dateFormatters';
+import { logger } from '../../../core/logging';
+import { handleError } from '@/core/error/errorHandler';
+import { useToast } from '../../../hooks/useToast';
 
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: 'male', label: 'Male' },
@@ -24,6 +27,7 @@ const AVAILABLE_ROLES = ['user', 'admin', 'moderator', 'support'];
 export default function UserDetailPage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const toast = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
@@ -69,9 +73,12 @@ export default function UserDetailPage() {
         userId,
         data: formData,
       });
+      toast.success('User profile updated successfully');
       setIsEditing(false);
     } catch (err) {
-      console.error('Failed to update user:', err);
+      const result = handleError(err);
+      toast.error(result.userMessage);
+      logger().error('Failed to update user', err instanceof Error ? err : null, { userId });
     }
   };
 
@@ -107,8 +114,11 @@ export default function UserDetailPage() {
           replace: true,
         },
       });
+      toast.success('User roles updated successfully');
     } catch (err) {
-      console.error('Failed to update roles:', err);
+      const result = handleError(err);
+      toast.error(result.userMessage);
+      logger().error('Failed to update roles', err instanceof Error ? err : null, { userId });
     }
   };
 
@@ -124,10 +134,13 @@ export default function UserDetailPage() {
           send_welcome_email: true,
         },
       });
+      toast.success('User approved successfully');
       setShowApprovalModal(false);
       setApprovalMessage('');
     } catch (err) {
-      console.error('Failed to approve user:', err);
+      const result = handleError(err);
+      toast.error(result.userMessage);
+      logger().error('Failed to approve user', err instanceof Error ? err : null, { userId });
     }
   };
 
@@ -147,10 +160,13 @@ export default function UserDetailPage() {
           reapplication_wait_days: 7,
         },
       });
+      toast.success('User rejected');
       setShowRejectionModal(false);
       setRejectionReason('');
     } catch (err) {
-      console.error('Failed to reject user:', err);
+      const result = handleError(err);
+      toast.error(result.userMessage);
+      logger().error('Failed to reject user', err instanceof Error ? err : null, { userId });
     }
   };
 

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useResetPassword } from '../hooks/useAuth.hooks';
 import { useToast } from '../../../hooks/useToast';
 import { calculatePasswordStrength } from '../../../core/validation';
+import { handleError } from '@/core/error/errorHandler';
 import Badge from '../../../shared/components/ui/Badge';
 import { Button, Input } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
@@ -72,8 +73,8 @@ export function ResetPasswordPage() {
         });
       }, 3000);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('errors:RESET_PASSWORD_FAILED');
-      toast.error(errorMessage);
+      const result = handleError(error);
+      toast.error(result.userMessage);
     }
   };
 

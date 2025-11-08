@@ -2,11 +2,12 @@
 // Optimized RBAC Provider - Single Source, High Performance
 // ========================================
 // Consolidated from RbacContext.tsx + RbacProvider.tsx
-// Added performance optimizations and memoization
+// React Compiler automatically optimizes permission checks
+// useMemo kept for contextValue (semantic - object identity for Context.Provider)
 // Eliminates code duplication (234 lines → 150 lines)
 // ========================================
 
-import { useCallback, useMemo, type ReactNode } from 'react';
+import { useMemo, useEffect, type ReactNode } from 'react';
 import type {
   RbacContextValue,
   AccessCheckOptions,
@@ -66,220 +67,203 @@ export function RbacProvider({
 }: RbacProviderProps) {
   
   // ========================================
-  // Memoized Permission Checking Methods
+  // Permission Checking Methods
+  // React Compiler auto-memoizes these functions
   // ========================================
 
   /**
    * Check if user has specific role
-   * Memoized for performance
    */
-  const hasRole = useCallback(
-    (role: UserRole | UserRole[]): boolean => {
-      const rolesToCheck = Array.isArray(role) ? role : [role];
-      return permissionCache.memoize(
-        hasAnyRole,
-        userRoles,
-        permissions,
-        'hasRole',
-        userRoles,
-        rolesToCheck
-      );
-    },
-    [userRoles, permissions]
-  );
+  const hasRole = (role: UserRole | UserRole[]): boolean => {
+    const rolesToCheck = Array.isArray(role) ? role : [role];
+    return permissionCache.memoize(
+      hasAnyRole,
+      userRoles,
+      permissions,
+      'hasRole',
+      userRoles,
+      rolesToCheck
+    );
+  };
 
   /**
    * Check if user has specific permission
-   * Memoized for performance
+   * React Compiler auto-memoizes this function
    */
-  const hasPermission = useCallback(
-    (permission: Permission): boolean => {
-      return permissionCache.memoize(
-        checkPermission,
-        userRoles,
-        permissions,
-        'hasPermission',
-        permissions,
-        permission
-      );
-    },
-    [userRoles, permissions]
-  );
+  const hasPermission = (permission: Permission): boolean => {
+    return permissionCache.memoize(
+      checkPermission,
+      userRoles,
+      permissions,
+      'hasPermission',
+      permissions,
+      permission
+    );
+  };
 
   /**
    * Check if user has ALL specified permissions
+   * React Compiler auto-memoizes this function
    */
-  const hasAllPermissions = useCallback(
-    (perms: Permission[]): boolean => {
-      return permissionCache.memoize(
-        checkAllPermissions,
-        userRoles,
-        permissions,
-        'hasAllPermissions',
-        permissions,
-        perms
-      );
-    },
-    [userRoles, permissions]
-  );
+  const hasAllPermissions = (perms: Permission[]): boolean => {
+    return permissionCache.memoize(
+      checkAllPermissions,
+      userRoles,
+      permissions,
+      'hasAllPermissions',
+      permissions,
+      perms
+    );
+  };
 
   /**
    * Check if user has ANY of specified permissions
+   * React Compiler auto-memoizes this function
    */
-  const hasAnyPermission = useCallback(
-    (perms: Permission[]): boolean => {
-      return permissionCache.memoize(
-        checkAnyPermission,
-        userRoles,
-        permissions,
-        'hasAnyPermission',
-        permissions,
-        perms
-      );
-    },
-    [userRoles, permissions]
-  );
+  const hasAnyPermission = (perms: Permission[]): boolean => {
+    return permissionCache.memoize(
+      checkAnyPermission,
+      userRoles,
+      permissions,
+      'hasAnyPermission',
+      permissions,
+      perms
+    );
+  };
 
   /**
    * Complex access check with multiple conditions
-   * Optimized with memoization
+   * React Compiler auto-memoizes this function
    */
-  const hasAccess = useCallback(
-    (options: AccessCheckOptions): boolean => {
-      return permissionCache.memoize(
-        (opts: AccessCheckOptions) => {
-          const { requiredRole, requiredPermissions, requireAllPermissions } = opts;
+  const hasAccess = (options: AccessCheckOptions): boolean => {
+    return permissionCache.memoize(
+      (opts: AccessCheckOptions) => {
+        const { requiredRole, requiredPermissions, requireAllPermissions } = opts;
 
-          // Check role requirement
-          if (requiredRole) {
-            const rolesToCheck = Array.isArray(requiredRole)
-              ? requiredRole
-              : [requiredRole];
+        // Check role requirement
+        if (requiredRole) {
+          const rolesToCheck = Array.isArray(requiredRole)
+            ? requiredRole
+            : [requiredRole];
 
-            if (!hasAnyRole(userRoles, rolesToCheck)) {
+          if (!hasAnyRole(userRoles, rolesToCheck)) {
+            return false;
+          }
+        }
+
+        // Check permission requirement
+        if (requiredPermissions) {
+          const permsToCheck = Array.isArray(requiredPermissions)
+            ? requiredPermissions
+            : [requiredPermissions];
+
+          if (requireAllPermissions) {
+            if (!checkAllPermissions(permissions, permsToCheck)) {
+              return false;
+            }
+          } else {
+            if (!checkAnyPermission(permissions, permsToCheck)) {
               return false;
             }
           }
+        }
 
-          // Check permission requirement
-          if (requiredPermissions) {
-            const permsToCheck = Array.isArray(requiredPermissions)
-              ? requiredPermissions
-              : [requiredPermissions];
-
-            if (requireAllPermissions) {
-              if (!checkAllPermissions(permissions, permsToCheck)) {
-                return false;
-              }
-            } else {
-              if (!checkAnyPermission(permissions, permsToCheck)) {
-                return false;
-              }
-            }
-          }
-
-          return true;
-        },
-        userRoles,
-        permissions,
-        'hasAccess',
-        options
-      );
-    },
-    [userRoles, permissions]
-  );
+        return true;
+      },
+      userRoles,
+      permissions,
+      'hasAccess',
+      options
+    );
+  };
 
   /**
-   * Get role level (memoized)
+   * Get role level
+   * React Compiler auto-memoizes this function
    */
-  const getRoleLevel = useCallback((role: UserRole): RoleLevelType => {
+  const getRoleLevel = (role: UserRole): RoleLevelType => {
     return ROLE_HIERARCHY[role] ?? RoleLevel.PUBLIC;
-  }, []);
+  };
 
   /**
    * Check if user has minimum role level
+   * React Compiler auto-memoizes this function
    */
-  const hasRoleLevel = useCallback(
-    (minimumLevel: RoleLevelType): boolean => {
-      return permissionCache.memoize(
-        hasMinimumRoleLevel,
-        userRoles,
-        permissions,
-        'hasRoleLevel',
-        userRoles,
-        minimumLevel
-      );
-    },
-    [userRoles, permissions]
-  );
+  const hasRoleLevel = (minimumLevel: RoleLevelType): boolean => {
+    return permissionCache.memoize(
+      hasMinimumRoleLevel,
+      userRoles,
+      permissions,
+      'hasRoleLevel',
+      userRoles,
+      minimumLevel
+    );
+  };
 
   /**
    * ⚡ OPTIMIZED: Check if user can access API endpoint
    * Uses O(1) endpoint cache instead of O(n) array search
+   * React Compiler auto-memoizes this function
    */
-  const canAccessEndpoint = useCallback(
-    (method: string, path: string): boolean => {
-      return permissionCache.memoize(
-        (m: string, p: string) => {
-          // O(1) lookup instead of O(n) search
-          const endpoint = endpointCache.findEndpoint(m, p);
+  const canAccessEndpoint = (method: string, path: string): boolean => {
+    return permissionCache.memoize(
+      (m: string, p: string) => {
+        // O(1) lookup instead of O(n) search
+        const endpoint = endpointCache.findEndpoint(m, p);
 
-          if (!endpoint) {
-            return false; // Endpoint not configured
+        if (!endpoint) {
+          return false; // Endpoint not configured
+        }
+
+        if (endpoint.public) {
+          return true; // Public endpoint
+        }
+
+        // Check role requirements
+        if (endpoint.requiredRoles && endpoint.requiredRoles.length > 0) {
+          if (!hasAnyRole(userRoles, endpoint.requiredRoles)) {
+            return false;
           }
+        }
 
-          if (endpoint.public) {
-            return true; // Public endpoint
+        // Check permission requirements
+        if (endpoint.requiredPermissions && endpoint.requiredPermissions.length > 0) {
+          if (!checkAllPermissions(permissions, endpoint.requiredPermissions)) {
+            return false;
           }
+        }
 
-          // Check role requirements
-          if (endpoint.requiredRoles && endpoint.requiredRoles.length > 0) {
-            if (!hasAnyRole(userRoles, endpoint.requiredRoles)) {
-              return false;
-            }
-          }
-
-          // Check permission requirements
-          if (endpoint.requiredPermissions && endpoint.requiredPermissions.length > 0) {
-            if (!checkAllPermissions(permissions, endpoint.requiredPermissions)) {
-              return false;
-            }
-          }
-
-          return true;
-        },
-        userRoles,
-        permissions,
-        'canAccessEndpoint',
-        method,
-        path
-      );
-    },
-    [userRoles, permissions]
-  );
+        return true;
+      },
+      userRoles,
+      permissions,
+      'canAccessEndpoint',
+      method,
+      path
+    );
+  };
 
   /**
    * ⚡ OPTIMIZED: Get permissions required for endpoint
    * Uses O(1) endpoint cache
+   * React Compiler auto-memoizes this function
    */
-  const getEndpointPermissions = useCallback(
-    (method: string, path: string): { requiredRoles: UserRole[]; requiredPermissions: Permission[]; } | null => {
-      // O(1) lookup
-      const endpoint = endpointCache.findEndpoint(method, path);
-      if (!endpoint) return null;
-      
-      return {
-        requiredRoles: endpoint.requiredRoles,
-        requiredPermissions: endpoint.requiredPermissions,
-      };
-    },
-    [] // No dependencies - endpoint config is static
-  );
+  const getEndpointPermissions = (method: string, path: string): { requiredRoles: UserRole[]; requiredPermissions: Permission[]; } | null => {
+    // O(1) lookup
+    const endpoint = endpointCache.findEndpoint(method, path);
+    if (!endpoint) return null;
+    
+    return {
+      requiredRoles: endpoint.requiredRoles,
+      requiredPermissions: endpoint.requiredPermissions,
+    };
+  };
 
   // ========================================
   // Memoized Context Value
   // ========================================
 
+  // React Compiler optimizes function references, so we only need to depend on primitive values
   const contextValue = useMemo<RbacContextValue>(() => ({
     permissions,
     userRoles,
@@ -292,22 +276,10 @@ export function RbacProvider({
     hasRoleLevel,
     canAccessEndpoint,
     getEndpointPermissions,
-  }), [
-    permissions,
-    userRoles,
-    hasRole,
-    hasPermission,
-    hasAllPermissions,
-    hasAnyPermission,
-    hasAccess,
-    getRoleLevel,
-    hasRoleLevel,
-    canAccessEndpoint,
-    getEndpointPermissions,
-  ]);
+  }), [permissions, userRoles]);
 
-  // Clear permission cache when user changes
-  useMemo(() => {
+  // Clear permission cache on mount
+  useEffect(() => {
     permissionCache.clear();
   }, []);
 

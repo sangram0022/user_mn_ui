@@ -69,25 +69,39 @@ apiClient.interceptors.request.use(
     // Get access token from storage
     const accessToken = tokenService.getAccessToken();
     
-    // Minimal debug logging (only for errors/unexpected scenarios)
-    // Full logging available via browser devtools network tab
+    // Enhanced debug logging for authentication issues
+    if (import.meta.env.MODE === 'development') {
+      logger().debug('API Request interceptor', {
+        url: config.url,
+        method: config.method,
+        hasToken: !!accessToken,
+        tokenPreview: accessToken ? `${accessToken.substring(0, 20)}...` : 'none',
+        context: 'apiClient.requestInterceptor',
+      });
+    }
     
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
       
       // Log that we SET the Authorization header
       if (import.meta.env.MODE === 'development') {
-        logger().debug('Authorization header SET for request', {
+        logger().info('✓ Authorization header SET for request', {
           url: config.url,
+          method: config.method,
           context: 'apiClient.requestInterceptor',
         });
       }
     } else {
       // Only warn for protected endpoints, not public ones like login/register
-      const isPublicEndpoint = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
-      if (import.meta.env.MODE === 'development' && !isPublicEndpoint) {
-        logger().warn('No access token found for request', {
+      const isPublicEndpoint = config.url?.includes('/auth/login') || 
+                                config.url?.includes('/auth/register') ||
+                                config.url?.includes('/auth/forgot-password') ||
+                                config.url?.includes('/auth/reset-password');
+      if (!isPublicEndpoint) {
+        logger().warn('⚠ No access token found for protected request', {
           url: config.url,
+          method: config.method,
+          headers: Object.keys(config.headers || {}),
           context: 'apiClient.requestInterceptor',
         });
       }

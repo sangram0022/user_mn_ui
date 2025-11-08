@@ -34,9 +34,6 @@ export {
   type ErrorHandlingResult,
 } from './errorHandler';
 
-// Export Error Boundary component
-export { ErrorBoundary } from './ErrorBoundary';
-
 // Export global error handlers (AWS CloudWatch handles performance monitoring)
 export {
   initializeGlobalErrorHandlers,

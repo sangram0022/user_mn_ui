@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { useToast } from '../../../hooks/useToast';
+import { handleError } from '@/core/error/errorHandler';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
 import Badge from '../../../shared/components/ui/Badge';
@@ -62,8 +63,14 @@ export function RegisterPage() {
         });
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('errors:REGISTRATION_FAILED');
-      toast.error(errorMessage);
+      const result = handleError(error);
+      
+      // Extract field errors from context if present
+      if (result.context?.errors) {
+        setFieldErrors(result.context.errors as Record<string, string>);
+      }
+      
+      toast.error(result.userMessage);
     }
   };
 

@@ -1,11 +1,16 @@
 /**
  * Admin User Management Hooks
  * React Query hooks for user CRUD operations, bulk actions, and export
+ * Enhanced with centralized error handling and logging
+ * 
+ * Pattern: Hooks handle cache invalidation and logging.
+ * Components use handleError() for error display and toast for success messages.
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../../services/api/queryClient';
 import { adminService } from '../services';
+import { logger } from '../../../core/logging';
 import type {
   ListUsersFilters,
   CreateUserRequest,
@@ -49,13 +54,16 @@ export const useUser = (userId: string | undefined) => {
 
 /**
  * Create new user
+ * Enhanced with logging and error context
  */
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation<AdminUser, Error, CreateUserRequest>({
     mutationFn: async (data: CreateUserRequest) => {
+      logger().info('Creating new user', { email: data.email, roles: data.roles });
       const response = await adminService.createUser(data);
+      logger().info('User created successfully', { userId: response.user.user_id });
       return response.user;
     },
     onSuccess: (user: AdminUser) => {
@@ -68,21 +76,31 @@ export const useCreateUser = () => {
         user
       );
     },
+    onError: (error: Error, variables: CreateUserRequest) => {
+      logger().error('Failed to create user', error, { 
+        email: variables.email
+      });
+    },
   });
 };
 
 /**
  * Update existing user
+ * Enhanced with logging, optimistic updates, and error recovery
  */
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation<AdminUser, Error, { userId: string; data: UpdateUserRequest }>({
     mutationFn: async ({ userId, data }: { userId: string; data: UpdateUserRequest }) => {
+      logger().info('Updating user', { userId, changes: Object.keys(data) });
       const response = await adminService.updateUser(userId, data);
+      logger().info('User updated successfully', { userId });
       return response.user;
     },
     onMutate: async ({ userId, data }) => {
+      logger().debug('Starting optimistic update', { userId });
+      
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: queryKeys.users.detail(userId) });
 
@@ -101,12 +119,17 @@ export const useUpdateUser = () => {
 
       return { previousUser };
     },
-    onError: (_err, { userId }, context) => {
+    onError: (error, variables, context) => {
+      logger().error('User update failed', error, { 
+        userId: variables.userId
+      });
+      
       // Rollback on error
       const typedContext = context as { previousUser?: AdminUser } | undefined;
       if (typedContext?.previousUser) {
+        logger().debug('Rolling back optimistic update', { userId: variables.userId });
         queryClient.setQueryData(
-          queryKeys.users.detail(userId),
+          queryKeys.users.detail(variables.userId),
           typedContext.previousUser
         );
       }
@@ -126,90 +149,145 @@ export const useUpdateUser = () => {
 
 /**
  * Delete user (soft or hard delete)
+ * Enhanced with logging
  */
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, options }: { userId: string; options?: DeleteUserOptions }) =>
-      adminService.deleteUser(userId, options),
-    onSuccess: (_response, { userId }) => {
+    mutationFn: ({ userId, options }: { userId: string; options?: DeleteUserOptions }) => {
+      logger().info('Deleting user', { userId, options });
+      return adminService.deleteUser(userId, options);
+    },
+    onSuccess: (_response, variables) => {
+      logger().info('User deleted successfully', { userId: variables.userId });
+      
       // Remove from cache
-      queryClient.removeQueries({ queryKey: queryKeys.users.detail(userId) });
+      queryClient.removeQueries({ queryKey: queryKeys.users.detail(variables.userId) });
       
       // Invalidate lists
       queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+    },
+    onError: (error: Error, variables) => {
+      logger().error('Failed to delete user', error, { 
+        userId: variables.userId
+      });
     },
   });
 };
 
 /**
  * Safe delete user (prevents self-deletion)
+ * Enhanced with logging
  */
 export const useSafeDeleteUser = (currentUserId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, options }: { userId: string; options?: DeleteUserOptions }) =>
-      adminService.safeDeleteUser(userId, currentUserId, options),
-    onSuccess: (_response, { userId }) => {
-      queryClient.removeQueries({ queryKey: queryKeys.users.detail(userId) });
+    mutationFn: ({ userId, options }: { userId: string; options?: DeleteUserOptions }) => {
+      logger().info('Safe delete user', { userId, currentUserId });
+      return adminService.safeDeleteUser(userId, currentUserId, options);
+    },
+    onSuccess: (_response, variables) => {
+      logger().info('Safe delete successful', { userId: variables.userId });
+      queryClient.removeQueries({ queryKey: queryKeys.users.detail(variables.userId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+    },
+    onError: (error: Error, variables) => {
+      logger().error('Safe delete failed', error, { 
+        userId: variables.userId
+      });
     },
   });
 };
 
 // ============================================================================
 // Bulk Operation Hooks
+// Enhanced with logging and error tracking
 // ============================================================================
 
 /**
  * Bulk user actions (approve, delete, etc.)
+ * Enhanced with logging
  */
 export const useBulkUserAction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: BulkUserAction) =>
-      adminService.bulkUserAction(request),
-    onSuccess: () => {
+    mutationFn: (request: BulkUserAction) => {
+      logger().info('Bulk user action', { operation: request.operation, count: request.user_ids.length });
+      return adminService.bulkUserAction(request);
+    },
+    onSuccess: (result, variables) => {
+      logger().info('Bulk action completed', { 
+        operation: variables.operation,
+        requested: variables.user_ids.length,
+        succeeded: result.succeeded,
+        failed: result.failed 
+      });
+      
       // Invalidate all user queries after bulk action
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+    },
+    onError: (error: Error, variables) => {
+      logger().error('Bulk action failed', error, { 
+        operation: variables.operation,
+        count: variables.user_ids.length
+      });
     },
   });
 };
 
 /**
  * Bulk delete users
+ * Enhanced with logging
  */
 export const useBulkDeleteUsers = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userIds, options }: { userIds: string[]; options?: DeleteUserOptions }) =>
-      adminService.bulkDeleteUsers(userIds, options),
-    onSuccess: () => {
+    mutationFn: ({ userIds, options }: { userIds: string[]; options?: DeleteUserOptions }) => {
+      logger().info('Bulk delete users', { count: userIds.length, options });
+      return adminService.bulkDeleteUsers(userIds, options);
+    },
+    onSuccess: (result, variables) => {
+      logger().info('Bulk delete completed', { 
+        requested: variables.userIds.length,
+        succeeded: result.succeeded,
+        failed: result.failed 
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+    },
+    onError: (error: Error, variables) => {
+      logger().error('Bulk delete failed', error, { 
+        count: variables.userIds.length
+      });
     },
   });
 };
 
 // ============================================================================
 // Export Hook
+// Enhanced with logging and download automation
 // ============================================================================
 
 /**
  * Export users to file (CSV, JSON, XLSX)
+ * Enhanced with logging
  */
 export const useExportUsers = () => {
   return useMutation({
     mutationFn: async (request: ExportUsersRequest) => {
+      logger().info('Exporting users', { format: request.format });
+      
       const blob = await adminService.exportUsers(request);
       
       // Generate filename
       const timestamp = new Date().toISOString().split('T')[0];
       const extension = request.format === 'xlsx' ? 'xlsx' : request.format;
       const filename = `users-export-${timestamp}.${extension}`;
+      
+      logger().debug('Export ready for download', { filename, size: blob.size });
       
       // Download blob
       const url = window.URL.createObjectURL(blob);
@@ -221,7 +299,14 @@ export const useExportUsers = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
+      logger().info('Export completed', { filename });
+      
       return { success: true, filename };
+    },
+    onError: (error: Error, variables) => {
+      logger().error('Export failed', error, { 
+        format: variables.format
+      });
     },
   });
 };

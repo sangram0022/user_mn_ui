@@ -9,6 +9,7 @@
 
 import { apiClient } from '../../../services/api/apiClient';
 import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
+import { logger } from '@/core/logging';
 import type {
   ApproveUserRequest,
   ApproveUserResponse,
@@ -84,6 +85,10 @@ export const bulkApproveUsers = async (
       results.approved++;
       results.success_ids.push(userId);
     } catch (error) {
+      logger().error('Bulk approval failed for user', error instanceof Error ? error : null, {
+        userId,
+        context: 'adminApprovalService.bulkApproveUsers',
+      });
       results.failed++;
       results.errors.push({
         user_id: userId,
@@ -126,6 +131,11 @@ export const bulkRejectUsers = async (
       results.rejected++;
       results.success_ids.push(userId);
     } catch (error) {
+      logger().error('Bulk rejection failed for user', error instanceof Error ? error : null, {
+        userId,
+        reason: request.reason,
+        context: 'adminApprovalService.bulkRejectUsers',
+      });
       results.failed++;
       results.errors.push({
         user_id: userId,

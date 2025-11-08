@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useVerifyEmail } from '../hooks/useAuth.hooks';
 import { useToast } from '../../../hooks/useToast';
+import { handleError } from '@/core/error/errorHandler';
 import { Button } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 
@@ -39,10 +40,10 @@ export default function VerifyEmailPage() {
           });
         }, 3000);
       } catch (error) {
+        const result = handleError(error);
         setStatus('error');
-        const message = error instanceof Error ? error.message : t('errors:VERIFICATION_FAILED');
-        setErrorMessage(message);
-        toast.error(message);
+        setErrorMessage(result.userMessage);
+        toast.error(result.userMessage);
       }
     };
 

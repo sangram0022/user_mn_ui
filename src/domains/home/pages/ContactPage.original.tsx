@@ -5,6 +5,7 @@ import Card from '../../../shared/components/ui/Card';
 import Badge from '../../../shared/components/ui/Badge';
 import { typographyVariants, animationUtils } from '../../../design-system/variants';
 import type { BadgeVariant } from '../../../design-system/variants';
+import { logger } from '../../../core/logging';
 
 // Contact data - Single source of truth
 const contactData = {
@@ -133,7 +134,7 @@ export default function ContactPage() {
     // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    console.log('Contact form submitted:', formData);
+    logger().info('Contact form submitted', { formData });
     setIsSubmitting(false);
     
     // Reset form

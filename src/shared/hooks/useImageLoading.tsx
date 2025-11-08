@@ -2,7 +2,7 @@
 // Image Loading Hook
 // ========================================
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 interface UseImageLoadingOptions {
@@ -31,7 +31,8 @@ export function useImageLoading(
 
   const shouldLoad = !options.lazy || inView;
 
-  const loadImage = useCallback(async (imageSrc: string) => {
+  // React Compiler auto-memoizes this function
+  const loadImage = async (imageSrc: string) => {
     if (isLoading || isLoaded) return;
     
     setIsLoading(true);
@@ -53,7 +54,7 @@ export function useImageLoading(
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, isLoaded]);
+  };
 
   useEffect(() => {
     if (shouldLoad && src) {

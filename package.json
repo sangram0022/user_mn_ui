@@ -96,6 +96,7 @@
     "@vitest/coverage-v8": "^4.0.6",
     "@vitest/ui": "^4.0.6",
     "autoprefixer": "^10.4.20",
+    "babel-plugin-react-compiler": "^1.0.0",
     "cssnano": "^7.1.2",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",

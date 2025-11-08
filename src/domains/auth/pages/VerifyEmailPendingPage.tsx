@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useResendVerification } from '../hooks/useAuth.hooks';
 import { useToast } from '../../../hooks/useToast';
+import { handleError } from '@/core/error/errorHandler';
 import { Button } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 
@@ -44,8 +45,8 @@ export default function VerifyEmailPendingPage() {
       setLastResendTime(now);
       toast.success(t('verifyEmail.resendSuccess'));
     } catch (error) {
-      const message = error instanceof Error ? error.message : t('errors:RESEND_FAILED');
-      toast.error(message);
+      const result = handleError(error);
+      toast.error(result.userMessage);
     }
   };
 

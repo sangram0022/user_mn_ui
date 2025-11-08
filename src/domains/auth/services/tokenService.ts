@@ -5,6 +5,7 @@
 
 import { apiClient } from '../../../services/api/apiClient';
 import { API_PREFIXES } from '../../../services/api/common';
+import { logger } from '@/core/logging';
 import type {
   RefreshTokenResponse,
 } from '../types/auth.types';
@@ -67,17 +68,49 @@ export const storeTokens = (
 ): void => {
   const expiresAt = Date.now() + tokens.expires_in * 1000;
   
+  // Debug logging
+  if (import.meta.env.DEV) {
+    logger().debug('[tokenService] Storing tokens', {
+      hasAccessToken: !!tokens.access_token,
+      hasRefreshToken: !!tokens.refresh_token,
+      accessTokenLength: tokens.access_token?.length || 0,
+      expiresIn: tokens.expires_in,
+      expiresAt: new Date(expiresAt).toISOString(),
+      rememberMe,
+    });
+  }
+  
   localStorage.setItem(TOKEN_STORAGE_KEY, tokens.access_token);
   localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, tokens.refresh_token);
   localStorage.setItem(TOKEN_EXPIRY_KEY, expiresAt.toString());
   localStorage.setItem(REMEMBER_ME_KEY, rememberMe ? 'true' : 'false');
+  
+  // Verify storage
+  if (import.meta.env.DEV) {
+    const stored = localStorage.getItem(TOKEN_STORAGE_KEY);
+    logger().debug('[tokenService] Token storage verification', {
+      stored: !!stored,
+      storedLength: stored?.length || 0,
+      matches: stored === tokens.access_token,
+    });
+  }
 };
 
 /**
  * Get access token from localStorage
  */
 export const getAccessToken = (): string | null => {
-  return localStorage.getItem(TOKEN_STORAGE_KEY);
+  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  
+  if (import.meta.env.DEV) {
+    logger().debug('[tokenService] Getting access token', {
+      hasToken: !!token,
+      tokenLength: token?.length || 0,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
+    });
+  }
+  
+  return token;
 };
 
 /**
