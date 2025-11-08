@@ -9,7 +9,7 @@
 // - Accessibility features
 // ========================================
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveRegion } from '../../../shared/components/accessibility/AccessibilityEnhancements';
 import { logger } from '../../../core/logging';
@@ -264,16 +264,15 @@ function PermissionMatrix({
   allPermissions: Permission[];
   onPermissionToggle: (role: Role, permission: Permission, granted: boolean) => void;
 }) {
-  const groupedPermissions = useMemo(() => {
-    const groups: Record<string, Permission[]> = {};
-    allPermissions.forEach(permission => {
-      if (!groups[permission.category]) {
-        groups[permission.category] = [];
-      }
-      groups[permission.category].push(permission);
-    });
-    return groups;
-  }, [allPermissions]);
+  // React 19 Compiler: No useMemo needed - simple grouping operation
+  const groups: Record<string, Permission[]> = {};
+  allPermissions.forEach(permission => {
+    if (!groups[permission.category]) {
+      groups[permission.category] = [];
+    }
+    groups[permission.category].push(permission);
+  });
+  const groupedPermissions = groups;
 
   const hasPermission = (permission: Permission) => {
     return role.permissions.some(p => p.id === permission.id);
@@ -339,31 +338,28 @@ export default function RolesManagementPage() {
     document.title = 'Role Management - Admin';
   }, []);
 
-  const filteredRoles = useMemo(() => {
-    // AWS CloudWatch monitors performance automatically
-    
-    const filtered = roles.filter(role =>
-      role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      role.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  // React 19 Compiler: No useMemo needed - simple filter and sort
+  const filtered = roles.filter(role =>
+    role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    role.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'level':
-          return a.level - b.level;
-        case 'users':
-          return b.userCount - a.userCount;
-        case 'updated':
-          return b.updatedAt.getTime() - a.updatedAt.getTime();
-        default:
-          return 0;
-      }
-    });
+  filtered.sort((a, b) => {
+    switch (sortBy) {
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'level':
+        return a.level - b.level;
+      case 'users':
+        return b.userCount - a.userCount;
+      case 'updated':
+        return b.updatedAt.getTime() - a.updatedAt.getTime();
+      default:
+        return 0;
+    }
+  });
 
-    return filtered;
-  }, [roles, searchTerm, sortBy]); // AWS CloudWatch monitors performance automatically
+  const filteredRoles = filtered;
 
   const handleRoleEdit = (role: Role) => {
     logger().debug('Editing role', { roleName: role.name });

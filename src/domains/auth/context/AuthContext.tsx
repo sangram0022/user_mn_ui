@@ -1,10 +1,13 @@
 // ========================================
 // Auth Context - Global Authentication State
 // Uses React 19's use() hook for context consumption
+// 
+// Note: useCallback KEPT for all action functions
+// Reason: Context value memoization - prevents unnecessary re-renders of consumers
 // ========================================
 
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
 import authService from '../services/authService';
 import tokenService from '../services/tokenService';
 import { logger } from '@/core/logging';
@@ -81,6 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // ========================================
   // Actions
+  // Kept: useCallback for context value stability (prevents consumer re-renders)
   // ========================================
 
   /**
@@ -266,13 +270,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, [checkAuth]); // checkAuth is stable (useCallback)
 
   // ========================================
   // Context Value (State + Actions)
+  // Kept: useMemo for context value identity (prevents unnecessary re-renders)
   // ========================================
 
-  const value: AuthContextValue = {
+  const value: AuthContextValue = useMemo(() => ({
     // State
     user: state.user,
     isAuthenticated: state.isAuthenticated,
@@ -285,7 +290,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuth,
     refreshSession,
     updateUser,
-  };
+  }), [state.user, state.isAuthenticated, state.isLoading, state.permissions, login, logout, checkAuth, refreshSession, updateUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -9,7 +9,7 @@
 // - Real-time data synchronization
 // ========================================
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveRegion, useKeyboardNavigation } from '../../../shared/components/accessibility/AccessibilityEnhancements';
 import { logger } from '../../../core/logging';
@@ -419,55 +419,48 @@ function UsersManagementPage() {
   });
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   
-  // AWS CloudWatch records metrics automatically - development mock
-  const recordComponentMetric = useCallback(() => {}, []);
-  const { announce, LiveRegion } = useLiveRegion();
+  const { announce, LiveRegion} = useLiveRegion();
 
   // Filter and sort users
-  const filteredUsers = useMemo(() => {
-    // AWS CloudWatch monitors performance automatically
+  // React 19 Compiler: No useMemo needed - compiler optimizes automatically
+  const filtered = allUsers.filter(user => {
+    const matchesSearch = filters.search === '' || 
+      user.firstName.toLowerCase().includes(filters.search.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(filters.search.toLowerCase()) ||
+      user.email.toLowerCase().includes(filters.search.toLowerCase());
     
-    const filtered = allUsers.filter(user => {
-      const matchesSearch = filters.search === '' || 
-        user.firstName.toLowerCase().includes(filters.search.toLowerCase()) ||
-        user.lastName.toLowerCase().includes(filters.search.toLowerCase()) ||
-        user.email.toLowerCase().includes(filters.search.toLowerCase());
-      
-      const matchesRole = filters.role === '' || user.role === filters.role;
-      const matchesStatus = filters.status === '' || user.status === filters.status;
-      
-      return matchesSearch && matchesRole && matchesStatus;
-    });
+    const matchesRole = filters.role === '' || user.role === filters.role;
+    const matchesStatus = filters.status === '' || user.status === filters.status;
+    
+    return matchesSearch && matchesRole && matchesStatus;
+  });
 
-    // Sort users
-    filtered.sort((a, b) => {
-      let compareValue = 0;
-      
-      switch (filters.sortBy) {
-        case 'name':
-          compareValue = `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
-          break;
-        case 'email':
-          compareValue = a.email.localeCompare(b.email);
-          break;
-        case 'lastLogin': {
-          const aLogin = a.lastLogin?.getTime() || 0;
-          const bLogin = b.lastLogin?.getTime() || 0;
-          compareValue = aLogin - bLogin;
-          break;
-        }
-        case 'createdAt':
-          compareValue = a.createdAt.getTime() - b.createdAt.getTime();
-          break;
+  // Sort users
+  filtered.sort((a, b) => {
+    let compareValue = 0;
+    
+    switch (filters.sortBy) {
+      case 'name':
+        compareValue = `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+        break;
+      case 'email':
+        compareValue = a.email.localeCompare(b.email);
+        break;
+      case 'lastLogin': {
+        const aLogin = a.lastLogin?.getTime() || 0;
+        const bLogin = b.lastLogin?.getTime() || 0;
+        compareValue = aLogin - bLogin;
+        break;
       }
-      
-      return filters.sortOrder === 'desc' ? -compareValue : compareValue;
-    });
-
-    recordComponentMetric(); // AWS CloudWatch handles timing automatically
+      case 'createdAt':
+        compareValue = a.createdAt.getTime() - b.createdAt.getTime();
+        break;
+    }
     
-    return filtered;
-  }, [allUsers, filters, recordComponentMetric]);
+    return filters.sortOrder === 'desc' ? -compareValue : compareValue;
+  });
+
+  const filteredUsers = filtered;
 
   useEffect(() => {
     document.title = 'User Management - Admin';
