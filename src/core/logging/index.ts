@@ -14,6 +14,7 @@ export {
   formatTimestamp,
   getSourceLocation,
 } from './config.ts';
+export { diagnostic } from './diagnostic.ts';
 
 /**
  * Quick usage examples:

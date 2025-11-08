@@ -2,10 +2,14 @@
  * API Diagnostic Tool
  * Run this in browser console to diagnose the 401 error
  * 
- * Using centralized logger for diagnostic output
+ * Using centralized diagnostic logger for dual output:
+ * - Browser console: Immediate visibility with emoji styling
+ * - Structured logs: Persistence and debugging
+ * 
+ * @see {diagnostic} @/core/logging/diagnostic
  */
 
-import { logger } from '@/core/logging';
+import { logger, diagnostic } from '@/core/logging';
 
 // ============================================================================
 // Diagnostic Functions
@@ -19,7 +23,7 @@ export const diagnoseAPI = {
     const token = localStorage.getItem('access_token');
     
     if (!token) {
-      console.error('❌ No access token found in localStorage');
+      diagnostic.error('❌ No access token found in localStorage');
       return null;
     }
     
@@ -27,28 +31,28 @@ export const diagnoseAPI = {
       const [, payloadBase64] = token.split('.');
       const payload = JSON.parse(atob(payloadBase64));
       
-      logger().debug('✅ Access Token Found');
-      logger().debug('Token Payload:', { payload });
-      logger().debug('Permissions:', { permissions: payload.permissions || 'None' });
-      logger().debug('Roles:', { roles: payload.roles || 'None' });
-      logger().debug('Expires:', { expires: new Date(payload.exp * 1000).toLocaleString() });
+      diagnostic.log('✅ Access Token Found');
+      diagnostic.log('Token Payload:', { payload });
+      diagnostic.log('Permissions:', { permissions: payload.permissions || 'None' });
+      diagnostic.log('Roles:', { roles: payload.roles || 'None' });
+      diagnostic.log('Expires:', { expires: new Date(payload.exp * 1000).toLocaleString() });
       
       // Check for RBAC permissions
       const hasRbacRead = payload.permissions?.includes('admin:rbac:read');
       const hasUsersRead = payload.permissions?.includes('admin:users:read');
       
-      logger().debug('📊 Permission Check:');
-      logger().debug(`  admin:users:read: ${hasUsersRead ? '✅' : '❌'}`);
-      logger().debug(`  admin:rbac:read: ${hasRbacRead ? '✅' : '❌'}`);
+      diagnostic.log('📊 Permission Check:');
+      diagnostic.log(`  admin:users:read: ${hasUsersRead ? '✅' : '❌'}`);
+      diagnostic.log(`  admin:rbac:read: ${hasRbacRead ? '✅' : '❌'}`);
       
       if (!hasRbacRead) {
-        console.warn('\n⚠️ WARNING: Token lacks admin:rbac:read permission!');
-        console.warn('This is likely why role API returns 401');
+        diagnostic.warn('⚠️ WARNING: Token lacks admin:rbac:read permission!');
+        diagnostic.warn('This is likely why role API returns 401');
       }
       
       return payload;
     } catch (error) {
-      console.error('❌ Failed to decode token:', error);
+      diagnostic.error('❌ Failed to decode token:', error);
       return null;
     }
   },
@@ -60,14 +64,14 @@ export const diagnoseAPI = {
     const token = localStorage.getItem('access_token');
     
     if (!token) {
-      console.error('❌ No access token found');
+      diagnostic.error('❌ No access token found');
       return;
     }
     
     const baseURL = 'http://localhost:8000';
     
     // Test User API (working)
-    logger().debug('\n🧪 Testing User API...');
+    diagnostic.log('\n🧪 Testing User API...');
     try {
       const userResponse = await fetch(`${baseURL}/api/v1/admin/users?page=1&page_size=10`, {
         headers: {
@@ -76,21 +80,21 @@ export const diagnoseAPI = {
         },
       });
       
-      logger().debug(`User API Status: ${userResponse.status} ${userResponse.statusText}`);
+      diagnostic.log(`User API Status: ${userResponse.status} ${userResponse.statusText}`);
       
       if (userResponse.ok) {
         const data = await userResponse.json();
-        logger().debug('✅ User API Success:', data);
+        diagnostic.log('✅ User API Success:', data);
       } else {
         const error = await userResponse.text();
-        console.error('❌ User API Error:', error);
+        diagnostic.error('❌ User API Error:', error);
       }
     } catch (error) {
-      console.error('❌ User API Request Failed:', error);
+      diagnostic.error('❌ User API Request Failed:', error);
     }
     
     // Test Role API (failing)
-    logger().debug('\n🧪 Testing Role API (current path)...');
+    diagnostic.log('\n🧪 Testing Role API (current path)...');
     try {
       const roleResponse = await fetch(`${baseURL}/api/v1/admin/rbac/roles`, {
         headers: {
@@ -99,21 +103,21 @@ export const diagnoseAPI = {
         },
       });
       
-      logger().debug(`Role API Status: ${roleResponse.status} ${roleResponse.statusText}`);
+      diagnostic.log(`Role API Status: ${roleResponse.status} ${roleResponse.statusText}`);
       
       if (roleResponse.ok) {
         const data = await roleResponse.json();
-        logger().debug('✅ Role API Success:', data);
+        diagnostic.log('✅ Role API Success:', data);
       } else {
         const error = await roleResponse.text();
-        console.error('❌ Role API Error:', error);
+        diagnostic.error('❌ Role API Error:', error);
       }
     } catch (error) {
-      console.error('❌ Role API Request Failed:', error);
+      diagnostic.error('❌ Role API Request Failed:', error);
     }
     
     // Test alternative path
-    logger().debug('\n🧪 Testing Role API (alternative path)...');
+    diagnostic.log('\n🧪 Testing Role API (alternative path)...');
     try {
       const altResponse = await fetch(`${baseURL}/api/v1/admin/roles`, {
         headers: {
@@ -122,17 +126,17 @@ export const diagnoseAPI = {
         },
       });
       
-      logger().debug(`Alternative Role API Status: ${altResponse.status} ${altResponse.statusText}`);
+      diagnostic.log(`Alternative Role API Status: ${altResponse.status} ${altResponse.statusText}`);
       
       if (altResponse.ok) {
         const data = await altResponse.json();
-        logger().debug('✅ Alternative path works!:', data);
+        diagnostic.log('✅ Alternative path works!:', data);
       } else {
         const error = await altResponse.text();
-        console.error('❌ Alternative path also fails:', error);
+        diagnostic.error('❌ Alternative path also fails:', error);
       }
     } catch (error) {
-      console.error('❌ Alternative path request failed:', error);
+      diagnostic.error('❌ Alternative path request failed:', error);
     }
   },
   
@@ -140,19 +144,19 @@ export const diagnoseAPI = {
    * Compare API prefixes in code
    */
   checkPrefixes: () => {
-    logger().debug('📋 Current API Prefix Configuration:');
-    logger().debug('  ADMIN: /api/v1/admin');
-    logger().debug('  ADMIN_USERS: /api/v1/admin/users');
-    logger().debug('  ADMIN_RBAC: /api/v1/admin/rbac');
+    diagnostic.log('📋 Current API Prefix Configuration:');
+    diagnostic.log('  ADMIN: /api/v1/admin');
+    diagnostic.log('  ADMIN_USERS: /api/v1/admin/users');
+    diagnostic.log('  ADMIN_RBAC: /api/v1/admin/rbac');
     
-    logger().debug('\n🔍 Actual URLs Used:');
-    logger().debug('  User List: /api/v1/admin + /users = /api/v1/admin/users ✅');
-    logger().debug('  Role List: /api/v1/admin/rbac + /roles = /api/v1/admin/rbac/roles ❓');
+    diagnostic.log('\n🔍 Actual URLs Used:');
+    diagnostic.log('  User List: /api/v1/admin + /users = /api/v1/admin/users ✅');
+    diagnostic.log('  Role List: /api/v1/admin/rbac + /roles = /api/v1/admin/rbac/roles ❓');
     
-    logger().debug('\n💡 Recommendation:');
-    logger().debug('  Check backend to see if it expects:');
-    logger().debug('    Option A: /api/v1/admin/rbac/roles');
-    logger().debug('    Option B: /api/v1/admin/roles');
+    diagnostic.log('\n💡 Recommendation:');
+    diagnostic.log('  Check backend to see if it expects:');
+    diagnostic.log('    Option A: /api/v1/admin/rbac/roles');
+    diagnostic.log('    Option B: /api/v1/admin/roles');
   },
   
   /**
@@ -162,10 +166,10 @@ export const diagnoseAPI = {
     const token = localStorage.getItem('access_token');
     const csrfToken = localStorage.getItem('csrf_token');
     
-    logger().debug('🔒 Request Headers That Will Be Sent:');
-    logger().debug(`  Authorization: ${token ? `Bearer ${token.substring(0, 20)}...` : '❌ Missing'}`);
-    logger().debug(`  X-CSRF-Token: ${csrfToken ? csrfToken : '❌ Missing (only for mutations)'}`);
-    logger().debug('  Content-Type: application/json');
+    diagnostic.log('🔒 Request Headers That Will Be Sent:');
+    diagnostic.log(`  Authorization: ${token ? `Bearer ${token.substring(0, 20)}...` : '❌ Missing'}`);
+    diagnostic.log(`  X-CSRF-Token: ${csrfToken ? csrfToken : '❌ Missing (only for mutations)'}`);
+    diagnostic.log('  Content-Type: application/json');
   },
   
   /**
@@ -173,20 +177,18 @@ export const diagnoseAPI = {
    */
   runFullDiagnostic: async () => {
     // Clear console for cleaner output (diagnostic tool)
-    if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
-      console.clear();
-    }
-    logger().debug('🔍 API DIAGNOSTIC REPORT');
-    logger().debug('========================');
+    diagnostic.clear();
+    
+    diagnostic.log('🔍 API DIAGNOSTIC REPORT');
+    diagnostic.log('========================');
     
     diagnoseAPI.checkToken();
     diagnoseAPI.checkPrefixes();
     diagnoseAPI.checkHeaders();
     await diagnoseAPI.testEndpoints();
     
-    logger().debug('\n✅ Diagnostic Complete');
-    logger().debug('Check the output above for issues');
+    diagnostic.log('\n✅ Diagnostic Complete');
+    diagnostic.log('Check the output above for issues');
   }
 };
 
