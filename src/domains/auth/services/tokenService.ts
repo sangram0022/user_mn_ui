@@ -1,6 +1,15 @@
 // ========================================
 // Token Service
 // Token management and CSRF operations
+// 
+// Response Format:
+// API functions return backend ApiResponse<T> format:
+// - Success: { success: true, data: T, message?, timestamp? }
+// - Error: { success: false, error: string, field_errors?, message_code?, timestamp? }
+// 
+// Local storage functions manage token persistence (no API calls).
+// 
+// @see {ApiResponse} @/core/api/types
 // ========================================
 
 import { apiClient } from '../../../services/api/apiClient';
@@ -29,6 +38,13 @@ const REMEMBER_ME_EMAIL_KEY = 'remember_me_email';
 /**
  * POST /api/v1/auth/refresh
  * Refresh access token
+ * 
+ * @param refreshToken - The refresh token string
+ * @returns Full API response with new token data
+ * @throws {APIError} On invalid or expired refresh token (401)
+ * 
+ * Backend returns: ApiResponse<{ access_token, refresh_token, token_type, expires_in }>
+ * This function returns: RefreshTokenResponse (full response)
  */
 export const refreshToken = async (refreshToken: string): Promise<RefreshTokenResponse> => {
   const response = await apiClient.post<RefreshTokenResponse>(`${API_PREFIX}/refresh`, {
@@ -39,7 +55,13 @@ export const refreshToken = async (refreshToken: string): Promise<RefreshTokenRe
 
 /**
  * GET /api/v1/auth/csrf-token
- * Get CSRF token
+ * Get CSRF token for secure form submissions
+ * 
+ * @returns Full API response with CSRF token
+ * @throws {APIError} On server error
+ * 
+ * Backend returns: ApiResponse<{ csrf_token: string }>
+ * This function returns: CsrfTokenResponse (full response)
  */
 export const getCsrfToken = async (): Promise<CsrfTokenResponse> => {
   const response = await apiClient.get<CsrfTokenResponse>(`${API_PREFIX}/csrf-token`);
@@ -49,6 +71,13 @@ export const getCsrfToken = async (): Promise<CsrfTokenResponse> => {
 /**
  * POST /api/v1/auth/validate-csrf
  * Validate CSRF token
+ * 
+ * @param data - CSRF token to validate
+ * @returns Full API response with validation result
+ * @throws {APIError} On invalid CSRF token
+ * 
+ * Backend returns: ApiResponse<{ valid: boolean, message: string }>
+ * This function returns: ValidateCsrfResponse (full response)
  */
 export const validateCsrfToken = async (data: ValidateCsrfRequest): Promise<ValidateCsrfResponse> => {
   const response = await apiClient.post<ValidateCsrfResponse>(`${API_PREFIX}/validate-csrf`, data);
