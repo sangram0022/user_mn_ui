@@ -1,4 +1,9 @@
 # robots.txt for User Management System
+# Optimized for S3 + CloudFront deployment
+
+# ============================================
+# Production Configuration
+# ============================================
 
 # Allow all robots to crawl public pages
 User-agent: *
@@ -6,24 +11,63 @@ Allow: /
 Allow: /login
 Allow: /register
 Allow: /forgot-password
+Allow: /contact
+Allow: /about
 
 # Disallow crawling of authenticated/private areas
 Disallow: /dashboard
-Disallow: /admin
-Disallow: /auditor
-Disallow: /user
+Disallow: /admin/
+Disallow: /auditor/
+Disallow: /user/
 Disallow: /profile
 Disallow: /settings
-Disallow: /api
-Disallow: /*.json$
+Disallow: /auth/
 
-# Disallow showcase/development pages (if in production)
+# Disallow API endpoints and internal files
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /assets/
+Disallow: /locales/
+
+# Disallow development/showcase pages (remove in production if needed)
 Disallow: /showcase
 Disallow: /products
 Disallow: /services
 
-# Sitemap location
-Sitemap: https://example.com/sitemap.xml
+# ============================================
+# Search Engine Specific Rules
+# ============================================
 
-# Crawl-delay (optional, adjust as needed)
+# Google-specific
+User-agent: Googlebot
+Allow: /
+Allow: /login
+Allow: /register
+Disallow: /dashboard
+Disallow: /admin/
+
+# Bing-specific
+User-agent: Bingbot
+Allow: /
+Disallow: /dashboard
+Disallow: /admin/
+
+# ============================================
+# Sitemap Location
+# ============================================
+# NOTE: Update SITE_URL during deployment
+# Example: https://d1234567890.cloudfront.net or https://yourdomain.com
+Sitemap: SITE_URL/sitemap.xml
+
+# ============================================
+# Crawl Rate Control
+# ============================================
+# Crawl-delay: 1 second between requests
+# Adjust based on CloudFront capacity and costs
 Crawl-delay: 1
+
+# ============================================
+# Bad Bot Protection
+# ============================================
+# Block known bad bots (handled by WAF in production)
+# CloudFront WAF provides better protection than robots.txt

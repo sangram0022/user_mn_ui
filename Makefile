@@ -582,3 +582,223 @@ ci-deploy-production: terraform-apply-production deploy-ecs-production run-smoke
 # Full CI pipeline
 ci-full-pipeline: ci-validate ci-build ci-test ci-security ci-quality ci-package ## Run full CI pipeline
 	@echo "$(GREEN)Full CI pipeline completed$(NC)"
+
+# ============================================================================
+# S3 + CLOUDFRONT DEPLOYMENT TARGETS
+# ============================================================================
+
+# Terraform targets for S3+CloudFront infrastructure
+terraform-init-s3: ## Initialize Terraform for S3+CloudFront
+@echo "$(BLUE)Initializing Terraform...$(NC)"
+cd $(TERRAFORM_DIR) && terraform init
+
+terraform-plan-dev: terraform-init-s3 ## Plan Terraform changes for development
+@echo "$(BLUE)Planning Terraform changes for development...$(NC)"
+cd $(TERRAFORM_DIR) && terraform plan -var-file=dev.tfvars -out=tfplan-dev
+
+terraform-plan-staging: terraform-init-s3 ## Plan Terraform changes for staging
+@echo "$(BLUE)Planning Terraform changes for staging...$(NC)"
+cd $(TERRAFORM_DIR) && terraform plan -var-file=staging.tfvars -out=tfplan-staging
+
+terraform-plan-production: terraform-init-s3 ## Plan Terraform changes for production
+@echo "$(BLUE)Planning Terraform changes for production...$(NC)"
+cd $(TERRAFORM_DIR) && terraform plan -var-file=production.tfvars -out=tfplan-production
+
+terraform-apply-dev: terraform-plan-dev ## Apply Terraform changes for development
+@echo "$(BLUE)Applying Terraform changes for development...$(NC)"
+cd $(TERRAFORM_DIR) && terraform apply tfplan-dev
+@echo "$(GREEN)Terraform apply completed for development$(NC)"
+
+terraform-apply-staging: terraform-plan-staging ## Apply Terraform changes for staging
+@echo "$(BLUE)Applying Terraform changes for staging...$(NC)"
+cd $(TERRAFORM_DIR) && terraform apply tfplan-staging
+@echo "$(GREEN)Terraform apply completed for staging$(NC)"
+
+terraform-apply-production: terraform-plan-production ## Apply Terraform changes for production
+@echo "$(BLUE)Applying Terraform changes for production...$(NC)"
+cd $(TERRAFORM_DIR) && terraform apply tfplan-production
+@echo "$(GREEN)Terraform apply completed for production$(NC)"
+
+terraform-destroy-dev: ## Destroy Terraform resources for development
+@echo "$(RED)WARNING: This will destroy all resources!$(NC)"
+@echo "Press Ctrl+C within 10 seconds to cancel..."
+@sleep 10
+cd $(TERRAFORM_DIR) && terraform destroy -var-file=dev.tfvars -auto-approve
+
+terraform-show-outputs: ## Show Terraform outputs
+@echo "$(BLUE)Terraform Outputs:$(NC)"
+cd $(TERRAFORM_DIR) && terraform output -json | jq '.'
+
+# S3 sync targets
+deploy-s3-dev: build-production ## Deploy to S3 development bucket
+@echo "$(BLUE)Deploying to S3 development bucket...$(NC)"
+$(eval S3_BUCKET := $(shell cd $(TERRAFORM_DIR) && terraform output -raw s3_bucket_id))
+aws s3 sync $(BUILD_DIR) s3://$(S3_BUCKET) \
+--delete \
+--cache-control "public, max-age=31536000, immutable" \
+--exclude "index.html" \
+--exclude "*.map"
+aws s3 cp $(BUILD_DIR)/index.html s3://$(S3_BUCKET)/index.html \
+--cache-control "public, max-age=0, must-revalidate" \
+--content-type "text/html"
+@echo "$(GREEN)Deployment to S3 completed$(NC)"
+
+deploy-s3-staging: build-production ## Deploy to S3 staging bucket
+@echo "$(BLUE)Deploying to S3 staging bucket...$(NC)"
+$(eval S3_BUCKET := $(shell cd $(TERRAFORM_DIR) && terraform output -raw s3_bucket_id))
+aws s3 sync $(BUILD_DIR) s3://$(S3_BUCKET) \
+--delete \
+--cache-control "public, max-age=31536000, immutable" \
+--exclude "index.html" \
+--exclude "*.map" \
+--exclude "health.html"
+aws s3 cp $(BUILD_DIR)/index.html s3://$(S3_BUCKET)/index.html \
+--cache-control "public, max-age=0, must-revalidate" \
+--content-type "text/html"
+aws s3 cp $(BUILD_DIR)/health.html s3://$(S3_BUCKET)/health.html \
+--cache-control "public, max-age=60" \
+--content-type "text/html"
+@echo "$(GREEN)Deployment to S3 staging completed$(NC)"
+
+deploy-s3-production: build-production ## Deploy to S3 production bucket (requires confirmation)
+@echo "$(RED)WARNING: Deploying to PRODUCTION!$(NC)"
+@echo "Press Ctrl+C within 10 seconds to cancel..."
+@sleep 10
+@echo "$(BLUE)Deploying to S3 production bucket...$(NC)"
+$(eval S3_BUCKET := $(shell cd $(TERRAFORM_DIR) && terraform output -raw s3_bucket_id))
+aws s3 sync $(BUILD_DIR) s3://$(S3_BUCKET) \
+--delete \
+--cache-control "public, max-age=31536000, immutable" \
+--exclude "index.html" \
+--exclude "*.map" \
+--exclude "health.html"
+aws s3 cp $(BUILD_DIR)/index.html s3://$(S3_BUCKET)/index.html \
+--cache-control "public, max-age=0, must-revalidate" \
+--content-type "text/html"
+aws s3 cp $(BUILD_DIR)/health.html s3://$(S3_BUCKET)/health.html \
+--cache-control "public, max-age=60" \
+--content-type "text/html"
+@echo "$(GREEN)Deployment to S3 production completed$(NC)"
+
+# CloudFront invalidation targets
+invalidate-cloudfront-dev: ## Invalidate CloudFront cache for development
+@echo "$(BLUE)Invalidating CloudFront cache for development...$(NC)"
+$(eval DISTRIBUTION_ID := $(shell cd $(TERRAFORM_DIR) && terraform output -raw cloudfront_distribution_id))
+aws cloudfront create-invalidation --distribution-id $(DISTRIBUTION_ID) --paths "/*"
+@echo "$(GREEN)CloudFront cache invalidation initiated$(NC)"
+
+invalidate-cloudfront-staging: ## Invalidate CloudFront cache for staging
+@echo "$(BLUE)Invalidating CloudFront cache for staging...$(NC)"
+$(eval DISTRIBUTION_ID := $(shell cd $(TERRAFORM_DIR) && terraform output -raw cloudfront_distribution_id))
+aws cloudfront create-invalidation --distribution-id $(DISTRIBUTION_ID) --paths "/*"
+@echo "$(GREEN)CloudFront cache invalidation initiated$(NC)"
+
+invalidate-cloudfront-production: ## Invalidate CloudFront cache for production
+@echo "$(BLUE)Invalidating CloudFront cache for production...$(NC)"
+$(eval DISTRIBUTION_ID := $(shell cd $(TERRAFORM_DIR) && terraform output -raw cloudfront_distribution_id))
+aws cloudfront create-invalidation --distribution-id $(DISTRIBUTION_ID) --paths "/*"
+@echo "$(GREEN)CloudFront cache invalidation initiated$(NC)"
+
+invalidate-cloudfront-selective: ## Invalidate specific CloudFront paths (use PATHS variable)
+@echo "$(BLUE)Invalidating specific CloudFront paths...$(NC)"
+$(eval DISTRIBUTION_ID := $(shell cd $(TERRAFORM_DIR) && terraform output -raw cloudfront_distribution_id))
+@if [ -z "$(PATHS)" ]; then \
+echo "$(RED)Error: PATHS variable not set. Usage: make invalidate-cloudfront-selective PATHS='/index.html /assets/*'$(NC)"; \
+exit 1; \
+fi
+aws cloudfront create-invalidation --distribution-id $(DISTRIBUTION_ID) --paths $(PATHS)
+@echo "$(GREEN)CloudFront selective cache invalidation initiated$(NC)"
+
+# Check CloudFront distribution status
+check-cloudfront-status: ## Check CloudFront distribution status
+@echo "$(BLUE)Checking CloudFront distribution status...$(NC)"
+$(eval DISTRIBUTION_ID := $(shell cd $(TERRAFORM_DIR) && terraform output -raw cloudfront_distribution_id))
+aws cloudfront get-distribution --id $(DISTRIBUTION_ID) --query 'Distribution.Status' --output text
+
+# Check invalidation status
+check-invalidation-status: ## Check CloudFront invalidation status (use INVALIDATION_ID variable)
+@echo "$(BLUE)Checking CloudFront invalidation status...$(NC)"
+$(eval DISTRIBUTION_ID := $(shell cd $(TERRAFORM_DIR) && terraform output -raw cloudfront_distribution_id))
+@if [ -z "$(INVALIDATION_ID)" ]; then \
+echo "$(RED)Error: INVALIDATION_ID variable not set. Usage: make check-invalidation-status INVALIDATION_ID=<id>$(NC)"; \
+exit 1; \
+fi
+aws cloudfront get-invalidation --distribution-id $(DISTRIBUTION_ID) --id $(INVALIDATION_ID)
+
+# Complete deployment workflow targets
+deploy-full-dev: terraform-apply-dev deploy-s3-dev invalidate-cloudfront-dev ## Full deployment workflow for development
+@echo "$(GREEN)Full development deployment completed!$(NC)"
+@echo "$(BLUE)Website URL:$(NC)"
+cd $(TERRAFORM_DIR) && terraform output -raw website_url
+
+deploy-full-staging: terraform-apply-staging deploy-s3-staging invalidate-cloudfront-staging ## Full deployment workflow for staging
+@echo "$(GREEN)Full staging deployment completed!$(NC)"
+@echo "$(BLUE)Website URL:$(NC)"
+cd $(TERRAFORM_DIR) && terraform output -raw website_url
+
+deploy-full-production: terraform-apply-production deploy-s3-production invalidate-cloudfront-production ## Full deployment workflow for production
+@echo "$(GREEN)Full production deployment completed!$(NC)"
+@echo "$(BLUE)Website URL:$(NC)"
+cd $(TERRAFORM_DIR) && terraform output -raw website_url
+
+# Rollback targets
+rollback-s3-staging: ## Rollback S3 staging deployment to previous version
+@echo "$(BLUE)Rolling back S3 staging deployment...$(NC)"
+$(eval S3_BUCKET := $(shell cd $(TERRAFORM_DIR) && terraform output -raw s3_bucket_id))
+aws s3api list-object-versions --bucket $(S3_BUCKET) --prefix "index.html" --query 'Versions[1].VersionId' --output text | \
+xargs -I {} aws s3api copy-object --bucket $(S3_BUCKET) --copy-source $(S3_BUCKET)/index.html?versionId={} --key index.html
+@echo "$(GREEN)S3 rollback completed$(NC)"
+
+rollback-s3-production: ## Rollback S3 production deployment to previous version
+@echo "$(RED)WARNING: Rolling back PRODUCTION deployment!$(NC)"
+@echo "Press Ctrl+C within 10 seconds to cancel..."
+@sleep 10
+@echo "$(BLUE)Rolling back S3 production deployment...$(NC)"
+$(eval S3_BUCKET := $(shell cd $(TERRAFORM_DIR) && terraform output -raw s3_bucket_id))
+aws s3api list-object-versions --bucket $(S3_BUCKET) --prefix "index.html" --query 'Versions[1].VersionId' --output text | \
+xargs -I {} aws s3api copy-object --bucket $(S3_BUCKET) --copy-source $(S3_BUCKET)/index.html?versionId={} --key index.html
+@echo "$(GREEN)S3 rollback completed$(NC)"
+
+# Health check targets
+health-check-dev: ## Check health of development deployment
+@echo "$(BLUE)Checking health of development deployment...$(NC)"
+$(eval WEBSITE_URL := $(shell cd $(TERRAFORM_DIR) && terraform output -raw website_url))
+curl -f $(WEBSITE_URL)/health.html || echo "$(RED)Health check failed$(NC)"
+
+health-check-staging: ## Check health of staging deployment
+@echo "$(BLUE)Checking health of staging deployment...$(NC)"
+$(eval WEBSITE_URL := $(shell cd $(TERRAFORM_DIR) && terraform output -raw website_url))
+curl -f $(WEBSITE_URL)/health.html || echo "$(RED)Health check failed$(NC)"
+
+health-check-production: ## Check health of production deployment
+@echo "$(BLUE)Checking health of production deployment...$(NC)"
+$(eval WEBSITE_URL := $(shell cd $(TERRAFORM_DIR) && terraform output -raw website_url))
+curl -f $(WEBSITE_URL)/health.html || echo "$(RED)Health check failed$(NC)"
+
+# Cache warming targets
+warm-cache-dev: ## Warm CloudFront cache for development
+@echo "$(BLUE)Warming CloudFront cache for development...$(NC)"
+$(eval WEBSITE_URL := $(shell cd $(TERRAFORM_DIR) && terraform output -raw website_url))
+@for path in / /assets/index.css /assets/index.js; do \
+echo "Warming cache: $(WEBSITE_URL)$$path"; \
+curl -s -o /dev/null $(WEBSITE_URL)$$path; \
+done
+@echo "$(GREEN)Cache warming completed$(NC)"
+
+warm-cache-staging: ## Warm CloudFront cache for staging
+@echo "$(BLUE)Warming CloudFront cache for staging...$(NC)"
+$(eval WEBSITE_URL := $(shell cd $(TERRAFORM_DIR) && terraform output -raw website_url))
+@for path in / /assets/index.css /assets/index.js; do \
+echo "Warming cache: $(WEBSITE_URL)$$path"; \
+curl -s -o /dev/null $(WEBSITE_URL)$$path; \
+done
+@echo "$(GREEN)Cache warming completed$(NC)"
+
+warm-cache-production: ## Warm CloudFront cache for production
+@echo "$(BLUE)Warming CloudFront cache for production...$(NC)"
+$(eval WEBSITE_URL := $(shell cd $(TERRAFORM_DIR) && terraform output -raw website_url))
+@for path in / /assets/index.css /assets/index.js; do \
+echo "Warming cache: $(WEBSITE_URL)$$path"; \
+curl -s -o /dev/null $(WEBSITE_URL)$$path; \
+done
+@echo "$(GREEN)Cache warming completed$(NC)"

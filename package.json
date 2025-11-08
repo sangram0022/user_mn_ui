@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc -b && vite build",
-    "build:dev": "tsc -b && vite build --mode development",
-    "build:prod": "NODE_ENV=production tsc -b && vite build --mode production",
+    "build": "tsc -b && vite build && node scripts/update-site-urls.mjs",
+    "build:dev": "tsc -b && vite build --mode development && node scripts/update-site-urls.mjs",
+    "build:prod": "NODE_ENV=production tsc -b && vite build --mode production && node scripts/update-site-urls.mjs",
     "optimize-build": "npm run analyze-bundle && npm run compress-assets",
     "preview": "vite preview --host 0.0.0.0",
     "serve": "vite preview --port 3000",

@@ -4,42 +4,56 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
                             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   
+  <!-- 
+    NOTE: Replace SITE_URL with actual domain during deployment
+    Production: Use CloudFront distribution domain or custom domain
+    Example: https://d1234567890.cloudfront.net or https://yourdomain.com
+  -->
+  
   <!-- Homepage -->
   <url>
-    <loc>https://example.com/</loc>
-    <lastmod>2025-11-02</lastmod>
+    <loc>SITE_URL/</loc>
+    <lastmod>2025-11-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   
-  <!-- Auth Pages -->
+  <!-- Auth Pages (Public) -->
   <url>
-    <loc>https://example.com/login</loc>
-    <lastmod>2025-11-02</lastmod>
+    <loc>SITE_URL/login</loc>
+    <lastmod>2025-11-08</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://example.com/register</loc>
-    <lastmod>2025-11-02</lastmod>
+    <loc>SITE_URL/register</loc>
+    <lastmod>2025-11-08</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://example.com/forgot-password</loc>
-    <lastmod>2025-11-02</lastmod>
+    <loc>SITE_URL/forgot-password</loc>
+    <lastmod>2025-11-08</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
   
   <!-- Public Pages -->
   <url>
-    <loc>https://example.com/contact</loc>
-    <lastmod>2025-11-02</lastmod>
+    <loc>SITE_URL/contact</loc>
+    <lastmod>2025-11-08</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
+  
+  <!-- 
+    Note: Private/authenticated pages are excluded from sitemap
+    - /dashboard (requires authentication)
+    - /admin/* (requires admin role)
+    - /auditor/* (requires auditor role)
+    - /profile (requires authentication)
+  -->
 
 </urlset>

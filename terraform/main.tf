@@ -1,265 +1,714 @@
-# Terraform Root Configuration
-# React 19 Application Infrastructure on AWS
+# ============================================================================
+# Terraform Configuration for React 19 Static Website
+# Architecture: S3 + CloudFront + Route53 + WAF
+# ============================================================================
 
 terraform {
-  required_version = ">= 1.6.0"
+  required_version = ">= 1.7.0"
   
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 5.80"
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.1"
-    }
-    null = {
-      source  = "hashicorp/null"
-      version = "~> 3.1"
+      version = "~> 3.6"
     }
   }
 
-  # Backend configuration for state management
+  # S3 backend for state management
+  # Configure via: terraform init -backend-config="bucket=your-state-bucket"
   backend "s3" {
-    # These values should be set via backend-config during terraform init
-    # terraform init -backend-config="bucket=your-terraform-state-bucket"
-    # bucket         = "terraform-state-bucket"
-    # key            = "react-app/terraform.tfstate"
-    # region         = "us-east-1"
-    # encrypt        = true
-    # dynamodb_table = "terraform-state-lock"
+    key            = "react-app/terraform.tfstate"
+    encrypt        = true
+    dynamodb_table = "terraform-state-lock"
   }
 }
 
-# Configure the AWS Provider
+# ============================================================================
+# Provider Configuration
+# ============================================================================
+
 provider "aws" {
   region = var.aws_region
 
-  # Common tags for all resources
   default_tags {
     tags = {
       Project     = var.project_name
       Environment = var.environment
-      ManagedBy   = "terraform"
-      Owner       = var.owner
-      Application = "react-19-app"
+      ManagedBy   = "Terraform"
+      Application = "React19-StaticWebsite"
       CostCenter  = var.cost_center
+      Repository  = var.repository_url
     }
   }
 }
 
-# Data sources for existing AWS resources
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-data "aws_availability_zones" "available" {
-  state = "available"
-}
+# CloudFront requires ACM certificates in us-east-1
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
 
-# Random password for database (if needed)
-resource "random_password" "db_password" {
-  count   = var.create_database ? 1 : 0
-  length  = 16
-  special = true
-}
-
-# Local values for computed configurations
-locals {
-  account_id = data.aws_caller_identity.current.account_id
-  region     = data.aws_region.current.name
-  
-  # Common naming convention
-  name_prefix = "${var.project_name}-${var.environment}"
-  
-  # Availability zones (minimum 2 for high availability)
-  azs = slice(data.aws_availability_zones.available.names, 0, min(length(data.aws_availability_zones.available.names), var.max_availability_zones))
-  
-  # Common tags
-  common_tags = {
-    Project     = var.project_name
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    Owner       = var.owner
-    Application = "react-19-app"
-    CostCenter  = var.cost_center
-    GitlabProject = var.gitlab_project_path
-    CreatedAt   = timestamp()
+  default_tags {
+    tags = {
+      Project     = var.project_name
+      Environment = var.environment
+      ManagedBy   = "Terraform"
+      Application = "React19-StaticWebsite"
+    }
   }
 }
 
-# Network Module - VPC, Subnets, Routing
-module "network" {
-  source = "./modules/network"
+# ============================================================================
+# Data Sources
+# ============================================================================
+data "aws_caller_identity" "current" {}
 
-  name_prefix         = local.name_prefix
-  vpc_cidr           = var.vpc_cidr
-  availability_zones = local.azs
+data "aws_canonical_user_id" "current" {}
+
+# ============================================================================
+# Local Variables
+# ============================================================================
+
+locals {
+  account_id  = data.aws_caller_identity.current.account_id
+  bucket_name = var.s3_bucket_name != "" ? var.s3_bucket_name : "${var.project_name}-${var.environment}-${local.account_id}"
   
-  # Subnet configuration
-  public_subnet_cidrs  = var.public_subnet_cidrs
-  private_subnet_cidrs = var.private_subnet_cidrs
+  # Origin ID for CloudFront
+  s3_origin_id = "S3-${local.bucket_name}"
   
-  # NAT Gateway configuration
-  enable_nat_gateway     = var.enable_nat_gateway
-  single_nat_gateway     = var.single_nat_gateway
-  enable_vpn_gateway     = var.enable_vpn_gateway
-  
-  # DNS configuration
-  enable_dns_hostnames = var.enable_dns_hostnames
-  enable_dns_support   = var.enable_dns_support
-  
-  tags = local.common_tags
+  # Common MIME types for caching
+  cache_control_by_type = {
+    "text/html"                 = "public, max-age=0, must-revalidate"
+    "application/json"          = "public, max-age=0, must-revalidate"
+    "text/css"                  = "public, max-age=31536000, immutable"
+    "application/javascript"    = "public, max-age=31536000, immutable"
+    "image/jpeg"               = "public, max-age=31536000, immutable"
+    "image/png"                = "public, max-age=31536000, immutable"
+    "image/svg+xml"            = "public, max-age=31536000, immutable"
+    "image/webp"               = "public, max-age=31536000, immutable"
+    "font/woff"                = "public, max-age=31536000, immutable"
+    "font/woff2"               = "public, max-age=31536000, immutable"
+  }
 }
 
-# Security Module - IAM, Security Groups, WAF
-module "security" {
-  source = "./modules/security"
+# ============================================================================
+# S3 Bucket for Static Website Hosting
+# ============================================================================
 
-  name_prefix = local.name_prefix
-  vpc_id      = module.network.vpc_id
-  
-  # Application configuration
-  application_port = var.application_port
-  allowed_cidrs   = var.allowed_cidrs
-  
-  # WAF configuration
-  enable_waf          = var.enable_waf
-  waf_rate_limit      = var.waf_rate_limit
-  waf_allowed_countries = var.waf_allowed_countries
-  
-  # SSL configuration
-  ssl_certificate_arn = var.ssl_certificate_arn
-  
-  tags = local.common_tags
+resource "aws_s3_bucket" "website" {
+  bucket        = local.bucket_name
+  force_destroy = var.environment != "production" # Only allow in non-prod
+
+  tags = {
+    Name        = local.bucket_name
+    Purpose     = "StaticWebsiteHosting"
+    Environment = var.environment
+  }
 }
 
-# Container Module - ECR, ECS Task Definitions
-module "container" {
-  source = "./modules/container"
+# Enable versioning for backup and rollback capability
+resource "aws_s3_bucket_versioning" "website" {
+  bucket = aws_s3_bucket.website.id
 
-  name_prefix = local.name_prefix
-  
-  # ECR configuration
-  ecr_repository_name = var.ecr_repository_name
-  image_tag_mutability = var.image_tag_mutability
-  image_scanning_on_push = var.image_scanning_on_push
-  
-  # Container configuration
-  container_name   = var.container_name
-  container_port   = var.container_port
-  container_cpu    = var.container_cpu
-  container_memory = var.container_memory
-  
-  # Health check configuration
-  health_check_path     = var.health_check_path
-  health_check_interval = var.health_check_interval
-  health_check_timeout  = var.health_check_timeout
-  
-  # Environment variables
-  environment_variables = var.environment_variables
-  secrets              = var.secrets
-  
-  # IAM roles from security module
-  ecs_task_execution_role_arn = module.security.ecs_task_execution_role_arn
-  ecs_task_role_arn          = module.security.ecs_task_role_arn
-  
-  tags = local.common_tags
+  versioning_configuration {
+    status = var.enable_versioning ? "Enabled" : "Suspended"
+  }
 }
 
-# Compute Module - ECS/Fargate, ALB, Auto Scaling
-module "compute" {
-  source = "./modules/compute"
+# Configure server-side encryption
+resource "aws_s3_bucket_server_side_encryption_configuration" "website" {
+  bucket = aws_s3_bucket.website.id
 
-  name_prefix = local.name_prefix
-  
-  # Network configuration
-  vpc_id            = module.network.vpc_id
-  public_subnet_ids = module.network.public_subnet_ids
-  private_subnet_ids = module.network.private_subnet_ids
-  
-  # Security configuration
-  alb_security_group_id = module.security.alb_security_group_id
-  ecs_security_group_id = module.security.ecs_security_group_id
-  
-  # ECS configuration
-  ecs_cluster_name = var.ecs_cluster_name
-  enable_container_insights = var.enable_container_insights
-  
-  # Fargate service configuration
-  service_name         = var.service_name
-  task_definition_arn  = module.container.task_definition_arn
-  desired_count        = var.desired_count
-  min_capacity         = var.min_capacity
-  max_capacity         = var.max_capacity
-  
-  # Load balancer configuration
-  certificate_arn    = var.ssl_certificate_arn
-  health_check_path  = var.health_check_path
-  target_port        = var.container_port
-  
-  # Auto scaling configuration
-  cpu_target_value    = var.cpu_target_value
-  memory_target_value = var.memory_target_value
-  
-  # Blue/Green deployment
-  enable_blue_green = var.enable_blue_green
-  
-  tags = local.common_tags
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+    bucket_key_enabled = true
+  }
 }
 
-# API Module - API Gateway, Lambda (if needed)
-module "api" {
-  source = "./modules/api"
-  count  = var.create_api_gateway ? 1 : 0
+# Block public access (CloudFront will access via OAC)
+resource "aws_s3_bucket_public_access_block" "website" {
+  bucket = aws_s3_bucket.website.id
 
-  name_prefix = local.name_prefix
-  
-  # API Gateway configuration
-  api_gateway_name        = var.api_gateway_name
-  api_gateway_description = var.api_gateway_description
-  api_gateway_stage_name  = var.environment
-  
-  # Lambda configuration (if using Lambda for API)
-  lambda_functions = var.lambda_functions
-  
-  # Integration with ALB (if using direct integration)
-  alb_arn = module.compute.alb_arn
-  
-  # Security
-  api_key_required = var.api_key_required
-  throttle_settings = var.throttle_settings
-  
-  tags = local.common_tags
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
-# Monitoring Module - CloudWatch, X-Ray, Alarms
-module "monitoring" {
-  source = "./modules/monitoring"
+# Configure lifecycle rules
+resource "aws_s3_bucket_lifecycle_configuration" "website" {
+  bucket = aws_s3_bucket.website.id
 
-  name_prefix = local.name_prefix
-  
-  # ECS monitoring
-  ecs_cluster_name = module.compute.ecs_cluster_name
-  ecs_service_name = module.compute.ecs_service_name
-  
-  # ALB monitoring
-  alb_arn_suffix = module.compute.alb_arn_suffix
-  target_group_arn_suffix = module.compute.target_group_arn_suffix
-  
-  # CloudWatch configuration
-  log_retention_in_days = var.log_retention_in_days
-  
-  # X-Ray tracing
-  enable_xray_tracing = var.enable_xray_tracing
-  
-  # Alerting
-  sns_topic_arn = var.sns_topic_arn
-  alert_email   = var.alert_email
-  
-  # Thresholds
-  cpu_alarm_threshold    = var.cpu_alarm_threshold
-  memory_alarm_threshold = var.memory_alarm_threshold
-  response_time_threshold = var.response_time_threshold
-  error_rate_threshold   = var.error_rate_threshold
-  
-  tags = local.common_tags
+  rule {
+    id     = "delete-old-versions"
+    status = "Enabled"
+
+    noncurrent_version_expiration {
+      noncurrent_days = var.noncurrent_version_expiration_days
+    }
+  }
+
+  rule {
+    id     = "delete-incomplete-uploads"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+
+# Enable bucket logging (optional)
+resource "aws_s3_bucket_logging" "website" {
+  count = var.enable_logging ? 1 : 0
+
+  bucket        = aws_s3_bucket.website.id
+  target_bucket = aws_s3_bucket.logs[0].id
+  target_prefix = "s3-access-logs/"
+}
+
+# S3 bucket for logs
+resource "aws_s3_bucket" "logs" {
+  count = var.enable_logging ? 1 : 0
+
+  bucket        = "${local.bucket_name}-logs"
+  force_destroy = var.environment != "production"
+
+  tags = {
+    Name    = "${local.bucket_name}-logs"
+    Purpose = "AccessLogs"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "logs" {
+  count = var.enable_logging ? 1 : 0
+
+  bucket = aws_s3_bucket.logs[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+  count = var.enable_logging ? 1 : 0
+
+  bucket = aws_s3_bucket.logs[0].id
+
+  rule {
+    id     = "expire-logs"
+    status = "Enabled"
+
+    expiration {
+      days = var.log_retention_days
+    }
+  }
+}
+
+# ============================================================================
+# CloudFront Origin Access Control (OAC) - Latest Best Practice
+# ============================================================================
+
+resource "aws_cloudfront_origin_access_control" "website" {
+  name                              = "${local.bucket_name}-oac"
+  description                       = "OAC for ${local.bucket_name}"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+# S3 bucket policy to allow CloudFront OAC access
+resource "aws_s3_bucket_policy" "website" {
+  bucket = aws_s3_bucket.website.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontServicePrincipal"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.website.arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.website.arn
+          }
+        }
+      }
+    ]
+  })
+}
+
+# ============================================================================
+# CloudFront Distribution
+# ============================================================================
+
+resource "aws_cloudfront_distribution" "website" {
+  enabled             = true
+  is_ipv6_enabled     = true
+  http_version        = "http2and3"
+  price_class         = var.cloudfront_price_class
+  comment             = "CloudFront distribution for ${var.project_name} ${var.environment}"
+  default_root_object = "index.html"
+  aliases             = var.domain_names
+
+  # S3 Origin
+  origin {
+    domain_name              = aws_s3_bucket.website.bucket_regional_domain_name
+    origin_id                = local.s3_origin_id
+    origin_access_control_id = aws_cloudfront_origin_access_control.website.id
+
+    # Origin shield for additional caching layer (optional)
+    dynamic "origin_shield" {
+      for_each = var.enable_origin_shield ? [1] : []
+      content {
+        enabled              = true
+        origin_shield_region = var.aws_region
+      }
+    }
+  }
+
+  # Default cache behavior for all files
+  default_cache_behavior {
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id       = local.s3_origin_id
+    compress               = true
+    viewer_protocol_policy = "redirect-to-https"
+
+    # Use managed cache policy for optimal performance
+    cache_policy_id            = var.cache_policy_id != "" ? var.cache_policy_id : aws_cloudfront_cache_policy.optimized[0].id
+    origin_request_policy_id   = data.aws_cloudfront_origin_request_policy.cors_s3.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers.id
+  }
+
+  # Ordered cache behavior for static assets (CSS, JS, images)
+  ordered_cache_behavior {
+    path_pattern     = "/assets/*"
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id = local.s3_origin_id
+    compress         = true
+
+    viewer_protocol_policy = "redirect-to-https"
+    cache_policy_id        = aws_cloudfront_cache_policy.static_assets.id
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_s3.id
+  }
+
+  # Ordered cache behavior for index.html (no caching)
+  ordered_cache_behavior {
+    path_pattern     = "/index.html"
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id = local.s3_origin_id
+    compress         = true
+
+    viewer_protocol_policy = "redirect-to-https"
+    cache_policy_id        = aws_cloudfront_cache_policy.no_cache.id
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_s3.id
+  }
+
+  # Custom error responses for SPA routing
+  dynamic "custom_error_response" {
+    for_each = var.enable_spa_mode ? [
+      { error_code = 403, response_code = 200, response_page_path = "/index.html" },
+      { error_code = 404, response_code = 200, response_page_path = "/index.html" }
+    ] : []
+
+    content {
+      error_code            = custom_error_response.value.error_code
+      response_code         = custom_error_response.value.response_code
+      response_page_path    = custom_error_response.value.response_page_path
+      error_caching_min_ttl = 10
+    }
+  }
+
+  # Geo restrictions
+  restrictions {
+    geo_restriction {
+      restriction_type = var.geo_restriction_type
+      locations        = var.geo_restriction_locations
+    }
+  }
+
+  # SSL/TLS Certificate
+  viewer_certificate {
+    acm_certificate_arn      = var.acm_certificate_arn != "" ? var.acm_certificate_arn : null
+    cloudfront_default_certificate = var.acm_certificate_arn == ""
+    minimum_protocol_version = "TLSv1.2_2021"
+    ssl_support_method       = var.acm_certificate_arn != "" ? "sni-only" : null
+  }
+
+  # Enable access logs
+  dynamic "logging_config" {
+    for_each = var.enable_logging ? [1] : []
+    content {
+      include_cookies = false
+      bucket          = aws_s3_bucket.logs[0].bucket_domain_name
+      prefix          = "cloudfront-logs/"
+    }
+  }
+
+  # Enable WAF
+  web_acl_id = var.enable_waf ? aws_wafv2_web_acl.cloudfront[0].arn : null
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-cdn"
+    Environment = var.environment
+  }
+}
+
+# ============================================================================
+# CloudFront Cache Policies
+# ============================================================================
+
+# Optimized cache policy for application
+resource "aws_cloudfront_cache_policy" "optimized" {
+  count = var.cache_policy_id == "" ? 1 : 0
+
+  name        = "${var.project_name}-${var.environment}-optimized"
+  comment     = "Optimized caching for React application"
+  default_ttl = 86400  # 1 day
+  max_ttl     = 31536000  # 1 year
+  min_ttl     = 1
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+  }
+}
+
+# Cache policy for static assets (max caching)
+resource "aws_cloudfront_cache_policy" "static_assets" {
+  name        = "${var.project_name}-${var.environment}-static-assets"
+  comment     = "Maximum caching for static assets"
+  default_ttl = 31536000  # 1 year
+  max_ttl     = 31536000  # 1 year
+  min_ttl     = 31536000  # 1 year
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+  }
+}
+
+# Cache policy for HTML files (no caching)
+resource "aws_cloudfront_cache_policy" "no_cache" {
+  name        = "${var.project_name}-${var.environment}-no-cache"
+  comment     = "No caching for HTML files"
+  default_ttl = 0
+  max_ttl     = 0
+  min_ttl     = 0
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    cookies_config {
+      cookie_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+  }
+}
+
+# Use AWS managed CORS-S3 origin request policy
+data "aws_cloudfront_origin_request_policy" "cors_s3" {
+  name = "Managed-CORS-S3Origin"
+}
+
+# ============================================================================
+# CloudFront Response Headers Policy (Security Headers)
+# ============================================================================
+
+resource "aws_cloudfront_response_headers_policy" "security_headers" {
+  name    = "${var.project_name}-${var.environment}-security-headers"
+  comment = "Security headers for ${var.project_name}"
+
+  # Security headers
+  security_headers_config {
+    strict_transport_security {
+      access_control_max_age_sec = 63072000  # 2 years
+      include_subdomains         = true
+      preload                    = true
+      override                   = true
+    }
+
+    content_type_options {
+      override = true
+    }
+
+    frame_options {
+      frame_option = "DENY"
+      override     = true
+    }
+
+    xss_protection {
+      mode_block = true
+      protection = true
+      override   = true
+    }
+
+    referrer_policy {
+      referrer_policy = "strict-origin-when-cross-origin"
+      override        = true
+    }
+
+    content_security_policy {
+      content_security_policy = var.content_security_policy
+      override                = true
+    }
+  }
+
+  # CORS headers
+  cors_config {
+    access_control_allow_credentials = false
+    
+    access_control_allow_headers {
+      items = ["*"]
+    }
+    
+    access_control_allow_methods {
+      items = ["GET", "HEAD", "OPTIONS"]
+    }
+    
+    access_control_allow_origins {
+      items = var.cors_allowed_origins
+    }
+    
+    access_control_max_age_sec = 600
+    origin_override            = true
+  }
+
+  # Custom headers
+  dynamic "custom_headers_config" {
+    for_each = var.custom_headers
+    content {
+      header {
+        header   = custom_headers_config.value.header
+        value    = custom_headers_config.value.value
+        override = true
+      }
+    }
+  }
+}
+
+# ============================================================================
+# WAF for CloudFront (Optional but Recommended)
+# ============================================================================
+
+resource "aws_wafv2_web_acl" "cloudfront" {
+  count = var.enable_waf ? 1 : 0
+
+  provider = aws.us_east_1  # WAF for CloudFront must be in us-east-1
+  name     = "${var.project_name}-${var.environment}-cloudfront-waf"
+  scope    = "CLOUDFRONT"
+
+  default_action {
+    allow {}
+  }
+
+  # Rate limiting rule
+  rule {
+    name     = "RateLimitRule"
+    priority = 1
+
+    action {
+      block {}
+    }
+
+    statement {
+      rate_based_statement {
+        limit              = var.waf_rate_limit
+        aggregate_key_type = "IP"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.project_name}-${var.environment}-rate-limit"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  # AWS Managed Rules - Core Rule Set
+  rule {
+    name     = "AWSManagedRulesCommonRuleSet"
+    priority = 2
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        vendor_name = "AWS"
+        name        = "AWSManagedRulesCommonRuleSet"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.project_name}-${var.environment}-common-rules"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  # AWS Managed Rules - Known Bad Inputs
+  rule {
+    name     = "AWSManagedRulesKnownBadInputsRuleSet"
+    priority = 3
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        vendor_name = "AWS"
+        name        = "AWSManagedRulesKnownBadInputsRuleSet"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.project_name}-${var.environment}-bad-inputs"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "${var.project_name}-${var.environment}-waf"
+    sampled_requests_enabled   = true
+  }
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-cloudfront-waf"
+    Environment = var.environment
+  }
+}
+
+# ============================================================================
+# Route53 DNS Records (Optional)
+# ============================================================================
+
+data "aws_route53_zone" "main" {
+  count = var.create_route53_records ? 1 : 0
+
+  name         = var.route53_zone_name
+  private_zone = false
+}
+
+resource "aws_route53_record" "website" {
+  for_each = var.create_route53_records ? toset(var.domain_names) : []
+
+  zone_id = data.aws_route53_zone.main[0].zone_id
+  name    = each.key
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.website.domain_name
+    zone_id                = aws_cloudfront_distribution.website.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# AAAA record for IPv6
+resource "aws_route53_record" "website_ipv6" {
+  for_each = var.create_route53_records ? toset(var.domain_names) : []
+
+  zone_id = data.aws_route53_zone.main[0].zone_id
+  name    = each.key
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.website.domain_name
+    zone_id                = aws_cloudfront_distribution.website.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# ============================================================================
+# CloudWatch Alarms
+# ============================================================================
+
+resource "aws_cloudwatch_metric_alarm" "cloudfront_4xx_errors" {
+  count = var.enable_cloudwatch_alarms ? 1 : 0
+
+  alarm_name          = "${var.project_name}-${var.environment}-cloudfront-4xx-errors"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "4xxErrorRate"
+  namespace           = "AWS/CloudFront"
+  period              = "300"
+  statistic           = "Average"
+  threshold           = var.cloudfront_4xx_error_threshold
+  alarm_description   = "This metric monitors CloudFront 4xx errors"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    DistributionId = aws_cloudfront_distribution.website.id
+  }
+
+  alarm_actions = var.alarm_sns_topic_arn != "" ? [var.alarm_sns_topic_arn] : []
+}
+
+resource "aws_cloudwatch_metric_alarm" "cloudfront_5xx_errors" {
+  count = var.enable_cloudwatch_alarms ? 1 : 0
+
+  alarm_name          = "${var.project_name}-${var.environment}-cloudfront-5xx-errors"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "5xxErrorRate"
+  namespace           = "AWS/CloudFront"
+  period              = "300"
+  statistic           = "Average"
+  threshold           = var.cloudfront_5xx_error_threshold
+  alarm_description   = "This metric monitors CloudFront 5xx errors"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    DistributionId = aws_cloudfront_distribution.website.id
+  }
+
+  alarm_actions = var.alarm_sns_topic_arn != "" ? [var.alarm_sns_topic_arn] : []
 }

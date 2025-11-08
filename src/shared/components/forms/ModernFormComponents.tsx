@@ -1,9 +1,11 @@
 /**
  * Modern Form Components with React Hook Form and React 19
  * Replaces manual form handling with optimized patterns
+ * Uses React 19 useFormStatus for automatic pending state tracking
  */
 
 import { forwardRef, type ReactNode } from 'react';
+import { useFormStatus } from 'react-dom';
 import { 
   useForm, 
   useController, 
@@ -419,6 +421,10 @@ export const SubmitButton = forwardRef<HTMLButtonElement, SubmitButtonProps>(({
   size = 'md',
   className = '',
 }, ref) => {
+  // React 19: useFormStatus automatically tracks form submission state
+  const { pending: formPending } = useFormStatus();
+  const isPending = formPending || isLoading;
+  
   const baseClasses = 'font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200';
   
   const variantClasses = {
@@ -437,10 +443,11 @@ export const SubmitButton = forwardRef<HTMLButtonElement, SubmitButtonProps>(({
     <button
       ref={ref}
       type="submit"
-      disabled={disabled || isLoading}
+      disabled={disabled || isPending}
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      aria-busy={isPending}
     >
-      {isLoading && (
+      {isPending && (
         <div className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
       )}
       {children}
