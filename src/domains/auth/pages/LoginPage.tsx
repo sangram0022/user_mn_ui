@@ -10,13 +10,14 @@ import { useLogin } from '../hooks/useAuth.hooks';
 import { useLoginForm } from '../../../core/validation';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 import tokenService from '../services/tokenService';
-import { handleError } from '@/core/error/errorHandler';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 
 export default function LoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
   const navigate = useNavigate();
   const { login: setAuthState } = useAuth();
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
   
   // Use new centralized login hook with React Query
   const loginMutation = useLogin();
@@ -71,19 +72,11 @@ export default function LoginPage() {
           navigate(redirectPath, { replace: true });
         }
       } catch (error) {
-        // Use centralized error handler
-        const result = handleError(error);
-        toast.error(result.userMessage);
-        
-        // Handle redirect if needed
-        if (result.redirectToLogin) {
-          navigate(ROUTE_PATHS.LOGIN, { replace: true });
-        }
+        handleError(error, { context: { operation: 'login' } });
       }
     },
     onError: (error) => {
-      const result = handleError(error);
-      toast.error(result.userMessage);
+      handleError(error, { context: { operation: 'login-form' } });
     }
   });
 

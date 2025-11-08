@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useVerifyEmail } from '../hooks/useAuth.hooks';
 import { useToast } from '../../../hooks/useToast';
-import { handleError } from '@/core/error/errorHandler';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { Button } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 
@@ -14,6 +14,7 @@ export default function VerifyEmailPage() {
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
   
   // Use new centralized verify email hook
   const verifyEmailMutation = useVerifyEmail();
@@ -40,15 +41,14 @@ export default function VerifyEmailPage() {
           });
         }, 3000);
       } catch (error) {
-        const result = handleError(error);
+        const result = handleError(error, { context: { operation: 'verifyEmail', token } });
         setStatus('error');
         setErrorMessage(result.userMessage);
-        toast.error(result.userMessage);
       }
     };
 
     verify();
-  }, [token, verifyEmailMutation, toast, navigate, t]);
+  }, [token, verifyEmailMutation, toast, navigate, t, handleError]);
 
   if (status === 'loading') {
     return (

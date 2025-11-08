@@ -8,7 +8,7 @@
 import { useState, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useLogin } from '../hooks/useAuth.hooks';
-import { handleError } from '@/core/error/errorHandler';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import Input from '../../../components/Input';
 import { Button } from '../../../components';
 import type { LoginRequest } from '../types/auth.types';
@@ -63,6 +63,7 @@ function SubmitButton({ isPending: externalPending }: { isPending?: boolean }) {
 export function LoginForm({ onSuccess, onError, redirectTo = '/dashboard' }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
+  const handleError = useStandardErrorHandler();
 
   // React 19 useActionState for form action handling
   const [state, formAction, isPending] = useActionState<FormState, FormData>(
@@ -88,7 +89,7 @@ export function LoginForm({ onSuccess, onError, redirectTo = '/dashboard' }: Log
         }
         return { success: true };
       } catch (error) {
-        const result = handleError(error);
+        const result = handleError(error, { context: { operation: 'loginForm' } });
         onError?.(error as Error);
         return { error: result.userMessage };
       }
