@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   UserCheck,
   BarChart3,
-  Activity,
 } from 'lucide-react';
 import { ROUTES } from '../../../core/routing/config';
 import { useAuth } from '../../../hooks/useAuth';
@@ -63,12 +62,6 @@ export default function Sidebar() {
       path: ROUTES.ADMIN_REPORTS,
       icon: BarChart3,
       label: t('nav.reports') || 'Reports',
-      roles: [ROLES.ADMIN],
-    },
-    {
-      path: ROUTES.ADMIN_MONITORING,
-      icon: Activity,
-      label: t('nav.monitoring') || 'Monitoring',
       roles: [ROLES.ADMIN],
     },
     {

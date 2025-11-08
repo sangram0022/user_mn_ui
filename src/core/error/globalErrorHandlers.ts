@@ -82,38 +82,6 @@ export function initializeGlobalErrorHandlers(): void {
 }
 
 /**
- * Setup performance monitoring and error reporting
- * Call this after initializeGlobalErrorHandlers
- */
-export function setupPerformanceMonitoring(): void {
-  // Monitor for performance issues that might indicate errors
-  if ('PerformanceObserver' in window) {
-    try {
-      // Monitor long tasks (> 50ms)
-      const observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.duration > 5000) {
-            // Log very long tasks (5+ seconds)
-            logger().warn('Long running task detected', {
-              name: entry.name,
-              duration: Math.round(entry.duration),
-              startTime: Math.round(entry.startTime),
-              context: 'performanceMonitoring.longTasks',
-            });
-          }
-        }
-      });
-
-      observer.observe({ entryTypes: ['longtask', 'measure'] });
-    } catch {
-      logger().debug('Performance monitoring not available', {
-        context: 'performanceMonitoring.setup',
-      });
-    }
-  }
-}
-
-/**
  * Send error report to backend/error tracking service
  * Useful for integrating with services like Sentry, Rollbar, etc.
  */
@@ -191,10 +159,10 @@ export function getErrorStatistics(): {
 
 /**
  * Export all global error handling utilities
+ * AWS CloudWatch handles performance monitoring
  */
 export const GlobalErrorHandler = {
   initialize: initializeGlobalErrorHandlers,
-  setupPerformanceMonitoring,
   reportErrorToBackend,
   getStatistics: getErrorStatistics,
 };

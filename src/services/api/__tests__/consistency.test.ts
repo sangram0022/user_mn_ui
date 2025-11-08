@@ -98,7 +98,6 @@ describe('Query Keys Consistency', () => {
   it('should have consistent admin query keys', () => {
     expect(queryKeys.admin.all).toEqual(['admin']);
     expect(queryKeys.admin.stats.all).toEqual(['admin', 'stats']);
-    expect(queryKeys.admin.analytics.all).toEqual(['admin', 'analytics']);
   });
 });
 

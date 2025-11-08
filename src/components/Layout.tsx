@@ -1,6 +1,6 @@
 import { Link, Outlet } from 'react-router-dom';
 import { use } from 'react';
-import Button from './Button';
+import { Button } from '../components';
 import { AuthContext } from '../domains/auth/context/AuthContext';
 
 export default function Layout() {

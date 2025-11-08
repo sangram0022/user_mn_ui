@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useLogin } from '../hooks/useAuth.hooks';
 import Input from '../../../components/Input';
-import Button from '../../../components/Button';
+import { Button } from '../../../components';
 import type { LoginRequest } from '../types/auth.types';
 
 interface LoginFormProps {

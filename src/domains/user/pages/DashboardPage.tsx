@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { use } from 'react';
 import { AuthContext } from '../../auth/context/AuthContext';
 import { SEO, SEO_CONFIG } from '../../../shared/components/seo';
+import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 // ========================================
 // User Dashboard Component
@@ -22,7 +23,23 @@ export default function UserDashboard() {
   const { user } = use(AuthContext);
 
   return (
-    <>
+    <ModernErrorBoundary 
+      level="page"
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Unable to Load Dashboard</h1>
+            <p className="text-gray-600 mb-6">We're experiencing technical difficulties. Please try refreshing the page.</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      }
+    >
       <SEO {...SEO_CONFIG.dashboard} />
       <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -179,8 +196,8 @@ export default function UserDashboard() {
           </div>
         </div>
       </main>
-    </div>
-    </>
+      </div>
+    </ModernErrorBoundary>
   );
 }
 

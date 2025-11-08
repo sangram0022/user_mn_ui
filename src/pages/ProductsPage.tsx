@@ -1,4 +1,4 @@
-import Button from '../components/Button';
+import { Button } from '../components';
 import Badge from '../components/Badge';
 import Card from '../components/Card';
 import { OptimizedImage } from '../shared/components/OptimizedImage';
@@ -216,7 +216,6 @@ export default function ProductsPage() {
                   width={400}
                   height={300}
                   priority={false}
-                  quality={85}
                   className="transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />

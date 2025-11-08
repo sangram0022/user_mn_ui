@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useForgotPassword } from '../hooks/useAuth.hooks';
 import Input from '../../../components/Input';
-import Button from '../../../components/Button';
+import { Button } from '../../../components';
 
 interface ForgotPasswordFormProps {
   onSuccess?: () => void;

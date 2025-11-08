@@ -39,12 +39,7 @@ export {
   getAccessibleEndpoints,
 } from './utils/apiRoleMapping';
 
-// Export performance utilities
-export {
-  getRbacPerformanceStats,
-  clearRbacCaches,
-  useRbacPerformanceStats,
-} from './utils/performanceUtils';
+// AWS CloudWatch handles performance utilities
 
 // Export types
 export type { UserRole, Permission, AccessCheckOptions, PermissionCheckResult, ApiEndpointConfig, RoleBasedButtonProps, CanAccessProps, RolePermissionMapping } from './types/rbac.types';

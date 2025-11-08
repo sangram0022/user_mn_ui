@@ -6,7 +6,7 @@
 
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Button from '../components/Button';
+import { Button } from '../components';
 import Input from '../components/Input';
 import Card from '../components/Card';
 import Badge from '../components/Badge';

@@ -3,7 +3,7 @@
  * Provides consistent loading state management across components
  */
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 
 export interface LoadingState {
   isLoading: boolean;
@@ -75,7 +75,8 @@ export const useAsyncOperation = <T,>(
     error: null,
   });
 
-  const execute = useCallback(async () => {
+  // React 19: No useCallback needed - Compiler optimizes automatically
+  const execute = async () => {
     setState({ isLoading: true, result: null, error: null });
 
     try {
@@ -106,11 +107,12 @@ export const useAsyncOperation = <T,>(
 
       throw error;
     }
-  }, [operation, options]);
+  };
 
-  const reset = useCallback(() => {
+  // React 19: No useCallback needed - Compiler optimizes automatically
+  const reset = () => {
     setState({ isLoading: false, result: null, error: null });
-  }, []);
+  };
 
   return {
     ...state,

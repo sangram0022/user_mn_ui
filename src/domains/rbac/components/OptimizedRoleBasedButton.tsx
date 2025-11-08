@@ -16,7 +16,7 @@
 
 import { memo, useMemo, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { usePermissions } from '../hooks/usePermissions';
-import Button from '../../../components/Button';
+import { Button } from '../../../components';
 import type { UserRole, Permission } from '../types/rbac.types';
 
 interface OptimizedRoleBasedButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {

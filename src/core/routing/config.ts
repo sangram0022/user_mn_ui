@@ -58,7 +58,6 @@ const LazyAdminUserApprovalPage = lazy(() => import('../../domains/admin/pages/U
 const LazyAdminRolesPage = lazy(() => import('../../domains/admin/pages/RolesPage'));
 const LazyAdminRoleDetailPage = lazy(() => import('../../domains/admin/pages/RoleDetailPage'));
 const LazyAdminReportsPage = lazy(() => import('../../domains/admin/pages/ReportsPage'));
-const LazyAdminMonitoringPage = lazy(() => import('../../domains/admin/pages/MonitoringPage'));
 
 // Auditor Pages
 const LazyAuditorDashboardPage = lazy(() => import('../../domains/auditor/pages/DashboardPage'));
@@ -310,15 +309,6 @@ export const routes: RouteConfig[] = [
     requiredRoles: ['admin', 'super_admin'],
   },
   {
-    path: '/admin/monitoring',
-    component: LazyAdminMonitoringPage,
-    layout: 'admin',
-    guard: 'admin',
-    title: 'Monitoring',
-    description: 'Monitor system health and performance',
-    requiredRoles: ['admin', 'super_admin'],
-  },
-  {
     path: '/users',
     component: LazyAdminUsersPage,
     layout: 'admin',
@@ -441,7 +431,6 @@ export const ROUTES = {
   ADMIN_ROLE_DETAIL: '/admin/roles/:name',
   ADMIN_AUDIT_LOGS: '/admin/audit-logs',
   ADMIN_REPORTS: '/admin/reports',
-  ADMIN_MONITORING: '/admin/monitoring',
   
   // Public pages
   CONTACT: '/contact',

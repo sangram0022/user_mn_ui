@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import type { RoleBasedButtonProps } from '../domains/rbac/types/rbac.types';
 import { usePermissions } from '../domains/rbac/hooks/usePermissions';
-import Button from './Button';
+import { Button } from '../components';
 
 /**
  * Permission-aware button component

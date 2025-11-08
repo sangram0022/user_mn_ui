@@ -3,7 +3,7 @@
 // Social login buttons (Google, GitHub, etc.)
 // ========================================
 
-import Button from '../../../components/Button';
+import { Button } from '../../../components';
 
 interface OAuthButtonsProps {
   onGoogleLogin?: () => void;

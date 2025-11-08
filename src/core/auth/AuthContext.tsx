@@ -1,36 +1,43 @@
-// React 19: Modern Context with use() hook pattern
-// Removed useCallback - React 19 Compiler handles optimization automatically
-import { createContext, useState, useEffect, type ReactNode } from 'react';
+// React 19 + Modern Auth Context with proper type alignment
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { AuthContextType, User, LoginCredentials, RegisterData } from './types';
+import type { Role } from './roles';
+import authService from '../../domains/auth/services/authService';
+import tokenService from '../../domains/auth/services/tokenService';
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem('auth_token');
-  });
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize auth from localStorage
+  const isAuthenticated = !!user && !!token;
+
+  // Initialize auth from tokenService
   useEffect(() => {
     const initAuth = async () => {
-      const storedToken = localStorage.getItem('auth_token');
-      const storedUser = localStorage.getItem('auth_user');
-
-      if (storedToken && storedUser) {
+      const storedToken = tokenService.getAccessToken();
+      
+      if (storedToken) {
         try {
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          // Keep existing localStorage pattern for user data
+          const storedUser = localStorage.getItem('auth_user');
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+          }
         } catch (error) {
           console.error('Failed to parse stored user:', error);
-          localStorage.removeItem('auth_token');
+          tokenService.clearTokens();
           localStorage.removeItem('auth_user');
         }
+      } else {
+        tokenService.clearTokens();
       }
       setIsLoading(false);
     };
@@ -42,22 +49,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function login(credentials: LoginCredentials) {
     setIsLoading(true);
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials),
+      // Use proper auth service instead of direct fetch
+      const data = await authService.login({
+        email: credentials.email,
+        password: credentials.password,
       });
-
-      if (!response.ok) throw new Error('Login failed');
-
-      const data = await response.json();
       
-      setToken(data.token);
-      setUser(data.user);
+      // Store tokens using tokenService
+      tokenService.storeTokens({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        token_type: data.token_type,
+        expires_in: data.expires_in,
+      });
       
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('auth_user', JSON.stringify(data.user));
+      // LoginResponseData only has basic info, we'll need to fetch full profile
+      // For now, create minimal user object
+      const userData: User = {
+        id: data.user_id,
+        email: data.email,
+        firstName: '', // Will be filled by profile fetch if needed
+        lastName: '',
+        roles: data.roles as Role[], // Backend sends string[], frontend expects Role[] (same thing)
+        isActive: true,
+        isVerified: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      setToken(data.access_token);
+      setUser(userData);
+      
+      localStorage.setItem('auth_user', JSON.stringify(userData));
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -69,22 +92,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function register(data: RegisterData) {
     setIsLoading(true);
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+      // Use proper auth service with correct payload structure
+      const responseData = await authService.register({
+        email: data.email,
+        password: data.password,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        // RegisterRequest expects first_name/last_name, not full_name
       });
-
-      if (!response.ok) throw new Error('Registration failed');
-
-      const responseData = await response.json();
       
-      setToken(responseData.token);
-      setUser(responseData.user);
+      // RegisterResponseData doesn't include tokens - user needs to verify email first
+      // Just return success, user will need to verify and then login
+      console.log('Registration successful:', responseData);
       
-      localStorage.setItem('auth_token', responseData.token);
-      localStorage.setItem('auth_user', JSON.stringify(responseData.user));
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -94,21 +114,56 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   function logout() {
+    // Clear all auth data
+    tokenService.clearTokens();
+    localStorage.removeItem('auth_user');
     setUser(null);
     setToken(null);
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    
+    // Call logout service (fire and forget)
+    authService.logout().catch(console.error);
   }
 
   async function refreshAuth() {
-    // TODO: Implement token refresh
-    console.log('Refreshing auth...');
+    try {
+      const refreshToken = tokenService.getRefreshToken();
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const data = await authService.refreshToken(refreshToken);
+      
+      // Store new tokens
+      tokenService.storeTokens({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        token_type: data.token_type,
+        expires_in: data.expires_in,
+      });
+      
+      setToken(data.access_token);
+      
+      // Update user data if needed
+      if (user && data.email !== user.email) {
+        const updatedUser: User = {
+          ...user,
+          email: data.email,
+          roles: data.roles as Role[], // Backend sends string[], frontend expects Role[] (same thing)
+        };
+        setUser(updatedUser);
+        localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      logout(); // Clear everything on refresh failure
+      throw error;
+    }
   }
 
   const value: AuthContextType = {
     user,
     token,
-    isAuthenticated: !!user && !!token,
+    isAuthenticated,
     isLoading,
     login,
     register,
@@ -116,7 +171,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refreshAuth,
   };
 
-  return <AuthContext value={value}>{children}</AuthContext>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export default AuthContext;
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}

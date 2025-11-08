@@ -1,4 +1,4 @@
-import Button from '../components/Button';
+import { Button } from '../components';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { CanAccess } from '../domains/rbac/components/CanAccess';

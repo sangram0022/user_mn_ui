@@ -1,0 +1,511 @@
+// ========================================
+// Enhanced Form Patterns - Advanced Performance
+// ========================================
+// Advanced form optimization system with:
+// - Form state persistence across navigation
+// - Real-time validation with intelligent debouncing
+// - Optimized re-render prevention
+// - Smart field dependency management
+// - Progressive enhancement patterns
+// ========================================
+
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useForm, type FieldValues, type UseFormReturn } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useDebouncedCallback } from 'use-debounce';
+import type { z } from 'zod';
+
+// ========================================
+// Types and Interfaces
+// ========================================
+
+export interface FormPersistenceOptions {
+  storageKey: string;
+  clearOnSubmit?: boolean;
+  persistOnChange?: boolean;
+  ttlMinutes?: number;
+}
+
+export interface ValidationOptions {
+  validateOnChange?: boolean;
+  validateOnBlur?: boolean;
+  debounceMs?: number;
+  revalidateMode?: 'onChange' | 'onBlur' | 'onSubmit';
+}
+
+export interface EnhancedFormOptions<T extends FieldValues> {
+  schema: z.ZodSchema<T>;
+  persistence?: FormPersistenceOptions;
+  validation?: ValidationOptions;
+  defaultValues?: Partial<T>;
+  onSubmit: (data: T) => Promise<void> | void;
+  onError?: (error: Error) => void;
+}
+
+// ========================================
+// Form State Persistence Manager
+// ========================================
+
+class FormPersistenceManager {
+  private static readonly PREFIX = 'form_state_';
+
+  /**
+   * Save form state to localStorage with TTL
+   */
+  static saveState(key: string, data: Record<string, unknown>, ttlMinutes = 60): void {
+    try {
+      const expiryTime = Date.now() + (ttlMinutes * 60 * 1000);
+      const storageData = {
+        data,
+        expiry: expiryTime,
+        timestamp: Date.now(),
+      };
+      
+      localStorage.setItem(
+        `${this.PREFIX}${key}`, 
+        JSON.stringify(storageData)
+      );
+    } catch (error) {
+      console.warn('Failed to persist form state:', error);
+    }
+  }
+
+  /**
+   * Load form state from localStorage
+   */
+  static loadState(key: string): Record<string, unknown> | null {
+    try {
+      const stored = localStorage.getItem(`${this.PREFIX}${key}`);
+      if (!stored) return null;
+
+      const { data, expiry } = JSON.parse(stored);
+      
+      // Check if expired
+      if (Date.now() > expiry) {
+        this.clearState(key);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.warn('Failed to load form state:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Clear form state from localStorage
+   */
+  static clearState(key: string): void {
+    try {
+      localStorage.removeItem(`${this.PREFIX}${key}`);
+    } catch (error) {
+      console.warn('Failed to clear form state:', error);
+    }
+  }
+
+  /**
+   * Clear all expired form states
+   */
+  static cleanupExpiredStates(): void {
+    try {
+      const keys = Object.keys(localStorage).filter(key => 
+        key.startsWith(this.PREFIX)
+      );
+
+      keys.forEach(key => {
+        try {
+          const data = localStorage.getItem(key);
+          if (data) {
+            const { expiry } = JSON.parse(data);
+            if (Date.now() > expiry) {
+              localStorage.removeItem(key);
+            }
+          }
+        } catch {
+          // Remove invalid entries
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to cleanup expired form states:', error);
+    }
+  }
+}
+
+// ========================================
+// Field Dependency Manager
+// ========================================
+
+class FieldDependencyManager<T extends FieldValues> {
+  private dependencies = new Map<keyof T, Set<keyof T>>();
+  private computedFields = new Map<keyof T, (values: T) => unknown>();
+
+  /**
+   * Add field dependency
+   */
+  addDependency(field: keyof T, dependsOn: (keyof T)[]): void {
+    if (!this.dependencies.has(field)) {
+      this.dependencies.set(field, new Set());
+    }
+    dependsOn.forEach((dep: keyof T) => this.dependencies.get(field)!.add(dep));
+  }
+
+  /**
+   * Add computed field
+   */
+  addComputedField(field: keyof T, computeFn: (values: T) => unknown): void {
+    this.computedFields.set(field, computeFn);
+  }
+
+  /**
+   * Get fields that should be revalidated when a field changes
+   */
+  getDependentFields(changedField: keyof T): Set<keyof T> {
+    const dependents = new Set<keyof T>();
+    
+    this.dependencies.forEach((deps, field) => {
+      if (deps.has(changedField)) {
+        dependents.add(field);
+      }
+    });
+
+    return dependents;
+  }
+
+  /**
+   * Update computed fields based on current values
+   */
+  updateComputedFields(values: T, setValue: (field: keyof T, value: unknown) => void): void {
+    this.computedFields.forEach((computeFn, field) => {
+      const newValue = computeFn(values);
+      setValue(field, newValue);
+    });
+  }
+}
+
+// ========================================
+// Enhanced Form Hook
+// ========================================
+
+export function useEnhancedForm<T extends FieldValues>(
+  options: EnhancedFormOptions<T>
+) {
+  const {
+    schema,
+    persistence,
+    validation = {},
+    defaultValues = {},
+    onSubmit,
+    onError,
+  } = options;
+
+  // Form instance with React Hook Form
+  const form = useForm<T>({
+    // @ts-ignore - Complex generic type compatibility between Zod and React Hook Form v7
+    resolver: zodResolver(schema),
+    // @ts-ignore - FieldValues default values type compatibility
+    defaultValues,
+    mode: validation.revalidateMode || 'onChange',
+  });
+
+  const { watch, setValue, trigger, formState } = form;
+  
+  // Performance optimization refs
+  const lastValidationTime = useRef<number>(0);
+  const validationInProgress = useRef(false);
+  const dependencyManager = useRef(new FieldDependencyManager<T>());
+  
+  // State management
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitCount, setSubmitCount] = useState(0);
+  const [persistedState, setPersistedState] = useState<Partial<T> | null>(null);
+
+  // ========================================
+  // Form Persistence
+  // ========================================
+
+  // Load persisted state on mount
+  useEffect(() => {
+    if (!persistence?.storageKey) return;
+
+    const stored = FormPersistenceManager.loadState(persistence.storageKey);
+    if (stored) {
+      setPersistedState(stored as Partial<T>);
+      // Apply persisted values
+      Object.entries(stored).forEach(([key, value]) => {
+        // @ts-ignore - Path<T> type compatibility
+        setValue(key, value);
+      });
+    }
+
+    // Cleanup expired states
+    FormPersistenceManager.cleanupExpiredStates();
+  }, [persistence?.storageKey, setValue]);
+
+  // Persist form state on change
+  const persistFormState = useDebouncedCallback(
+    (values: T) => {
+      if (persistence?.persistOnChange && persistence.storageKey) {
+        FormPersistenceManager.saveState(
+          persistence.storageKey,
+          values,
+          persistence.ttlMinutes
+        );
+      }
+    },
+    500 // Debounce persistence
+  );
+
+  // Watch all form values for persistence
+  const allValues = watch();
+  useEffect(() => {
+    if (persistence?.persistOnChange) {
+      persistFormState(allValues);
+    }
+  }, [allValues, persistFormState, persistence?.persistOnChange]);
+
+  // ========================================
+  // Smart Validation with Debouncing
+  // ========================================
+
+  const debouncedValidation = useDebouncedCallback(
+    async (fieldName?: keyof T) => {
+      if (validationInProgress.current) return;
+      
+      validationInProgress.current = true;
+      lastValidationTime.current = Date.now();
+
+      try {
+        if (fieldName) {
+          // Validate specific field
+          // @ts-ignore - Path<T> type compatibility
+          await trigger(fieldName);
+          
+          // Validate dependent fields
+          const dependentFields = dependencyManager.current.getDependentFields(fieldName);
+          if (dependentFields.size > 0) {
+            // @ts-ignore - Path<T> array type compatibility
+            await trigger([...dependentFields]);
+          }
+        } else {
+          // Validate entire form
+          await trigger();
+        }
+      } finally {
+        validationInProgress.current = false;
+      }
+    },
+    validation.debounceMs || 300
+  );
+
+  // ========================================
+  // Optimized Field Change Handler
+  // ========================================
+
+  const handleFieldChange = useCallback(
+    (fieldName: keyof T, value: unknown) => {
+      // @ts-ignore - Path<T> type compatibility
+      setValue(fieldName, value);
+
+      // Trigger validation if enabled
+      if (validation.validateOnChange) {
+        debouncedValidation(fieldName);
+      }
+    },
+    [setValue, validation.validateOnChange, debouncedValidation]
+  );
+
+  // ========================================
+  // Enhanced Submit Handler
+  // ========================================
+
+  const handleSubmit = useCallback(
+    async (data: T) => {
+      if (isSubmitting) return;
+
+      setIsSubmitting(true);
+      setSubmitCount(prev => prev + 1);
+
+      try {
+        await onSubmit(data);
+        
+        // Clear persisted state on successful submit
+        if (persistence?.clearOnSubmit && persistence.storageKey) {
+          FormPersistenceManager.clearState(persistence.storageKey);
+        }
+      } catch (error) {
+        onError?.(error as Error);
+        throw error;
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [isSubmitting, onSubmit, onError, persistence]
+  );
+
+  // ========================================
+  // Field Dependency Management
+  // ========================================
+
+  const addFieldDependency = useCallback(
+    (field: keyof T, dependsOn: (keyof T)[]) => {
+      dependencyManager.current.addDependency(field, dependsOn);
+    },
+    []
+  );
+
+  const addComputedField = useCallback(
+    (field: keyof T, computeFn: (values: T) => unknown) => {
+      dependencyManager.current.addComputedField(field, computeFn);
+    },
+    []
+  );
+
+  // ========================================
+  // Form State Analysis
+  // ========================================
+
+  const formAnalytics = useMemo(() => ({
+    hasChanges: Object.keys(formState.dirtyFields).length > 0,
+    totalErrors: Object.keys(formState.errors).length,
+    touchedFields: Object.keys(formState.touchedFields).length,
+    submitAttempts: submitCount,
+    isFirstSubmit: submitCount === 0,
+    hasPersistentState: !!persistedState,
+    validationLatency: lastValidationTime.current > 0 
+      ? Date.now() - lastValidationTime.current 
+      : 0,
+  }), [formState, submitCount, persistedState]);
+
+  // ========================================
+  // Cleanup
+  // ========================================
+
+  useEffect(() => {
+    return () => {
+      // Cancel pending validations
+      debouncedValidation.cancel();
+      persistFormState.cancel();
+    };
+  }, [debouncedValidation, persistFormState]);
+
+  return {
+    // React Hook Form instance
+    ...form,
+    
+    // Enhanced handlers
+    handleFieldChange,
+    // @ts-ignore - SubmitHandler type compatibility
+    handleSubmit: form.handleSubmit(handleSubmit),
+    
+    // State management
+    isSubmitting,
+    formAnalytics,
+    
+    // Dependency management
+    addFieldDependency,
+    addComputedField,
+    
+    // Persistence management
+    clearPersistedState: () => {
+      if (persistence?.storageKey) {
+        FormPersistenceManager.clearState(persistence.storageKey);
+        setPersistedState(null);
+      }
+    },
+    
+    // Manual validation trigger
+    validateField: (fieldName: keyof T) => debouncedValidation(fieldName),
+    validateForm: () => debouncedValidation(),
+  };
+}
+
+// ========================================
+// Enhanced Form Field Component
+// ========================================
+
+interface EnhancedFieldProps<T extends FieldValues = FieldValues> {
+  name: string;
+  label: string;
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel';
+  placeholder?: string;
+  helpText?: string;
+  disabled?: boolean;
+  required?: boolean;
+  form: UseFormReturn<T>;
+  onFieldChange?: (name: string, value: unknown) => void;
+  className?: string;
+}
+
+export function EnhancedField({
+  name,
+  label,
+  type = 'text',
+  placeholder,
+  helpText,
+  disabled,
+  required,
+  form,
+  onFieldChange,
+  className = '',
+}: EnhancedFieldProps) {
+  const { register, formState: { errors, touchedFields } } = form;
+  
+  const error = errors[name];
+  const isTouched = touchedFields[name];
+  const hasError = !!error;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFieldChange?.(name, e.target.value);
+  };
+
+  return (
+    <div className={`mb-4 ${className}`}>
+      <label 
+        htmlFor={name}
+        className="block text-sm font-medium text-gray-700 mb-1"
+      >
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      
+      <input
+        {...register(name)}
+        id={name}
+        type={type}
+        placeholder={placeholder}
+        disabled={disabled}
+        onChange={handleChange}
+        className={`
+          w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          ${hasError ? 'border-red-500' : 'border-gray-300'}
+          ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}
+          transition-colors duration-200
+        `}
+        aria-invalid={hasError}
+        aria-describedby={
+          hasError ? `${name}-error` : helpText ? `${name}-help` : undefined
+        }
+      />
+      
+      {helpText && !hasError && (
+        <p id={`${name}-help`} className="text-xs text-gray-500 mt-1">
+          {helpText}
+        </p>
+      )}
+      
+      {hasError && isTouched && (
+        <p id={`${name}-error`} className="text-xs text-red-500 mt-1" role="alert">
+          {error?.message as string}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ========================================
+// Export Utilities
+// ========================================
+
+export { FormPersistenceManager, FieldDependencyManager };

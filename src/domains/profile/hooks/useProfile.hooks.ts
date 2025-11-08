@@ -11,12 +11,7 @@ import type {
   UpdateProfileRequest,
 } from '../types/profile.types';
 import { extractErrorDetails, type ErrorDetails } from '../../auth/utils/error.utils';
-import {
-  validateName,
-  validatePhoneNumber,
-  validateAvatarUrl,
-  validateForm,
-} from '../../auth/utils/validation.utils';
+import { ValidationBuilder } from '@/core/validation';
 
 // ========================================
 // useProfile Hook
@@ -76,32 +71,41 @@ export function useUpdateProfile() {
     setFieldErrors(null);
 
     try {
-      // Client-side validation
-      const validations: Record<string, ReturnType<typeof validateName>> = {};
+      // Client-side validation using centralized ValidationBuilder
+      const builder = new ValidationBuilder();
 
       if (data.first_name !== undefined) {
-        validations.first_name = validateName(data.first_name, 'First name');
+        builder.validateField('first_name', data.first_name, (b) => 
+          b.required().name()
+        );
       }
 
       if (data.last_name !== undefined) {
-        validations.last_name = validateName(data.last_name, 'Last name');
+        builder.validateField('last_name', data.last_name, (b) => 
+          b.required().name()
+        );
       }
 
       if (data.phone_number !== undefined) {
-        validations.phone_number = validatePhoneNumber(data.phone_number);
+        builder.validateField('phone_number', data.phone_number, (b) => 
+          b.required().phone()
+        );
       }
 
-      if (data.avatar_url !== undefined) {
-        validations.avatar_url = validateAvatarUrl(data.avatar_url);
-      }
+      // Avatar URL is optional - backend will validate format
 
-      const validationResult = validateForm(validations);
+      const validationResult = builder.result();
 
       if (!validationResult.isValid) {
+        // Convert ValidationResult to Record<string, string> for fieldErrors
         const errors: Record<string, string> = {};
-        Object.entries(validationResult.fieldErrors).forEach(([field, errorMessages]) => {
-          errors[field] = errorMessages.join('\n');
-        });
+        if (validationResult.fields) {
+          Object.entries(validationResult.fields).forEach(([field, result]) => {
+            if (!result.isValid) {
+              errors[field] = result.errors.join('. ');
+            }
+          });
+        }
         
         setFieldErrors(errors);
         setError({ message: 'Please check your input' });

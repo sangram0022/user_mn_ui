@@ -9,6 +9,7 @@ import Badge from '../../../shared/components/ui/Badge';
 import { useRegister } from '../hooks/useAuth.hooks';
 import { useRegisterForm } from '../../../core/validation';
 import { calculatePasswordStrength } from '../../../core/validation';
+import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 export default function RegisterPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -109,21 +110,47 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-linear-to-br from-purple-50 to-pink-50 animate-fade-in">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8 animate-slide-down">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-purple-600 to-pink-600 rounded-2xl mb-4 shadow-lg shadow-purple-500/30">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
+    <ModernErrorBoundary 
+      level="page"
+      fallback={
+        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Unable to Load Registration Page</h1>
+            <p className="text-gray-600 mb-6">We're experiencing technical difficulties. Please try refreshing the page.</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Refresh Page
+            </button>
           </div>
-          <h1 className="text-3xl font-bold mb-2 text-gray-900">{t('auth:CREATE_ACCOUNT', 'Create Account')}</h1>
-          <p className="text-gray-600">{t('auth:REGISTER_DESCRIPTION', 'Join thousands of users managing teams efficiently')}</p>
         </div>
+      }
+    >
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-linear-to-br from-purple-50 to-pink-50 animate-fade-in">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="text-center mb-8 animate-slide-down">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-purple-600 to-pink-600 rounded-2xl mb-4 shadow-lg shadow-purple-500/30">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold mb-2 text-gray-900">{t('auth:CREATE_ACCOUNT', 'Create Account')}</h1>
+            <p className="text-gray-600">{t('auth:REGISTER_DESCRIPTION', 'Join thousands of users managing teams efficiently')}</p>
+          </div>
 
-        {/* Register Form Card */}
-        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200 animate-scale-in">
+          {/* Register Form Card */}
+          <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200 animate-scale-in">
+            <ModernErrorBoundary 
+              level="component"
+              fallback={
+                <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
+                  <p className="text-red-800 font-medium">Registration form error</p>
+                  <p className="text-red-600 text-sm mt-1">Please refresh the page to try again.</p>
+                </div>
+              }
+            >
 
           {/* Registration form with React Hook Form */}
           <form onSubmit={form.handleSubmit} className="space-y-6">
@@ -296,29 +323,31 @@ export default function RegisterPage() {
             </Button>
 
 
-          </form>
+            </form>
 
-          {/* Debug info in development */}
-          {import.meta.env.DEV && (
-            <div className="mt-6 p-4 bg-gray-100 rounded text-xs">
-              <div className="font-semibold mb-2">Form State Debug</div>
-              <div>Valid: {form.formState.isValid.toString()}</div>
-              <div>Dirty: {form.formState.isDirty.toString()}</div>
-              <div>Submitting: {form.formState.isSubmitting.toString()}</div>
-              <div>Errors: {Object.keys(form.formState.errors).length}</div>
-              <div>Password Strength: {passwordStrength}</div>
-            </div>
-          )}
+            {/* Debug info in development */}
+            {import.meta.env.DEV && (
+              <div className="mt-6 p-4 bg-gray-100 rounded text-xs">
+                <div className="font-semibold mb-2">Form State Debug</div>
+                <div>Valid: {form.formState.isValid.toString()}</div>
+                <div>Dirty: {form.formState.isDirty.toString()}</div>
+                <div>Submitting: {form.formState.isSubmitting.toString()}</div>
+                <div>Errors: {Object.keys(form.formState.errors).length}</div>
+                <div>Password Strength: {passwordStrength}</div>
+              </div>
+            )}
+            </ModernErrorBoundary>
+          </div>
+
+          {/* Sign In Link */}
+          <p className="text-center mt-6 text-gray-600 animate-slide-up">
+            {t('auth:ALREADY_HAVE_ACCOUNT', 'Already have an account?')}{' '}
+            <Link to={ROUTE_PATHS.LOGIN} className="text-purple-600 hover:text-purple-500 font-semibold transition-colors">
+              {t('auth:SIGN_IN', 'Sign in')}
+            </Link>
+          </p>
         </div>
-
-        {/* Sign In Link */}
-        <p className="text-center mt-6 text-gray-600 animate-slide-up">
-          {t('auth:ALREADY_HAVE_ACCOUNT', 'Already have an account?')}{' '}
-          <Link to={ROUTE_PATHS.LOGIN} className="text-purple-600 hover:text-purple-500 font-semibold transition-colors">
-            {t('auth:SIGN_IN', 'Sign in')}
-          </Link>
-        </p>
       </div>
-    </div>
+    </ModernErrorBoundary>
   );
 }

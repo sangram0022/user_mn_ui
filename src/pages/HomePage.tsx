@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import Button from '../components/Button';
+import { Button } from '../components';
 import Card from '../components/Card';
 import { animationUtils } from '../design-system/variants';
 import { SEO, SEO_CONFIG } from '../shared/components/seo';
