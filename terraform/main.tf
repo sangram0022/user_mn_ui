@@ -35,12 +35,19 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = var.project_name
-      Environment = var.environment
-      ManagedBy   = "Terraform"
-      Application = "React19-StaticWebsite"
-      CostCenter  = var.cost_center
-      Repository  = var.repository_url
+      Project           = var.project_name
+      Environment       = var.environment
+      ManagedBy         = "Terraform"
+      Application       = "React19-StaticWebsite"
+      CostCenter        = var.cost_center
+      Repository        = var.repository_url
+      Owner             = var.owner_team
+      BusinessUnit      = var.business_unit
+      ComplianceLevel   = var.compliance_level
+      DataClassification = var.data_classification
+      BackupFrequency   = var.backup_frequency
+      DisasterRecovery  = var.disaster_recovery_tier
+      AutoShutdown      = var.auto_shutdown_schedule
     }
   }
 }
@@ -160,6 +167,61 @@ resource "aws_s3_bucket_lifecycle_configuration" "website" {
       days_after_initiation = 7
     }
   }
+
+  # Intelligent Tiering for frequently accessed objects
+  rule {
+    id     = "intelligent-tiering-main"
+    status = var.enable_intelligent_tiering ? "Enabled" : "Suspended"
+
+    filter {
+      prefix = ""
+    }
+
+    transition {
+      days          = 0
+      storage_class = "INTELLIGENT_TIERING"
+    }
+  }
+
+  # Move logs to cheaper storage after 30 days
+  rule {
+    id     = "logs-transition"
+    status = "Enabled"
+
+    filter {
+      prefix = "logs/"
+    }
+
+    transition {
+      days          = 30
+      storage_class = "STANDARD_IA"
+    }
+
+    transition {
+      days          = 90
+      storage_class = "GLACIER"
+    }
+
+    expiration {
+      days = var.log_retention_days
+    }
+  }
+
+  # Move old versions to cheaper storage
+  rule {
+    id     = "version-transition"
+    status = "Enabled"
+
+    noncurrent_version_transition {
+      noncurrent_days = 30
+      storage_class   = "STANDARD_IA"
+    }
+
+    noncurrent_version_transition {
+      noncurrent_days = 90
+      storage_class   = "GLACIER"
+    }
+  }
 }
 
 # Enable bucket logging (optional)
@@ -211,7 +273,107 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
 }
 
 # ============================================================================
-# CloudFront Origin Access Control (OAC) - Latest Best Practice
+# S3 Storage Lens for Cost Optimization Analytics
+# ============================================================================
+
+resource "aws_s3control_storage_lens_configuration" "website" {
+  count = var.enable_storage_lens ? 1 : 0
+
+  config_id = "${var.project_name}-${var.environment}-storage-lens"
+
+  storage_lens_configuration {
+    enabled = true
+    account_level {
+      bucket_level {
+        activity_metrics {
+          enabled = true
+        }
+        prefix_level {
+          storage_metrics {
+            enabled = true
+            selection_criteria {
+              delimiter = "/"
+              max_depth = 5
+              min_storage_bytes_percentage = 1.0
+            }
+          }
+        }
+      }
+    }
+
+    aws_org {
+      arn = var.organization_arn != "" ? var.organization_arn : null
+    }
+
+    data_export {
+      cloud_watch_metrics {
+        enabled = true
+      }
+
+      s3_bucket_destination {
+        format     = "CSV"
+        output_schema_version = "V_1"
+        account_id = local.account_id
+        arn        = aws_s3_bucket.storage_lens[0].arn
+        prefix     = "storage-lens/"
+
+        encryption {
+          sse_s3 {}
+        }
+      }
+    }
+
+    exclude {
+      buckets = []
+      regions = []
+    }
+
+    include {
+      buckets = [aws_s3_bucket.website.bucket]
+      regions = [var.aws_region]
+    }
+  }
+}
+
+# S3 bucket for Storage Lens data export
+resource "aws_s3_bucket" "storage_lens" {
+  count = var.enable_storage_lens ? 1 : 0
+
+  bucket        = "${local.bucket_name}-storage-lens"
+  force_destroy = var.environment != "production"
+
+  tags = {
+    Name    = "${local.bucket_name}-storage-lens"
+    Purpose = "StorageLensDataExport"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "storage_lens" {
+  count = var.enable_storage_lens ? 1 : 0
+
+  bucket = aws_s3_bucket.storage_lens[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "storage_lens" {
+  count = var.enable_storage_lens ? 1 : 0
+
+  bucket = aws_s3_bucket.storage_lens[0].id
+
+  rule {
+    id     = "expire-storage-lens-data"
+    status = "Enabled"
+
+    expiration {
+      days = 365
+    }
+  }
+}
+
 # ============================================================================
 
 resource "aws_cloudfront_origin_access_control" "website" {
@@ -668,7 +830,230 @@ resource "aws_route53_record" "website_ipv6" {
 }
 
 # ============================================================================
-# CloudWatch Alarms
+# S3 Request Metrics for Cost Monitoring
+# ============================================================================
+
+resource "aws_s3_bucket_metric" "all_requests" {
+  bucket = aws_s3_bucket.website.bucket
+  name   = "EntireBucket"
+
+  filter {
+    prefix = ""
+  }
+}
+
+resource "aws_s3_bucket_metric" "static_assets" {
+  bucket = aws_s3_bucket.website.bucket
+  name   = "StaticAssets"
+
+  filter {
+    prefix = "assets/"
+  }
+}
+
+# ============================================================================
+# AWS Budget for Cost Control
+# ============================================================================
+
+resource "aws_budgets_budget" "monthly_cost" {
+  count = var.enable_budget_alerts ? 1 : 0
+
+  name         = "${var.project_name}-${var.environment}-monthly-budget"
+  budget_type  = "COST"
+  limit_amount = var.monthly_budget_limit
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+
+  cost_filter {
+    name   = "TagKeyValue"
+    values = ["Project$${var.project_name}"]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = var.budget_alert_threshold_percent
+    threshold_type            = "PERCENTAGE"
+    notification_type         = "FORECASTED"
+    subscriber_email_addresses = var.budget_alert_emails
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type            = "PERCENTAGE"
+    notification_type         = "ACTUAL"
+    subscriber_email_addresses = var.budget_alert_emails
+  }
+}
+
+# ============================================================================
+
+resource "aws_cloudwatch_dashboard" "cost_optimization" {
+  count = var.enable_cost_dashboard ? 1 : 0
+
+  dashboard_name = "${var.project_name}-${var.environment}-cost-optimization"
+
+  dashboard_body = jsonencode({
+    widgets = [
+      # S3 Cost and Usage Metrics
+      {
+        type   = "metric"
+        x      = 0
+        y      = 0
+        width  = 12
+        height = 6
+
+        properties = {
+          metrics = [
+            ["AWS/S3", "AllRequests", "BucketName", aws_s3_bucket.website.bucket, "StorageType", "AllStorageTypes"],
+            [".", "4xxErrors", ".", ".", ".", "."],
+            [".", "5xxErrors", ".", ".", ".", "."]
+          ]
+          view    = "timeSeries"
+          stacked = false
+          region  = var.aws_region
+          title   = "S3 Request Metrics"
+          period  = 300
+          stat    = "Sum"
+        }
+      },
+
+      # CloudFront Cost Metrics
+      {
+        type   = "metric"
+        x      = 12
+        y      = 0
+        width  = 12
+        height = 6
+
+        properties = {
+          metrics = [
+            ["AWS/CloudFront", "Requests", "DistributionId", aws_cloudfront_distribution.website.id, "Region", "Global"],
+            [".", "BytesDownloaded", ".", ".", ".", "."],
+            [".", "4xxErrorRate", ".", ".", ".", "."],
+            [".", "5xxErrorRate", ".", ".", ".", "."]
+          ]
+          view    = "timeSeries"
+          stacked = false
+          region  = "us-east-1"
+          title   = "CloudFront Performance & Cost Metrics"
+          period  = 300
+          stat    = "Sum"
+        }
+      },
+
+      # S3 Storage Size
+      {
+        type   = "metric"
+        x      = 0
+        y      = 6
+        width  = 12
+        height = 6
+
+        properties = {
+          metrics = [
+            ["AWS/S3", "BucketSizeBytes", "BucketName", aws_s3_bucket.website.bucket, "StorageType", "StandardStorage"],
+            [".", "BucketSizeBytes", ".", ".", "StorageType", "IntelligentTieringAAStorage"],
+            [".", "BucketSizeBytes", ".", ".", "StorageType", "IntelligentTieringIAStorage"],
+            [".", "BucketSizeBytes", ".", ".", "StorageType", "IntelligentTieringAASizeOverhead"],
+            [".", "BucketSizeBytes", ".", ".", "StorageType", "IntelligentTieringIASizeOverhead"]
+          ]
+          view    = "timeSeries"
+          stacked = true
+          region  = var.aws_region
+          title   = "S3 Storage Size by Class"
+          period  = 86400
+          stat    = "Maximum"
+        }
+      },
+
+      # Cost Estimation Widget (Text)
+      {
+        type   = "text"
+        x      = 12
+        y      = 6
+        width  = 12
+        height = 6
+
+        properties = {
+          markdown = <<-EOT
+# Cost Optimization Dashboard
+
+## Current Configuration
+- **S3 Intelligent Tiering**: ${var.enable_intelligent_tiering ? "Enabled" : "Disabled"}
+- **Storage Lens**: ${var.enable_storage_lens ? "Enabled" : "Disabled"}
+- **Origin Shield**: ${var.enable_origin_shield ? "Enabled" : "Disabled"}
+- **CloudFront Price Class**: ${var.cloudfront_price_class}
+
+## Estimated Monthly Savings
+- **Intelligent Tiering**: Up to 30% on storage costs
+- **Origin Shield**: $10-30/month (if enabled)
+- **Storage Lens**: Free analytics for optimization
+
+## Key Metrics to Monitor
+- S3 requests should stay below ${var.s3_request_threshold} per 5 minutes
+- Bucket size should stay below ${var.s3_bucket_size_threshold_gb} GB
+- CloudFront cache hit rate should be >85%
+
+## Cost Optimization Actions
+1. Enable Intelligent Tiering for automatic storage class optimization
+2. Monitor Storage Lens dashboard for usage patterns
+3. Consider Origin Shield for production workloads
+4. Set up billing alerts for cost thresholds
+5. Use CloudFront price classes based on user geography
+          EOT
+        }
+      }
+    ]
+  })
+}
+
+# ============================================================================
+
+resource "aws_cloudwatch_metric_alarm" "s3_requests_high" {
+  count = var.enable_cloudwatch_alarms ? 1 : 0
+
+  alarm_name          = "${var.project_name}-${var.environment}-s3-high-requests"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "AllRequests"
+  namespace           = "AWS/S3"
+  period              = "300"
+  statistic           = "Sum"
+  threshold           = var.s3_request_threshold
+  alarm_description   = "S3 request rate is too high - potential cost impact"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    BucketName = aws_s3_bucket.website.bucket
+    StorageType = "AllStorageTypes"
+  }
+
+  alarm_actions = var.alarm_sns_topic_arn != "" ? [var.alarm_sns_topic_arn] : []
+}
+
+resource "aws_cloudwatch_metric_alarm" "s3_bucket_size_high" {
+  count = var.enable_cloudwatch_alarms ? 1 : 0
+
+  alarm_name          = "${var.project_name}-${var.environment}-s3-bucket-size"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "BucketSizeBytes"
+  namespace           = "AWS/S3"
+  period              = "86400"
+  statistic           = "Maximum"
+  threshold           = var.s3_bucket_size_threshold_gb * 1024 * 1024 * 1024  # Convert GB to bytes
+  alarm_description   = "S3 bucket size is approaching limit"
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    BucketName = aws_s3_bucket.website.bucket
+    StorageType = "StandardStorage"
+  }
+
+  alarm_actions = var.alarm_sns_topic_arn != "" ? [var.alarm_sns_topic_arn] : []
+}
+
 # ============================================================================
 
 resource "aws_cloudwatch_metric_alarm" "cloudfront_4xx_errors" {

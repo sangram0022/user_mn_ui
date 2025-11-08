@@ -34,6 +34,48 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "owner_team" {
+  description = "Team responsible for this resource"
+  type        = string
+  default     = "Engineering"
+}
+
+variable "business_unit" {
+  description = "Business unit for cost allocation"
+  type        = string
+  default     = "Digital"
+}
+
+variable "compliance_level" {
+  description = "Compliance level (e.g., none, pci, hipaa, sox)"
+  type        = string
+  default     = "none"
+}
+
+variable "data_classification" {
+  description = "Data classification level (public, internal, confidential, restricted)"
+  type        = string
+  default     = "public"
+}
+
+variable "backup_frequency" {
+  description = "Backup frequency for cost optimization planning"
+  type        = string
+  default     = "daily"
+}
+
+variable "disaster_recovery_tier" {
+  description = "Disaster recovery tier (none, backup, pilot-light, warm-standby, multi-site)"
+  type        = string
+  default     = "backup"
+}
+
+variable "auto_shutdown_schedule" {
+  description = "Auto shutdown schedule for non-production environments"
+  type        = string
+  default     = "none"
+}
+
 variable "cost_center" {
   description = "Cost center tag for billing"
   type        = string
@@ -63,6 +105,24 @@ variable "s3_bucket_name" {
 
 variable "enable_versioning" {
   description = "Enable versioning for S3 bucket (recommended for production)"
+  type        = bool
+  default     = true
+}
+
+variable "enable_storage_lens" {
+  description = "Enable S3 Storage Lens for cost and usage analytics"
+  type        = bool
+  default     = true
+}
+
+variable "organization_arn" {
+  description = "AWS Organization ARN for Storage Lens (leave empty if not using Organizations)"
+  type        = string
+  default     = ""
+}
+
+variable "enable_intelligent_tiering" {
+  description = "Enable S3 Intelligent Tiering for automatic cost optimization"
   type        = bool
   default     = true
 }
@@ -248,6 +308,48 @@ variable "route53_zone_name" {
 # =============================================================================
 # MONITORING AND ALARMS
 # =============================================================================
+
+variable "enable_budget_alerts" {
+  description = "Enable AWS Budget alerts for cost control"
+  type        = bool
+  default     = true
+}
+
+variable "monthly_budget_limit" {
+  description = "Monthly budget limit in USD"
+  type        = number
+  default     = 100
+}
+
+variable "budget_alert_threshold_percent" {
+  description = "Budget alert threshold as percentage of budget"
+  type        = number
+  default     = 80
+}
+
+variable "budget_alert_emails" {
+  description = "Email addresses for budget alerts"
+  type        = list(string)
+  default     = []
+}
+
+variable "enable_cost_dashboard" {
+  description = "Enable CloudWatch dashboard for cost optimization monitoring"
+  type        = bool
+  default     = true
+}
+
+variable "s3_request_threshold" {
+  description = "Threshold for S3 requests per 5 minutes (cost monitoring)"
+  type        = number
+  default     = 100000  # 100k requests per 5 minutes
+}
+
+variable "s3_bucket_size_threshold_gb" {
+  description = "Threshold for S3 bucket size in GB (cost monitoring)"
+  type        = number
+  default     = 100  # 100 GB
+}
 
 variable "enable_cloudwatch_alarms" {
   description = "Enable CloudWatch alarms for CloudFront metrics"
