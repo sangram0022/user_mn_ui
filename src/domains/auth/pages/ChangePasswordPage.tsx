@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useChangePassword } from '../hooks/useAuth.hooks';
 import { useToast } from '../../../hooks/useToast';
-import { handleError } from '@/core/error/errorHandler';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { Button, Input } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { calculatePasswordStrength } from '../../../core/validation';
@@ -13,6 +13,7 @@ export function ChangePasswordPage() {
   const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
   
   // Use new centralized change password hook with React Query
   const changePasswordMutation = useChangePassword();
@@ -61,8 +62,7 @@ export function ChangePasswordPage() {
       toast.success(t('changePassword.success'));
       navigate(ROUTE_PATHS.PROFILE);
     } catch (error) {
-      const result = handleError(error);
-      toast.error(result.userMessage);
+      handleError(error, { context: { operation: 'changePassword' } });
     }
   };
 

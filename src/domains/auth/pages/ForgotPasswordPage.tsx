@@ -7,11 +7,12 @@ import { useForgotPassword } from '../hooks/useAuth.hooks';
 import { useForgotPasswordForm } from '../../../core/validation/useValidatedForm';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
-import { handleError } from '@/core/error/errorHandler';
+import { useSilentErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation(['auth', 'common']);
   const toast = useToast();
+  const handleError = useSilentErrorHandler(); // Use silent handler for security (prevent email enumeration)
   
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -28,16 +29,16 @@ export default function ForgotPasswordPage() {
         toast.success(t('forgotPassword.successMessage'));
         setIsSubmitted(true);
       } catch (error) {
-        // Use centralized error handler (but still show success for security)
-        handleError(error);
+        // Use silent handler for security - logs but doesn't show toast to prevent email enumeration
+        handleError(error, { context: { operation: 'forgotPassword' } });
         // Still show success to prevent email enumeration
         toast.success(t('forgotPassword.successMessage'));
         setIsSubmitted(true);
       }
     },
     onError: (error) => {
-      const result = handleError(error);
-      toast.error(result.userMessage);
+      // Silent error handling - prevents email enumeration
+      handleError(error, { context: { operation: 'forgotPassword' } });
     }
   });
 

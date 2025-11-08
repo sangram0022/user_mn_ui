@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useResetPassword } from '../hooks/useAuth.hooks';
 import { useToast } from '../../../hooks/useToast';
 import { calculatePasswordStrength } from '../../../core/validation';
-import { handleError } from '@/core/error/errorHandler';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import Badge from '../../../shared/components/ui/Badge';
 import { Button, Input } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
@@ -14,6 +14,7 @@ export function ResetPasswordPage() {
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
   
   // Use new centralized reset password hook
   const resetPasswordMutation = useResetPassword();
@@ -73,8 +74,7 @@ export function ResetPasswordPage() {
         });
       }, 3000);
     } catch (error) {
-      const result = handleError(error);
-      toast.error(result.userMessage);
+      handleError(error, { context: { operation: 'resetPassword' } });
     }
   };
 

@@ -10,12 +10,13 @@ import { useRegister } from '../hooks/useAuth.hooks';
 import { useRegisterForm } from '../../../core/validation';
 import { calculatePasswordStrength } from '../../../core/validation';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
-import { handleError } from '@/core/error/errorHandler';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 
 export default function RegisterPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
   const navigate = useNavigate();
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
 
   // Use new centralized register hook with React Query
   const registerMutation = useRegister();
@@ -48,14 +49,11 @@ export default function RegisterPage() {
           });
         }
       } catch (error) {
-        // Use centralized error handler
-        const result = handleError(error);
-        toast.error(result.userMessage);
+        handleError(error, { context: { operation: 'register' } });
       }
     },
     onError: (error) => {
-      const result = handleError(error);
-      toast.error(result.userMessage);
+      handleError(error, { context: { operation: 'register' } });
     }
   });
 
