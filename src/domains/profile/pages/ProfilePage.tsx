@@ -6,8 +6,9 @@ import { useFormErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { useProfile, useUpdateProfile } from '../hooks/useProfile.hooks';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
+import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
-export default function ProfilePage() {
+function ProfilePage() {
   const { t } = useTranslation(['profile', 'common', 'errors']);
   const { user: authUser } = useAuth();
   const toast = useToast();
@@ -318,3 +319,13 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+function ProfilePageWithErrorBoundary() {
+  return (
+    <PageErrorBoundary>
+      <ProfilePage />
+    </PageErrorBoundary>
+  );
+}
+
+export default ProfilePageWithErrorBoundary;

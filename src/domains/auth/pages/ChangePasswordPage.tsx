@@ -8,6 +8,7 @@ import { Button, Input } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { calculatePasswordStrength } from '../../../core/validation';
 import Badge from '../../../shared/components/ui/Badge';
+import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 export function ChangePasswordPage() {
   const { t } = useTranslation('auth');
@@ -175,4 +176,12 @@ export function ChangePasswordPage() {
   );
 }
 
-export default ChangePasswordPage;
+function ChangePasswordPageWithErrorBoundary() {
+  return (
+    <PageErrorBoundary>
+      <ChangePasswordPage />
+    </PageErrorBoundary>
+  );
+}
+
+export default ChangePasswordPageWithErrorBoundary;

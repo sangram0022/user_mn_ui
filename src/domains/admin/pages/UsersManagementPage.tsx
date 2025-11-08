@@ -13,6 +13,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveRegion, useKeyboardNavigation } from '../../../shared/components/accessibility/AccessibilityEnhancements';
 import { logger } from '../../../core/logging';
+import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 // AWS CloudWatch handles performance monitoring
 
 // ========================================
@@ -407,7 +408,7 @@ function VirtualUserList({
 // Main Users Management Page
 // ========================================
 
-export default function UsersManagementPage() {
+function UsersManagementPage() {
   const [allUsers] = useState(() => generateMockUsers(2500));
   const [filters, setFilters] = useState<UserFilters>({
     search: '',
@@ -591,3 +592,13 @@ export default function UsersManagementPage() {
     </div>
   );
 }
+
+function UsersManagementPageWithErrorBoundary() {
+  return (
+    <PageErrorBoundary>
+      <UsersManagementPage />
+    </PageErrorBoundary>
+  );
+}
+
+export default UsersManagementPageWithErrorBoundary;

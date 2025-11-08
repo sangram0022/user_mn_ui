@@ -6,10 +6,11 @@ import { useToast } from '../../../hooks/useToast';
 import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { Button } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
+import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 type VerificationStatus = 'loading' | 'success' | 'error';
 
-export default function VerifyEmailPage() {
+function VerifyEmailPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
@@ -132,3 +133,13 @@ export default function VerifyEmailPage() {
     </div>
   );
 }
+
+function VerifyEmailPageWithErrorBoundary() {
+  return (
+    <PageErrorBoundary>
+      <VerifyEmailPage />
+    </PageErrorBoundary>
+  );
+}
+
+export default VerifyEmailPageWithErrorBoundary;

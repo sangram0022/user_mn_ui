@@ -6,8 +6,9 @@ import { useToast } from '../../../hooks/useToast';
 import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { Button } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
+import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
-export default function VerifyEmailPendingPage() {
+function VerifyEmailPendingPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
   const location = useLocation();
   const navigate = useNavigate();
@@ -152,3 +153,13 @@ export default function VerifyEmailPendingPage() {
     </div>
   );
 }
+
+function VerifyEmailPendingPageWithErrorBoundary() {
+  return (
+    <PageErrorBoundary>
+      <VerifyEmailPendingPage />
+    </PageErrorBoundary>
+  );
+}
+
+export default VerifyEmailPendingPageWithErrorBoundary;

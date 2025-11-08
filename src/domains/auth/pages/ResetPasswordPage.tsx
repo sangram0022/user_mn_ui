@@ -8,6 +8,7 @@ import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler'
 import Badge from '../../../shared/components/ui/Badge';
 import { Button, Input } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
+import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 export function ResetPasswordPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -206,4 +207,12 @@ export function ResetPasswordPage() {
   );
 }
 
-export default ResetPasswordPage;
+function ResetPasswordPageWithErrorBoundary() {
+  return (
+    <PageErrorBoundary>
+      <ResetPasswordPage />
+    </PageErrorBoundary>
+  );
+}
+
+export default ResetPasswordPageWithErrorBoundary;

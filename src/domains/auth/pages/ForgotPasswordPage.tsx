@@ -8,8 +8,9 @@ import { useForgotPasswordForm } from '../../../core/validation/useValidatedForm
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
 import { useSilentErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordPage() {
   const { t } = useTranslation(['auth', 'common']);
   const toast = useToast();
   const handleError = useSilentErrorHandler(); // Use silent handler for security (prevent email enumeration)
@@ -138,3 +139,13 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+
+function ForgotPasswordPageWithErrorBoundary() {
+  return (
+    <PageErrorBoundary>
+      <ForgotPasswordPage />
+    </PageErrorBoundary>
+  );
+}
+
+export default ForgotPasswordPageWithErrorBoundary;

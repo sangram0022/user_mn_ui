@@ -19,6 +19,7 @@ import { Button, Input, ErrorAlert } from '../../../components';
 import { useLogin } from '../hooks/useAuth.hooks';
 import tokenService from '../services/tokenService';
 import { loginSchema, type LoginFormData } from '../../../core/validation/schemas';
+import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 export function ModernLoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -213,5 +214,13 @@ export function ModernLoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ModernLoginPageWithErrorBoundary() {
+  return (
+    <PageErrorBoundary>
+      <ModernLoginPage />
+    </PageErrorBoundary>
   );
 }
