@@ -58,6 +58,20 @@ const queryClient = new QueryClient({
 // Modern App Component
 // ========================================
 
+// Initialize auth debugger in development
+if (import.meta.env.DEV) {
+  import('./domains/auth/utils/authDebugger').then(module => {
+    // Auto-start storage monitoring
+    const stopMonitoring = module.startStorageMonitoring();
+    
+    // Initial diagnosis
+    module.diagnoseAuthState();
+    
+    // Make cleanup available (development only)
+    Object.assign(window, { stopAuthMonitoring: stopMonitoring });
+  });
+}
+
 export default function App() {
 
   // AWS CloudFront handles performance optimization and font preloading
