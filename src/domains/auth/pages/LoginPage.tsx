@@ -11,7 +11,6 @@ import { useLoginForm } from '../../../core/validation';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 import tokenService from '../services/tokenService';
 import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
-import { logger } from '@/core/logging';
 
 export default function LoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -32,26 +31,27 @@ export default function LoginPage() {
           password: data.password,
         });
         
-        // Debug: Log the actual response structure
-        if (import.meta.env.DEV) {
-          logger().info('🔍 Login response received', {
-            hasResult: !!result,
-            resultKeys: result ? Object.keys(result) : [],
-            hasAccessToken: !!result?.access_token,
-            hasData: 'data' in (result || {}),
-            accessToken: result?.access_token,
-            refreshToken: result?.refresh_token,
-          });
-        }
+        // Debug: Log the actual response structure (temporarily allow console)
+        // eslint-disable-next-line no-console
+        console.log('🔍 RAW LOGIN RESULT:', result);
+        // eslint-disable-next-line no-console
+        console.log('🔍 RESULT KEYS:', result ? Object.keys(result) : 'null');
+        // eslint-disable-next-line no-console
+        console.log('🔍 ACCESS_TOKEN:', result?.access_token);
+        // eslint-disable-next-line no-console
+        console.log('🔍 ROLES:', result?.roles, 'TYPE:', typeof result?.roles);
         
         if (result) {
           // Build user object from login response
+          // Ensure roles is always an array
+          const rolesArray = Array.isArray(result.roles) ? result.roles : [result.roles];
+          
           const user = {
             user_id: result.user_id,
             email: result.email,
             first_name: '', // Backend doesn't return these in login
             last_name: '',
-            roles: result.roles,
+            roles: rolesArray,
             is_active: true,
             is_verified: true,
             last_login: result.last_login_at,

@@ -71,13 +71,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // State (Single source of truth)
   const [state, setState] = useState<AuthState>(() => {
     const user = tokenService.getUser() as User | null;
+    // Defensive: ensure roles is an array before computing permissions
+    const rolesArray = user?.roles && Array.isArray(user.roles) ? user.roles : [];
     return {
       user,
       isAuthenticated: !!tokenService.getAccessToken(),
       isLoading: true,
       // Compute permissions from user roles if user exists
-      permissions: user?.roles
-        ? getEffectivePermissionsForRoles(user.roles as UserRole[])
+      permissions: rolesArray.length > 0
+        ? getEffectivePermissionsForRoles(rolesArray as UserRole[])
         : [],
     };
   });
@@ -120,7 +122,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
     
     // Compute permissions from user roles
-    const permissions = getEffectivePermissionsForRoles(user.roles as UserRole[]);
+    // Defensive: ensure roles is an array before computing permissions
+    const rolesArray = Array.isArray(user.roles) ? user.roles : [];
+    const permissions = getEffectivePermissionsForRoles(rolesArray as UserRole[]);
     
     setState({
       user,
@@ -180,7 +184,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const storedUser = tokenService.getUser() as User | null;
       if (storedUser) {
         // Compute permissions from user roles
-        const permissions = getEffectivePermissionsForRoles(storedUser.roles as UserRole[]);
+        // Defensive: ensure roles is an array before computing permissions
+        const rolesArray = Array.isArray(storedUser.roles) ? storedUser.roles : [];
+        const permissions = getEffectivePermissionsForRoles(rolesArray as UserRole[]);
         
         setState({
           user: storedUser,

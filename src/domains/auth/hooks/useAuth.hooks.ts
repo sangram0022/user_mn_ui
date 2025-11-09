@@ -6,7 +6,7 @@
 // ========================================
 
 import { useApiMutation } from '@/shared/hooks/useApiModern';
-import { apiClient } from '@/services/api/apiClient';
+import { apiPost } from '@/core/api/apiHelpers';
 import { API_PREFIXES } from '@/services/api/common';
 import type {
   LoginRequest,
@@ -37,10 +37,10 @@ const API_PREFIX = API_PREFIXES.AUTH;
 export function useLogin() {
   return useApiMutation(
     async (credentials: LoginRequest): Promise<LoginResponseData> => {
-      // Backend returns LoginResponse directly (not wrapped in ApiResponse)
-      // So we use apiClient.post directly instead of apiPost helper
-      const response = await apiClient.post<LoginResponseData>(`${API_PREFIX}/login`, credentials);
-      return response.data;
+      // Backend DOES wrap response: { success: true, data: { access_token, ... } }
+      // So we use apiPost which calls unwrapResponse()
+      const response = await apiPost<LoginResponseData>(`${API_PREFIX}/login`, credentials);
+      return response;
     },
     {
       successMessage: 'Login successful',
@@ -57,10 +57,8 @@ export function useLogin() {
 export function useRegister() {
   return useApiMutation(
     async (data: RegisterRequest): Promise<RegisterResponseData> => {
-      // Backend returns RegisterResponse directly (not wrapped in ApiResponse)
-      // So we use apiClient.post directly instead of apiPost helper
-      const response = await apiClient.post<RegisterResponseData>(`${API_PREFIX}/register`, data);
-      return response.data;
+      const response = await apiPost<RegisterResponseData>(`${API_PREFIX}/register`, data);
+      return response;
     },
     {
       successMessage: 'Registration successful! Please check your email.',
@@ -77,12 +75,11 @@ export function useRegister() {
 export function useForgotPassword() {
   return useApiMutation(
     async (data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> => {
-      // Backend returns response directly (not wrapped in ApiResponse)
-      const response = await apiClient.post<ForgotPasswordResponse>(
+      const response = await apiPost<ForgotPasswordResponse>(
         `${API_PREFIX}/forgot-password`,
         data
       );
-      return response.data;
+      return response;
     },
     {
       successMessage: 'Password reset link sent! Check your email.',
@@ -99,12 +96,11 @@ export function useForgotPassword() {
 export function useResetPassword() {
   return useApiMutation(
     async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
-      // Backend returns response directly (not wrapped in ApiResponse)
-      const response = await apiClient.post<ResetPasswordResponse>(
+      const response = await apiPost<ResetPasswordResponse>(
         `${API_PREFIX}/reset-password`,
         data
       );
-      return response.data;
+      return response;
     },
     {
       successMessage: 'Password reset successful! You can now login.',
@@ -121,12 +117,11 @@ export function useResetPassword() {
 export function useChangePassword() {
   return useApiMutation(
     async (data: ChangePasswordRequest): Promise<ChangePasswordResponse> => {
-      // Backend returns response directly (not wrapped in ApiResponse)
-      const response = await apiClient.post<ChangePasswordResponse>(
+      const response = await apiPost<ChangePasswordResponse>(
         `${API_PREFIX}/change-password`,
         data
       );
-      return response.data;
+      return response;
     },
     {
       successMessage: 'Password changed successfully!',
@@ -143,12 +138,11 @@ export function useChangePassword() {
 export function useVerifyEmail() {
   return useApiMutation(
     async (data: VerifyEmailRequest): Promise<VerifyEmailResponse> => {
-      // Backend returns response directly (not wrapped in ApiResponse)
-      const response = await apiClient.post<VerifyEmailResponse>(
+      const response = await apiPost<VerifyEmailResponse>(
         `${API_PREFIX}/verify-email`,
         data
       );
-      return response.data;
+      return response;
     },
     {
       successMessage: 'Email verified successfully!',
@@ -165,12 +159,11 @@ export function useVerifyEmail() {
 export function useResendVerification() {
   return useApiMutation(
     async (data: ResendVerificationRequest): Promise<ResendVerificationResponse> => {
-      // Backend returns response directly (not wrapped in ApiResponse)
-      const response = await apiClient.post<ResendVerificationResponse>(
+      const response = await apiPost<ResendVerificationResponse>(
         `${API_PREFIX}/resend-verification`,
         data
       );
-      return response.data;
+      return response;
     },
     {
       successMessage: 'Verification email sent! Check your inbox.',
@@ -187,9 +180,8 @@ export function useResendVerification() {
 export function useLogout() {
   return useApiMutation(
     async (): Promise<LogoutResponse> => {
-      // Backend returns response directly (not wrapped in ApiResponse)
-      const response = await apiClient.post<LogoutResponse>(`${API_PREFIX}/logout`, null);
-      return response.data;
+      const response = await apiPost<LogoutResponse>(`${API_PREFIX}/logout`, null);
+      return response;
     },
     {
       successMessage: 'Logged out successfully',
@@ -206,13 +198,11 @@ export function useLogout() {
 export function useRefreshToken() {
   return useApiMutation(
     async (refreshTokenValue: string): Promise<RefreshTokenResponseData> => {
-      // Backend returns RefreshTokenResponse directly (not wrapped in ApiResponse)
-      // So we use apiClient.post directly instead of apiPost helper
-      const response = await apiClient.post<RefreshTokenResponseData>(
+      const response = await apiPost<RefreshTokenResponseData>(
         `${API_PREFIX}/refresh`,
         { refresh_token: refreshTokenValue }
       );
-      return response.data;
+      return response;
     },
     {
       errorToast: false, // Silent refresh failures
