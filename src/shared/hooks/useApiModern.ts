@@ -310,15 +310,20 @@ export const createApiHooks = (baseUrl: string) => ({
    * GET request hook factory
    */
   useGet: <TData>(endpoint: string, options?: Parameters<typeof useApiQuery>[2]) =>
-    useApiQuery<TData>(['GET', baseUrl, endpoint], () => 
-      apiClient.get(`${baseUrl}${endpoint}`).then(res => res.data), options),
+    useApiQuery<TData>(['GET', baseUrl, endpoint], async () => {
+      const res = await apiClient.get(`${baseUrl}${endpoint}`);
+      return res.data;
+    }, options),
 
   /**
    * POST mutation hook factory
    */
   usePost: <TData, TVariables>(endpoint: string, options?: Parameters<typeof useApiMutation>[1]) =>
     useApiMutation<TData, TVariables>(
-      (variables) => apiClient.post(`${baseUrl}${endpoint}`, variables).then(res => res.data),
+      async (variables) => {
+        const res = await apiClient.post(`${baseUrl}${endpoint}`, variables);
+        return res.data;
+      },
       options
     ),
 
@@ -327,7 +332,10 @@ export const createApiHooks = (baseUrl: string) => ({
    */
   usePut: <TData, TVariables>(endpoint: string, options?: Parameters<typeof useApiMutation>[1]) =>
     useApiMutation<TData, TVariables>(
-      (variables) => apiClient.put(`${baseUrl}${endpoint}`, variables).then(res => res.data),
+      async (variables) => {
+        const res = await apiClient.put(`${baseUrl}${endpoint}`, variables);
+        return res.data;
+      },
       options
     ),
 
@@ -336,7 +344,10 @@ export const createApiHooks = (baseUrl: string) => ({
    */
   useDelete: <TData>(endpoint: string, options?: Parameters<typeof useApiMutation>[1]) =>
     useApiMutation<TData, void>(
-      () => apiClient.delete(`${baseUrl}${endpoint}`).then(res => res.data),
+      async () => {
+        const res = await apiClient.delete(`${baseUrl}${endpoint}`);
+        return res.data;
+      },
       options
     ),
 });
