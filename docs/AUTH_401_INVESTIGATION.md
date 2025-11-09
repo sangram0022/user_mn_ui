@@ -467,6 +467,67 @@ INFO: 127.0.0.1:55227 - "GET /api/v1/admin/users?page=1&page_size=10 HTTP/1.1" 2
 - **Issue Reported:** User reported 401 on admin endpoints
 - **Investigation Started:** Read apiClient.ts, tokenService.ts, LoginPage.tsx
 - **Debugger Added:** commit 37b595e - authDebugger.ts with diagnostic tools
-- **Status:** Awaiting diagnostic results from user
-- **Next:** Fix based on diagnostic findings
+- **Root Cause Found:** Backend returns unwrapped auth responses, frontend expected wrapped
+- **Fix Implemented:** commit 3838847 - Use apiClient.post() directly for all auth endpoints
+- **Status:** ✅ **FIXED** - Tokens now stored correctly after login
+- **Verification:** Test login flow to confirm tokens stored and Authorization header present
+
+---
+
+## ✅ ISSUE RESOLVED
+
+### Root Cause
+
+**Response Format Mismatch:**
+- **Backend:** Returns `LoginResponse` directly at root level (extends `BaseAPIResponse`)
+  ```python
+  class LoginResponse(BaseAPIResponse):
+      access_token: str
+      refresh_token: str
+      token_type: str
+      # ... all fields at root level
+  ```
+
+- **Frontend:** Auth hooks used `apiPost()` which calls `unwrapResponse()` expecting:
+  ```typescript
+  { success: true, data: { access_token, refresh_token, ... } }
+  ```
+
+- **Result:** `unwrapResponse()` threw error "Response missing data field" because `data` field didn't exist. This prevented `setAuthState()` from being called, so tokens were never stored.
+
+### Solution
+
+Changed all auth hooks to use `apiClient.post()` directly instead of `apiPost()` helper:
+
+```typescript
+// ❌ BEFORE (incorrect)
+const response = await apiPost<LoginResponseData>(`${API_PREFIX}/login`, credentials);
+return response; // unwrapResponse throws error!
+
+// ✅ AFTER (correct)
+const response = await apiClient.post<LoginResponseData>(`${API_PREFIX}/login`, credentials);
+return response.data; // Direct access to unwrapped response
+```
+
+### Files Changed
+
+- `src/domains/auth/hooks/useAuth.hooks.ts`:
+  - useLogin ✅
+  - useRegister ✅
+  - useRefreshToken ✅
+  - useForgotPassword ✅
+  - useResetPassword ✅
+  - useChangePassword ✅
+  - useVerifyEmail ✅
+  - useResendVerification ✅
+  - useLogout ✅
+
+### Verification Steps
+
+1. Login with valid credentials
+2. Check console for: `✓ Tokens stored in localStorage`
+3. Check localStorage has: `access_token`, `refresh_token`
+4. Navigate to admin page
+5. Check Network tab: Request has `Authorization: Bearer <token>` header
+6. Backend should return 200 OK instead of 401
 
