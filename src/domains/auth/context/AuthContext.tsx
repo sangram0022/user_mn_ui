@@ -96,7 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       email: user.email,
       roles: user.roles,
       rememberMe,
-      tokenPreview: tokens.access_token.substring(0, 20) + '...',
+      tokenPreview: tokens.access_token ? tokens.access_token.substring(0, 20) + '...' : 'none',
       expiresIn: tokens.expires_in || 3600,
       context: 'AuthContext.login',
     });

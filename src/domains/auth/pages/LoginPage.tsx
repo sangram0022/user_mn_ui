@@ -11,6 +11,7 @@ import { useLoginForm } from '../../../core/validation';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 import tokenService from '../services/tokenService';
 import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+import { logger } from '@/core/logging';
 
 export default function LoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -30,6 +31,18 @@ export default function LoginPage() {
           email: data.email,
           password: data.password,
         });
+        
+        // Debug: Log the actual response structure
+        if (import.meta.env.DEV) {
+          logger().info('🔍 Login response received', {
+            hasResult: !!result,
+            resultKeys: result ? Object.keys(result) : [],
+            hasAccessToken: !!result?.access_token,
+            hasData: 'data' in (result || {}),
+            accessToken: result?.access_token,
+            refreshToken: result?.refresh_token,
+          });
+        }
         
         if (result) {
           // Build user object from login response
