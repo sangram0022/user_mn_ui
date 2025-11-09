@@ -421,21 +421,21 @@ backup-YYYY-MM-DD-HHMM/
 **ALWAYS use** `useStandardErrorHandler` or `useFormErrorHandler` for API error handling.
 
 ```typescript
-import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+import { useStandardErrorHandler } from "@/shared/hooks/useStandardErrorHandler";
 
 const handleError = useStandardErrorHandler();
 
 try {
   await apiCall();
 } catch (error) {
-  handleError(error, { context: { operation: 'updateUser' } });
+  handleError(error, { context: { operation: "updateUser" } });
 }
 ```
 
 ### Form Error Handling Pattern
 
 ```typescript
-import { useFormErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+import { useFormErrorHandler } from "@/shared/hooks/useStandardErrorHandler";
 
 const handleError = useFormErrorHandler();
 const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -485,15 +485,15 @@ catch (error) {
 **Use TanStack Query** for all API calls. Never use raw axios/fetch in components.
 
 ```typescript
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useStandardErrorHandler } from "@/shared/hooks/useStandardErrorHandler";
 
 // Query Hook
 export function useUserProfile() {
   const handleError = useStandardErrorHandler();
-  
+
   return useQuery({
-    queryKey: ['user', 'profile'],
+    queryKey: ["user", "profile"],
     queryFn: () => userService.getCurrentUser(),
     onError: handleError,
   });
@@ -503,11 +503,11 @@ export function useUserProfile() {
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   const handleError = useStandardErrorHandler();
-  
+
   return useMutation({
     mutationFn: userService.updateProfile,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user', 'profile'] });
+      queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
     },
     onError: handleError,
   });
@@ -519,7 +519,11 @@ export function useUpdateProfile() {
 **Import from** `@/core/api/types` - Single Source of Truth
 
 ```typescript
-import type { ApiResponse, ValidationErrorResponse, PaginatedResponse } from '@/core/api';
+import type {
+  ApiResponse,
+  ValidationErrorResponse,
+  PaginatedResponse,
+} from "@/core/api";
 
 // Backend format
 interface ApiResponse<T> {
@@ -538,10 +542,10 @@ interface ApiResponse<T> {
 
 ```typescript
 // ❌ WRONG
-import { User, Role, Permission } from '@/types';
+import { User, Role, Permission } from "@/types";
 
 // ✅ CORRECT
-import type { User, Role, Permission } from '@/types';
+import type { User, Role, Permission } from "@/types";
 ```
 
 ESLint rule enforces this: `@typescript-eslint/consistent-type-imports`
@@ -552,13 +556,14 @@ ESLint rule enforces this: `@typescript-eslint/consistent-type-imports`
 
 ```typescript
 // ❌ AVOID
-apiClient.get('/users')
-  .then(res => res.data)
-  .catch(err => handleError(err));
+apiClient
+  .get("/users")
+  .then((res) => res.data)
+  .catch((err) => handleError(err));
 
 // ✅ PREFER
 try {
-  const res = await apiClient.get('/users');
+  const res = await apiClient.get("/users");
   return res.data;
 } catch (error) {
   handleError(error);
@@ -574,18 +579,21 @@ try {
 #### KEEP useCallback/useMemo ONLY for:
 
 1. **Context values** (object identity):
+
 ```typescript
 const value = useMemo(() => ({ state, actions }), [state, actions]);
 // Kept: Context value identity for Provider consumers
 ```
 
 2. **Expensive calculations** (>10ms with benchmark proof):
+
 ```typescript
 const result = useMemo(() => expensiveSort(data), [data]);
 // Kept: Calculation takes 15ms avg (benchmarked)
 ```
 
 3. **useEffect dependencies** (with explanation):
+
 ```typescript
 const callback = useCallback(() => {...}, []);
 useEffect(() => { callback(); }, [callback]);
@@ -639,16 +647,16 @@ const handleSubmit = async (data: FormData) => {
 ### Error Handler Testing
 
 ```typescript
-import { renderHook } from '@testing-library/react';
-import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+import { renderHook } from "@testing-library/react";
+import { useStandardErrorHandler } from "@/shared/hooks/useStandardErrorHandler";
 
-it('should redirect to login on 401', () => {
+it("should redirect to login on 401", () => {
   const { result } = renderHook(() => useStandardErrorHandler());
   const error = { response: { status: 401 } };
-  
+
   result.current(error);
-  
-  expect(window.location.href).toBe('/login');
+
+  expect(window.location.href).toBe("/login");
 });
 ```
 
@@ -667,7 +675,7 @@ const wrapper = ({ children }) => (
 
 it('should fetch user profile', async () => {
   const { result } = renderHook(() => useUserProfile(), { wrapper });
-  
+
   await waitFor(() => expect(result.current.isSuccess).toBe(true));
   expect(result.current.data).toBeDefined();
 });
@@ -678,25 +686,25 @@ it('should fetch user profile', async () => {
 **Use centralized logger** - NEVER use console.log directly:
 
 ```typescript
-import { logger } from '@/core/logging';
+import { logger } from "@/core/logging";
 
 // ✅ CORRECT
-logger().info('User logged in', { userId, email });
-logger().error('API call failed', error, { endpoint: '/users' });
-logger().debug('Cache hit', { key: 'user-123' });
+logger().info("User logged in", { userId, email });
+logger().error("API call failed", error, { endpoint: "/users" });
+logger().debug("Cache hit", { key: "user-123" });
 
 // ❌ FORBIDDEN (except in diagnostic tools)
-console.log('User logged in');
+console.log("User logged in");
 ```
 
 For diagnostic tools only:
 
 ```typescript
-import { diagnostic } from '@/core/logging/diagnostic';
+import { diagnostic } from "@/core/logging/diagnostic";
 
 // Development diagnostic output (dual: console + structured logs)
-diagnostic.log('✅ Token found', { userId: '123' });
-diagnostic.error('❌ API failed', error);
+diagnostic.log("✅ Token found", { userId: "123" });
+diagnostic.error("❌ API failed", error);
 ```
 
 ## Project Architecture Notes
