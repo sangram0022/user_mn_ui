@@ -241,9 +241,11 @@ class ErrorReportingService {
 
     // Track console messages
     if (this.config.breadcrumbs.captureConsole) {
+      // eslint-disable-next-line no-console
       const originalConsoleLog = console.log;
       const originalConsoleError = console.error;
 
+      // eslint-disable-next-line no-console
       console.log = (...args: unknown[]) => {
         originalConsoleLog(...args);
         this.addBreadcrumb(args.join(' '), 'console', { args }, 'info');

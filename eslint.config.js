@@ -22,6 +22,13 @@ export default defineConfig([
     rules: {
       // Enforce structured logging instead of console.*
       'no-console': ['error', { allow: ['warn', 'error'] }],
+      
+      // Enforce type-only imports for better tree-shaking (React 19 best practice)
+      '@typescript-eslint/consistent-type-imports': ['error', {
+        prefer: 'type-imports',
+        fixStyle: 'separate-type-imports',
+        disallowTypeAnnotations: false,
+      }],
     },
   },
 ])
