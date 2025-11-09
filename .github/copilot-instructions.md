@@ -414,6 +414,291 @@ backup-YYYY-MM-DD-HHMM/
 └── README.md (backup documentation)
 ```
 
+## 🔥 Error Handling Pattern (REQUIRED)
+
+### useStandardErrorHandler Hook
+
+**ALWAYS use** `useStandardErrorHandler` or `useFormErrorHandler` for API error handling.
+
+```typescript
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+
+const handleError = useStandardErrorHandler();
+
+try {
+  await apiCall();
+} catch (error) {
+  handleError(error, { context: { operation: 'updateUser' } });
+}
+```
+
+### Form Error Handling Pattern
+
+```typescript
+import { useFormErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+
+const handleError = useFormErrorHandler();
+const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+try {
+  await mutation.mutateAsync(data);
+} catch (error) {
+  handleError(error, setFieldErrors);
+}
+```
+
+### Error Handler Features
+
+- ✅ Automatic 401 redirect to login
+- ✅ Field error extraction (422 validation errors)
+- ✅ Toast notifications
+- ✅ Structured logging
+- ✅ Error categorization (network, auth, validation, server)
+
+### Forbidden Patterns
+
+❌ **NEVER** manually handle errors like this:
+
+```typescript
+// ❌ FORBIDDEN
+catch (error) {
+  if (error.response?.status === 401) {
+    window.location.href = '/login';
+  }
+  toast.error(error.message);
+}
+```
+
+✅ **ALWAYS** use the standard handler:
+
+```typescript
+// ✅ REQUIRED
+catch (error) {
+  handleError(error);
+}
+```
+
+## 🌐 API Patterns (REQUIRED)
+
+### TanStack Query Hook Pattern
+
+**Use TanStack Query** for all API calls. Never use raw axios/fetch in components.
+
+```typescript
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+
+// Query Hook
+export function useUserProfile() {
+  const handleError = useStandardErrorHandler();
+  
+  return useQuery({
+    queryKey: ['user', 'profile'],
+    queryFn: () => userService.getCurrentUser(),
+    onError: handleError,
+  });
+}
+
+// Mutation Hook
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  const handleError = useStandardErrorHandler();
+  
+  return useMutation({
+    mutationFn: userService.updateProfile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', 'profile'] });
+    },
+    onError: handleError,
+  });
+}
+```
+
+### API Response Types (SSOT)
+
+**Import from** `@/core/api/types` - Single Source of Truth
+
+```typescript
+import type { ApiResponse, ValidationErrorResponse, PaginatedResponse } from '@/core/api';
+
+// Backend format
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  error?: string;
+  field_errors?: Record<string, string[]>;
+  timestamp?: string;
+}
+```
+
+### Type-Only Imports (REQUIRED)
+
+**Always use** `import type` for type-only imports (better tree-shaking):
+
+```typescript
+// ❌ WRONG
+import { User, Role, Permission } from '@/types';
+
+// ✅ CORRECT
+import type { User, Role, Permission } from '@/types';
+```
+
+ESLint rule enforces this: `@typescript-eslint/consistent-type-imports`
+
+### Async/Await Pattern (REQUIRED)
+
+**Prefer async/await** over .then()/.catch():
+
+```typescript
+// ❌ AVOID
+apiClient.get('/users')
+  .then(res => res.data)
+  .catch(err => handleError(err));
+
+// ✅ PREFER
+try {
+  const res = await apiClient.get('/users');
+  return res.data;
+} catch (error) {
+  handleError(error);
+}
+```
+
+## ⚛️ React 19 Hook Guidelines
+
+### useCallback/useMemo Rules
+
+**React 19 Compiler** handles most optimizations automatically.
+
+#### KEEP useCallback/useMemo ONLY for:
+
+1. **Context values** (object identity):
+```typescript
+const value = useMemo(() => ({ state, actions }), [state, actions]);
+// Kept: Context value identity for Provider consumers
+```
+
+2. **Expensive calculations** (>10ms with benchmark proof):
+```typescript
+const result = useMemo(() => expensiveSort(data), [data]);
+// Kept: Calculation takes 15ms avg (benchmarked)
+```
+
+3. **useEffect dependencies** (with explanation):
+```typescript
+const callback = useCallback(() => {...}, []);
+useEffect(() => { callback(); }, [callback]);
+// Kept: useEffect dependency
+```
+
+#### REMOVE useCallback/useMemo for:
+
+- ❌ Simple computations (filter, map, sort)
+- ❌ Event handlers
+- ❌ Inline functions
+
+```typescript
+// ❌ REMOVE
+const filtered = useMemo(() => arr.filter(x => x.active), [arr]);
+const handleClick = useCallback(() => {...}, []);
+
+// ✅ CORRECT - React Compiler optimizes automatically
+const filtered = arr.filter(x => x.active);
+const handleClick = () => {...};
+```
+
+**IMPORTANT**: If you keep useCallback/useMemo, **MUST add comment** explaining why:
+
+```typescript
+const value = useMemo(() => ({ user, actions }), [user, actions]);
+// Kept: Context value identity prevents consumer re-renders
+```
+
+### useActionState for Forms
+
+**Use when:** Creating forms with native `action` prop (Server Actions pattern)
+
+**Current Status:** Most forms use TanStack Query mutations (already optimal)
+
+```typescript
+// Modern pattern with TanStack Query (PREFERRED for this app)
+const mutation = useUpdateProfile();
+
+const handleSubmit = async (data: FormData) => {
+  try {
+    await mutation.mutateAsync(data);
+  } catch (error) {
+    handleError(error);
+  }
+};
+```
+
+## 🧪 Testing Guidelines
+
+### Error Handler Testing
+
+```typescript
+import { renderHook } from '@testing-library/react';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+
+it('should redirect to login on 401', () => {
+  const { result } = renderHook(() => useStandardErrorHandler());
+  const error = { response: { status: 401 } };
+  
+  result.current(error);
+  
+  expect(window.location.href).toBe('/login');
+});
+```
+
+### TanStack Query Testing
+
+```typescript
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useUserProfile } from './useProfile.hooks';
+
+const wrapper = ({ children }) => (
+  <QueryClientProvider client={new QueryClient()}>
+    {children}
+  </QueryClientProvider>
+);
+
+it('should fetch user profile', async () => {
+  const { result } = renderHook(() => useUserProfile(), { wrapper });
+  
+  await waitFor(() => expect(result.current.isSuccess).toBe(true));
+  expect(result.current.data).toBeDefined();
+});
+```
+
+## 📝 Logging Pattern
+
+**Use centralized logger** - NEVER use console.log directly:
+
+```typescript
+import { logger } from '@/core/logging';
+
+// ✅ CORRECT
+logger().info('User logged in', { userId, email });
+logger().error('API call failed', error, { endpoint: '/users' });
+logger().debug('Cache hit', { key: 'user-123' });
+
+// ❌ FORBIDDEN (except in diagnostic tools)
+console.log('User logged in');
+```
+
+For diagnostic tools only:
+
+```typescript
+import { diagnostic } from '@/core/logging/diagnostic';
+
+// Development diagnostic output (dual: console + structured logs)
+diagnostic.log('✅ Token found', { userId: '123' });
+diagnostic.error('❌ API failed', error);
+```
+
 ## Project Architecture Notes
 
 - Follow Domain-Driven Design principles
@@ -422,3 +707,6 @@ backup-YYYY-MM-DD-HHMM/
 - Keep components atomic and reusable
 - Implement proper error boundaries
 - Use TypeScript strictly (no any types)
+- All API calls through TanStack Query
+- All errors through useStandardErrorHandler
+- All logging through centralized logger
