@@ -17,7 +17,7 @@
 
 import type { UserRole } from '../types/rbac.types';
 import type { ApiEndpointConfig } from '../types/rbac.types';
-import { logger } from '@/core/logging';
+import { storageService } from '@/core/storage';
 
 // ========================================
 // Types
@@ -334,24 +334,18 @@ class RbacPersistentCache {
     // Clear user roles
     this.memoryCache.userRoles.delete(`user_${userId}`);
 
-    // Clear localStorage entries (expensive operation)
+    // Clear storage entries for this user
     if (typeof window !== 'undefined') {
-      const keysToRemove: string[] = [];
-      
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (
-          key.includes(STORAGE_KEYS.PERMISSIONS) ||
-          key.includes(STORAGE_KEYS.USER_ROLES)
-        )) {
+      const allKeys = storageService.keys();
+      const keysToRemove = allKeys.filter(key => {
+        if (key.includes(STORAGE_KEYS.PERMISSIONS) || key.includes(STORAGE_KEYS.USER_ROLES)) {
           const entry = this.loadFromLocalStorage(key);
-          if (entry?.userId === userId) {
-            keysToRemove.push(key);
-          }
+          return entry?.userId === userId;
         }
-      }
+        return false;
+      });
 
-      keysToRemove.forEach(key => localStorage.removeItem(key));
+      keysToRemove.forEach(key => storageService.remove(key));
     }
 
     this.stats.invalidations++;
@@ -363,19 +357,13 @@ class RbacPersistentCache {
     this.memoryCache.endpoints.clear();
     this.memoryCache.userRoles.clear();
 
-    // Clear localStorage
+    // Clear storage
     if (typeof window !== 'undefined') {
+      const allKeys = storageService.keys();
+      
       Object.values(STORAGE_KEYS).forEach(keyPrefix => {
-        const keysToRemove: string[] = [];
-        
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.includes(keyPrefix)) {
-            keysToRemove.push(key);
-          }
-        }
-
-        keysToRemove.forEach(key => localStorage.removeItem(key));
+        const keysToRemove = allKeys.filter(key => key.includes(keyPrefix));
+        keysToRemove.forEach(key => storageService.remove(key));
       });
     }
 
@@ -399,77 +387,51 @@ class RbacPersistentCache {
       expiredKeys.forEach(key => cache.delete(key));
     });
 
-    // Clean localStorage (less frequent, more expensive)
+    // Clean storage (less frequent, more expensive)
+    // storageService handles TTL automatically, but manual cleanup helps with quota
     if (typeof window !== 'undefined' && Math.random() < 0.1) { // 10% chance
+      const allKeys = storageService.keys();
+      
       Object.values(STORAGE_KEYS).forEach(keyPrefix => {
-        const expiredKeys: string[] = [];
-        
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.includes(keyPrefix)) {
+        const expiredKeys = allKeys
+          .filter(key => key.includes(keyPrefix))
+          .map(key => {
             const entry = this.loadFromLocalStorage(key);
-            if (entry && now > entry.timestamp + entry.ttl) {
-              expiredKeys.push(key);
-            }
-          }
-        }
+            return entry && now > entry.timestamp + entry.ttl ? key : null;
+          })
+          .filter((key): key is string => key !== null);
 
-        expiredKeys.forEach(key => localStorage.removeItem(key));
+        expiredKeys.forEach(key => storageService.remove(key));
       });
     }
   }
 
   // ========================================
-  // LocalStorage Helpers
+  // Storage Helpers (using storageService)
   // ========================================
 
   private storeInLocalStorage<T>(key: string, entry: CacheEntry<T>): void {
     if (typeof window === 'undefined') return;
 
-    try {
-      localStorage.setItem(key, JSON.stringify(entry));
-    } catch {
-      // Handle localStorage quota exceeded
-      logger().warn('RBAC Cache: LocalStorage quota exceeded, clearing old entries', { key });
-      this.clearOldestEntries();
-      
-      // Try again
-      try {
-        localStorage.setItem(key, JSON.stringify(entry));
-      } catch {
-        logger().warn('RBAC Cache: Unable to store entry in localStorage', { key });
-      }
-    }
+    // storageService handles quota management, error handling, and retry logic
+    storageService.set(key, entry, { ttl: entry.ttl });
   }
 
   private loadFromLocalStorage<T>(key: string): CacheEntry<T> | null {
     if (typeof window === 'undefined') return null;
 
-    try {
-      const item = localStorage.getItem(key);
-      if (!item) return null;
-
-      const entry = JSON.parse(item) as CacheEntry<T>;
-      
-      // Check version compatibility
-      const expectedVersion = this.getExpectedVersion(key);
-      if (entry.version !== expectedVersion) {
-        localStorage.removeItem(key);
-        return null;
-      }
-
-      // Check TTL
-      if (Date.now() > entry.timestamp + entry.ttl) {
-        localStorage.removeItem(key);
-        return null;
-      }
-
-      return entry;
-    } catch {
-      // Handle corrupted entries
-      localStorage.removeItem(key);
+    const entry = storageService.get<CacheEntry<T>>(key);
+    if (!entry) return null;
+    
+    // Check version compatibility
+    const expectedVersion = this.getExpectedVersion(key);
+    if (entry.version !== expectedVersion) {
+      storageService.remove(key);
       return null;
     }
+
+    // TTL is automatically handled by storageService
+    return entry;
   }
 
   private getExpectedVersion(key: string): string {
@@ -479,32 +441,7 @@ class RbacPersistentCache {
     return '1.0.0';
   }
 
-  private clearOldestEntries(): void {
-    if (typeof window === 'undefined') return;
 
-    const entries: { key: string; timestamp: number }[] = [];
-    
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && Object.values(STORAGE_KEYS).some(prefix => key.includes(prefix))) {
-        try {
-          const item = localStorage.getItem(key);
-          if (item) {
-            const entry = JSON.parse(item);
-            entries.push({ key, timestamp: entry.timestamp || 0 });
-          }
-        } catch {
-          // Remove corrupted entries
-          localStorage.removeItem(key);
-        }
-      }
-    }
-
-    // Sort by timestamp and remove oldest 25%
-    entries.sort((a, b) => a.timestamp - b.timestamp);
-    const toRemove = entries.slice(0, Math.ceil(entries.length * 0.25));
-    toRemove.forEach(({ key }) => localStorage.removeItem(key));
-  }
 
   // ========================================
   // Stats and Monitoring
@@ -515,24 +452,16 @@ class RbacPersistentCache {
       return this.resetStats();
     }
 
-    try {
-      const stored = localStorage.getItem(STORAGE_KEYS.STATS);
-      return stored ? JSON.parse(stored) : this.resetStats();
-    } catch {
-      return this.resetStats();
-    }
+    const stored = storageService.get<CacheStats>(STORAGE_KEYS.STATS);
+    return stored || this.resetStats();
   }
 
   private saveStats(): void {
     if (typeof window === 'undefined') return;
 
-    try {
-      this.stats.memorySize = this.calculateMemorySize();
-      this.stats.localStorageSize = this.calculateLocalStorageSize();
-      localStorage.setItem(STORAGE_KEYS.STATS, JSON.stringify(this.stats));
-    } catch {
-      // Ignore save errors
-    }
+    this.stats.memorySize = this.calculateMemorySize();
+    this.stats.localStorageSize = this.calculateLocalStorageSize();
+    storageService.set(STORAGE_KEYS.STATS, this.stats);
   }
 
   private resetStats(): CacheStats {
@@ -557,20 +486,16 @@ class RbacPersistentCache {
   private calculateLocalStorageSize(): number {
     if (typeof window === 'undefined') return 0;
 
-    let size = 0;
-    Object.values(STORAGE_KEYS).forEach(keyPrefix => {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.includes(keyPrefix)) {
-          const item = localStorage.getItem(key);
-          if (item) {
-            size += item.length;
-          }
-        }
-      }
-    });
-
-    return size;
+    const allKeys = storageService.keys();
+    
+    return Object.values(STORAGE_KEYS).reduce((totalSize, keyPrefix) => {
+      const matchingKeys = allKeys.filter(key => key.includes(keyPrefix));
+      const keysSize = matchingKeys.reduce((sum, key) => {
+        const item = storageService.get<unknown>(key);
+        return sum + (item ? JSON.stringify(item).length : 0);
+      }, 0);
+      return totalSize + keysSize;
+    }, 0);
   }
 
   getStats(): CacheStats {
