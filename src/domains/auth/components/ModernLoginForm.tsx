@@ -4,6 +4,7 @@
 // ========================================
 
 import { z } from 'zod';
+import { useNavigate } from 'react-router-dom';
 import { ModernForm, InputField, SubmitButton, FormActions } from '@/shared/components/forms/ModernFormComponents';
 import { useApiMutation } from '@/shared/hooks/useApiModern';
 import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
@@ -51,6 +52,7 @@ export function ModernLoginForm({
   redirectTo = '/dashboard',
   className = '',
 }: ModernLoginFormProps) {
+  const navigate = useNavigate();
   
   // Modern API mutation with optimistic updates
   const loginMutation = useApiMutation(
@@ -62,9 +64,9 @@ export function ModernLoginForm({
       onSuccess: (data) => {
         onSuccess?.(data);
         
-        // Redirect after successful login
+        // Use React Router navigation instead of window.location
         setTimeout(() => {
-          window.location.href = redirectTo;
+          navigate(redirectTo, { replace: true });
         }, 1000);
       },
       onError: (error) => {

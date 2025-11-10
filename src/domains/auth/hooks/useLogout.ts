@@ -5,6 +5,7 @@
 
 import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import tokenService from '../services/tokenService';
 import type { LogoutResponse } from '../types/auth.types';
@@ -22,6 +23,7 @@ interface UseLogoutOptions {
  */
 export const useLogout = (options?: UseLogoutOptions): UseMutationResult<LogoutResponse, Error, void> => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: authService.logout,
@@ -35,8 +37,8 @@ export const useLogout = (options?: UseLogoutOptions): UseMutationResult<LogoutR
       // Call custom success handler
       options?.onSuccess?.(data);
 
-      // Redirect to login page
-      window.location.href = '/auth/login';
+      // Use React Router navigation instead of window.location
+      navigate('/auth/login', { replace: true });
     },
     onError: (error: Error) => {
       if (options?.onError) {
@@ -46,7 +48,8 @@ export const useLogout = (options?: UseLogoutOptions): UseMutationResult<LogoutR
         // This ensures user can't be stuck in an invalid auth state
         tokenService.clearTokens();
         queryClient.clear();
-        window.location.href = '/auth/login';
+        // Use React Router navigation instead of window.location
+        navigate('/auth/login', { replace: true });
       }
     },
   });

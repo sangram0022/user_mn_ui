@@ -7,6 +7,7 @@
 
 import { useState, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLogin } from '../hooks/useAuth.hooks';
 import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import Input from '../../../components/Input';
@@ -62,6 +63,7 @@ function SubmitButton({ isPending: externalPending }: { isPending?: boolean }) {
  */
 export function LoginForm({ onSuccess, onError, redirectTo = '/dashboard' }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
   const loginMutation = useLogin();
   const handleError = useStandardErrorHandler();
 
@@ -85,7 +87,8 @@ export function LoginForm({ onSuccess, onError, redirectTo = '/dashboard' }: Log
         await loginMutation.mutateAsync(credentials);
         onSuccess?.();
         if (redirectTo) {
-          window.location.href = redirectTo;
+          // Use React Router navigation instead of window.location
+          navigate(redirectTo, { replace: true });
         }
         return { success: true };
       } catch (error) {
