@@ -4,7 +4,8 @@
  * and better performance for large forms
  */
 
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
+import { API_TIMING } from '@/core/constants';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../components';
 import Input from '../components/Input';
@@ -62,7 +63,7 @@ export function ModernContactForm() {
   const onSubmit = async (data: ContactFormData) => {
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, API_TIMING.DEMO_DELAY));
       
       logger().info('Modern contact form submitted', { name: data.name, email: data.email, department: data.department });
       toast.success('Message sent successfully! We\'ll get back to you soon.');

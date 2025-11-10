@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/services/api/apiClient';
 import { storageService } from '@/core/storage';
+import { INTERVAL_TIMING } from '@/core/constants';
 
 export interface HealthStatus {
   status: 'healthy' | 'unhealthy' | 'degraded';
@@ -141,7 +142,7 @@ export function useHealthCheck() {
 
   // Periodic health checks
   useEffect(() => {
-    const interval = setInterval(performHealthCheck, 60000); // Check every minute
+    const interval = setInterval(performHealthCheck, INTERVAL_TIMING.HEALTH_CHECK);
     performHealthCheck(); // Initial check
 
     return () => clearInterval(interval);

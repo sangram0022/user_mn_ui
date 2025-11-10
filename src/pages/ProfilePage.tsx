@@ -12,6 +12,7 @@
 import { useState, useEffect } from 'react';
 import { EnhancedContactForm } from '../shared/components/forms/EnhancedFormPatterns';
 import { useLiveRegion } from '../shared/hooks/accessibility';
+import { API_TIMING } from '@/core/constants';
 // AWS CloudWatch handles performance monitoring
 
 // ========================================
@@ -381,7 +382,7 @@ export default function ProfilePage() {
     
     const loadProfile = async () => {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, API_TIMING.FAST_DELAY));
       
       // Only update state if component is still mounted
       if (!isMounted) return;

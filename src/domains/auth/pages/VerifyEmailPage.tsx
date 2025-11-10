@@ -7,6 +7,7 @@ import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler'
 import { Button } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
+import { UI_TIMING } from '@/core/constants';
 
 type VerificationStatus = 'loading' | 'success' | 'error';
 
@@ -49,7 +50,7 @@ function VerifyEmailPage() {
               state: { message: t('verifyEmail.successMessage') },
             });
           }
-        }, 3000);
+        }, UI_TIMING.SUCCESS_REDIRECT_DELAY);
       } catch (error) {
         if (!isMounted) return; // Don't update state if unmounted
 

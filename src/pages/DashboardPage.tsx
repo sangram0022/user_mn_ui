@@ -13,6 +13,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveRegion } from '../shared/hooks/accessibility';
 import { CardSkeleton } from '../shared/components/loading/Skeletons';
+import { API_TIMING, INTERVAL_TIMING } from '@/core/constants';
 
 // ========================================
 // Dashboard Metrics Types
@@ -277,7 +278,7 @@ export default function DashboardPage() {
 
     const loadData = async () => {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, API_TIMING.MEDIUM_DELAY));
       
       // Only update state if component is still mounted
       if (!isMounted) return;
@@ -300,7 +301,7 @@ export default function DashboardPage() {
         setMetrics(newMetrics);
         setLastUpdated(new Date());
       }
-    }, 30000);
+    }, INTERVAL_TIMING.DASHBOARD_REFRESH);
 
     return () => {
       isMounted = false; // Mark as unmounted
