@@ -4,6 +4,7 @@
 // ========================================
 
 import { isTokenExpired as checkTokenExpiration } from '../services/tokenService';
+import { storageService } from '@/core/storage';
 
 /**
  * Session storage keys
@@ -32,7 +33,7 @@ export const SESSION_TIMEOUT = {
  * Used to track user activity for idle timeout
  */
 export function updateLastActivity(): void {
-  localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, Date.now().toString());
+  storageService.set(SESSION_KEYS.LAST_ACTIVITY, Date.now().toString());
 }
 
 /**
@@ -41,7 +42,7 @@ export function updateLastActivity(): void {
  * @returns Last activity time in milliseconds, or null if not found
  */
 export function getLastActivity(): number | null {
-  const timestamp = localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY);
+  const timestamp = storageService.get<string>(SESSION_KEYS.LAST_ACTIVITY);
   return timestamp ? parseInt(timestamp, 10) : null;
 }
 
@@ -78,7 +79,7 @@ export function isSessionIdle(timeoutMs: number = SESSION_TIMEOUT.IDLE): boolean
  * @returns True if remember me is enabled
  */
 export function isRememberMeEnabled(): boolean {
-  const rememberMe = localStorage.getItem(SESSION_KEYS.REMEMBER_ME);
+  const rememberMe = storageService.get<string>(SESSION_KEYS.REMEMBER_ME);
   return rememberMe === 'true';
 }
 
@@ -89,9 +90,9 @@ export function isRememberMeEnabled(): boolean {
  */
 export function setRememberMe(enabled: boolean): void {
   if (enabled) {
-    localStorage.setItem(SESSION_KEYS.REMEMBER_ME, 'true');
+    storageService.set(SESSION_KEYS.REMEMBER_ME, 'true');
   } else {
-    localStorage.removeItem(SESSION_KEYS.REMEMBER_ME);
+    storageService.remove(SESSION_KEYS.REMEMBER_ME);
   }
 }
 
@@ -101,7 +102,7 @@ export function setRememberMe(enabled: boolean): void {
  */
 export function clearSession(): void {
   const keys = Object.values(SESSION_KEYS);
-  keys.forEach(key => localStorage.removeItem(key));
+  keys.forEach(key => storageService.remove(key));
 }
 
 /**
@@ -131,7 +132,7 @@ export function isSessionExpired(): boolean {
  * @returns Milliseconds until expiration, or 0 if expired
  */
 export function getSessionTimeRemaining(): number {
-  const expiresAt = localStorage.getItem(SESSION_KEYS.TOKEN_EXPIRES_AT);
+  const expiresAt = storageService.get<string>(SESSION_KEYS.TOKEN_EXPIRES_AT);
   
   if (!expiresAt) {
     return 0;
@@ -236,8 +237,8 @@ export function checkSessionHealth(): {
   const idle = isSessionIdle();
 
   // Check for tokens
-  const accessToken = localStorage.getItem(SESSION_KEYS.ACCESS_TOKEN);
-  const refreshToken = localStorage.getItem(SESSION_KEYS.REFRESH_TOKEN);
+  const accessToken = storageService.get<string>(SESSION_KEYS.ACCESS_TOKEN);
+  const refreshToken = storageService.get<string>(SESSION_KEYS.REFRESH_TOKEN);
 
   if (!accessToken) {
     issues.push('No access token found');
@@ -258,7 +259,7 @@ export function checkSessionHealth(): {
   }
 
   // Check for user data
-  const user = localStorage.getItem(SESSION_KEYS.USER);
+  const user = storageService.get<unknown>(SESSION_KEYS.USER);
   if (!user) {
     issues.push('No user data found');
   }
@@ -279,10 +280,10 @@ export function checkSessionHealth(): {
  * @param newKey - New storage key
  */
 export function migrateSessionKey(oldKey: string, newKey: string): void {
-  const value = localStorage.getItem(oldKey);
+  const value = storageService.get<string>(oldKey);
   
   if (value) {
-    localStorage.setItem(newKey, value);
-    localStorage.removeItem(oldKey);
+    storageService.set(newKey, value);
+    storageService.remove(oldKey);
   }
 }
