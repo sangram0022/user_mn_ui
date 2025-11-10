@@ -20,20 +20,20 @@ interface LazyRouteOptions {
 
 /**
  * Creates a lazy-loaded route component optimized for AWS CloudFront
- * Note: Using Record<string, never> for compatibility with React Router v6
+ * Uses generic type parameter for type-safe props
+ * 
+ * Note: Props type needs to extend object for React component compatibility
  */
-export function createLazyRoute(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  importFn: () => Promise<{ default: ComponentType<any> }>,
+export function createLazyRoute<P extends object = Record<string, never>>(
+  importFn: () => Promise<{ default: ComponentType<P> }>,
   options: LazyRouteOptions = {}
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): ComponentType<any> {
+): ComponentType<P> {
   const { errorBoundary = true } = options;
 
   // AWS CloudFront handles preloading and chunk optimization
   const LazyComponent = lazy(() => {
     return importFn().catch(() => ({
-      default: () => (
+      default: (() => (
         <div className="flex items-center justify-center min-h-[400px] text-center">
           <div>
             <div className="text-6xl mb-4">😕</div>
@@ -47,21 +47,20 @@ export function createLazyRoute(
             </button>
           </div>
         </div>
-      ),
+      )) as ComponentType<P>,
     }));
   });
 
-  // Type-safe wrapper for error boundary  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const WrappedComponent = (props: any) => {
+  // Type-safe wrapper component with proper prop typing
+  const WrappedComponent: ComponentType<P> = (props: P) => {
     if (errorBoundary) {
       return (
         <ComponentErrorBoundary>
-          <LazyComponent {...props} />
+          <LazyComponent {...(props as P)} />
         </ComponentErrorBoundary>
       );
     }
-    return <LazyComponent {...props} />;
+    return <LazyComponent {...(props as P)} />;
   };
 
   return WrappedComponent;

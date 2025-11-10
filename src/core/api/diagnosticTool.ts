@@ -68,27 +68,18 @@ export const diagnoseAPI = {
       return;
     }
     
-    const baseURL = 'http://localhost:8000';
+    // Import apiClient for consistent error handling, token injection, and retry logic
+    const { apiClient } = await import('@/services/api/apiClient');
     
     // Test User API (working)
     diagnostic.log('\n🧪 Testing User API...');
     try {
-      const userResponse = await fetch(`${baseURL}/api/v1/admin/users?page=1&page_size=10`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      const userResponse = await apiClient.get('/api/v1/admin/users', {
+        params: { page: 1, page_size: 10 },
       });
       
       diagnostic.log(`User API Status: ${userResponse.status} ${userResponse.statusText}`);
-      
-      if (userResponse.ok) {
-        const data = await userResponse.json();
-        diagnostic.log('✅ User API Success:', data);
-      } else {
-        const error = await userResponse.text();
-        diagnostic.error('❌ User API Error:', error);
-      }
+      diagnostic.log('✅ User API Success:', userResponse.data);
     } catch (error) {
       diagnostic.error('❌ User API Request Failed:', error);
     }
@@ -96,22 +87,10 @@ export const diagnoseAPI = {
     // Test Role API (failing)
     diagnostic.log('\n🧪 Testing Role API (current path)...');
     try {
-      const roleResponse = await fetch(`${baseURL}/api/v1/admin/rbac/roles`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const roleResponse = await apiClient.get('/api/v1/admin/rbac/roles');
       
       diagnostic.log(`Role API Status: ${roleResponse.status} ${roleResponse.statusText}`);
-      
-      if (roleResponse.ok) {
-        const data = await roleResponse.json();
-        diagnostic.log('✅ Role API Success:', data);
-      } else {
-        const error = await roleResponse.text();
-        diagnostic.error('❌ Role API Error:', error);
-      }
+      diagnostic.log('✅ Role API Success:', roleResponse.data);
     } catch (error) {
       diagnostic.error('❌ Role API Request Failed:', error);
     }
@@ -119,22 +98,10 @@ export const diagnoseAPI = {
     // Test alternative path
     diagnostic.log('\n🧪 Testing Role API (alternative path)...');
     try {
-      const altResponse = await fetch(`${baseURL}/api/v1/admin/roles`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const altResponse = await apiClient.get('/api/v1/admin/roles');
       
       diagnostic.log(`Alternative Role API Status: ${altResponse.status} ${altResponse.statusText}`);
-      
-      if (altResponse.ok) {
-        const data = await altResponse.json();
-        diagnostic.log('✅ Alternative path works!:', data);
-      } else {
-        const error = await altResponse.text();
-        diagnostic.error('❌ Alternative path also fails:', error);
-      }
+      diagnostic.log('✅ Alternative path works!:', altResponse.data);
     } catch (error) {
       diagnostic.error('❌ Alternative path request failed:', error);
     }

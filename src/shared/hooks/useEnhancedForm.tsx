@@ -10,7 +10,7 @@
 // ========================================
 
 import { useState, useEffect, useRef } from 'react';
-import { useForm, type FieldValues, type UseFormReturn, type Path } from 'react-hook-form';
+import { useForm, type FieldValues, type UseFormReturn, type Path, type PathValue } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDebouncedCallback } from 'use-debounce';
 import type { z } from 'zod';
@@ -310,8 +310,9 @@ export function useEnhancedForm<T extends FieldValues>(
   // ========================================
 
   const handleFieldChange = (fieldName: keyof T, value: unknown) => {
-    // @ts-expect-error - Path<T> type compatibility
-    setValue(fieldName, value);
+    // Type assertion needed: keyof T may not exactly match Path<T> from RHF
+    // This is safe because fieldName comes from the schema's field names
+    setValue(fieldName as Path<T>, value as PathValue<T, Path<T>>);
 
     // Trigger validation if enabled
     if (validation.validateOnChange) {

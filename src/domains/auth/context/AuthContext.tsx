@@ -121,6 +121,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Login - Set tokens and user in state & storage
+   * Kept: useCallback required for useMemo context value dependency (prevents Provider re-renders)
    */
   const login = useCallback((tokens: AuthTokens, user: User, rememberMe: boolean = false) => {
     logger().info('🔐 Login: Storing tokens and user data', {
@@ -171,6 +172,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Logout - Clear state, storage, and redirect
+   * Kept: useCallback required for useMemo context value dependency
    */
   const logout = useCallback(async () => {
     try {
@@ -197,6 +199,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Check Auth - Validate current session
+   * Kept: useCallback required for useMemo context value dependency
    */
   const checkAuth = useCallback(async () => {
     const accessToken = tokenService.getAccessToken();

@@ -85,16 +85,16 @@ export function VirtualTable({
         </div>
       </div>
 
-      {/* Virtual List */}
+      {/* Virtual List - react-window List uses specific prop types not in @types/react-window */}
       <VirtualList
-        height={maxHeight}
-        itemCount={data.length}
-        itemSize={rowHeight}
-        width="100%"
-      >
-        {/* @ts-expect-error - react-window List API */}
-        {Row}
-      </VirtualList>
+        {...({
+          height: maxHeight,
+          itemCount: data.length,
+          itemSize: rowHeight,
+          width: "100%",
+          children: Row,
+        } as unknown as React.ComponentProps<typeof VirtualList>)}
+      />
     </div>
   );
 }

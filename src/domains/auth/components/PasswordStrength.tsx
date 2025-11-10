@@ -74,6 +74,7 @@ function calculateStrength(password: string): StrengthResult {
  * Shows visual feedback for password quality
  */
 export function PasswordStrength({ password, showLabel = true }: PasswordStrengthProps) {
+  // Kept: useMemo for expensive regex calculations on every keystroke (6 regex tests)
   const strength = useMemo(() => calculateStrength(password), [password]);
   
   if (!password) {

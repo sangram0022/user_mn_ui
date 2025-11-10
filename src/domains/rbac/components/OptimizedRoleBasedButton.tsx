@@ -14,7 +14,7 @@
  * ========================================
  */
 
-import { memo, useMemo, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { memo, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { usePermissions } from '../hooks/usePermissions';
 import { Button } from '../../../components';
 import type { UserRole, Permission } from '../types/rbac.types';
@@ -45,45 +45,33 @@ function RoleBasedButtonInternal({
 }: OptimizedRoleBasedButtonProps) {
   const { hasRole, hasPermission } = usePermissions();
 
-  // ✅ Memoize expensive access checks
-  const hasAccess = useMemo(() => {
-    // Check role access
-    let hasRoleAccess = true;
-    if (requiredRole) {
-      const rolesArray = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-      hasRoleAccess = requireAll
-        ? rolesArray.every((role) => hasRole([role]))
-        : rolesArray.some((role) => hasRole([role]));
-    }
+  // React 19 Compiler: Simple boolean logic, no memoization needed
+  // Check role access
+  let hasRoleAccess = true;
+  if (requiredRole) {
+    const rolesArray = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    hasRoleAccess = requireAll
+      ? rolesArray.every((role) => hasRole([role]))
+      : rolesArray.some((role) => hasRole([role]));
+  }
 
-    // Check permission access
-    let hasPermAccess = true;
-    if (requiredPermission) {
-      const permArray = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
-      hasPermAccess = requireAll
-        ? permArray.every((perm) => hasPermission(perm))
-        : permArray.some((perm) => hasPermission(perm));
-    }
+  // Check permission access
+  let hasPermAccess = true;
+  if (requiredPermission) {
+    const permArray = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
+    hasPermAccess = requireAll
+      ? permArray.every((perm) => hasPermission(perm))
+      : permArray.some((perm) => hasPermission(perm));
+  }
 
-    return hasRoleAccess && hasPermAccess;
-  }, [
-    requiredRole,
-    requiredPermission,
-    requireAll,
-    hasRole,
-    hasPermission,
-  ]);
+  const hasAccess = hasRoleAccess && hasPermAccess;
 
-  // ✅ Memoize render decision and disabled state
-  const renderState = useMemo(() => {
-    const shouldRender = hasAccess || disabledBehavior !== 'hide';
-    const isDisabled = disabled || (!hasAccess && disabledBehavior === 'disable');
-    
-    return { shouldRender, isDisabled };
-  }, [hasAccess, disabledBehavior, disabled]);
+  // React 19 Compiler: Simple boolean logic, no memoization needed
+  const shouldRender = hasAccess || disabledBehavior !== 'hide';
+  const isDisabled = disabled || (!hasAccess && disabledBehavior === 'disable');
 
   // ✅ Early return optimization
-  if (!renderState.shouldRender) {
+  if (!shouldRender) {
     return null;
   }
 
@@ -92,7 +80,7 @@ function RoleBasedButtonInternal({
       {...buttonProps}
       variant={variant}
       size={size}
-      disabled={renderState.isDisabled}
+      disabled={isDisabled}
     >
       {children}
     </Button>
