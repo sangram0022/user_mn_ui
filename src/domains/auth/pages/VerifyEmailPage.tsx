@@ -24,24 +24,35 @@ function VerifyEmailPage() {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
+    let isMounted = true; // Track if component is still mounted
+    let redirectTimeout: number | null = null;
+
     const verify = async () => {
       if (!token) {
-        setStatus('error');
-        setErrorMessage(t('errors:VERIFICATION_TOKEN_INVALID'));
+        if (isMounted) {
+          setStatus('error');
+          setErrorMessage(t('errors:VERIFICATION_TOKEN_INVALID'));
+        }
         return;
       }
 
       try {
         await verifyEmailMutation.mutateAsync({ token });
 
+        if (!isMounted) return; // Don't update state if unmounted
+
         setStatus('success');
         toast.success(t('verifyEmail.success'));
-        setTimeout(() => {
-          navigate(ROUTE_PATHS.LOGIN, {
-            state: { message: t('verifyEmail.successMessage') },
-          });
+        redirectTimeout = setTimeout(() => {
+          if (isMounted) {
+            navigate(ROUTE_PATHS.LOGIN, {
+              state: { message: t('verifyEmail.successMessage') },
+            });
+          }
         }, 3000);
       } catch (error) {
+        if (!isMounted) return; // Don't update state if unmounted
+
         const result = handleError(error, { context: { operation: 'verifyEmail', token } });
         setStatus('error');
         setErrorMessage(result.userMessage);
@@ -49,6 +60,13 @@ function VerifyEmailPage() {
     };
 
     verify();
+
+    return () => {
+      isMounted = false; // Mark as unmounted
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout); // Clear pending redirect
+      }
+    };
   }, [token, verifyEmailMutation, toast, navigate, t, handleError]);
 
   if (status === 'loading') {

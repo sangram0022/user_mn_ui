@@ -376,11 +376,15 @@ export default function ProfilePage() {
   const { announce, LiveRegion } = useLiveRegion();
 
   useEffect(() => {
+    let isMounted = true; // Track if component is still mounted
     // AWS CloudWatch monitors performance automatically
     
     const loadProfile = async () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Only update state if component is still mounted
+      if (!isMounted) return;
       
       const mockProfile = generateMockProfile();
       setProfile(mockProfile);
@@ -392,6 +396,10 @@ export default function ProfilePage() {
 
     loadProfile();
     document.title = 'Profile - User Management';
+
+    return () => {
+      isMounted = false; // Mark as unmounted
+    };
   }, [announce]);
 
   const tabs = [

@@ -11,7 +11,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import { useLiveRegion } from '../shared/components/accessibility/AccessibilityEnhancements';
+import { useLiveRegion } from '../shared/hooks/accessibility';
 import { CardSkeleton } from '../shared/components/loading/Skeletons';
 
 // ========================================
@@ -273,9 +273,14 @@ export default function DashboardPage() {
 
   // Simulate data loading
   useEffect(() => {
+    let isMounted = true; // Track if component is still mounted
+
     const loadData = async () => {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Only update state if component is still mounted
+      if (!isMounted) return;
       
       const newMetrics = generateMockMetrics();
       setMetrics(newMetrics);
@@ -289,12 +294,18 @@ export default function DashboardPage() {
 
     // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
-      const newMetrics = generateMockMetrics();
-      setMetrics(newMetrics);
-      setLastUpdated(new Date());
+      // Only update if component is still mounted
+      if (isMounted) {
+        const newMetrics = generateMockMetrics();
+        setMetrics(newMetrics);
+        setLastUpdated(new Date());
+      }
     }, 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false; // Mark as unmounted
+      clearInterval(interval);
+    };
   }, [announce]);
 
   useEffect(() => {
