@@ -87,7 +87,7 @@ export function PasswordStrength({ password, showLabel = true }: PasswordStrengt
       <div className="flex gap-1 h-2">
         {[...Array(4)].map((_, index) => (
           <div
-            key={index}
+            key={`strength-bar-${index}`}
             className={`flex-1 rounded-full transition-colors duration-300 ${
               index < strength.score
                 ? strength.color

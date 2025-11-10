@@ -321,7 +321,7 @@ export function AccessibleBreadcrumbs({ items, className = '' }: AccessibleBread
     <nav aria-label="Breadcrumb" className={`mb-4 ${className}`}>
       <ol className="flex items-center space-x-2 text-sm">
         {items.map((item, index) => (
-          <li key={index} className="flex items-center">
+          <li key={item.path || `breadcrumb-${item.label}-${index}`} className="flex items-center">
             {index > 0 && (
               <svg
                 className="w-4 h-4 text-gray-400 mx-2"

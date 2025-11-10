@@ -356,8 +356,8 @@ export default function HtmlShowcase() {
         </h2>
         
         <div className="grid md:grid-cols-3 gap-6">
-          {sampleData.mediaItems.map((item, index) => (
-            <figure key={index} className="group">
+          {sampleData.mediaItems.map((item) => (
+            <figure key={item.src} className="group">
               <div className="overflow-hidden rounded-xl shadow-lg">
                 <img
                   src={item.src}
@@ -390,7 +390,7 @@ export default function HtmlShowcase() {
             
             return (
               <div
-                key={index}
+                key={notification.title}
                 className={`p-4 border-l-4 rounded-r-lg ${colors[notification.type as keyof typeof colors]} ${animationUtils.withStagger('animate-slide-left', index)}`}
               >
                 <div className="flex items-start">
@@ -418,7 +418,7 @@ export default function HtmlShowcase() {
         
         <div className="space-y-6">
           {sampleData.progressItems.map((item, index) => (
-            <div key={index} className="space-y-2">
+            <div key={item.label} className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-700">{item.label}</span>
                 <span className="text-sm text-gray-500">{item.value}%</span>
@@ -443,7 +443,7 @@ export default function HtmlShowcase() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sampleData.featuresGrid.map((feature, index) => (
             <div
-              key={index}
+              key={feature.title}
               className={`group p-6 bg-linear-to-br from-white to-gray-50 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer ${animationUtils.withStagger('animate-scale-in', index)}`}
             >
               <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
@@ -474,8 +474,8 @@ export default function HtmlShowcase() {
                 { title: 'What is React 19?', content: 'React 19 introduces new features like the React Compiler, improved Server Components, and enhanced performance optimizations.' },
                 { title: 'Tailwind CSS v4 Benefits', content: 'Version 4 brings CSS-first configuration, improved performance, and better developer experience with enhanced IntelliSense.' },
                 { title: 'Vite 6 Features', content: 'Vite 6 offers faster cold starts, improved HMR, and better support for modern JavaScript features.' },
-              ].map((item, index) => (
-                <details key={index} className="bg-gray-50 rounded-lg overflow-hidden border border-gray-200 group">
+              ].map((item) => (
+                <details key={item.title} className="bg-gray-50 rounded-lg overflow-hidden border border-gray-200 group">
                   <summary className="px-4 py-3 cursor-pointer font-medium hover:bg-gray-100 transition-colors flex items-center justify-between">
                     <span>{item.title}</span>
                     <svg className="w-5 h-5 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

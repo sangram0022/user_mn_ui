@@ -58,7 +58,7 @@ export default function AdminDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statsData.map((stat, index) => (
-          <Card key={index} hover className={animationUtils.withStagger('animate-scale-in', index)}>
+          <Card key={stat.title} hover className={animationUtils.withStagger('animate-scale-in', index)}>
             <div className="flex items-center justify-between mb-4">
               <div className="text-3xl">{stat.icon}</div>
               <span className={`text-sm font-medium ${stat.trendUp ? 'text-semantic-success' : 'text-semantic-error'}`}>

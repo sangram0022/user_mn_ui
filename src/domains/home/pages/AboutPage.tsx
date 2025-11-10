@@ -97,7 +97,7 @@ export default function AboutPage() {
 
         <div className="max-w-3xl mx-auto space-y-4">
           {principles.map((principle, index) => (
-            <Card key={index} className="flex items-start gap-4 group hover:shadow-lg transition-shadow">
+            <Card key={`principle-${index}-${principle.substring(0, 20)}`} className="flex items-start gap-4 group hover:shadow-lg transition-shadow">
               <div className="shrink-0 w-8 h-8 bg-linear-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold">
                 {index + 1}
               </div>

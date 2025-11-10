@@ -372,8 +372,8 @@ export default function ContactPage() {
           <Card className="animate-slide-right">
             <h3 className="text-lg font-semibold mb-4">Office Hours</h3>
             <div className="space-y-3">
-              {contactData.officeHours.map((schedule, index) => (
-                <div key={index} className="flex justify-between items-center py-2">
+              {contactData.officeHours.map((schedule) => (
+                <div key={schedule.day} className="flex justify-between items-center py-2">
                   <span className="text-gray-700">{schedule.day}</span>
                   <span className="text-gray-600 font-medium">{schedule.hours}</span>
                 </div>
@@ -414,9 +414,9 @@ export default function ContactPage() {
                 { name: 'API Documentation', icon: '⚡' },
                 { name: 'Community Forum', icon: '👥' },
                 { name: 'System Status', icon: '🟢' },
-              ].map((link, index) => (
+              ].map((link) => (
                 <a
-                  key={index}
+                  key={link.name}
                   href="#"
                   className="flex items-center gap-3 p-2 text-gray-700 hover:text-brand-primary hover:bg-blue-50 rounded-lg transition-colors"
                 >

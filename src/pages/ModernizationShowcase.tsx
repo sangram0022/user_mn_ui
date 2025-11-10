@@ -267,8 +267,8 @@ export default function ModernizationShowcase() {
                 { icon: '♿', label: 'WCAG Compliant' },
                 { icon: '📱', label: 'Mobile First' },
                 { icon: '🔄', label: 'Offline Support' },
-              ].map((feature, index) => (
-                <div key={index} className="text-center p-4 bg-white bg-opacity-10 rounded-lg">
+              ].map((feature) => (
+                <div key={feature.label} className="text-center p-4 bg-white bg-opacity-10 rounded-lg">
                   <div className="text-2xl mb-2">{feature.icon}</div>
                   <div className="text-sm font-medium">{feature.label}</div>
                 </div>

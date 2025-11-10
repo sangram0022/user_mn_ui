@@ -106,7 +106,7 @@ export default function Breadcrumb() {
           const isLast = index === breadcrumbs.length - 1;
 
           return (
-            <li key={index} className="flex items-center space-x-2">
+            <li key={item.path || `breadcrumb-${item.label}-${index}`} className="flex items-center space-x-2">
               <ChevronRight size={16} className="text-gray-400" aria-hidden="true" />
               
               {item.path && !isLast ? (

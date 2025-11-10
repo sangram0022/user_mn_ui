@@ -154,7 +154,7 @@ export default function ProductsPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {productsData.stats.map((stat, index) => (
             <Card 
-              key={index} 
+              key={stat.label} 
               hover 
               className={`text-center ${animationUtils.withStagger('animate-scale-in', index)}`}
             >
