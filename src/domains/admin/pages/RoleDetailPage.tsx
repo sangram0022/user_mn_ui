@@ -1,82 +1,48 @@
-import { useState, useEffect } from 'react';
+// ========================================
+// Role Detail Page - Refactored
+// ========================================
+
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRole, useUpdateRole } from '../hooks';
 import type { UpdateRoleRequest } from '../types';
 import Button from '../../../shared/components/ui/Button';
 import Badge from '../../../shared/components/ui/Badge';
 import { logger } from '../../../core/logging';
-
-const SYSTEM_ROLES = ['admin', 'user'];
-
-// Define all available resources and actions
-const RESOURCES = [
-  'users',
-  'roles',
-  'analytics',
-  'audit_logs',
-  'settings',
-  'reports',
-  'notifications',
-] as const;
-
-const ACTIONS = ['create', 'read', 'update', 'delete', 'approve', 'export', 'configure'] as const;
-
-// Define which actions are available for each resource
-const RESOURCE_ACTIONS: Record<string, string[]> = {
-  users: ['create', 'read', 'update', 'delete', 'approve'],
-  roles: ['create', 'read', 'update', 'delete'],
-  analytics: ['read', 'export'],
-  audit_logs: ['read', 'export'],
-  settings: ['read', 'update', 'configure'],
-  reports: ['create', 'read', 'export'],
-  notifications: ['create', 'read', 'update', 'delete'],
-};
+import { SYSTEM_ROLES, RESOURCES, ACTIONS, RESOURCE_ACTIONS, getRoleLevelBadge } from '../components/role-detail/constants';
+import { useRolePermissions } from '../components/role-detail/useRolePermissions';
 
 export default function RoleDetailPage() {
   const { roleName } = useParams<{ roleName: string }>();
   const navigate = useNavigate();
-
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    display_name: '',
-    description: '',
-    level: 1,
-    permissions: new Map<string, Set<string>>(), // resource -> actions set
-  });
 
-  const { data: roleData, isLoading, isError, error } = useRole(roleName!, {
+  const { data: role, isLoading, isError, error } = useRole(roleName!, {
     include_users: true,
     users_limit: 100,
   });
 
   const updateRole = useUpdateRole();
-  const role = roleData;
 
-  // Initialize form data when role loads
-  useEffect(() => {
-    if (role) {
-      const permissionsMap = new Map<string, Set<string>>();
-      
-      // Convert RolePermission[] to Map<resource, Set<actions>>
-      role.permissions.forEach((perm) => {
-        permissionsMap.set(perm.resource, new Set(perm.actions));
-      });
-
-      setFormData({
-        display_name: role.display_name,
-        description: role.description || '',
-        level: role.level,
-        permissions: permissionsMap,
-      });
-    }
-  }, [role]);
+  const {
+    formData,
+    setFormData,
+    togglePermission,
+    selectAllForResource,
+    deselectAllForResource,
+    selectAllForAction,
+    deselectAllForAction,
+    hasPermission,
+    isResourceFullySelected,
+    isActionFullySelected,
+    getTotalPermissions,
+  } = useRolePermissions(role);
 
   const isSystemRole = roleName ? SYSTEM_ROLES.includes(roleName) : false;
 
   const handleSave = async () => {
     if (!roleName) return;
 
-    // Convert permissions map to API format
     const permissions = Array.from(formData.permissions.entries()).map(([resource, actions]) => ({
       resource,
       actions: Array.from(actions),
@@ -102,131 +68,7 @@ export default function RoleDetailPage() {
 
   const handleCancel = () => {
     setIsEditing(false);
-    
-    // Reset to original data
-    if (role) {
-      const permissionsMap = new Map<string, Set<string>>();
-      role.permissions.forEach((perm) => {
-        permissionsMap.set(perm.resource, new Set(perm.actions));
-      });
-
-      setFormData({
-        display_name: role.display_name,
-        description: role.description || '',
-        level: role.level,
-        permissions: permissionsMap,
-      });
-    }
-  };
-
-  const togglePermission = (resource: string, action: string) => {
-    if (isSystemRole || !isEditing) return;
-
-    setFormData((prev) => {
-      const newPermissions = new Map(prev.permissions);
-      const actions = newPermissions.get(resource) || new Set<string>();
-      
-      if (actions.has(action)) {
-        actions.delete(action);
-        if (actions.size === 0) {
-          newPermissions.delete(resource);
-        } else {
-          newPermissions.set(resource, actions);
-        }
-      } else {
-        actions.add(action);
-        newPermissions.set(resource, actions);
-      }
-
-      return { ...prev, permissions: newPermissions };
-    });
-  };
-
-  const selectAllForResource = (resource: string) => {
-    if (isSystemRole || !isEditing) return;
-
-    setFormData((prev) => {
-      const newPermissions = new Map(prev.permissions);
-      const availableActions = RESOURCE_ACTIONS[resource] || [];
-      newPermissions.set(resource, new Set(availableActions));
-      return { ...prev, permissions: newPermissions };
-    });
-  };
-
-  const deselectAllForResource = (resource: string) => {
-    if (isSystemRole || !isEditing) return;
-
-    setFormData((prev) => {
-      const newPermissions = new Map(prev.permissions);
-      newPermissions.delete(resource);
-      return { ...prev, permissions: newPermissions };
-    });
-  };
-
-  const selectAllForAction = (action: string) => {
-    if (isSystemRole || !isEditing) return;
-
-    setFormData((prev) => {
-      const newPermissions = new Map(prev.permissions);
-      
-      RESOURCES.forEach((resource) => {
-        const availableActions = RESOURCE_ACTIONS[resource] || [];
-        if (availableActions.includes(action)) {
-          const actions = newPermissions.get(resource) || new Set<string>();
-          actions.add(action);
-          newPermissions.set(resource, actions);
-        }
-      });
-
-      return { ...prev, permissions: newPermissions };
-    });
-  };
-
-  const deselectAllForAction = (action: string) => {
-    if (isSystemRole || !isEditing) return;
-
-    setFormData((prev) => {
-      const newPermissions = new Map(prev.permissions);
-      
-      newPermissions.forEach((actions, resource) => {
-        actions.delete(action);
-        if (actions.size === 0) {
-          newPermissions.delete(resource);
-        }
-      });
-
-      return { ...prev, permissions: newPermissions };
-    });
-  };
-
-  const hasPermission = (resource: string, action: string): boolean => {
-    return formData.permissions.get(resource)?.has(action) || false;
-  };
-
-  const isResourceFullySelected = (resource: string): boolean => {
-    const availableActions = RESOURCE_ACTIONS[resource] || [];
-    const selectedActions = formData.permissions.get(resource);
-    return availableActions.length > 0 && selectedActions?.size === availableActions.length;
-  };
-
-  const isActionFullySelected = (action: string): boolean => {
-    let hasAll = true;
-    RESOURCES.forEach((resource) => {
-      const availableActions = RESOURCE_ACTIONS[resource] || [];
-      if (availableActions.includes(action)) {
-        if (!hasPermission(resource, action)) {
-          hasAll = false;
-        }
-      }
-    });
-    return hasAll;
-  };
-
-  const getRoleLevelBadge = (level: number) => {
-    if (level >= 90) return { variant: 'danger' as const, text: 'Critical' };
-    if (level >= 70) return { variant: 'warning' as const, text: 'High' };
-    if (level >= 40) return { variant: 'info' as const, text: 'Medium' };
-    return { variant: 'success' as const, text: 'Low' };
+    // Form data will reset via useEffect in useRolePermissions hook
   };
 
   if (isLoading) {
@@ -255,10 +97,7 @@ export default function RoleDetailPage() {
   }
 
   const levelBadge = getRoleLevelBadge(role.level);
-  const totalPermissions = Array.from(formData.permissions.values()).reduce(
-    (sum, actions) => sum + actions.size,
-    0
-  );
+  const totalPermissions = getTotalPermissions();
 
   return (
     <div className="space-y-6">
@@ -355,55 +194,61 @@ export default function RoleDetailPage() {
               }`}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Higher levels have more authority (1=lowest, 99=highest)
+              Higher level = more authority. System roles (90+), Admins (70-89), Managers (40-69), Users (1-39)
             </p>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="space-y-4">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-1">Assigned Users</h3>
-            <p className="text-3xl font-bold text-gray-900">{role.users_count || 0}</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-1">Total Permissions</h3>
-            <p className="text-3xl font-bold text-gray-900">{totalPermissions}</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-1">Status</h3>
-            <Badge variant={role.status === 'active' ? 'success' : 'warning'}>
-              {role.status}
-            </Badge>
+        {/* Quick Stats */}
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">Quick Stats</h2>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Total Permissions</span>
+              <span className="text-lg font-bold text-primary-600">{totalPermissions}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Assigned Users</span>
+              <span className="text-lg font-bold text-primary-600">{role.users?.length || 0}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Role Type</span>
+              <Badge variant={isSystemRole ? 'info' : 'success'} size="sm">
+                {isSystemRole ? 'System' : 'Custom'}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Status</span>
+              <Badge variant="success" size="sm">Active</Badge>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Permission Matrix */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Permission Matrix</h2>
-          {!isSystemRole && isEditing && (
-            <p className="text-sm text-gray-600">
-              Click row/column headers to select all, or individual cells to toggle
-            </p>
+      {/* Permissions Matrix */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-900">Permissions Matrix</h2>
+          {isEditing && !isSystemRole && (
+            <div className="text-sm text-gray-500">
+              Click checkboxes to toggle permissions. Click resource/action headers to select all.
+            </div>
           )}
         </div>
-
+        
         <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse">
-            <thead>
-              <tr className="border-b-2 border-gray-200">
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Resource</th>
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Resource</th>
                 {ACTIONS.map((action) => {
                   const isFullySelected = isActionFullySelected(action);
                   return (
                     <th
                       key={action}
-                      className={`px-4 py-3 text-center text-sm font-semibold text-gray-700 ${
-                        isEditing && !isSystemRole ? 'cursor-pointer hover:bg-gray-50' : ''
+                      className={`px-4 py-3 text-center text-sm font-medium text-gray-900 capitalize ${
+                        isEditing && !isSystemRole ? 'cursor-pointer hover:bg-gray-100' : ''
                       }`}
                       onClick={() => {
                         if (isEditing && !isSystemRole) {
@@ -416,7 +261,6 @@ export default function RoleDetailPage() {
                       }}
                     >
                       <div className="flex flex-col items-center gap-1">
-                        <span className="capitalize">{action}</span>
                         {isEditing && !isSystemRole && (
                           <input
                             type="checkbox"
@@ -432,20 +276,21 @@ export default function RoleDetailPage() {
                             className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                           />
                         )}
+                        <span>{action}</span>
                       </div>
                     </th>
                   );
                 })}
                 {isEditing && !isSystemRole && (
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">All</th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Actions</th>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200">
               {RESOURCES.map((resource) => {
                 const availableActions = RESOURCE_ACTIONS[resource] || [];
                 const isFullySelected = isResourceFullySelected(resource);
-                
+
                 return (
                   <tr key={resource} className="hover:bg-gray-50">
                     <td
@@ -558,7 +403,7 @@ export default function RoleDetailPage() {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Assigned At
+                    Assigned Date
                   </th>
                 </tr>
               </thead>
@@ -569,18 +414,17 @@ export default function RoleDetailPage() {
                       <div className="text-sm font-medium text-gray-900">
                         {user.first_name} {user.last_name}
                       </div>
-                      <div className="text-xs text-gray-500">{user.user_id}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{user.email}</div>
+                      <div className="text-sm text-gray-500">{user.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant={user.status === 'active' ? 'success' : 'gray'}>
+                      <Badge variant={user.status === 'active' ? 'success' : 'warning'} size="sm">
                         {user.status}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.assigned_at ? new Date(user.assigned_at).toLocaleDateString() : '-'}
+                      {user.assigned_at ? new Date(user.assigned_at).toLocaleDateString() : 'N/A'}
                     </td>
                   </tr>
                 ))}
