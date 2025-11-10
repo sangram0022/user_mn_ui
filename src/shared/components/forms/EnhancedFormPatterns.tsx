@@ -15,6 +15,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { z } from 'zod';
 import { logger } from '@/core/logging';
 import { useToast } from '@/hooks/useToast';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 
 // ========================================
 // Form Persistence Utility
@@ -86,6 +87,7 @@ export function EnhancedContactForm() {
   });
 
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
 
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
@@ -156,8 +158,13 @@ export function EnhancedContactForm() {
         setSubmitSuccess(false);
       }, 3000);
     } catch (error) {
-      logger().error('Contact form submission failed', error instanceof Error ? error : undefined);
-      toast.error('Failed to send message. Please try again.');
+      handleError(error, {
+        context: {
+          operation: 'submitContactForm',
+          formData: { name: data.name, email: data.email },
+        },
+        showToast: true,
+      });
     } finally {
       setIsSubmitting(false);
     }
