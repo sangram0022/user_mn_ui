@@ -11,7 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import { EnhancedContactForm } from '../shared/components/forms/EnhancedFormPatterns';
-import { useLiveRegion } from '../shared/components/accessibility/AccessibilityEnhancements';
+import { useLiveRegion } from '../shared/hooks/accessibility';
 // AWS CloudWatch handles performance monitoring
 
 // ========================================

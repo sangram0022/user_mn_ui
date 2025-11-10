@@ -15,7 +15,8 @@ import { logger } from '../core/logging';
 
 // Modern Components
 import { EnhancedContactForm, EnhancedRegistrationForm } from '../shared/components/forms/EnhancedFormPatterns';
-import { AccessibilityDemo, useLiveRegion } from '../shared/components/accessibility/AccessibilityEnhancements';
+import { AccessibilityDemo } from '../shared/components/accessibility/AccessibilityEnhancements';
+import { useLiveRegion } from '../shared/hooks/accessibility';
 // AWS CloudWatch handles performance monitoring
 
 // ========================================
