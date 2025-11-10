@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useDebouncedCallback } from 'use-debounce';
 import type { z } from 'zod';
 import { logger } from '@/core/logging';
+import { useStandardErrorHandler } from './useStandardErrorHandler';
 
 // ========================================
 // Types and Interfaces
@@ -201,6 +202,9 @@ export function useEnhancedForm<T extends FieldValues>(
     onError,
   } = options;
 
+  // Standard error handler for consistent error handling
+  const handleError = useStandardErrorHandler();
+
   // Form instance with React Hook Form
   // Type assertions needed: Zod generic constraints incompatible with RHF FieldValues
   // zodResolver expects Zod3Type<T, FieldValues> but receives ZodType<T, unknown>
@@ -339,6 +343,8 @@ export function useEnhancedForm<T extends FieldValues>(
         FormPersistenceManager.clearState(persistence.storageKey);
       }
     } catch (error) {
+      // Use standard error handler for consistent error handling and logging
+      handleError(error, { context: { operation: 'form-submit', formName: persistence?.storageKey } });
       onError?.(error as Error);
       throw error;
     } finally {

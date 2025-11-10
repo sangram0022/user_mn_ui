@@ -15,6 +15,7 @@ import { apiClient } from '@/services/api/apiClient';
 import { APIError } from '@/core/error';
 import { logger } from '@/core/logging';
 import { useToast } from '@/hooks/useToast';
+import { useStandardErrorHandler } from './useStandardErrorHandler';
 
 // ========================================
 // Enhanced Query Hook with Error Handling
@@ -44,6 +45,7 @@ export function useApiQuery<TData = unknown>(
   } = options || {};
 
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
 
   return useQuery({
     queryKey,
@@ -67,11 +69,11 @@ export function useApiQuery<TData = unknown>(
           error as Record<string, unknown> || undefined
         );
         
-        logger().error(`API Query Error: ${queryKey.join('/')}`, apiError);
-        
-        if (errorToast) {
-          toast.error(apiError.message);
-        }
+        // Use standard error handler for consistent error handling
+        handleError(apiError, { 
+          context: { operation: 'api-query', queryKey: queryKey.join('/') },
+          showToast: errorToast 
+        });
         
         onError?.(apiError);
         throw apiError;
@@ -110,6 +112,7 @@ export function useApiMutation<TData = unknown, TVariables = unknown>(
   } = options || {};
 
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
 
   return useMutation({
     mutationFn: async (variables: TVariables) => {
@@ -131,11 +134,11 @@ export function useApiMutation<TData = unknown, TVariables = unknown>(
           error as Record<string, unknown> || undefined
         );
         
-        logger().error('API Mutation Error', apiError);
-        
-        if (errorToast) {
-          toast.error(apiError.message);
-        }
+        // Use standard error handler for consistent error handling
+        handleError(apiError, { 
+          context: { operation: 'api-mutation' },
+          showToast: errorToast 
+        });
         
         throw apiError;
       }
