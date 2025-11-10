@@ -202,10 +202,12 @@ export function useEnhancedForm<T extends FieldValues>(
   } = options;
 
   // Form instance with React Hook Form
-  // Note: Type assertions needed due to complex generic constraints between Zod and RHF
+  // Type assertions needed: Zod generic constraints incompatible with RHF FieldValues
+  // zodResolver expects Zod3Type<T, FieldValues> but receives ZodType<T, unknown>
+  // This is a known limitation in the type definitions, safe to cast
   const form = useForm<T>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema as any) as any,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     defaultValues: defaultValues as any,
     mode: validation.revalidateMode || 'onChange',
@@ -391,7 +393,6 @@ export function useEnhancedForm<T extends FieldValues>(
     
     // Enhanced handlers
     handleFieldChange,
-    // @ts-expect-error - SubmitHandler type compatibility
     handleSubmit: form.handleSubmit(handleSubmit),
     
     // State management

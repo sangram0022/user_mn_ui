@@ -351,11 +351,17 @@ export function reportErrorToService(
       userReported: true,
     });
 
-    // TODO: Implement actual reporting
-    // Example:
-    // if (window.Sentry) {
-    //   window.Sentry.captureException(error, { extra: context });
-    // }
+    // Report to external error monitoring service (async, fire-and-forget)
+    import('./errorReporting')
+      .then(({ errorReportingService }) => {
+        errorReportingService.reportFromDetails(details, 'error');
+      })
+      .catch((importErr) => {
+        logger().warn('Failed to import error reporting service', { 
+          error: extractErrorMessage(importErr),
+          context: 'errorHandler.reportError',
+        });
+      });
   } catch (err) {
     logger().warn('Failed to report error to service', { error: extractErrorMessage(err) });
   }

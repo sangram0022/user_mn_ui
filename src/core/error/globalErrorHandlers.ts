@@ -104,20 +104,28 @@ export async function reportErrorToBackend(
       context,
     };
 
-    // TODO: Replace with actual error reporting endpoint
-    // Example:
-    // const response = await fetch('/api/errors', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(errorData),
-    // });
+    // Report to external error monitoring service
+    try {
+      const { errorReportingService } = await import('./errorReporting');
+      errorReportingService.report({
+        message: errorData.message,
+        level: 'error',
+        error: error instanceof Error ? error : undefined,
+        context: errorData,
+      });
+    } catch (importErr) {
+      logger().warn('Failed to import error reporting service', {
+        error: importErr instanceof Error ? importErr.message : String(importErr),
+        context: 'globalErrorHandler.reportErrorToBackend.import',
+      });
+    }
 
-    logger().info('Error report prepared (not sent)', {
-      ...errorData,
+    logger().info('Error reported to monitoring service', {
+      message: errorData.message,
       context: 'globalErrorHandler.reportErrorToBackend',
     });
   } catch (e) {
-    logger().warn('Failed to prepare error report', {
+    logger().warn('Failed to report error', {
       error: e instanceof Error ? e.message : String(e),
       context: 'globalErrorHandler.reportErrorToBackend.error',
     });

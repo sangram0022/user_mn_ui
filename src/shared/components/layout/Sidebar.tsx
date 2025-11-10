@@ -12,8 +12,16 @@ import {
 } from 'lucide-react';
 import { ROUTES } from '../../../core/routing/config';
 import { useAuth } from '../../../hooks/useAuth';
-import { ROLES } from '../../../core/auth/roles';
+import type { UserRole } from '@/domains/rbac/types/rbac.types';
 import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
+
+// Role constants for menu access control
+const ROLES: Record<string, UserRole> = {
+  ADMIN: 'admin',
+  USER: 'user',
+  AUDITOR: 'auditor',
+  SUPER_ADMIN: 'super_admin',
+};
 
 function Sidebar() {
   const { t } = useTranslation();

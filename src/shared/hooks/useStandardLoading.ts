@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { useToast } from '@/hooks/useToast';
 
 export interface LoadingState {
   isLoading: boolean;
@@ -66,6 +67,7 @@ export const useAsyncOperation = <T,>(
     errorMessage?: string;
   }
 ) => {
+  const toast = useToast();
   const [state, setState] = useState<{
     isLoading: boolean;
     result: T | null;
@@ -89,8 +91,7 @@ export const useAsyncOperation = <T,>(
       }
 
       if (options?.successMessage) {
-        // TODO: Integrate with toast notification system
-        // console.log(options.successMessage);
+        toast.success(options.successMessage);
       }
 
       return result;
@@ -102,8 +103,7 @@ export const useAsyncOperation = <T,>(
       }
 
       if (options?.errorMessage) {
-        // TODO: Integrate with toast notification system  
-        // console.error(options.errorMessage, error);
+        toast.error(options.errorMessage);
       }
 
       throw error;
