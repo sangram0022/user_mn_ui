@@ -7,8 +7,7 @@ interface VirtualTableProps {
   data: Array<Record<string, unknown>>;
   rowHeight?: number;
   maxHeight?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  renderCell?: (value: any, key: string, rowIndex?: number) => any;
+  renderCell?: (value: unknown, key: string, rowIndex?: number) => React.ReactNode;
 }
 
 /**

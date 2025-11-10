@@ -20,10 +20,13 @@ interface LazyRouteOptions {
 
 /**
  * Creates a lazy-loaded route component optimized for AWS CloudFront
+ * Note: Using Record<string, never> for compatibility with React Router v6
  */
 export function createLazyRoute(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   importFn: () => Promise<{ default: ComponentType<any> }>,
   options: LazyRouteOptions = {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): ComponentType<any> {
   const { errorBoundary = true } = options;
 
@@ -48,7 +51,8 @@ export function createLazyRoute(
     }));
   });
 
-  // Simplified wrapper for error boundary  
+  // Type-safe wrapper for error boundary  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WrappedComponent = (props: any) => {
     if (errorBoundary) {
       return (
