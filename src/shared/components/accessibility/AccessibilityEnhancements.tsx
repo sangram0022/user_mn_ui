@@ -1,89 +1,19 @@
 // ========================================
 // Accessibility Enhancement System
 // ========================================
-// Comprehensive accessibility features:
-// - Focus management with trapFocus
-// - Screen reader optimizations
-// - Keyboard navigation patterns
-// - ARIA live regions for dynamic content
-// - Skip links and landmarks
+// Comprehensive accessibility components:
+// - Accessible modals and dialogs
+// - Skip links and breadcrumbs
+// - Dropdown menus with keyboard navigation
+// - Form fields with proper ARIA labels
+// - Page announcements for dynamic content
+// 
+// NOTE: Hooks have been moved to src/shared/hooks/accessibility/
 // ========================================
 
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-
-// ========================================
-// Focus Management System
-// ========================================
-
-export function useFocusTrap(isActive: boolean) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    if (!isActive) return;
-
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Store the currently focused element
-    previousFocusRef.current = document.activeElement as HTMLElement;
-
-    // Get all focusable elements
-    const focusableElements = container.querySelectorAll(
-      'a[href], button, textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select, [tabindex]:not([tabindex="-1"])'
-    ) as NodeListOf<HTMLElement>;
-
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements[focusableElements.length - 1];
-
-    // Focus first element
-    if (firstElement) {
-      firstElement.focus();
-    }
-
-    const handleTabKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-
-      if (e.shiftKey) {
-        // Shift + Tab (backward)
-        if (document.activeElement === firstElement) {
-          e.preventDefault();
-          lastElement?.focus();
-        }
-      } else {
-        // Tab (forward)
-        if (document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement?.focus();
-        }
-      }
-    };
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        // This should trigger the parent to close the trap
-        container.dispatchEvent(new CustomEvent('escapeFocusTrap'));
-      }
-    };
-
-    document.addEventListener('keydown', handleTabKey);
-    document.addEventListener('keydown', handleEscape);
-
-    return () => {
-      document.removeEventListener('keydown', handleTabKey);
-      document.removeEventListener('keydown', handleEscape);
-      
-      // Restore focus to the previously focused element
-      if (previousFocusRef.current) {
-        previousFocusRef.current.focus();
-      }
-    };
-  }, [isActive]);
-
-  return containerRef;
-}
+import { useFocusTrap, useLiveRegion, useKeyboardNavigation } from '@/shared/hooks/accessibility';
 
 // ========================================
 // Skip Links Component
@@ -130,59 +60,6 @@ export function SkipLinks() {
       </a>
     </div>
   );
-}
-
-// ========================================
-// Live Region for Dynamic Announcements
-// ========================================
-
-export function useLiveRegion() {
-  const [messages, setMessages] = useState<Array<{ id: string; text: string; priority: 'polite' | 'assertive' }>>([]);
-
-  // React Compiler auto-memoizes this function
-  const announce = (text: string, priority: 'polite' | 'assertive' = 'polite') => {
-    const id = `announcement-${Date.now()}`;
-    setMessages(prev => [...prev, { id, text, priority }]);
-
-    // Auto-clear after announcement
-    setTimeout(() => {
-      setMessages(prev => prev.filter(msg => msg.id !== id));
-    }, 1000);
-  };
-
-  const LiveRegion = () => (
-    <>
-      {/* Polite announcements */}
-      <div
-        aria-live="polite"
-        aria-atomic="true"
-        className="sr-only"
-        role="status"
-      >
-        {messages
-          .filter(msg => msg.priority === 'polite')
-          .map(msg => (
-            <div key={msg.id}>{msg.text}</div>
-          ))}
-      </div>
-
-      {/* Assertive announcements */}
-      <div
-        aria-live="assertive"
-        aria-atomic="true"
-        className="sr-only"
-        role="alert"
-      >
-        {messages
-          .filter(msg => msg.priority === 'assertive')
-          .map(msg => (
-            <div key={msg.id}>{msg.text}</div>
-          ))}
-      </div>
-    </>
-  );
-
-  return { announce, LiveRegion };
 }
 
 // ========================================
@@ -354,72 +231,6 @@ export function AccessibleBreadcrumbs({ items, className = '' }: AccessibleBread
       </ol>
     </nav>
   );
-}
-
-// ========================================
-// Keyboard Navigation Hook
-// ========================================
-
-interface KeyboardNavigationOptions {
-  onArrowUp?: () => void;
-  onArrowDown?: () => void;
-  onArrowLeft?: () => void;
-  onArrowRight?: () => void;
-  onEnter?: () => void;
-  onEscape?: () => void;
-  onTab?: (e: KeyboardEvent) => void;
-  disabled?: boolean;
-}
-
-export function useKeyboardNavigation(options: KeyboardNavigationOptions) {
-  const elementRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (options.disabled) return;
-
-    const element = elementRef.current;
-    if (!element) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowUp':
-          e.preventDefault();
-          options.onArrowUp?.();
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          options.onArrowDown?.();
-          break;
-        case 'ArrowLeft':
-          e.preventDefault();
-          options.onArrowLeft?.();
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          options.onArrowRight?.();
-          break;
-        case 'Enter':
-          e.preventDefault();
-          options.onEnter?.();
-          break;
-        case 'Escape':
-          e.preventDefault();
-          options.onEscape?.();
-          break;
-        case 'Tab':
-          options.onTab?.(e);
-          break;
-      }
-    };
-
-    element.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      element.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [options]);
-
-  return elementRef;
 }
 
 // ========================================
