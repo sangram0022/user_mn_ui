@@ -15,7 +15,7 @@ import {
   ImageGallery, 
   OptimizedAvatar,
   type ImageSource 
-} from './ModernImageComponents';
+} from './index';
 
 // ========================================
 // Demo Component
@@ -133,7 +133,7 @@ export function ImageOptimizationDemo() {
             columns={4}
             gap={16}
             lazy={true}
-            onImageClick={(image, _index) => {
+            onImageClick={(image) => {
               setSelectedImage(image);
             }}
           />
