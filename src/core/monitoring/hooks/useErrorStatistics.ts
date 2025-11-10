@@ -71,6 +71,7 @@ export function useErrorStatistics(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  // Kept: useCallback required for useEffect dependency (prevents infinite loop)
   const updateStatistics = useCallback(() => {
     try {
       // Get logger to access logs

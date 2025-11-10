@@ -59,6 +59,7 @@ export function useStandardErrorHandler() {
   const toast = useToast();
   const navigate = useNavigate();
 
+  // Kept: useCallback required - function returned from hook (stable reference for consumers)
   return useCallback(
     (error: unknown, options: ErrorHandlerOptions = {}) => {
       const {
@@ -129,6 +130,7 @@ export function useStandardErrorHandler() {
 export function useFormErrorHandler() {
   const handleError = useStandardErrorHandler();
 
+  // Kept: useCallback required - function returned from hook (stable reference for consumers)
   return useCallback(
     (
       error: unknown,
@@ -165,6 +167,7 @@ export function useFormErrorHandler() {
 export function useSilentErrorHandler() {
   const handleError = useStandardErrorHandler();
 
+  // Kept: useCallback required - function returned from hook (stable reference for consumers)
   return useCallback(
     (error: unknown, options?: Omit<ErrorHandlerOptions, 'showToast'>) => {
       return handleError(error, {
