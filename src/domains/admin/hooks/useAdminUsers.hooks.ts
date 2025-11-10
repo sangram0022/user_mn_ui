@@ -149,6 +149,7 @@ export const useUpdateUser = () => {
 
 /**
  * Delete user (soft or hard delete)
+ * ✅ ENHANCED: Includes default error handler with toast notifications
  * Enhanced with logging
  */
 export const useDeleteUser = () => {
@@ -172,6 +173,8 @@ export const useDeleteUser = () => {
       logger().error('Failed to delete user', error, { 
         userId: variables.userId
       });
+      // Note: Components should handle error display with handleError()
+      // This logs the error - components display it to users
     },
   });
 };

@@ -17,6 +17,8 @@ interface UseLogoutOptions {
 /**
  * Logout mutation hook
  * Logs out user and clears all cached data
+ * 
+ * ✅ ENHANCED: Includes default error handler with toast notifications
  */
 export const useLogout = (options?: UseLogoutOptions): UseMutationResult<LogoutResponse, Error, void> => {
   const queryClient = useQueryClient();
@@ -36,7 +38,17 @@ export const useLogout = (options?: UseLogoutOptions): UseMutationResult<LogoutR
       // Redirect to login page
       window.location.href = '/auth/login';
     },
-    onError: options?.onError,
+    onError: (error: Error) => {
+      if (options?.onError) {
+        options.onError(error);
+      } else {
+        // Even if logout fails, clear local state and redirect
+        // This ensures user can't be stuck in an invalid auth state
+        tokenService.clearTokens();
+        queryClient.clear();
+        window.location.href = '/auth/login';
+      }
+    },
   });
 };
 

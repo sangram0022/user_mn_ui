@@ -148,6 +148,84 @@ function BatchOperations() {
 }
 ```
 
+### Pattern 5: Mutation Hook Error Handling (RECOMMENDED)
+
+**Two-Layer Pattern:** Hooks log errors, components display them to users.
+
+```typescript
+// ✅ GOOD: Mutation hook with logging
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, data }) => {
+      logger().info('Updating user', { userId });
+      return adminService.updateUser(userId, data);
+    },
+    onSuccess: (_data, variables) => {
+      logger().info('User updated', { userId: variables.userId });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+    },
+    onError: (error, variables) => {
+      // Log error for debugging/monitoring
+      logger().error('Failed to update user', error, { 
+        userId: variables.userId 
+      });
+      // Note: Component handles user-facing error display
+    },
+  });
+};
+
+// ✅ GOOD: Component handles user-facing errors
+function UserForm({ userId }) {
+  const handleError = useStandardErrorHandler();
+  const toast = useToast();
+  const updateMutation = useUpdateUser();
+
+  const handleSubmit = async (data) => {
+    try {
+      await updateMutation.mutateAsync({ userId, data });
+      toast.success('User updated successfully!');
+    } catch (error) {
+      handleError(error, {
+        context: { operation: 'updateUser', userId },
+        fieldErrorSetter: form.setError,
+      });
+    }
+  };
+}
+```
+
+**Why this pattern?**
+1. **Separation of concerns:** Hooks handle cache/logging, components handle UX
+2. **Reusability:** Same hook works across different components with different error UX
+3. **Flexibility:** Components can customize error handling per context
+4. **Consistency:** Standard error handler ensures uniform user experience
+
+**Alternative (when components need no customization):**
+
+```typescript
+// ⚠️ ACCEPTABLE: Hook includes default error handler
+export const useDeleteUser = (options?: { onError?: (error: Error) => void }) => {
+  const handleError = useStandardErrorHandler();
+  
+  return useMutation({
+    mutationFn: adminService.deleteUser,
+    onError: (error) => {
+      if (options?.onError) {
+        options.onError(error);
+      } else {
+        // Fallback: Default error handling
+        handleError(error, {
+          context: { operation: 'deleteUser' },
+          showToast: true,
+        });
+      }
+    },
+  });
+};
+```
+
 ---
 
 ## Error Handler Options
