@@ -1,21 +1,13 @@
 import { useState } from 'react';
 import Button from '../../../shared/components/ui/Button';
-import Badge from '../../../shared/components/ui/Badge';
+import ReportStatsCards from './reports/components/ReportStatsCards';
+import ReportFilters from './reports/components/ReportFilters';
+import ReportsTable, { type Report } from './reports/components/ReportsTable';
 
 type ReportType = 'users' | 'activity' | 'security' | 'performance';
 type ReportStatus = 'completed' | 'pending' | 'failed';
 
-interface DummyReport {
-  id: string;
-  name: string;
-  type: ReportType;
-  status: ReportStatus;
-  generated_at: string;
-  file_size: string;
-  duration: string;
-}
-
-const DUMMY_REPORTS: DummyReport[] = [
+const DUMMY_REPORTS: Report[] = [
   {
     id: '1',
     name: 'User Activity Report - Q1 2025',
@@ -76,25 +68,20 @@ export default function ReportsPage() {
     filteredReports = filteredReports.filter((r) => r.status === selectedStatus);
   }
 
-  const getStatusBadge = (status: ReportStatus) => {
-    switch (status) {
-      case 'completed':
-        return <Badge variant="success">Completed</Badge>;
-      case 'pending':
-        return <Badge variant="warning">Pending</Badge>;
-      case 'failed':
-        return <Badge variant="danger">Failed</Badge>;
-    }
+  const handleDownload = (reportId: string) => {
+    alert(`Download report ${reportId} - feature coming soon!`);
   };
 
-  const getTypeBadge = (type: ReportType) => {
-    const colors = {
-      users: 'info',
-      activity: 'success',
-      security: 'danger',
-      performance: 'warning',
-    } as const;
-    return <Badge variant={colors[type]}>{type.charAt(0).toUpperCase() + type.slice(1)}</Badge>;
+  const handleView = (reportId: string) => {
+    alert(`View report ${reportId} - feature coming soon!`);
+  };
+
+  const handleCancel = (reportId: string) => {
+    alert(`Cancel report ${reportId} - feature coming soon!`);
+  };
+
+  const handleRetry = (reportId: string) => {
+    alert(`Retry report ${reportId} - feature coming soon!`);
   };
 
   return (
@@ -113,201 +100,24 @@ export default function ReportsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Reports</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{DUMMY_REPORTS.length}</p>
-            </div>
-            <div className="h-12 w-12 bg-primary-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">📊</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">
-                {DUMMY_REPORTS.filter((r) => r.status === 'completed').length}
-              </p>
-            </div>
-            <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl text-green-600">✓</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-3xl font-bold text-yellow-600 mt-2">
-                {DUMMY_REPORTS.filter((r) => r.status === 'pending').length}
-              </p>
-            </div>
-            <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl text-yellow-600">⏳</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Failed</p>
-              <p className="text-3xl font-bold text-red-600 mt-2">
-                {DUMMY_REPORTS.filter((r) => r.status === 'failed').length}
-              </p>
-            </div>
-            <div className="h-12 w-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl text-red-600">⚠️</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ReportStatsCards reports={DUMMY_REPORTS} />
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value as ReportType | 'all')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="all">All Types</option>
-              <option value="users">Users</option>
-              <option value="activity">Activity</option>
-              <option value="security">Security</option>
-              <option value="performance">Performance</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value as ReportStatus | 'all')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="all">All Statuses</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-            </select>
-          </div>
-        </div>
-      </div>
+      <ReportFilters
+        selectedType={selectedType}
+        selectedStatus={selectedStatus}
+        onTypeChange={setSelectedType}
+        onStatusChange={setSelectedStatus}
+      />
 
       {/* Reports Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Report Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Generated At
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  File Size
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Duration
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredReports.map((report) => (
-                <tr key={report.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{report.name}</div>
-                    <div className="text-xs text-gray-500">ID: {report.id}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{getTypeBadge(report.type)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(report.status)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {new Date(report.generated_at).toLocaleDateString()}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {new Date(report.generated_at).toLocaleTimeString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {report.file_size}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {report.duration}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    {report.status === 'completed' && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => alert('Download feature coming soon!')}
-                        >
-                          Download
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => alert('View feature coming soon!')}
-                        >
-                          View
-                        </Button>
-                      </>
-                    )}
-                    {report.status === 'pending' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => alert('Cancel feature coming soon!')}
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                    {report.status === 'failed' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => alert('Retry feature coming soon!')}
-                      >
-                        Retry
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Empty State */}
-        {filteredReports.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-5xl mb-4">📊</div>
-            <p className="text-gray-500 text-lg mb-2">No reports found</p>
-            <p className="text-gray-400 text-sm">Try adjusting your filters or generate a new report</p>
-          </div>
-        )}
-      </div>
+      <ReportsTable
+        reports={filteredReports}
+        onDownload={handleDownload}
+        onView={handleView}
+        onCancel={handleCancel}
+        onRetry={handleRetry}
+      />
 
       {/* Info Banner */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
