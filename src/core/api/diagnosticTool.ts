@@ -10,6 +10,7 @@
  */
 
 import { logger, diagnostic } from '@/core/logging';
+import { storageService } from '@/core/storage';
 
 // ============================================================================
 // Diagnostic Functions
@@ -20,7 +21,7 @@ export const diagnoseAPI = {
    * Check if access token exists and decode it
    */
   checkToken: () => {
-    const token = localStorage.getItem('access_token');
+    const token = storageService.get<string>('access_token');
     
     if (!token) {
       diagnostic.error('❌ No access token found in localStorage');
@@ -61,7 +62,7 @@ export const diagnoseAPI = {
    * Test both API endpoints
    */
   testEndpoints: async () => {
-    const token = localStorage.getItem('access_token');
+    const token = storageService.get<string>('access_token');
     
     if (!token) {
       diagnostic.error('❌ No access token found');
@@ -130,8 +131,8 @@ export const diagnoseAPI = {
    * Check request headers
    */
   checkHeaders: () => {
-    const token = localStorage.getItem('access_token');
-    const csrfToken = localStorage.getItem('csrf_token');
+    const token = storageService.get<string>('access_token');
+    const csrfToken = storageService.get<string>('csrf_token');
     
     diagnostic.log('🔒 Request Headers That Will Be Sent:');
     diagnostic.log(`  Authorization: ${token ? `Bearer ${token.substring(0, 20)}...` : '❌ Missing'}`);
