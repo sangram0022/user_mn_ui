@@ -14,9 +14,8 @@ import RolesSection from './user-detail/components/RolesSection';
 import UserActions from './user-detail/components/UserActions';
 import ApprovalModal from './user-detail/components/ApprovalModal';
 import RejectionModal from './user-detail/components/RejectionModal';
-import { GENDER_OPTIONS, AVAILABLE_ROLES } from './user-detail/utils';
+import { AVAILABLE_ROLES } from './user-detail/utils';
 import { useUserEditForm } from '../../../core/validation';
-import { formatShortDate } from '../../../shared/utils/dateFormatters';
 import { logger } from '../../../core/logging';
 
 export default function UserDetailPageRefactored() {
@@ -126,7 +125,7 @@ export default function UserDetailPageRefactored() {
   };
 
   if (isLoading) return (<div className="flex items-center justify-center min-h-96"><div className="text-lg text-gray-600">Loading user details...</div></div>);
-  if (isError || !user) return (<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"><h3 className="font-bold">Error loading user</h3><p>{(error as any)?.message || 'User not found'}</p></div>);
+  if (isError || !user) return (<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"><h3 className="font-bold">Error loading user</h3><p>{String(error) || 'User not found'}</p></div>);
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -137,7 +136,7 @@ export default function UserDetailPageRefactored() {
         {/* ... */}
       </div>
 
-      <ProfileForm form={form as any} isEditing={isEditing} onCancel={handleCancelEdit} />
+  <ProfileForm form={form} isEditing={isEditing} onCancel={handleCancelEdit} />
 
       <RolesSection availableRoles={AVAILABLE_ROLES} selectedRoles={selectedRoles} onToggle={handleRoleToggle} onSave={handleSaveRoles} saving={assignRoles.isPending} />
 

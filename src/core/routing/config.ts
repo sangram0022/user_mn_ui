@@ -51,7 +51,7 @@ const LazyVerifyEmailPendingPage = lazy(() => import('../../domains/auth/pages/V
 const LazyAdminDashboardPage = lazy(() => import('../../domains/admin/pages/DashboardPage'));
 const LazyAdminAuditLogsPage = lazy(() => import('../../domains/admin/pages/AuditLogsPage'));
 const LazyAdminUsersPage = lazy(() => import('../../domains/admin/pages/UsersPage'));
-const LazyAdminUserDetailPage = lazy(() => import('../../domains/admin/pages/UserDetailPage'));
+const LazyAdminUserDetailPage = lazy(() => import('../../domains/admin/pages/UserDetailPage-refactored'));
 const LazyAdminUserViewPage = lazy(() => import('../../domains/admin/pages/UserViewPage'));
 const LazyAdminUserEditPage = lazy(() => import('../../domains/admin/pages/UserEditPage'));
 const LazyAdminUserApprovalPage = lazy(() => import('../../domains/admin/pages/UserApprovalPage'));
