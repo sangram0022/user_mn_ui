@@ -136,8 +136,9 @@ export function startStorageMonitoring(): () => void {
 
   // Override clear
   localStorage.clear = function() {
-    logger().error(`🧨 localStorage.clear called`, {
-      stack: new Error().stack,
+    const error = new Error('localStorage.clear called');
+    logger().error(`🧨 localStorage.clear called`, error, {
+      stack: error.stack,
     });
     return originalClear.apply(this);
   };

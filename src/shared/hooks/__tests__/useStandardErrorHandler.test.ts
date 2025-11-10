@@ -7,8 +7,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useStandardErrorHandler, useFormErrorHandler, useSilentErrorHandler } from '../useStandardErrorHandler';
-import { APIError, ValidationError, NetworkError, AuthError } from '@/core/error/types';
-import * as errorHandler from '@/core/error/errorHandler';
+import { APIError, ValidationError } from '@/core/error/types';
 
 // Mock dependencies
 vi.mock('@/hooks/useToast', () => ({
@@ -40,7 +39,7 @@ describe('useStandardErrorHandler', () => {
 
   it('should handle API errors and show toast', () => {
     const { result } = renderHook(() => useStandardErrorHandler());
-    const error = new APIError('Test error', 'GET', '/api/test', 500);
+    const error = new APIError('Test error', 500, 'GET', '/api/test');
 
     act(() => {
       const handlingResult = result.current(error);
@@ -51,7 +50,7 @@ describe('useStandardErrorHandler', () => {
 
   it('should handle validation errors with field errors', () => {
     const { result } = renderHook(() => useStandardErrorHandler());
-    const fieldErrors = { email: 'Invalid email', password: 'Too short' };
+    const fieldErrors = { email: ['Invalid email'], password: ['Too short'] };
     const error = new ValidationError('Validation failed', fieldErrors);
     const fieldErrorSetter = vi.fn();
 
@@ -77,7 +76,7 @@ describe('useStandardErrorHandler', () => {
     const customMessage = 'Custom error message';
 
     act(() => {
-      const handlingResult = result.current(error, { customMessage });
+      result.current(error, { customMessage });
       // Custom message should be used (verified by mock toast call)
     });
   });
@@ -86,7 +85,7 @@ describe('useStandardErrorHandler', () => {
 describe('useFormErrorHandler', () => {
   it('should handle form errors with field setter', () => {
     const { result } = renderHook(() => useFormErrorHandler());
-    const fieldErrors = { email: 'Invalid' };
+    const fieldErrors = { email: ['Invalid'] };
     const error = new ValidationError('Validation failed', fieldErrors);
     const setFieldErrors = vi.fn();
 
