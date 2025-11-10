@@ -6,6 +6,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/services/api/apiClient';
+import { storageService } from '@/core/storage';
 
 export interface HealthStatus {
   status: 'healthy' | 'unhealthy' | 'degraded';
@@ -113,15 +114,15 @@ export function useHealthCheck() {
     }
   };
 
-  // Check local storage health
+  // Check local storage health using storageService
   const checkLocalStorageHealth = (): boolean => {
     try {
       const testKey = '__health_check__';
       const testValue = 'test';
       
-      localStorage.setItem(testKey, testValue);
-      const retrieved = localStorage.getItem(testKey);
-      localStorage.removeItem(testKey);
+      storageService.set(testKey, testValue);
+      const retrieved = storageService.get<string>(testKey);
+      storageService.remove(testKey);
       
       return retrieved === testValue;
     } catch {
