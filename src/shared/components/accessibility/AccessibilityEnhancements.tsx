@@ -234,17 +234,17 @@ export function AccessibleModal({
     }
   };
 
-  // React Compiler auto-memoizes this function
-  const handleEscape = () => {
-    if (closeOnEscape) {
-      onClose();
-    }
-  };
-
   // Handle escape key from focus trap
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+
+    // Define handleEscape inside useEffect to avoid dependency issues
+    const handleEscape = () => {
+      if (closeOnEscape) {
+        onClose();
+      }
+    };
 
     const handleEscapeEvent = () => handleEscape();
     container.addEventListener('escapeFocusTrap', handleEscapeEvent);
@@ -252,7 +252,7 @@ export function AccessibleModal({
     return () => {
       container.removeEventListener('escapeFocusTrap', handleEscapeEvent);
     };
-  }, [closeOnEscape, onClose]);
+  }, [closeOnEscape, onClose, containerRef]);
 
   if (!isOpen) return null;
 

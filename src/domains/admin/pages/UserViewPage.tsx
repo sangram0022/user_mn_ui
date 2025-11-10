@@ -82,7 +82,7 @@ export default function UserViewPage() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
               {/* Avatar */}
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-white text-4xl font-bold mb-4 shadow-lg">
+                <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-linear-to-br from-primary-500 to-primary-700 text-white text-4xl font-bold mb-4 shadow-lg">
                   {initials}
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">{fullName}</h2>

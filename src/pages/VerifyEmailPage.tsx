@@ -37,7 +37,7 @@ export default function VerifyEmailPage() {
   // Verifying state
   if (status === 'verifying') {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 animate-fade-in">
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-linear-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 animate-fade-in">
         <div className="w-full max-w-md">
           <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
             <div className="text-center">
@@ -61,7 +61,7 @@ export default function VerifyEmailPage() {
   // Success state
   if (status === 'success') {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800 animate-fade-in">
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-linear-to-br from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800 animate-fade-in">
         <div className="w-full max-w-md">
           <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 animate-scale-in">
             <div className="text-center">
@@ -89,7 +89,7 @@ export default function VerifyEmailPage() {
 
   // Error state
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-gradient-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 animate-fade-in">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-linear-to-br from-red-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 animate-fade-in">
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 animate-scale-in">
           <div className="text-center">
