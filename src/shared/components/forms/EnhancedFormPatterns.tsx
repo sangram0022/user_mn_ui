@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { logger } from '@/core/logging';
 import { useToast } from '@/hooks/useToast';
 import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+import { storageService } from '@/core/storage';
 
 // ========================================
 // Form Persistence Utility
@@ -25,41 +26,21 @@ class FormStateManager {
   private static PREFIX = 'form_persist_';
 
   static save(key: string, data: Record<string, unknown>, ttlHours = 24): void {
-    try {
-      const payload = {
-        data,
-        expiry: Date.now() + (ttlHours * 60 * 60 * 1000),
-        timestamp: Date.now(),
-      };
-      localStorage.setItem(`${this.PREFIX}${key}`, JSON.stringify(payload));
-    } catch (error) {
-      logger().warn('Form state persistence failed', { key, error });
-    }
+    // Use storageService with TTL support
+    storageService.set(
+      `${this.PREFIX}${key}`,
+      data,
+      { ttl: ttlHours * 60 * 60 * 1000 }
+    );
   }
 
   static load(key: string): Record<string, unknown> | null {
-    try {
-      const stored = localStorage.getItem(`${this.PREFIX}${key}`);
-      if (!stored) return null;
-
-      const { data, expiry } = JSON.parse(stored);
-      if (Date.now() > expiry) {
-        this.clear(key);
-        return null;
-      }
-      return data;
-    } catch (error) {
-      logger().warn('Form state loading failed', { key, error });
-      return null;
-    }
+    // storageService handles TTL automatically
+    return storageService.get<Record<string, unknown>>(`${this.PREFIX}${key}`);
   }
 
   static clear(key: string): void {
-    try {
-      localStorage.removeItem(`${this.PREFIX}${key}`);
-    } catch (error) {
-      logger().warn('Form state clearing failed', { key, error });
-    }
+    storageService.remove(`${this.PREFIX}${key}`);
   }
 }
 
