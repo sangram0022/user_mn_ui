@@ -459,7 +459,7 @@ export default function UsersPage() {
                   {user.email}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Badge variant="info">{formatUserRole(user.roles[0] || 'user')}</Badge>
+                  <Badge variant="info">{formatUserRole((Array.isArray(user.roles) && user.roles[0]) || 'user')}</Badge>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Badge 

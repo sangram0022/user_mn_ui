@@ -451,7 +451,7 @@ export default function UserDetailPage() {
             <div className="mt-4 pt-4 border-t border-gray-200">
               <p className="text-sm text-gray-600">Current Roles:</p>
               <div className="flex flex-wrap gap-2 mt-2">
-                {user.roles.map((role) => (
+                {(Array.isArray(user.roles) ? user.roles : []).map((role) => (
                   <Badge key={role} variant="info">
                     {role}
                   </Badge>

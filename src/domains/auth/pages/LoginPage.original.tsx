@@ -56,12 +56,14 @@ export function LoginPage() {
       
       if (result) {
         // Build user object from login response
+        // Ensure roles is always an array
+        const rolesArray = Array.isArray(result.roles) ? result.roles : (result.roles ? [result.roles] : []);
         const user = {
           user_id: result.user_id,
           email: result.email,
           first_name: '', // Backend doesn't return these in login
           last_name: '',
-          roles: result.roles,
+          roles: rolesArray,
           is_active: true,
           is_verified: true,
           last_login: result.last_login_at,
@@ -89,8 +91,8 @@ export function LoginPage() {
         // Success message
         toast.success(t('login.success'));
         
-        // Navigate based on role
-        const userRole = result.roles[0];
+        // Navigate based on role (safe array access)
+        const userRole = (Array.isArray(result.roles) && result.roles.length > 0) ? result.roles[0] : undefined;
         const redirectPath = getPostLoginRedirect(userRole);
         navigate(redirectPath, { replace: true });
       }

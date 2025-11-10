@@ -15,6 +15,36 @@ import { getEffectivePermissionsForRoles } from '@/domains/rbac/utils/rolePermis
 import type { User } from '../types/auth.types';
 import type { Permission, UserRole } from '@/domains/rbac/types/rbac.types';
 
+// Normalize roles coming from various sources (array, CSV string, JSON string, object)
+function normalizeRoles(raw: unknown): UserRole[] {
+  if (!raw) return [];
+  // Already an array of strings
+  if (Array.isArray(raw)) {
+    return raw.filter(r => typeof r === 'string') as UserRole[];
+  }
+
+  // JSON stringified array or CSV string
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter(r => typeof r === 'string') as UserRole[];
+    } catch {
+      // not JSON, continue to CSV handling
+    }
+
+    // CSV (comma separated) fallback
+    return raw.split(',').map(s => s.trim()).filter(Boolean) as UserRole[];
+  }
+
+  // Object (could be numeric keyed or a map)
+  if (typeof raw === 'object') {
+    const vals = Object.values(raw as Record<string, unknown>);
+    return vals.filter(v => typeof v === 'string') as UserRole[];
+  }
+
+  return [];
+}
+
 // ========================================
 // Types
 // ========================================
@@ -71,8 +101,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // State (Single source of truth)
   const [state, setState] = useState<AuthState>(() => {
     const user = tokenService.getUser() as User | null;
-    // Defensive: ensure roles is an array before computing permissions
-    const rolesArray = user?.roles && Array.isArray(user.roles) ? user.roles : [];
+    // Defensive: normalize roles before computing permissions
+    const rolesArray = normalizeRoles(user?.roles);
     return {
       user,
       isAuthenticated: !!tokenService.getAccessToken(),
@@ -121,10 +151,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       context: 'AuthContext.login',
     });
     
-    // Compute permissions from user roles
-    // Defensive: ensure roles is an array before computing permissions
-    const rolesArray = Array.isArray(user.roles) ? user.roles : [];
-    const permissions = getEffectivePermissionsForRoles(rolesArray as UserRole[]);
+  // Compute permissions from user roles (normalized)
+  const rolesArray = normalizeRoles(user.roles);
+  const permissions = getEffectivePermissionsForRoles(rolesArray as UserRole[]);
     
     setState({
       user,
@@ -183,9 +212,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // For now, we'll just trust the token exists
       const storedUser = tokenService.getUser() as User | null;
       if (storedUser) {
-        // Compute permissions from user roles
-        // Defensive: ensure roles is an array before computing permissions
-        const rolesArray = Array.isArray(storedUser.roles) ? storedUser.roles : [];
+        // Compute permissions from user roles (normalized)
+        const rolesArray = normalizeRoles(storedUser.roles);
         const permissions = getEffectivePermissionsForRoles(rolesArray as UserRole[]);
         
         setState({

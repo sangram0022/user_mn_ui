@@ -71,12 +71,14 @@ export function ModernLoginPage() {
       
       if (result) {
         // Build user object from login response
+        // Ensure roles is always an array
+        const rolesArray = Array.isArray(result.roles) ? result.roles : (result.roles ? [result.roles] : []);
         const user = {
           user_id: result.user_id,
           email: result.email,
           first_name: '', // Backend doesn't return these in login
           last_name: '',
-          roles: result.roles || [],
+          roles: rolesArray,
           is_active: true,
           is_verified: true,
           is_approved: true,
@@ -104,7 +106,8 @@ export function ModernLoginPage() {
         toast.success(t('auth:LOGIN_SUCCESS'));
 
         // Navigate to intended destination
-        const redirectTo = getPostLoginRedirect(user.roles[0]);
+        const userRole = (Array.isArray(user.roles) && user.roles.length > 0) ? user.roles[0] : undefined;
+        const redirectTo = getPostLoginRedirect(userRole);
         navigate(redirectTo, { replace: true });
       }
     } catch (error) {

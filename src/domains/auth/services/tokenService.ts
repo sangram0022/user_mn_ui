@@ -95,7 +95,8 @@ export const storeTokens = (
   tokens: Omit<TokenStorage, 'expires_at'>,
   rememberMe: boolean = false
 ): void => {
-  const expiresAt = Date.now() + tokens.expires_in * 1000;
+  const expiresIn = Number(tokens.expires_in) || 3600;
+  const expiresAt = Date.now() + expiresIn * 1000;
   
   // Debug logging
   if (import.meta.env.DEV) {
@@ -109,8 +110,18 @@ export const storeTokens = (
     });
   }
   
-  localStorage.setItem(TOKEN_STORAGE_KEY, tokens.access_token);
-  localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, tokens.refresh_token);
+  // Avoid storing literal 'undefined' strings or null values
+  if (tokens.access_token && tokens.access_token !== 'undefined') {
+    localStorage.setItem(TOKEN_STORAGE_KEY, tokens.access_token);
+  } else {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
+
+  if (tokens.refresh_token && tokens.refresh_token !== 'undefined') {
+    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, tokens.refresh_token);
+  } else {
+    localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+  }
   localStorage.setItem(TOKEN_EXPIRY_KEY, expiresAt.toString());
   localStorage.setItem(REMEMBER_ME_KEY, rememberMe ? 'true' : 'false');
   

@@ -115,7 +115,7 @@ export default function UserViewPage() {
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-600 mb-3">Roles</h3>
                 <div className="flex flex-wrap gap-2">
-                  {user.roles.map((role) => (
+                  {(Array.isArray(user.roles) ? user.roles : []).map((role) => (
                     <Badge key={role} variant="info">
                       {formatUserRole(role)}
                     </Badge>

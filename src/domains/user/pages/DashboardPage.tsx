@@ -56,7 +56,7 @@ export default function UserDashboard() {
             </div>
             <div className="flex items-center space-x-2">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {user?.roles[0] || 'User'}
+                {(user?.roles && Array.isArray(user.roles) && user.roles[0]) || 'User'}
               </span>
             </div>
           </div>

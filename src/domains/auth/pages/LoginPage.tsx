@@ -79,8 +79,8 @@ export default function LoginPage() {
           // Success message
           toast.success(t('login.success'));
           
-          // Navigate based on role
-          const userRole = result.roles[0];
+          // Navigate based on role (use normalized rolesArray)
+          const userRole = rolesArray && rolesArray.length > 0 ? rolesArray[0] : undefined;
           const redirectPath = getPostLoginRedirect(userRole);
           navigate(redirectPath, { replace: true });
         }
