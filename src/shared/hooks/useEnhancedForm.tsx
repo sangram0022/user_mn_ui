@@ -10,7 +10,7 @@
 // ========================================
 
 import { useState, useEffect, useRef } from 'react';
-import { useForm, type FieldValues, type UseFormReturn } from 'react-hook-form';
+import { useForm, type FieldValues, type UseFormReturn, type Path } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDebouncedCallback } from 'use-debounce';
 import type { z } from 'zod';
@@ -202,11 +202,12 @@ export function useEnhancedForm<T extends FieldValues>(
   } = options;
 
   // Form instance with React Hook Form
+  // Note: Type assertions needed due to complex generic constraints between Zod and RHF
   const form = useForm<T>({
-    // @ts-ignore - Complex generic type compatibility between Zod and React Hook Form v7
-    resolver: zodResolver(schema),
-    // @ts-ignore - FieldValues default values type compatibility
-    defaultValues,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(schema) as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    defaultValues: defaultValues as any,
     mode: validation.revalidateMode || 'onChange',
   });
 
@@ -233,10 +234,10 @@ export function useEnhancedForm<T extends FieldValues>(
     const stored = FormPersistenceManager.loadState(persistence.storageKey);
     if (stored) {
       setPersistedState(stored as Partial<T>);
-      // Apply persisted values
+      // Apply persisted values with type assertion for dynamic field names
       Object.entries(stored).forEach(([key, value]) => {
-        // @ts-ignore - Path<T> type compatibility
-        setValue(key, value);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setValue(key as Path<T>, value as any);
       });
     }
 
@@ -279,15 +280,16 @@ export function useEnhancedForm<T extends FieldValues>(
 
       try {
         if (fieldName) {
-          // Validate specific field
-          // @ts-ignore - Path<T> type compatibility
-          await trigger(fieldName);
+          // Validate specific field - type assertion for Path<T> compatibility
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await trigger(fieldName as any as Path<T>);
           
           // Validate dependent fields
           const dependentFields = dependencyManager.current.getDependentFields(fieldName);
           if (dependentFields.size > 0) {
-            // @ts-ignore - Path<T> array type compatibility
-            await trigger([...dependentFields]);
+            // Type assertion: Field dependency manager returns valid field names
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await trigger([...dependentFields] as any as Path<T>[]);
           }
         } else {
           // Validate entire form

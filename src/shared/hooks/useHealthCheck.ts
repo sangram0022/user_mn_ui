@@ -5,6 +5,7 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
+import { apiClient } from '@/services/api/apiClient';
 
 export interface HealthStatus {
   status: 'healthy' | 'unhealthy' | 'degraded';
@@ -97,19 +98,17 @@ export function useHealthCheck() {
     }
   };
 
-  // Check API health
+  // Check API health using apiClient for proper token injection and error handling
   const checkApiHealth = async (): Promise<boolean> => {
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-      if (!apiBaseUrl) return false;
-
-      const response = await fetch(`${apiBaseUrl}/health`, {
-        method: 'GET',
+      // Use apiClient instead of fetch() to get automatic token injection, CSRF protection, and error handling
+      const response = await apiClient.get('/health', {
         timeout: 5000,
-      } as RequestInit);
+      });
 
-      return response.ok;
+      return response.status === 200;
     } catch {
+      // Health check failed - API is down or unreachable
       return false;
     }
   };

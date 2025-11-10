@@ -4,6 +4,7 @@
 // ========================================
 
 import { logger } from '@/core/logging';
+import { diagnostic } from '@/core/logging/diagnostic';
 import tokenService from '../services/tokenService';
 
 /**
@@ -156,16 +157,23 @@ export function startStorageMonitoring(): () => void {
 
 // Make available in window for easy console debugging
 if (import.meta.env.DEV && typeof window !== 'undefined') {
-  (window as any).authDebug = {
+  const debugTools = {
     diagnoseAuthState,
     diagnoseRequestAuth,
     clearAuthStateWithLogging,
     startStorageMonitoring,
   };
   
-  console.log('🔧 Auth debugger available:');
-  console.log('  - window.authDebug.diagnoseAuthState()');
-  console.log('  - window.authDebug.diagnoseRequestAuth(url)');
-  console.log('  - window.authDebug.clearAuthStateWithLogging()');
-  console.log('  - window.authDebug.startStorageMonitoring()');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).authDebug = debugTools;
+  
+  // Only show debugger availability in development
+  diagnostic.log('🔧 Auth debugger available:', {
+    methods: [
+      'window.authDebug.diagnoseAuthState()',
+      'window.authDebug.diagnoseRequestAuth(url)',
+      'window.authDebug.clearAuthStateWithLogging()',
+      'window.authDebug.startStorageMonitoring()',
+    ],
+  });
 }

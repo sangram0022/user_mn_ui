@@ -11,6 +11,7 @@
 
 import { useOptimistic } from 'react';
 import { logger } from '@/core/logging';
+import { useStandardErrorHandler } from './useStandardErrorHandler';
 
 /**
  * Generic optimistic update hook
@@ -62,6 +63,7 @@ export function useOptimisticToggle(
     currentValue,
     (_currentState, newValue: boolean) => newValue
   );
+  const handleError = useStandardErrorHandler();
 
   // React Compiler auto-memoizes this function
   const toggle = async () => {
@@ -72,6 +74,8 @@ export function useOptimisticToggle(
       await toggleFn(newValue);
       return { success: true };
     } catch (error) {
+      // Use standard error handler for consistent error handling
+      handleError(error, { context: { operation: 'optimistic-toggle' } });
       logger().error('Toggle failed, rolling back', error instanceof Error ? error : new Error(String(error)));
       return { success: false, error };
     }
@@ -99,6 +103,7 @@ export function useOptimisticList<T extends { id: string | number }>(
     onUpdate?: (id: string | number, updates: Partial<T>) => Promise<T>;
   }
 ) {
+  const handleError = useStandardErrorHandler();
   const [optimisticList, updateOptimisticList] = useOptimistic(
     currentList,
     (state, action: { type: 'add' | 'remove' | 'update'; payload: unknown }) => {
@@ -128,6 +133,7 @@ export function useOptimisticList<T extends { id: string | number }>(
       }
       return { success: true, data: item };
     } catch (error) {
+      handleError(error, { context: { operation: 'optimistic-list-add' } });
       logger().error('Failed to add item', error instanceof Error ? error : new Error(String(error)));
       return { success: false, error };
     }
@@ -142,6 +148,7 @@ export function useOptimisticList<T extends { id: string | number }>(
       }
       return { success: true };
     } catch (error) {
+      handleError(error, { context: { operation: 'optimistic-list-remove', itemId: id } });
       logger().error('Failed to remove item', error instanceof Error ? error : new Error(String(error)));
       return { success: false, error };
     }
@@ -157,6 +164,7 @@ export function useOptimisticList<T extends { id: string | number }>(
       }
       return { success: true };
     } catch (error) {
+      handleError(error, { context: { operation: 'optimistic-list-update', itemId: id } });
       logger().error('Failed to update item', error instanceof Error ? error : new Error(String(error)));
       return { success: false, error };
     }
