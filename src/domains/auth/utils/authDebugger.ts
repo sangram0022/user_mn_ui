@@ -7,6 +7,18 @@ import { logger } from '@/core/logging';
 import { diagnostic } from '@/core/logging/diagnostic';
 import tokenService from '../services/tokenService';
 
+// Extend Window interface for auth debug tools
+declare global {
+  interface Window {
+    authDebug?: {
+      diagnoseAuthState: typeof diagnoseAuthState;
+      diagnoseRequestAuth: typeof diagnoseRequestAuth;
+      clearAuthStateWithLogging: typeof clearAuthStateWithLogging;
+      startStorageMonitoring: typeof startStorageMonitoring;
+    };
+  }
+}
+
 /**
  * Check if authentication is properly set up
  * Returns diagnostic information about auth state
@@ -164,8 +176,7 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
     startStorageMonitoring,
   };
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).authDebug = debugTools;
+  window.authDebug = debugTools;
   
   // Only show debugger availability in development
   diagnostic.log('🔧 Auth debugger available:', {
