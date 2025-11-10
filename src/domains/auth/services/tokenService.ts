@@ -15,6 +15,7 @@
 import { apiClient } from '../../../services/api/apiClient';
 import { API_PREFIXES } from '../../../services/api/common';
 import { logger } from '@/core/logging';
+import { storageService } from '@/core/storage';
 import type {
   RefreshTokenResponse,
 } from '../types/auth.types';
@@ -112,22 +113,22 @@ export const storeTokens = (
   
   // Avoid storing literal 'undefined' strings or null values
   if (tokens.access_token && tokens.access_token !== 'undefined') {
-    localStorage.setItem(TOKEN_STORAGE_KEY, tokens.access_token);
+    storageService.set(TOKEN_STORAGE_KEY, tokens.access_token);
   } else {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    storageService.remove(TOKEN_STORAGE_KEY);
   }
 
   if (tokens.refresh_token && tokens.refresh_token !== 'undefined') {
-    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, tokens.refresh_token);
+    storageService.set(REFRESH_TOKEN_STORAGE_KEY, tokens.refresh_token);
   } else {
-    localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+    storageService.remove(REFRESH_TOKEN_STORAGE_KEY);
   }
-  localStorage.setItem(TOKEN_EXPIRY_KEY, expiresAt.toString());
-  localStorage.setItem(REMEMBER_ME_KEY, rememberMe ? 'true' : 'false');
+  storageService.set(TOKEN_EXPIRY_KEY, expiresAt.toString());
+  storageService.set(REMEMBER_ME_KEY, rememberMe ? 'true' : 'false');
   
   // Verify storage
   if (import.meta.env.DEV) {
-    const stored = localStorage.getItem(TOKEN_STORAGE_KEY);
+    const stored = storageService.get<string>(TOKEN_STORAGE_KEY);
     logger().debug('[tokenService] Token storage verification', {
       stored: !!stored,
       storedLength: stored?.length || 0,
@@ -140,7 +141,7 @@ export const storeTokens = (
  * Get access token from localStorage
  */
 export const getAccessToken = (): string | null => {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  const token = storageService.get<string>(TOKEN_STORAGE_KEY);
   
   if (import.meta.env.DEV) {
     logger().debug('[tokenService] Getting access token', {
@@ -157,14 +158,14 @@ export const getAccessToken = (): string | null => {
  * Get refresh token from localStorage
  */
 export const getRefreshToken = (): string | null => {
-  return localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+  return storageService.get<string>(REFRESH_TOKEN_STORAGE_KEY);
 };
 
 /**
  * Check if token is expired
  */
 export const isTokenExpired = (): boolean => {
-  const expiryTime = localStorage.getItem(TOKEN_EXPIRY_KEY);
+  const expiryTime = storageService.get<string>(TOKEN_EXPIRY_KEY);
   if (!expiryTime) return true;
   
   return Date.now() >= parseInt(expiryTime, 10);
@@ -174,12 +175,12 @@ export const isTokenExpired = (): boolean => {
  * Clear all tokens from localStorage
  */
 export const clearTokens = (): void => {
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
-  localStorage.removeItem(TOKEN_EXPIRY_KEY);
-  localStorage.removeItem(USER_STORAGE_KEY);
-  localStorage.removeItem(CSRF_TOKEN_STORAGE_KEY);
-  localStorage.removeItem(REMEMBER_ME_KEY);
+  storageService.remove(TOKEN_STORAGE_KEY);
+  storageService.remove(REFRESH_TOKEN_STORAGE_KEY);
+  storageService.remove(TOKEN_EXPIRY_KEY);
+  storageService.remove(USER_STORAGE_KEY);
+  storageService.remove(CSRF_TOKEN_STORAGE_KEY);
+  storageService.remove(REMEMBER_ME_KEY);
   // Note: We keep REMEMBER_ME_EMAIL_KEY so user can see it on login page next time
 };
 
@@ -187,85 +188,78 @@ export const clearTokens = (): void => {
  * Check if remember me is enabled
  */
 export const isRememberMeEnabled = (): boolean => {
-  return localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+  return storageService.get<string>(REMEMBER_ME_KEY) === 'true';
 };
 
 /**
  * Get remember me email
  */
 export const getRememberMeEmail = (): string | null => {
-  return localStorage.getItem(REMEMBER_ME_EMAIL_KEY);
+  return storageService.get<string>(REMEMBER_ME_EMAIL_KEY);
 };
 
 /**
  * Set remember me email
  */
 export const setRememberMeEmail = (email: string): void => {
-  localStorage.setItem(REMEMBER_ME_EMAIL_KEY, email);
+  storageService.set(REMEMBER_ME_EMAIL_KEY, email);
 };
 
 /**
  * Clear remember me data
  */
 export const clearRememberMe = (): void => {
-  localStorage.removeItem(REMEMBER_ME_EMAIL_KEY);
-  localStorage.removeItem(REMEMBER_ME_KEY);
+  storageService.remove(REMEMBER_ME_EMAIL_KEY);
+  storageService.remove(REMEMBER_ME_KEY);
 };
 
 /**
  * Store user data in localStorage
  */
 export const storeUser = (user: unknown): void => {
-  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+  storageService.set(USER_STORAGE_KEY, user);
 };
 
 /**
  * Get user data from localStorage
  */
 export const getUser = (): unknown | null => {
-  const user = localStorage.getItem(USER_STORAGE_KEY);
-  if (!user) return null;
-  
-  try {
-    return JSON.parse(user);
-  } catch {
-    return null;
-  }
+  return storageService.get<unknown>(USER_STORAGE_KEY);
 };
 
 /**
  * Store CSRF token in localStorage
  */
 export const storeCsrfToken = (token: string): void => {
-  localStorage.setItem(CSRF_TOKEN_STORAGE_KEY, token);
+  storageService.set(CSRF_TOKEN_STORAGE_KEY, token);
 };
 
 /**
  * Get CSRF token from localStorage
  */
 export const getStoredCsrfToken = (): string | null => {
-  return localStorage.getItem(CSRF_TOKEN_STORAGE_KEY);
+  return storageService.get<string>(CSRF_TOKEN_STORAGE_KEY);
 };
 
 /**
  * Remove user data from localStorage
  */
 export const removeUser = (): void => {
-  localStorage.removeItem(USER_STORAGE_KEY);
+  storageService.remove(USER_STORAGE_KEY);
 };
 
 /**
  * Remove CSRF token from localStorage
  */
 export const removeCsrfToken = (): void => {
-  localStorage.removeItem(CSRF_TOKEN_STORAGE_KEY);
+  storageService.remove(CSRF_TOKEN_STORAGE_KEY);
 };
 
 /**
  * Get time until token expires (in seconds)
  */
 export const getTokenExpiryTime = (): number | null => {
-  const expiryTime = localStorage.getItem(TOKEN_EXPIRY_KEY);
+  const expiryTime = storageService.get<string>(TOKEN_EXPIRY_KEY);
   if (!expiryTime) return null;
   
   const timeRemaining = parseInt(expiryTime, 10) - Date.now();
