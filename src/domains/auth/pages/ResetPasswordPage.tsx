@@ -43,20 +43,32 @@ export function ResetPasswordPage() {
     e.preventDefault();
 
     if (!token) {
-      toast.error(t('errors:RESET_TOKEN_INVALID'));
+      // Use standard error handler for validation errors
+      handleError(new Error(t('errors:RESET_TOKEN_INVALID')), {
+        context: { operation: 'resetPassword', validation: 'tokenMissing' },
+        customMessage: t('errors:RESET_TOKEN_INVALID'),
+      });
       return;
     }
 
     // Password confirmation check
     if (formData.password !== formData.confirmPassword) {
-      toast.error(t('errors:PASSWORD_MISMATCH'));
+      // Use standard error handler for validation errors
+      handleError(new Error(t('errors:PASSWORD_MISMATCH')), {
+        context: { operation: 'resetPassword', validation: 'passwordMismatch' },
+        customMessage: t('errors:PASSWORD_MISMATCH'),
+      });
       return;
     }
 
     // Check password strength
     const strength = calculatePasswordStrength(formData.password);
     if (strength.score < 40) {
-      toast.error(t('errors:PASSWORD_TOO_WEAK'));
+      // Use standard error handler for validation errors
+      handleError(new Error(t('errors:PASSWORD_TOO_WEAK')), {
+        context: { operation: 'resetPassword', validation: 'weakPassword' },
+        customMessage: t('errors:PASSWORD_TOO_WEAK'),
+      });
       return;
     }
 

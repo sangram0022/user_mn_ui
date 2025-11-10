@@ -43,13 +43,21 @@ export function ChangePasswordPage() {
 
     // Password confirmation check
     if (formData.newPassword !== formData.confirmPassword) {
-      toast.error(t('changePassword.validation.passwordsNotMatch'));
+      // Use standard error handler for validation errors
+      handleError(new Error(t('changePassword.validation.passwordsNotMatch')), {
+        context: { operation: 'changePassword', validation: 'passwordMismatch' },
+        customMessage: t('changePassword.validation.passwordsNotMatch'),
+      });
       return;
     }
 
     // Check new password is different from current
     if (formData.currentPassword === formData.newPassword) {
-      toast.error(t('changePassword.validation.passwordSameAsCurrent'));
+      // Use standard error handler for validation errors
+      handleError(new Error(t('changePassword.validation.passwordSameAsCurrent')), {
+        context: { operation: 'changePassword', validation: 'samePassword' },
+        customMessage: t('changePassword.validation.passwordSameAsCurrent'),
+      });
       return;
     }
 

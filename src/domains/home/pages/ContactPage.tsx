@@ -5,6 +5,7 @@ import Badge from '../../../shared/components/ui/Badge';
 import { typographyVariants } from '../../../design-system/variants';
 import type { BadgeVariant } from '../../../design-system/variants';
 import { useContactForm } from '../../../core/validation';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { logger } from '@/core/logging';
 import { useToast } from '@/hooks/useToast';
 
@@ -116,6 +117,7 @@ const contactData = {
 
 export default function ContactPage() {
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
 
   // React Hook Form for contact form
   const form = useContactForm({
@@ -129,8 +131,11 @@ export default function ContactPage() {
       form.reset();
     },
     onError: (error) => {
-      logger().error('Contact form submission failed', error instanceof Error ? error : undefined);
-      toast.error('Failed to send message. Please try again.');
+      // Use standard error handler for consistent error UX
+      handleError(error, {
+        context: { operation: 'submitContactForm', page: 'ContactPage' },
+        customMessage: 'Failed to send message. Please try again.',
+      });
     },
     successMessage: 'Message sent successfully!',
     errorMessage: 'Failed to send message'

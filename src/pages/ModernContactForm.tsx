@@ -11,6 +11,7 @@ import Input from '../components/Input';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { useToast } from '../hooks/useToast';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { contactFormSchema, type ContactFormData } from '../core/validation/schemas';
 import { logger } from '@/core/logging';
 
@@ -30,6 +31,7 @@ const PRIORITY_OPTIONS = [
 
 export function ModernContactForm() {
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
 
   const {
     register,
@@ -66,8 +68,11 @@ export function ModernContactForm() {
       toast.success('Message sent successfully! We\'ll get back to you soon.');
       reset(); // Reset form after successful submission
     } catch (error) {
-      logger().error('Modern contact form submission failed', error instanceof Error ? error : new Error(String(error)));
-      toast.error('Failed to send message. Please try again.');
+      // Use standard error handler for consistent error UX
+      handleError(error, {
+        context: { operation: 'submitContactForm', form: 'ModernContactForm' },
+        customMessage: 'Failed to send message. Please try again.',
+      });
     }
   };
 

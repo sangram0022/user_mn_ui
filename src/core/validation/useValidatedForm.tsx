@@ -1,6 +1,9 @@
 /**
  * Custom Hooks for React Hook Form Integration
  * Provides a standardized way to use forms with validation across the app
+ * 
+ * NOTE: Toast notifications are handled by the onError callback (typically useStandardErrorHandler).
+ * The errorMessage option is deprecated - errors should be handled by the onError callback.
  */
 
 import { useForm } from 'react-hook-form';
@@ -49,10 +52,9 @@ export function useLoginForm(options?: FormHookOptions<LoginFormData>) {
       }
     } catch (error) {
       logger().error('Login form error', error instanceof Error ? error : new Error(String(error)));
+      // Let onError callback handle error display (typically useStandardErrorHandler)
       options?.onError?.(error);
-      if (options?.errorMessage) {
-        toast.error(options.errorMessage);
-      }
+      // Note: errorMessage option deprecated - onError callback handles error display
     }
   });
 
@@ -83,10 +85,9 @@ export function useRegisterForm(options?: FormHookOptions<RegisterFormData>) {
       }
     } catch (error) {
       logger().error('Register form error', error instanceof Error ? error : new Error(String(error)));
+      // Let onError callback handle error display (typically useStandardErrorHandler)
       options?.onError?.(error);
-      if (options?.errorMessage) {
-        toast.error(options.errorMessage);
-      }
+      // Note: errorMessage option deprecated - onError callback handles error display
     }
   });
 
@@ -117,10 +118,9 @@ export function useContactForm(options?: FormHookOptions<ContactFormData>) {
       }
     } catch (error) {
       logger().error('Contact form error', error instanceof Error ? error : new Error(String(error)));
+      // Let onError callback handle error display (typically useStandardErrorHandler)
       options?.onError?.(error);
-      if (options?.errorMessage) {
-        toast.error(options.errorMessage);
-      }
+      // Note: errorMessage option deprecated - onError callback handles error display
     }
   });
 
@@ -151,10 +151,9 @@ export function useUserEditForm(options?: FormHookOptions<UserEditFormData>) {
       }
     } catch (error) {
       logger().error('User edit form error', error instanceof Error ? error : new Error(String(error)));
+      // Let onError callback handle error display (typically useStandardErrorHandler)
       options?.onError?.(error);
-      if (options?.errorMessage) {
-        toast.error(options.errorMessage);
-      }
+      // Note: errorMessage option deprecated - onError callback handles error display
     }
   });
 
@@ -187,10 +186,9 @@ export function useForgotPasswordForm(options?: FormHookOptions<{ email: string 
       }
     } catch (error) {
       logger().error('Forgot password form error', error instanceof Error ? error : new Error(String(error)));
+      // Let onError callback handle error display (typically useStandardErrorHandler)
       options?.onError?.(error);
-      if (options?.errorMessage) {
-        toast.error(options.errorMessage);
-      }
+      // Note: errorMessage option deprecated - onError callback handles error display
     }
   });
 

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { useToast } from '../../../hooks/useToast';
 import { handleError } from '@/core/error/errorHandler';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
 import Badge from '../../../shared/components/ui/Badge';
@@ -14,6 +15,7 @@ export function RegisterPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
   const navigate = useNavigate();
   const toast = useToast();
+  const handleStandardError = useStandardErrorHandler();
 
   // Use new centralized register hook with React Query
   const registerMutation = useRegister();
@@ -38,12 +40,20 @@ export function RegisterPage() {
     // Client-side validation
     if (formData.password !== formData.confirmPassword) {
       setFieldErrors({ confirmPassword: t('errors:PASSWORD_MISMATCH') });
-      toast.error(t('errors:PASSWORD_MISMATCH'));
+      // Use standard error handler for validation errors
+      handleStandardError(new Error(t('errors:PASSWORD_MISMATCH')), {
+        context: { operation: 'register', validation: 'passwordMismatch' },
+        customMessage: t('errors:PASSWORD_MISMATCH'),
+      });
       return;
     }
 
     if (!formData.terms) {
-      toast.error(t('errors:TERMS_NOT_ACCEPTED'));
+      // Use standard error handler for validation errors
+      handleStandardError(new Error(t('errors:TERMS_NOT_ACCEPTED')), {
+        context: { operation: 'register', validation: 'termsNotAccepted' },
+        customMessage: t('errors:TERMS_NOT_ACCEPTED'),
+      });
       return;
     }
 
@@ -70,7 +80,11 @@ export function RegisterPage() {
         setFieldErrors(result.context.errors as Record<string, string>);
       }
       
-      toast.error(result.userMessage);
+      // Use standard error handler for API errors
+      handleStandardError(error, {
+        context: { operation: 'register', errors: result.context?.errors },
+        customMessage: result.userMessage,
+      });
     }
   };
 

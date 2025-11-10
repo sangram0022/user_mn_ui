@@ -6,11 +6,13 @@
 import { Link } from 'react-router-dom';
 import { ForgotPasswordForm } from '../domains/auth/components';
 import { SEO, SEO_CONFIG } from '../shared/components/seo';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { logger } from '@/core/logging';
 import { useToast } from '@/hooks/useToast';
 
 export default function ForgotPasswordPage() {
   const toast = useToast();
+  const handleError = useStandardErrorHandler();
 
   return (
     <>
@@ -36,8 +38,11 @@ export default function ForgotPasswordPage() {
               toast.success('Reset email sent! Check your inbox.');
             }}
             onError={(error) => {
-              logger().error('Password reset request failed', error instanceof Error ? error : undefined);
-              toast.error('Failed to send reset email. Please try again.');
+              // Use standard error handler for consistent error UX
+              handleError(error, {
+                context: { operation: 'forgotPassword', page: 'ForgotPasswordPage' },
+                customMessage: 'Failed to send reset email. Please try again.',
+              });
             }}
           />
         </div>

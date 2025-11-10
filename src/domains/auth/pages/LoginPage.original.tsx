@@ -6,6 +6,7 @@ import { getPostLoginRedirect } from '../../../core/routing/config';
 import { useAuth } from '../../../hooks/useAuth';
 import { useToast } from '../../../hooks/useToast';
 import { handleError } from '@/core/error/errorHandler';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { Button, Input, ErrorAlert } from '../../../components';
 import { useLogin } from '../hooks/useAuth.hooks';
 import tokenService from '../services/tokenService';
@@ -15,6 +16,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const { login: setAuthState } = useAuth();
   const toast = useToast();
+  const handleStandardError = useStandardErrorHandler();
   
   // Use new centralized login hook with React Query
   const loginMutation = useLogin();
@@ -107,7 +109,11 @@ export function LoginPage() {
         setFieldErrors({});
       }
       
-      toast.error(result.userMessage);
+      // Use standard error handler for API errors
+      handleStandardError(error, {
+        context: { operation: 'login', errors: result.context?.errors },
+        customMessage: result.userMessage,
+      });
     }
   };
 

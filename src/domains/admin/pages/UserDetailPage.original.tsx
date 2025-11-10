@@ -13,6 +13,7 @@ import Badge from '../../../shared/components/ui/Badge';
 import { formatShortDate } from '../../../shared/utils/dateFormatters';
 import { logger } from '../../../core/logging';
 import { handleError } from '@/core/error/errorHandler';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { useToast } from '../../../hooks/useToast';
 
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
@@ -28,6 +29,7 @@ export default function UserDetailPage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const toast = useToast();
+  const handleStandardError = useStandardErrorHandler();
   const [isEditing, setIsEditing] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
@@ -77,7 +79,11 @@ export default function UserDetailPage() {
       setIsEditing(false);
     } catch (err) {
       const result = handleError(err);
-      toast.error(result.userMessage);
+      // Use standard error handler for API errors
+      handleStandardError(err, {
+        context: { operation: 'updateUser', userId, errors: result.context?.errors },
+        customMessage: result.userMessage,
+      });
       logger().error('Failed to update user', err instanceof Error ? err : null, { userId });
     }
   };
@@ -117,7 +123,11 @@ export default function UserDetailPage() {
       toast.success('User roles updated successfully');
     } catch (err) {
       const result = handleError(err);
-      toast.error(result.userMessage);
+      // Use standard error handler for API errors
+      handleStandardError(err, {
+        context: { operation: 'updateRoles', userId, errors: result.context?.errors },
+        customMessage: result.userMessage,
+      });
       logger().error('Failed to update roles', err instanceof Error ? err : null, { userId });
     }
   };
@@ -139,7 +149,11 @@ export default function UserDetailPage() {
       setApprovalMessage('');
     } catch (err) {
       const result = handleError(err);
-      toast.error(result.userMessage);
+      // Use standard error handler for API errors
+      handleStandardError(err, {
+        context: { operation: 'approveUser', userId, errors: result.context?.errors },
+        customMessage: result.userMessage,
+      });
       logger().error('Failed to approve user', err instanceof Error ? err : null, { userId });
     }
   };
@@ -165,7 +179,11 @@ export default function UserDetailPage() {
       setRejectionReason('');
     } catch (err) {
       const result = handleError(err);
-      toast.error(result.userMessage);
+      // Use standard error handler for API errors
+      handleStandardError(err, {
+        context: { operation: 'rejectUser', userId, errors: result.context?.errors },
+        customMessage: result.userMessage,
+      });
       logger().error('Failed to reject user', err instanceof Error ? err : null, { userId });
     }
   };
