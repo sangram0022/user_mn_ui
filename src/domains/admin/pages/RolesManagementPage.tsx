@@ -13,8 +13,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveRegion } from '../../../shared/components/accessibility/AccessibilityEnhancements';
 import { logger } from '../../../core/logging';
-import RoleCard from './roles/components/RoleCard';
+import RolesList from './roles/components/RolesList';
 import PermissionMatrix from './roles/components/PermissionMatrix';
+import RolesFilters from './roles/components/RolesFilters';
+import RolesStats from './roles/components/RolesStats';
 import type { Role, Permission } from './roles/types';
 // AWS CloudWatch handles performance monitoring
 
@@ -123,9 +125,9 @@ function generateMockRoles(): Role[] {
 export default function RolesManagementPage() {
   const [roles] = useState(() => generateMockRoles());
   const [allPermissions] = useState(() => generateMockPermissions());
-  const [selectedRole] = useState<Role | null>(null);
-  const [searchTerm] = useState('');
-  const [sortBy] = useState<'name' | 'level' | 'users' | 'updated'>('level');
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'level' | 'users' | 'updated'>('level');
   
   // AWS CloudWatch records metrics automatically
   const { announce, LiveRegion } = useLiveRegion();
@@ -210,53 +212,25 @@ export default function RolesManagementPage() {
       {/* Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Roles Overview</h2>
-            <div className="text-sm text-gray-600">
-              {roles.length} roles total
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex-1 min-w-64">
-              <input
-                type="text"
-                placeholder="Search roles..."
-                value={searchTerm}
-                onChange={() => logger().debug('AWS handles search')}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            
-            <div>
-              <select
-                value={sortBy}
-                onChange={() => logger().debug('AWS handles sorting')}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="level">Sort by Level</option>
-                <option value="name">Sort by Name</option>
-                <option value="users">Sort by User Count</option>
-                <option value="updated">Sort by Updated</option>
-              </select>
-            </div>
-          </div>
-        </div>
+        <RolesFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          sortBy={sortBy}
+          onSortChange={(v) => setSortBy(v)}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Roles List */}
           <div>
             <div className="grid gap-4">
-              {filteredRoles.map(role => (
-                <RoleCard
-                  key={role.id}
-                  role={role}
-                  onEdit={handleRoleEdit}
-                  onDelete={handleRoleDelete}
-                  onViewUsers={handleViewUsers}
-                />
-              ))}
+              <RolesList
+                roles={filteredRoles}
+                onEdit={handleRoleEdit}
+                onDelete={handleRoleDelete}
+                onViewUsers={handleViewUsers}
+                onSelectRole={(r: Role) => setSelectedRole(r)}
+                selectedRoleId={selectedRole?.id ?? null}
+              />
             </div>
           </div>
 
@@ -285,35 +259,12 @@ export default function RolesManagementPage() {
         </div>
 
         {/* Statistics */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="text-2xl font-bold text-gray-900">
-              {roles.length}
-            </div>
-            <div className="text-sm text-gray-600">Total Roles</div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="text-2xl font-bold text-gray-900">
-              {allPermissions.length}
-            </div>
-            <div className="text-sm text-gray-600">Available Permissions</div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="text-2xl font-bold text-gray-900">
-              {roles.reduce((sum, role) => sum + role.userCount, 0).toLocaleString()}
-            </div>
-            <div className="text-sm text-gray-600">Total Users</div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="text-2xl font-bold text-gray-900">
-              {Array.from(new Set(allPermissions.map(p => p.category))).length}
-            </div>
-            <div className="text-sm text-gray-600">Permission Categories</div>
-          </div>
-        </div>
+        <RolesStats
+          totalRoles={roles.length}
+          totalPermissions={allPermissions.length}
+          totalUsersWithRoles={roles.reduce((sum, role) => sum + role.userCount, 0)}
+          permissionCategories={Array.from(new Set(allPermissions.map(p => p.category))).length}
+        />
 
         {/* Performance Info */}
         {import.meta.env.MODE === 'development' && (
