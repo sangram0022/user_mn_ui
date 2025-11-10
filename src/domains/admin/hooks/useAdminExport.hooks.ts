@@ -4,6 +4,8 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+import { useToast } from '@/hooks/useToast';
 import adminExportService from '../services/adminExportService';
 import type { ExportFormat, ExportFilters } from '../services/adminExportService';
 
@@ -15,6 +17,9 @@ import type { ExportFormat, ExportFilters } from '../services/adminExportService
  * Export users to file
  */
 export const useExportUsers = () => {
+  const handleError = useStandardErrorHandler();
+  const toast = useToast();
+
   return useMutation({
     mutationFn: async ({
       format,
@@ -28,6 +33,14 @@ export const useExportUsers = () => {
       adminExportService.downloadBlob(blob, filename);
       return { success: true, filename };
     },
+    onSuccess: (data) => {
+      toast.success(`Users exported successfully to ${data.filename}`);
+    },
+    onError: (error) => {
+      handleError(error, {
+        context: { operation: 'exportUsers' },
+      });
+    },
   });
 };
 
@@ -35,6 +48,9 @@ export const useExportUsers = () => {
  * Export audit logs to file
  */
 export const useExportAuditLogs = () => {
+  const handleError = useStandardErrorHandler();
+  const toast = useToast();
+
   return useMutation({
     mutationFn: async ({
       format,
@@ -48,6 +64,14 @@ export const useExportAuditLogs = () => {
       adminExportService.downloadBlob(blob, filename);
       return { success: true, filename };
     },
+    onSuccess: (data) => {
+      toast.success(`Audit logs exported successfully to ${data.filename}`);
+    },
+    onError: (error) => {
+      handleError(error, {
+        context: { operation: 'exportAuditLogs' },
+      });
+    },
   });
 };
 
@@ -55,6 +79,9 @@ export const useExportAuditLogs = () => {
  * Export roles to file
  */
 export const useExportRoles = () => {
+  const handleError = useStandardErrorHandler();
+  const toast = useToast();
+
   return useMutation({
     mutationFn: async ({
       format,
@@ -67,6 +94,14 @@ export const useExportRoles = () => {
       const filename = adminExportService.generateExportFilename('roles', format);
       adminExportService.downloadBlob(blob, filename);
       return { success: true, filename };
+    },
+    onSuccess: (data) => {
+      toast.success(`Roles exported successfully to ${data.filename}`);
+    },
+    onError: (error) => {
+      handleError(error, {
+        context: { operation: 'exportRoles' },
+      });
     },
   });
 };

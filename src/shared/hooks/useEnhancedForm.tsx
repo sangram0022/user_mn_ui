@@ -1,12 +1,27 @@
 // ========================================
-// Enhanced Form Patterns - Advanced Performance
+// Enhanced Form Patterns - EXPERIMENTAL / DEPRECATED
 // ========================================
-// Advanced form optimization system with:
-// - Form state persistence across navigation
-// - Real-time validation with intelligent debouncing
-// - Optimized re-render prevention
-// - Smart field dependency management
-// - Progressive enhancement patterns
+// ⚠️ DEPRECATED: This hook is experimental and NOT recommended for production use.
+// 
+// **USE INSTEAD:** React Hook Form + Zod (Standard Pattern)
+//   - Example: src/pages/ModernContactForm.tsx
+//   - See: src/domains/auth/pages/ChangePasswordPage.tsx
+//
+// **WHY DEPRECATED:**
+//   - Adds unnecessary complexity over React Hook Form
+//   - 504 lines of code vs simple RHF integration
+//   - React Compiler handles optimizations automatically
+//   - Persistence patterns better handled at app level
+//
+// **STANDARD PATTERN (PREFERRED):**
+//   ```ts
+//   const { register, handleSubmit, formState: { errors } } = useForm({
+//     resolver: zodResolver(schema),
+//     defaultValues: {...}
+//   });
+//   ```
+//
+// This file remains for reference only. Do NOT use in new code.
 // ========================================
 
 import { useState, useEffect, useRef } from 'react';

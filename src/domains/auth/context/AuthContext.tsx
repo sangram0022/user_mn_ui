@@ -12,6 +12,8 @@ import authService from '../services/authService';
 import tokenService from '../services/tokenService';
 import { logger } from '@/core/logging';
 import { getEffectivePermissionsForRoles } from '@/domains/rbac/utils/rolePermissionMap';
+import { useSessionMonitor } from '@/shared/hooks/useSessionMonitor';
+import { SessionTimeoutDialog } from '@/shared/components/dialogs/SessionTimeoutDialog';
 import type { User } from '../types/auth.types';
 import type { Permission, UserRole } from '@/domains/rbac/types/rbac.types';
 
@@ -310,6 +312,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [checkAuth]); // checkAuth is stable (useCallback)
 
   // ========================================
+  // Session Monitoring (5-minute warning)
+  // ========================================
+
+  const { showWarning, secondsRemaining } = useSessionMonitor({
+    warningMinutes: 5,
+    onTimeout: logout,
+    enabled: state.isAuthenticated,
+  });
+
+  const handleExtendSession = async () => {
+    await refreshSession();
+  };
+
+  // ========================================
   // Context Value (State + Actions)
   // Kept: useMemo for context value identity (prevents unnecessary re-renders)
   // ========================================
@@ -329,5 +345,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     updateUser,
   }), [state.user, state.isAuthenticated, state.isLoading, state.permissions, login, logout, checkAuth, refreshSession, updateUser]);
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      <SessionTimeoutDialog
+        isOpen={showWarning}
+        secondsRemaining={secondsRemaining}
+        onExtend={handleExtendSession}
+        onLogout={logout}
+      />
+    </AuthContext.Provider>
+  );
 }
