@@ -8,8 +8,6 @@ import { useRole, useUpdateRole } from '../hooks';
 import type { UpdateRoleRequest } from '../types';
 import Button from '../../../shared/components/ui/Button';
 import Badge from '../../../shared/components/ui/Badge';
-import RoleOverview from './role-detail/components/RoleOverview';
-import RoleQuickStats from './role-detail/components/RoleQuickStats';
 import { logger } from '../../../core/logging';
 import { SYSTEM_ROLES, RESOURCES, ACTIONS, RESOURCE_ACTIONS, getRoleLevelBadge } from '../components/role-detail/constants';
 import { useRolePermissions } from '../components/role-detail/useRolePermissions';
@@ -152,18 +150,81 @@ export default function RoleDetailPage() {
 
       {/* Role Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <RoleOverview
-          formData={formData}
-          setFormData={setFormData}
-          isSystemRole={isSystemRole}
-          isEditing={isEditing}
-        />
+        {/* Basic Info */}
+        <div className="lg:col-span-2 bg-white rounded-lg shadow p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+            <input
+              type="text"
+              value={formData.display_name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, display_name: e.target.value }))}
+              disabled={isSystemRole || !isEditing}
+              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                isSystemRole || !isEditing ? 'bg-gray-100 text-gray-500' : ''
+              }`}
+            />
+          </div>
 
-        <RoleQuickStats
-          totalPermissions={totalPermissions}
-          assignedUsersCount={role.users?.length || 0}
-          isSystemRole={isSystemRole}
-        />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+              rows={3}
+              disabled={isSystemRole || !isEditing}
+              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                isSystemRole || !isEditing ? 'bg-gray-100 text-gray-500' : ''
+              }`}
+              placeholder="Brief description of this role..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Role Level (1-99)</label>
+            <input
+              type="number"
+              value={formData.level}
+              onChange={(e) => setFormData((prev) => ({ ...prev, level: Number(e.target.value) }))}
+              min="1"
+              max="99"
+              disabled={isSystemRole || !isEditing}
+              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                isSystemRole || !isEditing ? 'bg-gray-100 text-gray-500' : ''
+              }`}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Higher level = more authority. System roles (90+), Admins (70-89), Managers (40-69), Users (1-39)
+            </p>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">Quick Stats</h2>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Total Permissions</span>
+              <span className="text-lg font-bold text-primary-600">{totalPermissions}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Assigned Users</span>
+              <span className="text-lg font-bold text-primary-600">{role.users?.length || 0}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Role Type</span>
+              <Badge variant={isSystemRole ? 'info' : 'success'} size="sm">
+                {isSystemRole ? 'System' : 'Custom'}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Status</span>
+              <Badge variant="success" size="sm">Active</Badge>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Permissions Matrix */}
