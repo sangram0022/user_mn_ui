@@ -10,7 +10,7 @@
 // - Memory management for large images
 // ========================================
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 // ========================================
 // Types and Interfaces
@@ -229,7 +229,8 @@ export function ProgressiveImage({
     imgRef,
   } = useImageLoading(src as string, { lazy: isLazy });
 
-  const imageBuilder = new ImageURLBuilder();
+  // Kept: useMemo prevents object recreation, required for useEffect dependency
+  const imageBuilder = useMemo(() => new ImageURLBuilder(), []);
 
   // Detect best format on mount
   useEffect(() => {

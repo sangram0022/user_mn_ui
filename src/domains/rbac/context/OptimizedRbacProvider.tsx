@@ -7,7 +7,7 @@
 // Eliminates code duplication (234 lines → 150 lines)
 // ========================================
 
-import { useMemo, useEffect, type ReactNode } from 'react';
+import { useMemo, useCallback, useEffect, type ReactNode } from 'react';
 import type {
   RbacContextValue,
   AccessCheckOptions,
@@ -68,13 +68,14 @@ export function RbacProvider({
   
   // ========================================
   // Permission Checking Methods
-  // React Compiler auto-memoizes these functions
+  // Kept: useCallback required for context value stability
   // ========================================
 
   /**
    * Check if user has specific role
+   * Kept: useCallback - function included in context value
    */
-  const hasRole = (role: UserRole | UserRole[]): boolean => {
+  const hasRole = useCallback((role: UserRole | UserRole[]): boolean => {
     const rolesToCheck = Array.isArray(role) ? role : [role];
     return permissionCache.memoize(
       hasAnyRole,
@@ -84,13 +85,13 @@ export function RbacProvider({
       userRoles,
       rolesToCheck
     );
-  };
+  }, [userRoles, permissions]);
 
   /**
    * Check if user has specific permission
-   * React Compiler auto-memoizes this function
+   * Kept: useCallback - function included in context value
    */
-  const hasPermission = (permission: Permission): boolean => {
+  const hasPermission = useCallback((permission: Permission): boolean => {
     return permissionCache.memoize(
       checkPermission,
       userRoles,
@@ -99,13 +100,13 @@ export function RbacProvider({
       permissions,
       permission
     );
-  };
+  }, [userRoles, permissions]);
 
   /**
    * Check if user has ALL specified permissions
-   * React Compiler auto-memoizes this function
+   * Kept: useCallback - function included in context value
    */
-  const hasAllPermissions = (perms: Permission[]): boolean => {
+  const hasAllPermissions = useCallback((perms: Permission[]): boolean => {
     return permissionCache.memoize(
       checkAllPermissions,
       userRoles,
@@ -114,13 +115,13 @@ export function RbacProvider({
       permissions,
       perms
     );
-  };
+  }, [userRoles, permissions]);
 
   /**
    * Check if user has ANY of specified permissions
-   * React Compiler auto-memoizes this function
+   * Kept: useCallback - function included in context value
    */
-  const hasAnyPermission = (perms: Permission[]): boolean => {
+  const hasAnyPermission = useCallback((perms: Permission[]): boolean => {
     return permissionCache.memoize(
       checkAnyPermission,
       userRoles,
@@ -129,13 +130,13 @@ export function RbacProvider({
       permissions,
       perms
     );
-  };
+  }, [userRoles, permissions]);
 
   /**
    * Complex access check with multiple conditions
-   * React Compiler auto-memoizes this function
+   * Kept: useCallback - function included in context value
    */
-  const hasAccess = (options: AccessCheckOptions): boolean => {
+  const hasAccess = useCallback((options: AccessCheckOptions): boolean => {
     return permissionCache.memoize(
       (opts: AccessCheckOptions) => {
         const { requiredRole, requiredPermissions, requireAllPermissions } = opts;
@@ -175,21 +176,21 @@ export function RbacProvider({
       'hasAccess',
       options
     );
-  };
+  }, [userRoles, permissions]);
 
   /**
    * Get role level
-   * React Compiler auto-memoizes this function
+   * Kept: useCallback - function included in context value
    */
-  const getRoleLevel = (role: UserRole): RoleLevelType => {
+  const getRoleLevel = useCallback((role: UserRole): RoleLevelType => {
     return ROLE_HIERARCHY[role] ?? RoleLevel.PUBLIC;
-  };
+  }, []);
 
   /**
    * Check if user has minimum role level
-   * React Compiler auto-memoizes this function
+   * Kept: useCallback - function included in context value
    */
-  const hasRoleLevel = (minimumLevel: RoleLevelType): boolean => {
+  const hasRoleLevel = useCallback((minimumLevel: RoleLevelType): boolean => {
     return permissionCache.memoize(
       hasMinimumRoleLevel,
       userRoles,
@@ -198,14 +199,14 @@ export function RbacProvider({
       userRoles,
       minimumLevel
     );
-  };
+  }, [userRoles, permissions]);
 
   /**
    * ⚡ OPTIMIZED: Check if user can access API endpoint
    * Uses O(1) endpoint cache instead of O(n) array search
-   * React Compiler auto-memoizes this function
+   * Kept: useCallback - function included in context value
    */
-  const canAccessEndpoint = (method: string, path: string): boolean => {
+  const canAccessEndpoint = useCallback((method: string, path: string): boolean => {
     return permissionCache.memoize(
       (m: string, p: string) => {
         // O(1) lookup instead of O(n) search
@@ -241,14 +242,14 @@ export function RbacProvider({
       method,
       path
     );
-  };
+  }, [userRoles, permissions]);
 
   /**
    * ⚡ OPTIMIZED: Get permissions required for endpoint
    * Uses O(1) endpoint cache
-   * React Compiler auto-memoizes this function
+   * Kept: useCallback - function included in context value
    */
-  const getEndpointPermissions = (method: string, path: string): { requiredRoles: UserRole[]; requiredPermissions: Permission[]; } | null => {
+  const getEndpointPermissions = useCallback((method: string, path: string): { requiredRoles: UserRole[]; requiredPermissions: Permission[]; } | null => {
     // O(1) lookup
     const endpoint = endpointCache.findEndpoint(method, path);
     if (!endpoint) return null;
@@ -257,13 +258,13 @@ export function RbacProvider({
       requiredRoles: endpoint.requiredRoles,
       requiredPermissions: endpoint.requiredPermissions,
     };
-  };
+  }, []);
 
   // ========================================
   // Memoized Context Value
   // ========================================
 
-  // React Compiler optimizes function references, so we only need to depend on primitive values
+  // Kept: useMemo for context value identity (prevents consumer re-renders)
   const contextValue = useMemo<RbacContextValue>(() => ({
     permissions,
     userRoles,
@@ -276,7 +277,19 @@ export function RbacProvider({
     hasRoleLevel,
     canAccessEndpoint,
     getEndpointPermissions,
-  }), [permissions, userRoles]);
+  }), [
+    permissions,
+    userRoles,
+    hasRole,
+    hasPermission,
+    hasAllPermissions,
+    hasAnyPermission,
+    hasAccess,
+    getRoleLevel,
+    hasRoleLevel,
+    canAccessEndpoint,
+    getEndpointPermissions,
+  ]);
 
   // Clear permission cache on mount
   useEffect(() => {

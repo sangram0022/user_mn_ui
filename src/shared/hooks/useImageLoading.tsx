@@ -31,36 +31,35 @@ export function useImageLoading(
 
   const shouldLoad = !options.lazy || inView;
 
-  // React Compiler auto-memoizes this function
-  const loadImage = async (imageSrc: string) => {
-    if (isLoading || isLoaded) return;
-    
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const img = new Image();
-      
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error(`Failed to load image: ${imageSrc}`));
-        img.src = imageSrc;
-      });
-
-      setCurrentSrc(imageSrc);
-      setIsLoaded(true);
-    } catch (err) {
-      setError(err as Error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Move loadImage inside useEffect to avoid dependency issues
   useEffect(() => {
-    if (shouldLoad && src) {
-      loadImage(src);
-    }
-  }, [shouldLoad, src, loadImage]);
+    if (!shouldLoad || !src) return;
+    if (isLoading || isLoaded) return;
+
+    const loadImage = async (imageSrc: string) => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const img = new Image();
+        
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error(`Failed to load image: ${imageSrc}`));
+          img.src = imageSrc;
+        });
+
+        setCurrentSrc(imageSrc);
+        setIsLoaded(true);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadImage(src);
+  }, [shouldLoad, src, isLoading, isLoaded]);
 
   return {
     isLoaded,
