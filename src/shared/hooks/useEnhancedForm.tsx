@@ -14,8 +14,8 @@ import { useForm, type FieldValues, type UseFormReturn, type Path, type PathValu
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDebouncedCallback } from 'use-debounce';
 import type { z } from 'zod';
-import { logger } from '@/core/logging';
 import { useStandardErrorHandler } from './useStandardErrorHandler';
+import { storageService } from '@/core/storage';
 
 // ========================================
 // Types and Interfaces
@@ -52,86 +52,45 @@ class FormPersistenceManager {
   private static readonly PREFIX = 'form_state_';
 
   /**
-   * Save form state to localStorage with TTL
+   * Save form state using storageService with TTL
    */
   static saveState(key: string, data: Record<string, unknown>, ttlMinutes = 60): void {
-    try {
-      const expiryTime = Date.now() + (ttlMinutes * 60 * 1000);
-      const storageData = {
-        data,
-        expiry: expiryTime,
-        timestamp: Date.now(),
-      };
-      
-      localStorage.setItem(
-        `${this.PREFIX}${key}`, 
-        JSON.stringify(storageData)
-      );
-    } catch (error) {
-      logger().warn('Failed to persist form state', { key, error });
-    }
+    // storageService handles TTL, error handling, and JSON serialization
+    storageService.set(
+      `${this.PREFIX}${key}`,
+      data,
+      { ttl: ttlMinutes * 60 * 1000 }
+    );
   }
 
   /**
-   * Load form state from localStorage
+   * Load form state using storageService (auto-handles expiry)
    */
   static loadState(key: string): Record<string, unknown> | null {
-    try {
-      const stored = localStorage.getItem(`${this.PREFIX}${key}`);
-      if (!stored) return null;
-
-      const { data, expiry } = JSON.parse(stored);
-      
-      // Check if expired
-      if (Date.now() > expiry) {
-        this.clearState(key);
-        return null;
-      }
-
-      return data;
-    } catch (error) {
-      logger().warn('Failed to load form state', { key, error });
-      return null;
-    }
+    // storageService automatically checks TTL and removes expired items
+    return storageService.get<Record<string, unknown>>(`${this.PREFIX}${key}`);
   }
 
   /**
-   * Clear form state from localStorage
+   * Clear form state using storageService
    */
   static clearState(key: string): void {
-    try {
-      localStorage.removeItem(`${this.PREFIX}${key}`);
-    } catch (error) {
-      logger().warn('Failed to clear form state', { key, error });
-    }
+    storageService.remove(`${this.PREFIX}${key}`);
   }
 
   /**
    * Clear all expired form states
+   * Note: storageService automatically handles expiry on get()
+   * This method clears all form_state_* keys
    */
   static cleanupExpiredStates(): void {
-    try {
-      const keys = Object.keys(localStorage).filter(key => 
-        key.startsWith(this.PREFIX)
-      );
-
-      keys.forEach(key => {
-        try {
-          const data = localStorage.getItem(key);
-          if (data) {
-            const { expiry } = JSON.parse(data);
-            if (Date.now() > expiry) {
-              localStorage.removeItem(key);
-            }
-          }
-        } catch {
-          // Remove invalid entries
-          localStorage.removeItem(key);
-        }
-      });
-    } catch (error) {
-      logger().warn('Failed to cleanup expired form states', { error });
-    }
+    const allKeys = storageService.keys();
+    const formKeys = allKeys.filter(key => key.startsWith(this.PREFIX));
+    
+    formKeys.forEach(key => {
+      // Accessing the key will auto-remove if expired
+      storageService.get(key);
+    });
   }
 }
 
