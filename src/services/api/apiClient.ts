@@ -291,15 +291,18 @@ apiClient.interceptors.response.use(
         // Retry original request
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, clear tokens and redirect to login
+        // Refresh failed, clear tokens
+        // Note: Redirect to login is handled by useStandardErrorHandler (SSOT)
+        // This prevents hard refresh and preserves navigation state
         processQueue(refreshError, null);
         tokenService.clearTokens();
         
-        // Only redirect if not already on login page
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
+        logger().warn('Token refresh failed, tokens cleared', {
+          error: refreshError,
+          context: 'apiClient.tokenRefresh.failed',
+        });
         
+        // Let the error propagate - useStandardErrorHandler will handle redirect
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
