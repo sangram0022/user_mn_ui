@@ -1,237 +1,15 @@
+// ========================================
+// Services Page - Refactored
+// ========================================
+
+import { useRef } from 'react';
 import { Button } from '../components';
 import Badge from '../components/Badge';
 import Card from '../components/Card';
 import { OptimizedImage } from '../shared/components/OptimizedImage';
 import { typographyVariants, animationUtils } from '../design-system/variants';
-import type { BadgeVariant } from '../design-system/variants';
-import { useRef } from 'react';
-
-// Services data - Single source of truth
-const servicesData = {
-  heroServices: [
-    {
-      id: 1,
-      name: 'Web Development',
-      description: 'Modern, responsive websites built with latest technologies',
-      icon: '💻',
-      price: 'From $2,999',
-      duration: '2-4 weeks',
-      popular: true,
-    },
-    {
-      id: 2,
-      name: 'Mobile App Development',
-      description: 'Native and cross-platform mobile applications',
-      icon: '📱',
-      price: 'From $4,999',
-      duration: '6-12 weeks',
-      popular: false,
-    },
-    {
-      id: 3,
-      name: 'UI/UX Design',
-      description: 'User-centered design that converts and delights',
-      icon: '🎨',
-      price: 'From $1,999',
-      duration: '1-3 weeks',
-      popular: false,
-    },
-  ],
-
-  detailedServices: [
-    {
-      id: 1,
-      name: 'Enterprise Solutions',
-      category: 'Development',
-      description: 'Scalable enterprise applications with advanced security and performance',
-      features: [
-        'Custom Architecture Design',
-        'Advanced Security Implementation',
-        'Performance Optimization',
-        'Third-party Integrations',
-        'Cloud Deployment',
-        '24/7 Support & Maintenance',
-      ],
-      technologies: ['React', 'Node.js', 'AWS', 'Docker', 'TypeScript'],
-      startingPrice: 15000,
-      timeline: '12-24 weeks',
-      complexity: 'Advanced',
-      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop',
-    },
-    {
-      id: 2,
-      name: 'E-commerce Development',
-      category: 'Development',
-      description: 'Complete e-commerce solutions with payment processing and inventory management',
-      features: [
-        'Custom Shopping Cart',
-        'Payment Gateway Integration',
-        'Inventory Management',
-        'Order Processing System',
-        'Customer Analytics',
-        'SEO Optimization',
-      ],
-      technologies: ['Next.js', 'Stripe', 'PostgreSQL', 'Redis', 'Tailwind'],
-      startingPrice: 8000,
-      timeline: '8-16 weeks',
-      complexity: 'Intermediate',
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop',
-    },
-    {
-      id: 3,
-      name: 'Brand Identity Design',
-      category: 'Design',
-      description: 'Complete brand identity including logo, guidelines, and marketing materials',
-      features: [
-        'Logo Design & Variations',
-        'Brand Guidelines',
-        'Color Palette & Typography',
-        'Business Card Design',
-        'Letterhead & Stationery',
-        'Social Media Templates',
-      ],
-      technologies: ['Figma', 'Adobe Creative Suite', 'Sketch', 'Principle'],
-      startingPrice: 3000,
-      timeline: '3-6 weeks',
-      complexity: 'Beginner',
-      image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&h=400&fit=crop',
-    },
-    {
-      id: 4,
-      name: 'Digital Marketing',
-      category: 'Marketing',
-      description: 'Comprehensive digital marketing strategy to grow your online presence',
-      features: [
-        'SEO Strategy & Implementation',
-        'Social Media Management',
-        'Content Marketing',
-        'PPC Campaign Management',
-        'Email Marketing Automation',
-        'Analytics & Reporting',
-      ],
-      technologies: ['Google Analytics', 'SEMrush', 'Mailchimp', 'Hootsuite'],
-      startingPrice: 2500,
-      timeline: '4-8 weeks',
-      complexity: 'Intermediate',
-      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop',
-    },
-    {
-      id: 5,
-      name: 'Mobile App Strategy',
-      category: 'Consulting',
-      description: 'Strategic consulting for mobile app development and market positioning',
-      features: [
-        'Market Research & Analysis',
-        'Technology Stack Recommendation',
-        'User Experience Strategy',
-        'Monetization Strategy',
-        'Go-to-Market Planning',
-        'Competitive Analysis',
-      ],
-      technologies: ['Research Tools', 'Analytics Platforms', 'Prototyping Tools'],
-      startingPrice: 5000,
-      timeline: '2-4 weeks',
-      complexity: 'Advanced',
-      image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&h=400&fit=crop',
-    },
-    {
-      id: 6,
-      name: 'API Development',
-      category: 'Development',
-      description: 'Robust and scalable API development for modern applications',
-      features: [
-        'RESTful API Design',
-        'GraphQL Implementation',
-        'Authentication & Authorization',
-        'Rate Limiting & Caching',
-        'API Documentation',
-        'Testing & Monitoring',
-      ],
-      technologies: ['Node.js', 'Express', 'GraphQL', 'MongoDB', 'Jest'],
-      startingPrice: 4000,
-      timeline: '4-8 weeks',
-      complexity: 'Intermediate',
-      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=400&fit=crop',
-    },
-  ],
-
-  process: [
-    {
-      step: 1,
-      title: 'Discovery & Planning',
-      description: 'We understand your needs and create a detailed project roadmap',
-      icon: '🔍',
-      duration: '1-2 weeks',
-    },
-    {
-      step: 2,
-      title: 'Design & Prototyping',
-      description: 'Create wireframes, mockups, and interactive prototypes',
-      icon: '✏️',
-      duration: '2-3 weeks',
-    },
-    {
-      step: 3,
-      title: 'Development & Testing',
-      description: 'Build your solution with rigorous testing and quality assurance',
-      icon: '⚡',
-      duration: '4-12 weeks',
-    },
-    {
-      step: 4,
-      title: 'Launch & Support',
-      description: 'Deploy your project and provide ongoing maintenance',
-      icon: '🚀',
-      duration: 'Ongoing',
-    },
-  ],
-
-  testimonials: [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      role: 'CEO, TechStart Inc.',
-      content: 'Exceptional service and outstanding results. Our new website increased conversions by 150%.',
-      avatar: '👩‍💼',
-      rating: 5,
-    },
-    {
-      id: 2,
-      name: 'Michael Chen',
-      role: 'Product Manager, InnovaCorp',
-      content: 'Professional team that delivered exactly what we needed, on time and within budget.',
-      avatar: '👨‍💻',
-      rating: 5,
-    },
-    {
-      id: 3,
-      name: 'Emily Rodriguez',
-      role: 'Marketing Director, GrowthCo',
-      content: 'Their digital marketing strategy helped us reach new markets and double our online presence.',
-      avatar: '👩‍🚀',
-      rating: 5,
-    },
-  ],
-};
-
-const getComplexityColor = (complexity: string): BadgeVariant => {
-  switch (complexity) {
-    case 'Beginner': return 'success';
-    case 'Intermediate': return 'warning';
-    case 'Advanced': return 'danger';
-    default: return 'gray';
-  }
-};
-
-const getCategoryColor = (category: string): BadgeVariant => {
-  switch (category) {
-    case 'Development': return 'primary';
-    case 'Design': return 'secondary';
-    case 'Marketing': return 'info';
-    case 'Consulting': return 'warning';
-    default: return 'gray';
-  }
-};
+import { servicesData } from './components/services/servicesData';
+import { getComplexityColor, getCategoryColor } from './components/services/serviceUtils';
 
 export default function ServicesPage() {
   // Skip to main content for accessibility
@@ -405,49 +183,31 @@ export default function ServicesPage() {
                     </details>
 
                     {/* Technologies */}
-                    <div>
-                      <h4 className="font-medium mb-2">Technologies:</h4>
-                      <div className="flex flex-wrap gap-2" role="list">
-                        {service.technologies.map((tech, i) => (
-                          <Badge key={i} variant="gray" className="text-xs">
-                            {tech}
-                          </Badge>
-                        ))}
-                      </div>
+                    <div className="flex flex-wrap gap-2">
+                      {service.technologies.map((tech, i) => (
+                        <Badge key={i} variant="gray" size="sm" aria-label={`Technology: ${tech}`}>
+                          {tech}
+                        </Badge>
+                      ))}
                     </div>
 
-                    {/* Service Details */}
-                    <dl className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+                    {/* Pricing & Timeline */}
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                       <div>
-                        <dt className="text-sm text-tertiary">Starting at</dt>
-                        <dd className="text-lg font-semibold text-brand-primary">
+                        <div className="text-sm text-tertiary">Starting from</div>
+                        <div className="text-xl font-bold text-brand-primary">
                           ${service.startingPrice.toLocaleString()}
-                        </dd>
+                        </div>
                       </div>
-                      <div>
-                        <dt className="text-sm text-tertiary">Timeline</dt>
-                        <dd className="text-lg font-semibold">{service.timeline}</dd>
+                      <div className="text-right">
+                        <div className="text-sm text-tertiary">Timeline</div>
+                        <div className="font-semibold">{service.timeline}</div>
                       </div>
-                    </dl>
-
-                    {/* Actions */}
-                    <div className="flex gap-3 pt-2">
-                      <Button 
-                        variant="primary" 
-                        size="sm" 
-                        className="flex-1"
-                        aria-label={`Get quote for ${service.name}`}
-                      >
-                        Get Quote
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        aria-label={`Learn more about ${service.name}`}
-                      >
-                        Learn More
-                      </Button>
                     </div>
+
+                    <Button variant="primary" fullWidth aria-label={`Learn more about ${service.name}`}>
+                      Learn More
+                    </Button>
                   </div>
                 </Card>
               </article>
@@ -455,48 +215,42 @@ export default function ServicesPage() {
           </div>
         </section>
 
-        {/* Process Section */}
-        <section className="space-y-8" aria-labelledby="our-process">
+        {/* Development Process */}
+        <section className="space-y-8" aria-labelledby="process">
           <header className="text-center">
-            <h2 id="our-process" className={`${typographyVariants.headings.h2} text-balance`}>
-              Our Process
+            <h2 id="process" className={`${typographyVariants.headings.h2} text-balance`}>
+              Our Development Process
             </h2>
             <p className={`${typographyVariants.body.lg} text-secondary mt-4 text-pretty`}>
-              How we deliver exceptional results for your project
+              A proven methodology that delivers consistent results
             </p>
           </header>
           
-          <ol className="grid md:grid-cols-2 lg:grid-cols-4 gap-8" role="list">
+          <div className="grid md:grid-cols-4 gap-6 grid-auto-fit">
             {servicesData.process.map((step, index) => (
-              <li 
+              <article 
                 key={step.step} 
-                className={`scroll-reveal animate-stagger-${index + 1}`}
+                className={`text-center scroll-reveal animate-stagger-${index + 1}`}
+                aria-labelledby={`process-step-${step.step}-title`}
               >
-                <Card className="interactive-card text-center relative h-full">
-                  {/* Step Number */}
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div 
-                      className="w-8 h-8 bg-brand-primary text-white rounded-full flex items-center justify-center font-bold text-sm"
-                      aria-label={`Step ${step.step}`}
-                    >
-                      {step.step}
-                    </div>
+                <Card hover className="interactive-card h-full">
+                  <div className="text-4xl font-bold text-brand-primary mb-2" aria-label={`Step ${step.step}`}>
+                    {step.step}
                   </div>
-                  
-                  <div className="pt-4">
-                    <div className="text-4xl mb-4" role="img" aria-label={`${step.title} icon`}>
-                      {step.icon}
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2 text-balance">{step.title}</h3>
-                    <p className="text-secondary text-sm mb-3 text-pretty">{step.description}</p>
-                    <Badge variant="info" className="text-xs" aria-label={`Duration: ${step.duration}`}>
-                      {step.duration}
-                    </Badge>
+                  <div className="text-5xl mb-4" role="img" aria-label={`${step.title} icon`}>
+                    {step.icon}
+                  </div>
+                  <h3 id={`process-step-${step.step}-title`} className="font-semibold mb-2 text-balance">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-secondary mb-4 text-pretty">{step.description}</p>
+                  <div className="text-xs text-tertiary" aria-label={`Duration: ${step.duration}`}>
+                    {step.duration}
                   </div>
                 </Card>
-              </li>
+              </article>
             ))}
-          </ol>
+          </div>
         </section>
 
         {/* Testimonials */}
