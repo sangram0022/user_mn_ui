@@ -12,6 +12,7 @@ import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBounda
 import tokenService from '../services/tokenService';
 import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { logger } from '@/core/logging';
+import { isDevelopment } from '@/core/config';
 
 export default function LoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -33,7 +34,7 @@ export default function LoginPage() {
         });
         
         // Development diagnostics
-        if (import.meta.env.DEV) {
+        if (isDevelopment()) {
           logger().debug('Login response received', {
             hasResult: !!result,
             resultKeys: result ? Object.keys(result) : [],
@@ -249,7 +250,7 @@ export default function LoginPage() {
               </form>
 
               {/* Debug info in development */}
-              {import.meta.env.DEV && (
+              {isDevelopment() && (
                 <div className="mt-6 p-4 bg-gray-100 rounded text-xs">
                   <div className="font-semibold mb-2">Form State Debug</div>
                   <div>Valid: {form.formState.isValid.toString()}</div>

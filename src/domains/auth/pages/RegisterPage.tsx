@@ -11,6 +11,7 @@ import { useRegisterForm } from '../../../core/validation';
 import { calculatePasswordStrength } from '../../../core/validation';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+import { isDevelopment } from '@/core/config';
 
 export default function RegisterPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -299,7 +300,7 @@ export default function RegisterPage() {
             </form>
 
             {/* Debug info in development */}
-            {import.meta.env.DEV && (
+            {isDevelopment() && (
               <div className="mt-6 p-4 bg-gray-100 rounded text-xs">
                 <div className="font-semibold mb-2">Form State Debug</div>
                 <div>Valid: {form.formState.isValid.toString()}</div>

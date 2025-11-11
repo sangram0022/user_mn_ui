@@ -20,6 +20,7 @@ import { useLogin } from '../hooks/useAuth.hooks';
 import tokenService from '../services/tokenService';
 import { loginSchema, type LoginFormData } from '../../../core/validation/schemas';
 import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
+import { isDevelopment } from '@/core/config';
 
 export function ModernLoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors']);
@@ -207,7 +208,7 @@ export function ModernLoginPage() {
           </div>
 
           {/* Form Debug Info (Development Only) */}
-          {import.meta.env.DEV && (
+          {isDevelopment() && (
             <div className="mt-4 p-3 bg-gray-100 rounded text-xs">
               <div>Form State: isDirty={isDirty.toString()}, isValid={isValid.toString()}</div>
               <div>Errors: {JSON.stringify(errors, null, 2)}</div>

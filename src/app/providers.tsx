@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from '../domains/auth/context/AuthContext';
 import { RbacWrapper } from './RbacWrapper';
 import { queryClient } from '../services/api/queryClient';
+import { isDevelopment } from '@/core/config';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -18,7 +19,7 @@ export function Providers({ children }: ProvidersProps) {
         <AuthProvider>
           <RbacWrapper>
             {children}
-            {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+            {isDevelopment() && <ReactQueryDevtools initialIsOpen={false} />}
           </RbacWrapper>
         </AuthProvider>
       </QueryClientProvider>

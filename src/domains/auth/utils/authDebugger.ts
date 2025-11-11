@@ -6,6 +6,7 @@
 import { logger } from '@/core/logging';
 import { diagnostic } from '@/core/logging/diagnostic';
 import tokenService from '../services/tokenService';
+import { isDevelopment } from '@/core/config';
 
 // Extend Window interface for auth debug tools
 declare global {
@@ -168,7 +169,7 @@ export function startStorageMonitoring(): () => void {
 }
 
 // Make available in window for easy console debugging
-if (import.meta.env.DEV && typeof window !== 'undefined') {
+if (isDevelopment() && typeof window !== 'undefined') {
   const debugTools = {
     diagnoseAuthState,
     diagnoseRequestAuth,

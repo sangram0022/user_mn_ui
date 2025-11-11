@@ -11,6 +11,7 @@ import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBou
 import authService from '../services/authService';
 import type { LoginRequest } from '../types/auth.types';
 import { logger } from '../../../core/logging';
+import { isDevelopment } from '@/core/config';
 
 // ========================================
 // Validation Schema with Zod
@@ -178,7 +179,7 @@ export function ModernLoginForm({
               )}
 
               {/* Development Info */}
-              {import.meta.env.MODE === 'development' && (
+              {isDevelopment() && (
                 <details className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
                   <summary className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                     Form State (Development)
