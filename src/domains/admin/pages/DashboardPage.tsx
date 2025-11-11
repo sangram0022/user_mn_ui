@@ -1,10 +1,12 @@
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStats, useGrowthAnalytics, useAuditLogs } from '../hooks';
 import type { TimePeriod } from '../types';
 import { ChartSkeleton } from '../../../shared/components/loading/Skeletons';
-import UserStatusChart from '../components/UserStatusChart';
-import RegistrationTrendsChart from '../components/RegistrationTrendsChart';
+
+// Lazy load chart components to reduce initial bundle size (recharts is ~80KB gzipped)
+const UserStatusChart = lazy(() => import('../components/UserStatusChart'));
+const RegistrationTrendsChart = lazy(() => import('../components/RegistrationTrendsChart'));
 import {
   DashboardHeader,
   DashboardStatsCards,

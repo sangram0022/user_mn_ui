@@ -29,6 +29,9 @@ vi.mock('@/core/logging', () => ({
     warn: vi.fn(),
     info: vi.fn(),
     debug: vi.fn(),
+    clearContext: vi.fn(),
+    setContext: vi.fn(),
+    getContext: vi.fn(() => ({})),
   }),
 }));
 

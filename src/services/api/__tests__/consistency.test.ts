@@ -43,15 +43,15 @@ describe('Token Storage Consistency', () => {
 
     tokenService.storeTokens(tokens);
 
-    expect(localStorageMock.setItem).toHaveBeenCalledWith('access_token', 'access123');
-    expect(localStorageMock.setItem).toHaveBeenCalledWith('refresh_token', 'refresh123');
-    expect(localStorageMock.setItem).toHaveBeenCalledWith('token_expires_at', expect.any(String));
+    expect(localStorageMock.setItem).toHaveBeenCalledWith('usermn_access_token', 'access123');
+    expect(localStorageMock.setItem).toHaveBeenCalledWith('usermn_refresh_token', 'refresh123');
+    expect(localStorageMock.setItem).toHaveBeenCalledWith('usermn_token_expires_at', expect.any(String));
   });
 
   it('should retrieve tokens consistently', () => {
     localStorageMock.getItem.mockImplementation((key: string) => {
-      if (key === 'access_token') return 'access123';
-      if (key === 'refresh_token') return 'refresh123';
+      if (key === 'usermn_access_token') return 'access123';
+      if (key === 'usermn_refresh_token') return 'refresh123';
       return null;
     });
 
@@ -72,11 +72,11 @@ describe('Token Storage Consistency', () => {
     // Clear tokens
     tokenService.clearTokens();
 
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('access_token');
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('refresh_token');
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('token_expires_at');
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('user');
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('csrf_token');
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith('usermn_access_token');
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith('usermn_refresh_token');
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith('usermn_token_expires_at');
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith('usermn_user');
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith('usermn_csrf_token');
   });
 });
 
@@ -124,15 +124,14 @@ describe('unwrapResponse Consistency', () => {
     expect(unwrapped).toEqual({ id: 1, name: 'test' });
   });
 
-  it('should return response as-is if no data property', () => {
+  it('should throw error if response missing data property', () => {
     const directResponse = { id: 1, name: 'test' };
-    const result = unwrapResponse(directResponse);
-    expect(result).toEqual({ id: 1, name: 'test' });
+    expect(() => unwrapResponse(directResponse)).toThrow('Response missing data field');
   });
 
-  it('should handle null/undefined responses', () => {
-    expect(unwrapResponse(null)).toBeNull();
-    expect(unwrapResponse(undefined)).toBeUndefined();
+  it('should throw error for null/undefined responses', () => {
+    expect(() => unwrapResponse(null)).toThrow('Invalid response format');
+    expect(() => unwrapResponse(undefined)).toThrow('Invalid response format');
   });
 });
 

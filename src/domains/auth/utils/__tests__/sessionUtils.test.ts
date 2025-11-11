@@ -23,6 +23,9 @@ import {
 } from '../sessionUtils';
 
 describe('sessionUtils', () => {
+  // Helper to get prefixed storage key (matches storageService prefix)
+  const getStorageKey = (key: string) => `usermn_${key}`;
+
   beforeEach(() => {
     // Clear localStorage before each test
     localStorage.clear();
@@ -59,7 +62,7 @@ describe('sessionUtils', () => {
       updateLastActivity();
       const afterTime = Date.now();
 
-      const stored = localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY);
+      const stored = localStorage.getItem('usermn_' + SESSION_KEYS.LAST_ACTIVITY);
       expect(stored).not.toBeNull();
 
       const storedTime = parseInt(stored!, 10);
@@ -69,13 +72,13 @@ describe('sessionUtils', () => {
 
     it('should update timestamp on subsequent calls', async () => {
       updateLastActivity();
-      const firstTimestamp = localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY);
+      const firstTimestamp = localStorage.getItem('usermn_' + SESSION_KEYS.LAST_ACTIVITY);
 
       // Wait a bit
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       updateLastActivity();
-      const secondTimestamp = localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY);
+      const secondTimestamp = localStorage.getItem('usermn_' + SESSION_KEYS.LAST_ACTIVITY);
 
       expect(secondTimestamp).not.toBe(firstTimestamp);
     });
@@ -84,7 +87,7 @@ describe('sessionUtils', () => {
   describe('getLastActivity', () => {
     it('should return last activity timestamp', () => {
       const now = Date.now();
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, now.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), now.toString());
 
       const result = getLastActivity();
       expect(result).toBe(now);
@@ -95,14 +98,14 @@ describe('sessionUtils', () => {
     });
 
     it('should handle invalid timestamp gracefully', () => {
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, 'invalid');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), 'invalid');
       const result = getLastActivity();
       expect(isNaN(result!)).toBe(true);
     });
 
     it('should parse string timestamp correctly', () => {
       const timestamp = 1234567890000;
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, timestamp.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), timestamp.toString());
 
       expect(getLastActivity()).toBe(timestamp);
     });
@@ -114,20 +117,20 @@ describe('sessionUtils', () => {
     });
 
     it('should return false for recent activity', () => {
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, Date.now().toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), Date.now().toString());
       expect(isSessionIdle()).toBe(false);
     });
 
     it('should return true when activity exceeds default timeout', () => {
       const oldTime = Date.now() - (31 * 60 * 1000); // 31 minutes ago
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, oldTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), oldTime.toString());
 
       expect(isSessionIdle()).toBe(true);
     });
 
     it('should respect custom timeout parameter', () => {
       const oldTime = Date.now() - (10 * 60 * 1000); // 10 minutes ago
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, oldTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), oldTime.toString());
 
       expect(isSessionIdle(5 * 60 * 1000)).toBe(true); // 5 min timeout
       expect(isSessionIdle(15 * 60 * 1000)).toBe(false); // 15 min timeout
@@ -136,7 +139,7 @@ describe('sessionUtils', () => {
     it('should return false at exact timeout boundary', () => {
       const timeout = 30 * 60 * 1000;
       const exactTime = Date.now() - timeout;
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, exactTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), exactTime.toString());
 
       expect(isSessionIdle(timeout)).toBe(false);
     });
@@ -144,14 +147,14 @@ describe('sessionUtils', () => {
     it('should return true just past timeout boundary', () => {
       const timeout = 30 * 60 * 1000;
       const pastTime = Date.now() - timeout - 1000; // 1 second past
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, pastTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), pastTime.toString());
 
       expect(isSessionIdle(timeout)).toBe(true);
     });
 
     it('should handle very old timestamps', () => {
       const veryOldTime = Date.now() - (365 * 24 * 60 * 60 * 1000); // 1 year ago
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, veryOldTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), veryOldTime.toString());
 
       expect(isSessionIdle()).toBe(true);
     });
@@ -163,22 +166,22 @@ describe('sessionUtils', () => {
     });
 
     it('should return true when set to "true"', () => {
-      localStorage.setItem(SESSION_KEYS.REMEMBER_ME, 'true');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REMEMBER_ME), 'true');
       expect(isRememberMeEnabled()).toBe(true);
     });
 
     it('should return false when set to "false"', () => {
-      localStorage.setItem(SESSION_KEYS.REMEMBER_ME, 'false');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REMEMBER_ME), 'false');
       expect(isRememberMeEnabled()).toBe(false);
     });
 
     it('should return false for any other value', () => {
-      localStorage.setItem(SESSION_KEYS.REMEMBER_ME, 'yes');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REMEMBER_ME), 'yes');
       expect(isRememberMeEnabled()).toBe(false);
     });
 
     it('should return false for empty string', () => {
-      localStorage.setItem(SESSION_KEYS.REMEMBER_ME, '');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REMEMBER_ME), '');
       expect(isRememberMeEnabled()).toBe(false);
     });
   });
@@ -186,53 +189,53 @@ describe('sessionUtils', () => {
   describe('setRememberMe', () => {
     it('should set remember me to true', () => {
       setRememberMe(true);
-      expect(localStorage.getItem(SESSION_KEYS.REMEMBER_ME)).toBe('true');
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.REMEMBER_ME))).toBe('true');
     });
 
     it('should remove remember me when set to false', () => {
-      localStorage.setItem(SESSION_KEYS.REMEMBER_ME, 'true');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REMEMBER_ME), 'true');
       setRememberMe(false);
-      expect(localStorage.getItem(SESSION_KEYS.REMEMBER_ME)).toBeNull();
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.REMEMBER_ME))).toBeNull();
     });
 
     it('should overwrite existing value', () => {
-      localStorage.setItem(SESSION_KEYS.REMEMBER_ME, 'some-value');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REMEMBER_ME), 'some-value');
       setRememberMe(true);
-      expect(localStorage.getItem(SESSION_KEYS.REMEMBER_ME)).toBe('true');
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.REMEMBER_ME))).toBe('true');
     });
   });
 
   describe('clearSession', () => {
     it('should remove all session keys', () => {
       // Set all session keys
-      localStorage.setItem(SESSION_KEYS.ACCESS_TOKEN, 'token123');
-      localStorage.setItem(SESSION_KEYS.REFRESH_TOKEN, 'refresh123');
-      localStorage.setItem(SESSION_KEYS.USER, JSON.stringify({ id: 1 }));
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, '123456789');
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, Date.now().toString());
-      localStorage.setItem(SESSION_KEYS.REMEMBER_ME, 'true');
-      localStorage.setItem(SESSION_KEYS.CSRF_TOKEN, 'csrf123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.ACCESS_TOKEN), 'token123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REFRESH_TOKEN), 'refresh123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.USER), JSON.stringify({ id: 1 }));
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), '123456789');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), Date.now().toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REMEMBER_ME), 'true');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.CSRF_TOKEN), 'csrf123');
 
       clearSession();
 
       // Verify all are removed
-      expect(localStorage.getItem(SESSION_KEYS.ACCESS_TOKEN)).toBeNull();
-      expect(localStorage.getItem(SESSION_KEYS.REFRESH_TOKEN)).toBeNull();
-      expect(localStorage.getItem(SESSION_KEYS.USER)).toBeNull();
-      expect(localStorage.getItem(SESSION_KEYS.TOKEN_EXPIRES_AT)).toBeNull();
-      expect(localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY)).toBeNull();
-      expect(localStorage.getItem(SESSION_KEYS.REMEMBER_ME)).toBeNull();
-      expect(localStorage.getItem(SESSION_KEYS.CSRF_TOKEN)).toBeNull();
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.ACCESS_TOKEN))).toBeNull();
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.REFRESH_TOKEN))).toBeNull();
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.USER))).toBeNull();
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT))).toBeNull();
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY))).toBeNull();
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.REMEMBER_ME))).toBeNull();
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.CSRF_TOKEN))).toBeNull();
     });
 
     it('should not affect other localStorage keys', () => {
       localStorage.setItem('other_key', 'other_value');
-      localStorage.setItem(SESSION_KEYS.ACCESS_TOKEN, 'token123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.ACCESS_TOKEN), 'token123');
 
       clearSession();
 
       expect(localStorage.getItem('other_key')).toBe('other_value');
-      expect(localStorage.getItem(SESSION_KEYS.ACCESS_TOKEN)).toBeNull();
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.ACCESS_TOKEN))).toBeNull();
     });
 
     it('should handle empty localStorage', () => {
@@ -264,34 +267,34 @@ describe('sessionUtils', () => {
 
     it('should return false for future expiration', () => {
       const futureTime = Date.now() + (60 * 60 * 1000); // 1 hour from now
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, futureTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), futureTime.toString());
 
       expect(isSessionExpired()).toBe(false);
     });
 
     it('should return true for past expiration', () => {
       const pastTime = Date.now() - (60 * 60 * 1000); // 1 hour ago
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, pastTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), pastTime.toString());
 
       expect(isSessionExpired()).toBe(true);
     });
 
     it('should return true at exact expiration time', () => {
       const now = Date.now();
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, now.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), now.toString());
 
       expect(isSessionExpired()).toBe(true);
     });
 
     it('should return false just before expiration', () => {
       const futureTime = Date.now() + 1000; // 1 second from now
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, futureTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), futureTime.toString());
 
       expect(isSessionExpired()).toBe(false);
     });
 
     it('should handle invalid expiration timestamp', () => {
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, 'invalid');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), 'invalid');
       // Invalid timestamp should be treated as expired
       // But implementation returns false for NaN comparison
       // This is actually safer - if we can't parse, don't expire
@@ -306,7 +309,7 @@ describe('sessionUtils', () => {
 
     it('should return positive milliseconds for future expiration', () => {
       const futureTime = Date.now() + (60 * 60 * 1000); // 1 hour
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, futureTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), futureTime.toString());
 
       const remaining = getSessionTimeRemaining();
       expect(remaining).toBeGreaterThan(3500000); // ~58+ minutes
@@ -315,14 +318,14 @@ describe('sessionUtils', () => {
 
     it('should return 0 for past expiration', () => {
       const pastTime = Date.now() - (60 * 60 * 1000); // 1 hour ago
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, pastTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), pastTime.toString());
 
       expect(getSessionTimeRemaining()).toBe(0);
     });
 
     it('should return 0 at exact expiration', () => {
       const now = Date.now();
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, now.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), now.toString());
 
       const remaining = getSessionTimeRemaining();
       expect(remaining).toBeLessThanOrEqual(0);
@@ -330,7 +333,7 @@ describe('sessionUtils', () => {
 
     it('should handle very short remaining time', () => {
       const futureTime = Date.now() + 1000; // 1 second
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, futureTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), futureTime.toString());
 
       const remaining = getSessionTimeRemaining();
       expect(remaining).toBeGreaterThan(0);
@@ -386,7 +389,7 @@ describe('sessionUtils', () => {
     it('should set initial activity timestamp', () => {
       const cleanup = initActivityTracking();
       
-      expect(localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY)).not.toBeNull();
+      expect(localStorage.getItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY))).not.toBeNull();
       
       cleanup();
     });
@@ -400,7 +403,7 @@ describe('sessionUtils', () => {
 
     it('should update activity on mousedown', async () => {
       const cleanup = initActivityTracking();
-      const initialTime = localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY);
+      const initialTime = localStorage.getItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY));
 
       // Wait to ensure timestamp difference
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -409,7 +412,7 @@ describe('sessionUtils', () => {
       const event = new MouseEvent('mousedown');
       window.dispatchEvent(event);
 
-      const updatedTime = localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY);
+      const updatedTime = localStorage.getItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY));
       expect(updatedTime).not.toBe(initialTime);
 
       cleanup();
@@ -417,7 +420,7 @@ describe('sessionUtils', () => {
 
     it('should update activity on keydown', async () => {
       const cleanup = initActivityTracking();
-      const initialTime = localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY);
+      const initialTime = localStorage.getItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY));
 
       // Wait to ensure timestamp difference
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -425,7 +428,7 @@ describe('sessionUtils', () => {
       const event = new KeyboardEvent('keydown');
       window.dispatchEvent(event);
 
-      const updatedTime = localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY);
+      const updatedTime = localStorage.getItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY));
       expect(updatedTime).not.toBe(initialTime);
 
       cleanup();
@@ -433,7 +436,7 @@ describe('sessionUtils', () => {
 
     it('should remove event listeners on cleanup', () => {
       const cleanup = initActivityTracking();
-      const initialTime = localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY);
+      const initialTime = localStorage.getItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY));
       
       cleanup();
 
@@ -442,7 +445,7 @@ describe('sessionUtils', () => {
       window.dispatchEvent(event);
 
       // Should not have updated (listeners removed)
-      const timeAfterCleanup = localStorage.getItem(SESSION_KEYS.LAST_ACTIVITY);
+      const timeAfterCleanup = localStorage.getItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY));
       expect(timeAfterCleanup).toBe(initialTime);
     });
   });
@@ -457,11 +460,11 @@ describe('sessionUtils', () => {
     });
 
     it('should report healthy for complete valid session', () => {
-      localStorage.setItem(SESSION_KEYS.ACCESS_TOKEN, 'token123');
-      localStorage.setItem(SESSION_KEYS.REFRESH_TOKEN, 'refresh123');
-      localStorage.setItem(SESSION_KEYS.USER, JSON.stringify({ id: 1 }));
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, (Date.now() + 3600000).toString());
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, Date.now().toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.ACCESS_TOKEN), 'token123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REFRESH_TOKEN), 'refresh123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.USER), JSON.stringify({ id: 1 }));
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), (Date.now() + 3600000).toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), Date.now().toString());
 
       const health = checkSessionHealth();
 
@@ -472,10 +475,10 @@ describe('sessionUtils', () => {
     });
 
     it('should detect expired session', () => {
-      localStorage.setItem(SESSION_KEYS.ACCESS_TOKEN, 'token123');
-      localStorage.setItem(SESSION_KEYS.REFRESH_TOKEN, 'refresh123');
-      localStorage.setItem(SESSION_KEYS.USER, JSON.stringify({ id: 1 }));
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, (Date.now() - 1000).toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.ACCESS_TOKEN), 'token123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REFRESH_TOKEN), 'refresh123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.USER), JSON.stringify({ id: 1 }));
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), (Date.now() - 1000).toString());
 
       const health = checkSessionHealth();
 
@@ -484,11 +487,11 @@ describe('sessionUtils', () => {
     });
 
     it('should detect idle session', () => {
-      localStorage.setItem(SESSION_KEYS.ACCESS_TOKEN, 'token123');
-      localStorage.setItem(SESSION_KEYS.REFRESH_TOKEN, 'refresh123');
-      localStorage.setItem(SESSION_KEYS.USER, JSON.stringify({ id: 1 }));
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, (Date.now() + 3600000).toString());
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, (Date.now() - (31 * 60 * 1000)).toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.ACCESS_TOKEN), 'token123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REFRESH_TOKEN), 'refresh123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.USER), JSON.stringify({ id: 1 }));
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), (Date.now() + 3600000).toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), (Date.now() - (31 * 60 * 1000)).toString());
 
       const health = checkSessionHealth();
 
@@ -498,9 +501,9 @@ describe('sessionUtils', () => {
     });
 
     it('should detect missing user data', () => {
-      localStorage.setItem(SESSION_KEYS.ACCESS_TOKEN, 'token123');
-      localStorage.setItem(SESSION_KEYS.REFRESH_TOKEN, 'refresh123');
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, (Date.now() + 3600000).toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.ACCESS_TOKEN), 'token123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REFRESH_TOKEN), 'refresh123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), (Date.now() + 3600000).toString());
 
       const health = checkSessionHealth();
 
@@ -510,11 +513,11 @@ describe('sessionUtils', () => {
 
     it('should return correct expiresIn value', () => {
       const expirationTime = Date.now() + (30 * 60 * 1000); // 30 minutes
-      localStorage.setItem(SESSION_KEYS.ACCESS_TOKEN, 'token123');
-      localStorage.setItem(SESSION_KEYS.REFRESH_TOKEN, 'refresh123');
-      localStorage.setItem(SESSION_KEYS.USER, JSON.stringify({ id: 1 }));
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, expirationTime.toString());
-      localStorage.setItem(SESSION_KEYS.LAST_ACTIVITY, Date.now().toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.ACCESS_TOKEN), 'token123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.REFRESH_TOKEN), 'refresh123');
+      localStorage.setItem(getStorageKey(SESSION_KEYS.USER), JSON.stringify({ id: 1 }));
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), expirationTime.toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.LAST_ACTIVITY), Date.now().toString());
 
       const health = checkSessionHealth();
 
@@ -524,7 +527,7 @@ describe('sessionUtils', () => {
 
     it('should accumulate multiple issues', () => {
       // No tokens, no user, expired
-      localStorage.setItem(SESSION_KEYS.TOKEN_EXPIRES_AT, (Date.now() - 1000).toString());
+      localStorage.setItem(getStorageKey(SESSION_KEYS.TOKEN_EXPIRES_AT), (Date.now() - 1000).toString());
 
       const health = checkSessionHealth();
 
@@ -581,3 +584,5 @@ describe('sessionUtils', () => {
     });
   });
 });
+
+

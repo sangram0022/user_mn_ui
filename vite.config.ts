@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 // AWS CloudFront-Optimized Vite Configuration
 // CloudFront handles: compression, caching, edge optimization
@@ -22,6 +23,13 @@ export default defineConfig({
       }
     }),
     tailwindcss(),
+    // Bundle visualizer (creates stats.html)
+    visualizer({
+      filename: './dist/stats.html',
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+    }) as unknown as import('vite').Plugin,
   ],
   
   // Development server configuration
@@ -44,19 +52,56 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // AWS CloudFront cache-friendly chunking strategy
-        manualChunks: (id) => {
+        manualChunks(id) {
           // Vendor chunk for stable dependencies (long cache)
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'vendor-react'; // Core React (~45KB gzipped)
+            // Core React libraries - must come first
+            if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('scheduler')) {
+              return 'vendor-react';
             }
-            if (id.includes('react-router')) {
-              return 'vendor-router'; // Routing (~20KB gzipped)
+            
+            // Router
+            if (id.includes('react-router') || id.includes('@remix-run')) {
+              return 'vendor-router';
             }
-            if (id.includes('react-hook-form') || id.includes('zod')) {
-              return 'vendor-forms'; // Forms (~25KB gzipped)
+            
+            // Forms and validation
+            if (id.includes('react-hook-form') || id.includes('/zod/') || id.includes('@hookform')) {
+              return 'vendor-forms';
             }
-            return 'vendor-libs'; // Other libraries (~30KB gzipped)
+            
+            // TanStack Query (data fetching)
+            if (id.includes('@tanstack/query-core') || id.includes('@tanstack/react-query')) {
+              return 'vendor-query';
+            }
+            
+            // i18n libraries
+            if (id.includes('i18next') || id.includes('react-i18next')) {
+              return 'vendor-i18n';
+            }
+            
+            // Charts library (heavy, lazy loaded)
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'vendor-charts';
+            }
+            
+            // Icons
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            
+            // Utilities (axios, dompurify, etc.)
+            if (id.includes('axios') || id.includes('dompurify') || id.includes('use-debounce')) {
+              return 'vendor-utils';
+            }
+            
+            // TanStack Virtual
+            if (id.includes('@tanstack/virtual') || id.includes('@tanstack/react-virtual')) {
+              return 'vendor-virtual';
+            }
+            
+            // Other small libraries
+            return 'vendor-misc';
           }
           
           // Feature-based chunks for better caching

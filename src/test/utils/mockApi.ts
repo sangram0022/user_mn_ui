@@ -24,17 +24,17 @@ export const adminHandlers = [
 
   // List users
   http.get(`${API_BASE_URL}${API_PREFIX}/admin/users`, () => {
-    return HttpResponse.json(mockAdminUserListResponse);
+    return HttpResponse.json({ success: true, data: mockAdminUserListResponse });
   }),
 
   // Get user detail
   http.get(`${API_BASE_URL}${API_PREFIX}/admin/users/:id`, ({ params }) => {
     const { id } = params;
     if (id === 'user-1') {
-      return HttpResponse.json(mockAdminUserDetail);
+      return HttpResponse.json({ success: true, data: mockAdminUserDetail });
     }
     return HttpResponse.json(
-      { detail: 'User not found', code: 'USER_001' },
+      { success: false, error: 'User not found', detail: 'User not found', code: 'USER_001' },
       { status: 404 }
     );
   }),
@@ -43,7 +43,7 @@ export const adminHandlers = [
   http.post(`${API_BASE_URL}${API_PREFIX}/admin/users`, async ({ request }) => {
     const body = await request.json();
     return HttpResponse.json(
-      { ...mockAdminUser, ...(body as Record<string, unknown>) },
+      { success: true, data: { ...mockAdminUser, ...(body as Record<string, unknown>) } },
       { status: 201 }
     );
   }),
@@ -53,10 +53,10 @@ export const adminHandlers = [
     const { id } = params;
     const body = await request.json();
     if (id === 'user-1') {
-      return HttpResponse.json({ ...mockAdminUserDetail, ...(body as Record<string, unknown>) });
+      return HttpResponse.json({ success: true, data: { ...mockAdminUserDetail, ...(body as Record<string, unknown>) } });
     }
     return HttpResponse.json(
-      { detail: 'User not found', code: 'USER_001' },
+      { success: false, error: 'User not found', detail: 'User not found', code: 'USER_001' },
       { status: 404 }
     );
   }),
@@ -65,10 +65,10 @@ export const adminHandlers = [
   http.delete(`${API_BASE_URL}${API_PREFIX}/admin/users/:id`, ({ params }) => {
     const { id } = params;
     if (id === 'user-1') {
-      return HttpResponse.json({ message: 'User deleted successfully' });
+      return HttpResponse.json({ success: true, data: { message: 'User deleted successfully' } });
     }
     return HttpResponse.json(
-      { detail: 'User not found', code: 'USER_001' },
+      { success: false, error: 'User not found', detail: 'User not found', code: 'USER_001' },
       { status: 404 }
     );
   }),
@@ -77,7 +77,7 @@ export const adminHandlers = [
   http.post(`${API_BASE_URL}${API_PREFIX}/admin/users/:id/approve`, ({ params }) => {
     const { id } = params;
     if (id === 'user-2') {
-      return HttpResponse.json({
+      return HttpResponse.json({ success: true, data: {
         user_id: id as string,
         email: 'jane.smith@example.com',
         username: 'janesmith',
@@ -88,7 +88,7 @@ export const adminHandlers = [
         welcome_email_sent: true,
         initial_permissions: ['read'],
         message: 'User approved successfully',
-      });
+      }});
     }
     return HttpResponse.json(
       { detail: 'User not found', code: 'USER_001' },
