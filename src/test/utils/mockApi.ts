@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
+import { config } from '@/core/config';
 import {
   mockAdminUserListResponse,
   mockAdminUserDetail,
@@ -11,7 +12,8 @@ import {
   mockAuditLogListResponse,
 } from './mockData';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// Mock API base URL - should match the actual API client configuration
+const API_BASE_URL = config.api.baseUrl;
 const API_PREFIX = '/api/v1';
 
 /**

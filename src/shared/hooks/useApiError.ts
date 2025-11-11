@@ -48,6 +48,7 @@
 
 import { useStandardErrorHandler } from './useStandardErrorHandler';
 import { logger } from '@/core/logging';
+import { isDevelopment } from '@/core/config';
 
 interface FieldErrors {
   [key: string]: string;
@@ -68,7 +69,7 @@ interface UseApiErrorReturn {
  */
 export function useApiError(): UseApiErrorReturn {
   // Show deprecation warning in development
-  if (import.meta.env.DEV) {
+  if (isDevelopment()) {
     logger().warn(
       '⚠️  useApiError is deprecated! Please migrate to useStandardErrorHandler.',
       {

@@ -8,6 +8,7 @@
 
 import { logger } from '@/core/logging';
 import type { ApiResponse } from '@/core/api';
+import { isDevelopment } from '@/core/config';
 
 // Re-export from core API module for backward compatibility
 export { APIError, API_PREFIXES, type ApiPrefixKey, type ApiResponse } from '@/core/api';
@@ -29,7 +30,7 @@ export { APIError, API_PREFIXES, type ApiPrefixKey, type ApiResponse } from '@/c
  */
 export function unwrapResponse<T>(response: unknown): T {
   // Debug logging in development
-  if (import.meta.env.DEV) {
+  if (isDevelopment()) {
     logger().debug('[unwrapResponse] Processing response', {
       hasResponse: !!response,
       responseType: typeof response,
@@ -56,7 +57,7 @@ export function unwrapResponse<T>(response: unknown): T {
     throw new Error('Response missing data field');
   }
 
-  if (import.meta.env.DEV) {
+  if (isDevelopment()) {
     logger().debug('[unwrapResponse] Successfully unwrapped response', {
       hasData: !!apiResponse.data,
       dataType: typeof apiResponse.data,

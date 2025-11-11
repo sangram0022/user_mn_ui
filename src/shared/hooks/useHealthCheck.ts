@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { apiClient } from '@/services/api/apiClient';
 import { storageService } from '@/core/storage';
 import { INTERVAL_TIMING } from '@/core/constants';
+import { config } from '@/core/config';
 
 export interface HealthStatus {
   status: 'healthy' | 'unhealthy' | 'degraded';
@@ -31,7 +32,7 @@ export function useHealthCheck() {
   const [healthStatus, setHealthStatus] = useState<HealthStatus>({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+    version: config.app.version,
     uptime: performance.now(),
     checks: {
       api: true,
@@ -61,7 +62,7 @@ export function useHealthCheck() {
       const status: HealthStatus = {
         status: apiCheck && storageCheck ? 'healthy' : 'degraded',
         timestamp: new Date().toISOString(),
-        version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+        version: config.app.version,
         uptime: performance.now(),
         checks: {
           api: apiCheck,
@@ -82,7 +83,7 @@ export function useHealthCheck() {
       const errorStatus: HealthStatus = {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
-        version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+        version: config.app.version,
         uptime: performance.now(),
         checks: {
           api: false,

@@ -44,9 +44,8 @@ import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 
 import tokenService from '../../domains/auth/services/tokenService';
 import { logger } from '@/core/logging';
 import { APIError } from '@/core/error';
+import { config, isDevelopment } from '@/core/config';
 import type { ValidationErrorResponse, FieldErrors } from '@/core/api';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 // ========================================
 // Refresh Token Queue
@@ -107,8 +106,8 @@ const getRetryDelay = (retryCount: number): number => {
  * @see {APIError} @/core/error
  */
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 30000,
+  baseURL: config.api.baseUrl,
+  timeout: config.api.timeout,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -128,7 +127,7 @@ apiClient.interceptors.request.use(
     const accessToken = tokenService.getAccessToken();
     
     // Enhanced debug logging for authentication issues
-    if (import.meta.env.MODE === 'development') {
+    if (isDevelopment()) {
       logger().debug('API Request interceptor', {
         url: config.url,
         method: config.method,
@@ -142,7 +141,7 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${accessToken}`;
       
       // Log that we SET the Authorization header
-      if (import.meta.env.MODE === 'development') {
+      if (isDevelopment()) {
         logger().info('✓ Authorization header SET for request', {
           url: config.url,
           method: config.method,
@@ -217,7 +216,7 @@ apiClient.interceptors.response.use(
       ? performance.now() - parseInt(response.config.headers['X-Request-Start'] as string, 10)
       : undefined;
 
-    if (import.meta.env.MODE === 'development' || status >= 400) {
+    if (isDevelopment() || status >= 400) {
       logger().debug(`API Success: ${method} ${url}`, {
         status,
         duration,
