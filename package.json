@@ -3,6 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "sideEffects": [
+    "*.css",
+    "*.scss",
+    "src/main.tsx",
+    "src/core/config/index.ts",
+    "src/core/error/globalErrorHandlers.ts",
+    "src/i18n.ts"
+  ],
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build && node scripts/update-site-urls.mjs",

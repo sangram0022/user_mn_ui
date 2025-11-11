@@ -125,9 +125,39 @@ export default defineConfig({
           if (id.includes('/domains/auth/')) {
             return 'feature-auth';
           }
+          
+          // Admin domain split by route for lazy loading
           if (id.includes('/domains/admin/')) {
-            return 'feature-admin';
+            // Dashboard route
+            if (id.includes('DashboardPage')) {
+              return 'admin-dashboard';
+            }
+            
+            // User management routes (users list, detail, edit)
+            if (id.includes('UsersPage') || id.includes('UserDetailPage') || 
+                id.includes('UserEditPage') || id.includes('VirtualizedUsersTable')) {
+              return 'admin-users';
+            }
+            
+            // Role management routes (roles list, detail)
+            if (id.includes('RolesPage') || id.includes('RoleDetailPage')) {
+              return 'admin-roles';
+            }
+            
+            // Audit logs route (with virtualized table)
+            if (id.includes('AuditLogsPage') || id.includes('VirtualizedAuditLogTable')) {
+              return 'admin-audit';
+            }
+            
+            // Approval workflow route
+            if (id.includes('ApprovalPage') || id.includes('PendingApprovalsPage')) {
+              return 'admin-approvals';
+            }
+            
+            // Shared admin utilities, services, hooks
+            return 'admin-shared';
           }
+          
           if (id.includes('/shared/')) {
             return 'shared-components';
           }
@@ -141,13 +171,24 @@ export default defineConfig({
     },
     
     // Production optimizations - CloudFront handles compression
-    minify: 'esbuild', // Faster than terser, CloudFront handles advanced compression
+    minify: 'terser', // Use terser for better tree shaking and console.log removal
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.log in production
+        drop_debugger: true, // Remove debugger statements
+        pure_funcs: ['console.log', 'console.debug', 'console.info'], // Remove specific console methods
+        passes: 2, // Multiple passes for better optimization
+      },
+      format: {
+        comments: false, // Remove all comments
+      },
+    },
     cssCodeSplit: true,
     sourcemap: false, // CloudFront serves without source maps
     reportCompressedSize: false, // Skip since CloudFront compresses
     
     // Modern browser target for smaller bundles
-    cssMinify: 'esbuild',
+    cssMinify: 'lightningcss', // Faster and better CSS minification
     
     // Chunk size warnings optimized for HTTP/2 + CloudFront
     chunkSizeWarningLimit: 300, // Smaller chunks for better caching
