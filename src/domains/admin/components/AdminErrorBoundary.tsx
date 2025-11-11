@@ -15,6 +15,7 @@ import { AlertTriangle, RefreshCw, Home, Mail } from 'lucide-react';
 import Button from '../../../shared/components/ui/Button';
 import { handleError, extractErrorDetails } from '../../../core/error';
 import { logger } from '../../../core/logging';
+import { isDevelopment } from '@/core/config';
 
 interface Props {
   children: ReactNode;
@@ -158,7 +159,7 @@ export class AdminErrorBoundary extends Component<Props, State> {
             </p>
 
             {/* Error Details (Development Only) */}
-            {import.meta.env.DEV && errorDetails && (
+            {isDevelopment() && errorDetails && (
               <div className="mb-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <h3 className="text-sm font-semibold text-gray-900 mb-2">
                   Error Details (Development Only)

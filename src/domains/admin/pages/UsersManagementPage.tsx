@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { useLiveRegion } from '@/shared/hooks/accessibility';
 import { logger } from '@/core/logging';
 import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
+import { isDevelopment } from '@/core/config';
 import {
   UserFiltersPanel,
   VirtualUserList,
@@ -151,7 +152,7 @@ function UsersManagementPage() {
         />
 
         {/* Performance Info */}
-        {import.meta.env.MODE === 'development' && (
+        {isDevelopment() && (
           <div className="mt-8 bg-gray-900 text-white p-4 rounded-lg">
             <h3 className="font-semibold mb-2">Performance Metrics</h3>
             <div className="text-sm">

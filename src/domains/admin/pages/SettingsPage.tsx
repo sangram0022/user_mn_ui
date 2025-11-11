@@ -12,6 +12,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLiveRegion } from '@/shared/hooks/accessibility';
+import { isDevelopment } from '@/core/config';
 import {
   GeneralSettingsSection,
   SecuritySettingsSection,
@@ -155,7 +156,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Performance Info */}
-        {import.meta.env.MODE === 'development' && (
+        {isDevelopment() && (
           <div className="mt-8 bg-gray-900 text-white p-4 rounded-lg">
             <h3 className="font-semibold mb-2">Settings Status</h3>
             <div className="text-sm">
