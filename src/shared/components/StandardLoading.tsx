@@ -25,13 +25,19 @@ export const StandardLoading: FC<StandardLoadingProps> = ({
   };
 
   return (
-    <div className={`flex items-center justify-center ${className}`}>
+    <div 
+      className={`flex items-center justify-center ${className}`}
+      role="status"
+      aria-label={message}
+      aria-live="polite"
+    >
       {showSpinner && (
         <svg
-          className={`animate-spin text-gray-400 mr-2 ${sizeClasses[size]}`}
+          className={`animate-spin text-gray-400 dark:text-gray-500 mr-2 ${sizeClasses[size]}`}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <circle
             className="opacity-25"
@@ -48,7 +54,7 @@ export const StandardLoading: FC<StandardLoadingProps> = ({
           />
         </svg>
       )}
-      <span className="text-gray-600">{message}</span>
+      <span className="text-gray-600 dark:text-gray-400">{message}</span>
     </div>
   );
 };
@@ -74,7 +80,12 @@ export const LoadingOverlay: FC<LoadingOverlayProps> = ({
   return (
     <div className="relative">
       {children}
-      <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+      <div 
+        className="absolute inset-0 bg-white dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 flex items-center justify-center z-10"
+        role="status"
+        aria-label={message}
+        aria-live="polite"
+      >
         <StandardLoading message={message} size={size} />
       </div>
     </div>
@@ -94,11 +105,17 @@ export const ContentSkeleton: FC<SkeletonLoaderProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`space-y-2 ${className}`}>
+    <div 
+      className={`space-y-2 ${className}`}
+      role="status"
+      aria-label={`Loading ${lines} lines of content`}
+      aria-live="polite"
+    >
+      <span className="sr-only">Loading content...</span>
       {Array.from({ length: lines }, (_, i) => (
         <div
           key={i}
-          className={`h-4 bg-gray-200 rounded animate-pulse ${
+          className={`h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse ${
             i === lines - 1 ? 'w-3/4' : 'w-full'
           }`}
         />
