@@ -9,6 +9,7 @@
  */
 
 import { logger } from '@/core/logging';
+import { isProduction } from '@/core/config';
 
 /**
  * Initialize global error handlers
@@ -90,7 +91,7 @@ export async function reportErrorToBackend(
   context?: Record<string, unknown>
 ): Promise<void> {
   // Only report in production
-  if (import.meta.env.MODE !== 'production') {
+  if (!isProduction()) {
     return;
   }
 

@@ -7,6 +7,7 @@
  */
 
 import { logger } from '@/core/logging';
+import { isProduction } from '@/core/config';
 import {
   AppError,
   APIError,
@@ -335,7 +336,7 @@ export function reportErrorToService(
   error: unknown,
   context?: Record<string, unknown>
 ): void {
-  if (import.meta.env.MODE !== 'production') {
+  if (!isProduction()) {
     return; // Only report in production
   }
 

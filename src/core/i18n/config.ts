@@ -5,6 +5,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import enTranslations from './translations/en.json';
 import esTranslations from './translations/es.json';
 import frTranslations from './translations/fr.json';
+import { isDevelopment } from '@/core/config';
 
 i18n
   .use(LanguageDetector)
@@ -16,7 +17,7 @@ i18n
       fr: { translation: frTranslations },
     },
     fallbackLng: 'en',
-    debug: import.meta.env.DEV,
+    debug: isDevelopment(),
     interpolation: {
       escapeValue: false, // React already escapes
     },
