@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import type { UpdateRoleRequest } from '../../types';
+import type { UpdateRoleRequest } from '../../../types/adminRole.types';
 
 interface Props {
   formData: UpdateRoleRequest;

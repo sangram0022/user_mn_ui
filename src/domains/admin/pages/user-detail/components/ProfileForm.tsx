@@ -1,11 +1,10 @@
-import React from 'react';
-import Input from '../../../../shared/components/ui/Input';
-import Button from '../../../../shared/components/ui/Button';
 import type { UseFormReturn } from 'react-hook-form';
-import type { UserEditFormData } from '../../../../../core/validation/schemas';
-import type { DateInput } from '../../../../../shared/utils/dateFormatters';
+import Input from '@/shared/components/ui/Input';
+import Button from '@/shared/components/ui/Button';
+import type { UserEditFormData } from '@/core/validation/schemas';
+import type { DateInput } from '@/shared/utils/dateFormatters';
 import { GENDER_OPTIONS } from '../utils';
-import { formatShortDate } from '../../../../../shared/utils/dateFormatters';
+import { formatShortDate } from '@/shared/utils/dateFormatters';
 
 interface Props {
   form: Omit<UseFormReturn<UserEditFormData>, 'handleSubmit'> & { handleSubmit: (e?: React.BaseSyntheticEvent) => void | Promise<void> };

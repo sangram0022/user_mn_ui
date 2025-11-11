@@ -1,5 +1,4 @@
-import React from 'react';
-import Button from '../../../../shared/components/ui/Button';
+import Button from '@/shared/components/ui/Button';
 
 interface Props {
   availableRoles: string[];

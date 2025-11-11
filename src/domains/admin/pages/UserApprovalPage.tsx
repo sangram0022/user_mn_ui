@@ -12,7 +12,7 @@ import { useUserApprovalManagement } from '../hooks/useUserApprovalManagement';
 import PendingUsersTable from '../components/PendingUsersTable';
 import UserApprovalModal from '../components/UserApprovalModal';
 import UserRejectionModal from '../components/UserRejectionModal';
-import Pagination from './Pagination';
+import Pagination from '../components/Pagination';
 import Button from '@/shared/components/ui/Button';
 
 export default function UserApprovalPage() {

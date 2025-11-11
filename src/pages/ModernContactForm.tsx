@@ -4,7 +4,7 @@
  * and better performance for large forms
  */
 
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { API_TIMING } from '@/core/constants';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../components';

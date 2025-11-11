@@ -11,7 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useLiveRegion } from '../shared/components/accessibility/AccessibilityEnhancements';
+import { useLiveRegion } from '@/shared/hooks/accessibility';
 
 interface TeamMember {
   id: string;

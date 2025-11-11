@@ -1,4 +1,4 @@
-import type { TimePeriod } from '../../types';
+import type { TimePeriod } from '../../../types/admin.types';
 
 interface DashboardHeaderProps {
   readonly autoRefresh: boolean;

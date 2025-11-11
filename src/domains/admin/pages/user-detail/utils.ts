@@ -1,4 +1,4 @@
-import type { Gender } from '../types';
+import type { Gender } from '../../types/admin.types';
 
 export const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: 'male', label: 'Male' },
