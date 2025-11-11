@@ -30,6 +30,7 @@ export type ErrorReportingService = 'sentry' | 'cloudwatch' | 'custom' | 'none';
 export interface AppConfig {
   name: string;
   version: string;
+  url: string;
   environment: Environment;
   isProduction: boolean;
   isDevelopment: boolean;
@@ -142,6 +143,7 @@ export const config: Config = {
   app: {
     name: getEnv('VITE_APP_NAME', 'UserMN'),
     version: getEnv('VITE_APP_VERSION', '1.0.0'),
+    url: getEnv('VITE_APP_URL', 'https://example.com'),
     environment,
     isProduction: environment === 'production',
     isDevelopment: environment === 'development',

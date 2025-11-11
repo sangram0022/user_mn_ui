@@ -4,11 +4,12 @@
  * Global SEO settings for the application
  */
 
+import { config } from '@/core/config';
 import type { SEOConfig } from './types';
 
 export const seoConfig: SEOConfig = {
   siteName: 'User Management System',
-  siteUrl: import.meta.env.VITE_APP_URL || 'https://example.com',
+  siteUrl: config.app.url,
   defaultDescription: 'Modern, secure, and scalable user management system built with React 19, TypeScript, and AWS infrastructure.',
   defaultOgImage: '/og-image.png', // Place 1200x630px image in public/
   twitterHandle: 'yourtwitterhandle', // Replace with actual Twitter handle
@@ -16,7 +17,7 @@ export const seoConfig: SEOConfig = {
   titleSeparator: '|',
   organization: {
     name: 'User Management System',
-    url: import.meta.env.VITE_APP_URL || 'https://example.com',
+    url: config.app.url,
     logo: '/logo.png', // Place logo in public/
     sameAs: [
       // Add social media profile URLs

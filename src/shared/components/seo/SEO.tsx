@@ -12,6 +12,7 @@
  */
 
 import { useEffect } from 'react';
+import { config } from '@/core/config';
 
 interface SEOProps {
   title: string;
@@ -56,7 +57,7 @@ export default function SEO({
   structuredData,
   noSuffix = false,
 }: SEOProps) {
-  const siteUrl = import.meta.env.VITE_APP_URL || 'https://example.com';
+  const siteUrl = config.app.url;
   const siteName = 'User Management System';
   const fullTitle = noSuffix ? title : `${title} | ${siteName}`;
   const canonicalUrl = canonical || window.location.href;

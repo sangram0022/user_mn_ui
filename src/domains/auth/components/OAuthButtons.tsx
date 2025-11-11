@@ -3,6 +3,7 @@
 // Social login buttons (Google, GitHub, etc.)
 // ========================================
 
+import { config } from '@/core/config';
 import { Button } from '../../../components';
 
 interface OAuthButtonsProps {
@@ -21,7 +22,7 @@ export function OAuthButtons({ onGoogleLogin, onGitHubLogin, disabled = false }:
       onGoogleLogin();
     } else {
       // Default: redirect to backend OAuth endpoint
-      window.location.href = `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/oauth/google`;
+      window.location.href = `${config.api.baseUrl}/api/v1/auth/oauth/google`;
     }
   };
 
@@ -30,7 +31,7 @@ export function OAuthButtons({ onGoogleLogin, onGitHubLogin, disabled = false }:
       onGitHubLogin();
     } else {
       // Default: redirect to backend OAuth endpoint
-      window.location.href = `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/oauth/github`;
+      window.location.href = `${config.api.baseUrl}/api/v1/auth/oauth/github`;
     }
   };
 

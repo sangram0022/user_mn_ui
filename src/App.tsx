@@ -15,6 +15,7 @@ import { Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { isDevelopment } from '@/core/config';
 
 // Modern Components
 import { AppErrorBoundary } from './shared/components/error/ModernErrorBoundary';
@@ -59,7 +60,7 @@ const queryClient = new QueryClient({
 // ========================================
 
 // Initialize auth debugger in development
-if (import.meta.env.DEV) {
+if (isDevelopment()) {
   import('./domains/auth/utils/authDebugger').then(module => {
     // Auto-start storage monitoring
     const stopMonitoring = module.startStorageMonitoring();
@@ -119,7 +120,7 @@ export default function App() {
         </BrowserRouter>
         
         {/* React Query Devtools (development only) */}
-        {import.meta.env.MODE === 'development' && (
+        {isDevelopment() && (
           <ReactQueryDevtools 
             initialIsOpen={false} 
             position="bottom"

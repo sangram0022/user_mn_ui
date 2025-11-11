@@ -16,6 +16,7 @@ import { apiClient } from '../../../services/api/apiClient';
 import { API_PREFIXES } from '../../../services/api/common';
 import { logger } from '@/core/logging';
 import { storageService } from '@/core/storage';
+import { isDevelopment } from '@/core/config';
 import type {
   RefreshTokenResponse,
 } from '../types/auth.types';
@@ -100,7 +101,7 @@ export const storeTokens = (
   const expiresAt = Date.now() + expiresIn * 1000;
   
   // Debug logging
-  if (import.meta.env.DEV) {
+  if (isDevelopment()) {
     logger().debug('[tokenService] Storing tokens', {
       hasAccessToken: !!tokens.access_token,
       hasRefreshToken: !!tokens.refresh_token,
@@ -127,7 +128,7 @@ export const storeTokens = (
   storageService.set(REMEMBER_ME_KEY, rememberMe ? 'true' : 'false');
   
   // Verify storage
-  if (import.meta.env.DEV) {
+  if (isDevelopment()) {
     const stored = storageService.get<string>(TOKEN_STORAGE_KEY);
     logger().debug('[tokenService] Token storage verification', {
       stored: !!stored,
@@ -143,7 +144,7 @@ export const storeTokens = (
 export const getAccessToken = (): string | null => {
   const token = storageService.get<string>(TOKEN_STORAGE_KEY);
   
-  if (import.meta.env.DEV) {
+  if (isDevelopment()) {
     logger().debug('[tokenService] Getting access token', {
       hasToken: !!token,
       tokenLength: token?.length || 0,
