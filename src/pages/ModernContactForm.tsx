@@ -15,6 +15,7 @@ import { useToast } from '../hooks/useToast';
 import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { contactFormSchema, type ContactFormData } from '../core/validation/schemas';
 import { logger } from '@/core/logging';
+import { isDevelopment } from '@/core/config';
 
 const DEPARTMENT_OPTIONS = [
   { value: '', label: 'Select Department' },
@@ -250,7 +251,7 @@ export function ModernContactForm() {
                 </div>
 
                 {/* Form Debug Info (Development Only) */}
-                {import.meta.env.DEV && (
+                {isDevelopment() && (
                   <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                     <h4 className="text-sm font-semibold mb-2">Form Debug Info</h4>
                     <div className="text-xs space-y-1">

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
 import { useAuth } from '../../../hooks/useAuth';
 import Button from '../ui/Button';
+import { isDevelopment } from '@/core/config';
 
 export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -121,7 +122,7 @@ export default function Header() {
             )}
             
             {/* Development Only - Reference UI Pages (Public only) */}
-            {import.meta.env.DEV && !isAuthenticated && (
+            {isDevelopment() && !isAuthenticated && (
               <Link
                 to={ROUTE_PATHS.REFERENCE_INDEX}
                 className="text-yellow-600 hover:text-yellow-700 font-medium transition-colors flex items-center gap-1"

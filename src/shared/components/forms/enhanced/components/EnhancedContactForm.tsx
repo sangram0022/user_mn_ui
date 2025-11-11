@@ -8,6 +8,7 @@ import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler'
 import { FormField } from './FormField';
 import { FormStateManager } from '../utils/FormStateManager';
 import { contactSchema, type ContactFormData } from '../utils/contactSchema';
+import { isDevelopment } from '@/core/config';
 
 export function EnhancedContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -269,7 +270,7 @@ export function EnhancedContactForm() {
         </div>
 
         {/* Form Analytics */}
-        {import.meta.env.MODE === 'development' && (
+        {isDevelopment() && (
           <details className="mt-8">
             <summary className="text-sm text-gray-500 cursor-pointer">Form Debug Info</summary>
             <div className="mt-2 p-4 bg-gray-50 rounded text-xs">

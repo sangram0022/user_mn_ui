@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { useLiveRegion } from '../shared/hooks/accessibility';
 import { CardSkeleton } from '../shared/components/loading/Skeletons';
 import { API_TIMING, INTERVAL_TIMING } from '@/core/constants';
+import { isDevelopment } from '@/core/config';
 
 // ========================================
 // Dashboard Metrics Types
@@ -460,7 +461,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Developer Info */}
-        {import.meta.env.MODE === 'development' && (
+        {isDevelopment() && (
           <div className="mt-8 bg-gray-900 text-white p-6 rounded-lg">
             <h3 className="text-lg font-semibold mb-4">🔧 Developer Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -472,7 +473,7 @@ export default function DashboardPage() {
               <div>
                 <strong>Accessibility:</strong> WCAG 2.1 AA<br />
                 <strong>React Version:</strong> 19.x<br />
-                <strong>Build Mode:</strong> {import.meta.env.MODE}
+                <strong>Build Mode:</strong> Development
               </div>
             </div>
           </div>

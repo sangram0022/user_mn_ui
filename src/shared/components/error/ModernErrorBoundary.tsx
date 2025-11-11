@@ -7,6 +7,7 @@ import { type ReactNode, type ErrorInfo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { logger } from '@/core/logging';
 import { APIError } from '@/core/error';
+import { isDevelopment } from '@/core/config';
 
 // ========================================
 // Error Boundary Props
@@ -160,7 +161,7 @@ function PageErrorFallback({ error, resetErrorBoundary, retryCount, maxRetries }
           </button>
         </div>
         
-        {import.meta.env.MODE === 'development' && (
+        {isDevelopment() && (
           <details className="mt-6 text-left bg-gray-100 rounded-md p-4">
             <summary className="cursor-pointer text-sm font-medium text-gray-700">
               Error Details (Development)
