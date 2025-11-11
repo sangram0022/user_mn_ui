@@ -6,11 +6,11 @@ export default async function globalSetup() {
     onUnhandledRequest: 'warn',
   });
 
-  console.log('🔶 MSW server started');
+  console.warn('🔶 MSW server started');
 }
 
 export async function globalTeardown() {
   // Clean up after all tests
   server.close();
-  console.log('🔶 MSW server stopped');
+  console.warn('🔶 MSW server stopped');
 }

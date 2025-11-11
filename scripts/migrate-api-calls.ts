@@ -9,7 +9,6 @@
  */
 
 import * as fs from 'fs';
-import * as path from 'path';
 import { glob } from 'glob';
 
 interface MigrationIssue {
@@ -39,7 +38,6 @@ const patterns = [
 
 async function scanFile(filePath: string): Promise<MigrationIssue[]> {
   const content = fs.readFileSync(filePath, 'utf-8');
-  const lines = content.split('\n');
   const issues: MigrationIssue[] = [];
 
   patterns.forEach(({ regex, type, suggestion }) => {
@@ -62,10 +60,9 @@ async function scanFile(filePath: string): Promise<MigrationIssue[]> {
 
 async function main() {
   const args = process.argv.slice(2);
-  const isCheck = args.includes('--check');
   const isReport = args.includes('--report');
 
-  console.log('🔍 Scanning codebase for migration opportunities...\n');
+  console.warn('🔍 Scanning codebase for migration opportunities...\n');
 
   const files = await glob('src/**/*.{ts,tsx}', {
     ignore: ['**/*.test.ts', '**/*.test.tsx', '**/node_modules/**']
@@ -88,10 +85,10 @@ async function main() {
   }, {} as Record<string, MigrationIssue[]>);
 
   // Report
-  console.log('📊 Migration Status:\n');
+  console.warn('📊 Migration Status:\n');
   
   Object.entries(byPattern).forEach(([pattern, issues]) => {
-    console.log(`\n${pattern}: ${issues.length} occurrences`);
+    console.warn(`\n${pattern}: ${issues.length} occurrences`);
     
     if (isReport) {
       const byFile = issues.reduce((acc, issue) => {
@@ -103,19 +100,19 @@ async function main() {
       }, {} as Record<string, MigrationIssue[]>);
 
       Object.entries(byFile).forEach(([file, fileIssues]) => {
-        console.log(`  ${file.replace('src/', '')}`);
+        console.warn(`  ${file.replace('src/', '')}`);
         fileIssues.forEach(issue => {
-          console.log(`    Line ${issue.line}: ${issue.suggestion}`);
+          console.warn(`    Line ${issue.line}: ${issue.suggestion}`);
         });
       });
     }
   });
 
-  console.log(`\n\n✅ Total files scanned: ${files.length}`);
-  console.log(`⚠️  Total issues found: ${allIssues.length}\n`);
+  console.warn(`\n\n✅ Total files scanned: ${files.length}`);
+  console.warn(`⚠️  Total issues found: ${allIssues.length}\n`);
 
   if (!isReport && allIssues.length > 0) {
-    console.log('💡 Run with --report flag for detailed file-by-file breakdown\n');
+    console.warn('💡 Run with --report flag for detailed file-by-file breakdown\n');
   }
 }
 
