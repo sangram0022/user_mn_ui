@@ -1,9 +1,12 @@
 /**
  * useUserApprovalManagement Hook
  * Manages user approval/rejection workflow, state, and business logic
+ * 
+ * React 19 Features:
+ * - useOptimistic for instant approval/rejection feedback
  */
 
-import { useState } from 'react';
+import { useState, useOptimistic } from 'react';
 import {
   useUserList,
   useApproveUser,
@@ -80,6 +83,21 @@ export function useUserApprovalManagement() {
   const users = usersData?.users || [];
   const pagination = usersData?.pagination;
 
+  // Optimistic UI for instant approval/rejection feedback
+  const [optimisticUsers, setOptimisticUsers] = useOptimistic(
+    users,
+    (state, action: { type: 'approve' | 'reject'; userId: string }) => {
+      return state.map((user) =>
+        user.user_id === action.userId
+          ? {
+              ...user,
+              status: action.type === 'approve' ? ('active' as const) : ('rejected' as const),
+            }
+          : user
+      );
+    }
+  );
+
   // Handlers
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -149,6 +167,9 @@ export function useUserApprovalManagement() {
   const handleApproveUser = async () => {
     if (!selectedUserId) return;
 
+    // Instant UI feedback
+    setOptimisticUsers({ type: 'approve', userId: selectedUserId });
+
     try {
       await approveUser.mutateAsync({
         userId: selectedUserId,
@@ -161,9 +182,10 @@ export function useUserApprovalManagement() {
       });
       setShowIndividualApprovalModal(false);
       resetApprovalForm();
+      logger().info('User approved with optimistic update', { userId: selectedUserId });
     } catch (err) {
       logger().error(
-        'Failed to approve user',
+        'Failed to approve user, rollback automatic',
         err instanceof Error ? err : new Error(String(err)),
         { userId: selectedUserId }
       );
@@ -177,6 +199,9 @@ export function useUserApprovalManagement() {
       throw new Error('Rejection reason must be at least 10 characters');
     }
 
+    // Instant UI feedback
+    setOptimisticUsers({ type: 'reject', userId: selectedUserId });
+
     try {
       await rejectUser.mutateAsync({
         userId: selectedUserId,
@@ -188,9 +213,10 @@ export function useUserApprovalManagement() {
       });
       setShowIndividualRejectionModal(false);
       resetRejectionForm();
+      logger().info('User rejected with optimistic update', { userId: selectedUserId });
     } catch (err) {
       logger().error(
-        'Failed to reject user',
+        'Failed to reject user, rollback automatic',
         err instanceof Error ? err : new Error(String(err)),
         { userId: selectedUserId }
       );
@@ -253,8 +279,8 @@ export function useUserApprovalManagement() {
   };
 
   return {
-    // Data
-    users,
+    // Data (with optimistic updates)
+    users: optimisticUsers, // React 19 useOptimistic for instant feedback
     pagination,
     isLoading,
     isError,

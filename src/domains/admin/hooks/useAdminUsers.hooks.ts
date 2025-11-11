@@ -5,8 +5,12 @@
  * 
  * Pattern: Hooks handle cache invalidation and logging.
  * Components use handleError() for error display and toast for success messages.
+ * 
+ * React 19 Features:
+ * - useOptimistic for instant UI feedback on user updates
  */
 
+import { useOptimistic } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../../services/api/queryClient';
 import { adminService } from '../services';
@@ -51,6 +55,77 @@ export const useUser = (userId: string | undefined) => {
 // ============================================================================
 // Mutation Hooks
 // ============================================================================
+
+/**
+ * Toggle user status with optimistic update
+ * React 19 useOptimistic provides instant UI feedback
+ * 
+ * @param userId - User ID to toggle
+ * @param currentUser - Current user data from cache
+ * @returns Mutation with optimistic state
+ */
+export const useToggleUserStatus = (userId: string, currentUser: AdminUser | undefined) => {
+  const queryClient = useQueryClient();
+  
+  // Optimistic state for instant UI feedback
+  const [optimisticUser, setOptimisticUser] = useOptimistic(
+    currentUser,
+    (_state, updatedUser: AdminUser) => updatedUser
+  );
+
+  const mutation = useMutation({
+    mutationFn: async (newStatus: boolean) => {
+      logger().info('Toggling user status', { userId, newStatus });
+      const response = await adminService.updateUser(userId, { is_active: newStatus });
+      logger().info('User status toggled successfully', { userId, newStatus });
+      return response.user;
+    },
+    onMutate: async (newStatus: boolean) => {
+      // Instant UI update
+      if (currentUser) {
+        const optimistic = { ...currentUser, is_active: newStatus };
+        setOptimisticUser(optimistic);
+        
+        // Cancel outgoing refetches
+        await queryClient.cancelQueries({ queryKey: queryKeys.users.detail(userId) });
+        
+        // Update cache optimistically
+        queryClient.setQueryData<AdminUser>(
+          queryKeys.users.detail(userId),
+          optimistic
+        );
+        
+        logger().debug('Optimistic status update applied', { userId, newStatus });
+      }
+      
+      return { previousUser: currentUser };
+    },
+    onError: (error, _newStatus, context) => {
+      logger().error('Status toggle failed, rolling back', error, { userId });
+      
+      // Rollback on error
+      if (context?.previousUser) {
+        setOptimisticUser(context.previousUser);
+        queryClient.setQueryData(
+          queryKeys.users.detail(userId),
+          context.previousUser
+        );
+      }
+    },
+    onSuccess: (user) => {
+      // Update cache with server response
+      queryClient.setQueryData(queryKeys.users.detail(userId), user);
+      
+      // Invalidate lists to reflect changes
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+    },
+  });
+
+  return {
+    ...mutation,
+    optimisticUser, // Expose optimistic state for components
+  };
+};
 
 /**
  * Create new user

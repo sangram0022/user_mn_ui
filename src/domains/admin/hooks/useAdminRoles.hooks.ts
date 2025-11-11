@@ -1,11 +1,16 @@
 /**
  * Admin Role Management Hooks
  * React Query hooks for RBAC role and permission operations
+ * 
+ * React 19 Features:
+ * - useOptimistic for instant role assignment feedback
  */
 
+import { useOptimistic } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../../services/api/queryClient';
 import { adminRoleService } from '../services';
+import { logger } from '../../../core/logging';
 import type {
   ListRolesParams,
   GetRoleParams,
@@ -193,6 +198,73 @@ export const useAssignRoles = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles.all });
     },
   });
+};
+
+/**
+ * Assign roles with optimistic update
+ * React 19 useOptimistic provides instant UI feedback
+ * 
+ * @param userId - User ID to assign roles to
+ * @param currentRoles - Current user roles from cache
+ * @returns Mutation with optimistic state
+ */
+export const useOptimisticAssignRoles = (userId: string, currentRoles: string[] = []) => {
+  const queryClient = useQueryClient();
+  
+  // Optimistic state for instant UI feedback
+  const [optimisticRoles, setOptimisticRoles] = useOptimistic(
+    currentRoles,
+    (_state, newRoles: string[]) => newRoles
+  );
+
+  const mutation = useMutation({
+    mutationFn: async (data: AssignRolesRequest) => {
+      logger().info('Assigning roles to user', { userId, roles: data.roles });
+      const response = await adminRoleService.assignRolesToUser(userId, data);
+      logger().info('Roles assigned successfully', { userId, roles: data.roles });
+      return response;
+    },
+    onMutate: async (data: AssignRolesRequest) => {
+      // Instant UI update
+      setOptimisticRoles(data.roles);
+      
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: queryKeys.users.detail(userId) });
+      
+      // Snapshot previous value
+      const previousUser = queryClient.getQueryData(queryKeys.users.detail(userId));
+      
+      logger().debug('Optimistic role assignment applied', { userId, roles: data.roles });
+      
+      return { previousUser, previousRoles: currentRoles };
+    },
+    onError: (error, _data, context) => {
+      logger().error('Role assignment failed, rolling back', error, { userId });
+      
+      // Rollback on error
+      if (context?.previousRoles) {
+        setOptimisticRoles(context.previousRoles);
+      }
+      if (context?.previousUser) {
+        queryClient.setQueryData(
+          queryKeys.users.detail(userId),
+          context.previousUser
+        );
+      }
+    },
+    onSuccess: () => {
+      // Invalidate user queries to reflect new roles
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(userId) });
+      
+      // Invalidate role queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles.all });
+    },
+  });
+
+  return {
+    ...mutation,
+    optimisticRoles, // Expose optimistic state for components
+  };
 };
 
 // ============================================================================
