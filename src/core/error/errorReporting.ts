@@ -6,6 +6,7 @@
  */
 
 import { logger } from '@/core/logging';
+import { config as appConfig, isProduction } from '@/core/config';
 import type { ErrorDetails } from './types';
 
 // ========================================
@@ -23,13 +24,13 @@ interface ErrorReportingConfig {
 }
 
 const config: ErrorReportingConfig = {
-  enabled: import.meta.env.PROD, // Only in production
-  service: (import.meta.env.VITE_ERROR_REPORTING_SERVICE as 'sentry' | 'cloudwatch' | 'custom') || 'none',
-  sentryDsn: import.meta.env.VITE_SENTRY_DSN,
-  customEndpoint: import.meta.env.VITE_ERROR_REPORTING_ENDPOINT,
-  environment: import.meta.env.MODE || 'development',
-  release: import.meta.env.VITE_APP_VERSION,
-  sampleRate: parseFloat(import.meta.env.VITE_ERROR_SAMPLE_RATE || '1.0'),
+  enabled: isProduction(), // Only in production
+  service: appConfig.errorReporting.service,
+  sentryDsn: appConfig.errorReporting.sentryDsn,
+  customEndpoint: appConfig.errorReporting.customEndpoint,
+  environment: appConfig.app.environment,
+  release: appConfig.app.version,
+  sampleRate: appConfig.errorReporting.sampleRate,
 };
 
 // ========================================

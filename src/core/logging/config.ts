@@ -4,6 +4,7 @@
  * Optimized for performance with minimal overhead
  */
 
+import { config, isDevelopment } from '@/core/config';
 import type { LoggerConfig, LogLevel } from './types.ts';
 import { LOG_LEVELS } from './types.ts';
 
@@ -11,10 +12,7 @@ import { LOG_LEVELS } from './types.ts';
 const getEnvironment = (): 'development' | 'staging' | 'production' => {
   if (typeof window === 'undefined') return 'production';
   
-  const isDev = import.meta.env.MODE === 'development';
-  const isStaging = import.meta.env.MODE === 'staging';
-  
-  return isDev ? 'development' : isStaging ? 'staging' : 'production';
+  return config.app.environment as 'development' | 'staging' | 'production';
 };
 
 /** Get minimum log level based on environment */
@@ -40,8 +38,8 @@ export const DEFAULT_LOGGER_CONFIG: LoggerConfig = {
   console: true, // Always log to console in development, errors only in production
   persistence: false, // Disabled by default to reduce memory usage
   maxLogs: 100, // Keep only recent logs in memory
-  performanceTracking: import.meta.env.MODE === 'development', // Only in development
-  structured: import.meta.env.MODE !== 'development', // Structured format in production
+  performanceTracking: isDevelopment(), // Only in development
+  structured: !isDevelopment(), // Structured format in production
 };
 
 /** Log level hierarchy - lower values = higher priority */
