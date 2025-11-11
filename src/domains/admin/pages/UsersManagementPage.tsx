@@ -10,7 +10,6 @@
 // ========================================
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useLiveRegion } from '@/shared/hooks/accessibility';
 import { logger } from '@/core/logging';
 import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
@@ -21,6 +20,7 @@ import {
   type User,
   type UserFilters,
 } from '../components/users-management';
+import { UsersHeader, BulkActionsBar } from './users-management/components';
 
 // AWS CloudWatch handles performance monitoring
 
@@ -123,29 +123,7 @@ function UsersManagementPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <LiveRegion />
-
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-              <p className="text-sm text-gray-500">
-                Manage all users, roles, and permissions
-              </p>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <Link
-                to="/users/new"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-              >
-                Add New User
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+      <UsersHeader />
 
       {/* Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -162,32 +140,15 @@ function UsersManagementPage() {
           onUserAction={handleUserAction}
         />
 
-        {selectedUsers.size > 0 && (
-          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div className="text-blue-800">
-                {selectedUsers.size} user{selectedUsers.size !== 1 ? 's' : ''} selected
-              </div>
-              <div className="flex items-center space-x-2">
-                <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
-                  Bulk Edit
-                </button>
-                <button className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors">
-                  Bulk Delete
-                </button>
-                <button 
-                  onClick={() => {
-                    setSelectedUsers(new Set());
-                    announce('Selection cleared');
-                  }}
-                  className="text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  Clear
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <BulkActionsBar
+          selectedCount={selectedUsers.size}
+          onBulkEdit={() => announce('Bulk edit triggered')}
+          onBulkDelete={() => announce('Bulk delete triggered')}
+          onClear={() => {
+            setSelectedUsers(new Set());
+            announce('Selection cleared');
+          }}
+        />
 
         {/* Performance Info */}
         {import.meta.env.MODE === 'development' && (
