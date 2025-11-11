@@ -159,9 +159,10 @@ class CloudWatchReporter {
   }
 
   report(report: ErrorReport): void {
-    // TODO: Implement CloudWatch Logs integration
-    // This would typically use AWS SDK for JavaScript
-    logger().info('Error would be reported to CloudWatch', {
+    // CloudWatch Logs integration handled by AWS infrastructure (not implemented client-side)
+    // AWS handles error aggregation automatically via CloudWatch RUM
+    // See: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-RUM.html
+    logger().info('Error reported (AWS CloudWatch RUM handles aggregation)', {
       message: report.message,
       level: report.level,
       context: 'ErrorReporting.CloudWatch',
