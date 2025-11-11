@@ -6,29 +6,39 @@
  * Aligned with backend validation patterns
  */
 
+// Re-export shared types from SSOT
+export type {
+  ApiResponse,
+  PaginationParams,
+  PaginationMeta,
+  PaginatedResponse,
+  PaginatedApiResponse,
+  SortOrder,
+  SortOptions,
+  SearchOptions,
+  ExportFormat,
+  UserStatus,
+  RoleLevel,
+} from '@/shared/types';
+
 // ============================================================================
-// Base Enums
+// Admin-specific Enums
 // ============================================================================
 
-export type UserStatus = 'active' | 'inactive' | 'pending' | 'suspended' | 'deleted';
 export type AccountType = 'regular' | 'premium' | 'trial';
-export type RoleLevel = 'admin' | 'manager' | 'auditor' | 'user';
 export type Gender = 'male' | 'female' | 'other' | 'prefer_not_to_say';
 export type AuditSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type ActionResult = 'success' | 'failed' | 'partial';
-export type ExportFormat = 'csv' | 'json' | 'xlsx' | 'pdf';
 export type TimePeriod = '24h' | '7d' | '30d' | '90d' | '1y' | 'all';
-export type SortOrder = 'asc' | 'desc';
 
 // ============================================================================
-// Pagination Types
+// Pagination Types (Admin-specific extensions)
 // ============================================================================
 
-export interface PaginationParams {
-  page?: number;
-  page_size?: number;
-}
-
+/**
+ * @deprecated Use PaginationMeta from @/shared/types instead
+ * Kept for backward compatibility, will be removed in future
+ */
 export interface PaginationInfo {
   page: number;
   page_size: number;
@@ -38,24 +48,9 @@ export interface PaginationInfo {
   has_prev: boolean;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  pagination: PaginationInfo;
-  filters_applied?: Record<string, unknown>;
-}
-
 // ============================================================================
-// API Response Types
+// Error Types (Admin-specific)
 // ============================================================================
-
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: ApiError;
-  message?: string;
-  timestamp: string;
-  metadata?: Record<string, unknown>;
-}
 
 export interface ApiError {
   code: string;
@@ -83,15 +78,6 @@ export interface RequestOptions {
   signal?: AbortSignal;
   timeout?: number;
   headers?: Record<string, string>;
-}
-
-export interface SortOptions {
-  sort_by?: string;
-  sort_order?: SortOrder;
-}
-
-export interface SearchOptions {
-  search?: string;
 }
 
 // ============================================================================

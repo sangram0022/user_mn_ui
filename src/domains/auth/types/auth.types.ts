@@ -3,18 +3,19 @@
 // Complete type definitions matching backend API v1.0.0
 // ========================================
 
+// Re-export shared types from SSOT
+import type { ApiResponse as BaseApiResponse, FieldErrors } from '@/shared/types';
+
 /**
- * Base API Response Wrapper
- * All responses follow this standard format
+ * Auth-specific API Response (extends base)
+ * Adds auth-specific fields to standard ApiResponse
  */
-export interface ApiResponse<T = unknown> {
-  success: boolean;
+export interface ApiResponse<T = unknown> extends Omit<BaseApiResponse<T>, 'data' | 'message'> {
   message: string;
   message_code: string;
-  timestamp: string;
   data?: T;
   errors?: FieldError[];
-  field_errors?: Record<string, string[]>;
+  field_errors?: FieldErrors;
   request_id: string;
   api_version: string;
 }
