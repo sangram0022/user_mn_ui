@@ -17,7 +17,7 @@
  * @see {PaginatedApiResponse} @/core/api/types
  */
 
-import { apiClient } from '../../../services/api/apiClient';
+import { apiGet, apiDownload } from '@/core/api/apiHelpers';
 import { API_PREFIXES } from '../../../services/api/common';
 import type {
   AuditLog,
@@ -102,26 +102,9 @@ function adaptAuditLogsResponse(response: unknown): AuditLogsResponse {
  * List audit logs with filtering, pagination, and search
  */
 export const getAuditLogs = async (filters?: AuditLogFilters): Promise<AuditLogsResponse> => {
-  const queryParams = new URLSearchParams();
-  
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          value.forEach(v => queryParams.append(key, String(v)));
-        } else {
-          queryParams.append(key, String(value));
-        }
-      }
-    });
-  }
-  
-  const queryString = queryParams.toString();
-  const url = queryString ? `${API_PREFIX}?${queryString}` : API_PREFIX;
-  
-  const response = await apiClient.get<AuditLogsResponse>(url);
+  const response = await apiGet<AuditLogsResponse>(API_PREFIX, filters as Record<string, unknown>);
   // Backend returns array with different field names, use adapter
-  return adaptAuditLogsResponse(response.data);
+  return adaptAuditLogsResponse(response);
 };
 
 /**
@@ -131,26 +114,12 @@ export const getAuditLogs = async (filters?: AuditLogFilters): Promise<AuditLogs
 export const exportAuditLogs = async (
   request: ExportAuditLogsRequest
 ): Promise<Blob> => {
-  const params = new URLSearchParams();
-  params.append('format', request.format);
+  const allFilters = {
+    format: request.format,
+    ...request.filters,
+  };
   
-  // Add filters to query params
-  if (request.filters) {
-    Object.entries(request.filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, String(value));
-      }
-    });
-  }
-  
-  const response = await apiClient.get(
-    `/api/v1/admin/export/audit-logs?${params.toString()}`,
-    {
-      responseType: 'blob',
-    }
-  );
-  
-  return response.data;
+  return apiDownload('/api/v1/admin/export/audit-logs', allFilters as Record<string, unknown>);
 };
 
 // ============================================================================

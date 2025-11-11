@@ -15,14 +15,12 @@
 // @see {ValidationErrorResponse} @/core/api/types
 // ========================================
 
-import { apiClient } from '../../../services/api/apiClient';
-import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
+import { apiPost } from '@/core/api/apiHelpers';
+import { API_PREFIXES } from '../../../services/api/common';
 import type {
   LoginRequest,
-  LoginResponse,
   LoginResponseData,
   RegisterRequest,
-  RegisterResponse,
   RegisterResponseData,
   LogoutResponse,
   ResetPasswordRequest,
@@ -35,7 +33,6 @@ import type {
   VerifyEmailResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
-  RefreshTokenResponse,
   RefreshTokenResponseData,
 } from '../types/auth.types';
 
@@ -53,8 +50,7 @@ const API_PREFIX = API_PREFIXES.AUTH;
  * This function returns: LoginResponseData (unwrapped)
  */
 export const login = async (data: LoginRequest): Promise<LoginResponseData> => {
-  const response = await apiClient.post<LoginResponse>(`${API_PREFIX}/login`, data);
-  return unwrapResponse<LoginResponseData>(response.data);
+  return apiPost<LoginResponseData>(`${API_PREFIX}/login`, data);
 };
 
 /**
@@ -69,8 +65,7 @@ export const login = async (data: LoginRequest): Promise<LoginResponseData> => {
  * This function returns: RegisterResponseData (unwrapped)
  */
 export const register = async (data: RegisterRequest): Promise<RegisterResponseData> => {
-  const response = await apiClient.post<RegisterResponse>(`${API_PREFIX}/register`, data);
-  return unwrapResponse<RegisterResponseData>(response.data);
+  return apiPost<RegisterResponseData>(`${API_PREFIX}/register`, data);
 };
 
 /**
@@ -85,8 +80,7 @@ export const register = async (data: RegisterRequest): Promise<RegisterResponseD
  * This function returns: LogoutResponse (full response)
  */
 export const logout = async (): Promise<LogoutResponse> => {
-  const response = await apiClient.post<LogoutResponse>(`${API_PREFIX}/logout`);
-  return response.data;
+  return apiPost<LogoutResponse>(`${API_PREFIX}/logout`, {});
 };
 
 /**
@@ -102,7 +96,7 @@ export const logout = async (): Promise<LogoutResponse> => {
  * This function returns: RefreshTokenResponseData (unwrapped)
  */
 export const refreshToken = async (refreshTokenValue: string): Promise<RefreshTokenResponseData> => {
-  const response = await apiClient.post<RefreshTokenResponse>(
+  return apiPost<RefreshTokenResponseData>(
     `${API_PREFIX}/refresh`,
     null,
     {
@@ -111,7 +105,6 @@ export const refreshToken = async (refreshTokenValue: string): Promise<RefreshTo
       },
     }
   );
-  return unwrapResponse<RefreshTokenResponseData>(response.data);
 };
 
 /**
@@ -127,8 +120,7 @@ export const refreshToken = async (refreshTokenValue: string): Promise<RefreshTo
  * This function returns: ForgotPasswordResponse (full response)
  */
 export const forgotPassword = async (data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> => {
-  const response = await apiClient.post<ForgotPasswordResponse>(`${API_PREFIX}/forgot-password`, data);
-  return response.data;
+  return apiPost<ForgotPasswordResponse>(`${API_PREFIX}/forgot-password`, data);
 };
 
 /**
@@ -143,8 +135,7 @@ export const forgotPassword = async (data: ForgotPasswordRequest): Promise<Forgo
  * This function returns: ResetPasswordResponse (full response)
  */
 export const resetPassword = async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
-  const response = await apiClient.post<ResetPasswordResponse>(`${API_PREFIX}/reset-password`, data);
-  return response.data;
+  return apiPost<ResetPasswordResponse>(`${API_PREFIX}/reset-password`, data);
 };
 
 /**
@@ -160,8 +151,7 @@ export const resetPassword = async (data: ResetPasswordRequest): Promise<ResetPa
  * This function returns: ChangePasswordResponse (full response)
  */
 export const changePassword = async (data: ChangePasswordRequest): Promise<ChangePasswordResponse> => {
-  const response = await apiClient.post<ChangePasswordResponse>(`${API_PREFIX}/change-password`, data);
-  return response.data;
+  return apiPost<ChangePasswordResponse>(`${API_PREFIX}/change-password`, data);
 };
 
 /**
@@ -177,8 +167,7 @@ export const changePassword = async (data: ChangePasswordRequest): Promise<Chang
  * This function returns: VerifyEmailResponse (full response)
  */
 export const verifyEmail = async (data: VerifyEmailRequest): Promise<VerifyEmailResponse> => {
-  const response = await apiClient.post<VerifyEmailResponse>(`${API_PREFIX}/verify-email`, data);
-  return response.data;
+  return apiPost<VerifyEmailResponse>(`${API_PREFIX}/verify-email`, data);
 };
 
 /**
@@ -193,8 +182,7 @@ export const verifyEmail = async (data: VerifyEmailRequest): Promise<VerifyEmail
  * This function returns: ResendVerificationResponse (full response)
  */
 export const resendVerification = async (data: ResendVerificationRequest): Promise<ResendVerificationResponse> => {
-  const response = await apiClient.post<ResendVerificationResponse>(`${API_PREFIX}/resend-verification`, data);
-  return response.data;
+  return apiPost<ResendVerificationResponse>(`${API_PREFIX}/resend-verification`, data);
 };
 
 // Export all as default object

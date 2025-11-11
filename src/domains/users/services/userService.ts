@@ -22,8 +22,7 @@
  * @see {ValidationErrorResponse} @/core/api/types
  */
 
-import { apiClient } from '@/services/api/apiClient';
-import { unwrapResponse } from '@/services/api/common';
+import { apiGet, apiPut, apiPost, apiDelete } from '@/core/api/apiHelpers';
 
 // API prefix for user endpoints
 const API_PREFIX = '/api/v1/users';
@@ -111,10 +110,7 @@ export interface UploadProfilePictureResponse {
  * This function returns: UserProfile (unwrapped)
  */
 export const getCurrentUser = async (): Promise<UserProfile> => {
-  const response = await apiClient.get<{ success: boolean; data: UserProfile }>(
-    `${API_PREFIX}/me`
-  );
-  return unwrapResponse<UserProfile>(response.data);
+  return apiGet<UserProfile>(`${API_PREFIX}/me`);
 };
 
 /**
@@ -131,8 +127,7 @@ export const getCurrentUser = async (): Promise<UserProfile> => {
 export const updateCurrentUserProfile = async (
   data: UpdateProfileRequest
 ): Promise<UserProfile> => {
-  const response = await apiClient.put<UpdateProfileResponse>(`${API_PREFIX}/me`, data);
-  return unwrapResponse<UserProfile>(response.data);
+  return apiPut<UserProfile>(`${API_PREFIX}/me`, data);
 };
 
 /**
@@ -149,10 +144,7 @@ export const updateCurrentUserProfile = async (
 export const deleteCurrentUserAccount = async (
   data: DeleteAccountRequest
 ): Promise<DeleteAccountResponse> => {
-  const response = await apiClient.delete<DeleteAccountResponse>(`${API_PREFIX}/me`, {
-    data,
-  });
-  return unwrapResponse<DeleteAccountResponse>(response.data);
+  return apiDelete<DeleteAccountResponse>(`${API_PREFIX}/me`, { data });
 };
 
 // ============================================================================
@@ -172,10 +164,7 @@ export const deleteCurrentUserAccount = async (
  * This function returns: UserProfile (unwrapped)
  */
 export const getUserById = async (userId: string): Promise<UserProfile> => {
-  const response = await apiClient.get<{ success: boolean; data: UserProfile }>(
-    `${API_PREFIX}/${userId}`
-  );
-  return unwrapResponse<UserProfile>(response.data);
+  return apiGet<UserProfile>(`${API_PREFIX}/${userId}`);
 };
 
 /**
@@ -194,11 +183,7 @@ export const changePassword = async (
   userId: string,
   data: ChangePasswordRequest
 ): Promise<ChangePasswordResponse> => {
-  const response = await apiClient.put<ChangePasswordResponse>(
-    `${API_PREFIX}/${userId}/password`,
-    data
-  );
-  return unwrapResponse<ChangePasswordResponse>(response.data);
+  return apiPut<ChangePasswordResponse>(`${API_PREFIX}/${userId}/password`, data);
 };
 
 /**
@@ -215,11 +200,7 @@ export const changePassword = async (
 export const changeCurrentUserPassword = async (
   data: ChangePasswordRequest
 ): Promise<ChangePasswordResponse> => {
-  const response = await apiClient.put<ChangePasswordResponse>(
-    `${API_PREFIX}/me/password`,
-    data
-  );
-  return unwrapResponse<ChangePasswordResponse>(response.data);
+  return apiPut<ChangePasswordResponse>(`${API_PREFIX}/me/password`, data);
 };
 
 /**
@@ -242,7 +223,7 @@ export const uploadProfilePicture = async (
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await apiClient.post<UploadProfilePictureResponse>(
+  return apiPost<UploadProfilePictureResponse>(
     `${API_PREFIX}/${userId}/profile-picture`,
     formData,
     {
@@ -251,7 +232,6 @@ export const uploadProfilePicture = async (
       },
     }
   );
-  return unwrapResponse<UploadProfilePictureResponse>(response.data);
 };
 
 /**
@@ -272,7 +252,7 @@ export const uploadCurrentUserProfilePicture = async (
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await apiClient.post<UploadProfilePictureResponse>(
+  return apiPost<UploadProfilePictureResponse>(
     `${API_PREFIX}/me/profile-picture`,
     formData,
     {
@@ -281,7 +261,6 @@ export const uploadCurrentUserProfilePicture = async (
       },
     }
   );
-  return unwrapResponse<UploadProfilePictureResponse>(response.data);
 };
 
 /**
@@ -297,10 +276,9 @@ export const uploadCurrentUserProfilePicture = async (
  * This function returns: { success: boolean; message: string } (unwrapped)
  */
 export const deleteProfilePicture = async (userId: string): Promise<{ success: boolean; message: string }> => {
-  const response = await apiClient.delete<{ success: boolean; message: string }>(
+  return apiDelete<{ success: boolean; message: string }>(
     `${API_PREFIX}/${userId}/profile-picture`
   );
-  return unwrapResponse<{ success: boolean; message: string }>(response.data);
 };
 
 // ============================================================================

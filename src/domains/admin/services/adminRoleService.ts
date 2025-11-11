@@ -21,9 +21,10 @@
  * @see {ValidationErrorResponse} @/core/api/types
  */
 
-import { apiClient } from '../../../services/api/apiClient';
+import { apiGet, apiPost, apiPut, apiDelete, apiDownload } from '@/core/api/apiHelpers';
 import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
 import { logger } from '../../../core/logging';
+import { apiClient } from '../../../services/api/apiClient';
 import type {
   AdminRole,
   ListRolesParams,
@@ -51,35 +52,16 @@ const API_PREFIX = API_PREFIXES.ADMIN_RBAC;
  * List all roles with optional permissions and user counts
  */
 export const listRoles = async (params?: ListRolesParams): Promise<ListRolesResponse> => {
-  const queryParams = new URLSearchParams();
+  logger().debug('About to call apiGet', { service: 'adminRoleService.listRoles', endpoint: `${API_PREFIX}/roles` });
   
-  if (params) {
-    if (params.include_permissions !== undefined) {
-      queryParams.append('include_permissions', String(params.include_permissions));
-    }
-    if (params.include_users_count !== undefined) {
-      queryParams.append('include_users_count', String(params.include_users_count));
-    }
-    if (params.status) {
-      queryParams.append('status', params.status);
-    }
-  }
-  
-  const queryString = queryParams.toString();
-  const url = queryString ? `${API_PREFIX}/roles?${queryString}` : `${API_PREFIX}/roles`;
-  
-  logger().debug('About to call apiClient.get', { service: 'adminRoleService.listRoles', url });
-  
-  const response = await apiClient.get<ListRolesResponse>(url);
+  const response = await apiGet<ListRolesResponse>(`${API_PREFIX}/roles`, params as Record<string, unknown>);
   
   logger().debug('Response received', {
     service: 'adminRoleService.listRoles',
-    status: response.status,
-    hasData: !!response.data,
-    dataKeys: response.data ? Object.keys(response.data) : [],
+    hasData: !!response,
   });
   
-  return response.data;
+  return response;
 };
 
 /**
@@ -90,25 +72,7 @@ export const getRole = async (
   roleName: string,
   params?: GetRoleParams
 ): Promise<AdminRole> => {
-  const queryParams = new URLSearchParams();
-  
-  if (params) {
-    if (params.include_users !== undefined) {
-      queryParams.append('include_users', String(params.include_users));
-    }
-    if (params.users_limit !== undefined) {
-      queryParams.append('users_limit', String(params.users_limit));
-    }
-  }
-  
-  const queryString = queryParams.toString();
-  const url = queryString 
-    ? `${API_PREFIX}/roles/${roleName}?${queryString}`
-    : `${API_PREFIX}/roles/${roleName}`;
-  
-  const response = await apiClient.get<GetRoleResponse>(url);
-  // Extract role from response
-  const data = response.data as GetRoleResponse;
+  const data = await apiGet<GetRoleResponse>(`${API_PREFIX}/roles/${roleName}`, params as Record<string, unknown>);
   return data.role;
 };
 
@@ -117,8 +81,7 @@ export const getRole = async (
  * Create a new custom role with permissions
  */
 export const createRole = async (data: CreateRoleRequest): Promise<AdminRole> => {
-  const response = await apiClient.post<CreateRoleResponse>(`${API_PREFIX}/roles`, data);
-  const result = unwrapResponse<CreateRoleResponse>(response.data);
+  const result = await apiPost<CreateRoleResponse>(`${API_PREFIX}/roles`, data);
   return result.role;
 };
 
@@ -130,11 +93,7 @@ export const updateRole = async (
   roleName: string,
   data: UpdateRoleRequest
 ): Promise<UpdateRoleResponse> => {
-  const response = await apiClient.put<UpdateRoleResponse>(
-    `${API_PREFIX}/roles/${roleName}`,
-    data
-  );
-  return unwrapResponse<UpdateRoleResponse>(response.data);
+  return apiPut<UpdateRoleResponse>(`${API_PREFIX}/roles/${roleName}`, data);
 };
 
 /**
@@ -145,24 +104,7 @@ export const deleteRole = async (
   roleName: string,
   options?: DeleteRoleOptions
 ): Promise<DeleteRoleResponse> => {
-  const queryParams = new URLSearchParams();
-  
-  if (options) {
-    if (options.force !== undefined) {
-      queryParams.append('force', String(options.force));
-    }
-    if (options.reassign_to) {
-      queryParams.append('reassign_to', options.reassign_to);
-    }
-  }
-  
-  const queryString = queryParams.toString();
-  const url = queryString 
-    ? `${API_PREFIX}/roles/${roleName}?${queryString}`
-    : `${API_PREFIX}/roles/${roleName}`;
-  
-  const response = await apiClient.delete<DeleteRoleResponse>(url);
-  return unwrapResponse<DeleteRoleResponse>(response.data);
+  return apiDelete<DeleteRoleResponse>(`${API_PREFIX}/roles/${roleName}`, { params: options });
 };
 
 /**
@@ -173,11 +115,7 @@ export const assignRolesToUser = async (
   userId: string,
   data: AssignRolesRequest
 ): Promise<AssignRolesResponse> => {
-  const response = await apiClient.post<AssignRolesResponse>(
-    `/api/v1/admin/users/${userId}/roles`,
-    data
-  );
-  return unwrapResponse<AssignRolesResponse>(response.data);
+  return apiPost<AssignRolesResponse>(`/api/v1/admin/users/${userId}/roles`, data);
 };
 
 // ============================================================================
@@ -229,26 +167,12 @@ export const exportRoles = async (
   format: 'csv' | 'json' | 'xlsx' = 'csv',
   filters?: { include_permissions?: boolean; include_users_count?: boolean }
 ): Promise<Blob> => {
-  const params = new URLSearchParams();
-  params.append('format', format);
+  const allFilters = {
+    format,
+    ...filters,
+  };
   
-  // Add filters to query params
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        params.append(key, String(value));
-      }
-    });
-  }
-  
-  const response = await apiClient.get(
-    `/api/v1/admin/export/roles?${params.toString()}`,
-    {
-      responseType: 'blob',
-    }
-  );
-  
-  return response.data;
+  return apiDownload('/api/v1/admin/export/roles', allFilters as Record<string, unknown>);
 };
 
 // Export all as default object

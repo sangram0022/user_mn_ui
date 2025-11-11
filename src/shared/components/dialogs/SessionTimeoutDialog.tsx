@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components';
+import { formatCountdown } from '@/shared/utils/dateFormatters';
 
 export interface SessionTimeoutDialogProps {
   /** Whether dialog is visible */
@@ -18,19 +19,6 @@ export interface SessionTimeoutDialogProps {
   onExtend: () => void;
   /** Callback to logout immediately */
   onLogout: () => void;
-}
-
-/**
- * Format seconds into human-readable time
- */
-function formatTimeRemaining(seconds: number): string {
-  const minutes = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  
-  if (minutes > 0) {
-    return `${minutes}m ${secs}s`;
-  }
-  return `${secs}s`;
 }
 
 export function SessionTimeoutDialog({
@@ -95,14 +83,14 @@ export function SessionTimeoutDialog({
           {t(
             'session.timeoutMessage',
             'Your session will expire in {{time}}. Would you like to continue?',
-            { time: formatTimeRemaining(countdown) }
+            { time: formatCountdown(countdown) }
           )}
         </p>
 
         {/* Countdown Display */}
         <div className="bg-linear-to-r from-yellow-50 to-orange-50 rounded-xl p-4 mb-6 text-center">
           <div className="text-3xl font-bold text-orange-600">
-            {formatTimeRemaining(countdown)}
+            {formatCountdown(countdown)}
           </div>
           <div className="text-sm text-gray-600 mt-1">
             {t('session.remaining', 'remaining')}

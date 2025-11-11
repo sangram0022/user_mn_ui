@@ -20,8 +20,8 @@
  * @see {ValidationErrorResponse} @/core/api/types
  */
 
-import { apiClient } from '../../../services/api/apiClient';
-import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
+import { apiPost } from '@/core/api/apiHelpers';
+import { API_PREFIXES } from '../../../services/api/common';
 import { logger } from '@/core/logging';
 import type {
   ApproveUserRequest,
@@ -48,11 +48,7 @@ export const approveUser = async (
   userId: string,
   data?: ApproveUserRequest
 ): Promise<ApproveUserResponse> => {
-  const response = await apiClient.post<ApproveUserResponse>(
-    `${API_PREFIX}/${userId}/approve`,
-    data || {}
-  );
-  return unwrapResponse<ApproveUserResponse>(response.data);
+  return apiPost<ApproveUserResponse>(`${API_PREFIX}/${userId}/approve`, data || {});
 };
 
 /**
@@ -67,11 +63,7 @@ export const rejectUser = async (
     throw new Error('Rejection reason must be at least 10 characters');
   }
   
-  const response = await apiClient.post<RejectUserResponse>(
-    `${API_PREFIX}/${userId}/reject`,
-    data
-  );
-  return unwrapResponse<RejectUserResponse>(response.data);
+  return apiPost<RejectUserResponse>(`${API_PREFIX}/${userId}/reject`, data);
 };
 
 // ============================================================================

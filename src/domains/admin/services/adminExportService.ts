@@ -16,7 +16,7 @@
  * @see {ApiResponse} @/core/api/types
  */
 
-import { apiClient } from '../../../services/api/apiClient';
+import { apiDownload } from '@/core/api/apiHelpers';
 import { API_PREFIXES } from '../../../services/api/common';
 
 const API_PREFIX = API_PREFIXES.ADMIN_EXPORT;
@@ -53,22 +53,12 @@ export const exportUsers = async (
   format: ExportFormat = 'csv',
   filters?: ExportFilters
 ): Promise<Blob> => {
-  const params = new URLSearchParams();
-  params.append('format', format);
+  const allFilters = {
+    format,
+    ...filters,
+  };
   
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, String(value));
-      }
-    });
-  }
-  
-  const response = await apiClient.get(`${API_PREFIX}/users?${params.toString()}`, {
-    responseType: 'blob',
-  });
-  
-  return response.data;
+  return apiDownload(`${API_PREFIX}/users`, allFilters as Record<string, unknown>);
 };
 
 /**
@@ -79,22 +69,12 @@ export const exportAuditLogs = async (
   format: ExportFormat = 'csv',
   filters?: ExportFilters
 ): Promise<Blob> => {
-  const params = new URLSearchParams();
-  params.append('format', format);
+  const allFilters = {
+    format,
+    ...filters,
+  };
   
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, String(value));
-      }
-    });
-  }
-  
-  const response = await apiClient.get(`${API_PREFIX}/audit-logs?${params.toString()}`, {
-    responseType: 'blob',
-  });
-  
-  return response.data;
+  return apiDownload(`${API_PREFIX}/audit-logs`, allFilters as Record<string, unknown>);
 };
 
 /**
@@ -105,22 +85,12 @@ export const exportRoles = async (
   format: ExportFormat = 'csv',
   filters?: ExportFilters
 ): Promise<Blob> => {
-  const params = new URLSearchParams();
-  params.append('format', format);
+  const allFilters = {
+    format,
+    ...filters,
+  };
   
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, String(value));
-      }
-    });
-  }
-  
-  const response = await apiClient.get(`${API_PREFIX}/roles?${params.toString()}`, {
-    responseType: 'blob',
-  });
-  
-  return response.data;
+  return apiDownload(`${API_PREFIX}/roles`, allFilters as Record<string, unknown>);
 };
 
 // ============================================================================

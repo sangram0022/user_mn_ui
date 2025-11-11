@@ -25,8 +25,8 @@
  * @see {PaginatedApiResponse} @/core/api/types
  */
 
-import { apiClient } from '../../../services/api/apiClient';
-import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
+import { apiGet, apiPost, apiPut, apiDelete, apiDownload } from '@/core/api/apiHelpers';
+import { API_PREFIXES } from '../../../services/api/common';
 import type {
   ListUsersFilters,
   ListUsersResponse,
@@ -56,25 +56,7 @@ const API_PREFIX = API_PREFIXES.ADMIN;
  * Backend returns wrapped response with users array, pagination, filters, and summary
  */
 export const listUsers = async (filters?: ListUsersFilters): Promise<ListUsersResponse> => {
-  const queryParams = new URLSearchParams();
-  
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          value.forEach(v => queryParams.append(key, String(v)));
-        } else {
-          queryParams.append(key, String(value));
-        }
-      }
-    });
-  }
-  
-  const queryString = queryParams.toString();
-  const url = queryString ? `${API_PREFIX}/users?${queryString}` : `${API_PREFIX}/users`;
-  
-  const response = await apiClient.get<{ success: boolean; data: ListUsersResponse }>(url);
-  return unwrapResponse<ListUsersResponse>(response.data);
+  return apiGet<ListUsersResponse>(`${API_PREFIX}/users`, filters as Record<string, unknown>);
 };
 
 /**
@@ -82,8 +64,7 @@ export const listUsers = async (filters?: ListUsersFilters): Promise<ListUsersRe
  * Create a new user (admin-created users are auto-verified and auto-approved)
  */
 export const createUser = async (data: CreateUserRequest): Promise<CreateUserResponse> => {
-  const response = await apiClient.post<CreateUserResponse>(`${API_PREFIX}/users`, data);
-  return unwrapResponse<CreateUserResponse>(response.data);
+  return apiPost<CreateUserResponse>(`${API_PREFIX}/users`, data);
 };
 
 /**
@@ -91,8 +72,7 @@ export const createUser = async (data: CreateUserRequest): Promise<CreateUserRes
  * Get detailed user information including login statistics
  */
 export const getUser = async (userId: string): Promise<UserDetailedStats> => {
-  const response = await apiClient.get<UserDetailedStats>(`${API_PREFIX}/users/${userId}`);
-  return unwrapResponse<UserDetailedStats>(response.data);
+  return apiGet<UserDetailedStats>(`${API_PREFIX}/users/${userId}`);
 };
 
 /**
@@ -103,8 +83,7 @@ export const updateUser = async (
   userId: string,
   data: UpdateUserRequest
 ): Promise<UpdateUserResponse> => {
-  const response = await apiClient.put<UpdateUserResponse>(`${API_PREFIX}/users/${userId}`, data);
-  return unwrapResponse<UpdateUserResponse>(response.data);
+  return apiPut<UpdateUserResponse>(`${API_PREFIX}/users/${userId}`, data);
 };
 
 /**
@@ -115,23 +94,7 @@ export const deleteUser = async (
   userId: string,
   options?: DeleteUserOptions
 ): Promise<DeleteUserResponse> => {
-  const queryParams = new URLSearchParams();
-  
-  if (options) {
-    Object.entries(options).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        queryParams.append(key, String(value));
-      }
-    });
-  }
-  
-  const queryString = queryParams.toString();
-  const url = queryString 
-    ? `${API_PREFIX}/users/${userId}?${queryString}`
-    : `${API_PREFIX}/users/${userId}`;
-  
-  const response = await apiClient.delete<DeleteUserResponse>(url);
-  return unwrapResponse<DeleteUserResponse>(response.data);
+  return apiDelete<DeleteUserResponse>(`${API_PREFIX}/users/${userId}`, { params: options });
 };
 
 /**
@@ -142,11 +105,10 @@ export const approveUser = async (
   userId: string,
   data?: ApproveUserRequest
 ): Promise<ApproveUserResponse> => {
-  const response = await apiClient.post<ApproveUserResponse>(
+  return apiPost<ApproveUserResponse>(
     `${API_PREFIX}/users/${userId}/approve`,
     data || {}
   );
-  return unwrapResponse<ApproveUserResponse>(response.data);
 };
 
 // ============================================================================
@@ -157,11 +119,7 @@ export const approveUser = async (
  * Perform bulk operations on multiple users
  */
 export const bulkUserAction = async (action: BulkUserAction): Promise<BulkOperationResult> => {
-  const response = await apiClient.post<BulkOperationResult>(
-    `${API_PREFIX}/users/bulk`,
-    action
-  );
-  return unwrapResponse<BulkOperationResult>(response.data);
+  return apiPost<BulkOperationResult>(`${API_PREFIX}/users/bulk`, action);
 };
 
 /**
@@ -201,26 +159,12 @@ export const bulkDeleteUsers = async (
  * GET /api/v1/admin/export/users?format=csv
  */
 export const exportUsers = async (request: ExportUsersRequest): Promise<Blob> => {
-  const params = new URLSearchParams();
-  params.append('format', request.format);
+  const filters = {
+    format: request.format,
+    ...request.filters,
+  };
   
-  // Add filters to query params
-  if (request.filters) {
-    Object.entries(request.filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, String(value));
-      }
-    });
-  }
-  
-  const response = await apiClient.get(
-    `/api/v1/admin/export/users?${params.toString()}`,
-    {
-      responseType: 'blob',
-    }
-  );
-  
-  return response.data;
+  return apiDownload('/api/v1/admin/export/users', filters as Record<string, unknown>);
 };
 
 // ============================================================================

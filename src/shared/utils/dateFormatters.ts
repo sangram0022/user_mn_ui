@@ -353,6 +353,67 @@ export function isInFuture(date: DateInput): boolean {
 }
 
 // ============================================================================
+// Duration and Countdown Formatters
+// ============================================================================
+
+/**
+ * Format duration from milliseconds to human-readable string
+ * 
+ * @param milliseconds - Duration in milliseconds
+ * @returns Human-readable duration (e.g., "2 minutes 30 seconds", "5 seconds")
+ * 
+ * @example
+ * formatDuration(90000) // "1 minute 30 seconds"
+ * formatDuration(5000) // "5 seconds"
+ * formatDuration(3600000) // "1 hour"
+ */
+export function formatDuration(milliseconds: number): string {
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) return days === 1 ? '1 day' : `${days} days`;
+  if (hours > 0) return hours === 1 ? '1 hour' : `${hours} hours`;
+  if (minutes > 0) {
+    const remainingSeconds = seconds % 60;
+    if (remainingSeconds > 0) {
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ${remainingSeconds} ${remainingSeconds === 1 ? 'second' : 'seconds'}`;
+    }
+    return minutes === 1 ? '1 minute' : `${minutes} minutes`;
+  }
+  return seconds === 1 ? '1 second' : `${seconds} seconds`;
+}
+
+/**
+ * Format countdown time in MM:SS or HH:MM:SS format
+ * 
+ * @param seconds - Time remaining in seconds
+ * @returns Formatted countdown (e.g., "1:30", "0:05", "1:23:45")
+ * 
+ * @example
+ * formatCountdown(90) // "1:30"
+ * formatCountdown(5) // "0:05"
+ * formatCountdown(3665) // "1:01:05"
+ */
+export function formatCountdown(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+  return `${minutes}:${String(secs).padStart(2, '0')}`;
+}
+
+/**
+ * Alias for formatDuration for backward compatibility
+ * @deprecated Use formatDuration instead
+ */
+export const formatTimeRemaining = formatDuration;
+
+// ============================================================================
 // Constants
 // ============================================================================
 

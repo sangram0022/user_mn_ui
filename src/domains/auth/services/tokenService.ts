@@ -12,7 +12,7 @@
 // @see {ApiResponse} @/core/api/types
 // ========================================
 
-import { apiClient } from '../../../services/api/apiClient';
+import { apiPost, apiGet } from '@/core/api/apiHelpers';
 import { API_PREFIXES } from '../../../services/api/common';
 import { logger } from '@/core/logging';
 import { storageService } from '@/core/storage';
@@ -49,10 +49,9 @@ const REMEMBER_ME_EMAIL_KEY = 'remember_me_email';
  * This function returns: RefreshTokenResponse (full response)
  */
 export const refreshToken = async (refreshToken: string): Promise<RefreshTokenResponse> => {
-  const response = await apiClient.post<RefreshTokenResponse>(`${API_PREFIX}/refresh`, {
+  return apiPost<RefreshTokenResponse>(`${API_PREFIX}/refresh`, {
     refresh_token: refreshToken,
   });
-  return response.data;
 };
 
 /**
@@ -66,8 +65,7 @@ export const refreshToken = async (refreshToken: string): Promise<RefreshTokenRe
  * This function returns: CsrfTokenResponse (full response)
  */
 export const getCsrfToken = async (): Promise<CsrfTokenResponse> => {
-  const response = await apiClient.get<CsrfTokenResponse>(`${API_PREFIX}/csrf-token`);
-  return response.data;
+  return apiGet<CsrfTokenResponse>(`${API_PREFIX}/csrf-token`);
 };
 
 /**
@@ -82,8 +80,7 @@ export const getCsrfToken = async (): Promise<CsrfTokenResponse> => {
  * This function returns: ValidateCsrfResponse (full response)
  */
 export const validateCsrfToken = async (data: ValidateCsrfRequest): Promise<ValidateCsrfResponse> => {
-  const response = await apiClient.post<ValidateCsrfResponse>(`${API_PREFIX}/validate-csrf`, data);
-  return response.data;
+  return apiPost<ValidateCsrfResponse>(`${API_PREFIX}/validate-csrf`, data);
 };
 
 // ========================================

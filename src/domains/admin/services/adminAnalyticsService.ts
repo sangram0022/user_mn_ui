@@ -16,8 +16,8 @@
  * @see {ApiResponse} @/core/api/types
  */
 
-import { apiClient } from '../../../services/api/apiClient';
-import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
+import { apiGet } from '@/core/api/apiHelpers';
+import { API_PREFIXES } from '../../../services/api/common';
 import type {
   AdminStatsParams,
   AdminStats,
@@ -36,25 +36,7 @@ const API_PREFIX = API_PREFIXES.ADMIN;
  * Get comprehensive dashboard statistics
  */
 export const getAdminStats = async (params?: AdminStatsParams): Promise<AdminStats> => {
-  const queryParams = new URLSearchParams();
-  
-  if (params) {
-    if (params.period) {
-      queryParams.append('period', params.period);
-    }
-    if (params.include_charts !== undefined) {
-      queryParams.append('include_charts', String(params.include_charts));
-    }
-    if (params.metrics && params.metrics.length > 0) {
-      queryParams.append('metrics', params.metrics.join(','));
-    }
-  }
-  
-  const queryString = queryParams.toString();
-  const url = queryString ? `${API_PREFIX}/stats?${queryString}` : `${API_PREFIX}/stats`;
-  
-  const response = await apiClient.get<AdminStats>(url);
-  return unwrapResponse<AdminStats>(response.data);
+  return apiGet<AdminStats>(`${API_PREFIX}/stats`, params as Record<string, unknown>);
 };
 
 /**
@@ -64,27 +46,7 @@ export const getAdminStats = async (params?: AdminStatsParams): Promise<AdminSta
 export const getGrowthAnalytics = async (
   params?: GrowthAnalyticsParams
 ): Promise<GrowthAnalytics> => {
-  const queryParams = new URLSearchParams();
-  
-  if (params) {
-    if (params.period) {
-      queryParams.append('period', params.period);
-    }
-    if (params.granularity) {
-      queryParams.append('granularity', params.granularity);
-    }
-    if (params.include_predictions !== undefined) {
-      queryParams.append('include_predictions', String(params.include_predictions));
-    }
-  }
-  
-  const queryString = queryParams.toString();
-  const url = queryString 
-    ? `${API_PREFIX}/analytics/growth?${queryString}`
-    : `${API_PREFIX}/analytics/growth`;
-  
-  const response = await apiClient.get<GrowthAnalytics>(url);
-  return unwrapResponse<GrowthAnalytics>(response.data);
+  return apiGet<GrowthAnalytics>(`${API_PREFIX}/analytics/growth`, params as Record<string, unknown>);
 };
 
 // ============================================================================

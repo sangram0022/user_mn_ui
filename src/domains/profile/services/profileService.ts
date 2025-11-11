@@ -4,8 +4,8 @@
 // Implements SOLID principles with clean separation of concerns
 // ========================================
 
-import { apiClient } from '../../../services/api/apiClient';
-import { API_PREFIXES, unwrapResponse } from '../../../services/api/common';
+import { apiGet, apiPut } from '@/core/api/apiHelpers';
+import { API_PREFIXES } from '@/services/api/common';
 import type {
   GetProfileResponse,
   UpdateProfileRequest,
@@ -20,8 +20,7 @@ const API_PREFIX = API_PREFIXES.PROFILE;
  * Alternative endpoints: /api/v1/users/profile, /api/v1/users/profile/
  */
 export const getProfile = async (): Promise<GetProfileResponse> => {
-  const response = await apiClient.get<GetProfileResponse>(`${API_PREFIX}/me`);
-  return response.data;
+  return apiGet<GetProfileResponse>(`${API_PREFIX}/me`);
 };
 
 /**
@@ -35,8 +34,7 @@ export const getProfile = async (): Promise<GetProfileResponse> => {
 export const updateProfile = async (
   data: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> => {
-  const response = await apiClient.put<UpdateProfileResponse>(`${API_PREFIX}/me`, data);
-  return unwrapResponse<UpdateProfileResponse>(response.data);
+  return apiPut<UpdateProfileResponse>(`${API_PREFIX}/me`, data);
 };
 
 // Export all as default object

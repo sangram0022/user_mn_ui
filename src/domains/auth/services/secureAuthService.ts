@@ -12,7 +12,7 @@
 // @see {ApiResponse} @/core/api/types
 // ========================================
 
-import { apiClient } from '../../../services/api/apiClient';
+import { apiPost } from '@/core/api/apiHelpers';
 import { API_PREFIXES } from '../../../services/api/common';
 import type {
   LoginRequest,
@@ -36,10 +36,9 @@ const API_PREFIX = API_PREFIXES.AUTH;
  * Tokens stored in httpOnly cookies automatically
  */
 export const loginSecure = async (data: LoginRequest): Promise<SecureLoginResponse> => {
-  const response = await apiClient.post<SecureLoginResponse>(`${API_PREFIX}/login-secure`, data, {
+  return apiPost<SecureLoginResponse>(`${API_PREFIX}/login-secure`, data, {
     withCredentials: true, // Enable cookies
   });
-  return response.data;
 };
 
 /**
@@ -53,10 +52,9 @@ export const loginSecure = async (data: LoginRequest): Promise<SecureLoginRespon
  * Cookies cleared automatically by backend
  */
 export const logoutSecure = async (): Promise<SecureLogoutResponse> => {
-  const response = await apiClient.post<SecureLogoutResponse>(`${API_PREFIX}/logout-secure`, {}, {
+  return apiPost<SecureLogoutResponse>(`${API_PREFIX}/logout-secure`, {}, {
     withCredentials: true,
   });
-  return response.data;
 };
 
 /**
@@ -70,10 +68,9 @@ export const logoutSecure = async (): Promise<SecureLogoutResponse> => {
  * New tokens stored in httpOnly cookies automatically
  */
 export const refreshSecure = async (): Promise<SecureRefreshResponse> => {
-  const response = await apiClient.post<SecureRefreshResponse>(`${API_PREFIX}/refresh-secure`, {}, {
+  return apiPost<SecureRefreshResponse>(`${API_PREFIX}/refresh-secure`, {}, {
     withCredentials: true,
   });
-  return response.data;
 };
 
 // Export all as default object

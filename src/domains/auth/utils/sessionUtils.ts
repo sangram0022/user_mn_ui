@@ -147,36 +147,10 @@ export function getSessionTimeRemaining(): number {
 
 /**
  * Format time remaining into human-readable string
- * 
- * @param milliseconds - Time in milliseconds
- * @returns Formatted string (e.g., "5 minutes", "2 hours")
- * 
- * @example
- * ```ts
- * const remaining = getSessionTimeRemaining();
- * console.log(formatTimeRemaining(remaining)); // "15 minutes"
- * ```
+ * @deprecated Use formatDuration from @/shared/utils/dateFormatters instead
+ * Re-exported for backward compatibility
  */
-export function formatTimeRemaining(milliseconds: number): string {
-  if (milliseconds <= 0) {
-    return 'Expired';
-  }
-
-  const seconds = Math.floor(milliseconds / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) {
-    return `${days} day${days > 1 ? 's' : ''}`;
-  } else if (hours > 0) {
-    return `${hours} hour${hours > 1 ? 's' : ''}`;
-  } else if (minutes > 0) {
-    return `${minutes} minute${minutes > 1 ? 's' : ''}`;
-  } else {
-    return `${seconds} second${seconds !== 1 ? 's' : ''}`;
-  }
-}
+export { formatDuration as formatTimeRemaining } from '@/shared/utils/dateFormatters';
 
 /**
  * Initialize session activity tracking

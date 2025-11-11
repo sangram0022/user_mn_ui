@@ -345,7 +345,7 @@ class ErrorReportingService {
       },
       // Remove retryMetadata before sending
       errors: errorsToSend.map(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line unused-imports/no-unused-vars, @typescript-eslint/no-unused-vars
         ({ retryMetadata, ...error }) => error
       ),
       count: errorsToSend.length,
