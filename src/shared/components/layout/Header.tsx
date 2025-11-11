@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { ROUTE_PATHS } from '../../../core/routing/routes';
-import { useAuth } from '../../../hooks/useAuth';
-import Button from '../ui/Button';
+import { ROUTE_PATHS } from '@/core/routing/routes';
+import { useAuth } from '@/hooks/useAuth';
+import Button from '@/shared/components/ui/Button';
 import { isDevelopment } from '@/core/config';
 
 export default function Header() {

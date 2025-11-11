@@ -1,9 +1,9 @@
-import { Button } from '../components';
-import Card from '../components/Card';
-import Badge from '../components/Badge';
-import { CanAccess } from '../domains/rbac/components/CanAccess';
-import { RoleBasedButton } from '../domains/rbac/components/RoleBasedButton';
-import { animationUtils } from '../design-system/variants';
+import { Button } from '@/components';
+import Card from '@/components/Card';
+import Badge from '@/components/Badge';
+import { CanAccess } from '@/domains/rbac/components/CanAccess';
+import { RoleBasedButton } from '@/domains/rbac/components/RoleBasedButton';
+import { animationUtils } from '@/design-system/variants';
 
 // Dummy data - Single source of truth
 const statsData = [

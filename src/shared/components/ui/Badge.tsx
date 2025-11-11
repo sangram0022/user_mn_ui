@@ -4,7 +4,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { badgeVariants, type BadgeVariant, type BadgeSize } from '../../../design-system/variants';
+import { badgeVariants, type BadgeVariant, type BadgeSize } from '@/design-system/variants';
 
 interface BadgeProps {
   variant?: BadgeVariant;

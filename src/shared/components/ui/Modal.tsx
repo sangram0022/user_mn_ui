@@ -5,8 +5,8 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { X } from 'lucide-react';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useKeyboardShortcut, SHORTCUTS } from '../../hooks/useKeyboardShortcut';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
+import { useKeyboardShortcut, SHORTCUTS } from '@/shared/hooks/useKeyboardShortcut';
 import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
 interface ModalProps {

@@ -4,7 +4,7 @@
  */
 
 import type { InputHTMLAttributes, ReactNode } from 'react';
-import { inputVariants, type InputVariant, type InputSize } from '../../../design-system/variants';
+import { inputVariants, type InputVariant, type InputSize } from '@/design-system/variants';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;

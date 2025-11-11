@@ -3,11 +3,11 @@
 // ========================================
 
 import { useRef } from 'react';
-import { Button } from '../components';
-import Badge from '../components/Badge';
-import Card from '../components/Card';
-import { OptimizedImage } from '../shared/components/OptimizedImage';
-import { typographyVariants, animationUtils } from '../design-system/variants';
+import { Button } from '@/components';
+import Badge from '@/components/Badge';
+import Card from '@/components/Card';
+import { OptimizedImage } from '@/shared/components/OptimizedImage';
+import { typographyVariants, animationUtils } from '@/design-system/variants';
 import { servicesData } from './components/services/servicesData';
 import { getComplexityColor, getCategoryColor } from './components/services/serviceUtils';
 

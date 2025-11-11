@@ -41,11 +41,30 @@
 // ========================================
 
 import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
-import tokenService from '../../domains/auth/services/tokenService';
+import tokenService from '@/domains/auth/services/tokenService';
 import { logger } from '@/core/logging';
 import { APIError } from '@/core/error';
 import { config, isDevelopment } from '@/core/config';
 import type { ValidationErrorResponse, FieldErrors } from '@/core/api';
+import { RequestDeduplicator } from '@/shared/utils/requestDeduplication';
+
+// ========================================
+// Request Deduplication
+// Prevents duplicate parallel requests
+// Available for use in apiHelpers or custom hooks
+// ========================================
+
+export const requestDeduplicator = new RequestDeduplicator();
+
+// Log deduplication stats periodically in development
+if (isDevelopment()) {
+  setInterval(() => {
+    const stats = requestDeduplicator.getStats();
+    if (stats.totalRequests > 0) {
+      logger().debug('Request deduplication stats', stats);
+    }
+  }, 60000); // Every minute
+}
 
 // ========================================
 // Refresh Token Queue

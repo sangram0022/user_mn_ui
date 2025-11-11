@@ -10,8 +10,8 @@ import {
   UserCheck,
   BarChart3,
 } from 'lucide-react';
-import { ROUTES } from '../../../core/routing/config';
-import { useAuth } from '../../../hooks/useAuth';
+import { ROUTES } from '@/core/routing/config';
+import { useAuth } from '@/hooks/useAuth';
 import type { UserRole } from '@/domains/rbac/types/rbac.types';
 import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 

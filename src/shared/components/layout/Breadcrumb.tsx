@@ -7,7 +7,7 @@
 
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
-import { ROUTES } from '../../../core/routing/config';
+import { ROUTES } from '@/core/routing/config';
 
 interface BreadcrumbItem {
   label: string;

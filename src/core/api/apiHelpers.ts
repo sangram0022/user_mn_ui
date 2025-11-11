@@ -2,9 +2,15 @@
  * API Integration Helpers
  * Common utilities and patterns for service layer implementation
  * Single Source of Truth for API call patterns
+ * 
+ * Features:
+ * - Request deduplication for GET requests (prevents parallel duplicates)
+ * - Automatic response unwrapping
+ * - Query parameter building
+ * - File download handling
  */
 
-import { apiClient } from '@/services/api/apiClient';
+import { apiClient, requestDeduplicator } from '@/services/api/apiClient';
 import { unwrapResponse } from '@/services/api/common';
 import type { AxiosRequestConfig } from 'axios';
 
@@ -62,6 +68,9 @@ export function buildUrlWithQuery(baseUrl: string, filters?: Record<string, unkn
  * Standard GET request with optional query parameters
  * Returns raw response.data (for paginated lists)
  * 
+ * Includes automatic request deduplication - parallel identical GET requests
+ * will share a single network call.
+ * 
  * @example
  * const users = await apiGet<UserListResponse>('/api/v1/admin/users', { status: 'active' });
  */
@@ -71,8 +80,17 @@ export async function apiGet<T>(
   config?: AxiosRequestConfig
 ): Promise<T> {
   const url = buildUrlWithQuery(endpoint, filters);
-  const response = await apiClient.get<T>(url, config);
-  return response.data;
+  
+  // Use deduplication for GET requests to prevent parallel duplicates
+  return requestDeduplicator.deduplicate(
+    'GET',
+    url,
+    async () => {
+      const response = await apiClient.get<T>(url, config);
+      return response.data;
+    },
+    filters
+  );
 }
 
 /**
