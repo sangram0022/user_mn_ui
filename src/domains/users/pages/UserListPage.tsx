@@ -2,7 +2,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VirtualTable } from '@/shared/components/VirtualTable';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
-import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
+import { TableSkeleton } from '@/shared/components/loading/Skeletons';
 import { useApiQuery } from '@/shared/hooks/useApiModern';
 import { logger } from '@/core/logging';
 import { useToast } from '@/hooks/useToast';
@@ -308,12 +308,10 @@ export default function UserListPage() {
 
         {/* Users Table with Virtual Scrolling */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <LoadingSpinner />
-            </div>
-          ) : (
-            <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<TableSkeleton rows={10} columns={6} />}>
+            {isLoading ? (
+              <TableSkeleton rows={10} columns={6} />
+            ) : (
               <VirtualTable
                 columns={columns}
                 data={tableData}
@@ -321,8 +319,8 @@ export default function UserListPage() {
                 maxHeight={700}
                 renderCell={renderUserCell}
               />
-            </Suspense>
-          )}
+            )}
+          </Suspense>
         </div>
       </div>
     </ModernErrorBoundary>

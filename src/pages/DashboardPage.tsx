@@ -12,7 +12,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveRegion } from '../shared/hooks/accessibility';
-import { CardSkeleton } from '../shared/components/loading/Skeletons';
+import { CardSkeleton, DashboardSkeleton } from '../shared/components/loading/Skeletons';
 import { API_TIMING, INTERVAL_TIMING } from '@/core/constants';
 import { isDevelopment } from '@/core/config';
 
@@ -315,15 +315,7 @@ export default function DashboardPage() {
   }, []);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900">Loading Dashboard</h2>
-          <p className="text-gray-600">Fetching real-time metrics...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (!metrics) {
