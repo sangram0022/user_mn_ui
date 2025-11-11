@@ -95,9 +95,26 @@ export default defineConfig({
               return 'vendor-utils';
             }
             
-            // TanStack Virtual
-            if (id.includes('@tanstack/virtual') || id.includes('@tanstack/react-virtual')) {
-              return 'vendor-virtual';
+            // TanStack Virtual + Form
+            if (id.includes('@tanstack/virtual') || id.includes('@tanstack/react-virtual') || 
+                id.includes('@tanstack/react-form')) {
+              return 'vendor-tanstack';
+            }
+            
+            // State management
+            if (id.includes('zustand')) {
+              return 'vendor-state';
+            }
+            
+            // PWA & Service Worker
+            if (id.includes('workbox') || id.includes('vite-plugin-pwa')) {
+              return 'vendor-pwa';
+            }
+            
+            // React utilities
+            if (id.includes('react-error-boundary') || id.includes('react-intersection-observer') ||
+                id.includes('react-window')) {
+              return 'vendor-react-utils';
             }
             
             // Other small libraries
