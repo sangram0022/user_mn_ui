@@ -14,23 +14,29 @@ export { default as Card } from './Card';
 export { default as Input } from './Input';
 export { default as Layout } from './Layout';
 
-// Loading components - Single source of truth
+// Loading and Skeleton components - Single source of truth
 export { 
   LoadingSpinner, 
   LoadingFallback, 
-  InlineSpinner 
-} from '../shared/components/LoadingSpinner';
-
-export { 
+  InlineSpinner,
   SkeletonLine, 
   SkeletonText, 
   SkeletonCard, 
   SkeletonAvatar, 
-  SkeletonButton 
-} from '../shared/components/SkeletonLoader';
-
-// New Skeleton components (Week 4)
-export { default as Skeleton, SkeletonTable } from '../shared/components/ui/Skeleton';
+  SkeletonButton,
+  Skeleton,
+  TableSkeleton,
+  CardSkeleton,
+  FormSkeleton,
+  ProfileSkeleton,
+  ListSkeleton,
+  ChartSkeleton,
+  DashboardSkeleton,
+  PageSkeleton,
+  StandardLoading,
+  LoadingOverlay,
+  ContentSkeleton,
+} from '../shared/components/skeletons';
 
 // Accessibility components (Week 4 - WCAG 2.1 AA)
 export { SkipLink, Announcement } from '../shared/components/accessibility';

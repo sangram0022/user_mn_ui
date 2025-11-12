@@ -2,7 +2,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VirtualTable } from '@/shared/components/VirtualTable';
 import { ModernErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
-import { TableSkeleton } from '@/shared/components/loading/Skeletons';
+import { TableSkeleton } from '@/shared/components/skeletons';
 import { useApiQuery } from '@/shared/hooks/useApiModern';
 import { logger } from '@/core/logging';
 import { useToast } from '@/hooks/useToast';

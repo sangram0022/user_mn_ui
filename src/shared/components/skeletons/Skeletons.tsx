@@ -47,17 +47,12 @@ interface ListSkeletonProps extends BaseSkeletonProps {
 const Skeleton: React.FC<SkeletonProps> = ({ 
   className = '', 
   style,
-  'aria-label': ariaLabel = 'Loading content',
 }) => (
   <div
     className={`relative overflow-hidden rounded bg-gray-200 dark:bg-gray-700 ${className}`}
     style={style}
-    role="status"
-    aria-label={ariaLabel}
-    aria-live="polite"
   >
     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 dark:via-gray-500/40 to-transparent animate-shimmer" />
-    <span className="sr-only">{ariaLabel}</span>
   </div>
 );
 

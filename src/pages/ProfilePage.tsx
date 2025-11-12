@@ -12,7 +12,7 @@
 import { useState, useEffect } from 'react';
 import { EnhancedContactForm } from '../shared/components/forms/EnhancedFormPatterns';
 import { useLiveRegion } from '../shared/hooks/accessibility';
-import { ProfileSkeleton } from '../shared/components/loading/Skeletons';
+import { ProfileSkeleton } from '../shared/components/skeletons';
 import { API_TIMING } from '@/core/constants';
 // AWS CloudWatch handles performance monitoring
 

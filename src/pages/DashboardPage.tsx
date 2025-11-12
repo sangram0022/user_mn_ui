@@ -12,7 +12,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveRegion } from '../shared/hooks/accessibility';
-import { CardSkeleton, DashboardSkeleton } from '../shared/components/loading/Skeletons';
+import { CardSkeleton, DashboardSkeleton } from '../shared/components/skeletons';
 import { API_TIMING, INTERVAL_TIMING } from '@/core/constants';
 import { isDevelopment } from '@/core/config';
 

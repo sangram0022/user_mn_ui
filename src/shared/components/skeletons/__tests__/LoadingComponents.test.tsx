@@ -85,6 +85,7 @@ describe('LoadingOverlay', () => {
 
   it('has ARIA attributes when visible', () => {
     render(<LoadingOverlay isVisible={true} message="Loading..." />);
+    // Updated: LoadingOverlay now has single status role
     const overlay = screen.getByRole('status');
     expect(overlay).toHaveAttribute('aria-label', 'Loading...');
     expect(overlay).toHaveAttribute('aria-live', 'polite');
