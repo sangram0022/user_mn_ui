@@ -71,6 +71,34 @@ export {
   NAME_MAX_LENGTH,
 } from './validators/NameValidator';
 
+export {
+  DateValidator,
+  validateDate,
+  isValidDate,
+  isPastDate,
+  isFutureDate,
+  isValidAge,
+  type DateValidatorOptions,
+} from './validators/DateValidator';
+
+export {
+  URLValidator,
+  validateURL,
+  isValidURL,
+  isHTTPSUrl,
+  isValidDomain,
+  type URLValidatorOptions,
+} from './validators/URLValidator';
+
+export {
+  AsyncValidator,
+  createUsernameUniqueValidator,
+  createEmailAvailableValidator,
+  createAsyncValidator,
+  type AsyncValidationFn,
+  type AsyncValidatorOptions,
+} from './validators/AsyncValidator';
+
 export type { IValidator } from './validators/BaseValidator';
 
 // Usage Examples:
