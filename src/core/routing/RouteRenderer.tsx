@@ -3,7 +3,7 @@
 // ========================================
 // Following React 19 and Router v6 best practices:
 // - Suspense for lazy loading
-// - Error boundaries
+// - Error boundaries per route
 // - Layout composition
 // - Type-safe route guards
 // ========================================
@@ -13,6 +13,7 @@ import { Suspense } from 'react';
 import type { RouteConfig } from './config';
 import { ProtectedRoute, PublicRoute, AdminRoute, NoGuard } from './RouteGuards';
 import Layout from '../layout/Layout'; // Import the actual Layout component
+import ErrorBoundary from '@/shared/components/ErrorBoundary';
 
 // Auth Layout - Special layout for login/register pages (no header/footer)
 const AuthLayout: FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -78,7 +79,7 @@ interface RouteRendererProps {
 }
 
 export const RouteRenderer: FC<RouteRendererProps> = ({ route }) => {
-  const { component: Component, layout, guard, requiredRoles } = route;
+  const { component: Component, layout, guard, requiredRoles, path } = route;
 
   const LayoutComponent = layouts[layout];
   const GuardComponent = guards[guard];
@@ -86,9 +87,11 @@ export const RouteRenderer: FC<RouteRendererProps> = ({ route }) => {
   return (
     <GuardComponent requiredRoles={requiredRoles}>
       <LayoutComponent>
-        <Suspense fallback={<RouteLoadingFallback />}>
-          <Component />
-        </Suspense>
+        <ErrorBoundary boundaryName={`Route:${path}`}>
+          <Suspense fallback={<RouteLoadingFallback />}>
+            <Component />
+          </Suspense>
+        </ErrorBoundary>
       </LayoutComponent>
     </GuardComponent>
   );
