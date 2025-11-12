@@ -18,6 +18,7 @@
 import { BaseValidator } from './BaseValidator';
 import type { FieldValidationResult } from '../ValidationResult';
 import { ValidationStatus } from '../ValidationStatus';
+import { translateValidation } from '@/core/localization';
 
 export interface DateValidatorOptions {
   /** Minimum allowed date (ISO 8601 string or Date) */
@@ -85,6 +86,13 @@ export class DateValidator extends BaseValidator {
       formats: options.formats ?? ['ISO8601'],
       messages: options.messages,
     };
+  }
+  
+  /**
+   * Helper to translate validation keys
+   */
+  private translateValidation(key: string): string {
+    return translateValidation('validation', key);
   }
   
   validate(value: unknown, field = 'date'): FieldValidationResult {
@@ -176,7 +184,7 @@ export class DateValidator extends BaseValidator {
     
     // Warnings
     if (this.isLeapYear(parsedDate.getFullYear()) && parsedDate.getMonth() === 1 && parsedDate.getDate() === 29) {
-      warnings.push('This is a leap year date (February 29)');
+      warnings.push(this.translateValidation('date.leapYear'));
     }
     
     const isValid = errors.length === 0;

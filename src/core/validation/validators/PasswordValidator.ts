@@ -109,6 +109,13 @@ export class PasswordValidator extends BaseValidator {
     };
   }
   
+  /**
+   * Helper to translate validation keys
+   */
+  private translateValidation(key: string): string {
+    return translateValidation('validation', key);
+  }
+  
   validate(value: unknown, field: string = 'password'): FieldValidationResult | PasswordStrengthResult {
     const password = this.toString(value);
     
@@ -177,57 +184,57 @@ export class PasswordValidator extends BaseValidator {
       score += 20;
     } else if (length >= 12 && length < 16) {
       score += 25;
-      feedback.push('Good length');
+      feedback.push(this.translateValidation('passwordFeedback.goodLength'));
     } else if (length >= 16) {
       score += 30;
-      feedback.push('Excellent length');
+      feedback.push(this.translateValidation('passwordFeedback.excellentLength'));
     }
     
     // Character variety scoring
     if (/[A-Z]/.test(password)) {
       score += 15;
     } else {
-      feedback.push('Add uppercase letters');
+      feedback.push(this.translateValidation('passwordFeedback.addUppercase'));
     }
     
     if (/[a-z]/.test(password)) {
       score += 15;
     } else {
-      feedback.push('Add lowercase letters');
+      feedback.push(this.translateValidation('passwordFeedback.addLowercase'));
     }
     
     if (/[0-9]/.test(password)) {
       score += 15;
     } else {
-      feedback.push('Add numbers');
+      feedback.push(this.translateValidation('passwordFeedback.addNumbers'));
     }
     
     if (/[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/.test(password)) {
       score += 15;
     } else {
-      feedback.push('Add special characters');
+      feedback.push(this.translateValidation('passwordFeedback.addSpecialChars'));
     }
     
     // Pattern penalties
     if (/(.)\1{2,}/.test(password)) {
       score -= 10;
-      feedback.push('Avoid repeating characters');
+      feedback.push(this.translateValidation('passwordFeedback.avoidRepeating'));
     }
     
     if (/^[0-9]+$/.test(password)) {
       score -= 20;
-      feedback.push('Avoid only numbers');
+      feedback.push(this.translateValidation('passwordFeedback.avoidOnlyNumbers'));
     }
     
     if (/^[a-zA-Z]+$/.test(password)) {
       score -= 15;
-      feedback.push('Add numbers and symbols');
+      feedback.push(this.translateValidation('passwordFeedback.addNumbersAndSymbols'));
     }
     
     // Sequential patterns
     if (/abc|bcd|cde|def|123|234|345|456|789/.test(password.toLowerCase())) {
       score -= 10;
-      feedback.push('Avoid sequential patterns');
+      feedback.push(this.translateValidation('passwordFeedback.avoidSequential'));
     }
     
     // Common passwords
@@ -237,7 +244,7 @@ export class PasswordValidator extends BaseValidator {
     ];
     if (commonPasswords.some(common => password.toLowerCase().includes(common))) {
       score -= 20;
-      feedback.push('Avoid common words');
+      feedback.push(this.translateValidation('passwordFeedback.avoidCommonWords'));
     }
     
     // Cap score at 100
@@ -259,7 +266,7 @@ export class PasswordValidator extends BaseValidator {
     
     // Positive feedback if strong
     if (feedback.length === 0) {
-      feedback.push('Password looks great!');
+      feedback.push(this.translateValidation('passwordFeedback.looksGreat'));
     }
     
     // Create result

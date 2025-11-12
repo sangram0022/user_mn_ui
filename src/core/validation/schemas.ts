@@ -13,6 +13,7 @@ import {
 } from './index';
 
 import { PASSWORD_RULES } from './validators/PasswordValidator';
+import { translateValidation } from '@/core/localization';
 
 // ============================================================================
 // Password Regex Patterns
@@ -81,7 +82,7 @@ export const registerSchema = z.object({
   confirmPassword: z.string(),
   terms: z.boolean().refine(val => val === true, 'You must accept the terms and conditions'),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: translateValidation('validation', 'passwordsDoNotMatch'),
   path: ['confirmPassword'],
 });
 
@@ -93,7 +94,7 @@ export const resetPasswordSchema = z.object({
   password: passwordSchema,
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: translateValidation('validation', 'passwordsDoNotMatch'),
   path: ['confirmPassword'],
 });
 
@@ -102,7 +103,7 @@ export const changePasswordSchema = z.object({
   newPassword: passwordSchema,
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: translateValidation('validation', 'passwordsDoNotMatch'),
   path: ['confirmPassword'],
 });
 

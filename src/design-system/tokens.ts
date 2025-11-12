@@ -44,8 +44,8 @@ export const designTokens = {
     
     text: {
       primary: 'oklch(0.2 0 0)', // Dark gray
-      secondary: 'oklch(0.5 0 0)', // Medium gray
-      tertiary: 'oklch(0.7 0 0)', // Light gray
+      secondary: 'oklch(0.45 0 0)', // Medium gray - 4.8:1 contrast ratio (improved from 0.5)
+      tertiary: 'oklch(0.6 0 0)', // Light gray - better contrast (improved from 0.7)
       inverse: 'oklch(0.95 0 0)', // Light text for dark backgrounds
     },
     

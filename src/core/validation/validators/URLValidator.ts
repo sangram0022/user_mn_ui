@@ -19,6 +19,7 @@
 import { BaseValidator } from './BaseValidator';
 import type { FieldValidationResult } from '../ValidationResult';
 import { ValidationStatus } from '../ValidationStatus';
+import { translateValidation } from '@/core/localization';
 
 export interface URLValidatorOptions {
   /** Allowed protocols (default: ['http', 'https']) */
@@ -96,6 +97,13 @@ export class URLValidator extends BaseValidator {
     };
   }
   
+  /**
+   * Helper to translate validation keys
+   */
+  private translateValidation(key: string): string {
+    return translateValidation('validation', key);
+  }
+  
   validate(value: unknown, field = 'url'): FieldValidationResult {
     // Check if empty
     if (this.isEmpty(value)) {
@@ -165,25 +173,25 @@ export class URLValidator extends BaseValidator {
     // Validate authentication
     if (parsedUrl.username || parsedUrl.password) {
       if (!this.options.allowAuth) {
-        errors.push(this.options.messages?.auth ?? 'URL authentication is not allowed');
+        errors.push(this.options.messages?.auth ?? this.translateValidation('url.authCredentials'));
       } else {
-        warnings.push('URL contains authentication credentials - ensure secure transmission');
+        warnings.push(this.translateValidation('url.authCredentials'));
       }
     }
     
     // Validate query parameters
     if (!this.options.allowQueryParams && parsedUrl.search) {
-      errors.push('Query parameters are not allowed in URL');
+      errors.push(this.translateValidation('url.noQueryParams'));
     }
     
     // Validate fragments
     if (!this.options.allowFragments && parsedUrl.hash) {
-      errors.push('URL fragments (#hash) are not allowed');
+      errors.push(this.translateValidation('url.noFragments'));
     }
     
     // Warnings
     if (parsedUrl.protocol === 'http:' && parsedUrl.hostname !== 'localhost') {
-      warnings.push('Consider using HTTPS for better security');
+      warnings.push(this.translateValidation('url.useHttps'));
     }
     
     const isValid = errors.length === 0;
@@ -217,27 +225,27 @@ export class URLValidator extends BaseValidator {
     
     // Check localhost
     if (hostname === 'localhost' && !this.options.allowLocalhost) {
-      errors.push('Localhost URLs are not allowed');
+      errors.push(this.translateValidation('url.noLocalhost'));
       return errors;
     }
     
     // Check IP address
     if (this.isIpAddress(hostname)) {
       if (!this.options.allowIpAddress) {
-        errors.push('IP address URLs are not allowed');
+        errors.push(this.translateValidation('url.noIpAddress'));
       }
       return errors;
     }
     
     // Check TLD requirement
     if (this.options.requireTld && !hostname.includes('.')) {
-      errors.push('URL must have a top-level domain (e.g., .com, .org)');
+      errors.push(this.translateValidation('url.needTld'));
     }
     
     // Validate domain format
     const domainRegex = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
     if (!domainRegex.test(hostname) && hostname !== 'localhost') {
-      errors.push('Invalid domain name format');
+      errors.push(this.translateValidation('url.invalidDomain'));
     }
     
     return errors;

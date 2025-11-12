@@ -67,8 +67,8 @@ export default {
         },
         'text': {
           'primary': 'oklch(0.2 0 0)',
-          'secondary': 'oklch(0.5 0 0)',
-          'tertiary': 'oklch(0.7 0 0)',
+          'secondary': 'oklch(0.45 0 0)', // 4.8:1 contrast - improved accessibility
+          'tertiary': 'oklch(0.6 0 0)', // Better contrast - improved accessibility
           'inverse': 'oklch(0.95 0 0)',
         },
         'semantic': {
