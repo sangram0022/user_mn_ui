@@ -64,14 +64,10 @@ const guards = {
 // ========================================
 // Loading Fallback
 // ========================================
+// Updated to use PageSkeleton for better UX
+import { PageSkeleton } from '@/shared/components/skeletons';
 
-const RouteLoadingFallback: FC = () => (
-  <div className="flex items-center justify-center min-h-[200px]">
-    <div className="text-center">
-      <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-brand-primary border-r-transparent"></div>
-    </div>
-  </div>
-);
+const RouteLoadingFallback: FC = () => <PageSkeleton />;
 
 // ========================================
 // Route Renderer Component
