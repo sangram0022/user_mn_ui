@@ -1,0 +1,19 @@
+{
+  "email": "Email",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "username": "Username",
+  "name": "Name",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "phone": "Phone Number",
+  "address": "Address",
+  "city": "City",
+  "state": "State",
+  "country": "Country",
+  "zipCode": "ZIP Code",
+  "role": "Role",
+  "status": "Status",
+  "createdAt": "Created At",
+  "updatedAt": "Updated At"
+}

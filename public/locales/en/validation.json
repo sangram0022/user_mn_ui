@@ -1,0 +1,29 @@
+{
+  "required": "{{field}} is required",
+  "email": "Please enter a valid email address",
+  "minLength": "Must be at least {{count}} characters",
+  "maxLength": "Must be no more than {{count}} characters",
+  "pattern": "Invalid format for {{field}}",
+  "match": "{{field}} must match {{otherField}}",
+  "unique": "{{field}} is already taken",
+  "invalid": "Invalid {{field}}",
+  "passwordStrength": {
+    "weak": "Weak password - use a stronger password",
+    "medium": "Medium strength password",
+    "strong": "Strong password"
+  },
+  "phone": {
+    "invalid": "Invalid phone number",
+    "format": "Phone number must be in format: {{format}}"
+  },
+  "date": {
+    "invalid": "Invalid date",
+    "past": "Date must be in the past",
+    "future": "Date must be in the future",
+    "range": "Date must be between {{start}} and {{end}}"
+  },
+  "url": {
+    "invalid": "Invalid URL",
+    "format": "URL must start with http:// or https://"
+  }
+}
