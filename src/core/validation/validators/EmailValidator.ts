@@ -5,6 +5,7 @@
 
 import { BaseValidator } from './BaseValidator';
 import { createSuccessResult, createErrorResult, type FieldValidationResult } from '../ValidationResult';
+import { translateValidation } from '@/core/localization';
 
 /**
  * Email validation regex - RFC 5322 compliant (simplified)
@@ -53,7 +54,7 @@ export class EmailValidator extends BaseValidator {
   constructor(options: EmailValidatorOptions = {}) {
     super();
     this.options = {
-      message: options.message || 'Please enter a valid email address',
+      message: options.message || translateValidation('email', 'email'),
       allowEmpty: options.allowEmpty ?? false,
       maxLength: options.maxLength ?? 254,
       blockedDomains: options.blockedDomains ?? [],
@@ -68,12 +69,12 @@ export class EmailValidator extends BaseValidator {
       if (this.options.allowEmpty) {
         return createSuccessResult(field);
       }
-      return createErrorResult(field, ['Email is required']);
+      return createErrorResult(field, [translateValidation(field, 'required')]);
     }
     
     // Check length
     if (email.length > this.options.maxLength) {
-      return createErrorResult(field, [`Email must not exceed ${this.options.maxLength} characters`]);
+      return createErrorResult(field, [translateValidation(field, 'maxLength', { count: this.options.maxLength })]);
     }
     
     // Check format
@@ -85,7 +86,7 @@ export class EmailValidator extends BaseValidator {
     if (this.options.blockedDomains.length > 0) {
       const domain = email.split('@')[1]?.toLowerCase();
       if (domain && this.options.blockedDomains.includes(domain)) {
-        return createErrorResult(field, ['This email domain is not allowed']);
+        return createErrorResult(field, [translateValidation(field, 'invalid')]);
       }
     }
     

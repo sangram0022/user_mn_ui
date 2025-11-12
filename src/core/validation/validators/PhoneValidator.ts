@@ -5,6 +5,7 @@
 
 import { BaseValidator } from './BaseValidator';
 import { createSuccessResult, createErrorResult, type FieldValidationResult } from '../ValidationResult';
+import { translateValidation } from '@/core/localization';
 
 /**
  * Phone number validation pattern (E.164 format)
@@ -62,7 +63,7 @@ export class PhoneValidator extends BaseValidator {
   constructor(options: PhoneValidatorOptions = {}) {
     super();
     this.options = {
-      message: options.message || `Phone number must be ${PHONE_MIN_DIGITS}-${PHONE_MAX_DIGITS} digits`,
+      message: options.message || translateValidation('phone', 'invalid'),
       allowEmpty: options.allowEmpty ?? true, // Phone is optional by default
       minDigits: options.minDigits ?? PHONE_MIN_DIGITS,
       maxDigits: options.maxDigits ?? PHONE_MAX_DIGITS,
@@ -78,7 +79,7 @@ export class PhoneValidator extends BaseValidator {
       if (this.options.allowEmpty) {
         return createSuccessResult(field);
       }
-      return createErrorResult(field, ['Phone number is required']);
+      return createErrorResult(field, [translateValidation(field, 'required')]);
     }
     
     const trimmed = phone.trim();
@@ -88,11 +89,11 @@ export class PhoneValidator extends BaseValidator {
     
     // Check digit count
     if (digitsOnly.length < this.options.minDigits) {
-      return createErrorResult(field, [`Phone number must have at least ${this.options.minDigits} digits`]);
+      return createErrorResult(field, [translateValidation(field, 'minLength', { count: this.options.minDigits })]);
     }
     
     if (digitsOnly.length > this.options.maxDigits) {
-      return createErrorResult(field, [`Phone number must not exceed ${this.options.maxDigits} digits`]);
+      return createErrorResult(field, [translateValidation(field, 'maxLength', { count: this.options.maxDigits })]);
     }
     
     // Check format - must match backend E.164 pattern
@@ -102,7 +103,7 @@ export class PhoneValidator extends BaseValidator {
     
     // If international format is not allowed, check for + prefix
     if (!this.options.allowInternational && trimmed.startsWith('+')) {
-      return createErrorResult(field, ['International phone format is not allowed']);
+      return createErrorResult(field, [translateValidation(field, 'pattern')]);
     }
     
     return createSuccessResult(field, { phone: trimmed, digitsOnly });

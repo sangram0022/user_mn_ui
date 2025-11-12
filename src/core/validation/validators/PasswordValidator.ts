@@ -12,6 +12,7 @@ import {
   type PasswordStrengthResult,
 } from '../ValidationResult';
 import { ValidationStatus } from '../ValidationStatus';
+import { translateValidation } from '@/core/localization';
 
 /**
  * Password strength levels
@@ -103,7 +104,7 @@ export class PasswordValidator extends BaseValidator {
       requireNumber: options.requireNumber ?? PASSWORD_RULES.REQUIRE_NUMBER,
       requireSpecial: options.requireSpecial ?? PASSWORD_RULES.REQUIRE_SPECIAL,
       allowEmpty: options.allowEmpty ?? false,
-      message: options.message || 'Password does not meet requirements',
+      message: options.message || translateValidation('password', 'pattern'),
       calculateStrength: options.calculateStrength ?? false,
     };
   }
@@ -116,35 +117,35 @@ export class PasswordValidator extends BaseValidator {
       if (this.options.allowEmpty) {
         return createSuccessResult(field);
       }
-      return createErrorResult(field, ['Password is required']);
+      return createErrorResult(field, [translateValidation(field, 'required')]);
     }
     
     const errors: string[] = [];
     
     // Length checks
     if (password.length < this.options.minLength) {
-      errors.push(`Password must be at least ${this.options.minLength} characters`);
+      errors.push(translateValidation(field, 'minLength', { count: this.options.minLength }));
     }
     
     if (password.length > this.options.maxLength) {
-      errors.push(`Password must not exceed ${this.options.maxLength} characters`);
+      errors.push(translateValidation(field, 'maxLength', { count: this.options.maxLength }));
     }
     
     // Character requirement checks
     if (this.options.requireUppercase && !/[A-Z]/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
+      errors.push(translateValidation(field, 'pattern'));
     }
     
     if (this.options.requireLowercase && !/[a-z]/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
+      errors.push(translateValidation(field, 'pattern'));
     }
     
     if (this.options.requireNumber && !/[0-9]/.test(password)) {
-      errors.push('Password must contain at least one number');
+      errors.push(translateValidation(field, 'pattern'));
     }
     
     if (this.options.requireSpecial && !/[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/.test(password)) {
-      errors.push('Password must contain at least one special character');
+      errors.push(translateValidation(field, 'pattern'));
     }
     
     // Return basic result if not calculating strength
