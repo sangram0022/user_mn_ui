@@ -16,6 +16,28 @@ export {
 } from './config.ts';
 export { diagnostic } from './diagnostic.ts';
 
+// Export logging utilities
+export {
+  logApiCall,
+  logApiError,
+  logUserAction,
+  logAuthEvent,
+  logValidationError,
+  logSecurityEvent,
+  logDataFetch,
+  logCacheOperation,
+  logNavigation,
+  logFormSubmission,
+  logComponentLifecycle,
+  logPerformance,
+  logError,
+  withContext,
+  createTimer,
+  logStateChange,
+  logDebug,
+  loggingUtils,
+} from './utilities.ts';
+
 /**
  * Quick usage examples:
  *
