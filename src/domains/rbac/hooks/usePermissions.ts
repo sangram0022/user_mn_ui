@@ -7,6 +7,7 @@
 
 import { use } from 'react';
 import { RbacContext } from '../context/RbacContext';
+import type { UserRole } from '../types/rbac.types';
 
 /**
  * Main hook for permission checking
@@ -39,9 +40,9 @@ export function usePermissions() {
  * Hook to check single role
  * ✅ Simpler API for common use case
  */
-export function useRole(role: string): boolean {
+export function useRole(role: UserRole): boolean {
   const { hasRole } = usePermissions();
-  return hasRole(role as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+  return hasRole(role);
 }
 
 /**

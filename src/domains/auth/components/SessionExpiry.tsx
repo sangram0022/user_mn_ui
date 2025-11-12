@@ -4,7 +4,7 @@
 // ========================================
 
 import { useState, useEffect } from 'react';
-import Button from '../../../components/Button';
+import { Button } from '../../../components';
 import { useRefreshToken } from '../hooks/useRefreshToken';
 import { getTokenExpiryTime, getRefreshToken } from '../services/tokenService';
 

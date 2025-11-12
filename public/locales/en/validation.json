@@ -1,0 +1,53 @@
+{
+  "required": "{{field}} is required",
+  "email": "Please enter a valid email address",
+  "minLength": "Must be at least {{count}} characters",
+  "maxLength": "Must be no more than {{count}} characters",
+  "pattern": "Invalid format for {{field}}",
+  "match": "{{field}} must match {{otherField}}",
+  "unique": "{{field}} is already taken",
+  "invalid": "Invalid {{field}}",
+  "passwordsDoNotMatch": "Passwords don't match",
+  "passwordStrength": {
+    "weak": "Weak password - use a stronger password",
+    "medium": "Medium strength password",
+    "strong": "Strong password"
+  },
+  "passwordFeedback": {
+    "goodLength": "Good length",
+    "excellentLength": "Excellent length",
+    "addUppercase": "Add uppercase letters",
+    "addLowercase": "Add lowercase letters",
+    "addNumbers": "Add numbers",
+    "addSpecialChars": "Add special characters",
+    "avoidRepeating": "Avoid repeating characters",
+    "avoidOnlyNumbers": "Avoid only numbers",
+    "addNumbersAndSymbols": "Add numbers and symbols",
+    "avoidSequential": "Avoid sequential patterns",
+    "avoidCommonWords": "Avoid common words",
+    "looksGreat": "Password looks great!"
+  },
+  "phone": {
+    "invalid": "Invalid phone number",
+    "format": "Phone number must be in format: {{format}}"
+  },
+  "date": {
+    "invalid": "Invalid date",
+    "past": "Date must be in the past",
+    "future": "Date must be in the future",
+    "range": "Date must be between {{start}} and {{end}}",
+    "leapYear": "This is a leap year date (February 29)"
+  },
+  "url": {
+    "invalid": "Invalid URL",
+    "format": "URL must start with http:// or https://",
+    "authCredentials": "URL contains authentication credentials - ensure secure transmission",
+    "noQueryParams": "Query parameters are not allowed in URL",
+    "noFragments": "URL fragments (#hash) are not allowed",
+    "useHttps": "Consider using HTTPS for better security",
+    "noLocalhost": "Localhost URLs are not allowed",
+    "noIpAddress": "IP address URLs are not allowed",
+    "needTld": "URL must have a top-level domain (e.g., .com, .org)",
+    "invalidDomain": "Invalid domain name format"
+  }
+}

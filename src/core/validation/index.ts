@@ -6,6 +6,12 @@
 // Main builder
 export { ValidationBuilder, createValidator, quickValidate } from './ValidationBuilder';
 
+// Zod schemas for React Hook Form integration
+export * from './schemas';
+
+// React Hook Form integration hooks
+export * from './useValidatedForm';
+
 // Status
 export { ValidationStatus, booleanToStatus, isValidationStatus, type ValidationStatusType } from './ValidationStatus';
 
@@ -64,6 +70,34 @@ export {
   NAME_MIN_LENGTH,
   NAME_MAX_LENGTH,
 } from './validators/NameValidator';
+
+export {
+  DateValidator,
+  validateDate,
+  isValidDate,
+  isPastDate,
+  isFutureDate,
+  isValidAge,
+  type DateValidatorOptions,
+} from './validators/DateValidator';
+
+export {
+  URLValidator,
+  validateURL,
+  isValidURL,
+  isHTTPSUrl,
+  isValidDomain,
+  type URLValidatorOptions,
+} from './validators/URLValidator';
+
+export {
+  AsyncValidator,
+  createUsernameUniqueValidator,
+  createEmailAvailableValidator,
+  createAsyncValidator,
+  type AsyncValidationFn,
+  type AsyncValidatorOptions,
+} from './validators/AsyncValidator';
 
 export type { IValidator } from './validators/BaseValidator';
 

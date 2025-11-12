@@ -74,6 +74,7 @@ function calculateStrength(password: string): StrengthResult {
  * Shows visual feedback for password quality
  */
 export function PasswordStrength({ password, showLabel = true }: PasswordStrengthProps) {
+  // Kept: useMemo for expensive regex calculations on every keystroke (6 regex tests)
   const strength = useMemo(() => calculateStrength(password), [password]);
   
   if (!password) {
@@ -86,7 +87,7 @@ export function PasswordStrength({ password, showLabel = true }: PasswordStrengt
       <div className="flex gap-1 h-2">
         {[...Array(4)].map((_, index) => (
           <div
-            key={index}
+            key={`strength-bar-${index}`}
             className={`flex-1 rounded-full transition-colors duration-300 ${
               index < strength.score
                 ? strength.color

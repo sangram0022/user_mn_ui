@@ -97,7 +97,7 @@ resource "aws_ecr_lifecycle_policy" "main" {
 # CloudWatch Log Group for ECS Tasks
 resource "aws_cloudwatch_log_group" "ecs_tasks" {
   name              = "/ecs/${var.project_name}"
-  retention_in_days = var.log_retention_days
+  retention_in_days = 7  # Reduced from default 30 to 7 days for cost optimization
 
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-ecs-logs"

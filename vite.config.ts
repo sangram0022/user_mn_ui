@@ -1,210 +1,197 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { VitePWA } from 'vite-plugin-pwa'
-import { visualizer } from 'rollup-plugin-visualizer'
-import compression from 'vite-plugin-compression'
 import path from 'path'
+import { visualizer } from 'rollup-plugin-visualizer'
 
-// https://vite.dev/config/
+// AWS CloudFront-Optimized Vite Configuration
+// CloudFront handles: compression, caching, edge optimization
+// Local optimization: code splitting, tree shaking, modern JS
+
 export default defineConfig({
   plugins: [
-    react(),
+    // React 19 with React Compiler for automatic memoization
+    react({
+      babel: {
+        plugins: [
+          ['babel-plugin-react-compiler', {
+            // React Compiler configuration
+            // Automatically optimizes components without manual useMemo/useCallback
+            runtimeModule: 'react/compiler-runtime'
+          }]
+        ]
+      }
+    }),
     tailwindcss(),
-    
-    // Bundle analysis - generates interactive bundle map
+    // Bundle visualizer (creates stats.html)
     visualizer({
-      filename: 'dist/bundle-analysis.html',
-      open: false, // Don't auto-open in CI
+      filename: './dist/stats.html',
+      open: false,
       gzipSize: true,
       brotliSize: true,
-      template: 'treemap', // Options: treemap, sunburst, network
-    }),
-
-    // Compression plugins - Brotli and Gzip
-    compression({
-      algorithm: 'brotliCompress',
-      ext: '.br',
-      threshold: 1024, // Only compress files larger than 1KB
-      compressionOptions: {
-        level: 11, // Maximum compression
-      },
-    }),
-    compression({
-      algorithm: 'gzip',
-      ext: '.gz',
-      threshold: 1024,
-      compressionOptions: {
-        level: 9, // Maximum compression
-      },
-    }),
-    
-    // Progressive Web App plugin - enables offline support and caching
-    VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
-      workbox: {
-        // Cache static assets
-        globPatterns: [
-          '**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2,ttf,eot}',
-        ],
-        runtimeCaching: [
-          // Cache API responses with NetworkFirst strategy
-          // Try network first, fall back to cache if offline
-          {
-            urlPattern: /^https:\/\/api\.example\.com\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              networkTimeoutSeconds: 5,
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 3600, // 1 hour
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          // Cache images with CacheFirst strategy
-          // Use cache first, update in background
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'image-cache',
-              expiration: {
-                maxEntries: 200,
-                maxAgeSeconds: 86400 * 30, // 30 days
-              },
-            },
-          },
-          // Cache fonts with CacheFirst strategy
-          {
-            urlPattern: /\.(?:woff|woff2|ttf|eot)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'font-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 86400 * 365, // 1 year
-              },
-            },
-          },
-        ],
-      },
-      // Web app manifest
-      manifest: {
-        name: 'User Management System',
-        short_name: 'UserMN',
-        description: 'Comprehensive User Management and Admin Dashboard',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'portrait-primary',
-        icons: [
-          {
-            src: '/logo.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any',
-          },
-          {
-            src: '/logo.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any',
-          },
-          {
-            src: '/logo.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
-        ],
-        screenshots: [
-          {
-            src: '/screenshot1.png',
-            sizes: '540x720',
-            type: 'image/png',
-            form_factor: 'narrow',
-          },
-        ],
-      },
-    }),
+    }) as unknown as import('vite').Plugin,
   ],
   
-  // Build optimizations
+  // Development server configuration
+  server: {
+    headers: {
+      // Content Security Policy - XSS protection
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:8000 ws://localhost:*; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+      // Additional security headers
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+    },
+  },
+  
+  // AWS CloudFront-Optimized Build Configuration
   build: {
-    // Manual chunks for better caching and parallel loading
+    target: 'esnext', // Modern browsers - CloudFront handles legacy support via transforms
+    
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core React libraries - ~140KB
-          'vendor-react': [
-            'react',
-            'react-dom',
-            'react-router-dom',
-          ],
+        // AWS CloudFront cache-friendly chunking strategy
+        manualChunks(id) {
+          // Vendor chunk for stable dependencies (long cache)
+          if (id.includes('node_modules')) {
+            // Core React libraries - must come first
+            if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('scheduler')) {
+              return 'vendor-react';
+            }
+            
+            // Router
+            if (id.includes('react-router') || id.includes('@remix-run')) {
+              return 'vendor-router';
+            }
+            
+            // Forms and validation
+            if (id.includes('react-hook-form') || id.includes('/zod/') || id.includes('@hookform')) {
+              return 'vendor-forms';
+            }
+            
+            // TanStack Query (data fetching)
+            if (id.includes('@tanstack/query-core') || id.includes('@tanstack/react-query')) {
+              return 'vendor-query';
+            }
+            
+            // i18n libraries
+            if (id.includes('i18next') || id.includes('react-i18next')) {
+              return 'vendor-i18n';
+            }
+            
+            // Charts library (heavy, lazy loaded)
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'vendor-charts';
+            }
+            
+            // Icons
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            
+            // Utilities (axios, dompurify, etc.)
+            if (id.includes('axios') || id.includes('dompurify') || id.includes('use-debounce')) {
+              return 'vendor-utils';
+            }
+            
+            // TanStack Virtual + Form
+            if (id.includes('@tanstack/virtual') || id.includes('@tanstack/react-virtual') || 
+                id.includes('@tanstack/react-form')) {
+              return 'vendor-tanstack';
+            }
+            
+            // State management
+            if (id.includes('zustand')) {
+              return 'vendor-state';
+            }
+            
+            // PWA & Service Worker
+            if (id.includes('workbox') || id.includes('vite-plugin-pwa')) {
+              return 'vendor-pwa';
+            }
+            
+            // React utilities
+            if (id.includes('react-error-boundary') || id.includes('react-intersection-observer') ||
+                id.includes('react-window')) {
+              return 'vendor-react-utils';
+            }
+            
+            // Other small libraries
+            return 'vendor-misc';
+          }
           
-          // Form handling libraries - ~40KB
-          'vendor-forms': [
-            'react-hook-form',
-            '@hookform/resolvers',
-            'zod',
-          ],
+          // Feature-based chunks for better caching
+          if (id.includes('/domains/auth/')) {
+            return 'feature-auth';
+          }
           
-          // Data fetching and state management - ~80KB
-          'vendor-data': [
-            '@tanstack/react-query',
-            '@tanstack/react-query-devtools',
-            'zustand',
-          ],
+          // Admin domain split by route for lazy loading
+          if (id.includes('/domains/admin/')) {
+            // Dashboard route
+            if (id.includes('DashboardPage')) {
+              return 'admin-dashboard';
+            }
+            
+            // User management routes (users list, detail, edit)
+            if (id.includes('UsersPage') || id.includes('UserDetailPage') || 
+                id.includes('UserEditPage') || id.includes('VirtualizedUsersTable')) {
+              return 'admin-users';
+            }
+            
+            // Role management routes (roles list, detail)
+            if (id.includes('RolesPage') || id.includes('RoleDetailPage')) {
+              return 'admin-roles';
+            }
+            
+            // Audit logs route (with virtualized table)
+            if (id.includes('AuditLogsPage') || id.includes('VirtualizedAuditLogTable')) {
+              return 'admin-audit';
+            }
+            
+            // Approval workflow route
+            if (id.includes('ApprovalPage') || id.includes('PendingApprovalsPage')) {
+              return 'admin-approvals';
+            }
+            
+            // Shared admin utilities, services, hooks
+            return 'admin-shared';
+          }
           
-          // Internationalization - ~30KB
-          'vendor-i18n': [
-            'i18next',
-            'react-i18next',
-            'i18next-browser-languagedetector',
-            'i18next-http-backend',
-          ],
-          
-          // Utility libraries - ~20KB
-          'vendor-utils': [
-            'axios',
-            'date-fns',
-            'dompurify',
-          ],
-          
-          // Icons - if large
-          'vendor-icons': [
-            'lucide-react',
-          ],
+          if (id.includes('/shared/')) {
+            return 'shared-components';
+          }
         },
+        
+        // CloudFront-friendly file naming with cache optimization
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        entryFileNames: 'assets/[name]-[hash].js',
       },
     },
     
-    // Advanced minification
-    minify: 'terser',
+    // Production optimizations - CloudFront handles compression
+    minify: 'terser', // Use terser for better tree shaking and console.log removal
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console.logs in production
+        drop_console: true, // Remove console.log in production
         drop_debugger: true, // Remove debugger statements
-        pure_funcs: ['console.log', 'console.info', 'console.debug'], // Remove specific console methods
+        pure_funcs: ['console.log', 'console.debug', 'console.info'], // Remove specific console methods
+        passes: 2, // Multiple passes for better optimization
       },
-      mangle: {
-        safari10: true, // Support Safari 10+
+      format: {
+        comments: false, // Remove all comments
       },
     },
-    
-    // CSS code splitting for better caching
     cssCodeSplit: true,
+    sourcemap: false, // CloudFront serves without source maps
+    reportCompressedSize: false, // Skip since CloudFront compresses
     
-    // Disable source maps in production (reduces bundle size)
-    sourcemap: false,
+    // Modern browser target for smaller bundles
+    cssMinify: 'lightningcss', // Faster and better CSS minification
     
-    // Chunk size warnings
-    chunkSizeWarningLimit: 500, // Warn if chunk > 500KB
+    // Chunk size warnings optimized for HTTP/2 + CloudFront
+    chunkSizeWarningLimit: 300, // Smaller chunks for better caching
   },
   
   resolve: {

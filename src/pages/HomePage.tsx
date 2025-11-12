@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import Button from '../components/Button';
+import { Button } from '../components';
 import Card from '../components/Card';
 import { animationUtils } from '../design-system/variants';
 import { SEO, SEO_CONFIG } from '../shared/components/seo';
@@ -75,8 +75,8 @@ export default function HomePage() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto animate-scale-in animate-stagger-3">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
+            {stats.map((stat) => (
+              <div key={stat.label} className="text-center">
                 <div className="text-3xl md:text-4xl font-bold mb-2">{stat.value}</div>
                 <div className="text-white/80 text-sm">{stat.label}</div>
               </div>
@@ -95,7 +95,7 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} hover className={`group ${animationUtils.withStagger('animate-slide-up', index)}`}>
+              <Card key={feature.title} hover className={`group ${animationUtils.withStagger('animate-slide-up', index)}`}>
                 <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
                   {feature.icon}
                 </div>

@@ -241,9 +241,11 @@ class ErrorReportingService {
 
     // Track console messages
     if (this.config.breadcrumbs.captureConsole) {
+      // eslint-disable-next-line no-console
       const originalConsoleLog = console.log;
       const originalConsoleError = console.error;
 
+      // eslint-disable-next-line no-console
       console.log = (...args: unknown[]) => {
         originalConsoleLog(...args);
         this.addBreadcrumb(args.join(' '), 'console', { args }, 'info');
@@ -343,7 +345,7 @@ class ErrorReportingService {
       },
       // Remove retryMetadata before sending
       errors: errorsToSend.map(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line unused-imports/no-unused-vars, @typescript-eslint/no-unused-vars
         ({ retryMetadata, ...error }) => error
       ),
       count: errorsToSend.length,

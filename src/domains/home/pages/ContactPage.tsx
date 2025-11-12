@@ -1,10 +1,13 @@
-import { useState } from 'react';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
 import Card from '../../../shared/components/ui/Card';
 import Badge from '../../../shared/components/ui/Badge';
-import { typographyVariants, animationUtils } from '../../../design-system/variants';
+import { typographyVariants } from '../../../design-system/variants';
 import type { BadgeVariant } from '../../../design-system/variants';
+import { useContactForm } from '../../../core/validation';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
+import { logger } from '@/core/logging';
+import { useToast } from '@/hooks/useToast';
 
 // Contact data - Single source of truth
 const contactData = {
@@ -113,47 +116,30 @@ const contactData = {
 };
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    company: '',
-    department: '',
-    subject: '',
-    message: '',
-    priority: 'normal',
-    newsletter: false,
+  const toast = useToast();
+  const handleError = useStandardErrorHandler();
+
+  // React Hook Form for contact form
+  const form = useContactForm({
+    onSuccess: async (data) => {
+      // Simulate form submission
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      logger().info('Contact form submitted', { name: data.name, email: data.email });
+      
+      // Show success message and reset form
+      toast.success('Thank you for your message! We\'ll get back to you soon.');
+      form.reset();
+    },
+    onError: (error) => {
+      // Use standard error handler for consistent error UX
+      handleError(error, {
+        context: { operation: 'submitContactForm', page: 'ContactPage' },
+        customMessage: 'Failed to send message. Please try again.',
+      });
+    },
+    successMessage: 'Message sent successfully!',
+    errorMessage: 'Failed to send message'
   });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    console.log('Contact form submitted:', formData);
-    setIsSubmitting(false);
-    
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      company: '',
-      department: '',
-      subject: '',
-      message: '',
-      priority: 'normal',
-      newsletter: false,
-    });
-    
-    alert('Thank you for your message! We\'ll get back to you soon.');
-  };
-
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
 
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-16 animate-fade-in">
@@ -175,11 +161,11 @@ export default function ContactPage() {
       {/* Contact Methods */}
       <section>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {contactData.contactInfo.map((contact, index) => (
+          {contactData.contactInfo.map((contact) => (
             <Card 
               key={contact.id} 
               hover 
-              className={`text-center group ${animationUtils.withStagger('animate-scale-in', index)}`}
+              className={`text-center group animate-scale-in`}
             >
               <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
                 {contact.icon}
@@ -215,15 +201,15 @@ export default function ContactPage() {
           <Card className="animate-slide-up">
             <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
             
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={form.handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <Input
                   type="text"
                   label="Full Name *"
                   placeholder="John Doe"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  required
+                  {...form.register('name')}
+                  error={form.formState.errors.name?.message}
+                  disabled={form.formState.isSubmitting}
                   icon={
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -234,9 +220,9 @@ export default function ContactPage() {
                   type="email"
                   label="Email Address *"
                   placeholder="john@company.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  required
+                  {...form.register('email')}
+                  error={form.formState.errors.email?.message}
+                  disabled={form.formState.isSubmitting}
                   icon={
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -250,8 +236,9 @@ export default function ContactPage() {
                   type="text"
                   label="Company"
                   placeholder="Company Name"
-                  value={formData.company}
-                  onChange={(e) => handleInputChange('company', e.target.value)}
+                  {...form.register('company')}
+                  error={form.formState.errors.company?.message}
+                  disabled={form.formState.isSubmitting}
                   icon={
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -261,8 +248,8 @@ export default function ContactPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
                   <select
-                    value={formData.department}
-                    onChange={(e) => handleInputChange('department', e.target.value)}
+                    {...form.register('department')}
+                    disabled={form.formState.isSubmitting}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   >
                     <option value="">Select Department</option>
@@ -272,6 +259,9 @@ export default function ContactPage() {
                       </option>
                     ))}
                   </select>
+                  {form.formState.errors.department && (
+                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.department.message}</p>
+                  )}
                 </div>
               </div>
 
@@ -279,9 +269,9 @@ export default function ContactPage() {
                 type="text"
                 label="Subject *"
                 placeholder="How can we help you?"
-                value={formData.subject}
-                onChange={(e) => handleInputChange('subject', e.target.value)}
-                required
+                {...form.register('subject')}
+                error={form.formState.errors.subject?.message}
+                disabled={form.formState.isSubmitting}
               />
 
               <div>
@@ -289,11 +279,13 @@ export default function ContactPage() {
                 <textarea
                   rows={6}
                   placeholder="Tell us more about your inquiry..."
-                  value={formData.message}
-                  onChange={(e) => handleInputChange('message', e.target.value)}
-                  required
+                  {...form.register('message')}
+                  disabled={form.formState.isSubmitting}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                 />
+                {form.formState.errors.message && (
+                  <p className="mt-1 text-sm text-red-600">{form.formState.errors.message.message}</p>
+                )}
               </div>
 
               <div>
@@ -308,10 +300,9 @@ export default function ContactPage() {
                     <label key={priority.value} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
-                        name="priority"
                         value={priority.value}
-                        checked={formData.priority === priority.value}
-                        onChange={(e) => handleInputChange('priority', e.target.value)}
+                        {...form.register('priority')}
+                        disabled={form.formState.isSubmitting}
                         className="w-4 h-4 text-brand-primary border-gray-300 focus:ring-2 focus:ring-blue-500"
                       />
                       <Badge variant={priority.color} className="text-xs">
@@ -325,8 +316,8 @@ export default function ContactPage() {
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={formData.newsletter}
-                  onChange={(e) => handleInputChange('newsletter', e.target.checked)}
+                  {...form.register('newsletter')}
+                  disabled={form.formState.isSubmitting}
                   className="mt-1 w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700">
@@ -340,23 +331,20 @@ export default function ContactPage() {
                   type="submit"
                   variant="primary"
                   size="lg"
-                  disabled={isSubmitting}
+                  disabled={form.formState.isSubmitting}
+                  loading={form.formState.isSubmitting}
                   className="flex-1"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Sending...
-                    </>
-                  ) : (
-                    'Send Message'
-                  )}
+                  Send Message
                 </Button>
-                <Button type="reset" variant="outline" size="lg">
-                  Reset
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => form.reset()}
+                  disabled={form.formState.isSubmitting}
+                >
+                  Clear Form
                 </Button>
               </div>
             </form>
@@ -369,8 +357,8 @@ export default function ContactPage() {
           <Card className="animate-slide-right">
             <h3 className="text-lg font-semibold mb-4">Office Hours</h3>
             <div className="space-y-3">
-              {contactData.officeHours.map((schedule, index) => (
-                <div key={index} className="flex justify-between items-center py-2">
+              {contactData.officeHours.map((schedule) => (
+                <div key={schedule.day} className="flex justify-between items-center py-2">
                   <span className="text-gray-700">{schedule.day}</span>
                   <span className="text-gray-600 font-medium">{schedule.hours}</span>
                 </div>
@@ -411,9 +399,9 @@ export default function ContactPage() {
                 { name: 'API Documentation', icon: '⚡' },
                 { name: 'Community Forum', icon: '👥' },
                 { name: 'System Status', icon: '🟢' },
-              ].map((link, index) => (
+              ].map((link) => (
                 <a
-                  key={index}
+                  key={link.name}
                   href="#"
                   className="flex items-center gap-3 p-2 text-gray-700 hover:text-brand-primary hover:bg-blue-50 rounded-lg transition-colors"
                 >
@@ -439,10 +427,10 @@ export default function ContactPage() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          {contactData.faqs.map((faq, index) => (
+          {contactData.faqs.map((faq) => (
             <Card 
               key={faq.id} 
-              className={animationUtils.withStagger('animate-slide-up', index)}
+              className={`animate-slide-up`}
             >
               <h3 className="font-semibold text-lg mb-3 text-gray-900">
                 {faq.question}

@@ -10,16 +10,6 @@ export interface RefreshTokenRequest {
 }
 
 /**
- * POST /api/v1/auth/refresh - Refresh token response
- */
-export interface RefreshTokenResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: 'bearer';
-  expires_in: number;
-}
-
-/**
  * GET /api/v1/auth/csrf-token - Get CSRF token response
  */
 export interface CsrfTokenResponse {

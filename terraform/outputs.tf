@@ -1,286 +1,185 @@
-# Terraform Outputs
-# React 19 Application Infrastructure Outputs
+# ============================================================================
+# Terraform Outputs for S3 + CloudFront Static Website
+# ============================================================================
 
 # =============================================================================
-# GENERAL OUTPUTS
+# S3 BUCKET OUTPUTS
 # =============================================================================
 
-output "account_id" {
-  description = "AWS Account ID"
-  value       = local.account_id
+output "s3_bucket_id" {
+  description = "ID of the S3 bucket"
+  value       = aws_s3_bucket.website.id
 }
 
-output "region" {
-  description = "AWS Region"
-  value       = local.region
+output "s3_bucket_arn" {
+  description = "ARN of the S3 bucket"
+  value       = aws_s3_bucket.website.arn
 }
 
-output "environment" {
-  description = "Environment name"
-  value       = var.environment
+output "s3_bucket_domain_name" {
+  description = "Domain name of the S3 bucket"
+  value       = aws_s3_bucket.website.bucket_domain_name
 }
 
-output "project_name" {
-  description = "Project name"
-  value       = var.project_name
+output "s3_bucket_regional_domain_name" {
+  description = "Regional domain name of the S3 bucket"
+  value       = aws_s3_bucket.website.bucket_regional_domain_name
 }
 
-# =============================================================================
-# NETWORK OUTPUTS
-# =============================================================================
-
-output "vpc_id" {
-  description = "VPC ID"
-  value       = module.network.vpc_id
-}
-
-output "vpc_cidr_block" {
-  description = "VPC CIDR block"
-  value       = module.network.vpc_cidr_block
-}
-
-output "public_subnet_ids" {
-  description = "Public subnet IDs"
-  value       = module.network.public_subnet_ids
-}
-
-output "private_subnet_ids" {
-  description = "Private subnet IDs"
-  value       = module.network.private_subnet_ids
-}
-
-output "internet_gateway_id" {
-  description = "Internet Gateway ID"
-  value       = module.network.internet_gateway_id
-}
-
-output "nat_gateway_ids" {
-  description = "NAT Gateway IDs"
-  value       = module.network.nat_gateway_ids
+output "s3_bucket_region" {
+  description = "AWS region where the S3 bucket is created"
+  value       = aws_s3_bucket.website.region
 }
 
 # =============================================================================
-# SECURITY OUTPUTS
+# CLOUDFRONT OUTPUTS
 # =============================================================================
 
-output "alb_security_group_id" {
-  description = "Application Load Balancer Security Group ID"
-  value       = module.security.alb_security_group_id
+output "cloudfront_distribution_id" {
+  description = "ID of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.website.id
 }
 
-output "ecs_security_group_id" {
-  description = "ECS Security Group ID"
-  value       = module.security.ecs_security_group_id
+output "cloudfront_distribution_arn" {
+  description = "ARN of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.website.arn
 }
 
-output "ecs_task_execution_role_arn" {
-  description = "ECS Task Execution Role ARN"
-  value       = module.security.ecs_task_execution_role_arn
+output "cloudfront_domain_name" {
+  description = "Domain name of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.website.domain_name
 }
 
-output "ecs_task_role_arn" {
-  description = "ECS Task Role ARN"
-  value       = module.security.ecs_task_role_arn
+output "cloudfront_hosted_zone_id" {
+  description = "CloudFront hosted zone ID for Route53 alias records"
+  value       = aws_cloudfront_distribution.website.hosted_zone_id
 }
 
-output "waf_web_acl_id" {
-  description = "WAF Web ACL ID"
-  value       = var.enable_waf ? module.security.waf_web_acl_id : null
-}
-
-# =============================================================================
-# CONTAINER OUTPUTS
-# =============================================================================
-
-output "ecr_repository_url" {
-  description = "ECR Repository URL"
-  value       = module.container.ecr_repository_url
-}
-
-output "ecr_repository_arn" {
-  description = "ECR Repository ARN"
-  value       = module.container.ecr_repository_arn
-}
-
-output "task_definition_arn" {
-  description = "ECS Task Definition ARN"
-  value       = module.container.task_definition_arn
-}
-
-output "task_definition_family" {
-  description = "ECS Task Definition Family"
-  value       = module.container.task_definition_family
-}
-
-output "task_definition_revision" {
-  description = "ECS Task Definition Revision"
-  value       = module.container.task_definition_revision
-}
-
-# =============================================================================
-# COMPUTE OUTPUTS
-# =============================================================================
-
-output "ecs_cluster_id" {
-  description = "ECS Cluster ID"
-  value       = module.compute.ecs_cluster_id
-}
-
-output "ecs_cluster_name" {
-  description = "ECS Cluster Name"
-  value       = module.compute.ecs_cluster_name
-}
-
-output "ecs_cluster_arn" {
-  description = "ECS Cluster ARN"
-  value       = module.compute.ecs_cluster_arn
-}
-
-output "ecs_service_id" {
-  description = "ECS Service ID"
-  value       = module.compute.ecs_service_id
-}
-
-output "ecs_service_name" {
-  description = "ECS Service Name"
-  value       = module.compute.ecs_service_name
-}
-
-output "ecs_service_arn" {
-  description = "ECS Service ARN"
-  value       = module.compute.ecs_service_arn
-}
-
-output "alb_arn" {
-  description = "Application Load Balancer ARN"
-  value       = module.compute.alb_arn
-}
-
-output "alb_dns_name" {
-  description = "Application Load Balancer DNS Name"
-  value       = module.compute.alb_dns_name
-}
-
-output "alb_zone_id" {
-  description = "Application Load Balancer Zone ID"
-  value       = module.compute.alb_zone_id
-}
-
-output "alb_target_group_arn" {
-  description = "ALB Target Group ARN"
-  value       = module.compute.alb_target_group_arn
-}
-
-# =============================================================================
-# API GATEWAY OUTPUTS
-# =============================================================================
-
-output "api_gateway_id" {
-  description = "API Gateway ID"
-  value       = var.create_api_gateway ? module.api[0].api_gateway_id : null
-}
-
-output "api_gateway_url" {
-  description = "API Gateway URL"
-  value       = var.create_api_gateway ? module.api[0].api_gateway_url : null
-}
-
-output "api_gateway_stage_name" {
-  description = "API Gateway stage name"
-  value       = var.create_api_gateway ? module.api[0].api_gateway_stage_name : null
-}
-
-# =============================================================================
-# MONITORING OUTPUTS
-# =============================================================================
-
-output "cloudwatch_log_group_name" {
-  description = "CloudWatch Log Group Name"
-  value       = module.monitoring.cloudwatch_log_group_name
-}
-
-output "cloudwatch_log_group_arn" {
-  description = "CloudWatch Log Group ARN"
-  value       = module.monitoring.cloudwatch_log_group_arn
-}
-
-output "sns_topic_arn" {
-  description = "SNS Topic ARN for alerts"
-  value       = module.monitoring.sns_topic_arn
-}
-
-# =============================================================================
-# APPLICATION URLS
-# =============================================================================
-
-output "application_url" {
-  description = "Application URL (HTTP)"
-  value       = "http://${module.compute.alb_dns_name}"
-}
-
-output "application_https_url" {
-  description = "Application URL (HTTPS)"
-  value       = var.ssl_certificate_arn != "" ? "https://${module.compute.alb_dns_name}" : "SSL certificate not configured"
+output "cloudfront_status" {
+  description = "Current status of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.website.status
 }
 
 # =============================================================================
 # DEPLOYMENT INFORMATION
 # =============================================================================
 
-output "deployment_info" {
-  description = "Deployment information for CI/CD"
-  value = {
-    cluster_name         = module.compute.ecs_cluster_name
-    service_name         = module.compute.ecs_service_name
-    task_definition_arn  = module.container.task_definition_arn
-    ecr_repository_url   = module.container.ecr_repository_url
-    alb_target_group_arn = module.compute.alb_target_group_arn
-    region              = local.region
-    account_id          = local.account_id
-  }
+output "website_url" {
+  description = "Primary website URL"
+  value       = length(var.domain_names) > 0 ? "https://${var.domain_names[0]}" : "https://${aws_cloudfront_distribution.website.domain_name}"
+}
+
+output "alternative_urls" {
+  description = "Alternative website URLs (if custom domains configured)"
+  value       = [for domain in var.domain_names : "https://${domain}"]
 }
 
 # =============================================================================
-# RESOURCE IDENTIFIERS FOR GITLAB CI/CD
+# CACHE POLICY OUTPUTS
+# =============================================================================
+
+output "cache_policy_optimized_id" {
+  description = "ID of the optimized cache policy"
+  value       = var.cache_policy_id == "" ? aws_cloudfront_cache_policy.optimized[0].id : null
+}
+
+output "cache_policy_static_assets_id" {
+  description = "ID of the static assets cache policy"
+  value       = aws_cloudfront_cache_policy.static_assets.id
+}
+
+output "cache_policy_no_cache_id" {
+  description = "ID of the no-cache policy for HTML files"
+  value       = aws_cloudfront_cache_policy.no_cache.id
+}
+
+# =============================================================================
+# SECURITY OUTPUTS
+# =============================================================================
+
+output "waf_web_acl_id" {
+  description = "ID of the WAF Web ACL"
+  value       = var.enable_waf ? aws_wafv2_web_acl.cloudfront[0].id : null
+}
+
+output "waf_web_acl_arn" {
+  description = "ARN of the WAF Web ACL"
+  value       = var.enable_waf ? aws_wafv2_web_acl.cloudfront[0].arn : null
+}
+
+output "origin_access_control_id" {
+  description = "ID of the CloudFront Origin Access Control"
+  value       = aws_cloudfront_origin_access_control.website.id
+}
+
+# =============================================================================
+# LOGGING OUTPUTS
+# =============================================================================
+
+output "logs_bucket_id" {
+  description = "ID of the logs bucket"
+  value       = var.enable_logging ? aws_s3_bucket.logs[0].id : null
+}
+
+output "logs_bucket_arn" {
+  description = "ARN of the logs bucket"
+  value       = var.enable_logging ? aws_s3_bucket.logs[0].arn : null
+}
+
+# =============================================================================
+# ROUTE53 OUTPUTS
+# =============================================================================
+
+output "route53_records" {
+  description = "Route53 DNS records created"
+  value = var.create_route53_records ? {
+    for domain in var.domain_names : domain => {
+      a_record    = aws_route53_record.website[domain].fqdn
+      aaaa_record = aws_route53_record.website_ipv6[domain].fqdn
+    }
+  } : null
+}
+
+# =============================================================================
+# GITLAB CI/CD VARIABLES
 # =============================================================================
 
 output "gitlab_ci_variables" {
-  description = "Variables to be set in GitLab CI/CD"
+  description = "Environment variables for GitLab CI/CD pipeline"
   value = {
-    AWS_REGION                = local.region
-    AWS_ACCOUNT_ID           = local.account_id
-    ECR_REPOSITORY_URL       = module.container.ecr_repository_url
-    ECS_CLUSTER_NAME         = module.compute.ecs_cluster_name
-    ECS_SERVICE_NAME         = module.compute.ecs_service_name
-    TASK_DEFINITION_FAMILY   = module.container.task_definition_family
-    ALB_TARGET_GROUP_ARN     = module.compute.alb_target_group_arn
-    APPLICATION_URL          = "http://${module.compute.alb_dns_name}"
-    CLOUDWATCH_LOG_GROUP     = module.monitoring.cloudwatch_log_group_name
+    S3_BUCKET                   = aws_s3_bucket.website.id
+    CLOUDFRONT_DISTRIBUTION_ID  = aws_cloudfront_distribution.website.id
+    AWS_REGION                  = var.aws_region
+    WEBSITE_URL                 = length(var.domain_names) > 0 ? "https://${var.domain_names[0]}" : "https://${aws_cloudfront_distribution.website.domain_name}"
   }
   sensitive = false
 }
 
 # =============================================================================
-# HEALTH CHECK INFORMATION
+# DEPLOYMENT COMMANDS
 # =============================================================================
 
-output "health_check_url" {
-  description = "Health check URL"
-  value       = "http://${module.compute.alb_dns_name}${var.health_check_path}"
+output "deployment_commands" {
+  description = "Useful commands for deployment"
+  value = {
+    sync_to_s3 = "aws s3 sync ./dist s3://${aws_s3_bucket.website.id} --delete --cache-control 'public, max-age=31536000, immutable'"
+    invalidate_cache = "aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.website.id} --paths '/*'"
+    check_status = "aws cloudfront get-distribution --id ${aws_cloudfront_distribution.website.id} --query 'Distribution.Status' --output text"
+  }
 }
 
 # =============================================================================
-# COST INFORMATION
+# COST ESTIMATION
 # =============================================================================
 
 output "estimated_monthly_cost" {
-  description = "Estimated monthly cost (approximate)"
+  description = "Estimated monthly cost breakdown (approximate)"
   value = {
-    fargate_tasks    = "$${var.desired_count * var.container_cpu * 0.04048 * 24 * 30 + var.desired_count * var.container_memory * 0.004445 * 24 * 30}"
-    application_load_balancer = "$22.00"
-    nat_gateway     = var.enable_nat_gateway ? (var.single_nat_gateway ? "$32.00" : "$${length(local.azs) * 32}") : "$0.00"
-    cloudwatch_logs = "$5.00 - $20.00"
-    data_transfer   = "$Variable based on usage"
-    note           = "This is an approximate cost. Actual costs may vary based on usage patterns."
+    s3_storage_per_gb       = "$0.023 per GB (first 50 TB)"
+    s3_requests_per_1000    = "$0.0004 per 1,000 PUT requests, $0.00036 per 1,000 GET requests"
+    cloudfront_data_transfer = "$0.085 per GB (first 10 TB, US/Europe)"
+    cloudfront_requests     = "$0.0075 per 10,000 HTTP requests, $0.01 per 10,000 HTTPS requests"
+    waf_web_acl            = var.enable_waf ? "$5.00 per month + $1.00 per million requests" : "Disabled"
+    note                   = "Actual costs depend on usage. See AWS pricing calculator for detailed estimates."
   }
 }

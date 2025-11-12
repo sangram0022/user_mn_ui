@@ -1,12 +1,14 @@
-# Terraform Variables
-# React 19 Application Infrastructure Configuration
+# ============================================================================
+# Terraform Variables for S3 + CloudFront Static Website
+# React 19 Application - Simplified Configuration
+# ============================================================================
 
 # =============================================================================
 # GENERAL CONFIGURATION
 # =============================================================================
 
 variable "project_name" {
-  description = "Name of the project"
+  description = "Name of the project (used in resource naming)"
   type        = string
   default     = "react-app"
   
@@ -17,98 +19,205 @@ variable "project_name" {
 }
 
 variable "environment" {
-  description = "Environment name (dev, staging, prod)"
+  description = "Environment name"
   type        = string
   
   validation {
-    condition     = contains(["dev", "staging", "prod"], var.environment)
-    error_message = "Environment must be one of: dev, staging, prod."
+    condition     = contains(["dev", "staging", "production"], var.environment)
+    error_message = "Environment must be one of: dev, staging, production."
   }
 }
 
 variable "aws_region" {
-  description = "AWS region for resources"
+  description = "AWS region for S3 bucket and related resources"
   type        = string
   default     = "us-east-1"
 }
 
-variable "owner" {
-  description = "Owner of the resources"
-  type        = string
-  default     = "DevOps Team"
-}
-
-variable "cost_center" {
-  description = "Cost center for billing"
+variable "owner_team" {
+  description = "Team responsible for this resource"
   type        = string
   default     = "Engineering"
 }
 
-variable "gitlab_project_path" {
-  description = "GitLab project path for tracking"
+variable "business_unit" {
+  description = "Business unit for cost allocation"
+  type        = string
+  default     = "Digital"
+}
+
+variable "compliance_level" {
+  description = "Compliance level (e.g., none, pci, hipaa, sox)"
+  type        = string
+  default     = "none"
+}
+
+variable "data_classification" {
+  description = "Data classification level (public, internal, confidential, restricted)"
+  type        = string
+  default     = "public"
+}
+
+variable "backup_frequency" {
+  description = "Backup frequency for cost optimization planning"
+  type        = string
+  default     = "daily"
+}
+
+variable "disaster_recovery_tier" {
+  description = "Disaster recovery tier (none, backup, pilot-light, warm-standby, multi-site)"
+  type        = string
+  default     = "backup"
+}
+
+variable "auto_shutdown_schedule" {
+  description = "Auto shutdown schedule for non-production environments"
+  type        = string
+  default     = "none"
+}
+
+variable "cost_center" {
+  description = "Cost center tag for billing"
+  type        = string
+  default     = "Engineering"
+}
+
+variable "repository_url" {
+  description = "Repository URL for tracking"
   type        = string
   default     = ""
 }
 
-variable "max_availability_zones" {
-  description = "Maximum number of availability zones to use"
-  type        = number
-  default     = 3
-}
-
 # =============================================================================
-# NETWORK CONFIGURATION
+# S3 BUCKET CONFIGURATION
 # =============================================================================
 
-variable "vpc_cidr" {
-  description = "CIDR block for VPC"
+variable "s3_bucket_name" {
+  description = "Name for the S3 bucket (leave empty for auto-generated name with account ID)"
   type        = string
-  default     = "10.0.0.0/16"
+  default     = ""
   
   validation {
-    condition     = can(cidrhost(var.vpc_cidr, 0))
-    error_message = "VPC CIDR must be a valid IPv4 CIDR block."
+    condition     = var.s3_bucket_name == "" || can(regex("^[a-z0-9][a-z0-9-]*[a-z0-9]$", var.s3_bucket_name))
+    error_message = "S3 bucket name must be lowercase alphanumeric with hyphens, start and end with alphanumeric."
   }
 }
 
-variable "public_subnet_cidrs" {
-  description = "CIDR blocks for public subnets"
-  type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-}
-
-variable "private_subnet_cidrs" {
-  description = "CIDR blocks for private subnets"
-  type        = list(string)
-  default     = ["10.0.10.0/24", "10.0.20.0/24", "10.0.30.0/24"]
-}
-
-variable "enable_nat_gateway" {
-  description = "Enable NAT Gateway for private subnets"
-  type        = bool
-  default     = true
-}
-
-variable "single_nat_gateway" {
-  description = "Use single NAT Gateway for cost optimization"
+variable "enable_versioning" {
+  description = "Enable versioning for S3 bucket (disabled since code is managed via git)"
   type        = bool
   default     = false
 }
 
-variable "enable_vpn_gateway" {
-  description = "Enable VPN Gateway"
-  type        = bool
-  default     = false
-}
-
-variable "enable_dns_hostnames" {
-  description = "Enable DNS hostnames in VPC"
+variable "enable_storage_lens" {
+  description = "Enable S3 Storage Lens for cost and usage analytics"
   type        = bool
   default     = true
 }
 
-variable "enable_dns_support" {
-  description = "Enable DNS support in VPC"
+variable "organization_arn" {
+  description = "AWS Organization ARN for Storage Lens (leave empty if not using Organizations)"
+  type        = string
+  default     = ""
+}
+
+variable "enable_intelligent_tiering" {
+  description = "Enable S3 Intelligent Tiering for automatic cost optimization"
+  type        = bool
+  default     = true
+}
+
+variable "noncurrent_version_expiration_days" {
+  description = "Days after which non-current object versions will be deleted"
+  type        = number
+  default     = 30
+  
+  validation {
+    condition     = var.noncurrent_version_expiration_days >= 1 && var.noncurrent_version_expiration_days <= 3650
+    error_message = "Non-current version expiration must be between 1 and 3650 days."
+  }
+}
+
+# =============================================================================
+# CLOUDFRONT DISTRIBUTION CONFIGURATION
+# =============================================================================
+
+variable "domain_names" {
+  description = "List of custom domain names (CNAMEs) for CloudFront distribution"
+  type        = list(string)
+  default     = []
+  
+  validation {
+    condition     = alltrue([for domain in var.domain_names : can(regex("^[a-z0-9][a-z0-9.-]*[a-z0-9]$", domain))])
+    error_message = "Domain names must be valid hostnames."
+  }
+}
+
+variable "acm_certificate_arn" {
+  description = "ARN of ACM certificate for custom domains (must be in us-east-1 for CloudFront)"
+  type        = string
+  default     = ""
+}
+
+variable "expected_daily_users" {
+  description = "Expected daily active users for capacity planning"
+  type        = number
+  default     = 1000
+  
+  validation {
+    condition     = var.expected_daily_users >= 100 && var.expected_daily_users <= 1000000
+    error_message = "Expected daily users must be between 100 and 1,000,000."
+  }
+}
+
+variable "cloudfront_price_class" {
+  description = "CloudFront price class - optimize for global traffic"
+  type        = string
+  default     = "PriceClass_All"  # All edge locations for global traffic
+  
+  validation {
+    condition     = contains(["PriceClass_100", "PriceClass_200", "PriceClass_All"], var.cloudfront_price_class)
+    error_message = "Price class must be one of: PriceClass_100, PriceClass_200, PriceClass_All."
+  }
+}
+
+variable "enable_origin_shield" {
+  description = "Enable CloudFront Origin Shield for high-traffic optimization"
+  type        = bool
+  default     = true  # Enable for high traffic
+}
+
+variable "origin_shield_region" {
+  description = "Origin Shield region for optimal performance"
+  type        = string
+  default     = "us-east-1"  # Optimal for global traffic
+}
+
+variable "enable_cloudfront_reserved_capacity" {
+  description = "Enable CloudFront reserved capacity for cost optimization"
+  type        = bool
+  default     = false  # Set to true for production with predictable traffic
+}
+
+variable "cloudfront_reserved_capacity_monthly" {
+  description = "Monthly CloudFront requests for reserved capacity (millions)"
+  type        = number
+  default     = 1000  # 1 billion requests/month
+  
+  validation {
+    condition     = var.cloudfront_reserved_capacity_monthly >= 100 && var.cloudfront_reserved_capacity_monthly <= 100000
+    error_message = "Reserved capacity must be between 100M and 100B requests per month."
+  }
+}
+
+variable "cache_policy_id" {
+  description = "Custom cache policy ID (leave empty to use default optimized policy)"
+  type        = string
+  default     = ""
+}
+
+variable "enable_spa_mode" {
+  description = "Enable SPA mode (redirects 403/404 errors to index.html for client-side routing)"
   type        = bool
   default     = true
 }
@@ -117,358 +226,185 @@ variable "enable_dns_support" {
 # SECURITY CONFIGURATION
 # =============================================================================
 
-variable "application_port" {
-  description = "Port on which the application runs"
-  type        = number
-  default     = 3000
+variable "content_security_policy" {
+  description = "Content Security Policy header value"
+  type        = string
+  default     = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.example.com;"
 }
 
-variable "allowed_cidrs" {
-  description = "CIDR blocks allowed to access the application"
+variable "cors_allowed_origins" {
+  description = "List of allowed origins for CORS"
   type        = list(string)
-  default     = ["0.0.0.0/0"]
+  default     = ["*"]
 }
+
+variable "custom_headers" {
+  description = "List of custom headers to add to responses"
+  type = list(object({
+    header = string
+    value  = string
+  }))
+  default = []
+}
+
+variable "geo_restriction_type" {
+  description = "Type of geo restriction (none, whitelist, blacklist)"
+  type        = string
+  default     = "none"
+  
+  validation {
+    condition     = contains(["none", "whitelist", "blacklist"], var.geo_restriction_type)
+    error_message = "Geo restriction type must be: none, whitelist, or blacklist."
+  }
+}
+
+variable "geo_restriction_locations" {
+  description = "List of country codes for geo restriction (ISO 3166-1-alpha-2)"
+  type        = list(string)
+  default     = []
+}
+
+# =============================================================================
+# WAF CONFIGURATION
+# =============================================================================
 
 variable "enable_waf" {
-  description = "Enable AWS WAF for additional security"
+  description = "Enable AWS WAF for CloudFront distribution"
   type        = bool
   default     = true
 }
 
 variable "waf_rate_limit" {
-  description = "WAF rate limit per 5-minute period"
+  description = "Maximum number of requests per 5 minutes from a single IP"
   type        = number
   default     = 2000
+  
+  validation {
+    condition     = var.waf_rate_limit >= 100 && var.waf_rate_limit <= 20000000
+    error_message = "WAF rate limit must be between 100 and 20,000,000."
+  }
 }
 
-variable "waf_allowed_countries" {
-  description = "List of allowed country codes for WAF geo-blocking"
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+
+variable "enable_logging" {
+  description = "Enable access logging for S3 and CloudFront"
+  type        = bool
+  default     = true
+}
+
+variable "log_retention_days" {
+  description = "Number of days to retain logs (optimized for cost: 7 days default, most debugging happens within 48 hours)"
+  type        = number
+  default     = 7  # Optimized for cost: CloudWatch Logs $0.50/GB ingested + $0.03/GB stored. Use S3 for longer retention.
+  
+  validation {
+    condition     = var.log_retention_days >= 1 && var.log_retention_days <= 3650
+    error_message = "Log retention days must be between 1 and 3650."
+  }
+}
+
+variable "enable_realtime_logs" {
+  description = "Enable CloudFront real-time logs (via Kinesis)"
+  type        = bool
+  default     = false
+}
+
+variable "realtime_log_sampling_rate" {
+  description = "Sampling rate for real-time logs (1-100)"
+  type        = number
+  default     = 100
+  
+  validation {
+    condition     = var.realtime_log_sampling_rate >= 1 && var.realtime_log_sampling_rate <= 100
+    error_message = "Real-time log sampling rate must be between 1 and 100."
+  }
+}
+
+# =============================================================================
+# ROUTE53 CONFIGURATION
+# =============================================================================
+
+variable "create_route53_records" {
+  description = "Create Route53 DNS records for custom domains"
+  type        = bool
+  default     = false
+}
+
+variable "route53_zone_name" {
+  description = "Route53 hosted zone name (required if create_route53_records is true)"
+  type        = string
+  default     = ""
+}
+
+# =============================================================================
+# MONITORING AND ALARMS
+# =============================================================================
+
+variable "enable_budget_alerts" {
+  description = "Enable AWS Budget alerts for cost control"
+  type        = bool
+  default     = true
+}
+
+variable "monthly_budget_limit" {
+  description = "Monthly budget limit in USD"
+  type        = number
+  default     = 100
+}
+
+variable "budget_alert_threshold_percent" {
+  description = "Budget alert threshold as percentage of budget"
+  type        = number
+  default     = 80
+}
+
+variable "budget_alert_emails" {
+  description = "Email addresses for budget alerts"
   type        = list(string)
-  default     = ["US", "CA", "GB", "DE", "FR", "AU", "JP", "IN"]
+  default     = []
 }
 
-variable "ssl_certificate_arn" {
-  description = "ARN of SSL certificate for HTTPS"
+variable "enable_cost_dashboard" {
+  description = "Enable CloudWatch dashboard for cost optimization monitoring"
+  type        = bool
+  default     = true
+}
+
+variable "s3_request_threshold" {
+  description = "Threshold for S3 requests per 5 minutes (cost monitoring)"
+  type        = number
+  default     = 100000  # 100k requests per 5 minutes
+}
+
+variable "s3_bucket_size_threshold_gb" {
+  description = "Threshold for S3 bucket size in GB (cost monitoring)"
+  type        = number
+  default     = 100  # 100 GB
+}
+
+variable "enable_cloudwatch_alarms" {
+  description = "Enable CloudWatch alarms for CloudFront metrics (disable for cost optimization when using external monitoring tools like DataDog/New Relic)"
+  type        = bool
+  default     = false  # Disabled by default: saves $15-25/month. Use external APM tools for production monitoring.
+}
+
+variable "cloudfront_4xx_error_threshold" {
+  description = "Threshold for 4xx error rate alarm (percentage)"
+  type        = number
+  default     = 5.0
+}
+
+variable "cloudfront_5xx_error_threshold" {
+  description = "Threshold for 5xx error rate alarm (percentage)"
+  type        = number
+  default     = 1.0
+}
+
+variable "alarm_sns_topic_arn" {
+  description = "SNS topic ARN for CloudWatch alarms"
   type        = string
   default     = ""
-}
-
-# =============================================================================
-# CONTAINER CONFIGURATION
-# =============================================================================
-
-variable "ecr_repository_name" {
-  description = "Name of the ECR repository"
-  type        = string
-  default     = "react-app"
-}
-
-variable "image_tag_mutability" {
-  description = "Image tag mutability setting for ECR"
-  type        = string
-  default     = "MUTABLE"
-  
-  validation {
-    condition     = contains(["MUTABLE", "IMMUTABLE"], var.image_tag_mutability)
-    error_message = "Image tag mutability must be either MUTABLE or IMMUTABLE."
-  }
-}
-
-variable "image_scanning_on_push" {
-  description = "Enable image scanning on push to ECR"
-  type        = bool
-  default     = true
-}
-
-variable "container_name" {
-  description = "Name of the container"
-  type        = string
-  default     = "react-app"
-}
-
-variable "container_port" {
-  description = "Port exposed by the container"
-  type        = number
-  default     = 3000
-}
-
-variable "container_cpu" {
-  description = "CPU units for the container (1024 = 1 vCPU)"
-  type        = number
-  default     = 512
-  
-  validation {
-    condition     = contains([256, 512, 1024, 2048, 4096], var.container_cpu)
-    error_message = "Container CPU must be one of: 256, 512, 1024, 2048, 4096."
-  }
-}
-
-variable "container_memory" {
-  description = "Memory for the container (in MB)"
-  type        = number
-  default     = 1024
-  
-  validation {
-    condition = (
-      (var.container_cpu == 256 && contains([512, 1024, 2048], var.container_memory)) ||
-      (var.container_cpu == 512 && var.container_memory >= 1024 && var.container_memory <= 4096) ||
-      (var.container_cpu == 1024 && var.container_memory >= 2048 && var.container_memory <= 8192) ||
-      (var.container_cpu == 2048 && var.container_memory >= 4096 && var.container_memory <= 16384) ||
-      (var.container_cpu == 4096 && var.container_memory >= 8192 && var.container_memory <= 30720)
-    )
-    error_message = "Container memory must be compatible with CPU allocation. See AWS Fargate task sizing documentation."
-  }
-}
-
-variable "health_check_path" {
-  description = "Health check path for the application"
-  type        = string
-  default     = "/health"
-}
-
-variable "health_check_interval" {
-  description = "Health check interval in seconds"
-  type        = number
-  default     = 30
-}
-
-variable "health_check_timeout" {
-  description = "Health check timeout in seconds"
-  type        = number
-  default     = 5
-}
-
-variable "environment_variables" {
-  description = "Environment variables for the container"
-  type        = map(string)
-  default     = {
-    NODE_ENV = "production"
-    PORT     = "3000"
-  }
-}
-
-variable "secrets" {
-  description = "Secrets for the container (stored in AWS Secrets Manager)"
-  type        = map(string)
-  default     = {}
-}
-
-# =============================================================================
-# COMPUTE CONFIGURATION
-# =============================================================================
-
-variable "ecs_cluster_name" {
-  description = "Name of the ECS cluster"
-  type        = string
-  default     = "react-app-cluster"
-}
-
-variable "enable_container_insights" {
-  description = "Enable CloudWatch Container Insights"
-  type        = bool
-  default     = true
-}
-
-variable "service_name" {
-  description = "Name of the ECS service"
-  type        = string
-  default     = "react-app-service"
-}
-
-variable "desired_count" {
-  description = "Desired number of running tasks"
-  type        = number
-  default     = 2
-  
-  validation {
-    condition     = var.desired_count >= 1 && var.desired_count <= 100
-    error_message = "Desired count must be between 1 and 100."
-  }
-}
-
-variable "min_capacity" {
-  description = "Minimum number of running tasks"
-  type        = number
-  default     = 1
-}
-
-variable "max_capacity" {
-  description = "Maximum number of running tasks"
-  type        = number
-  default     = 10
-}
-
-variable "cpu_target_value" {
-  description = "Target CPU utilization percentage for auto scaling"
-  type        = number
-  default     = 70
-  
-  validation {
-    condition     = var.cpu_target_value >= 1 && var.cpu_target_value <= 100
-    error_message = "CPU target value must be between 1 and 100."
-  }
-}
-
-variable "memory_target_value" {
-  description = "Target memory utilization percentage for auto scaling"
-  type        = number
-  default     = 80
-  
-  validation {
-    condition     = var.memory_target_value >= 1 && var.memory_target_value <= 100
-    error_message = "Memory target value must be between 1 and 100."
-  }
-}
-
-variable "enable_blue_green" {
-  description = "Enable blue/green deployment"
-  type        = bool
-  default     = true
-}
-
-# =============================================================================
-# API GATEWAY CONFIGURATION
-# =============================================================================
-
-variable "create_api_gateway" {
-  description = "Create API Gateway for API endpoints"
-  type        = bool
-  default     = false
-}
-
-variable "api_gateway_name" {
-  description = "Name of the API Gateway"
-  type        = string
-  default     = "react-app-api"
-}
-
-variable "api_gateway_description" {
-  description = "Description of the API Gateway"
-  type        = string
-  default     = "API Gateway for React 19 application"
-}
-
-variable "lambda_functions" {
-  description = "Lambda functions configuration for API Gateway"
-  type = map(object({
-    filename         = string
-    function_name    = string
-    handler         = string
-    runtime         = string
-    memory_size     = number
-    timeout         = number
-    environment_vars = map(string)
-  }))
-  default = {}
-}
-
-variable "api_key_required" {
-  description = "Require API key for API Gateway"
-  type        = bool
-  default     = false
-}
-
-variable "throttle_settings" {
-  description = "API Gateway throttle settings"
-  type = object({
-    rate_limit  = number
-    burst_limit = number
-  })
-  default = {
-    rate_limit  = 1000
-    burst_limit = 2000
-  }
-}
-
-# =============================================================================
-# MONITORING CONFIGURATION
-# =============================================================================
-
-variable "log_retention_in_days" {
-  description = "CloudWatch log retention period in days"
-  type        = number
-  default     = 14
-  
-  validation {
-    condition = contains([
-      1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, 3653
-    ], var.log_retention_in_days)
-    error_message = "Log retention must be a valid CloudWatch log retention value."
-  }
-}
-
-variable "enable_xray_tracing" {
-  description = "Enable X-Ray tracing"
-  type        = bool
-  default     = true
-}
-
-variable "sns_topic_arn" {
-  description = "SNS topic ARN for alerts"
-  type        = string
-  default     = ""
-}
-
-variable "alert_email" {
-  description = "Email address for alerts"
-  type        = string
-  default     = ""
-}
-
-variable "cpu_alarm_threshold" {
-  description = "CPU utilization threshold for alarms (%)"
-  type        = number
-  default     = 80
-}
-
-variable "memory_alarm_threshold" {
-  description = "Memory utilization threshold for alarms (%)"
-  type        = number
-  default     = 85
-}
-
-variable "response_time_threshold" {
-  description = "Response time threshold for alarms (seconds)"
-  type        = number
-  default     = 2
-}
-
-variable "error_rate_threshold" {
-  description = "Error rate threshold for alarms (%)"
-  type        = number
-  default     = 5
-}
-
-# =============================================================================
-# DATABASE CONFIGURATION (Optional)
-# =============================================================================
-
-variable "create_database" {
-  description = "Create RDS database"
-  type        = bool
-  default     = false
-}
-
-variable "db_instance_class" {
-  description = "RDS instance class"
-  type        = string
-  default     = "db.t3.micro"
-}
-
-variable "db_allocated_storage" {
-  description = "RDS allocated storage (GB)"
-  type        = number
-  default     = 20
-}
-
-variable "db_engine" {
-  description = "RDS engine"
-  type        = string
-  default     = "postgres"
-}
-
-variable "db_engine_version" {
-  description = "RDS engine version"
-  type        = string
-  default     = "13.7"
 }

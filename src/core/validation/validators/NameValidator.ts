@@ -5,6 +5,7 @@
 
 import { BaseValidator } from './BaseValidator';
 import { createSuccessResult, createErrorResult, type FieldValidationResult } from '../ValidationResult';
+import { translateValidation } from '@/core/localization';
 
 /**
  * Name validation pattern
@@ -67,7 +68,7 @@ export class NameValidator extends BaseValidator {
   constructor(options: NameValidatorOptions = {}) {
     super();
     this.options = {
-      message: options.message || 'Name can only contain letters, spaces, hyphens, and apostrophes',
+      message: options.message || translateValidation('name', 'pattern'),
       allowEmpty: options.allowEmpty ?? false,
       minLength: options.minLength ?? NAME_MIN_LENGTH,
       maxLength: options.maxLength ?? NAME_MAX_LENGTH,
@@ -84,26 +85,26 @@ export class NameValidator extends BaseValidator {
       if (this.options.allowEmpty) {
         return createSuccessResult(field);
       }
-      return createErrorResult(field, [`${this.options.fieldName} is required`]);
+      return createErrorResult(field, [translateValidation(field, 'required')]);
     }
     
     const trimmed = name.trim();
     
     // Check if empty after trim
     if (trimmed.length === 0) {
-      return createErrorResult(field, [`${this.options.fieldName} cannot be empty`]);
+      return createErrorResult(field, [translateValidation(field, 'required')]);
     }
     
     // Check length
     if (trimmed.length < this.options.minLength) {
       return createErrorResult(field, [
-        `${this.options.fieldName} must be at least ${this.options.minLength} characters`
+        translateValidation(field, 'minLength', { count: this.options.minLength })
       ]);
     }
     
     if (trimmed.length > this.options.maxLength) {
       return createErrorResult(field, [
-        `${this.options.fieldName} must not exceed ${this.options.maxLength} characters`
+        translateValidation(field, 'maxLength', { count: this.options.maxLength })
       ]);
     }
     
@@ -120,7 +121,7 @@ export class NameValidator extends BaseValidator {
         trimmed.endsWith(' ') || 
         trimmed.endsWith('-') || 
         trimmed.endsWith("'")) {
-      return createErrorResult(field, [`${this.options.fieldName} has invalid format`]);
+      return createErrorResult(field, [translateValidation(field, 'pattern')]);
     }
     
     // Auto-capitalize if enabled (matches backend .title() behavior)

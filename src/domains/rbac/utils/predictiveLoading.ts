@@ -18,6 +18,8 @@
 import type { UserRole, Permission } from '../types/rbac.types';
 import { ROLE_HIERARCHY } from '../utils/rolePermissionMap';
 import { preloadRoleBundles, preloadPredictedBundles } from './bundleSplitting';
+import { logger } from '@/core/logging';
+import { storageService } from '@/core/storage';
 // import { rbacPersistentCache } from './persistentCache'; // For future integration
 
 // ========================================
@@ -413,11 +415,11 @@ class RbacPredictiveLoader {
       }
 
       if (import.meta.env.DEV) {
-        console.log(`✅ Preloaded ${prediction.type}: ${prediction.target} (${(prediction.probability * 100).toFixed(1)}%)`);
+        logger().info(`Preloaded ${prediction.type}: ${prediction.target}`, { probability: (prediction.probability * 100).toFixed(1) + '%' });
       }
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.warn(`⚠️ Failed to preload ${prediction.type}: ${prediction.target}`, error);
+        logger().warn(`Failed to preload ${prediction.type}: ${prediction.target}`, { error: String(error) });
       }
     }
   }
@@ -434,14 +436,18 @@ class RbacPredictiveLoader {
     if (this.currentSession) {
       // This will be filled by actual permission check results
       // For now, we just mark it as a predicted permission
-      console.log(`Predicting permission: ${permission} for user: ${this.currentSession.userId}`);
+      if (import.meta.env.DEV) {
+        logger().info(`Predicting permission: ${permission}`, { userId: this.currentSession.userId });
+      }
     }
   }
 
   private async preloadComponent(componentKey: string): Promise<void> {
     // This would normally trigger the bundle loader
     // For now, we just log the prediction
-    console.log(`Predicting component: ${componentKey}`);
+    if (import.meta.env.DEV) {
+      logger().info(`Predicting component: ${componentKey}`);
+    }
   }
 
   // ========================================
@@ -453,10 +459,10 @@ class RbacPredictiveLoader {
       await preloadRoleBundles(userRoles);
       
       if (import.meta.env.DEV) {
-        console.log(`🚀 Preloaded initial bundles for roles: ${userRoles.join(', ')}`);
+        logger().info(`Preloaded initial bundles for roles`, { roles: userRoles.join(', ') });
       }
     } catch (error) {
-      console.warn('Failed to preload initial bundles:', error);
+      logger().warn('Failed to preload initial bundles', { error: String(error) });
     }
   }
 
@@ -498,36 +504,22 @@ class RbacPredictiveLoader {
   private loadStoredData(): void {
     if (typeof window === 'undefined') return;
 
-    try {
-      const patterns = localStorage.getItem(STORAGE_KEYS.NAVIGATION_PATTERNS);
-      if (patterns) {
-        this.navigationPatterns = JSON.parse(patterns);
-      }
+    const patterns = storageService.get<NavigationPattern[]>(STORAGE_KEYS.NAVIGATION_PATTERNS);
+    if (patterns) {
+      this.navigationPatterns = patterns;
+    }
 
-      const model = localStorage.getItem(STORAGE_KEYS.PREDICTION_MODEL);
-      if (model) {
-        this.predictionModel = JSON.parse(model);
-      }
-    } catch (error) {
-      console.warn('Failed to load RBAC prediction data:', error);
+    const model = storageService.get<PredictionModel>(STORAGE_KEYS.PREDICTION_MODEL);
+    if (model) {
+      this.predictionModel = model;
     }
   }
 
   private saveStoredData(): void {
     if (typeof window === 'undefined') return;
 
-    try {
-      localStorage.setItem(
-        STORAGE_KEYS.NAVIGATION_PATTERNS,
-        JSON.stringify(this.navigationPatterns)
-      );
-      localStorage.setItem(
-        STORAGE_KEYS.PREDICTION_MODEL,
-        JSON.stringify(this.predictionModel)
-      );
-    } catch (error) {
-      console.warn('Failed to save RBAC prediction data:', error);
-    }
+    storageService.set(STORAGE_KEYS.NAVIGATION_PATTERNS, this.navigationPatterns);
+    storageService.set(STORAGE_KEYS.PREDICTION_MODEL, this.predictionModel);
   }
 
   private setupSessionCleanup(): void {
@@ -572,7 +564,7 @@ class RbacPredictiveLoader {
     
     if (typeof window !== 'undefined') {
       Object.values(STORAGE_KEYS).forEach(key => {
-        localStorage.removeItem(key);
+        storageService.remove(key);
       });
     }
   }

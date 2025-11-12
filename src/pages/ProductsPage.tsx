@@ -1,8 +1,8 @@
-import Button from '../components/Button';
-import Badge from '../components/Badge';
-import Card from '../components/Card';
-import { OptimizedImage } from '../shared/components/OptimizedImage';
-import { typographyVariants, animationUtils } from '../design-system/variants';
+import { Button } from '@/components';
+import Badge from '@/components/Badge';
+import Card from '@/components/Card';
+import { OptimizedImage } from '@/shared/components/OptimizedImage';
+import { typographyVariants, animationUtils } from '@/design-system/variants';
 
 // Products data - Single source of truth
 const productsData = {
@@ -154,7 +154,7 @@ export default function ProductsPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {productsData.stats.map((stat, index) => (
             <Card 
-              key={index} 
+              key={stat.label} 
               hover 
               className={`text-center ${animationUtils.withStagger('animate-scale-in', index)}`}
             >
@@ -216,7 +216,6 @@ export default function ProductsPage() {
                   width={400}
                   height={300}
                   priority={false}
-                  quality={85}
                   className="transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />

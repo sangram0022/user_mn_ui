@@ -4,9 +4,9 @@
 // ========================================
 
 import { useState } from 'react';
-import { useLogin } from '../hooks/useLogin';
+import { useLogin } from '../hooks/useAuth.hooks';
 import Input from '../../../components/Input';
-import Button from '../../../components/Button';
+import Button from '../../../shared/components/ui/Button';
 import type { LoginRequest } from '../types/auth.types';
 
 interface LoginFormProps {
@@ -24,17 +24,7 @@ export function LoginForm({ onSuccess, onError, redirectTo = '/dashboard' }: Log
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const loginMutation = useLogin({
-    onSuccess: () => {
-      onSuccess?.();
-      if (redirectTo) {
-        window.location.href = redirectTo;
-      }
-    },
-    onError: (error) => {
-      onError?.(error);
-    },
-  });
+  const loginMutation = useLogin();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +39,17 @@ export function LoginForm({ onSuccess, onError, redirectTo = '/dashboard' }: Log
       password,
     };
 
-    loginMutation.mutate(credentials);
+    loginMutation.mutate(credentials, {
+      onSuccess: () => {
+        onSuccess?.();
+        if (redirectTo) {
+          window.location.href = redirectTo;
+        }
+      },
+      onError: (error: Error) => {
+        onError?.(error);
+      },
+    });
   };
 
   const isDisabled = loginMutation.isPending || !email || !password;

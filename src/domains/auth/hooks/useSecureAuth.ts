@@ -5,6 +5,7 @@
 
 import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import secureAuthService from '../services/secureAuthService';
 import tokenService from '../services/tokenService';
 import type { LoginRequest, SecureLoginResponse, SecureLogoutResponse } from '../types/auth.types';
@@ -46,6 +47,7 @@ export function useSecureLogout(
   options?: UseSecureLogoutOptions
 ): UseMutationResult<SecureLogoutResponse, Error, void> {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: secureAuthService.logoutSecure,
@@ -60,8 +62,8 @@ export function useSecureLogout(
       // Call custom success handler
       options?.onSuccess?.(data);
 
-      // Redirect to login page
-      window.location.href = '/auth/login';
+      // Use React Router navigation instead of window.location
+      navigate('/auth/login', { replace: true });
     },
     onError: options?.onError,
   });

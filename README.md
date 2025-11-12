@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
+﻿# User Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, enterprise-grade user management system built with React 19, featuring comprehensive authentication, role-based access control (RBAC), and admin capabilities.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Authentication: JWT-based auth with refresh tokens
+- Role-Based Access Control: Multi-role system (admin, manager, user, auditor)
+- User Management: Complete CRUD operations with advanced filtering
+- Audit Logging: Comprehensive activity tracking
+- Multi-Factor Authentication: TOTP-based 2FA
+- Profile Management: User profile editing and password changes
+- Export Capabilities: CSV/JSON export functionality
+- Responsive Design: Mobile-first responsive UI
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19.1.1 - Latest React with compiler optimizations
+- TypeScript 5.9.3 - Static type checking
+- Vite 6.0.1 - Lightning-fast build tool
+- Tailwind CSS v4 - Modern utility-first CSS
+- React Router v7 - Type-safe routing
+- Zustand - Lightweight state management
+- React Query - Server state management
+- Playwright - End-to-end testing
 
-## Expanding the ESLint configuration
+## Quick Start
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Install dependencies:
+npm install
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Start development server:
+npm run dev
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Build for production:
+npm run build
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Documentation
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- Frontend Quick Start: ./FRONTEND_QUICK_START.md
+- Architecture Guide: ./ARCHITECTURE.md
+- API Documentation: ./FRONTEND_API_DOCUMENTATION.md
+- Validation Guide: ./VALIDATION_ARCHITECTURE.md
+- Production Deployment: ./PRODUCTION_DEPLOYMENT_GUIDE.md
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## License
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+This project is licensed under the MIT License.

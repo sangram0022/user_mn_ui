@@ -9,6 +9,7 @@
  */
 
 import { logger } from '@/core/logging';
+import { isProduction } from '@/core/config';
 
 /**
  * Initialize global error handlers
@@ -82,38 +83,6 @@ export function initializeGlobalErrorHandlers(): void {
 }
 
 /**
- * Setup performance monitoring and error reporting
- * Call this after initializeGlobalErrorHandlers
- */
-export function setupPerformanceMonitoring(): void {
-  // Monitor for performance issues that might indicate errors
-  if ('PerformanceObserver' in window) {
-    try {
-      // Monitor long tasks (> 50ms)
-      const observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.duration > 5000) {
-            // Log very long tasks (5+ seconds)
-            logger().warn('Long running task detected', {
-              name: entry.name,
-              duration: Math.round(entry.duration),
-              startTime: Math.round(entry.startTime),
-              context: 'performanceMonitoring.longTasks',
-            });
-          }
-        }
-      });
-
-      observer.observe({ entryTypes: ['longtask', 'measure'] });
-    } catch {
-      logger().debug('Performance monitoring not available', {
-        context: 'performanceMonitoring.setup',
-      });
-    }
-  }
-}
-
-/**
  * Send error report to backend/error tracking service
  * Useful for integrating with services like Sentry, Rollbar, etc.
  */
@@ -122,7 +91,7 @@ export async function reportErrorToBackend(
   context?: Record<string, unknown>
 ): Promise<void> {
   // Only report in production
-  if (import.meta.env.MODE !== 'production') {
+  if (!isProduction()) {
     return;
   }
 
@@ -136,20 +105,28 @@ export async function reportErrorToBackend(
       context,
     };
 
-    // TODO: Replace with actual error reporting endpoint
-    // Example:
-    // const response = await fetch('/api/errors', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(errorData),
-    // });
+    // Report to external error monitoring service
+    try {
+      const { errorReportingService } = await import('./errorReporting');
+      errorReportingService.report({
+        message: errorData.message,
+        level: 'error',
+        error: error instanceof Error ? error : undefined,
+        context: errorData,
+      });
+    } catch (importErr) {
+      logger().warn('Failed to import error reporting service', {
+        error: importErr instanceof Error ? importErr.message : String(importErr),
+        context: 'globalErrorHandler.reportErrorToBackend.import',
+      });
+    }
 
-    logger().info('Error report prepared (not sent)', {
-      ...errorData,
+    logger().info('Error reported to monitoring service', {
+      message: errorData.message,
       context: 'globalErrorHandler.reportErrorToBackend',
     });
   } catch (e) {
-    logger().warn('Failed to prepare error report', {
+    logger().warn('Failed to report error', {
       error: e instanceof Error ? e.message : String(e),
       context: 'globalErrorHandler.reportErrorToBackend.error',
     });
@@ -191,10 +168,10 @@ export function getErrorStatistics(): {
 
 /**
  * Export all global error handling utilities
+ * AWS CloudWatch handles performance monitoring
  */
 export const GlobalErrorHandler = {
   initialize: initializeGlobalErrorHandlers,
-  setupPerformanceMonitoring,
   reportErrorToBackend,
   getStatistics: getErrorStatistics,
 };

@@ -5,6 +5,7 @@
 
 import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import tokenService from '../services/tokenService';
 import type { LogoutResponse } from '../types/auth.types';
@@ -17,9 +18,12 @@ interface UseLogoutOptions {
 /**
  * Logout mutation hook
  * Logs out user and clears all cached data
+ * 
+ * ✅ ENHANCED: Includes default error handler with toast notifications
  */
 export const useLogout = (options?: UseLogoutOptions): UseMutationResult<LogoutResponse, Error, void> => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: authService.logout,
@@ -33,10 +37,21 @@ export const useLogout = (options?: UseLogoutOptions): UseMutationResult<LogoutR
       // Call custom success handler
       options?.onSuccess?.(data);
 
-      // Redirect to login page
-      window.location.href = '/auth/login';
+      // Use React Router navigation instead of window.location
+      navigate('/auth/login', { replace: true });
     },
-    onError: options?.onError,
+    onError: (error: Error) => {
+      if (options?.onError) {
+        options.onError(error);
+      } else {
+        // Even if logout fails, clear local state and redirect
+        // This ensures user can't be stuck in an invalid auth state
+        tokenService.clearTokens();
+        queryClient.clear();
+        // Use React Router navigation instead of window.location
+        navigate('/auth/login', { replace: true });
+      }
+    },
   });
 };
 

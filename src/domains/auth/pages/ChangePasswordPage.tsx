@@ -1,24 +1,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Lock, Eye, EyeOff } from 'lucide-react';
-import { useChangePassword } from '../hooks/useChangePassword';
+import { useChangePassword } from '../hooks/useAuth.hooks';
 import { useToast } from '../../../hooks/useToast';
+import { useStandardErrorHandler } from '@/shared/hooks/useStandardErrorHandler';
 import { Button, Input } from '../../../components';
 import { ROUTE_PATHS } from '../../../core/routing/routes';
-import { ValidationBuilder, calculatePasswordStrength } from '../../../core/validation';
-import { parseAuthError } from '../utils/authErrorMapping';
+import { calculatePasswordStrength } from '../../../core/validation';
 import Badge from '../../../shared/components/ui/Badge';
+import { PageErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
-export default function ChangePasswordPage() {
+export function ChangePasswordPage() {
   const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const toast = useToast();
-  const { mutate: changePassword, isPending } = useChangePassword();
-
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const handleError = useStandardErrorHandler();
+  
+  // Use new centralized change password hook with React Query
+  const changePasswordMutation = useChangePassword();
+  const loading = changePasswordMutation.isPending;
 
   const [formData, setFormData] = useState({
     currentPassword: '',
@@ -27,274 +27,169 @@ export default function ChangePasswordPage() {
   });
 
   const [passwordStrength, setPasswordStrength] = useState<'weak' | 'fair' | 'good' | 'strong' | 'very_strong'>('weak');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Update password strength for new password
     if (name === 'newPassword' && value) {
       const strength = calculatePasswordStrength(value);
       setPasswordStrength(strength.strength);
     }
   };
 
-  // Helper function for password strength badge color
-  const getPasswordStrengthColor = (): 'success' | 'warning' | 'danger' => {
-    switch (passwordStrength) {
-      case 'very_strong':
-      case 'strong':
-        return 'success';
-      case 'good':
-      case 'fair':
-        return 'warning';
-      case 'weak':
-      default:
-        return 'danger';
-    }
-  };
-
-  // Helper function for password strength badge label
-  const getPasswordStrengthLabel = () => {
-    return passwordStrength.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side validation using core validation system
-    const validation = new ValidationBuilder()
-      .validateField('current_password', formData.currentPassword, (b) => b.required())
-      .validateField('new_password', formData.newPassword, (b) => b.required().password())
-      .result();
-
-    if (!validation.isValid) {
-      const errors: Record<string, string> = {};
-      
-      if (validation.fields) {
-        Object.entries(validation.fields).forEach(([fieldName, fieldResult]) => {
-          if (!fieldResult.isValid && fieldResult.errors.length > 0) {
-            errors[fieldName] = fieldResult.errors[0];
-          }
-        });
-      }
-      
-      setFieldErrors(errors);
-      toast.error(t('changePassword.validation.validationFailed'));
-      return;
-    }
-
     // Password confirmation check
     if (formData.newPassword !== formData.confirmPassword) {
-      setFieldErrors({ confirmPassword: t('changePassword.validation.passwordsNotMatch') });
-      toast.error(t('changePassword.validation.passwordsNotMatch'));
+      // Use standard error handler for validation errors
+      handleError(new Error(t('changePassword.validation.passwordsNotMatch')), {
+        context: { operation: 'changePassword', validation: 'passwordMismatch' },
+        customMessage: t('changePassword.validation.passwordsNotMatch'),
+      });
       return;
     }
 
     // Check new password is different from current
     if (formData.currentPassword === formData.newPassword) {
-      setFieldErrors({ newPassword: t('changePassword.validation.passwordSameAsCurrent') });
-      toast.error(t('changePassword.validation.passwordSameAsCurrent'));
+      // Use standard error handler for validation errors
+      handleError(new Error(t('changePassword.validation.passwordSameAsCurrent')), {
+        context: { operation: 'changePassword', validation: 'samePassword' },
+        customMessage: t('changePassword.validation.passwordSameAsCurrent'),
+      });
       return;
     }
 
-    // Check password strength
-    const strength = calculatePasswordStrength(formData.newPassword);
-    if (strength.score < 40) {
-      setFieldErrors({ newPassword: t('changePassword.validation.passwordTooWeak') });
-      toast.error(t('changePassword.validation.passwordTooWeak'));
-      return;
-    }
-
-    // Clear errors
-    setFieldErrors({});
-
-    changePassword(
-      {
+    try {
+      await changePasswordMutation.mutateAsync({
         current_password: formData.currentPassword,
         new_password: formData.newPassword,
-      },
-      {
-        onSuccess: () => {
-          toast.success(t('changePassword.success'));
-          setFormData({
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: '',
-          });
-          setTimeout(() => {
-            navigate(ROUTE_PATHS.PROFILE);
-          }, 2000);
-        },
-        onError: (error: Error) => {
-          const errorMapping = parseAuthError(error);
-          toast.error(errorMapping.message || t('changePassword.error'));
-        },
-      }
-    );
+        confirm_password: formData.confirmPassword,
+      });
+
+      toast.success(t('changePassword.success'));
+      navigate(ROUTE_PATHS.PROFILE);
+    } catch (error) {
+      handleError(error, { context: { operation: 'changePassword' } });
+    }
   };
 
   return (
-    <div className="min-h-screen bg-surface-secondary py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
-            <Lock className="h-8 w-8 text-white" />
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 animate-fade-in">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8 animate-slide-down">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-blue-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
           </div>
-          <h1 className="text-3xl font-bold text-text-primary mb-2">
-            {t('changePassword.title')}
-          </h1>
-          <p className="text-text-tertiary">
-            {t('changePassword.subtitle')}
-          </p>
+          <h1 className="text-3xl font-bold mb-2" data-testid="change-password-heading">{t('changePassword.title')}</h1>
+          <p className="text-gray-600">{t('changePassword.subtitle')}</p>
         </div>
 
-        <div className="card-base p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="currentPassword" className="form-label">
-                {t('changePassword.form.currentPassword.label')}
-              </label>
-              <div className="relative">
-                <Input
-                  id="currentPassword"
-                  name="currentPassword"
-                  type={showCurrentPassword ? 'text' : 'password'}
-                  value={formData.currentPassword}
-                  onChange={handleChange}
-                  required
-                  autoComplete="current-password"
-                  placeholder={t('changePassword.form.currentPassword.placeholder')}
-                  className="pl-10 pr-10"
-                  error={fieldErrors.current_password}
-                />
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-tertiary" />
-                <button
-                  type="button"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary"
+        <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl shadow-xl border border-white/20 space-y-6 animate-scale-in" data-testid="change-password-form">
+          <Input
+            type="password"
+            name="currentPassword"
+            label={t('changePassword.currentPassword')}
+            placeholder={t('changePassword.currentPasswordPlaceholder')}
+            value={formData.currentPassword}
+            onChange={handleChange}
+            required
+            disabled={loading}
+            data-testid="current-password-input"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            }
+          />
+
+          <div>
+            <Input
+              type="password"
+              name="newPassword"
+              label={t('changePassword.newPassword')}
+              placeholder={t('changePassword.newPasswordPlaceholder')}
+              value={formData.newPassword}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              data-testid="new-password-input"
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+              }
+            />
+            {formData.newPassword && (
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-sm text-gray-600">{t('changePassword.passwordStrength')}</span>
+                <Badge 
+                  variant={
+                    passwordStrength === 'weak' ? 'danger' : 
+                    passwordStrength === 'fair' ? 'warning' : 
+                    passwordStrength === 'good' ? 'info' :
+                    'success'
+                  }
+                  className="text-xs"
                 >
-                  {showCurrentPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
+                  {passwordStrength.toUpperCase()}
+                </Badge>
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="border-t border-border-base pt-6">
-              <div className="space-y-6">
-                <div>
-                  <label htmlFor="newPassword" className="form-label">
-                    {t('changePassword.form.newPassword.label')}
-                  </label>
-                  <div className="relative">
-                    <Input
-                      id="newPassword"
-                      name="newPassword"
-                      type={showNewPassword ? 'text' : 'password'}
-                      value={formData.newPassword}
-                      onChange={handleChange}
-                      required
-                      autoComplete="new-password"
-                      placeholder={t('changePassword.form.newPassword.placeholder')}
-                      className="pl-10 pr-10"
-                      error={fieldErrors.new_password}
-                    />
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-tertiary" />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary"
-                    >
-                      {showNewPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                  
-                  {/* Password Strength Indicator */}
-                  {formData.newPassword && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-sm text-text-tertiary">
-                        Password Strength:
-                      </span>
-                      <Badge variant={getPasswordStrengthColor()}>
-                        {getPasswordStrengthLabel()}
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  <p className="form-hint">{t('changePassword.form.newPassword.hint')}</p>
-                </div>
+          <Input
+            type="password"
+            name="confirmPassword"
+            label={t('changePassword.confirmPassword')}
+            placeholder={t('changePassword.confirmPasswordPlaceholder')}
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+            disabled={loading}
+            data-testid="confirm-password-input"
+            icon={
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+          />
 
-                <div>
-                  <label htmlFor="confirmPassword" className="form-label">
-                    {t('changePassword.form.confirmPassword.label')}
-                  </label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      required
-                      autoComplete="new-password"
-                      placeholder={t('changePassword.form.confirmPassword.placeholder')}
-                      className="pl-10 pr-10"
-                      error={fieldErrors.confirmPassword}
-                    />
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-tertiary" />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-6 border-t border-border-base">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => navigate(ROUTE_PATHS.PROFILE)}
-              >
-                {t('changePassword.form.cancel')}
-              </Button>
-              <Button
-                type="submit"
-                disabled={
-                  isPending ||
-                  !formData.currentPassword ||
-                  !formData.newPassword ||
-                  !formData.confirmPassword
-                }
-              >
-                {isPending ? t('changePassword.form.submitting') : t('changePassword.form.submit')}
-              </Button>
-            </div>
-          </form>
-        </div>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-text-tertiary">
-            {t('changePassword.securityNote')}
-          </p>
-        </div>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            disabled={loading}
+            className="w-full"
+            data-testid="change-submit-button"
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                {t('changePassword.submitting')}
+              </>
+            ) : (
+              t('changePassword.submitButton')
+            )}
+          </Button>
+        </form>
       </div>
     </div>
   );
 }
+
+function ChangePasswordPageWithErrorBoundary() {
+  return (
+    <PageErrorBoundary>
+      <ChangePasswordPage />
+    </PageErrorBoundary>
+  );
+}
+
+export default ChangePasswordPageWithErrorBoundary;

@@ -14,7 +14,7 @@
  * ========================================
  */
 
-import { memo, useMemo, type ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { usePermissions } from '../hooks/usePermissions';
 import type { UserRole, Permission } from '../types/rbac.types';
 
@@ -38,44 +38,29 @@ function CanAccessInternal({
 }: OptimizedCanAccessProps) {
   const { hasRole, hasPermission } = usePermissions();
 
-  // ✅ Memoize complex access calculations
-  const accessResult = useMemo(() => {
-    // Check role access
-    if (requiredRole) {
-      const rolesArray = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-      const roleCheck = requireAll
-        ? rolesArray.every((role) => hasRole([role]))
-        : rolesArray.some((role) => hasRole([role]));
+  // React 19 Compiler: Simple boolean logic, no memoization needed
+  // Check role access
+  if (requiredRole) {
+    const rolesArray = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    const roleCheck = requireAll
+      ? rolesArray.every((role) => hasRole([role]))
+      : rolesArray.some((role) => hasRole([role]));
 
-      if (!roleCheck) {
-        return { hasAccess: false, reason: 'role' };
-      }
+    if (!roleCheck) {
+      return <>{fallback}</>;
     }
+  }
 
-    // Check permission access
-    if (requiredPermission) {
-      const permArray = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
-      const permCheck = requireAll
-        ? permArray.every((perm) => hasPermission(perm))
-        : permArray.some((perm) => hasPermission(perm));
+  // Check permission access
+  if (requiredPermission) {
+    const permArray = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
+    const permCheck = requireAll
+      ? permArray.every((perm) => hasPermission(perm))
+      : permArray.some((perm) => hasPermission(perm));
 
-      if (!permCheck) {
-        return { hasAccess: false, reason: 'permission' };
-      }
+    if (!permCheck) {
+      return <>{fallback}</>;
     }
-
-    return { hasAccess: true, reason: null };
-  }, [
-    requiredRole,
-    requiredPermission,
-    requireAll,
-    hasRole,
-    hasPermission,
-  ]);
-
-  // ✅ Early return optimization
-  if (!accessResult.hasAccess) {
-    return <>{fallback}</>;
   }
 
   // ✅ User has required access

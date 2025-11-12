@@ -1,0 +1,476 @@
+import { useState } from 'react';
+import Button from '../../../shared/components/ui/Button';
+import Input from '../../../shared/components/ui/Input';
+import Card from '../../../shared/components/ui/Card';
+import Badge from '../../../shared/components/ui/Badge';
+import { typographyVariants, animationUtils } from '../../../design-system/variants';
+import type { BadgeVariant } from '../../../design-system/variants';
+import { logger } from '../../../core/logging';
+
+// Contact data - Single source of truth
+const contactData = {
+  contactInfo: [
+    {
+      id: 1,
+      title: 'Email Us',
+      description: 'Send us an email and we\'ll respond within 24 hours',
+      value: 'hello@usermn.com',
+      icon: '📧',
+      action: 'mailto:hello@usermn.com',
+      actionText: 'Send Email',
+    },
+    {
+      id: 2,
+      title: 'Call Us',
+      description: 'Speak directly with our team during business hours',
+      value: '+1 (555) 123-4567',
+      icon: '📞',
+      action: 'tel:+15551234567',
+      actionText: 'Call Now',
+    },
+    {
+      id: 3,
+      title: 'Visit Office',
+      description: 'Come visit us at our headquarters',
+      value: '123 Business Ave, Suite 100\nSan Francisco, CA 94105',
+      icon: '📍',
+      action: 'https://maps.google.com',
+      actionText: 'Get Directions',
+    },
+    {
+      id: 4,
+      title: 'Live Chat',
+      description: 'Chat with our support team in real-time',
+      value: 'Available 9 AM - 6 PM PST',
+      icon: '💬',
+      action: '#',
+      actionText: 'Start Chat',
+    },
+  ],
+
+  officeHours: [
+    { day: 'Monday - Friday', hours: '9:00 AM - 6:00 PM PST' },
+    { day: 'Saturday', hours: '10:00 AM - 4:00 PM PST' },
+    { day: 'Sunday', hours: 'Closed' },
+  ],
+
+  departments: [
+    { name: 'General Inquiry', email: 'info@usermn.com' },
+    { name: 'Sales', email: 'sales@usermn.com' },
+    { name: 'Support', email: 'support@usermn.com' },
+    { name: 'Partnerships', email: 'partners@usermn.com' },
+    { name: 'Press & Media', email: 'press@usermn.com' },
+  ],
+
+  teamMembers: [
+    {
+      id: 1,
+      name: 'Sarah Johnson',
+      role: 'Head of Customer Success',
+      email: 'sarah@usermn.com',
+      avatar: '👩‍💼',
+      bio: 'Sarah ensures every customer has an exceptional experience with our platform.',
+    },
+    {
+      id: 2,
+      name: 'Michael Chen',
+      role: 'Technical Support Lead',
+      email: 'michael@usermn.com',
+      avatar: '👨‍💻',
+      bio: 'Michael leads our technical support team and loves solving complex problems.',
+    },
+    {
+      id: 3,
+      name: 'Emily Rodriguez',
+      role: 'Sales Director',
+      email: 'emily@usermn.com',
+      avatar: '👩‍🚀',
+      bio: 'Emily helps businesses find the perfect solution for their user management needs.',
+    },
+  ],
+
+  faqs: [
+    {
+      id: 1,
+      question: 'How quickly can you respond to support requests?',
+      answer: 'We typically respond to all support requests within 2-4 hours during business hours. For urgent issues, our premium support plan offers 1-hour response times.',
+    },
+    {
+      id: 2,
+      question: 'Do you offer custom development services?',
+      answer: 'Yes! We provide custom development services for enterprise clients. Contact our sales team to discuss your specific requirements and get a tailored solution.',
+    },
+    {
+      id: 3,
+      question: 'What are your implementation timelines?',
+      answer: 'Implementation timelines vary based on project complexity. Simple integrations take 1-2 weeks, while complex enterprise solutions can take 8-12 weeks. We\'ll provide a detailed timeline during consultation.',
+    },
+    {
+      id: 4,
+      question: 'Do you provide training for new users?',
+      answer: 'Absolutely! We offer comprehensive training programs including video tutorials, documentation, live webinars, and one-on-one training sessions for enterprise customers.',
+    },
+  ],
+};
+
+export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    company: '',
+    department: '',
+    subject: '',
+    message: '',
+    priority: 'normal',
+    newsletter: false,
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Simulate form submission
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    logger().info('Contact form submitted', { formData });
+    setIsSubmitting(false);
+    
+    // Reset form
+    setFormData({
+      name: '',
+      email: '',
+      company: '',
+      department: '',
+      subject: '',
+      message: '',
+      priority: 'normal',
+      newsletter: false,
+    });
+    
+    alert('Thank you for your message! We\'ll get back to you soon.');
+  };
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-16 animate-fade-in">
+      {/* Hero Section */}
+      <section className="text-center space-y-6">
+        <h1 className={`${typographyVariants.headings.h1} text-gradient`}>
+          Get in Touch
+        </h1>
+        <p className={`${typographyVariants.body.xl} text-gray-600 max-w-3xl mx-auto`}>
+          We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Badge variant="success">24/7 Support Available</Badge>
+          <Badge variant="info">Average 2-hour Response</Badge>
+          <Badge variant="primary">Free Consultation</Badge>
+        </div>
+      </section>
+
+      {/* Contact Methods */}
+      <section>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {contactData.contactInfo.map((contact, index) => (
+            <Card 
+              key={contact.id} 
+              hover 
+              className={`text-center group ${animationUtils.withStagger('animate-scale-in', index)}`}
+            >
+              <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
+                {contact.icon}
+              </div>
+              <h3 className="text-lg font-semibold mb-2 group-hover:text-brand-primary transition-colors">
+                {contact.title}
+              </h3>
+              <p className="text-gray-600 text-sm mb-3">{contact.description}</p>
+              <div className="text-sm font-medium mb-4 whitespace-pre-line">
+                {contact.value}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  if (contact.action.startsWith('http') || contact.action.startsWith('mailto') || contact.action.startsWith('tel')) {
+                    window.open(contact.action, '_blank');
+                  }
+                }}
+              >
+                {contact.actionText}
+              </Button>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Contact Form & Info */}
+      <section className="grid lg:grid-cols-3 gap-12">
+        {/* Contact Form */}
+        <div className="lg:col-span-2">
+          <Card className="animate-slide-up">
+            <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <Input
+                  type="text"
+                  label="Full Name *"
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  required
+                  icon={
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  }
+                />
+                <Input
+                  type="email"
+                  label="Email Address *"
+                  placeholder="john@company.com"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  required
+                  icon={
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                    </svg>
+                  }
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <Input
+                  type="text"
+                  label="Company"
+                  placeholder="Company Name"
+                  value={formData.company}
+                  onChange={(e) => handleInputChange('company', e.target.value)}
+                  icon={
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  }
+                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                  <select
+                    value={formData.department}
+                    onChange={(e) => handleInputChange('department', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  >
+                    <option value="">Select Department</option>
+                    {contactData.departments.map((dept) => (
+                      <option key={dept.name} value={dept.name}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <Input
+                type="text"
+                label="Subject *"
+                placeholder="How can we help you?"
+                value={formData.subject}
+                onChange={(e) => handleInputChange('subject', e.target.value)}
+                required
+              />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Message *</label>
+                <textarea
+                  rows={6}
+                  placeholder="Tell us more about your inquiry..."
+                  value={formData.message}
+                  onChange={(e) => handleInputChange('message', e.target.value)}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Priority Level</label>
+                <div className="flex gap-4">
+                  {[
+                    { value: 'low', label: 'Low', color: 'success' as BadgeVariant },
+                    { value: 'normal', label: 'Normal', color: 'primary' as BadgeVariant },
+                    { value: 'high', label: 'High', color: 'warning' as BadgeVariant },
+                    { value: 'urgent', label: 'Urgent', color: 'danger' as BadgeVariant },
+                  ].map((priority) => (
+                    <label key={priority.value} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="priority"
+                        value={priority.value}
+                        checked={formData.priority === priority.value}
+                        onChange={(e) => handleInputChange('priority', e.target.value)}
+                        className="w-4 h-4 text-brand-primary border-gray-300 focus:ring-2 focus:ring-blue-500"
+                      />
+                      <Badge variant={priority.color} className="text-xs">
+                        {priority.label}
+                      </Badge>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.newsletter}
+                  onChange={(e) => handleInputChange('newsletter', e.target.checked)}
+                  className="mt-1 w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">
+                  I'd like to receive updates about new features, products, and special offers.
+                  You can unsubscribe at any time.
+                </span>
+              </label>
+
+              <div className="flex gap-4">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Message'
+                  )}
+                </Button>
+                <Button type="reset" variant="outline" size="lg">
+                  Reset
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+
+        {/* Additional Info */}
+        <div className="space-y-6">
+          {/* Office Hours */}
+          <Card className="animate-slide-right">
+            <h3 className="text-lg font-semibold mb-4">Office Hours</h3>
+            <div className="space-y-3">
+              {contactData.officeHours.map((schedule, index) => (
+                <div key={index} className="flex justify-between items-center py-2">
+                  <span className="text-gray-700">{schedule.day}</span>
+                  <span className="text-gray-600 font-medium">{schedule.hours}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Team Members */}
+          <Card className="animate-slide-right animate-stagger-1">
+            <h3 className="text-lg font-semibold mb-4">Meet Our Team</h3>
+            <div className="space-y-4">
+              {contactData.teamMembers.map((member) => (
+                <div key={member.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="text-2xl">{member.avatar}</div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900">{member.name}</h4>
+                    <p className="text-sm text-brand-primary">{member.role}</p>
+                    <p className="text-xs text-gray-600 mt-1">{member.bio}</p>
+                    <a
+                      href={`mailto:${member.email}`}
+                      className="text-xs text-brand-primary hover:opacity-80 mt-1 inline-block"
+                    >
+                      {member.email}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Quick Links */}
+          <Card className="animate-slide-right animate-stagger-2">
+            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <div className="space-y-2">
+              {[
+                { name: 'Knowledge Base', icon: '📚' },
+                { name: 'Video Tutorials', icon: '🎥' },
+                { name: 'API Documentation', icon: '⚡' },
+                { name: 'Community Forum', icon: '👥' },
+                { name: 'System Status', icon: '🟢' },
+              ].map((link, index) => (
+                <a
+                  key={index}
+                  href="#"
+                  className="flex items-center gap-3 p-2 text-gray-700 hover:text-brand-primary hover:bg-blue-50 rounded-lg transition-colors"
+                >
+                  <span>{link.icon}</span>
+                  <span className="text-sm">{link.name}</span>
+                  <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="space-y-8">
+        <div className="text-center">
+          <h2 className={`${typographyVariants.headings.h2}`}>Frequently Asked Questions</h2>
+          <p className={`${typographyVariants.body.lg} text-gray-600 mt-4`}>
+            Find quick answers to common questions
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-6">
+          {contactData.faqs.map((faq, index) => (
+            <Card 
+              key={faq.id} 
+              className={animationUtils.withStagger('animate-slide-up', index)}
+            >
+              <h3 className="font-semibold text-lg mb-3 text-gray-900">
+                {faq.question}
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                {faq.answer}
+              </p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Map Section */}
+      <section>
+        <Card className="overflow-hidden">
+          <div className="relative h-64 bg-linear-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-6xl mb-4">🗺️</div>
+              <h3 className="text-xl font-semibold text-gray-700">Interactive Map</h3>
+              <p className="text-gray-600">Find us at our San Francisco headquarters</p>
+              <Button variant="primary" size="sm" className="mt-4">
+                View on Google Maps
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </section>
+    </div>
+  );
+}

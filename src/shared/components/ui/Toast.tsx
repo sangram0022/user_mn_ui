@@ -1,5 +1,5 @@
 import { X, CheckCircle, XCircle, Info, AlertTriangle } from 'lucide-react';
-import { useNotificationStore } from '../../../store/notificationStore';
+import { useNotificationStore } from '@/store/notificationStore';
 
 export default function Toast() {
   const { toasts, removeToast } = useNotificationStore();

@@ -44,11 +44,20 @@ const LazyRegisterPage = lazy(() => import('../../domains/auth/pages/RegisterPag
 const LazyForgotPasswordPage = lazy(() => import('../../domains/auth/pages/ForgotPasswordPage'));
 const LazyResetPasswordPage = lazy(() => import('../../domains/auth/pages/ResetPasswordPage'));
 const LazyChangePasswordPage = lazy(() => import('../../domains/auth/pages/ChangePasswordPage'));
+const LazyVerifyEmailPage = lazy(() => import('../../domains/auth/pages/VerifyEmailPage'));
+const LazyVerifyEmailPendingPage = lazy(() => import('../../domains/auth/pages/VerifyEmailPendingPage'));
 
 // Admin Pages
 const LazyAdminDashboardPage = lazy(() => import('../../domains/admin/pages/DashboardPage'));
 const LazyAdminAuditLogsPage = lazy(() => import('../../domains/admin/pages/AuditLogsPage'));
 const LazyAdminUsersPage = lazy(() => import('../../domains/admin/pages/UsersPage'));
+const LazyAdminUserDetailPage = lazy(() => import('../../domains/admin/pages/UserDetailPage-refactored'));
+const LazyAdminUserViewPage = lazy(() => import('../../domains/admin/pages/UserViewPage'));
+const LazyAdminUserEditPage = lazy(() => import('../../domains/admin/pages/UserEditPage'));
+const LazyAdminUserApprovalPage = lazy(() => import('../../domains/admin/pages/UserApprovalPage'));
+const LazyAdminRolesPage = lazy(() => import('../../domains/admin/pages/RolesPage'));
+const LazyAdminRoleDetailPage = lazy(() => import('../../domains/admin/pages/RoleDetailPage'));
+const LazyAdminReportsPage = lazy(() => import('../../domains/admin/pages/ReportsPage'));
 
 // Auditor Pages
 const LazyAuditorDashboardPage = lazy(() => import('../../domains/auditor/pages/DashboardPage'));
@@ -99,7 +108,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/login',
     component: LazyLoginPage,
-    layout: 'auth',
+    layout: 'default',
     guard: 'public',
     title: 'Login',
     description: 'Sign in to your account',
@@ -107,7 +116,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/auth/login',
     component: LazyLoginPage,
-    layout: 'auth',
+    layout: 'default',
     guard: 'public',
     title: 'Login',
     description: 'Sign in to your account',
@@ -115,7 +124,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/register',
     component: LazyRegisterPage,
-    layout: 'auth',
+    layout: 'default',
     guard: 'public',
     title: 'Register',
     description: 'Create a new account',
@@ -123,7 +132,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/auth/register',
     component: LazyRegisterPage,
-    layout: 'auth',
+    layout: 'default',
     guard: 'public',
     title: 'Register',
     description: 'Create a new account',
@@ -159,6 +168,22 @@ export const routes: RouteConfig[] = [
     guard: 'public',
     title: 'Reset Password',
     description: 'Set a new password',
+  },
+  {
+    path: '/auth/verify/:token',
+    component: LazyVerifyEmailPage,
+    layout: 'auth',
+    guard: 'public',
+    title: 'Verify Email',
+    description: 'Verify your email address',
+  },
+  {
+    path: '/auth/verify-email-pending',
+    component: LazyVerifyEmailPendingPage,
+    layout: 'auth',
+    guard: 'public',
+    title: 'Verify Email - Check Your Inbox',
+    description: 'Check your email to verify your account',
   },
 
   // ============================================================================
@@ -203,12 +228,84 @@ export const routes: RouteConfig[] = [
     requiredRoles: ['admin', 'super_admin'],
   },
   {
+    path: '/admin/users',
+    component: LazyAdminUsersPage,
+    layout: 'admin',
+    guard: 'admin',
+    title: 'Users Management',
+    description: 'Manage all users in the system',
+    requiredRoles: ['admin', 'super_admin'],
+  },
+  {
+    path: '/admin/users/approvals',
+    component: LazyAdminUserApprovalPage,
+    layout: 'admin',
+    guard: 'admin',
+    title: 'User Approvals',
+    description: 'Review and approve pending user registrations',
+    requiredRoles: ['admin', 'super_admin'],
+  },
+  {
+    path: '/admin/users/:userId/edit',
+    component: LazyAdminUserEditPage,
+    layout: 'admin',
+    guard: 'admin',
+    title: 'Edit User',
+    description: 'Edit user information',
+    requiredRoles: ['admin', 'super_admin'],
+  },
+  {
+    path: '/admin/users/:userId',
+    component: LazyAdminUserViewPage,
+    layout: 'admin',
+    guard: 'admin',
+    title: 'View User',
+    description: 'View user profile',
+    requiredRoles: ['admin', 'super_admin'],
+  },
+  {
+    path: '/admin/users/:id',
+    component: LazyAdminUserDetailPage,
+    layout: 'admin',
+    guard: 'admin',
+    title: 'User Details',
+    description: 'View and edit user details',
+    requiredRoles: ['admin', 'super_admin'],
+  },
+  {
+    path: '/admin/roles',
+    component: LazyAdminRolesPage,
+    layout: 'admin',
+    guard: 'admin',
+    title: 'Roles Management',
+    description: 'Manage roles and permissions',
+    requiredRoles: ['admin', 'super_admin'],
+  },
+  {
+    path: '/admin/roles/:name',
+    component: LazyAdminRoleDetailPage,
+    layout: 'admin',
+    guard: 'admin',
+    title: 'Role Details',
+    description: 'View and edit role permissions',
+    requiredRoles: ['admin', 'super_admin'],
+  },
+  {
     path: '/admin/audit-logs',
     component: LazyAdminAuditLogsPage,
     layout: 'admin',
     guard: 'admin',
     title: 'Audit Logs',
-    description: 'Manage and review audit logs',
+    description: 'Monitor and review system activity',
+    requiredRoles: ['admin', 'super_admin'],
+  },
+  {
+    path: '/admin/reports',
+    component: LazyAdminReportsPage,
+    layout: 'admin',
+    guard: 'admin',
+    title: 'Reports',
+    description: 'Generate and manage system reports',
     requiredRoles: ['admin', 'super_admin'],
   },
   {
@@ -321,9 +418,19 @@ export const ROUTES = {
   USER_DASHBOARD: '/dashboard',
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN: '/admin',
-  ADMIN_AUDIT_LOGS: '/admin/audit-logs',
   AUDITOR_DASHBOARD: '/auditor/dashboard',
   AUDITOR: '/auditor',
+  
+  // Admin routes
+  ADMIN_USERS: '/admin/users',
+  ADMIN_USER_VIEW: '/admin/users/:userId',
+  ADMIN_USER_EDIT: '/admin/users/:userId/edit',
+  ADMIN_USER_DETAIL: '/admin/users/:id',
+  ADMIN_USER_APPROVALS: '/admin/users/approvals',
+  ADMIN_ROLES: '/admin/roles',
+  ADMIN_ROLE_DETAIL: '/admin/roles/:name',
+  ADMIN_AUDIT_LOGS: '/admin/audit-logs',
+  ADMIN_REPORTS: '/admin/reports',
   
   // Public pages
   CONTACT: '/contact',
@@ -341,6 +448,17 @@ export const buildRoute = {
   dashboard: () => '/dashboard',
   login: () => '/login',
   register: () => '/register',
+  
+  // Admin navigation helpers
+  adminDashboard: () => '/admin',
+  adminUsers: () => '/admin/users',
+  adminUserView: (userId: string) => `/admin/users/${userId}`,
+  adminUserEdit: (userId: string) => `/admin/users/${userId}/edit`,
+  adminUserDetail: (userId: string) => `/admin/users/${userId}`,
+  adminUserApprovals: () => '/admin/users/approvals',
+  adminRoles: () => '/admin/roles',
+  adminRoleDetail: (roleName: string) => `/admin/roles/${roleName}`,
+  adminAuditLogs: () => '/admin/audit-logs',
 } as const;
 
 // ============================================================================

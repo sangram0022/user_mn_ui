@@ -5,6 +5,7 @@
 
 import { BaseValidator } from './BaseValidator';
 import { createSuccessResult, createErrorResult, type FieldValidationResult } from '../ValidationResult';
+import { translateValidation } from '@/core/localization';
 
 /**
  * Username validation pattern
@@ -54,7 +55,7 @@ export class UsernameValidator extends BaseValidator {
   constructor(options: UsernameValidatorOptions = {}) {
     super();
     this.options = {
-      message: options.message || 'Username can only contain letters, numbers, and underscores',
+      message: options.message || translateValidation('username', 'pattern'),
       allowEmpty: options.allowEmpty ?? false,
       minLength: options.minLength ?? USERNAME_MIN_LENGTH,
       maxLength: options.maxLength ?? USERNAME_MAX_LENGTH,
@@ -69,18 +70,18 @@ export class UsernameValidator extends BaseValidator {
       if (this.options.allowEmpty) {
         return createSuccessResult(field);
       }
-      return createErrorResult(field, ['Username is required']);
+      return createErrorResult(field, [translateValidation(field, 'required')]);
     }
     
     const trimmed = username.trim();
     
     // Check length
     if (trimmed.length < this.options.minLength) {
-      return createErrorResult(field, [`Username must be at least ${this.options.minLength} characters`]);
+      return createErrorResult(field, [translateValidation(field, 'minLength', { count: this.options.minLength })]);
     }
     
     if (trimmed.length > this.options.maxLength) {
-      return createErrorResult(field, [`Username must not exceed ${this.options.maxLength} characters`]);
+      return createErrorResult(field, [translateValidation(field, 'maxLength', { count: this.options.maxLength })]);
     }
     
     // Check format - must match backend pattern

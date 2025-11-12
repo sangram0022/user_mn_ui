@@ -1,6 +1,7 @@
 // Theme Management Store
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { storageService } from '@/core/storage';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -48,13 +49,10 @@ function applyTheme(theme: Theme) {
 
 // Initialize theme on load
 if (typeof window !== 'undefined') {
-  const storedTheme = localStorage.getItem('theme-storage');
+  const storedTheme = storageService.get<{ state: { theme: Theme } }>('theme-storage');
   if (storedTheme) {
-    try {
-      const { state } = JSON.parse(storedTheme);
-      applyTheme(state.theme);
-    } catch {
-      applyTheme('system');
-    }
+    applyTheme(storedTheme.state.theme);
+  } else {
+    applyTheme('system');
   }
 }

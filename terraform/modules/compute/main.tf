@@ -53,7 +53,7 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
 # CloudWatch Log Group for ECS Exec
 resource "aws_cloudwatch_log_group" "ecs_exec" {
   name              = "/aws/ecs/exec/${var.cluster_name}"
-  retention_in_days = var.log_retention_days
+  retention_in_days = 7  # Reduced from default 30 to 7 days for cost optimization
 
   tags = merge(var.common_tags, {
     Name = "${var.cluster_name}-exec-logs"

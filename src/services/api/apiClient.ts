@@ -2,13 +2,69 @@
 // API Client - Enhanced with Auth Interceptors
 // SINGLE SOURCE OF TRUTH for API configuration
 // ========================================
+//
+// This client expects backend responses to follow standardized formats:
+//
+// SUCCESS RESPONSE (ApiResponse<T>):
+// {
+//   success: true,
+//   data: T,
+//   message?: string,
+//   timestamp?: string
+// }
+//
+// VALIDATION ERROR (422 - ValidationErrorResponse):
+// {
+//   success: false,
+//   error: "Validation failed",
+//   field_errors: {
+//     email: ["Email is required", "Invalid format"],
+//     password: ["Too short"]
+//   },
+//   message_code?: "VALIDATION_ERROR",
+//   timestamp?: string
+// }
+//
+// GENERIC ERROR (ErrorResponse):
+// {
+//   success: false,
+//   error: "Error message",
+//   detail?: "Additional details",
+//   message_code?: "ERROR_CODE",
+//   status?: 500,
+//   timestamp?: string
+// }
+//
+// @see {ApiResponse} @/core/api/types
+// @see {ValidationErrorResponse} @/core/api/types
+// @see {ErrorResponse} @/core/api/types
+// ========================================
 
 import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
-import tokenService from '../../domains/auth/services/tokenService';
+import tokenService from '@/domains/auth/services/tokenService';
 import { logger } from '@/core/logging';
 import { APIError } from '@/core/error';
+import { config, isDevelopment } from '@/core/config';
+import type { ValidationErrorResponse, FieldErrors } from '@/core/api';
+import { RequestDeduplicator } from '@/shared/utils/requestDeduplication';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// ========================================
+// Request Deduplication
+// Prevents duplicate parallel requests
+// Available for use in apiHelpers or custom hooks
+// ========================================
+
+export const requestDeduplicator = new RequestDeduplicator();
+
+// Log deduplication stats periodically in development
+if (isDevelopment()) {
+  setInterval(() => {
+    const stats = requestDeduplicator.getStats();
+    if (stats.totalRequests > 0) {
+      logger().debug('Request deduplication stats', stats);
+    }
+  }, 60000); // Every minute
+}
 
 // ========================================
 // Refresh Token Queue
@@ -48,9 +104,29 @@ const getRetryDelay = (retryCount: number): number => {
 // Create Axios Instance
 // ========================================
 
+/**
+ * Axios instance configured for API communication
+ * 
+ * Features:
+ * - Automatic JWT token injection
+ * - Token refresh on 401 errors
+ * - CSRF protection for mutations
+ * - Exponential backoff retry for network errors
+ * - Structured error handling with APIError
+ * 
+ * Response Types:
+ * - Success responses follow ApiResponse<T> structure
+ * - Validation errors follow ValidationErrorResponse structure (422)
+ * - Generic errors follow ErrorResponse structure
+ * 
+ * @see {ApiResponse} @/core/api/types
+ * @see {ValidationErrorResponse} @/core/api/types
+ * @see {ErrorResponse} @/core/api/types
+ * @see {APIError} @/core/error
+ */
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 30000,
+  baseURL: config.api.baseUrl,
+  timeout: config.api.timeout,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -69,8 +145,42 @@ apiClient.interceptors.request.use(
     // Get access token from storage
     const accessToken = tokenService.getAccessToken();
     
+    // Enhanced debug logging for authentication issues
+    if (isDevelopment()) {
+      logger().debug('API Request interceptor', {
+        url: config.url,
+        method: config.method,
+        hasToken: !!accessToken,
+        tokenPreview: accessToken ? `${accessToken.substring(0, 20)}...` : 'none',
+        context: 'apiClient.requestInterceptor',
+      });
+    }
+    
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+      
+      // Log that we SET the Authorization header
+      if (isDevelopment()) {
+        logger().info('✓ Authorization header SET for request', {
+          url: config.url,
+          method: config.method,
+          context: 'apiClient.requestInterceptor',
+        });
+      }
+    } else {
+      // Only warn for protected endpoints, not public ones like login/register
+      const isPublicEndpoint = config.url?.includes('/auth/login') || 
+                                config.url?.includes('/auth/register') ||
+                                config.url?.includes('/auth/forgot-password') ||
+                                config.url?.includes('/auth/reset-password');
+      if (!isPublicEndpoint) {
+        logger().warn('⚠ No access token found for protected request', {
+          url: config.url,
+          method: config.method,
+          headers: Object.keys(config.headers || {}),
+          context: 'apiClient.requestInterceptor',
+        });
+      }
     }
 
     // Add CSRF token for mutations (POST, PUT, PATCH, DELETE)
@@ -104,6 +214,15 @@ apiClient.interceptors.request.use(
 // - Queue requests during refresh
 // - Exponential backoff for retries
 // - Enhanced error handling
+// 
+// Expected Response Types:
+// - Success: ApiResponse<T> with { success: true, data: T }
+// - Validation Error: ValidationErrorResponse with field_errors
+// - Generic Error: ErrorResponse with error message
+// 
+// @see {ApiResponse} @/core/api/types
+// @see {ValidationErrorResponse} @/core/api/types
+// @see {ErrorResponse} @/core/api/types
 // ========================================
 
 apiClient.interceptors.response.use(
@@ -116,7 +235,7 @@ apiClient.interceptors.response.use(
       ? performance.now() - parseInt(response.config.headers['X-Request-Start'] as string, 10)
       : undefined;
 
-    if (import.meta.env.MODE === 'development' || status >= 400) {
+    if (isDevelopment() || status >= 400) {
       logger().debug(`API Success: ${method} ${url}`, {
         status,
         duration,
@@ -138,18 +257,18 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         // Token refresh in progress, queue this request
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-            }
-            return apiClient(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
+        try {
+          const token = await new Promise<string | null>((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
           });
+          
+          if (originalRequest.headers && token) {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+          }
+          return apiClient(originalRequest);
+        } catch (err) {
+          return Promise.reject(err);
+        }
       }
 
       originalRequest._retry = true;
@@ -165,34 +284,43 @@ apiClient.interceptors.response.use(
         // Call refresh token endpoint
         const response = await tokenService.refreshToken(refreshToken);
         
+        // Extract token data from response
+        const tokenData = response.data;
+        if (!tokenData) {
+          throw new Error('Invalid refresh token response');
+        }
+        
         // Store new tokens
         tokenService.storeTokens({
-          access_token: response.access_token,
-          refresh_token: response.refresh_token,
-          token_type: response.token_type,
-          expires_in: response.expires_in,
+          access_token: tokenData.access_token,
+          refresh_token: tokenData.refresh_token,
+          token_type: tokenData.token_type,
+          expires_in: tokenData.expires_in,
         });
 
         // Update original request with new token
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${response.access_token}`;
+          originalRequest.headers.Authorization = `Bearer ${tokenData.access_token}`;
         }
 
         // Process queued requests
-        processQueue(null, response.access_token);
+        processQueue(null, tokenData.access_token);
 
         // Retry original request
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, clear tokens and redirect to login
+        // Refresh failed, clear tokens
+        // Note: Redirect to login is handled by useStandardErrorHandler (SSOT)
+        // This prevents hard refresh and preserves navigation state
         processQueue(refreshError, null);
         tokenService.clearTokens();
         
-        // Only redirect if not already on login page
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
+        logger().warn('Token refresh failed, tokens cleared', {
+          error: refreshError,
+          context: 'apiClient.tokenRefresh.failed',
+        });
         
+        // Let the error propagate - useStandardErrorHandler will handle redirect
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -231,15 +359,35 @@ apiClient.interceptors.response.use(
 
     // ========================================
     // Enhanced Error Handling with Logging
+    // Handles ValidationErrorResponse and ErrorResponse types
     // ========================================
 
-    const errorMessage = 
-      error.response?.data?.detail ||
-      error.response?.data?.message || 
-      error.message || 
-      'An unexpected error occurred';
+    // Extract error message from various response formats
+    let errorMessage = 'An unexpected error occurred';
+    // Response data can be ValidationErrorResponse or a generic error object
+    const responseData = error.response?.data as (ValidationErrorResponse & { message?: string; detail?: string; code?: string }) | undefined;
     
-    const errorCode = error.response?.data?.code;
+    if (responseData) {
+      // Check for field_errors first (backend validation errors)
+      // Corresponds to ValidationErrorResponse type
+      if (responseData.field_errors && typeof responseData.field_errors === 'object') {
+        const fieldErrors = responseData.field_errors as FieldErrors;
+        const allErrors = Object.values(fieldErrors).flat();
+        if (allErrors.length > 0) {
+          errorMessage = allErrors[0]; // Use first error as primary message
+        }
+      }
+      // Fallback to message, detail, or generic error
+      else if (responseData.message) {
+        errorMessage = responseData.message;
+      } else if (responseData.detail) {
+        errorMessage = responseData.detail;
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    const errorCode = responseData?.message_code || responseData?.code;
     const status = error.response?.status || 0;
     const method = originalRequest?.method?.toUpperCase() || 'UNKNOWN';
     const url = originalRequest?.url || 'unknown';
@@ -262,8 +410,8 @@ apiClient.interceptors.response.use(
       }
     );
 
-    // Throw structured error
-    throw new APIError(
+    // Throw structured error with enhanced message and full response data
+    const apiError = new APIError(
       errorMessage,
       status,
       method,
@@ -271,6 +419,14 @@ apiClient.interceptors.response.use(
       error.response?.data,
       duration
     );
+    
+    // Attach field_errors to the error object for component-level handling
+    // This preserves the ValidationErrorResponse structure for consumers
+    if (responseData?.field_errors) {
+      (apiError as unknown as { field_errors: FieldErrors }).field_errors = responseData.field_errors;
+    }
+    
+    throw apiError;
   }
 );
 

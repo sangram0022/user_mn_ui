@@ -15,6 +15,7 @@ export const ROUTE_PATHS = {
   FORGOT_PASSWORD: '/auth/forgot-password',
   RESET_PASSWORD: '/auth/reset-password/:token',
   VERIFY_EMAIL: '/auth/verify/:token',
+  VERIFY_EMAIL_PENDING: '/auth/verify-email-pending',
 
   // Profile routes (protected)
   PROFILE: '/profile',
@@ -69,6 +70,7 @@ export const PUBLIC_ROUTES = [
   ROUTE_PATHS.FORGOT_PASSWORD,
   ROUTE_PATHS.RESET_PASSWORD,
   ROUTE_PATHS.VERIFY_EMAIL,
+  ROUTE_PATHS.VERIFY_EMAIL_PENDING,
 ] as const;
 
 /**

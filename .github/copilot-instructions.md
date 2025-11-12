@@ -22,403 +22,184 @@ For more details, visit https://code.visualstudio.com/docs/copilot/copilot-custo
 - Ensure single source of truth for all state
 - Centralize localStorage access
 - Document state ownership
-
-## 🎯 Core Development Principles
-
-### 1. DRY (Don't Repeat Yourself) Principle
-
-**CRITICAL**: Eliminate all code duplication across the codebase.
-
-#### Validation Rules
-
-- **NEVER** duplicate validation logic in multiple files
-- **ALWAYS** use centralized validators from `src/core/validation/`
-- **SINGLE SOURCE OF TRUTH**: All validation patterns defined once
-- ❌ **FORBIDDEN**: Creating validation functions in component files
-- ✅ **REQUIRED**: Import from `@/core/validation`
-
-```typescript
-// ❌ WRONG: Duplicating validation logic
-function validateEmail(email: string): boolean {
-  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-}
-
-// ✅ CORRECT: Use centralized validator
-import { ValidationBuilder, isValidEmail } from "@/core/validation";
-const result = new ValidationBuilder().required().email().validate(email);
-```
-
-#### Business Logic
-
-- Extract common logic into reusable functions/hooks
-- Share utility functions via `src/shared/utils/`
-- Create custom hooks for repeated patterns
-- Use composition over duplication
-
-#### Constants and Configuration
-
-- Define constants once in appropriate config files
-- Use environment variables for deployment-specific values
-- Group related constants together
-- Never hardcode values that appear multiple times
-
-### 2. Clean Code Practices
-
-#### Naming Conventions
-
-- **Variables**: Use descriptive camelCase names (`userData`, `isLoading`)
-- **Functions**: Use verb-noun pattern (`getUserData`, `validateForm`)
-- **Components**: Use PascalCase (`UserProfile`, `LoginForm`)
-- **Constants**: Use UPPER_SNAKE_CASE (`API_BASE_URL`, `MAX_RETRY_COUNT`)
-- **Types/Interfaces**: Use PascalCase with descriptive names (`UserProfile`, `ValidationResult`)
-- **Boolean variables**: Use is/has/should prefix (`isAuthenticated`, `hasError`, `shouldRetry`)
-
-#### Function Guidelines
-
-- **Keep functions small**: Maximum 20-30 lines per function
-- **Single responsibility**: Each function does ONE thing
-- **Pure functions**: No side effects when possible
-- **Clear parameters**: Maximum 3-4 parameters, use objects for more
-- **Return early**: Use guard clauses to reduce nesting
-
-```typescript
-// ❌ WRONG: Too many responsibilities
-function processUserData(user: User) {
-  // validates, transforms, saves, and sends email
-}
-
-// ✅ CORRECT: Single responsibility
-function validateUser(user: User): ValidationResult {}
-function transformUserData(user: User): TransformedUser {}
-function saveUser(user: TransformedUser): Promise<void> {}
-function sendWelcomeEmail(email: string): Promise<void> {}
-```
-
-#### Code Organization
-
-- **File length**: Keep files under 200-300 lines
-- **Logical grouping**: Group related functions together
-- **Clear imports**: Organize imports (external → internal → relative)
-- **Export clarity**: Export only what's needed from modules
-
-#### Comments and Documentation
-
-- Write self-documenting code (clear names > comments)
-- Use JSDoc for public APIs and complex logic
-- Explain WHY, not WHAT (code shows what)
-- Keep comments up-to-date with code changes
-
-### 3. Single Responsibility Principle (SRP)
-
-**Each module/class/function should have ONE reason to change.**
-
-#### Component Responsibility
-
-```typescript
-// ❌ WRONG: Component handles too much
-function UserDashboard() {
-  // fetching data
-  // validation
-  // formatting
-  // rendering
-  // state management
-}
-
-// ✅ CORRECT: Separate concerns
-function UserDashboard() {
-  const { data } = useUserData(); // Data fetching
-  const { validate } = useValidation(); // Validation
-  const formatted = useFormattedData(data); // Formatting
-  return <DashboardView data={formatted} />; // Rendering
-}
-```
-
-#### Module Responsibility
-
-- **Validation modules**: Only validation logic
-- **API modules**: Only HTTP communication
-- **Utility modules**: Only pure helper functions
-- **Component modules**: Only UI rendering and user interaction
-
-#### Hook Responsibility
-
-- Custom hooks should have a single, clear purpose
-- Extract data fetching, state management, side effects separately
-- Name hooks to reflect their single responsibility
-
-```typescript
-// ✅ CORRECT: Single purpose hooks
-const { user, isLoading } = useUserData(userId);
-const { validate, errors } = useFormValidation(schema);
-const { submit, isSubmitting } = useFormSubmission(onSubmit);
-```
-
-### 4. Single Source of Truth (SSOT) Principle
-
-**Every piece of knowledge must have a single, unambiguous representation.**
-
-#### State Management
-
-- **One place** for each piece of application state
-- Derive computed values, don't duplicate state
-- Use context or global state for shared data
-- Avoid prop drilling with proper state architecture
-
-```typescript
-// ❌ WRONG: Duplicated state
-const [user, setUser] = useState(userData);
-const [userName, setUserName] = useState(userData.name); // Duplicate!
-
-// ✅ CORRECT: Single source, derive values
-const [user, setUser] = useState(userData);
-const userName = user.name; // Derived
-```
-
-#### Configuration
-
-- **Backend alignment**: All validation rules match backend exactly
-- **Reference**: `src/core/validation/` is SSOT for validation patterns
-- **API contracts**: Define types once, share across frontend
-- **Environment config**: Single .env file per environment
-
-#### Type Definitions
-
-```typescript
-// ✅ CORRECT: Define types once
-// src/types/user.types.ts
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-}
-
-// Use everywhere
-import type { User } from "@/types/user.types";
-```
-
-#### Validation Rules (CRITICAL)
-
-- **Backend source of truth**: Python FastAPI (`user_mn`)
-- **Frontend implementation**: `src/core/validation/` matches backend 100%
-- **No local validation**: Always import from core validation
-- **Pattern alignment**: Email, password, phone patterns match backend exactly
-
-```typescript
-// ✅ CORRECT: Using SSOT validators
-import {
-  ValidationBuilder,
-  EMAIL_REGEX,
-  PASSWORD_RULES,
-  USERNAME_REGEX,
-  PHONE_REGEX,
-  NAME_REGEX,
-} from "@/core/validation";
-
-// All patterns match backend src/app/core/validation/patterns.py
-```
-
-## 🔒 Validation System (SSOT Implementation)
-
-### Architecture
-
-```
-src/core/validation/
-├── ValidationBuilder.ts         ← Fluent interface for chaining
-├── ValidationStatus.ts          ← Status enum (SUCCESS, ERROR, WARNING)
-├── ValidationResult.ts          ← Type-safe result dataclasses
-├── validators/
-│   ├── BaseValidator.ts         ← Common validator interface
-│   ├── EmailValidator.ts        ← Email: RFC 5322, 254 chars max
-│   ├── PasswordValidator.ts     ← Password: 8-128 chars, strength calc
-│   ├── UsernameValidator.ts     ← Username: 3-30 chars, alphanumeric+_
-│   ├── PhoneValidator.ts        ← Phone: E.164, 10-15 digits
-│   └── NameValidator.ts         ← Name: 2-50 chars, letters/spaces/-/'
-└── index.ts                     ← Main exports
-```
-
-### Usage Requirements
-
-#### Form Validation (REQUIRED PATTERN)
-
-```typescript
-import { ValidationBuilder } from "@/core/validation";
-
-const formResult = new ValidationBuilder()
-  .validateField("email", email, (b) => b.required().email())
-  .validateField("password", password, (b) => b.required().password())
-  .validateField("username", username, (b) => b.required().username())
-  .result();
-
-if (!formResult.isValid) {
-  setErrors(formResult.errors);
-}
-```
-
-#### Quick Validation
-
-```typescript
-import { quickValidate, isValidEmail } from "@/core/validation";
-
-// Boolean check
-if (isValidEmail(email)) {
-  /* proceed */
-}
-
-// Full result
-const result = quickValidate.email(email);
-if (!result.isValid) {
-  console.log(result.errors);
-}
-```
-
-#### Password Strength
-
-```typescript
-import { calculatePasswordStrength } from "@/core/validation";
-
-const strength = calculatePasswordStrength(password);
-// strength.score: 0-100
-// strength.strength: 'weak' | 'fair' | 'good' | 'strong' | 'very_strong'
-// strength.feedback: string[] with improvement suggestions
-```
-
-### Forbidden Patterns
-
-❌ **NEVER create local validation functions:**
-
-```typescript
-// ❌ FORBIDDEN
-function validateEmail(email: string) {
-  /* ... */
-}
-const emailRegex = /^[^@]+@[^@]+$/;
-```
-
-❌ **NEVER duplicate validation logic:**
-
-```typescript
-// ❌ FORBIDDEN
-if (password.length < 8) {
-  /* ... */
-}
-if (!/[A-Z]/.test(password)) {
-  /* ... */
-}
-```
-
-❌ **NEVER hardcode validation patterns:**
-
-```typescript
-// ❌ FORBIDDEN
-const pattern = /^[a-zA-Z0-9]+$/;
-```
-
-### Backend Alignment Verification
-
-**Before implementing any validation:**
-
-1. Check backend patterns in `user_mn/src/app/core/validation/patterns.py`
-2. Verify alignment in `BACKEND_FRONTEND_VALIDATION_ALIGNMENT.md`
-3. Use existing validators from `@/core/validation`
-4. If new validation needed, extend existing validators
-
-## 📐 Component Design Guidelines
-
-### Component Structure (Required Order)
-
-```typescript
-// 1. Imports (grouped)
-import { useState } from "react";
-import { ValidationBuilder } from "@/core/validation";
-import type { User } from "@/types";
-
-// 2. Types/Interfaces
-interface Props {}
-
-// 3. Constants (outside component)
-const MAX_RETRIES = 3;
-
-// 4. Component
-export function MyComponent({ prop }: Props) {
-  // 4a. Hooks (top of component)
-  const [state, setState] = useState();
-  const { data } = useQuery();
-
-  // 4b. Handlers
-  const handleSubmit = () => {};
-
-  // 4c. Effects (if needed)
-  useEffect(() => {}, []);
-
-  // 4d. Render
-  return <div>{/* JSX */}</div>;
-}
-```
-
-### Prop Drilling Solution
-
-- Use Context for deeply nested shared state
-- Use composition (children props) for layout components
-- Extract shared logic to custom hooks
-
-### Performance Optimization
-
-- Lazy load routes and heavy components
-- Use React Compiler (no manual memoization needed)
-- Virtualize long lists (react-window/react-virtual)
-- Optimize images (lazy load, proper formats)
-
-## 🚨 CRITICAL: Backup and Reference Pages Policy
-
-### CSS Backup Policy
-
-- **All CSS changes are backed up** in timestamped directories (e.g., `backup-2025-10-28-1317/`)
-- Before making major CSS changes, create a new backup using the established backup structure
-- Backup includes:
-  - `src/App.css`
-  - `src/index.css`
-  - `src/styles/` directory (complete)
-  - Documentation of changes
-
-### Reference Pages - DO NOT MODIFY
-
-- **NEVER apply CSS changes to reference pages** located in `src/_reference_backup_ui/`
-- These pages are for **reference purposes only**
-- Reference pages include:
-  - `ComponentPatternsReference.tsx`
-  - `FormPatternsReference.tsx`
-  - `HtmlShowcase.tsx`
-  - `ModernHtmlPage.tsx`
-  - `ProductsPage.tsx`
-  - `ServicesPage.tsx`
-  - `UIElementsShowcase.tsx`
-  - All associated documentation files
-
-### When Working with Styles:
-
-1. **Before changes**: Create backup if major modifications planned
-2. **During changes**: Only modify files in `src/styles/`, `src/App.css`, or `src/index.css`
-3. **Never touch**: Any files in `src/_reference_backup_ui/`
-4. **Documentation**: Update relevant markdown files for architectural changes
-
-### Backup Directory Structure:
-
-```
-backup-YYYY-MM-DD-HHMM/
-├── css/
-│   ├── App.css
-│   ├── index.css
-│   └── styles/ (complete directory)
-├── reference-pages/
-│   └── _reference_backup_ui/ (complete directory)
-└── README.md (backup documentation)
-```
-
-## Project Architecture Notes
-
 - Follow Domain-Driven Design principles
 - Maintain clean separation of concerns
 - Use established design system tokens
 - Keep components atomic and reusable
 - Implement proper error boundaries
 - Use TypeScript strictly (no any types)
+- All API calls through TanStack Query
+- All errors through useStandardErrorHandler
+- All logging through centralized logger
+
+Purpose
+
+- Provide authoritative guidance for Copilot AI and contributors to implement, refactor and audit the React + TypeScript project.
+- Enforce consistency, SOLID, DRY, no-dead-code, high performance and production-readiness.
+
+Core Principles (apply to every change)
+
+- Consistency: identical patterns for similar functionality (services, hooks, components, error handling, logging, i18n).
+- SOLID: single responsibility, explicit abstractions, dependency inversion for external services.
+- DRY: single source of truth for config, API contracts, validation, query keys, types, error formats.
+- No dead / redundant code: remove unused modules, tests, fixtures; document intentionally retained legacy.
+- Performance-first: code-splitting, lazy loading, virtualize large lists, minimize re-renders, optimize assets.
+- Production-ready: strict typing, comprehensive tests, CI gates, security best-practices, observability (instrumentation, logging).
+
+Scope
+
+- Frontend app (React + TypeScript) including services, shared libs, pages, hooks, tests and docs.
+
+Standard Patterns (mandatory)
+
+1. API Layer
+   - All network calls via a central apiClient wrapper (fetch/axios) with request/response interceptors.
+   - TanStack Query for data fetching; single SSOT for queryKeys.
+   - Service → hook → component pattern for every endpoint.
+   - Unified error shape and standardized error handling hook (useStandardErrorHandler).
+   - Avoid inline `fetch`/`axios` in components.
+
+2. State & Context
+   - Split contexts into State + Actions where appropriate.
+   - Global app state via clear domain stores (React context or lightweight store); no prop drilling.
+   - Central token management service (tokenService) used everywhere; no duplicate localStorage access.
+
+3. Component & Hooks
+   - Small function components, single responsibility, <= 200-300 LOC per file.
+   - Custom hooks for repeated logic; each hook one responsibility.
+   - Use React 19 features where applicable: useOptimistic for UI-only optimistic updates, useActionState for server-action like forms, use() where valid, Suspense for code-splitting.
+   - Remove unnecessary useMemo/useCallback; keep only when justified (document why).
+
+4. UI / UX Patterns
+   - All text via i18n/localization functions; no hard-coded user-facing strings.
+   - Central design tokens and variants; reuse design-system components.
+   - Loading and error patterns consistent across app (StandardLoading, StandardError).
+
+5. Validation & Types
+   - Centralized validation SSOT that mirrors backend (sync with backend validation rules).
+   - All API types and DTOs defined once and imported as type-only.
+   - Use `import type` for type-only imports.
+
+6. Auth & RBAC
+   - Single auth context/dependency for login/logout/refresh and permission checks.
+   - RBAC checks via a single `CanAccess`/`requirePermission` utility.
+   - API client must always attach Authorization header (and handle refresh transparently).
+
+7. Error Handling & Logging
+   - Centralized standard error handler with consistent behavior (401 redirect, field errors mapping, toast).
+   - Structured logging via centralized logger (no console.log in prod code).
+   - Error boundaries and logging for UI crashes.
+
+8. Performance & Accessibility
+   - Lazy-load heavy routes, code-split, prefetch critical data.
+   - Virtualize long lists (react-window/react-virtual) where > 200 items.
+   - Optimize images (responsive, modern formats, lazy load).
+   - Lighthouse checks in CI and bundle size budgets.
+   - Ensure ARIA, keyboard nav, focus management.
+
+9. Testing & CI
+   - Unit tests (Vitest), integration tests, e2e (Playwright).
+   - Mock network at e2e layer; no reliance on prod services.
+   - Enforce lint, type-check, tests and security scans in CI.
+
+Detect Missing Implementations & Poor Patterns (search targets)
+
+- Multiple apiClient implementations or direct fetch calls in components.
+- Duplicate token/localStorage access code.
+- Ad-hoc validation in components instead of centralized validators.
+- Multiple query key factories or hard-coded query keys.
+- Components performing data fetching and business logic (no separation).
+- Console.log or dev-only code left in prod paths.
+- Hard-coded user messages and strings.
+- Blocking synchronous operations in render/effects.
+- Large files > 300 LOC with mixed responsibilities.
+- Tests hitting real backend services in CI or not using mocks.
+- Duplicate or unused UI components and reference pages mixed with prod code.
+
+High-Priority Suggestions (ranked)
+
+1. Create SSOT modules:
+   - Central config (env parsing + runtime flags).
+   - Central apiClient (with interceptors for auth, CSRF, retry).
+   - Central queryKeys factory.
+   - Central tokenService and auth context.
+   - Centralized validation and types module.
+   - Centralized logger and diagnostic utilities.
+2. Enforce service→hook→component pattern; refactor ad-hoc endpoints.
+3. Consolidate error handling: single useStandardErrorHandler hook used by all hooks.
+4. Ensure RBAC checks are declarative and consistent (CanAccess component + hook).
+5. Add request/response metrics middleware and integrate with observability (do not duplicate cloud vendor features).
+6. Add retry/backoff wrapper for transient network failures.
+7. Migrate long lists to virtualization and audit heavy renders.
+8. Run dead-code detection tooling and remove unused assets/components; keep backups for reference pages externally.
+9. Document patterns in a single developer guide and enforce via pre-commit / CI checks.
+
+Implementation Plan (phased)
+
+- Phase 0 — Audit (1–2 days)
+  - Run static analysis (ESLint, TypeScript), dead-code detection, tests, bundle analysis; produce findings with severity (P0-P3).
+- Phase 1 — SSOT & infra (2–4 days)
+  - Implement central apiClient, tokenService, queryKeys, config and logger. Update imports across codebase.
+- Phase 2 — Services & Hooks (3–6 days)
+  - Refactor domain services to use central apiClient; create hooks that use TanStack Query; enforce standard error handler.
+- Phase 3 — Validation & Types (2–3 days)
+  - Centralize validation rules and types; align with backend; remove local validators.
+- Phase 4 — Auth / RBAC / UI Patterns (2–4 days)
+  - Standardize auth flow, permission checks, and UI components (loading, error, empty states).
+- Phase 5 — Performance & Tests (3–5 days)
+  - Add virtualization, prefetching, Lighthouse checks; migrate/expand unit & e2e tests; enforce CI gating.
+- Phase 6 — Cleanup & Docs (1–2 days)
+  - Remove dead code, update documentation, add PR checklist and developer guide.
+
+Deliverables per phase
+
+- Audit report with prioritized findings.
+- SSOT modules and small, focused refactor PRs.
+- Test coverage report and CI configuration updates.
+- Developer guide and architecture decision records.
+
+Checks & Automation
+
+- Provide an `audit` script to run linters, type checks, tests, bundle analysis and dead-code scan.
+- CI must fail on:
+  - Type errors
+  - Lint failures
+  - Test failures
+  - Coverage below thresholds
+  - Bundle size exceeding budget
+- Add pre-commit hooks to run quick lint/type checks.
+
+Quick CLI examples
+
+- Start dev: `npm run dev`
+- Build: `npm run build`
+- Start prod preview: `npm run preview`
+- Run unit tests: `npm run test`
+- Run e2e: `npm run test:e2e`
+- Run audit (local): `npm run audit`
+
+Notes & Constraints
+
+- Do not commit secrets; use env and secret manager.
+- Keep PRs small and focused; one concern per PR.
+- If a recommended change conflicts with a deliberate architecture decision, document the rationale and keep as-is.
+- Reference pages / showcases must be kept out of production change sets; maintain as read-only backups.
+
+Reporting
+
+- Automated audits produce machine-readable and human-readable findings.
+- Each P0 finding must include reproduction steps, suggested fix, code references, and test plan.
+
+Usage
+
+- Use this prompt as authoritative guidance for code generation, refactors and PR suggestions.
+- If an auto-suggestion does not comply, reject it and state why.
+
+Appendix — Key patterns to enforce
+
+- Service → hook → component
+- Single apiClient + tokenService
+- Centralized queryKeys and types
+- Centralized validation SSOT
+- Standardized error handler and logging
+- React 19 features applied where applicable (useOptimistic, useActionState, use())

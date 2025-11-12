@@ -54,7 +54,8 @@ function ProtectedRouteInternal({ children }: OptimizedRouteGuardProps) {
   const location = useLocation();
   const { isAuthenticated, isLoading } = use(AuthContext);
 
-  // ✅ Memoize navigation decision
+  // Kept: useMemo for complex navigation state computation with multiple branches
+  // React Compiler can't optimize conditional returns with Navigate components
   const navigationState = useMemo(() => {
     if (isLoading) {
       return { type: 'loading' as const };
@@ -110,7 +111,7 @@ OptimizedProtectedRoute.displayName = 'OptimizedProtectedRoute';
 function PublicRouteInternal({ children }: OptimizedRouteGuardProps) {
   const { isAuthenticated, isLoading } = use(AuthContext);
 
-  // ✅ Memoize navigation decision
+  // Kept: useMemo for navigation state computation - prevents unnecessary Navigate renders
   const navigationState = useMemo(() => {
     if (isLoading) {
       return { type: 'render' as const }; // Show content immediately for public routes
@@ -158,7 +159,8 @@ function AdminRouteInternal({
   const { isAuthenticated, isLoading } = use(AuthContext);
   const { hasRole } = usePermissions();
 
-  // ✅ Memoize complex authorization decision
+  // Kept: useMemo for complex authorization logic with role checking
+  // Multiple conditional branches prevent compiler optimization
   const authorizationState = useMemo(() => {
     if (isLoading) {
       return { type: 'loading' as const };

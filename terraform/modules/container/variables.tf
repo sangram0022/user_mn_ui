@@ -348,9 +348,9 @@ variable "enable_container_monitoring" {
 }
 
 variable "enable_container_insights" {
-  description = "Enable ECS Container Insights"
+  description = "Enable ECS Container Insights (costs $10-30/month per cluster). Disable to save costs when using external APM tools."
   type        = bool
-  default     = true
+  default     = false  # Disabled by default for cost optimization. Enable only when detailed container metrics needed.
 }
 
 variable "cluster_name" {

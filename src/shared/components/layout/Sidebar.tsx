@@ -6,14 +6,24 @@ import {
   Shield,
   Settings,
   FileText,
-  Activity,
   LayoutDashboard,
+  UserCheck,
+  BarChart3,
 } from 'lucide-react';
-import { ROUTE_PATHS } from '../../../core/routing/routes';
-import { useAuth } from '../../../hooks/useAuth';
-import { ROLES } from '../../../core/auth/roles';
+import { ROUTES } from '@/core/routing/config';
+import { useAuth } from '@/hooks/useAuth';
+import type { UserRole } from '@/domains/rbac/types/rbac.types';
+import { ComponentErrorBoundary } from '@/shared/components/error/ModernErrorBoundary';
 
-export default function Sidebar() {
+// Role constants for menu access control
+const ROLES: Record<string, UserRole> = {
+  ADMIN: 'admin',
+  USER: 'user',
+  AUDITOR: 'auditor',
+  SUPER_ADMIN: 'super_admin',
+};
+
+function Sidebar() {
   const { t } = useTranslation();
   const location = useLocation();
   const { user } = useAuth();
@@ -22,43 +32,49 @@ export default function Sidebar() {
 
   const menuItems = [
     {
-      path: ROUTE_PATHS.HOME,
+      path: ROUTES.HOME,
       icon: Home,
       label: t('nav.home'),
       roles: [],
     },
     {
-      path: ROUTE_PATHS.ADMIN_DASHBOARD,
+      path: ROUTES.ADMIN_DASHBOARD,
       icon: LayoutDashboard,
-      label: t('nav.admin'),
+      label: t('nav.adminDashboard'),
       roles: [ROLES.ADMIN],
     },
     {
-      path: ROUTE_PATHS.USERS_LIST,
+      path: ROUTES.ADMIN_USERS,
       icon: Users,
       label: t('nav.users'),
-      roles: [ROLES.ADMIN, ROLES.MODERATOR],
+      roles: [ROLES.ADMIN],
     },
     {
-      path: ROUTE_PATHS.ROLES_LIST,
+      path: ROUTES.ADMIN_USER_APPROVALS,
+      icon: UserCheck,
+      label: t('nav.userApprovals'),
+      roles: [ROLES.ADMIN],
+    },
+    {
+      path: ROUTES.ADMIN_ROLES,
       icon: Shield,
       label: t('nav.roles'),
       roles: [ROLES.ADMIN],
     },
     {
-      path: ROUTE_PATHS.AUDIT_LOGS,
+      path: ROUTES.ADMIN_AUDIT_LOGS,
       icon: FileText,
-      label: t('nav.audit'),
+      label: t('nav.auditLogs') || 'Audit Logs',
       roles: [ROLES.ADMIN],
     },
     {
-      path: ROUTE_PATHS.MONITORING_HEALTH,
-      icon: Activity,
-      label: t('nav.monitoring'),
+      path: ROUTES.ADMIN_REPORTS,
+      icon: BarChart3,
+      label: t('nav.reports') || 'Reports',
       roles: [ROLES.ADMIN],
     },
     {
-      path: ROUTE_PATHS.PROFILE,
+      path: '/profile',
       icon: Settings,
       label: t('nav.profile'),
       roles: [],
@@ -104,3 +120,13 @@ export default function Sidebar() {
     </aside>
   );
 }
+
+function SidebarWithErrorBoundary() {
+  return (
+    <ComponentErrorBoundary>
+      <Sidebar />
+    </ComponentErrorBoundary>
+  );
+}
+
+export default SidebarWithErrorBoundary;

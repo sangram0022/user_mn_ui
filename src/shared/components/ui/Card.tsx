@@ -4,7 +4,7 @@
  */
 
 import type { ReactNode, CSSProperties, HTMLAttributes, ElementType } from 'react';
-import { cardVariants, type CardVariant } from '../../../design-system/variants';
+import { cardVariants, type CardVariant } from '@/design-system/variants';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;

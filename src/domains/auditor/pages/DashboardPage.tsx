@@ -10,7 +10,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from '../../../components/Button';
+import { Button } from '../../../components';
 import { AuditStatCard } from '@/shared/components/audit-logs/AuditStatCard';
 import { AuditLogRow } from '@/shared/components/audit-logs/AuditLogRow';
 import type { AuditLog, AuditFilters } from '@/domains/audit-logs/types/auditLog.types';

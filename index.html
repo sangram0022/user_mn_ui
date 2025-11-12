@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="theme-color" content="#ffffff" />
     
     <!-- ============================================
          PERFORMANCE: Font Loading Optimization
@@ -11,13 +11,31 @@
     <!-- System fonts: instant loading without FOIT/FOUT -->
     <!-- No external font requests = faster FCP -->
     
-    <!-- Preconnect to common external resources (if needed in future) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" as="style">
-    <link rel="dns-prefetch" href="https://api.example.com">
+    <!-- ============================================
+         PERFORMANCE: Resource Hints
+         ============================================ -->
+    <!-- DNS Prefetch: Resolve DNS early (low priority) -->
+    <link rel="dns-prefetch" href="//api.example.com">
+    
+    <!-- Preconnect: Establish connection early (DNS + TCP + TLS) -->
+    <link rel="preconnect" href="https://api.example.com" crossorigin>
+    
+    <!-- Preload: Load critical resources with high priority -->
+    <link rel="modulepreload" href="/src/main.tsx">
     
     <!-- ============================================
-         SECURITY HEADERS (Task 19)
+         SEO: Favicon and App Icons
          ============================================ -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- ============================================
+         SECURITY HEADERS
+         ============================================ -->
+    <!-- Note: Security headers are configured in CloudFront Response Headers Policy -->
+    <!-- These meta tags are fallbacks for non-CloudFront environments -->
+    
     <!-- Prevent MIME type sniffing -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     
@@ -25,38 +43,12 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     
     <!-- Content Security Policy (CSP) -->
-    <!-- Note: For production, move to server headers for better enforcement -->
-    <meta http-equiv="Content-Security-Policy" content="
-      default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval';
-      style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob: https:;
-      font-src 'self' data:;
-      connect-src 'self' http://localhost:* ws://localhost:*;
-      frame-ancestors 'none';
-      base-uri 'self';
-      form-action 'self';
-    ">
-    
-    <!-- Prevent clickjacking -->
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    
-    <!-- Force HTTPS in production (browser compatibility) -->
-    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+    <!-- Production: Enforced via CloudFront headers -->
+    <!-- Development: Using meta tag for local testing -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' http://localhost:* ws://localhost:* https://api.example.com; base-uri 'self'; form-action 'self';">
     
     <!-- XSS Protection (legacy browsers) -->
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
-    
-    <!-- Permissions Policy -->
-    <meta http-equiv="Permissions-Policy" content="
-      geolocation=(),
-      microphone=(),
-      camera=(),
-      payment=(),
-      usb=(),
-      magnetometer=(),
-      gyroscope=()
-    ">
     
     <title>User Management System</title>
   </head>

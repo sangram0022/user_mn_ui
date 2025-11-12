@@ -16,6 +16,7 @@
 
 import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react';
 import type { UserRole, Permission } from '../types/rbac.types';
+import { logger } from '../../../core/logging';
 
 // ========================================
 // Types
@@ -135,10 +136,10 @@ export async function preloadRoleBundles(userRoles: UserRole[]): Promise<void> {
       preloadedBundles.add(bundleKey);
       
       if (import.meta.env.DEV) {
-        console.log(`✅ Preloaded RBAC bundle: ${bundleKey}`);
+        logger().debug('Preloaded RBAC bundle', { bundleKey });
       }
     } catch (error) {
-      console.warn(`⚠️ Failed to preload RBAC bundle: ${bundleKey}`, error);
+      logger().warn('Failed to preload RBAC bundle', { bundleKey, error });
     }
   });
 
@@ -201,6 +202,6 @@ export function clearRbacBundleCache(): void {
   preloadedBundles.clear();
   
   if (import.meta.env.DEV) {
-    console.log('🧹 Cleared RBAC bundle cache');
+    logger().debug('Cleared RBAC bundle cache');
   }
 }

@@ -335,15 +335,20 @@ export function extractErrorMessage(error: unknown): string {
 }
 
 /**
- * Extract error details for logging
+ * Error details extracted from any error
  */
-export function extractErrorDetails(error: unknown): {
+export interface ErrorDetails {
   message: string;
   stack?: string;
   code?: string;
   statusCode?: number;
   context?: Record<string, unknown>;
-} {
+}
+
+/**
+ * Extract error details for logging
+ */
+export function extractErrorDetails(error: unknown): ErrorDetails {
   if (isAppError(error)) {
     return {
       message: error.message,

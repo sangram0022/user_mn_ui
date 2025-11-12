@@ -3,7 +3,12 @@
  * Provides application health status for monitoring and container orchestration
  */
 
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
+import { apiClient } from '@/services/api/apiClient';
+import { storageService } from '@/core/storage';
+import { INTERVAL_TIMING } from '@/core/constants';
+import { config } from '@/core/config';
 
 export interface HealthStatus {
   status: 'healthy' | 'unhealthy' | 'degraded';
@@ -27,7 +32,7 @@ export function useHealthCheck() {
   const [healthStatus, setHealthStatus] = useState<HealthStatus>({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+    version: config.app.version,
     uptime: performance.now(),
     checks: {
       api: true,
@@ -57,7 +62,7 @@ export function useHealthCheck() {
       const status: HealthStatus = {
         status: apiCheck && storageCheck ? 'healthy' : 'degraded',
         timestamp: new Date().toISOString(),
-        version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+        version: config.app.version,
         uptime: performance.now(),
         checks: {
           api: apiCheck,
@@ -74,11 +79,11 @@ export function useHealthCheck() {
 
       setHealthStatus(status);
       return status;
-    } catch (error) {
+    } catch {
       const errorStatus: HealthStatus = {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
-        version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+        version: config.app.version,
         uptime: performance.now(),
         checks: {
           api: false,
@@ -96,32 +101,30 @@ export function useHealthCheck() {
     }
   };
 
-  // Check API health
+  // Check API health using apiClient for proper token injection and error handling
   const checkApiHealth = async (): Promise<boolean> => {
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-      if (!apiBaseUrl) return false;
-
-      const response = await fetch(`${apiBaseUrl}/health`, {
-        method: 'GET',
+      // Use apiClient instead of fetch() to get automatic token injection, CSRF protection, and error handling
+      const response = await apiClient.get('/health', {
         timeout: 5000,
-      } as RequestInit);
+      });
 
-      return response.ok;
+      return response.status === 200;
     } catch {
+      // Health check failed - API is down or unreachable
       return false;
     }
   };
 
-  // Check local storage health
+  // Check local storage health using storageService
   const checkLocalStorageHealth = (): boolean => {
     try {
       const testKey = '__health_check__';
       const testValue = 'test';
       
-      localStorage.setItem(testKey, testValue);
-      const retrieved = localStorage.getItem(testKey);
-      localStorage.removeItem(testKey);
+      storageService.set(testKey, testValue);
+      const retrieved = storageService.get<string>(testKey);
+      storageService.remove(testKey);
       
       return retrieved === testValue;
     } catch {
@@ -131,8 +134,8 @@ export function useHealthCheck() {
 
   // Check memory usage (if available)
   const checkMemoryUsage = (): number | undefined => {
-    if ('memory' in performance && (performance as any).memory) {
-      const memory = (performance as any).memory;
+    if ('memory' in performance && (performance as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory) {
+      const memory = (performance as { memory: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory;
       return Math.round((memory.usedJSHeapSize / memory.totalJSHeapSize) * 100);
     }
     return undefined;
@@ -140,7 +143,7 @@ export function useHealthCheck() {
 
   // Periodic health checks
   useEffect(() => {
-    const interval = setInterval(performHealthCheck, 60000); // Check every minute
+    const interval = setInterval(performHealthCheck, INTERVAL_TIMING.HEALTH_CHECK);
     performHealthCheck(); // Initial check
 
     return () => clearInterval(interval);
@@ -148,7 +151,10 @@ export function useHealthCheck() {
 
   // Expose health check endpoint globally for container health checks
   useEffect(() => {
-    (window as any).getHealthStatus = () => healthStatus;
+    interface WindowWithHealthCheck extends Window {
+      getHealthStatus?: () => HealthStatus | null;
+    }
+    (window as WindowWithHealthCheck).getHealthStatus = () => healthStatus;
     
     // Create a global health check endpoint
     const originalFetch = window.fetch;

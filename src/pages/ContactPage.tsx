@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import Button from '../components/Button';
+import { Button } from '../components';
 import Input from '../components/Input';
 import Card from '../components/Card';
 import Badge from '../components/Badge';
 import { typographyVariants, animationUtils } from '../design-system/variants';
 import type { BadgeVariant } from '../design-system/variants';
+import { logger } from '@/core/logging';
+import { useToast } from '@/hooks/useToast';
 
 // Contact data - Single source of truth
 const contactData = {
@@ -113,6 +115,7 @@ const contactData = {
 };
 
 export default function ContactPage() {
+  const toast = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -133,7 +136,7 @@ export default function ContactPage() {
     // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    console.log('Contact form submitted:', formData);
+    logger().info('Contact form submitted', { name: formData.name, email: formData.email, department: formData.department });
     setIsSubmitting(false);
     
     // Reset form
@@ -148,7 +151,7 @@ export default function ContactPage() {
       newsletter: false,
     });
     
-    alert('Thank you for your message! We\'ll get back to you soon.');
+    toast.success('Thank you for your message! We\'ll get back to you soon.');
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -369,8 +372,8 @@ export default function ContactPage() {
           <Card className="animate-slide-right">
             <h3 className="text-lg font-semibold mb-4">Office Hours</h3>
             <div className="space-y-3">
-              {contactData.officeHours.map((schedule, index) => (
-                <div key={index} className="flex justify-between items-center py-2">
+              {contactData.officeHours.map((schedule) => (
+                <div key={schedule.day} className="flex justify-between items-center py-2">
                   <span className="text-gray-700">{schedule.day}</span>
                   <span className="text-gray-600 font-medium">{schedule.hours}</span>
                 </div>
@@ -411,9 +414,9 @@ export default function ContactPage() {
                 { name: 'API Documentation', icon: '⚡' },
                 { name: 'Community Forum', icon: '👥' },
                 { name: 'System Status', icon: '🟢' },
-              ].map((link, index) => (
+              ].map((link) => (
                 <a
-                  key={index}
+                  key={link.name}
                   href="#"
                   className="flex items-center gap-3 p-2 text-gray-700 hover:text-brand-primary hover:bg-blue-50 rounded-lg transition-colors"
                 >

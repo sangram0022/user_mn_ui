@@ -4,9 +4,9 @@
 // ========================================
 
 import { useState } from 'react';
-import { useForgotPassword } from '../hooks/useForgotPassword';
+import { useForgotPassword } from '../hooks/useAuth.hooks';
 import Input from '../../../components/Input';
-import Button from '../../../components/Button';
+import { Button } from '../../../components';
 
 interface ForgotPasswordFormProps {
   onSuccess?: () => void;
@@ -21,15 +21,7 @@ export function ForgotPasswordForm({ onSuccess, onError }: ForgotPasswordFormPro
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const forgotPasswordMutation = useForgotPassword({
-    onSuccess: () => {
-      setSubmitted(true);
-      onSuccess?.();
-    },
-    onError: (error) => {
-      onError?.(error);
-    },
-  });
+  const forgotPasswordMutation = useForgotPassword();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,9 +30,20 @@ export function ForgotPasswordForm({ onSuccess, onError }: ForgotPasswordFormPro
       return;
     }
 
-    forgotPasswordMutation.mutate({
-      email: email.trim().toLowerCase(),
-    });
+    forgotPasswordMutation.mutate(
+      {
+        email: email.trim().toLowerCase(),
+      },
+      {
+        onSuccess: () => {
+          setSubmitted(true);
+          onSuccess?.();
+        },
+        onError: (error: Error) => {
+          onError?.(error);
+        },
+      }
+    );
   };
 
   const isDisabled = forgotPasswordMutation.isPending || !email;

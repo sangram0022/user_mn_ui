@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import type { RoleBasedButtonProps } from '../domains/rbac/types/rbac.types';
 import { usePermissions } from '../domains/rbac/hooks/usePermissions';
-import Button from './Button';
+import { Button } from '../components';
 
 /**
  * Permission-aware button component
@@ -61,7 +61,7 @@ export function RoleBasedButton({
       <Button
         disabled={isDisabled}
         className={className}
-        {...(props as any)}
+        {...(props as React.ComponentPropsWithoutRef<typeof Button>)}
       >
         {children}
       </Button>
